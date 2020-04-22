@@ -1,4 +1,4 @@
-package com.cloud.activiti;
+package com.cloud;
 
 import org.activiti.spring.boot.SecurityAutoConfiguration;
 import org.springframework.boot.SpringApplication;

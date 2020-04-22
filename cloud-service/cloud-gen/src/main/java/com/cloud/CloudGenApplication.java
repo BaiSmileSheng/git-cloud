@@ -1,4 +1,4 @@
-package com.cloud.generator;
+package com.cloud;
 
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;

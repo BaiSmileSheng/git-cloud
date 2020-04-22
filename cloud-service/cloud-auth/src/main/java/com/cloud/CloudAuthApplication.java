@@ -1,24 +1,23 @@
-package com.cloud.system;
+package com.cloud;
 
-import com.cloud.system.annotation.EnableRyFeignClients;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import tk.mybatis.spring.annotation.MapperScan;
+
+import com.cloud.system.annotation.EnableRyFeignClients;
 
 /**
  * 启动程序
  *
  * @author cloud
  */
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
+@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
 @EnableDiscoveryClient
 @EnableRyFeignClients
-@MapperScan("com.cloud.*.mapper")
-public class CloudSystemApplication {
+public class CloudAuthApplication {
     public static void main(String[] args) {
         // System.setProperty("spring.devtools.restart.enabled", "false");
-        SpringApplication.run(CloudSystemApplication.class, args);
+        SpringApplication.run(CloudAuthApplication.class, args);
     }
 }
