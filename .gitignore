@@ -47,4 +47,13 @@ logs
 !*/build/*.java
 !*/build/*.html
 !*/build/*.xml
-cloud-ant
+cloud-antworkspace
+workspace
+### Example user template template
+### Example user template
+
+# IntelliJ project files
+.idea
+*.iml
+out
+gen

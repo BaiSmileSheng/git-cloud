@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -17,6 +19,7 @@ import com.cloud.common.core.domain.BaseEntity;
  *
  * @author cloud
  */
+@ApiModel(value = "用户类")
 public class SysUser extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
@@ -24,6 +27,7 @@ public class SysUser extends BaseEntity {
      * 用户ID
      */
     @Excel(name = "用户序号", prompt = "用户编号")
+    @ApiModelProperty(value = "用户序号")
     private Long userId;
 
     /**
@@ -110,6 +114,7 @@ public class SysUser extends BaseEntity {
      * 部门对象
      */
     @Excel(name = "部门名称", targetAttr = "deptName", type = Type.EXPORT)
+    @ApiModelProperty(hidden = true)
     private SysDept dept;
 
     private List<SysRole> roles;

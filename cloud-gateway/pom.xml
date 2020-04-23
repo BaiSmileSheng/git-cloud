@@ -63,6 +63,15 @@
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>
         </dependency>
+
+        <!-- 系统模块 -->
+        <dependency>
+            <groupId>com.cloud</groupId>
+            <artifactId>cloud-system-api</artifactId>
+            <version>${cloud.version}</version>
+        </dependency>
+
+
     </dependencies>
     <build>
         <plugins>

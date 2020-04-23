@@ -43,7 +43,7 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder().title("Cloud 接口文档").description("springcloud版本")
-                .contact(new Contact("wind", "", "")).version("1.0.1").build();
+                .contact(new Contact("mva", "", "")).version("1.0.1").build();
     }
 
     private ApiKey apiKey() {
