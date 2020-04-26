@@ -2,6 +2,11 @@ package com.cloud.auth.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.cloud.system.domain.entity.SysDept;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +19,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.SysUser;
 
 @RestController
+@Api(tags = "获取token")
 public class TokenController {
     @Autowired
     private AccessTokenService tokenService;
@@ -23,6 +29,15 @@ public class TokenController {
 
     @PostMapping("login")
     public R login(@RequestBody LoginForm form) {
+        // 用户登录
+        SysUser user = sysLoginService.login(form.getUsername(), form.getPassword());
+        // 获取登录token
+        return R.ok(tokenService.createToken(user));
+    }
+
+    @PostMapping("getToken")
+    @ApiOperation(value = "获取token", notes = "这样吧")
+    public R getToken(@RequestBody LoginForm form) {
         // 用户登录
         SysUser user = sysLoginService.login(form.getUsername(), form.getPassword());
         // 获取登录token

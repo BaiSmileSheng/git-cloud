@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import springfox.bean.validators.configuration.BeanValidatorPluginsConfiguration;
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -31,6 +32,7 @@ import java.util.List;
 @EnableSwagger2
 @EnableSwaggerBootstrapUI
 @Import(BeanValidatorPluginsConfiguration.class)
+@Profile({"dev","test"})
 public class SwaggerConfig {
     @Bean(value = "userApi")
     @Order(value = 1)
