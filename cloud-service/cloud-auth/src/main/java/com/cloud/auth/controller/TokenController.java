@@ -28,16 +28,8 @@ public class TokenController {
     private SysLoginService sysLoginService;
 
     @PostMapping("login")
+    @ApiOperation(value = "获取token", notes = "登录接口代替")
     public R login(@RequestBody LoginForm form) {
-        // 用户登录
-        SysUser user = sysLoginService.login(form.getUsername(), form.getPassword());
-        // 获取登录token
-        return R.ok(tokenService.createToken(user));
-    }
-
-    @PostMapping("getToken")
-    @ApiOperation(value = "获取token", notes = "这样吧")
-    public R getToken(@RequestBody LoginForm form) {
         // 用户登录
         SysUser user = sysLoginService.login(form.getUsername(), form.getPassword());
         // 获取登录token
