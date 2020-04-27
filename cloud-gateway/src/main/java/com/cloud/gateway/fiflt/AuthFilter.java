@@ -34,7 +34,7 @@ import reactor.core.publisher.Mono;
 public class AuthFilter implements GlobalFilter, Ordered {
     // 排除过滤的 uri 地址
     // swagger排除自行添加
-    private static final String[] whiteList = {"/auth/login", "/user/register", "/system/v2/api-docs"};
+    private static final String[] whiteList = {"/auth/login", "/user/register", "/system/v2/api-docs", "/auth/v2/api-docs", "/auth/getToken"};
 
     @Resource(name = "stringRedisTemplate")
     private ValueOperations<String, String> ops;
