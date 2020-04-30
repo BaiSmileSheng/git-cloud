@@ -21,7 +21,7 @@
 
     <sql id="selectRoleContactVo">
         select distinct r.role_id, r.role_name, r.role_key, r.role_sort, r.data_scope,
-            r.status, r.del_flag, r.create_time, r.remark 
+            r.status, r.del_flag, r.create_time, r.remark
         from sys_role r
 	        left join sys_user_role ur on ur.role_id = r.role_id
 	        left join sys_user u on u.user_id = ur.user_id
@@ -29,7 +29,7 @@
     </sql>
 
     <sql id="selectRoleVo">
-		select r.role_id, r.role_name, r.role_key, r.role_sort, r.data_scope, r.status, r.del_flag, r.create_time, r.remark 
+		select r.role_id, r.role_name, r.role_key, r.role_sort, r.data_scope, r.status, r.del_flag, r.create_time, r.remark
         from sys_role r
 	</sql>
 
@@ -48,14 +48,16 @@
         <if test="dataScope != null and dataScope != ''">
             AND r.data_scope = #{dataScope}
         </if>
-        <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+        <if test="params != null and params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
             and date_format(r.create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
         </if>
-        <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+        <if test="params != null and  params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
             and date_format(r.create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
         </if>
         <!-- 数据范围过滤 -->
-        ${params.dataScope}
+        <if test="params != null and params.dataScope != null">
+            ${params.dataScope}
+        </if>
     </select>
 
     <select id="selectRolesByUserId" parameterType="Long" resultMap="SysRoleResult">
@@ -128,4 +130,4 @@
         )
     </insert>
 
-</mapper> 
+</mapper>

@@ -24,7 +24,7 @@
     </resultMap>
 
     <sql id="selectDeptVo">
-        select d.dept_id, d.parent_id, d.ancestors, d.dept_name, d.order_num, d.leader,d.leader_id, d.phone, d.email, d.status, d.del_flag, d.create_by, d.create_time 
+        select d.dept_id, d.parent_id, d.ancestors, d.dept_name, d.order_num, d.leader,d.leader_id, d.phone, d.email, d.status, d.del_flag, d.create_by, d.create_time
         from sys_dept d
     </sql>
 
@@ -49,7 +49,9 @@
             AND status = #{status}
         </if>
         <!-- 数据范围过滤 -->
+        <if test="params != null and params.dataScope != null">
         ${params.dataScope}
+        </if>
         order by d.order_num
     </select>
 
@@ -166,4 +168,4 @@
 		order by d.parent_id, d.order_num
 	</select>
 
-</mapper> 
+</mapper>
