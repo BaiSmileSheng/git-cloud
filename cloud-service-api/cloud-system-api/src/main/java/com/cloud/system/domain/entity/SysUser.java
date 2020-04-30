@@ -4,8 +4,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
+import com.alibaba.excel.annotation.ExcelProperty;
+import com.cloud.common.easyexcel.converter.SexConverter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.*;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -20,20 +24,24 @@ import com.cloud.common.core.domain.BaseEntity;
  * @author cloud
  */
 @ApiModel(value = "用户类")
+@ExcelIgnoreUnannotated
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class SysUser extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /**
      * 用户ID
      */
-    @Excel(name = "用户序号", prompt = "用户编号")
+    @ExcelProperty(value = "用户序号")
     @ApiModelProperty(value = "用户序号")
     private Long userId;
 
     /**
      * 部门ID
      */
-    @Excel(name = "部门编号", type = Type.IMPORT)
     private Long deptId;
 
     /**
@@ -44,31 +52,28 @@ public class SysUser extends BaseEntity {
     /**
      * 登录名称
      */
-    @Excel(name = "登录名称")
     private String loginName;
 
     /**
      * 用户名称
      */
-    @Excel(name = "用户名称")
+    @ExcelProperty(value = "用户名称")
     private String userName;
 
     /**
      * 用户邮箱
      */
-    @Excel(name = "用户邮箱")
     private String email;
 
     /**
      * 手机号码
      */
-    @Excel(name = "手机号码")
     private String phonenumber;
 
     /**
      * 用户性别
      */
-    @Excel(name = "用户性别", readConverterExp = "0=男,1=女,2=未知")
+    @ExcelProperty(value = "性别",converter = SexConverter.class)
     private String sex;
 
     /**
@@ -89,7 +94,6 @@ public class SysUser extends BaseEntity {
     /**
      * 帐号状态（0正常 1停用）
      */
-    @Excel(name = "帐号状态", readConverterExp = "0=正常,1=停用")
     private String status;
 
     /**
@@ -100,20 +104,17 @@ public class SysUser extends BaseEntity {
     /**
      * 最后登陆IP
      */
-    @Excel(name = "最后登陆IP", type = Type.EXPORT)
     private String loginIp;
 
     /**
      * 最后登陆时间
      */
-    @Excel(name = "最后登陆时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss", type = Type.EXPORT)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date loginDate;
 
     /**
      * 部门对象
      */
-    @Excel(name = "部门名称", targetAttr = "deptName", type = Type.EXPORT)
     @ApiModelProperty(hidden = true)
     private SysDept dept;
 
