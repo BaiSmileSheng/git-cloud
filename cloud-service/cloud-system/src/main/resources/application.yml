@@ -59,4 +59,28 @@ pagehelper:
   helperDialect: mysql
   reasonable: true
   supportMethodsArguments: true
-  params: count=countSql       
+  params: count=countSql
+
+#seata配置,分布式事务
+seata:
+  enabled: true
+  application-id: ${spring.application.name}
+  #事务组
+  tx-service-group: seataGroup-${seata.application-id}
+  service:
+    vgroup-mapping: default
+    #配置Client连接TC的地址
+    grouplist: 127.0.0.1:8091
+    # 是否禁用全局事务
+    disable-global-transaction: false
+  config:
+    type: nacos
+    nacos:
+      namespace:
+      serverAddr: ${spring.cloud.nacos.discovery.server-addr}
+      group: SEATA_GROUP
+  #nacos中server-Addr 所在的命名空间
+  registry:
+    type: nacos
+    nacos:
+      server-addr: ${spring.cloud.nacos.discovery.server-addr}
