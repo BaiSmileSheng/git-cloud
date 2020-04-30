@@ -30,11 +30,11 @@ public class CommonController {
     @GetMapping("common/download")
     public void fileDownload(String fileName, Boolean delete, HttpServletResponse response, HttpServletRequest request) {
         try {
-            if (!FileUtils.isValidFilename(fileName)) {
-                throw new Exception(StringUtils.format("文件名称({})非法，不允许下载。 ", fileName));
-            }
-            String realFileName = DateUtils.dateTimeNow() + fileName.substring(fileName.indexOf("_") + 1);
-            String filePath = ToolUtil.getDownloadPath() + fileName;
+//            if (!FileUtils.isValidFilename(fileName)) {
+//                throw new Exception(StringUtils.format("文件名称({})非法，不允许下载。 ", fileName));
+//            }
+            String realFileName = DateUtils.dateTimeNow() + fileName.substring(fileName.lastIndexOf("\\") + 1,fileName.length());
+            String filePath =  fileName;
             response.setCharacterEncoding("utf-8");
             // 下载使用"application/octet-stream"更标准
             response.setContentType("application/octet-stream");
