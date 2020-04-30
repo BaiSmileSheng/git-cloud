@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * 异常处理器
  *
@@ -61,6 +63,13 @@ public class GlobalExceptionHandler {
     public R handleException(Exception e) throws Exception {
         logger.error(e.getMessage(), e);
         return R.error("服务器错误，请联系管理员");
+    }
+
+    @ExceptionHandler(value = SkeletonException.class)
+    public R globalExceptionHandle(SkeletonException e, HttpServletResponse response) {
+        logger.error("【错误描述】{}", e.getMessage());
+        e.printStackTrace();
+        return R.error(response.getStatus(), e.getMessage());
     }
 
     /**
