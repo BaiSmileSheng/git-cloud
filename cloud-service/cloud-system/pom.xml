@@ -133,6 +133,11 @@
             <artifactId>gson</artifactId>
         </dependency>
 
+        <!--seata分布式事务管理-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
+        </dependency>
 
     </dependencies>
     <build>
