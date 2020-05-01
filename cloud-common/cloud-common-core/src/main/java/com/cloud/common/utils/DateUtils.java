@@ -1,11 +1,15 @@
 package com.cloud.common.utils;
 
 import java.lang.management.ManagementFactory;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 时间工具类
@@ -13,6 +17,8 @@ import org.apache.commons.lang3.time.DateFormatUtils;
  * @author cloud
  */
 public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
+    private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
+
     public static String YYYY = "yyyy";
 
     public static String YYYY_MM = "yyyy-MM";
@@ -131,5 +137,25 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         // 计算差多少秒//输出结果
         // long sec = diff % nd % nh % nm / ns;
         return day + "天" + hour + "小时" + min + "分钟";
+    }
+
+    /**
+     * 将String类型转换为Date，根据自定义模式
+     */
+    public static Date string2Date(String date, String pattern) {
+        DateFormat dataformat = new SimpleDateFormat(pattern);
+        dataformat.setLenient(false);
+        try {
+            return dataformat.parse(date);
+        } catch (ParseException e) {
+            logger.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    public static String dateFormat(Date date, String format) {
+        SimpleDateFormat sdf1 = new SimpleDateFormat(format);
+        sdf1.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));// 设置时区
+        return sdf1.format(date);
     }
 }

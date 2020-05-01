@@ -30,6 +30,13 @@ spring:
       #        file-extension: yml
       discovery:
         server-addr: 10.133.1.8:8848
+  mail:
+    host: mail.mhaq.cn
+    port: 25
+    username: ws@mhaq.cn
+    password: Haier.123
+    protocol: smtp
+    defaultEncoding: utf-8
 
 feign:
   hystrix:

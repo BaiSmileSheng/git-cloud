@@ -38,9 +38,10 @@ public class SwaggerProvider implements SwaggerResourcesProvider {
         routeLocator.getRoutes().subscribe(route -> routes.add(route.getId()));
         // 结合配置的route-路径(Path)，和route过滤，只获取有效的route节点
         // 打开下面注释可以自动扫描接入gateway的服务，为了演示，只扫描system
-        // gatewayProperties.getRoutes().stream().filter(routeDefinition ->
-        // routes.contains(routeDefinition.getId()))
-        gatewayProperties.getRoutes().stream().filter(routeDefinition -> routeDefinition.getId().equals("cloud-system"))
+         gatewayProperties.getRoutes().stream().filter(routeDefinition ->
+         routes.contains(routeDefinition.getId()))
+//        gatewayProperties.getRoutes().stream().filter(routeDefinition ->
+//        routeDefinition.getId().equals("cloud-system"))
                 .forEach(routeDefinition -> routeDefinition.getPredicates().stream()
                         .filter(predicateDefinition -> ("Path").equalsIgnoreCase(predicateDefinition.getName()))
                         .forEach(predicateDefinition -> resources

@@ -1,5 +1,11 @@
 package ${packageName}.controller;
-
+import com.cloud.common.log.annotation.OperLog;
+import com.cloud.common.log.enums.BusinessType;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import tk.mybatis.mapper.entity.Example;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -7,12 +13,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.controller.BaseController;
-import ${packageName}.domain.${ClassName};
+import ${packageName}.domain.entity.${ClassName};
 import ${packageName}.service.I${ClassName}Service;
-
+import com.cloud.common.core.page.TableDataInfo;
+import java.util.List;
 /**
  * ${functionName} 提供者
  *
@@ -29,9 +35,10 @@ public class ${ClassName}Controller extends BaseController {
     /**
      * 查询${tableComment}
      */
-    @GetMapping("get/{${pkColumn.javaField}}")
-    public ${ClassName} get(@PathVariable("${pkColumn.javaField}") ${pkColumn.javaType} ${pkColumn.javaField}) {
-        return ${className}Service.select${ClassName}ById(${pkColumn.javaField});
+    @GetMapping("get")
+    @ApiOperation(value = "根据id查询${tableComment}", response = ${ClassName}.class)
+    public ${ClassName} get(${pkColumn.javaType} ${pkColumn.javaField}) {
+        return ${className}Service.selectByPrimaryKey(${pkColumn.javaField});
 
     }
 
@@ -39,9 +46,19 @@ public class ${ClassName}Controller extends BaseController {
      * 查询${functionName}列表
      */
     @GetMapping("list")
-    public R list(${ClassName} ${className}) {
+    @ApiOperation(value = "${tableComment}查询分页", response = ${ClassName}.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required =true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "sortField", value = "排序列", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false,paramType = "query", dataType = "String")
+    })
+    public TableDataInfo list(${ClassName} ${className}) {
+        Example example = new Example(${ClassName}.class);
+        Example.Criteria criteria = example.createCriteria();
         startPage();
-        return result(${className}Service.select${ClassName}List(${className}));
+        List<${ClassName}> ${className}List = ${className}Service.selectByExample(example);
+        return getDataTable(${className}List);
     }
 
 
@@ -49,24 +66,30 @@ public class ${ClassName}Controller extends BaseController {
      * 新增保存${functionName}
      */
     @PostMapping("save")
+    @OperLog(title = "新增保存${functionName}", businessType = BusinessType.INSERT)
+    @ApiOperation(value = "新增保存${functionName}", response = ${ClassName}.class)
     public R addSave(@RequestBody ${ClassName} ${className}) {
-        return toAjax(${className}Service.insert${ClassName}(${className}));
+        return toAjax(${className}Service.insertUseGeneratedKeys(${className}));
     }
 
     /**
      * 修改保存${functionName}
      */
     @PostMapping("update")
+    @OperLog(title = "修改保存${functionName}", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "修改保存${functionName}", response = ${ClassName}.class)
     public R editSave(@RequestBody ${ClassName} ${className}) {
-        return toAjax(${className}Service.update${ClassName}(${className}));
+        return toAjax(${className}Service.updateByPrimaryKeySelective(${className}));
     }
 
     /**
      * 删除${tableComment}
      */
     @PostMapping("remove")
+    @OperLog(title = "删除${tableComment}", businessType = BusinessType.DELETE)
+    @ApiOperation(value = "删除${tableComment}", response = ${ClassName}.class)
     public R remove(String ids) {
-        return toAjax(${className}Service.delete${ClassName}ByIds(ids));
+        return toAjax(${className}Service.deleteByIds(ids));
     }
 
 }
