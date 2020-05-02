@@ -1,4 +1,4 @@
-package com.xxl.job.executorbiz;
+package com.cloud.job.admin.executorbiz;
 
 import com.xxl.job.core.biz.ExecutorBiz;
 import com.xxl.job.core.biz.client.ExecutorBizClient;

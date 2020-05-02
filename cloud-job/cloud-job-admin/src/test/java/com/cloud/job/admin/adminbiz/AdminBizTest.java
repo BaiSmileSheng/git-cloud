@@ -1,4 +1,4 @@
-package com.xxl.job.adminbiz;
+package com.cloud.job.admin.adminbiz;
 
 import com.xxl.job.core.biz.AdminBiz;
 import com.xxl.job.core.biz.client.AdminBizClient;
