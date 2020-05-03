@@ -12,6 +12,7 @@
     <build/>
     <modules>
         <module>cloud-system</module>
+        <module>cloud-order</module>
         <module>cloud-auth</module>
         <module>cloud-gen</module>
         <module>cloud-activiti</module>
