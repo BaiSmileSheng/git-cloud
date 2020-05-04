@@ -77,15 +77,11 @@ seata:
   service:
     vgroup-mapping: default
     #配置Client连接TC的地址
-    grouplist: 127.0.0.1:8091
+    grouplist: 10.133.28.54:8091
+    #允许降级处理
+    enable-degrade: false
     # 是否禁用全局事务
     disable-global-transaction: false
-  config:
-    type: nacos
-    nacos:
-      namespace:
-      serverAddr: ${spring.cloud.nacos.discovery.server-addr}
-      group: SEATA_GROUP
   #nacos中server-Addr 所在的命名空间
   registry:
     type: nacos
