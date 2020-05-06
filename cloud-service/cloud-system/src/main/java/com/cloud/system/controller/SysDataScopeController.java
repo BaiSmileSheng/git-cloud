@@ -96,7 +96,7 @@ public class SysDataScopeController extends BaseController {
     }
 
     /**
-     * 删除 数据权限
+     * 物理删除 数据权限
      */
     @PostMapping("remove")
     @OperLog(title = "删除数据权限", businessType = BusinessType.DELETE)

@@ -83,11 +83,11 @@ public class ${ClassName}Controller extends BaseController {
     }
 
     /**
-     * 删除${tableComment}
+     * 删除${functionName}
      */
     @PostMapping("remove")
-    @OperLog(title = "删除${tableComment}", businessType = BusinessType.DELETE)
-    @ApiOperation(value = "删除${tableComment}", response = ${ClassName}.class)
+    @OperLog(title = "删除${functionName}", businessType = BusinessType.DELETE)
+    @ApiOperation(value = "删除${functionName}", response = ${ClassName}.class)
     public R remove(String ids) {
         return toAjax(${className}Service.deleteByIds(ids));
     }

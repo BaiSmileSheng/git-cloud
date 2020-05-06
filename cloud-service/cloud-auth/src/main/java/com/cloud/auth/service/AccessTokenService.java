@@ -33,6 +33,9 @@ public class AccessTokenService {
 
     private final static String ACCESS_USERID = Constants.ACCESS_USERID;
 
+    /**
+     * 用户数据权限
+     */
     private final static String ACCESS_USERID_SCOPE = Constants.ACCESS_USERID_SCOPE;
 
     public SysUser queryByToken(String token) {
@@ -63,7 +66,7 @@ public class AccessTokenService {
         }
     }
 
-    //更新用户物料权限到redis
+    //更新用户物料数据权限到redis
     public void userScopeRedis(Long userId){
         String scopes = remoteUserScopeService.selectDataScopeIdByUserId(userId);
         redis.set(Constants.ACCESS_USERID_SCOPE + userId, scopes, AccessTokenService.EXPIRE);

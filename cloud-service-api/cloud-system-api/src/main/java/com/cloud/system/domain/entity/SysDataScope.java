@@ -62,9 +62,9 @@ public class SysDataScope extends BaseEntity {
     private Integer orderNum;
 
     /**
-     * 部门状态（0正常 1停用）
+     * 数据权限状态（0正常 1停用）
      */
-    @ExcelProperty(value = "部门状态")
+    @ExcelProperty(value = "数据权限状态")
     private String status;
 
     /**

@@ -17,7 +17,7 @@ import com.cloud.common.core.controller.BaseController;
 import com.cloud.system.domain.entity.SysUserScope;
 
 /**
- * 用户和物料权限 提供者
+ * 用户和物料数据权限 提供者
  *
  * @author cs
  * @date 2020-05-02
@@ -32,7 +32,7 @@ public class SysUserScopeController extends BaseController {
     @Autowired
     private RedisUtils redis;
     /**
-     * 查询用户和物料权限
+     * 查询用户和物料数据权限
      */
     @GetMapping("get")
     @ApiOperation(value = "根据id查询用户和物料权限", response = SysUserScope.class)
@@ -84,7 +84,7 @@ public class SysUserScopeController extends BaseController {
     }
 
     /**
-     * 查询用户所有有效权限
+     * 查询用户所有有效物料数据权限
      *
      * @return
      */
@@ -107,7 +107,7 @@ public class SysUserScopeController extends BaseController {
         String scopes= StringUtils.join(sysUserScope.getScopes(), ",");
         try {
             Long userId = sysUserScope.getUserId();
-            //删除原有的
+            //删除原有的 物理删除
             sysUserScopeService.deleteByUserId(userId);
             //增加现有的
             if (sysUserScope.getScopes() != null) {

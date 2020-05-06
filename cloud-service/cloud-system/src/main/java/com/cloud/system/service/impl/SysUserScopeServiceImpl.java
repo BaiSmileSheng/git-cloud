@@ -7,7 +7,7 @@ import com.cloud.system.domain.entity.SysUserScope;
 import com.cloud.system.service.ISysUserScopeService;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 /**
- * 角色和部门关联Service业务层处理
+ * 用户和物料数据权限关联Service业务层处理
  *
  * @author cs
  * @date 2020-05-02

@@ -13,10 +13,5 @@ import java.util.List;
  * @date 2020-05-02
  */
 public interface ISysDataScopeService extends BaseService<SysDataScope>{
-    /**
-     * 查询 数据权限树列表
-     *
-     * @return 所有 数据权限信息
-     */
-//    public List<Ztree> selectSysDataScopeTree(SysDataScope sysDataScope);
-    }
+
+}

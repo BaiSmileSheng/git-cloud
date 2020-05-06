@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @FeignClient(name = ServiceNameConstants.SYSTEM_SERVICE, fallbackFactory = RemoteUserSocopeFallbackFactory.class)
 public interface RemoteUserScopeService {
     /**
-     * 查询拥有当前角色的所有权限
+     * 查询拥有当前用户所拥有的物料数据权限
      *
      * @param userId
      * @return

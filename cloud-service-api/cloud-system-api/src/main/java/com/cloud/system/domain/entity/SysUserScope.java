@@ -13,7 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.Transient;
 
 /**
- * 角色和部门关联对象 sys_user_scope
+ * 用户和物料数据权限关联对象 sys_user_scope
  *
  * @author cs
  * @date 2020-05-02
@@ -23,7 +23,7 @@ import javax.persistence.Transient;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ApiModel(value = "角色和部门关联")
+@ApiModel(value = "用户和物料数据权限关联")
 public class SysUserScope {
     private static final long serialVersionUID = 1L;
 
@@ -45,7 +45,7 @@ public class SysUserScope {
     private String dataScopeId;
 
     /**
-     * 接收用户物料权限时接收物料权限ID
+     * 接收用户物料权限时物料权限ID
      */
     @Transient
     private String[] scopes;
