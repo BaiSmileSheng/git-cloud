@@ -4,7 +4,7 @@ import com.cloud.system.domain.entity.SysUserScope;
 import com.cloud.common.core.service.BaseService;
 
 /**
- * 用户和物料数据权限关联Service接口
+ * 用户和数据权限关联Service接口
  *
  * @author cs
  * @date 2020-05-02

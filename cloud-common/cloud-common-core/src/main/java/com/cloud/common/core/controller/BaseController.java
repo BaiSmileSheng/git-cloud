@@ -97,7 +97,7 @@ public class BaseController {
     }
 
     /**
-     * 根据用户id从redis取物料数据权限
+     * 根据用户id从redis取数据权限
      * @param userId
      * @return
      */

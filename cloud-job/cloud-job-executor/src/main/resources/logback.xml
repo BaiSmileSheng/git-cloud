@@ -2,7 +2,7 @@
 <configuration debug="false" scan="true" scanPeriod="1 seconds">
 
     <contextName>logback</contextName>
-    <property name="log.path" value="/home/mvaCloud/logs/cloud-job-executor"/>
+    <property name="log.path" value="/ home/zkgc/logs/cloud-job-executor"/>
 
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -21,7 +21,7 @@
         </encoder>
     </appender>
 
-    <springProfile name="dev">
+    <springProfile name="prod">
         <root level="info">
             <appender-ref ref="console"/>
             <appender-ref ref="file"/>

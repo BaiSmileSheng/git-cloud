@@ -66,7 +66,7 @@ public class AccessTokenService {
         }
     }
 
-    //更新用户物料数据权限到redis
+    //更新用户数据权限到redis
     public void userScopeRedis(Long userId){
         String scopes = remoteUserScopeService.selectDataScopeIdByUserId(userId);
         redis.set(Constants.ACCESS_USERID_SCOPE + userId, scopes, AccessTokenService.EXPIRE);

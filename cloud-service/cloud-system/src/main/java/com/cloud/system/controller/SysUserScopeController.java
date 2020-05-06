@@ -17,7 +17,7 @@ import com.cloud.common.core.controller.BaseController;
 import com.cloud.system.domain.entity.SysUserScope;
 
 /**
- * 用户和物料数据权限 提供者
+ * 用户和数据权限 提供者
  *
  * @author cs
  * @date 2020-05-02
@@ -32,7 +32,7 @@ public class SysUserScopeController extends BaseController {
     @Autowired
     private RedisUtils redis;
     /**
-     * 查询用户和物料数据权限
+     * 查询用户和数据权限
      */
     @GetMapping("get")
     @ApiOperation(value = "根据id查询用户和物料权限", response = SysUserScope.class)
@@ -84,7 +84,7 @@ public class SysUserScopeController extends BaseController {
     }
 
     /**
-     * 查询用户所有有效物料数据权限
+     * 查询用户所有有效数据权限
      *
      * @return
      */

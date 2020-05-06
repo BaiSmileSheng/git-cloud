@@ -6,15 +6,15 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 用户 Feign服务层
+ * 数据权限Feign服务层
  *
- * @author zmr
- * @date 2019-05-20
+ * @author cs
+ * @date 2020-05-03
  */
 @FeignClient(name = ServiceNameConstants.SYSTEM_SERVICE, fallbackFactory = RemoteUserSocopeFallbackFactory.class)
 public interface RemoteUserScopeService {
     /**
-     * 查询拥有当前用户所拥有的物料数据权限
+     * 查询拥有当前用户所拥有的数据权限
      *
      * @param userId
      * @return

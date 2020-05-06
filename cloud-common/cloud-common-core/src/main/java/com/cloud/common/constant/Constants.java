@@ -74,7 +74,7 @@ public class Constants {
     public final static String ACCESS_USERID = "access_userid_";
 
     /**
-     * 用户redis物料数据权限标记
+     * 用户redis数据权限标记
      */
     public final static String ACCESS_USERID_SCOPE = "access_userid_scope_";
 
