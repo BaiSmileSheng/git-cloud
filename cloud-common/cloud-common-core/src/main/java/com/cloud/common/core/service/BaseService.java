@@ -41,12 +41,20 @@ public interface BaseService<T> {
 
 
     /**
-     * 根据主键字符串进行删除
+     * 根据主键字符串进行删除 逻辑删除
      * 类中只有存在一个带有@Id注解的字段
      *
      * @param ids 如 "1,2,3,4"
      */
     int deleteByIds(String ids);
+
+    /**
+     * 根据主键字符串进行删除 物理删除
+     * 类中只有存在一个带有@Id注解的字段
+     *
+     * @param ids 如 "1,2,3,4"
+     */
+    int deleteByIdsWL(String ids);
 
 
     /**
