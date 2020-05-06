@@ -1,0 +1,12 @@
+cloud:
+  job:
+    admin:
+      addresses: http://127.0.0.1:8080/job
+    accessToken:
+    executor:
+      appname: cloud-job-executor
+      address: http://127.0.0.1:9999
+      ip:
+      port: 9999
+      logpath: /logs/jobhandler
+      logretentiondays: 30
