@@ -31,5 +31,10 @@ spring:
 feign:
   hystrix:
     enabled: true
+  httpclient:
+    max-connections: 200
+    max-connections-per-route: 50
+    enabled: false
+  okhttp:
+    enabled: true
 
- 
