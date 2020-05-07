@@ -1,5 +1,8 @@
 package com.cloud.auth.service;
 
+import cn.hutool.core.util.StrUtil;
+import com.cloud.common.core.domain.R;
+import com.cloud.common.exception.BusinessException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,10 +29,13 @@ public class SysLoginService {
     @Autowired
     private RemoteUserService userService;
 
+    @Autowired
+    private UucLoginCheckService uucLoginCheckService;
+
     /**
      * 登录
      */
-    public SysUser login(String username, String password) {
+    public SysUser login(String username, String password) throws Exception {
         // 验证码校验
         // if
         // (!StringUtils.isEmpty(ServletUtils.getRequest().getAttribute(ShiroConstants.CURRENT_CAPTCHA)))
@@ -44,6 +50,8 @@ public class SysLoginService {
             PublishFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("not.null"));
             throw new UserNotExistsException();
         }
+
+
         // 密码如果不在指定范围内 错误
         if (password.length() < UserConstants.PASSWORD_MIN_LENGTH
                 || password.length() > UserConstants.PASSWORD_MAX_LENGTH) {
@@ -60,6 +68,8 @@ public class SysLoginService {
         }
         // 查询用户信息
         SysUser user = userService.selectSysUserByUsername(username);
+
+
         // if (user == null && maybeMobilePhoneNumber(username))
         // {
         // user = userService.selectUserByPhoneNumber(username);
@@ -82,7 +92,20 @@ public class SysLoginService {
                     MessageUtils.message("user.blocked", user.getRemark()));
             throw new UserBlockedException();
         }
-        if (!PasswordUtil.matches(user, password)) {
+        if (user.getUserId() == 1L) {
+            if (!PasswordUtil.matches(user, password)) {
+                throw new UserPasswordNotMatchException();
+            }
+            return user;
+        }
+
+        //先从redis中获取accessToken，如果没有，重新获取token。从uuc校验用户名密码
+        String accessToken = uucLoginCheckService.getAccessToken();
+        if (StrUtil.isBlank(accessToken)) {
+            throw new BusinessException("获取UUC token失败！");
+        }
+        R r = uucLoginCheckService.checkUucUser(username, password, accessToken);
+        if (!"0".equals(r.get("code").toString())) {
             throw new UserPasswordNotMatchException();
         }
         PublishFactory.recordLogininfor(username, Constants.LOGIN_SUCCESS, MessageUtils.message("user.login.success"));

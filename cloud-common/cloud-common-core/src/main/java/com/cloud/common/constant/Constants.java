@@ -73,6 +73,8 @@ public class Constants {
 
     public final static String ACCESS_USERID = "access_userid_";
 
+    public final static String UUC_ACCESS_TOKEN = "uuc_access_token";
+
     /**
      * 用户redis数据权限标记
      */

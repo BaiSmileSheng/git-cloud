@@ -11,3 +11,7 @@ spring:
         max-wait: -1ms      # 连接池最大阻塞等待时间（使用负值表示没有限制）
         max-idle: 10      # 连接池中的最大空闲连接
         min-idle: 5       # 连接池中的最小空闲连接
+uuc:
+  apiUrl: http://uuctest.cosmoplat.com
+  clientId: ZKDDPS
+  clientSecret: 5b638080ef2c95fc8efec2599f7afa86
