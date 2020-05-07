@@ -74,14 +74,10 @@ seata:
   application-id: ${spring.application.name}
   #事务组
   tx-service-group: seataGroup-${seata.application-id}
-  service:
-    vgroup-mapping: default
-    #配置Client连接TC的地址
-    grouplist: 10.133.28.54:8091
-    #允许降级处理
-    enable-degrade: false
-    # 是否禁用全局事务
-    disable-global-transaction: false
+  config:
+    type: file
+    file:
+      name: 'file.conf'
   #nacos中server-Addr 所在的命名空间
   registry:
     type: nacos
