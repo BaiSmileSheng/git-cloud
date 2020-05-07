@@ -29,7 +29,7 @@ public class TokenController {
 
     @PostMapping("login")
     @ApiOperation(value = "获取token", notes = "登录接口代替")
-    public R login(@RequestBody LoginForm form) {
+    public R login(@RequestBody LoginForm form) throws Exception {
         // 用户登录
         SysUser user = sysLoginService.login(form.getUsername(), form.getPassword());
         //将用户的数据权限放到redis

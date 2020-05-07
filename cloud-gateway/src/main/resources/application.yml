@@ -20,7 +20,7 @@ spring:
       #        server-addr: 127.0.0.1:8848
       #        file-extension: yml
       discovery:
-        server-addr: 10.133.1.8:8848
+        server-addr: 127.0.0.1:8848
     gateway:
       discovery:
         locator:
@@ -97,7 +97,7 @@ spring:
 
 ribbon:
   OkToRetryOnAllOperations: false #对所有操作请求都进行重试,默认false
-  ReadTimeout: 5000   #负载均衡超时时间，默认值5000
+  ReadTimeout: 8000   #负载均衡超时时间，默认值5000
   ConnectTimeout: 2000 #ribbon请求连接的超时时间，默认值2000
   MaxAutoRetries: 0     #对当前实例的重试次数，默认0
   MaxAutoRetriesNextServer: 1 #对切换实例的重试次数，默认1
