@@ -68,20 +68,16 @@ pagehelper:
   supportMethodsArguments: true
   params: count=countSql
 
-# TODO seata配置,分布式事务
+# seata配置,分布式事务
 seata:
   enabled: true
   application-id: ${spring.application.name}
   #事务组
   tx-service-group: seataGroup-${seata.application-id}
-  service:
-    vgroup-mapping: default
-    #配置Client连接TC的地址
-    grouplist: 10.133.28.54:8091
-    # 是否禁用全局事务
-    disable-global-transaction: false
-    #允许降级处理
-    enable-degrade: false
+  config:
+    type: file
+    file:
+      name: 'file.conf'
   #nacos中server-Addr 所在的命名空间
   registry:
     type: nacos
