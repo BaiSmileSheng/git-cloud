@@ -10,9 +10,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.cloud.common.redis.util.RedisUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 
@@ -34,6 +36,9 @@ import com.cloud.common.utils.sql.SqlUtil;
  */
 public class BaseController {
     protected final Logger logger = LoggerFactory.getLogger(BaseController.class);
+
+    @Autowired
+    RedisUtils redis;
 
     /**
      * 将前台传递过来的日期格式的字符串，自动转化为Date类型
@@ -89,6 +94,16 @@ public class BaseController {
             return Long.valueOf(currentId);
         }
         return 0l;
+    }
+
+    /**
+     * 根据用户id从redis取数据权限
+     * @param userId
+     * @return
+     */
+    public String getUserScopes(Long userId) {
+        String scocpes = redis.get(Constants.ACCESS_USERID_SCOPE + userId);
+        return scocpes;
     }
 
     public String getLoginName() {

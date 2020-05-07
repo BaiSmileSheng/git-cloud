@@ -73,5 +73,15 @@ public class Constants {
 
     public final static String ACCESS_USERID = "access_userid_";
 
+    /**
+     * 用户redis数据权限标记
+     */
+    public final static String ACCESS_USERID_SCOPE = "access_userid_scope_";
+
     public static final String RESOURCE_PREFIX = "/profile";
+
+    /**
+     * 12小时后过期
+     */
+    public final static long EXPIRE = 12 * 60 * 60;
 }

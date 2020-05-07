@@ -32,6 +32,8 @@ public class TokenController {
     public R login(@RequestBody LoginForm form) {
         // 用户登录
         SysUser user = sysLoginService.login(form.getUsername(), form.getPassword());
+        //将用户的数据权限放到redis
+        tokenService.userScopeRedis(user.getUserId());
         // 获取登录token
         return R.ok(tokenService.createToken(user));
     }

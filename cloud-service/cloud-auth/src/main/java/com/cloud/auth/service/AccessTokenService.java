@@ -3,6 +3,7 @@ package com.cloud.auth.service;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.cloud.system.feign.RemoteUserScopeService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,14 +20,23 @@ public class AccessTokenService {
     @Autowired
     private RedisUtils redis;
 
+    @Autowired
+    private RemoteUserScopeService remoteUserScopeService;
+
+
     /**
      * 12小时后过期
      */
-    private final static long EXPIRE = 12 * 60 * 60;
+    private final static long EXPIRE = Constants.EXPIRE;
 
     private final static String ACCESS_TOKEN = Constants.ACCESS_TOKEN;
 
     private final static String ACCESS_USERID = Constants.ACCESS_USERID;
+
+    /**
+     * 用户数据权限
+     */
+    private final static String ACCESS_USERID_SCOPE = Constants.ACCESS_USERID_SCOPE;
 
     public SysUser queryByToken(String token) {
         return redis.get(ACCESS_TOKEN + token, SysUser.class);
@@ -51,7 +61,14 @@ public class AccessTokenService {
         String token = redis.get(ACCESS_USERID + userId);
         if (StringUtils.isNotBlank(token)) {
             redis.delete(ACCESS_USERID + userId);
+            redis.delete(ACCESS_USERID_SCOPE + userId);
             redis.delete(ACCESS_TOKEN + token);
         }
+    }
+
+    //更新用户数据权限到redis
+    public void userScopeRedis(Long userId){
+        String scopes = remoteUserScopeService.selectDataScopeIdByUserId(userId);
+        redis.set(Constants.ACCESS_USERID_SCOPE + userId, scopes, AccessTokenService.EXPIRE);
     }
 }

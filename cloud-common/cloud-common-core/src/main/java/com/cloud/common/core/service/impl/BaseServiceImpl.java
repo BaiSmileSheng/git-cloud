@@ -61,6 +61,14 @@ public class BaseServiceImpl<T> implements BaseService<T> {
         return baseMapper.deleteShamByIds(ids);
     }
 
+    @Override
+    public int deleteByIdsWL(String ids) {
+        if (StringUtils.isEmpty(ids)) {
+            throw new SkeletonException(StatusEnums.PARAM_NOT_NULL);
+        }
+        //物理删除
+        return baseMapper.deleteByIds(ids);
+    }
 
     @Override
     public int updateByPrimaryKeySelective(T record) {
