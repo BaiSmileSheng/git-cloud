@@ -2,7 +2,7 @@
 <configuration debug="false" scan="true" scanPeriod="1 seconds">
 
     <contextName>logback</contextName>
-    <property name="log.path" value="/ home/zkgc/logs/cloud-job-executor"/>
+    <property name="log.path" value="/home/zkgc/logs/cloud-job-admin"/>
 
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -11,9 +11,9 @@
     </appender>
 
     <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${log.path}/job-executor.log</file>
+        <file>${log.path}/job-admin.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${log.path}/job-executor-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>${log.path}/job-admin-%d{yyyy-MM-dd}.log</fileNamePattern>
         </rollingPolicy>
         <encoder>
             <pattern>%date %level [%thread] %logger{36} [%file : %line] %msg%n

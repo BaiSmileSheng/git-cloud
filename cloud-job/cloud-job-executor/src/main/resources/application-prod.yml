@@ -1,7 +1,7 @@
 cloud:
   job:
     admin:
-      addresses: http://127.0.0.1:8080/job
+      addresses: http://127.0.0.1:8081/job
     accessToken:
     executor:
       appname: cloud-job-executor

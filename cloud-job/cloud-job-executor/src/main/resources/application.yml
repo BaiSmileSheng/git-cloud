@@ -7,11 +7,11 @@ spring:
 #        server-addr: 127.0.0.1:8848
   main:
     allow-bean-definition-overriding: true
-
-
+  profiles:
+    active: dev
 
   # log config
 logging:
-  config: classpath:logback.xml
+  config: classpath:logback-spring.xml
 
 
