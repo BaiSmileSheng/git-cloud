@@ -29,6 +29,9 @@ public class SysLoginService {
     @Autowired
     private UucLoginCheckService uucLoginCheckService;
 
+    @Autowired
+    private HucLoginCheckService hucLoginCheckService;
+
     /**
      * 登录
      */
