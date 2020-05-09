@@ -259,6 +259,12 @@
                 <artifactId>okhttp</artifactId>
                 <version>${okhttp3.version}</version>
             </dependency>
+            <!--jco 直连SAP-->
+            <dependency>
+                <groupId>com.github.easonjim</groupId>
+                <artifactId>com.sap.conn.jco.sapjco3</artifactId>
+                <version>3.0.11</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

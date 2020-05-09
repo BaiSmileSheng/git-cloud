@@ -134,7 +134,6 @@ public class OkHttpClients {
             Request request) throws Exception {
 
         OkhttpResult result = null;
-
         okhttp3.OkHttpClient client = null;
         ResponseBody responseBody = null;
         try {
@@ -143,7 +142,9 @@ public class OkHttpClients {
             client.newBuilder()
                     .connectTimeout(restParam.getConnectTimeout(), TimeUnit.MILLISECONDS)
                     .readTimeout(restParam.getReadTimeout(), TimeUnit.MILLISECONDS)
-                    .writeTimeout(restParam.getWriteTimeout(), TimeUnit.MILLISECONDS);
+                    .writeTimeout(restParam.getWriteTimeout(), TimeUnit.MILLISECONDS)
+                    .sslSocketFactory(SSLSocketClient.getSSLSocketFactory())    //忽略https
+                    .hostnameVerifier(SSLSocketClient.getHostnameVerifier()).build();
 
             Response response = client.newCall(request).execute();
 

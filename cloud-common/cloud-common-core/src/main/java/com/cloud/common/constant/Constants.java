@@ -73,7 +73,14 @@ public class Constants {
 
     public final static String ACCESS_USERID = "access_userid_";
 
+    /**
+     * uuc redis存放登录token key
+     */
     public final static String UUC_ACCESS_TOKEN = "uuc_access_token";
+    /**
+     * huc redis存放登录token key
+     */
+    public final static String HUC_ACCESS_TOKEN = "huc_access_token";
 
     /**
      * 用户redis数据权限标记
@@ -86,4 +93,10 @@ public class Constants {
      * 12小时后过期
      */
     public final static long EXPIRE = 12 * 60 * 60;
+
+    /**
+     * HUC token 有效期  2小时
+     */
+    public final static long HUC_TOKEN_EXPIRE = 2 * 60 * 60;
+
 }

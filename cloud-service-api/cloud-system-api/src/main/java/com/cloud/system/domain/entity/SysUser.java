@@ -97,6 +97,11 @@ public class SysUser extends BaseEntity {
     private String status;
 
     /**
+     * 用户类型（1、海尔用户 2、外部用户）
+     */
+    private String userType;
+
+    /**
      * 删除标志（0代表存在 2代表删除）
      */
     private String delFlag;
