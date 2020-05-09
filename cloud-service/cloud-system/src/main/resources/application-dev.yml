@@ -64,3 +64,11 @@ spring:
         wall:
           config:
             multi-statement-allow: true
+sap:
+  client600:
+    ashost: 10.202.84.25
+    sysnr: 30
+    client: 600
+    user: VPMS_COS
+    passwd: qwer1234
+    lang: ZH
