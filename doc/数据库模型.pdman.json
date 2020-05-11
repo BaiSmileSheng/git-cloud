@@ -4363,7 +4363,7 @@
       "chnname": "",
       "entities": [
         {
-          "title": "sys_bom",
+          "title": "cd_bom",
           "fields": [
             {
               "name": "id",
@@ -4523,7 +4523,7 @@
           "chnname": "bom清单数据"
         },
         {
-          "title": "sys_product_material_info",
+          "title": "cd_product_material_info",
           "fields": [
             {
               "name": "id",
@@ -4641,7 +4641,7 @@
           "chnname": "成品物料信息表"
         },
         {
-          "title": "sys_product_stock",
+          "title": "cd_product_stock",
           "fields": [
             {
               "name": "id",
@@ -4789,7 +4789,7 @@
           "chnname": "成品库存主表"
         },
         {
-          "title": "sys_raw_material_info",
+          "title": "cd_raw_material_info",
           "fields": [
             {
               "name": "id",
@@ -4913,7 +4913,7 @@
           "chnname": "原材料物料信息表"
         },
         {
-          "title": "sys_raw_material_stock",
+          "title": "cd_raw_material_stock",
           "fields": [
             {
               "name": "id",
@@ -5055,7 +5055,7 @@
           "chnname": "原材料库存表"
         },
         {
-          "title": "sys_factory_info",
+          "title": "cd_factory_info",
           "fields": [
             {
               "name": "id",
@@ -5167,7 +5167,7 @@
           "chnname": "工厂信息表"
         },
         {
-          "title": "sys_supplier_info",
+          "title": "cd_supplier_info",
           "fields": [
             {
               "name": "id",
@@ -5279,7 +5279,7 @@
           "chnname": "供应商信息表"
         },
         {
-          "title": "sys_product_intransit",
+          "title": "cd_product_intransit",
           "fields": [
             {
               "name": "id",
@@ -5415,7 +5415,7 @@
           "chnname": "成品库存在途明细表"
         },
         {
-          "title": "sys_product_warehouse",
+          "title": "cd_product_warehouse",
           "fields": [
             {
               "name": "id",
@@ -5551,7 +5551,7 @@
           "chnname": "成品库存在库明细表"
         },
         {
-          "title": "sys_production_line_info",
+          "title": "cd_production_line_info",
           "fields": [
             {
               "name": "id",
