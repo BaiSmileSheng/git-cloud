@@ -8,6 +8,7 @@ import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.easyexcel.SheetExcelData;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.common.obs.FileObsUntils;
 import com.cloud.system.domain.entity.SysDept;
 import com.cloud.system.domain.entity.SysDictType;
 import com.cloud.system.domain.entity.SysOperLog;
@@ -19,14 +20,12 @@ import com.cloud.system.service.ISysOperLogService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.bouncycastle.cms.Recipient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -90,7 +89,7 @@ public class SysTestLogController extends BaseController {
     @PostMapping("/importSingle")
     @ResponseBody
     @ApiOperation(value = "单sheet文件导入")
-    public R singleImport(MultipartFile file) throws IOException {
+    public R singleImport(MultipartFile file){
         List<SysOperLog> userPOList = (List<SysOperLog>) EasyExcelUtil.readSingleExcel(file,new SysOperLog(),1);
         return R.ok("success");
     }
@@ -98,7 +97,7 @@ public class SysTestLogController extends BaseController {
     @PostMapping("/importMul")
     @ResponseBody
     @ApiOperation(value = "多sheet文件导入")
-    public R mulImport(MultipartFile file) throws IOException {
+    public R mulImport(MultipartFile file) {
         List<SysOperLog> userPOList1 = (List<SysOperLog>) EasyExcelUtil.readMulExcel(file,new SysOperLog());
         return R.ok("success");
     }
@@ -126,7 +125,7 @@ public class SysTestLogController extends BaseController {
     }
 
     @GetMapping("sendMailText")
-    @ApiOperation(value = "测试发送文本邮件", response = SysDictType.class)
+    @ApiOperation(value = "测试发送文本邮件")
     public R sendMailText() {
         try {
             mailService.sendTextMail("721666450@qq.com", "发送文本邮件", "hello，这是Spring Boot发送的一封文本邮件!");
@@ -162,5 +161,29 @@ public class SysTestLogController extends BaseController {
             return R.error("发送邮件失败");
         }
         return R.ok();
+    }
+
+    @PostMapping("/upLoadFile")
+    @ResponseBody
+    @ApiOperation(value = "测试文件上传")
+    public R upLoadFile(MultipartFile file) {
+        FileObsUntils.upLoadFile(file);
+        return R.ok("success");
+    }
+
+    @PostMapping("/downLoadFile")
+    @ResponseBody
+    @ApiOperation(value = "测试文件下载")
+    public R downLoadFile(String fileName) throws IOException {
+        FileObsUntils.downLoadFile(fileName,getResponse().getOutputStream());
+        return R.ok("success");
+    }
+
+    @PostMapping("/deleteFile")
+    @ResponseBody
+    @ApiOperation(value = "测试文件删除")
+    public R deleteFile(String fileName) throws IOException {
+        FileObsUntils.deleteFile(fileName);
+        return R.ok("success");
     }
 }
