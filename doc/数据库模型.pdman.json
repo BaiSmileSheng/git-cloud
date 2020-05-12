@@ -3493,7 +3493,7 @@
               "autoIncrement": true
             },
             {
-              "name": "order_from1",
+              "name": "order_from",
               "type": "Char",
               "remark": "",
               "chnname": "订单来源（1：内单，2：外单）"
@@ -3503,6 +3503,18 @@
               "type": "DefaultString",
               "remark": "",
               "chnname": "订单种类:1：正常，2：追加，3：储备，4：新品"
+            },
+            {
+              "name": "branch_office",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "分公司"
+            },
+            {
+              "name": "monitor",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "班长"
             },
             {
               "name": "product_material_code",
@@ -3641,6 +3653,18 @@
               "type": "DefaultString",
               "remark": "",
               "chnname": "生产订单号"
+            },
+            {
+              "name": "csd_flag",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "是否卡萨帝"
+            },
+            {
+              "name": "product_status",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "产品状态"
             },
             {
               "name": "status",
