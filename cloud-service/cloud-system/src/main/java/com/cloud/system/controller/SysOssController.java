@@ -1,23 +1,13 @@
 package com.cloud.system.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.file.OssException;
-import com.cloud.common.utils.ValidatorUtils;
+import com.cloud.common.utils.file.FileUtils;
 import com.cloud.system.domain.entity.SysOss;
-import com.cloud.system.oss.CloudConstant;
-import com.cloud.system.oss.CloudConstant.CloudService;
-import com.cloud.system.oss.CloudStorageConfig;
-import com.cloud.system.oss.CloudStorageService;
-import com.cloud.system.oss.OSSFactory;
-import com.cloud.system.oss.valdator.AliyunGroup;
-import com.cloud.system.oss.valdator.QcloudGroup;
-import com.cloud.system.oss.valdator.QiniuGroup;
-import com.cloud.system.service.ISysConfigService;
+import com.cloud.system.oss.*;
 import com.cloud.system.service.ISysOssService;
-import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,46 +24,11 @@ import java.util.Date;
 @RestController
 @RequestMapping("oss")
 public class SysOssController extends BaseController {
-    private final static String KEY = CloudConstant.CLOUD_STORAGE_CONFIG_KEY;
-
     @Autowired
     private ISysOssService sysOssService;
 
     @Autowired
-    private ISysConfigService sysConfigService;
-
-    /**
-     * 云存储配置信息
-     */
-    @RequestMapping("config")
-    @HasPermissions("sys:oss:config")
-    public CloudStorageConfig config() {
-        String jsonconfig = sysConfigService.selectConfigByKey(CloudConstant.CLOUD_STORAGE_CONFIG_KEY);
-        // 获取云存储配置信息
-        CloudStorageConfig config = JSON.parseObject(jsonconfig, CloudStorageConfig.class);
-        return config;
-    }
-
-    /**
-     * 保存云存储配置信息
-     */
-    @RequestMapping("saveConfig")
-    @HasPermissions("sys:oss:config")
-    public R saveConfig(CloudStorageConfig config) {
-        // 校验类型
-        ValidatorUtils.validateEntity(config);
-        if (config.getType() == CloudService.QINIU.getValue()) {
-            // 校验七牛数据
-            ValidatorUtils.validateEntity(config, QiniuGroup.class);
-        } else if (config.getType() == CloudService.ALIYUN.getValue()) {
-            // 校验阿里云数据
-            ValidatorUtils.validateEntity(config, AliyunGroup.class);
-        } else if (config.getType() == CloudService.QCLOUD.getValue()) {
-            // 校验腾讯云数据
-            ValidatorUtils.validateEntity(config, QcloudGroup.class);
-        }
-        return toAjax(sysConfigService.updateValueByKey(KEY, new Gson().toJson(config)));
-    }
+    private CloudStorageConfig cloudStorageConfig;
 
     /**
      * 查询文件上传
@@ -104,19 +59,18 @@ public class SysOssController extends BaseController {
     /**
      * 修改保存文件上传
      *
-     * @throws IOException
      */
     @PostMapping("upload")
     @HasPermissions("sys:oss:add")
-    public R editSave(@RequestParam("file") MultipartFile file) throws IOException {
+    public R editSave(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
             throw new OssException("上传文件不能为空");
         }
         // 上传文件
         String fileName = file.getOriginalFilename();
         String suffix = fileName.substring(fileName.lastIndexOf("."));
-        CloudStorageService storage = OSSFactory.build();
-        String url = storage.uploadSuffix(file.getBytes(), suffix);
+        HuawCloudStorageService storage = new HuawCloudStorageService(cloudStorageConfig);
+        String url = storage.upload(file);
         // 保存文件信息
         SysOss ossEntity = new SysOss();
         ossEntity.setUrl(url);
@@ -124,8 +78,25 @@ public class SysOssController extends BaseController {
         ossEntity.setCreateBy(getLoginName());
         ossEntity.setFileName(fileName);
         ossEntity.setCreateTime(new Date());
-        ossEntity.setService(storage.getService());
-        return toAjax(sysOssService.insertSysOss(ossEntity));
+        ossEntity.setService(1);
+        sysOssService.insertSysOss(ossEntity);
+        return R.data(url);
+    }
+
+    /**
+     * 下载文件
+     *
+     */
+    @PostMapping("downLoad")
+    public void downLoad(String fileName) throws IOException {
+        // 下载文件
+        HuawCloudStorageService storage = new HuawCloudStorageService(cloudStorageConfig);
+        getResponse().setCharacterEncoding("utf-8");
+        // 下载使用"application/octet-stream"更标准
+        getResponse().setContentType("application/octet-stream");
+        getResponse().setHeader("Content-Disposition",
+                "attachment;filename=" + FileUtils.setFileDownloadHeader(getRequest(), fileName));
+        storage.downLoad(fileName,getResponse().getOutputStream());
     }
 
     /**
@@ -134,6 +105,14 @@ public class SysOssController extends BaseController {
     @PostMapping("remove")
     @HasPermissions("sys:oss:remove")
     public R remove(String ids) {
+        if(ids==null){
+            return R.error("参数为空!!");
+        }
+        HuawCloudStorageService storage = new HuawCloudStorageService(cloudStorageConfig);
+        for(String id:ids.split(",")){
+            SysOss sysOss = sysOssService.selectSysOssById(Long.parseLong(id));
+            storage.deleteFile(sysOss.getUrl());
+        }
         return toAjax(sysOssService.deleteSysOssByIds(ids));
     }
 }

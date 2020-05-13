@@ -8,12 +8,14 @@ import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.easyexcel.SheetExcelData;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
-import com.cloud.common.obs.FileObsUntils;
+import com.cloud.common.utils.file.FileUtils;
 import com.cloud.system.domain.entity.SysDept;
 import com.cloud.system.domain.entity.SysDictType;
 import com.cloud.system.domain.entity.SysOperLog;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.mail.MailService;
+import com.cloud.system.oss.HuawCloudStorageService;
+import com.cloud.system.oss.CloudStorageConfig;
 import com.cloud.system.service.ISysDeptService;
 import com.cloud.system.service.ISysDictTypeService;
 import com.cloud.system.service.ISysOperLogService;
@@ -46,6 +48,8 @@ public class SysTestLogController extends BaseController {
     private ISysDictTypeService sysDictTypeService;
     @Autowired
     private MailService mailService;
+    @Autowired
+    private CloudStorageConfig cloudStorageConfig;
 
 
     @OperLog(title = "操作日志", businessType = BusinessType.EXPORT)
@@ -163,27 +167,32 @@ public class SysTestLogController extends BaseController {
         return R.ok();
     }
 
-    @PostMapping("/upLoadFile")
-    @ResponseBody
-    @ApiOperation(value = "测试文件上传")
-    public R upLoadFile(MultipartFile file) {
-        FileObsUntils.upLoadFile(file);
-        return R.ok("success");
-    }
+//    @PostMapping("/upLoadFile")
+//    @ResponseBody
+//    @ApiOperation(value = "测试文件上传")
+//    public R upLoadFile(MultipartFile file) {
+//        FileObsUntils.upLoadFile(file);
+//        return R.ok("success");
+//    }
 
     @PostMapping("/downLoadFile")
     @ResponseBody
     @ApiOperation(value = "测试文件下载")
-    public R downLoadFile(String fileName) throws IOException {
-        FileObsUntils.downLoadFile(fileName,getResponse().getOutputStream());
-        return R.ok("success");
+    public void downLoadFile(String fileName) throws IOException {
+        HuawCloudStorageService storage = new HuawCloudStorageService(cloudStorageConfig);
+        getResponse().setCharacterEncoding("utf-8");
+        // 下载使用"application/octet-stream"更标准
+        getResponse().setContentType("application/octet-stream");
+        getResponse().setHeader("Content-Disposition",
+                "attachment;filename=" + FileUtils.setFileDownloadHeader(getRequest(), fileName));
+        storage.downLoad(fileName,getResponse().getOutputStream());
     }
 
-    @PostMapping("/deleteFile")
-    @ResponseBody
-    @ApiOperation(value = "测试文件删除")
-    public R deleteFile(String fileName) throws IOException {
-        FileObsUntils.deleteFile(fileName);
-        return R.ok("success");
-    }
+//    @PostMapping("/deleteFile")
+//    @ResponseBody
+//    @ApiOperation(value = "测试文件删除")
+//    public R deleteFile(String fileName) throws IOException {
+//        FileObsUntils.deleteFile(fileName);
+//        return R.ok("success");
+//    }
 }

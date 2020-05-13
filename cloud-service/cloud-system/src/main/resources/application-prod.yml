@@ -72,3 +72,8 @@ sap:
     user: VPMS_COS
     passwd: qwer1234
     lang: ZH
+obs:
+  endPoint: https://oss.cosmoplat.com
+  ak: D9850F77F89C0FC2D1F4
+  sk: O1R/ZGoGS3dxCrHhTeROsRta/fQAAAFx+JwPwhwb
+  bucketName: my-obs-bucket
