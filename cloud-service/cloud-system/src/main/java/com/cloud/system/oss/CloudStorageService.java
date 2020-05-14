@@ -8,7 +8,7 @@ import java.io.OutputStream;
 import java.util.UUID;
 
 /**
- * 云存储(支持七牛、阿里云、腾讯云、又拍云)
+ * 云存储(支持阿里云、华为云)
  */
 public abstract class CloudStorageService {
     /**
