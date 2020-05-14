@@ -8,25 +8,20 @@ import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.easyexcel.SheetExcelData;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
-import com.cloud.common.utils.file.FileUtils;
 import com.cloud.system.domain.entity.SysDept;
 import com.cloud.system.domain.entity.SysDictType;
 import com.cloud.system.domain.entity.SysOperLog;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.mail.MailService;
-import com.cloud.system.oss.HuawCloudStorageService;
-import com.cloud.system.oss.CloudStorageConfig;
 import com.cloud.system.service.ISysDeptService;
 import com.cloud.system.service.ISysDictTypeService;
 import com.cloud.system.service.ISysOperLogService;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,8 +43,6 @@ public class SysTestLogController extends BaseController {
     private ISysDictTypeService sysDictTypeService;
     @Autowired
     private MailService mailService;
-    @Autowired
-    private CloudStorageConfig cloudStorageConfig;
 
 
     @OperLog(title = "操作日志", businessType = BusinessType.EXPORT)
@@ -166,19 +159,4 @@ public class SysTestLogController extends BaseController {
         }
         return R.ok();
     }
-
-
-    @PostMapping("/downLoadFile")
-    @ResponseBody
-    @ApiOperation(value = "测试文件下载")
-    public void downLoadFile(String fileName) throws IOException {
-        HuawCloudStorageService storage = new HuawCloudStorageService(cloudStorageConfig);
-        getResponse().setCharacterEncoding("utf-8");
-        // 下载使用"application/octet-stream"更标准
-        getResponse().setContentType("application/octet-stream");
-        getResponse().setHeader("Content-Disposition",
-                "attachment;filename=" + FileUtils.setFileDownloadHeader(getRequest(), fileName));
-        storage.downLoad(fileName,getResponse().getOutputStream());
-    }
-
 }
