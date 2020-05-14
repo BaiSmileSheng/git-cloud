@@ -2630,16 +2630,16 @@
             {
               "name": "order_from",
               "type": "Char",
-              "remark": "",
-              "chnname": "订单来源（1：内单，2：外单）",
+              "remark": "1：内单，2：外单",
+              "chnname": "订单来源",
               "defaultValue": "",
               "notNull": true
             },
             {
               "name": "order_class",
               "type": "DefaultString",
-              "remark": "",
-              "chnname": "订单种类:1：正常，2：追加，3：储备，4：新品",
+              "remark": "1：正常，2：追加，3：储备，4：新品",
+              "chnname": "订单种类",
               "defaultValue": "",
               "notNull": true
             },
@@ -2652,7 +2652,7 @@
               "notNull": true
             },
             {
-              "name": "product_finished_material_desc",
+              "name": "product_material_desc",
               "type": "DefaultString",
               "remark": "",
               "chnname": "成品物料描述",
@@ -2722,8 +2722,8 @@
             {
               "name": "del_flag",
               "type": "Char",
-              "remark": "",
-              "chnname": "是否删除0：有效，1：删除",
+              "remark": "0：有效，1：删除",
+              "chnname": "是否删除",
               "defaultValue": "0"
             },
             {
