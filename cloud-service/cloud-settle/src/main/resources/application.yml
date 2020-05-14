@@ -1,0 +1,91 @@
+server:
+  port: 8003
+# 日志配置
+logging:
+  level:
+    com.cloud: debug
+    org.springframework: warn
+    com.alibaba.nacos.client.naming: error
+spring:
+  application:
+    name: cloud-settle
+  profiles:
+    active: dev
+  devtools:
+    restart:
+      enabled: true
+  main:
+    allow-bean-definition-overriding: true
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  servlet:
+    multipart:
+      maxFileSize: 5MB  #单位必须大写MB或不写(即为B)
+      maxRequestSize: 10MB
+  cloud:
+    nacos:
+      #      config:
+      #        server-addr: 127.0.0.1:8848
+      #        file-extension: yml
+      discovery:
+        server-addr: 127.0.0.1:8848
+  mail:
+    host: mail.mhaq.cn
+    port: 25
+    username: ws@mhaq.cn
+    password: Haier.123
+    protocol: smtp
+    defaultEncoding: utf-8
+
+feign:
+  hystrix:
+    enabled: true
+  httpclient:
+    max-connections: 200
+    max-connections-per-route: 50
+    enabled: false
+  okhttp:
+    enabled: true
+# 暴露监控端点
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+
+# MyBatis
+mybatis:
+  # 搜索指定包别名
+  typeAliasesPackage: com.cloud
+  # 配置mapper的扫描，找到所有的mapper.xml映射文件
+  mapperLocations: classpath*:mapper/**/*Mapper.xml
+
+mapper:
+  not-empty: true
+  identity: MYSQL
+
+# PageHelper分页插件
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+
+# seata配置,分布式事务
+seata:
+  enabled: true
+  application-id: ${spring.application.name}
+  #事务组
+  tx-service-group: seataGroup-${seata.application-id}
+  config:
+    type: file
+    file:
+      name: 'file.conf'
+  #nacos中server-Addr 所在的命名空间
+  registry:
+    type: nacos
+    nacos:
+      server-addr: ${spring.cloud.nacos.discovery.server-addr}
+

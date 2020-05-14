@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.settle.mapper.OmsTestMapper">
+
+    <resultMap type="OmsTest" id="OmsTestResult">
+        <result property="id" column="id"/>
+        <result property="testA" column="test_a"/>
+        <result property="testB" column="test_b"/>
+    </resultMap>
+
+    <sql id="selectOmsTestVo">
+        select id, test_a, test_b from oms_test
+    </sql>
+
+
+</mapper>

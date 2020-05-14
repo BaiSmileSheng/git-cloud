@@ -94,7 +94,24 @@ spring:
               args:
                 name: fallbackcmd
                 fallbackUri: 'forward:/fallback'
-
+        #settle 模块
+        - id: cloud-settle
+          uri: lb://cloud-settle
+          predicates:
+            - Path=/settle/**
+          filters:
+            - StripPrefix=1
+            # 限流配置
+            - name: RequestRateLimiter
+              args:
+                key-resolver: '#{@remoteAddrKeyResolver}'
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+              # 降级配置
+            - name: Hystrix
+              args:
+                name: fallbackcmd
+                fallbackUri: 'forward:/fallback'
 ribbon:
   OkToRetryOnAllOperations: false #对所有操作请求都进行重试,默认false
   ReadTimeout: 8000   #负载均衡超时时间，默认值5000
