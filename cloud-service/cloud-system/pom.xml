@@ -147,6 +147,11 @@
             <groupId>com.github.easonjim</groupId>
             <artifactId>com.sap.conn.jco.sapjco3</artifactId>
         </dependency>
+        <!--华为云-->
+        <dependency>
+            <groupId>com.huaweicloud</groupId>
+            <artifactId>esdk-obs-java</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
