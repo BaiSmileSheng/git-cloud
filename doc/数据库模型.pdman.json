@@ -5,398 +5,6 @@
       "chnname": "系统相关",
       "entities": [
         {
-          "title": "GEN_TABLE",
-          "chnname": "代码生成业务表",
-          "fields": [
-            {
-              "name": "TABLE_ID",
-              "type": "BIGINT_19",
-              "chnname": "编号",
-              "remark": "",
-              "pk": true,
-              "notNull": true,
-              "autoIncrement": true,
-              "defaultValue": ""
-            },
-            {
-              "name": "TABLE_NAME",
-              "type": "VARCHAR_200",
-              "chnname": "表名称",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "TABLE_COMMENT",
-              "type": "VARCHAR_500",
-              "chnname": "表描述",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "CLASS_NAME",
-              "type": "VARCHAR_100",
-              "chnname": "实体类名称",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "TPL_CATEGORY",
-              "type": "VARCHAR_200",
-              "chnname": "使用的模板（crud单表操作 tree树表操作）",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "PACKAGE_NAME",
-              "type": "VARCHAR_100",
-              "chnname": "生成包路径",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "MODULE_NAME",
-              "type": "VARCHAR_30",
-              "chnname": "生成模块名",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "BUSINESS_NAME",
-              "type": "VARCHAR_30",
-              "chnname": "生成业务名",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "FUNCTION_NAME",
-              "type": "VARCHAR_50",
-              "chnname": "生成功能名",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "FUNCTION_AUTHOR",
-              "type": "VARCHAR_50",
-              "chnname": "生成功能作者",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "OPTIONS",
-              "type": "VARCHAR_1000",
-              "chnname": "其它生成选项",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "CREATE_BY",
-              "type": "VARCHAR_64",
-              "chnname": "创建者",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "CREATE_TIME",
-              "type": "DATETIME",
-              "chnname": "创建时间",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "UPDATE_BY",
-              "type": "VARCHAR_64",
-              "chnname": "更新者",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "UPDATE_TIME",
-              "type": "DATETIME",
-              "chnname": "更新时间",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "REMARK",
-              "type": "VARCHAR_500",
-              "chnname": "备注",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            }
-          ]
-        },
-        {
-          "title": "GEN_TABLE_COLUMN",
-          "chnname": "代码生成业务表字段",
-          "fields": [
-            {
-              "name": "COLUMN_ID",
-              "type": "BIGINT_19",
-              "chnname": "编号",
-              "remark": "",
-              "pk": true,
-              "notNull": true,
-              "autoIncrement": true,
-              "defaultValue": ""
-            },
-            {
-              "name": "TABLE_ID",
-              "type": "VARCHAR_64",
-              "chnname": "归属表编号",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "COLUMN_NAME",
-              "type": "VARCHAR_200",
-              "chnname": "列名称",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "COLUMN_COMMENT",
-              "type": "VARCHAR_500",
-              "chnname": "列描述",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "COLUMN_TYPE",
-              "type": "VARCHAR_100",
-              "chnname": "列类型",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "JAVA_TYPE",
-              "type": "VARCHAR_500",
-              "chnname": "JAVA类型",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "JAVA_FIELD",
-              "type": "VARCHAR_200",
-              "chnname": "JAVA字段名",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "IS_PK",
-              "type": "CHAR_1",
-              "chnname": "是否主键（1是）",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "IS_INCREMENT",
-              "type": "CHAR_1",
-              "chnname": "是否自增（1是）",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "IS_REQUIRED",
-              "type": "CHAR_1",
-              "chnname": "是否必填（1是）",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "IS_INSERT",
-              "type": "CHAR_1",
-              "chnname": "是否为插入字段（1是）",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "IS_EDIT",
-              "type": "CHAR_1",
-              "chnname": "是否编辑字段（1是）",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "IS_LIST",
-              "type": "CHAR_1",
-              "chnname": "是否列表字段（1是）",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "IS_QUERY",
-              "type": "CHAR_1",
-              "chnname": "是否查询字段（1是）",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "QUERY_TYPE",
-              "type": "VARCHAR_200",
-              "chnname": "查询方式（等于、不等于、大于、小于、范围）",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "HTML_TYPE",
-              "type": "VARCHAR_200",
-              "chnname": "显示类型（文本框、文本域、下拉框、复选框、单选框、日期控件）",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "DICT_TYPE",
-              "type": "VARCHAR_200",
-              "chnname": "字典类型",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "SORT",
-              "type": "INT_10",
-              "chnname": "排序",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "CREATE_BY",
-              "type": "VARCHAR_64",
-              "chnname": "创建者",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "CREATE_TIME",
-              "type": "DATETIME",
-              "chnname": "创建时间",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "UPDATE_BY",
-              "type": "VARCHAR_64",
-              "chnname": "更新者",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "UPDATE_TIME",
-              "type": "DATETIME",
-              "chnname": "更新时间",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            }
-          ]
-        },
-        {
           "title": "SYS_CONFIG",
           "chnname": "参数配置表",
           "fields": [
@@ -494,162 +102,6 @@
               "name": "REMARK",
               "type": "VARCHAR_500",
               "chnname": "备注",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            }
-          ]
-        },
-        {
-          "title": "SYS_DEPT",
-          "chnname": "部门表",
-          "fields": [
-            {
-              "name": "DEPT_ID",
-              "type": "INT_10",
-              "chnname": "部门id",
-              "remark": "",
-              "pk": true,
-              "notNull": true,
-              "autoIncrement": true,
-              "defaultValue": ""
-            },
-            {
-              "name": "PARENT_ID",
-              "type": "INT_10",
-              "chnname": "父部门id",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "ANCESTORS",
-              "type": "VARCHAR_50",
-              "chnname": "祖级列表",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "DEPT_NAME",
-              "type": "VARCHAR_30",
-              "chnname": "部门名称",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "ORDER_NUM",
-              "type": "INT_10",
-              "chnname": "显示顺序",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "LEADER",
-              "type": "VARCHAR_20",
-              "chnname": "负责人",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "LEADER_ID",
-              "type": "INT_10",
-              "chnname": "负责人编号",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "PHONE",
-              "type": "VARCHAR_11",
-              "chnname": "联系电话",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "EMAIL",
-              "type": "VARCHAR_50",
-              "chnname": "邮箱",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "STATUS",
-              "type": "CHAR_1",
-              "chnname": "部门状态（0正常 1停用）",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "DEL_FLAG",
-              "type": "CHAR_1",
-              "chnname": "删除标志（0代表存在 2代表删除）",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "CREATE_BY",
-              "type": "VARCHAR_64",
-              "chnname": "创建者",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "CREATE_TIME",
-              "type": "DATETIME",
-              "chnname": "创建时间",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "UPDATE_BY",
-              "type": "VARCHAR_64",
-              "chnname": "更新者",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "UPDATE_TIME",
-              "type": "DATETIME",
-              "chnname": "更新时间",
               "remark": "",
               "pk": false,
               "notNull": false,
@@ -892,248 +344,6 @@
               "name": "REMARK",
               "type": "VARCHAR_500",
               "chnname": "备注",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            }
-          ]
-        },
-        {
-          "title": "SYS_JOB",
-          "chnname": "定时任务调度表",
-          "fields": [
-            {
-              "name": "JOB_ID",
-              "type": "INT_10",
-              "chnname": "任务ID",
-              "remark": "",
-              "pk": true,
-              "notNull": true,
-              "autoIncrement": true,
-              "defaultValue": ""
-            },
-            {
-              "name": "JOB_NAME",
-              "type": "VARCHAR_64",
-              "chnname": "任务名称",
-              "remark": "",
-              "pk": true,
-              "notNull": true,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "JOB_GROUP",
-              "type": "VARCHAR_64",
-              "chnname": "任务组名",
-              "remark": "",
-              "pk": true,
-              "notNull": true,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "METHOD_NAME",
-              "type": "VARCHAR_500",
-              "chnname": "任务方法",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "METHOD_PARAMS",
-              "type": "VARCHAR_50",
-              "chnname": "方法参数",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "CRON_EXPRESSION",
-              "type": "VARCHAR_255",
-              "chnname": "cron执行表达式",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "MISFIRE_POLICY",
-              "type": "VARCHAR_20",
-              "chnname": "计划执行错误策略（1立即执行 2执行一次 3放弃执行）",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "CONCURRENT",
-              "type": "CHAR_1",
-              "chnname": "是否并发执行（0允许 1禁止）",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "STATUS",
-              "type": "CHAR_1",
-              "chnname": "状态（0正常 1暂停）",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "CREATE_BY",
-              "type": "VARCHAR_64",
-              "chnname": "创建者",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "CREATE_TIME",
-              "type": "DATETIME",
-              "chnname": "创建时间",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "UPDATE_BY",
-              "type": "VARCHAR_64",
-              "chnname": "更新者",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "UPDATE_TIME",
-              "type": "DATETIME",
-              "chnname": "更新时间",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "REMARK",
-              "type": "VARCHAR_500",
-              "chnname": "备注信息",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            }
-          ]
-        },
-        {
-          "title": "SYS_JOB_LOG",
-          "chnname": "定时任务调度日志表",
-          "fields": [
-            {
-              "name": "JOB_LOG_ID",
-              "type": "INT_10",
-              "chnname": "任务日志ID",
-              "remark": "",
-              "pk": true,
-              "notNull": true,
-              "autoIncrement": true,
-              "defaultValue": ""
-            },
-            {
-              "name": "JOB_NAME",
-              "type": "VARCHAR_64",
-              "chnname": "任务名称",
-              "remark": "",
-              "pk": false,
-              "notNull": true,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "JOB_GROUP",
-              "type": "VARCHAR_64",
-              "chnname": "任务组名",
-              "remark": "",
-              "pk": false,
-              "notNull": true,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "METHOD_NAME",
-              "type": "VARCHAR_500",
-              "chnname": "任务方法",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "METHOD_PARAMS",
-              "type": "VARCHAR_50",
-              "chnname": "方法参数",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "JOB_MESSAGE",
-              "type": "VARCHAR_500",
-              "chnname": "日志信息",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "STATUS",
-              "type": "CHAR_1",
-              "chnname": "执行状态（0正常 1失败）",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "EXCEPTION_INFO",
-              "type": "VARCHAR_2000",
-              "chnname": "异常信息",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "CREATE_TIME",
-              "type": "DATETIME",
-              "chnname": "创建时间",
               "remark": "",
               "pk": false,
               "notNull": false,
@@ -2090,53 +1300,6 @@
               "autoIncrement": false,
               "defaultValue": ""
             }
-          ],
-          "indexs": [],
-          "headers": [
-            {
-              "fieldName": "chnname",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "name",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "type",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "dataType",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "remark",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "pk",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "notNull",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "autoIncrement",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "defaultValue",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "relationNoShow",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "uiHint",
-              "relationNoShow": true
-            }
           ]
         },
         {
@@ -2514,37 +1677,211 @@
           ]
         },
         {
-          "title": "test",
+          "title": "SYS_DATA_SCOPE",
+          "chnname": "用户权限表",
           "fields": [
             {
-              "name": "REVISION",
-              "type": "Integer",
+              "name": "ID",
+              "type": "VARCHAR_255",
+              "chnname": "",
               "remark": "",
-              "chnname": "乐观锁"
+              "pk": true,
+              "notNull": true,
+              "autoIncrement": true,
+              "defaultValue": ""
             },
             {
-              "name": "CREATED_BY",
-              "type": "IdOrKey",
+              "name": "MATERIAL_CODE",
+              "type": "VARCHAR_255",
+              "chnname": "物料号",
               "remark": "",
-              "chnname": "创建人"
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
             },
             {
-              "name": "CREATED_TIME",
-              "type": "DateTime",
+              "name": "MATERIAL_DESC",
+              "type": "VARCHAR_255",
+              "chnname": "物料描述",
               "remark": "",
-              "chnname": "创建时间"
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
             },
             {
-              "name": "UPDATED_BY",
-              "type": "IdOrKey",
+              "name": "PARENT_ID",
+              "type": "VARCHAR_255",
+              "chnname": "父id",
               "remark": "",
-              "chnname": "更新人"
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
             },
             {
-              "name": "UPDATED_TIME",
-              "type": "DateTime",
+              "name": "ORDER_NUM",
+              "type": "INT_10",
+              "chnname": "显示顺序",
               "remark": "",
-              "chnname": "更新时间"
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "STATUS",
+              "type": "CHAR_1",
+              "chnname": "状态（0正常 1停用）",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "REMARK",
+              "type": "VARCHAR_255",
+              "chnname": "备注",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "DEL_FLAG",
+              "type": "CHAR_1",
+              "chnname": "删除标志（0代表存在 1代表删除）",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "CREATE_BY",
+              "type": "VARCHAR_64",
+              "chnname": "创建者",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "CREATE_TIME",
+              "type": "DATETIME",
+              "chnname": "创建时间",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "UPDATE_BY",
+              "type": "VARCHAR_64",
+              "chnname": "更新者",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "UPDATE_TIME",
+              "type": "DATETIME",
+              "chnname": "更新时间",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            }
+          ],
+          "indexs": [],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
+            }
+          ]
+        },
+        {
+          "title": "SYS_USER_SCOPE",
+          "chnname": "用户和物料权限关联表",
+          "fields": [
+            {
+              "name": "ID",
+              "type": "BIGINT UNSIGNED_20",
+              "chnname": "",
+              "remark": "",
+              "pk": true,
+              "notNull": true,
+              "autoIncrement": true,
+              "defaultValue": ""
+            },
+            {
+              "name": "USER_ID",
+              "type": "BIGINT_19",
+              "chnname": "用户ID",
+              "remark": "",
+              "pk": false,
+              "notNull": true,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "DATA_SCOPE_ID",
+              "type": "VARCHAR_255",
+              "chnname": "用户权限ID",
+              "remark": "",
+              "pk": false,
+              "notNull": true,
+              "autoIncrement": false,
+              "defaultValue": ""
             }
           ],
           "indexs": [],
@@ -2596,10 +1933,505 @@
           ]
         }
       ],
-      "associations": [],
+      "associations": [
+        {
+          "relation": "1:0,n",
+          "from": {
+            "entity": "SYS_USER",
+            "field": "USER_ID"
+          },
+          "to": {
+            "entity": "SYS_USER_SCOPE",
+            "field": "USER_ID"
+          }
+        },
+        {
+          "relation": "0,n:1",
+          "from": {
+            "entity": "SYS_USER_SCOPE",
+            "field": "DATA_SCOPE_ID"
+          },
+          "to": {
+            "entity": "SYS_DATA_SCOPE",
+            "field": "ID"
+          }
+        },
+        {
+          "relation": "0,n:1",
+          "from": {
+            "entity": "SYS_ROLE_MENU",
+            "field": "MENU_ID"
+          },
+          "to": {
+            "entity": "SYS_MENU",
+            "field": "MENU_ID"
+          }
+        },
+        {
+          "relation": "0,n:1",
+          "from": {
+            "entity": "SYS_ROLE_MENU",
+            "field": "ROLE_ID"
+          },
+          "to": {
+            "entity": "SYS_ROLE",
+            "field": "ROLE_ID"
+          }
+        },
+        {
+          "relation": "0,n:1",
+          "from": {
+            "entity": "SYS_USER_ROLE",
+            "field": "USER_ID"
+          },
+          "to": {
+            "entity": "SYS_USER",
+            "field": "USER_ID"
+          }
+        },
+        {
+          "relation": "0,n:1",
+          "from": {
+            "entity": "SYS_MENU",
+            "field": "MENU_ID"
+          },
+          "to": {
+            "entity": "SYS_USER_ROLE",
+            "field": "ROLE_ID"
+          }
+        },
+        {
+          "relation": "0,n:1",
+          "from": {
+            "entity": "SYS_DICT_DATA",
+            "field": "DICT_TYPE"
+          },
+          "to": {
+            "entity": "SYS_DICT_TYPE",
+            "field": "DICT_TYPE"
+          }
+        },
+        {
+          "relation": "0,n:1",
+          "from": {
+            "entity": "SYS_USER_POST",
+            "field": "USER_ID"
+          },
+          "to": {
+            "entity": "SYS_USER",
+            "field": "USER_ID"
+          }
+        },
+        {
+          "relation": "0,n:1",
+          "from": {
+            "entity": "SYS_USER_POST",
+            "field": "POST_ID"
+          },
+          "to": {
+            "entity": "SYS_POST",
+            "field": "POST_ID"
+          }
+        },
+        {
+          "relation": "0,n:1",
+          "from": {
+            "entity": "SYS_LOGININFOR",
+            "field": "LOGIN_NAME"
+          },
+          "to": {
+            "entity": "SYS_USER",
+            "field": "LOGIN_NAME"
+          }
+        },
+        {
+          "relation": "0,n:1",
+          "from": {
+            "entity": "SYS_OPER_LOG",
+            "field": "OPER_NAME"
+          },
+          "to": {
+            "entity": "SYS_USER",
+            "field": "LOGIN_NAME"
+          }
+        },
+        {
+          "relation": "0,n:1",
+          "from": {
+            "entity": "SYS_USER_ONLINE",
+            "field": "LOGIN_NAME"
+          },
+          "to": {
+            "entity": "SYS_USER",
+            "field": "LOGIN_NAME"
+          }
+        }
+      ],
       "graphCanvas": {
-        "nodes": [],
-        "edges": []
+        "nodes": [
+          {
+            "shape": "table",
+            "title": "SYS_MENU",
+            "moduleName": false,
+            "x": -660,
+            "y": -150,
+            "id": "74c1212e"
+          },
+          {
+            "shape": "table",
+            "title": "SYS_ROLE_MENU",
+            "moduleName": false,
+            "x": 0,
+            "y": -170,
+            "id": "6332b629"
+          },
+          {
+            "shape": "table",
+            "title": "SYS_ROLE",
+            "moduleName": false,
+            "x": 520,
+            "y": -150,
+            "id": "fe266ed5"
+          },
+          {
+            "shape": "table",
+            "title": "SYS_USER_ROLE",
+            "moduleName": false,
+            "x": -100,
+            "y": 80,
+            "id": "790b7fe4"
+          },
+          {
+            "shape": "table",
+            "title": "SYS_DATA_SCOPE",
+            "moduleName": false,
+            "x": 1680,
+            "y": 440,
+            "id": "c64d244a"
+          },
+          {
+            "shape": "table",
+            "title": "SYS_USER",
+            "moduleName": false,
+            "x": 360,
+            "y": 430,
+            "id": "b7cbf2b0"
+          },
+          {
+            "shape": "table",
+            "title": "SYS_POST",
+            "moduleName": false,
+            "x": -590.1708809202595,
+            "y": 554.3372938443351,
+            "id": "812aea24"
+          },
+          {
+            "shape": "table",
+            "title": "SYS_USER_POST",
+            "moduleName": false,
+            "x": -160,
+            "y": 370,
+            "id": "8c5195d7"
+          },
+          {
+            "shape": "table",
+            "title": "SYS_OPER_LOG",
+            "moduleName": false,
+            "x": -280,
+            "y": 940,
+            "id": "9a91e3d8"
+          },
+          {
+            "shape": "table",
+            "title": "SYS_CONFIG",
+            "moduleName": false,
+            "x": -1050,
+            "y": -650,
+            "id": "ec0f01f0"
+          },
+          {
+            "shape": "table",
+            "title": "SYS_DICT_DATA",
+            "moduleName": false,
+            "x": -450,
+            "y": -680,
+            "id": "d322679a"
+          },
+          {
+            "shape": "table",
+            "title": "SYS_DICT_TYPE",
+            "moduleName": false,
+            "x": 230,
+            "y": -620,
+            "id": "0d27a6aa"
+          },
+          {
+            "shape": "table",
+            "title": "SYS_NOTICE",
+            "moduleName": false,
+            "x": 804.0289176734611,
+            "y": -690.5822501043363,
+            "id": "1ff33437"
+          },
+          {
+            "shape": "table",
+            "title": "SYS_LOGININFOR",
+            "moduleName": false,
+            "x": 1060,
+            "y": 900,
+            "id": "7b985d71"
+          },
+          {
+            "shape": "table",
+            "title": "SYS_USER_ONLINE",
+            "moduleName": false,
+            "x": 1050,
+            "y": 530,
+            "id": "415141d5"
+          },
+          {
+            "shape": "table",
+            "title": "SYS_USER_SCOPE",
+            "moduleName": false,
+            "x": 1050,
+            "y": 230,
+            "id": "6452385b"
+          }
+        ],
+        "edges": [
+          {
+            "shape": "erdRelation",
+            "relation": "1:0,n",
+            "source": "b7cbf2b0",
+            "target": "6452385b",
+            "id": "aac722fb",
+            "controlPoints": [
+              {
+                "x": 596.0146484375,
+                "y": 252.0872093023256
+              },
+              {
+                "x": 863.0986328125,
+                "y": 242.47037037037035
+              }
+            ],
+            "sourceAnchor": 1,
+            "targetAnchor": 2
+          },
+          {
+            "shape": "erdRelation",
+            "relation": "0,n:1",
+            "source": "6452385b",
+            "target": "c64d244a",
+            "id": "a3954afe",
+            "controlPoints": [
+              {
+                "x": 1236.9013671875,
+                "y": 262.52407407407406
+              },
+              {
+                "x": 1340,
+                "y": 300
+              },
+              {
+                "x": 1450.4248046875,
+                "y": 342.1388888888889
+              }
+            ],
+            "sourceAnchor": 5,
+            "targetAnchor": 0
+          },
+          {
+            "shape": "erdRelation",
+            "relation": "0,n:1",
+            "source": "6332b629",
+            "target": "74c1212e",
+            "id": "9e666dbe",
+            "controlPoints": [
+              {
+                "x": -121.2744140625,
+                "y": -147.19387755102042
+              },
+              {
+                "x": -319.193359375,
+                "y": -327.91279069767444
+              }
+            ],
+            "sourceAnchor": 2,
+            "targetAnchor": 1
+          },
+          {
+            "shape": "erdRelation",
+            "relation": "0,n:1",
+            "source": "6332b629",
+            "target": "fe266ed5",
+            "id": "af0db481",
+            "controlPoints": [
+              {
+                "x": 121.2744140625,
+                "y": -169.23979591836735
+              },
+              {
+                "x": 263.0966796875,
+                "y": -247.86111111111111
+              }
+            ],
+            "sourceAnchor": 1,
+            "targetAnchor": 0
+          },
+          {
+            "shape": "erdRelation",
+            "relation": "0,n:1",
+            "source": "790b7fe4",
+            "target": "b7cbf2b0",
+            "id": "3a6a2684",
+            "controlPoints": [
+              {
+                "x": 20.5283203125,
+                "y": 80.76020408163265
+              },
+              {
+                "x": 123.9853515625,
+                "y": 252.0872093023256
+              }
+            ],
+            "sourceAnchor": 1,
+            "targetAnchor": 0
+          },
+          {
+            "shape": "erdRelation",
+            "relation": "0,n:1",
+            "source": "74c1212e",
+            "target": "790b7fe4",
+            "id": "716621a6",
+            "controlPoints": [
+              {
+                "x": -319.193359375,
+                "y": -327.91279069767444
+              },
+              {
+                "x": -220.5283203125,
+                "y": 102.8061224489796
+              }
+            ],
+            "sourceAnchor": 1,
+            "targetAnchor": 2
+          },
+          {
+            "shape": "erdRelation",
+            "relation": "0,n:1",
+            "source": "d322679a",
+            "target": "0d27a6aa",
+            "id": "0089f427",
+            "controlPoints": [
+              {
+                "x": -249.4375,
+                "y": -717.6209677419355
+              },
+              {
+                "x": 45.0966796875,
+                "y": -647.6309523809524
+              }
+            ],
+            "sourceAnchor": 9,
+            "targetAnchor": 4
+          },
+          {
+            "shape": "erdRelation",
+            "relation": "0,n:1",
+            "source": "8c5195d7",
+            "target": "b7cbf2b0",
+            "id": "c8bcc87f",
+            "controlPoints": [
+              {
+                "x": -39.4716796875,
+                "y": 370.76020408163265
+              },
+              {
+                "x": 123.9853515625,
+                "y": 252.0872093023256
+              }
+            ],
+            "sourceAnchor": 1,
+            "targetAnchor": 0
+          },
+          {
+            "shape": "erdRelation",
+            "relation": "0,n:1",
+            "source": "8c5195d7",
+            "target": "812aea24",
+            "id": "39e51c47",
+            "controlPoints": [
+              {
+                "x": -280.5283203125,
+                "y": 392.8061224489796
+              },
+              {
+                "x": -405.2675606077595,
+                "y": 476.500337322596
+              }
+            ],
+            "sourceAnchor": 2,
+            "targetAnchor": 1
+          },
+          {
+            "shape": "erdRelation",
+            "relation": "0,n:1",
+            "source": "7b985d71",
+            "target": "b7cbf2b0",
+            "id": "f66236ef",
+            "controlPoints": [
+              {
+                "x": 852.423828125,
+                "y": 852.2738095238095
+              },
+              {
+                "x": 596.0146484375,
+                "y": 292.18023255813955
+              }
+            ],
+            "sourceAnchor": 2,
+            "targetAnchor": 5
+          },
+          {
+            "shape": "erdRelation",
+            "relation": "0,n:1",
+            "source": "9a91e3d8",
+            "target": "b7cbf2b0",
+            "id": "c4879008",
+            "controlPoints": [
+              {
+                "x": -15.9775390625,
+                "y": 932.4772727272727
+              },
+              {
+                "x": 123.9853515625,
+                "y": 292.18023255813955
+              }
+            ],
+            "sourceAnchor": 13,
+            "targetAnchor": 4
+          },
+          {
+            "shape": "erdRelation",
+            "relation": "0,n:1",
+            "source": "415141d5",
+            "target": "b7cbf2b0",
+            "id": "695f5cdb",
+            "controlPoints": [
+              {
+                "x": 815.72265625,
+                "y": 462.23
+              },
+              {
+                "x": 596.0146484375,
+                "y": 292.18023255813955
+              }
+            ],
+            "sourceAnchor": 2,
+            "targetAnchor": 5
+          }
+        ]
       }
     },
     {

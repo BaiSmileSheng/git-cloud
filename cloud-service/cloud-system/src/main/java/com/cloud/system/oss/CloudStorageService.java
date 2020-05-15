@@ -4,10 +4,11 @@ import com.cloud.common.utils.DateUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.UUID;
 
 /**
- * 云存储(支持七牛、阿里云、腾讯云、又拍云)
+ * 云存储(支持阿里云、华为云)
  */
 public abstract class CloudStorageService {
     /**
@@ -72,4 +73,19 @@ public abstract class CloudStorageService {
      * @return 返回http地址
      */
     public abstract String uploadSuffix(InputStream inputStream, String suffix);
+
+    /**
+     * 文件下载
+     * @param fileName
+     * @param os
+     */
+    public abstract void downLoad(String fileName, OutputStream os);
+
+    /**
+     * 文件删除
+     * @param fileName
+     */
+    public abstract void deleteFile(String fileName);
+
+
 }
