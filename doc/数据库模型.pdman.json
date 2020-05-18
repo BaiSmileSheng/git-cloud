@@ -5162,8 +5162,8 @@
             {
               "name": "order_status",
               "type": "CHAR_1",
-              "remark": "",
-              "chnname": "订单状态（未关单、已关单、待结算、已付款）"
+              "remark": "（0已提交 、1未关单、2已关单、3待结算、4已付款）",
+              "chnname": "订单状态"
             },
             {
               "name": "material_code",
