@@ -36,6 +36,11 @@ public interface RemoteOssService {
     @GetMapping("oss/remove")
     public String remove(String ids);
 
+    /**
+     * 根据订单编号查询文件上传列表
+     * @param orderNo
+     * @return
+     */
     @GetMapping("oss/listByOrderNo")
     public List<SysOss> listByOrderNo(String orderNo);
 

@@ -35,6 +35,11 @@ public class RemoteOssFallbackFactory implements FallbackFactory<RemoteOssServic
                 return null;
             }
 
+            /**
+             * 根据订单编号查询文件上传列表
+             * @param orderNo
+             * @return
+             */
             @Override
             public List<SysOss> listByOrderNo(String orderNo) {
                 return null;
