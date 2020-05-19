@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.system.mapper.SysOssMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.cloud.system.domain.entity.SysOss">
+        <id column="id" property="id" />
+        <result column="file_name" property="fileName" />
+        <result column="file_suffix" property="fileSuffix" />
+        <result column="url" property="url" />
+        <result column="create_time" property="createTime" />
+        <result column="create_by" property="createBy" />
+        <result column="service" property="service" />
+        <result column="order_no" property="orderNo" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, file_name, file_suffix, url, create_time, create_by, service, order_no
+    </sql>
+
+    <select id="selectSysOssListByOrderNo"  parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from sys_oss
+        where 1=1
+        <if test="orderNo != null">
+            and order_no = #{orderNo}
+        </if>
+    </select>
+</mapper>

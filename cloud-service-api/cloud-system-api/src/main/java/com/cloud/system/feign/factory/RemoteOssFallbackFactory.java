@@ -1,10 +1,13 @@
 package com.cloud.system.feign.factory;
 
+import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.feign.RemoteOssService;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 
 @Slf4j
@@ -29,6 +32,11 @@ public class RemoteOssFallbackFactory implements FallbackFactory<RemoteOssServic
 
             @Override
             public String remove(String ids) {
+                return null;
+            }
+
+            @Override
+            public List<SysOss> listByOrderNo(String orderNo) {
                 return null;
             }
         };

@@ -51,4 +51,11 @@ public interface ISysOssService {
      */
     public int deleteSysOssByIds(String ids);
 
+    /**
+     * 根据订单号查询文件列表
+     * @param orderNo
+     * @return
+     */
+    public List<SysOss> selectSysOssListByOrderNo(String orderNo);
+
 }

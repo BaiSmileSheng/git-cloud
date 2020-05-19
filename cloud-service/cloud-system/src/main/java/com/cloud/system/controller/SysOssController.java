@@ -16,6 +16,8 @@ import com.cloud.system.oss.valdator.HuaweiGroup;
 import com.cloud.system.service.ISysConfigService;
 import com.cloud.system.service.ISysOssService;
 import com.google.gson.Gson;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,6 +33,7 @@ import java.util.Date;
  */
 @RestController
 @RequestMapping("oss")
+@Api("文件上传")
 public class SysOssController extends BaseController {
     private final static String KEY = CloudConstant.CLOUD_STORAGE_CONFIG_KEY;
 
@@ -82,7 +85,8 @@ public class SysOssController extends BaseController {
      * 查询文件上传列表
      */
     @GetMapping("list")
-    public R list(SysOss sysOss) {
+    @ApiOperation(value = "查询文件上传列表",response = SysOss.class)
+    public R list(@RequestBody SysOss sysOss) {
         startPage();
         return result(sysOssService.selectSysOssList(sysOss));
     }
@@ -92,6 +96,7 @@ public class SysOssController extends BaseController {
      */
     @PostMapping("update")
     @HasPermissions("sys:oss:edit")
+    @ApiOperation(value = "修改",response = SysOss.class)
     public R editSave(@RequestBody SysOss sysOss) {
         return toAjax(sysOssService.updateSysOss(sysOss));
     }
@@ -103,6 +108,7 @@ public class SysOssController extends BaseController {
      */
     @PostMapping("upload")
     @HasPermissions("sys:oss:add")
+    @ApiOperation(value = "修改保存文件上传",response = SysOss.class)
     public R editSave(@RequestParam("file") MultipartFile file) throws IOException {
         if (file.isEmpty()) {
             throw new OssException("上传文件不能为空");
@@ -128,7 +134,8 @@ public class SysOssController extends BaseController {
      *
      */
     @PostMapping("downLoad")
-    public void downLoad(String url,String fileName) throws IOException {
+    @ApiOperation(value = "下载文件")
+    public void downLoad(@RequestParam("url") String url,@RequestParam("fileName")String fileName) throws IOException {
         String realName = new String();
         if(StringUtils.isNotBlank(fileName)){
             realName=fileName;
@@ -150,7 +157,8 @@ public class SysOssController extends BaseController {
      */
     @PostMapping("remove")
     @HasPermissions("sys:oss:remove")
-    public R remove(String ids) {
+    @ApiOperation(value = "删除文件上传",response = Integer.class)
+    public R remove(@RequestParam("ids") String ids) {
         if(ids==null){
             return R.error("参数为空!!");
         }
@@ -162,5 +170,13 @@ public class SysOssController extends BaseController {
         return toAjax(sysOssService.deleteSysOssByIds(ids));
     }
 
-
+    /**
+     * 根据订单编号查询文件上传列表
+     */
+    @GetMapping("listByOrderNo")
+    @ApiOperation(value = "根据订单编号查询文件上传列表",response = SysOss.class)
+    public R listByOrderNo(@RequestParam("orderNo") String orderNo) {
+        startPage();
+        return result(sysOssService.selectSysOssListByOrderNo(orderNo));
+    }
 }
