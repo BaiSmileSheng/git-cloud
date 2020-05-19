@@ -10,6 +10,4 @@ import java.util.List;
  * 文件上传
  */
 public interface SysOssMapper extends BaseMapper<SysOss> {
-
-    List<SysOss> selectSysOssListByOrderNo(@Param("orderNo") String orderNo);
 }

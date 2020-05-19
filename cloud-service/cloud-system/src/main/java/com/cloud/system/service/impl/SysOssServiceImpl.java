@@ -95,7 +95,10 @@ public class SysOssServiceImpl implements ISysOssService {
      */
     @Override
     public List<SysOss> selectSysOssListByOrderNo(String orderNo) {
-        return sysOssMapper.selectSysOssListByOrderNo(orderNo);
+        Example example = new Example(SysOss.class);
+        Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("orderNo", orderNo);
+        return sysOssMapper.selectByExample(example);
     }
 
 }
