@@ -16,6 +16,8 @@ import com.cloud.system.oss.valdator.HuaweiGroup;
 import com.cloud.system.service.ISysConfigService;
 import com.cloud.system.service.ISysOssService;
 import com.google.gson.Gson;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,6 +33,7 @@ import java.util.Date;
  */
 @RestController
 @RequestMapping("oss")
+@Api("文件上传")
 public class SysOssController extends BaseController {
     private final static String KEY = CloudConstant.CLOUD_STORAGE_CONFIG_KEY;
 
@@ -161,5 +164,12 @@ public class SysOssController extends BaseController {
         return toAjax(sysOssService.deleteSysOssByIds(ids));
     }
 
-
+    /**
+     * 根据订单编号查询文件上传列表
+     */
+    @GetMapping("listByOrderNo")
+    @ApiOperation(value = "根据订单编号查询文件上传列表",response = SysOss.class)
+    public R listByOrderNo(@RequestParam("orderNo") String orderNo) {
+        return result(sysOssService.selectSysOssListByOrderNo(orderNo));
+    }
 }
