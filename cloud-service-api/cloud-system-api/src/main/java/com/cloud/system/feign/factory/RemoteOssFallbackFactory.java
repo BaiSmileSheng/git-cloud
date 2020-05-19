@@ -57,7 +57,7 @@ public class RemoteOssFallbackFactory implements FallbackFactory<RemoteOssServic
              * @return
              */
             @Override
-            public List<SysOss> listByOrderNo(String orderNo) {
+            public R listByOrderNo(String orderNo) {
                 return null;
             }
         };

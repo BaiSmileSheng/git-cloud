@@ -49,6 +49,6 @@ public interface RemoteOssService {
      * @return
      */
     @GetMapping("oss/listByOrderNo")
-    public List<SysOss> listByOrderNo(String orderNo);
+    public R listByOrderNo(String orderNo);
 
 }
