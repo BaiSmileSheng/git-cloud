@@ -32,6 +32,12 @@ public class AliyunCloudStorageService extends CloudStorageService {
         return upload(new ByteArrayInputStream(data), path);
     }
 
+    /**
+     *
+     * @param inputStream 字节流
+     * @param path        文件路径，包含文件名
+     * @return 返回http地址
+     */
     @Override
     public String upload(InputStream inputStream, String path) {
         try {
@@ -52,11 +58,20 @@ public class AliyunCloudStorageService extends CloudStorageService {
         return upload(inputStream, getPath(config.getAliyunPrefix(), suffix));
     }
 
+    /**
+     * 功能暂无
+     * @param fileName
+     * @param os
+     */
     @Override
     public void downLoad(String fileName, OutputStream os) {
         throw new SkeletonException(StatusEnums.METHOD_NOT_REALIZE);
     }
 
+    /**
+     * 功能暂无
+     * @param fileName
+     */
     @Override
     public void deleteFile(String fileName) {
         throw new SkeletonException(StatusEnums.METHOD_NOT_REALIZE);

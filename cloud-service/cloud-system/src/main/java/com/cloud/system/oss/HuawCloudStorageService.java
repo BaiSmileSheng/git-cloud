@@ -18,6 +18,10 @@ public class HuawCloudStorageService extends  CloudStorageService{
     private  ObsClient obsClient;
 
 
+    /**
+     * 初始化OBS配置文件
+     * @param cloudStorageConfig
+     */
     public HuawCloudStorageService(CloudStorageConfig cloudStorageConfig) {
         this.config = cloudStorageConfig;
         ObsConfiguration config = new ObsConfiguration();
@@ -34,6 +38,12 @@ public class HuawCloudStorageService extends  CloudStorageService{
         return upload(new ByteArrayInputStream(data), path);
     }
 
+    /**
+     * 华为云 上传文件
+     * @param inputStream 字节流
+     * @param path        文件路径，包含文件名
+     * @return 返回值为objectKey  即可用于从华为云获取文件
+     */
     @Override
     public String upload(InputStream inputStream, String path) {
         try {
@@ -64,13 +74,13 @@ public class HuawCloudStorageService extends  CloudStorageService{
 
     /**
      * 下载文件
-     * @param fileName
+     * @param objectKey  上传时返回值   即文件表里存的url
      * @param os
      */
-    public void downLoad(String fileName, OutputStream os) {
+    public void downLoad(String objectKey, OutputStream os) {
         InputStream input = null;
         try {
-            ObsObject obsObject = obsClient.getObject(config.getHcloudBucketName(), fileName);
+            ObsObject obsObject = obsClient.getObject(config.getHcloudBucketName(), objectKey);
             input = obsObject.getObjectContent();
             byte[] b = new byte[1024];
             int len;
@@ -106,11 +116,11 @@ public class HuawCloudStorageService extends  CloudStorageService{
 
     /**
      * 删除文件
-     * @param fileName
+     * @param objectKey  上传时返回值   即文件表里存的url
      */
-    public void deleteFile(String fileName) {
+    public void deleteFile(String objectKey) {
         try {
-            obsClient.deleteObject(config.getHcloudBucketName(), fileName);
+            obsClient.deleteObject(config.getHcloudBucketName(), objectKey);
         } catch (ObsException e) {
             throw new ObsException("上传文件错误");
         }  finally {

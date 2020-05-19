@@ -102,7 +102,6 @@ public class SysOssController extends BaseController {
      * @throws IOException
      */
     @PostMapping("upload")
-    @HasPermissions("sys:oss:add")
     public R editSave(@RequestParam("file") MultipartFile file) throws IOException {
         if (file.isEmpty()) {
             throw new OssException("上传文件不能为空");
@@ -147,9 +146,9 @@ public class SysOssController extends BaseController {
 
     /**
      * 删除文件上传
+     * @param ids 需要删除的数据ID
      */
     @PostMapping("remove")
-    @HasPermissions("sys:oss:remove")
     public R remove(String ids) {
         if(ids==null){
             return R.error("参数为空!!");
