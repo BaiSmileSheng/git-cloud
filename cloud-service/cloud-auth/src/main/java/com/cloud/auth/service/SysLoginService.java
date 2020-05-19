@@ -1,16 +1,14 @@
 package com.cloud.auth.service;
 
 import cn.hutool.core.util.StrUtil;
-import com.cloud.common.core.domain.R;
-import com.cloud.common.exception.BusinessException;
-import com.cloud.common.exception.user.*;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
+import com.cloud.auth.form.HucProperties;
+import com.cloud.auth.form.UucProperties;
 import com.cloud.common.constant.Constants;
 import com.cloud.common.constant.UserConstants;
+import com.cloud.common.core.domain.R;
 import com.cloud.common.enums.UserStatus;
+import com.cloud.common.exception.BusinessException;
+import com.cloud.common.exception.user.*;
 import com.cloud.common.log.publish.PublishFactory;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.IpUtils;
@@ -19,6 +17,9 @@ import com.cloud.common.utils.ServletUtils;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteUserService;
 import com.cloud.system.util.PasswordUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component
 public class SysLoginService {
@@ -31,6 +32,12 @@ public class SysLoginService {
 
     @Autowired
     private HucLoginCheckService hucLoginCheckService;
+
+    @Autowired
+    private UucProperties uucProperties;
+
+    @Autowired
+    private HucProperties hucProperties;
 
     /**
      * 登录
@@ -98,33 +105,35 @@ public class SysLoginService {
             }
             return user;
         }
-
         //如果是海尔用户  UUC校验
         if("1".equals(user.getUserType())){
-            //先从redis中获取accessToken，如果没有，重新获取token。从uuc校验用户名密码
-            String accessToken = uucLoginCheckService.getAccessToken();
-            if (StrUtil.isBlank(accessToken)) {
-                throw new BusinessException("获取UUC token失败！");
-            }
-            R r = uucLoginCheckService.checkUucUser(username, password, accessToken);
-            if (!"0".equals(r.get("code").toString())) {
-                throw new UserPasswordNotMatchException();
+            if(uucProperties.getIsCheck()){
+                //先从redis中获取accessToken，如果没有，重新获取token。从uuc校验用户名密码
+                String accessToken = uucLoginCheckService.getAccessToken();
+                if (StrUtil.isBlank(accessToken)) {
+                    throw new BusinessException("获取UUC token失败！");
+                }
+                R r = uucLoginCheckService.checkUucUser(username, password, accessToken);
+                if (!"0".equals(r.get("code").toString())) {
+                    throw new UserPasswordNotMatchException();
+                }
             }
         } else if ("2".equals(user.getUserType())) {
-            //HUC校验外部用户
-            //先从redis中获取accessToken，如果没有，重新获取token。从uuc校验用户名密码
-            String accessToken = hucLoginCheckService.getAccessToken();
-            if (StrUtil.isBlank(accessToken)) {
-                throw new BusinessException("获取UUC token失败！");
-            }
-            R r = hucLoginCheckService.checkHucUser(username, password, accessToken);
-            if (!"0".equals(r.get("code").toString())) {
-                throw new UserPasswordNotMatchException();
+            if(hucProperties.getIsCheck()){
+                //HUC校验外部用户
+                //先从redis中获取accessToken，如果没有，重新获取token。从uuc校验用户名密码
+                String accessToken = hucLoginCheckService.getAccessToken();
+                if (StrUtil.isBlank(accessToken)) {
+                    throw new BusinessException("获取UUC token失败！");
+                }
+                R r = hucLoginCheckService.checkHucUser(username, password, accessToken);
+                if (!"0".equals(r.get("code").toString())) {
+                    throw new UserPasswordNotMatchException();
+                }
             }
         }else{
             throw new UserException("user.type.null",null);
         }
-
         PublishFactory.recordLogininfor(username, Constants.LOGIN_SUCCESS, MessageUtils.message("user.login.success"));
         recordLoginInfo(user);
         return user;

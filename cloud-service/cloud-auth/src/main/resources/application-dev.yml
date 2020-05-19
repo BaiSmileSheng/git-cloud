@@ -19,7 +19,9 @@ uuc:
   apiUrl: http://uuctest.cosmoplat.com
   clientId: ZKDDPS
   clientSecret: 5b638080ef2c95fc8efec2599f7afa86
+  isCheck: false
 huc:
   apiUrl: https://tuser.haier.net:8182
   appKey: ZKDDPS
   secret: 131665df773d7b7b9b816fb46d7569ec
+  isCheck: false
