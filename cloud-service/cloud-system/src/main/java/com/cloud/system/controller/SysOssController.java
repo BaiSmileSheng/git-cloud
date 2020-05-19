@@ -171,7 +171,6 @@ public class SysOssController extends BaseController {
     @GetMapping("listByOrderNo")
     @ApiOperation(value = "根据订单编号查询文件上传列表",response = SysOss.class)
     public R listByOrderNo(@RequestParam("orderNo") String orderNo) {
-        startPage();
         return result(sysOssService.selectSysOssListByOrderNo(orderNo));
     }
 }
