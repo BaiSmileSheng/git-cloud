@@ -1,6 +1,7 @@
 package com.cloud.system.feign;
 
 import com.cloud.common.constant.ServiceNameConstants;
+import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.feign.factory.RemoteOssFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -42,6 +43,6 @@ public interface RemoteOssService {
      * @return
      */
     @GetMapping("oss/listByOrderNo")
-    public List<SysOss> listByOrderNo(String orderNo);
+    public R listByOrderNo(String orderNo);
 
 }

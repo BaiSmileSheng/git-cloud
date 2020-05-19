@@ -1,5 +1,6 @@
 package com.cloud.system.feign.factory;
 
+import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.feign.RemoteOssService;
 import feign.hystrix.FallbackFactory;
@@ -41,7 +42,7 @@ public class RemoteOssFallbackFactory implements FallbackFactory<RemoteOssServic
              * @return
              */
             @Override
-            public List<SysOss> listByOrderNo(String orderNo) {
+            public R listByOrderNo(String orderNo) {
                 return null;
             }
         };
