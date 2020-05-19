@@ -85,8 +85,7 @@ public class SysOssController extends BaseController {
      * 查询文件上传列表
      */
     @GetMapping("list")
-    @ApiOperation(value = "查询文件上传列表",response = SysOss.class)
-    public R list(@RequestBody SysOss sysOss) {
+    public R list(SysOss sysOss) {
         startPage();
         return result(sysOssService.selectSysOssList(sysOss));
     }
@@ -96,7 +95,6 @@ public class SysOssController extends BaseController {
      */
     @PostMapping("update")
     @HasPermissions("sys:oss:edit")
-    @ApiOperation(value = "修改",response = SysOss.class)
     public R editSave(@RequestBody SysOss sysOss) {
         return toAjax(sysOssService.updateSysOss(sysOss));
     }
@@ -108,7 +106,6 @@ public class SysOssController extends BaseController {
      */
     @PostMapping("upload")
     @HasPermissions("sys:oss:add")
-    @ApiOperation(value = "修改保存文件上传",response = SysOss.class)
     public R editSave(@RequestParam("file") MultipartFile file) throws IOException {
         if (file.isEmpty()) {
             throw new OssException("上传文件不能为空");
@@ -134,8 +131,7 @@ public class SysOssController extends BaseController {
      *
      */
     @PostMapping("downLoad")
-    @ApiOperation(value = "下载文件")
-    public void downLoad(@RequestParam("url") String url,@RequestParam("fileName")String fileName) throws IOException {
+    public void downLoad(String url,String fileName) throws IOException {
         String realName = new String();
         if(StringUtils.isNotBlank(fileName)){
             realName=fileName;
@@ -157,8 +153,7 @@ public class SysOssController extends BaseController {
      */
     @PostMapping("remove")
     @HasPermissions("sys:oss:remove")
-    @ApiOperation(value = "删除文件上传",response = Integer.class)
-    public R remove(@RequestParam("ids") String ids) {
+    public R remove(String ids) {
         if(ids==null){
             return R.error("参数为空!!");
         }
