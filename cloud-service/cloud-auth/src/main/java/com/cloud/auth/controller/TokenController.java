@@ -48,4 +48,15 @@ public class TokenController {
         }
         return R.ok();
     }
+
+    @PostMapping("swaggerLogin")
+    @ApiOperation(value = "swagger获取token", notes = "登录接口代替")
+    public R swaggerLogin(@RequestBody LoginForm form) throws Exception {
+        // 用户登录
+        SysUser user = sysLoginService.login(form.getUsername(), form.getPassword());
+        //将用户的数据权限放到redis
+        tokenService.userScopeRedis(user.getUserId());
+        // 获取登录token
+        return R.ok(tokenService.createToken(user));
+    }
 }
