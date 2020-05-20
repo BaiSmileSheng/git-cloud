@@ -20,9 +20,10 @@ import org.springframework.stereotype.Component;
 @Builder
 public class UucProperties {
 
-    private String apiUrl;
-    private String clientId;
-    private String clientSecret;
+    private String apiUrl;//HCC请求域名
+    private String clientId;//UUC 下发的 client_id
+    private String clientSecret;//UUC 下发的 client_secret
+    private Boolean isCheck; //是否UUC检测
 
 
 }

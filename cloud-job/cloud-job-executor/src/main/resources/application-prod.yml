@@ -1,11 +1,11 @@
 cloud:
   job:
     admin:
-      addresses: http://127.0.0.1:8081/job
+      addresses: http://10.133.1.8:8081/job
     accessToken:
     executor:
       appname: cloud-job-executor
-      address: http://127.0.0.1:9999
+      address:
       ip:
       port: 9999
       logpath: /logs/jobhandler

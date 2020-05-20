@@ -1,10 +1,14 @@
 package com.cloud.system.feign.factory;
 
+import com.cloud.common.core.domain.R;
+import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.feign.RemoteOssService;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 
 @Slf4j
@@ -17,18 +21,43 @@ public class RemoteOssFallbackFactory implements FallbackFactory<RemoteOssServic
         return new RemoteOssService() {
 
 
+            /**
+             * 上传文件到华为云
+             * @param file
+             * @return
+             */
             @Override
-            public String uploadFile(MultipartFile file) {
-                return null;
+            public R uploadFile(MultipartFile file) {
+                return R.error();
             }
 
+            /**
+             * 下载文件
+             * @param url   文件表url
+             * @param fileName   下载文件名
+             */
             @Override
             public void downLoad(String url,String fileName) {
 
             }
 
+            /**
+             * 删除文件上传
+             * @param ids  文件表id  逗号分隔
+             * @return
+             */
             @Override
-            public String remove(String ids) {
+            public R remove(String ids) {
+                return R.error();
+            }
+
+            /**
+             * 根据订单编号查询文件上传列表
+             * @param orderNo
+             * @return
+             */
+            @Override
+            public R listByOrderNo(String orderNo) {
                 return null;
             }
         };

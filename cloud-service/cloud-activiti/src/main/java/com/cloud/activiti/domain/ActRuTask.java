@@ -5,37 +5,67 @@ import java.util.Date;
 
 public class ActRuTask implements Serializable {
     private String id;
-
+    /**
+     * 乐观锁
+     */
     private Integer rev;
-
+    /**
+     * 执行实例ID
+     */
     private String executionId;
-
+    /**
+     * 流程实例ID
+     */
     private String procInstId;
-
+    /**
+     * 流程定义ID
+     */
     private String procDefId;
-
+    /**
+     * 节点定义名称
+     */
     private String name;
-
+    /**
+     * 父节点实例ID
+     */
     private String parentTaskId;
-
+    /**
+     * 节点定义描述
+     */
     private String description;
-
+    /**
+     * 节点定义的KEY
+     */
     private String taskDefKey;
-
+    /**
+     * 实际签收人
+     */
     private String owner;
-
+    /**
+     * 签收人或委托人（一般情况下为空，只有在委托时才有值）
+     */
     private String assignee;
-
+    /**
+     * 委托类型
+     */
     private String delegation;
-
+    /**
+     * 优先级别,默认为：50
+     */
     private Integer priority;
-
+    /**
+     * 创建时间
+     */
     private Date createTime;
-
+    /**
+     * 过期时间
+     */
     private Date dueDate;
 
     private String category;
-
+    /**
+     * 是否挂起1代表激活 2代表挂起
+     */
     private Integer suspensionState;
 
     private String tenantId;

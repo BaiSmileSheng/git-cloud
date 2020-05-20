@@ -25,6 +25,7 @@ public class HucProperties {
     private String apiUrl;//HUC 请求域名
     private String appKey;//HUC 下发的 appKey
     private String secret;//HUC 下发的 secret
+    private Boolean isCheck; //是否HUC检测
 
 
 }

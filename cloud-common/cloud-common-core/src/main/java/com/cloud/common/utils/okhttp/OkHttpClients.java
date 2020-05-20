@@ -1,14 +1,11 @@
 package com.cloud.common.utils.okhttp;
 
 import com.alibaba.fastjson.JSON;
+import okhttp3.*;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import okhttp3.FormBody;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
 
 public class OkHttpClients {
 
@@ -73,7 +70,7 @@ public class OkHttpClients {
     }
 
     /**
-     * POST请求map数据
+     * POST请求map数据  （带Authorization认证）
      */
     public static <T> OkhttpResult<T> postWithAuthorize(OkHttpParam restParam, Map<String, String> parms, Class<T> tClass,String accessToken) throws Exception {
         String url = restParam.getApiUrl();
