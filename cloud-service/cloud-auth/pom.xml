@@ -77,12 +77,6 @@
             <artifactId>fastjson</artifactId>
         </dependency>
 
-        <!--验证码 -->
-        <dependency>
-            <groupId>com.github.penggle</groupId>
-            <artifactId>kaptcha</artifactId>
-        </dependency>
-
     </dependencies>
     <build>
         <plugins>

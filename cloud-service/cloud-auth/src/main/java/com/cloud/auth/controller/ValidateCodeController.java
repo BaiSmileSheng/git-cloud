@@ -2,7 +2,6 @@ package com.cloud.auth.controller;
 
 import com.cloud.common.constant.Constants;
 import com.cloud.common.core.domain.R;
-import com.google.code.kaptcha.impl.DefaultKaptcha;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -26,8 +26,8 @@ public class ValidateCodeController {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
-    @Autowired
-    private DefaultKaptcha captchaProducerMath;
+//    @Autowired
+//    private Producer producer;
 
     /**
      * 返回验证码的值和获取验证码的key
@@ -38,8 +38,8 @@ public class ValidateCodeController {
     @ApiOperation(value = "获取验证码", notes = "获取验证码接口")
     public R validateCode(){
         // 生成验证码
-        String capText = captchaProducerMath.createText();
-        String code = capText.substring(capText.lastIndexOf("@") + 1);
+        Random random = new Random();
+        String code = Math.abs(random.nextInt()%10)+"";
         // 保存验证码信息
         String randomStr = UUID.randomUUID().toString().replaceAll("-", "");
         redisTemplate.opsForValue().set(Constants.DEFAULT_CODE_KEY + randomStr, code, 60, TimeUnit.SECONDS);
