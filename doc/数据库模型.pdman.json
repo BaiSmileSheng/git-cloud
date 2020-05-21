@@ -5,6 +5,398 @@
       "chnname": "系统相关",
       "entities": [
         {
+          "title": "GEN_TABLE",
+          "chnname": "代码生成业务表",
+          "fields": [
+            {
+              "name": "TABLE_ID",
+              "type": "BIGINT_19",
+              "chnname": "编号",
+              "remark": "",
+              "pk": true,
+              "notNull": true,
+              "autoIncrement": true,
+              "defaultValue": ""
+            },
+            {
+              "name": "TABLE_NAME",
+              "type": "VARCHAR_200",
+              "chnname": "表名称",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "TABLE_COMMENT",
+              "type": "VARCHAR_500",
+              "chnname": "表描述",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "CLASS_NAME",
+              "type": "VARCHAR_100",
+              "chnname": "实体类名称",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "TPL_CATEGORY",
+              "type": "VARCHAR_200",
+              "chnname": "使用的模板（crud单表操作 tree树表操作）",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "PACKAGE_NAME",
+              "type": "VARCHAR_100",
+              "chnname": "生成包路径",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "MODULE_NAME",
+              "type": "VARCHAR_30",
+              "chnname": "生成模块名",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "BUSINESS_NAME",
+              "type": "VARCHAR_30",
+              "chnname": "生成业务名",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "FUNCTION_NAME",
+              "type": "VARCHAR_50",
+              "chnname": "生成功能名",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "FUNCTION_AUTHOR",
+              "type": "VARCHAR_50",
+              "chnname": "生成功能作者",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "OPTIONS",
+              "type": "VARCHAR_1000",
+              "chnname": "其它生成选项",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "CREATE_BY",
+              "type": "VARCHAR_64",
+              "chnname": "创建者",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "CREATE_TIME",
+              "type": "DATETIME",
+              "chnname": "创建时间",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "UPDATE_BY",
+              "type": "VARCHAR_64",
+              "chnname": "更新者",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "UPDATE_TIME",
+              "type": "DATETIME",
+              "chnname": "更新时间",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "REMARK",
+              "type": "VARCHAR_500",
+              "chnname": "备注",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            }
+          ]
+        },
+        {
+          "title": "GEN_TABLE_COLUMN",
+          "chnname": "代码生成业务表字段",
+          "fields": [
+            {
+              "name": "COLUMN_ID",
+              "type": "BIGINT_19",
+              "chnname": "编号",
+              "remark": "",
+              "pk": true,
+              "notNull": true,
+              "autoIncrement": true,
+              "defaultValue": ""
+            },
+            {
+              "name": "TABLE_ID",
+              "type": "VARCHAR_64",
+              "chnname": "归属表编号",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "COLUMN_NAME",
+              "type": "VARCHAR_200",
+              "chnname": "列名称",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "COLUMN_COMMENT",
+              "type": "VARCHAR_500",
+              "chnname": "列描述",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "COLUMN_TYPE",
+              "type": "VARCHAR_100",
+              "chnname": "列类型",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "JAVA_TYPE",
+              "type": "VARCHAR_500",
+              "chnname": "JAVA类型",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "JAVA_FIELD",
+              "type": "VARCHAR_200",
+              "chnname": "JAVA字段名",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "IS_PK",
+              "type": "CHAR_1",
+              "chnname": "是否主键（1是）",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "IS_INCREMENT",
+              "type": "CHAR_1",
+              "chnname": "是否自增（1是）",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "IS_REQUIRED",
+              "type": "CHAR_1",
+              "chnname": "是否必填（1是）",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "IS_INSERT",
+              "type": "CHAR_1",
+              "chnname": "是否为插入字段（1是）",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "IS_EDIT",
+              "type": "CHAR_1",
+              "chnname": "是否编辑字段（1是）",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "IS_LIST",
+              "type": "CHAR_1",
+              "chnname": "是否列表字段（1是）",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "IS_QUERY",
+              "type": "CHAR_1",
+              "chnname": "是否查询字段（1是）",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "QUERY_TYPE",
+              "type": "VARCHAR_200",
+              "chnname": "查询方式（等于、不等于、大于、小于、范围）",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "HTML_TYPE",
+              "type": "VARCHAR_200",
+              "chnname": "显示类型（文本框、文本域、下拉框、复选框、单选框、日期控件）",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "DICT_TYPE",
+              "type": "VARCHAR_200",
+              "chnname": "字典类型",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "SORT",
+              "type": "INT_10",
+              "chnname": "排序",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "CREATE_BY",
+              "type": "VARCHAR_64",
+              "chnname": "创建者",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "CREATE_TIME",
+              "type": "DATETIME",
+              "chnname": "创建时间",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "UPDATE_BY",
+              "type": "VARCHAR_64",
+              "chnname": "更新者",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "UPDATE_TIME",
+              "type": "DATETIME",
+              "chnname": "更新时间",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            }
+          ]
+        },
+        {
           "title": "SYS_CONFIG",
           "chnname": "参数配置表",
           "fields": [
@@ -102,6 +494,162 @@
               "name": "REMARK",
               "type": "VARCHAR_500",
               "chnname": "备注",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            }
+          ]
+        },
+        {
+          "title": "SYS_DEPT",
+          "chnname": "部门表",
+          "fields": [
+            {
+              "name": "DEPT_ID",
+              "type": "INT_10",
+              "chnname": "部门id",
+              "remark": "",
+              "pk": true,
+              "notNull": true,
+              "autoIncrement": true,
+              "defaultValue": ""
+            },
+            {
+              "name": "PARENT_ID",
+              "type": "INT_10",
+              "chnname": "父部门id",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "ANCESTORS",
+              "type": "VARCHAR_50",
+              "chnname": "祖级列表",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "DEPT_NAME",
+              "type": "VARCHAR_30",
+              "chnname": "部门名称",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "ORDER_NUM",
+              "type": "INT_10",
+              "chnname": "显示顺序",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "LEADER",
+              "type": "VARCHAR_20",
+              "chnname": "负责人",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "LEADER_ID",
+              "type": "INT_10",
+              "chnname": "负责人编号",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "PHONE",
+              "type": "VARCHAR_11",
+              "chnname": "联系电话",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "EMAIL",
+              "type": "VARCHAR_50",
+              "chnname": "邮箱",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "STATUS",
+              "type": "CHAR_1",
+              "chnname": "部门状态（0正常 1停用）",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "DEL_FLAG",
+              "type": "CHAR_1",
+              "chnname": "删除标志（0代表存在 2代表删除）",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "CREATE_BY",
+              "type": "VARCHAR_64",
+              "chnname": "创建者",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "CREATE_TIME",
+              "type": "DATETIME",
+              "chnname": "创建时间",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "UPDATE_BY",
+              "type": "VARCHAR_64",
+              "chnname": "更新者",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "UPDATE_TIME",
+              "type": "DATETIME",
+              "chnname": "更新时间",
               "remark": "",
               "pk": false,
               "notNull": false,
@@ -344,6 +892,248 @@
               "name": "REMARK",
               "type": "VARCHAR_500",
               "chnname": "备注",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            }
+          ]
+        },
+        {
+          "title": "SYS_JOB",
+          "chnname": "定时任务调度表",
+          "fields": [
+            {
+              "name": "JOB_ID",
+              "type": "INT_10",
+              "chnname": "任务ID",
+              "remark": "",
+              "pk": true,
+              "notNull": true,
+              "autoIncrement": true,
+              "defaultValue": ""
+            },
+            {
+              "name": "JOB_NAME",
+              "type": "VARCHAR_64",
+              "chnname": "任务名称",
+              "remark": "",
+              "pk": true,
+              "notNull": true,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "JOB_GROUP",
+              "type": "VARCHAR_64",
+              "chnname": "任务组名",
+              "remark": "",
+              "pk": true,
+              "notNull": true,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "METHOD_NAME",
+              "type": "VARCHAR_500",
+              "chnname": "任务方法",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "METHOD_PARAMS",
+              "type": "VARCHAR_50",
+              "chnname": "方法参数",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "CRON_EXPRESSION",
+              "type": "VARCHAR_255",
+              "chnname": "cron执行表达式",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "MISFIRE_POLICY",
+              "type": "VARCHAR_20",
+              "chnname": "计划执行错误策略（1立即执行 2执行一次 3放弃执行）",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "CONCURRENT",
+              "type": "CHAR_1",
+              "chnname": "是否并发执行（0允许 1禁止）",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "STATUS",
+              "type": "CHAR_1",
+              "chnname": "状态（0正常 1暂停）",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "CREATE_BY",
+              "type": "VARCHAR_64",
+              "chnname": "创建者",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "CREATE_TIME",
+              "type": "DATETIME",
+              "chnname": "创建时间",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "UPDATE_BY",
+              "type": "VARCHAR_64",
+              "chnname": "更新者",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "UPDATE_TIME",
+              "type": "DATETIME",
+              "chnname": "更新时间",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "REMARK",
+              "type": "VARCHAR_500",
+              "chnname": "备注信息",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            }
+          ]
+        },
+        {
+          "title": "SYS_JOB_LOG",
+          "chnname": "定时任务调度日志表",
+          "fields": [
+            {
+              "name": "JOB_LOG_ID",
+              "type": "INT_10",
+              "chnname": "任务日志ID",
+              "remark": "",
+              "pk": true,
+              "notNull": true,
+              "autoIncrement": true,
+              "defaultValue": ""
+            },
+            {
+              "name": "JOB_NAME",
+              "type": "VARCHAR_64",
+              "chnname": "任务名称",
+              "remark": "",
+              "pk": false,
+              "notNull": true,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "JOB_GROUP",
+              "type": "VARCHAR_64",
+              "chnname": "任务组名",
+              "remark": "",
+              "pk": false,
+              "notNull": true,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "METHOD_NAME",
+              "type": "VARCHAR_500",
+              "chnname": "任务方法",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "METHOD_PARAMS",
+              "type": "VARCHAR_50",
+              "chnname": "方法参数",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "JOB_MESSAGE",
+              "type": "VARCHAR_500",
+              "chnname": "日志信息",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "STATUS",
+              "type": "CHAR_1",
+              "chnname": "执行状态（0正常 1失败）",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "EXCEPTION_INFO",
+              "type": "VARCHAR_2000",
+              "chnname": "异常信息",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "CREATE_TIME",
+              "type": "DATETIME",
+              "chnname": "创建时间",
               "remark": "",
               "pk": false,
               "notNull": false,
@@ -1300,6 +2090,53 @@
               "autoIncrement": false,
               "defaultValue": ""
             }
+          ],
+          "indexs": [],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
+            }
           ]
         },
         {
@@ -1677,211 +2514,37 @@
           ]
         },
         {
-          "title": "SYS_DATA_SCOPE",
-          "chnname": "用户权限表",
+          "title": "test",
           "fields": [
             {
-              "name": "ID",
-              "type": "VARCHAR_255",
-              "chnname": "",
+              "name": "REVISION",
+              "type": "Integer",
               "remark": "",
-              "pk": true,
-              "notNull": true,
-              "autoIncrement": true,
-              "defaultValue": ""
+              "chnname": "乐观锁"
             },
             {
-              "name": "MATERIAL_CODE",
-              "type": "VARCHAR_255",
-              "chnname": "物料号",
+              "name": "CREATED_BY",
+              "type": "IdOrKey",
               "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
+              "chnname": "创建人"
             },
             {
-              "name": "MATERIAL_DESC",
-              "type": "VARCHAR_255",
-              "chnname": "物料描述",
+              "name": "CREATED_TIME",
+              "type": "DateTime",
               "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
+              "chnname": "创建时间"
             },
             {
-              "name": "PARENT_ID",
-              "type": "VARCHAR_255",
-              "chnname": "父id",
+              "name": "UPDATED_BY",
+              "type": "IdOrKey",
               "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
+              "chnname": "更新人"
             },
             {
-              "name": "ORDER_NUM",
-              "type": "INT_10",
-              "chnname": "显示顺序",
+              "name": "UPDATED_TIME",
+              "type": "DateTime",
               "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "STATUS",
-              "type": "CHAR_1",
-              "chnname": "状态（0正常 1停用）",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "REMARK",
-              "type": "VARCHAR_255",
-              "chnname": "备注",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "DEL_FLAG",
-              "type": "CHAR_1",
-              "chnname": "删除标志（0代表存在 1代表删除）",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "CREATE_BY",
-              "type": "VARCHAR_64",
-              "chnname": "创建者",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "CREATE_TIME",
-              "type": "DATETIME",
-              "chnname": "创建时间",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "UPDATE_BY",
-              "type": "VARCHAR_64",
-              "chnname": "更新者",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "UPDATE_TIME",
-              "type": "DATETIME",
-              "chnname": "更新时间",
-              "remark": "",
-              "pk": false,
-              "notNull": false,
-              "autoIncrement": false,
-              "defaultValue": ""
-            }
-          ],
-          "indexs": [],
-          "headers": [
-            {
-              "fieldName": "chnname",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "name",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "type",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "dataType",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "remark",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "pk",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "notNull",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "autoIncrement",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "defaultValue",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "relationNoShow",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "uiHint",
-              "relationNoShow": true
-            }
-          ]
-        },
-        {
-          "title": "SYS_USER_SCOPE",
-          "chnname": "用户和物料权限关联表",
-          "fields": [
-            {
-              "name": "ID",
-              "type": "BIGINT UNSIGNED_20",
-              "chnname": "",
-              "remark": "",
-              "pk": true,
-              "notNull": true,
-              "autoIncrement": true,
-              "defaultValue": ""
-            },
-            {
-              "name": "USER_ID",
-              "type": "BIGINT_19",
-              "chnname": "用户ID",
-              "remark": "",
-              "pk": false,
-              "notNull": true,
-              "autoIncrement": false,
-              "defaultValue": ""
-            },
-            {
-              "name": "DATA_SCOPE_ID",
-              "type": "VARCHAR_255",
-              "chnname": "用户权限ID",
-              "remark": "",
-              "pk": false,
-              "notNull": true,
-              "autoIncrement": false,
-              "defaultValue": ""
+              "chnname": "更新时间"
             }
           ],
           "indexs": [],
@@ -1933,505 +2596,10 @@
           ]
         }
       ],
-      "associations": [
-        {
-          "relation": "1:0,n",
-          "from": {
-            "entity": "SYS_USER",
-            "field": "USER_ID"
-          },
-          "to": {
-            "entity": "SYS_USER_SCOPE",
-            "field": "USER_ID"
-          }
-        },
-        {
-          "relation": "0,n:1",
-          "from": {
-            "entity": "SYS_USER_SCOPE",
-            "field": "DATA_SCOPE_ID"
-          },
-          "to": {
-            "entity": "SYS_DATA_SCOPE",
-            "field": "ID"
-          }
-        },
-        {
-          "relation": "0,n:1",
-          "from": {
-            "entity": "SYS_ROLE_MENU",
-            "field": "MENU_ID"
-          },
-          "to": {
-            "entity": "SYS_MENU",
-            "field": "MENU_ID"
-          }
-        },
-        {
-          "relation": "0,n:1",
-          "from": {
-            "entity": "SYS_ROLE_MENU",
-            "field": "ROLE_ID"
-          },
-          "to": {
-            "entity": "SYS_ROLE",
-            "field": "ROLE_ID"
-          }
-        },
-        {
-          "relation": "0,n:1",
-          "from": {
-            "entity": "SYS_USER_ROLE",
-            "field": "USER_ID"
-          },
-          "to": {
-            "entity": "SYS_USER",
-            "field": "USER_ID"
-          }
-        },
-        {
-          "relation": "0,n:1",
-          "from": {
-            "entity": "SYS_MENU",
-            "field": "MENU_ID"
-          },
-          "to": {
-            "entity": "SYS_USER_ROLE",
-            "field": "ROLE_ID"
-          }
-        },
-        {
-          "relation": "0,n:1",
-          "from": {
-            "entity": "SYS_DICT_DATA",
-            "field": "DICT_TYPE"
-          },
-          "to": {
-            "entity": "SYS_DICT_TYPE",
-            "field": "DICT_TYPE"
-          }
-        },
-        {
-          "relation": "0,n:1",
-          "from": {
-            "entity": "SYS_USER_POST",
-            "field": "USER_ID"
-          },
-          "to": {
-            "entity": "SYS_USER",
-            "field": "USER_ID"
-          }
-        },
-        {
-          "relation": "0,n:1",
-          "from": {
-            "entity": "SYS_USER_POST",
-            "field": "POST_ID"
-          },
-          "to": {
-            "entity": "SYS_POST",
-            "field": "POST_ID"
-          }
-        },
-        {
-          "relation": "0,n:1",
-          "from": {
-            "entity": "SYS_LOGININFOR",
-            "field": "LOGIN_NAME"
-          },
-          "to": {
-            "entity": "SYS_USER",
-            "field": "LOGIN_NAME"
-          }
-        },
-        {
-          "relation": "0,n:1",
-          "from": {
-            "entity": "SYS_OPER_LOG",
-            "field": "OPER_NAME"
-          },
-          "to": {
-            "entity": "SYS_USER",
-            "field": "LOGIN_NAME"
-          }
-        },
-        {
-          "relation": "0,n:1",
-          "from": {
-            "entity": "SYS_USER_ONLINE",
-            "field": "LOGIN_NAME"
-          },
-          "to": {
-            "entity": "SYS_USER",
-            "field": "LOGIN_NAME"
-          }
-        }
-      ],
+      "associations": [],
       "graphCanvas": {
-        "nodes": [
-          {
-            "shape": "table",
-            "title": "SYS_MENU",
-            "moduleName": false,
-            "x": -660,
-            "y": -150,
-            "id": "74c1212e"
-          },
-          {
-            "shape": "table",
-            "title": "SYS_ROLE_MENU",
-            "moduleName": false,
-            "x": 0,
-            "y": -170,
-            "id": "6332b629"
-          },
-          {
-            "shape": "table",
-            "title": "SYS_ROLE",
-            "moduleName": false,
-            "x": 520,
-            "y": -150,
-            "id": "fe266ed5"
-          },
-          {
-            "shape": "table",
-            "title": "SYS_USER_ROLE",
-            "moduleName": false,
-            "x": -100,
-            "y": 80,
-            "id": "790b7fe4"
-          },
-          {
-            "shape": "table",
-            "title": "SYS_DATA_SCOPE",
-            "moduleName": false,
-            "x": 1680,
-            "y": 440,
-            "id": "c64d244a"
-          },
-          {
-            "shape": "table",
-            "title": "SYS_USER",
-            "moduleName": false,
-            "x": 360,
-            "y": 430,
-            "id": "b7cbf2b0"
-          },
-          {
-            "shape": "table",
-            "title": "SYS_POST",
-            "moduleName": false,
-            "x": -590.1708809202595,
-            "y": 554.3372938443351,
-            "id": "812aea24"
-          },
-          {
-            "shape": "table",
-            "title": "SYS_USER_POST",
-            "moduleName": false,
-            "x": -160,
-            "y": 370,
-            "id": "8c5195d7"
-          },
-          {
-            "shape": "table",
-            "title": "SYS_OPER_LOG",
-            "moduleName": false,
-            "x": -280,
-            "y": 940,
-            "id": "9a91e3d8"
-          },
-          {
-            "shape": "table",
-            "title": "SYS_CONFIG",
-            "moduleName": false,
-            "x": -1050,
-            "y": -650,
-            "id": "ec0f01f0"
-          },
-          {
-            "shape": "table",
-            "title": "SYS_DICT_DATA",
-            "moduleName": false,
-            "x": -450,
-            "y": -680,
-            "id": "d322679a"
-          },
-          {
-            "shape": "table",
-            "title": "SYS_DICT_TYPE",
-            "moduleName": false,
-            "x": 230,
-            "y": -620,
-            "id": "0d27a6aa"
-          },
-          {
-            "shape": "table",
-            "title": "SYS_NOTICE",
-            "moduleName": false,
-            "x": 804.0289176734611,
-            "y": -690.5822501043363,
-            "id": "1ff33437"
-          },
-          {
-            "shape": "table",
-            "title": "SYS_LOGININFOR",
-            "moduleName": false,
-            "x": 1060,
-            "y": 900,
-            "id": "7b985d71"
-          },
-          {
-            "shape": "table",
-            "title": "SYS_USER_ONLINE",
-            "moduleName": false,
-            "x": 1050,
-            "y": 530,
-            "id": "415141d5"
-          },
-          {
-            "shape": "table",
-            "title": "SYS_USER_SCOPE",
-            "moduleName": false,
-            "x": 1050,
-            "y": 230,
-            "id": "6452385b"
-          }
-        ],
-        "edges": [
-          {
-            "shape": "erdRelation",
-            "relation": "1:0,n",
-            "source": "b7cbf2b0",
-            "target": "6452385b",
-            "id": "aac722fb",
-            "controlPoints": [
-              {
-                "x": 596.0146484375,
-                "y": 252.0872093023256
-              },
-              {
-                "x": 863.0986328125,
-                "y": 242.47037037037035
-              }
-            ],
-            "sourceAnchor": 1,
-            "targetAnchor": 2
-          },
-          {
-            "shape": "erdRelation",
-            "relation": "0,n:1",
-            "source": "6452385b",
-            "target": "c64d244a",
-            "id": "a3954afe",
-            "controlPoints": [
-              {
-                "x": 1236.9013671875,
-                "y": 262.52407407407406
-              },
-              {
-                "x": 1340,
-                "y": 300
-              },
-              {
-                "x": 1450.4248046875,
-                "y": 342.1388888888889
-              }
-            ],
-            "sourceAnchor": 5,
-            "targetAnchor": 0
-          },
-          {
-            "shape": "erdRelation",
-            "relation": "0,n:1",
-            "source": "6332b629",
-            "target": "74c1212e",
-            "id": "9e666dbe",
-            "controlPoints": [
-              {
-                "x": -121.2744140625,
-                "y": -147.19387755102042
-              },
-              {
-                "x": -319.193359375,
-                "y": -327.91279069767444
-              }
-            ],
-            "sourceAnchor": 2,
-            "targetAnchor": 1
-          },
-          {
-            "shape": "erdRelation",
-            "relation": "0,n:1",
-            "source": "6332b629",
-            "target": "fe266ed5",
-            "id": "af0db481",
-            "controlPoints": [
-              {
-                "x": 121.2744140625,
-                "y": -169.23979591836735
-              },
-              {
-                "x": 263.0966796875,
-                "y": -247.86111111111111
-              }
-            ],
-            "sourceAnchor": 1,
-            "targetAnchor": 0
-          },
-          {
-            "shape": "erdRelation",
-            "relation": "0,n:1",
-            "source": "790b7fe4",
-            "target": "b7cbf2b0",
-            "id": "3a6a2684",
-            "controlPoints": [
-              {
-                "x": 20.5283203125,
-                "y": 80.76020408163265
-              },
-              {
-                "x": 123.9853515625,
-                "y": 252.0872093023256
-              }
-            ],
-            "sourceAnchor": 1,
-            "targetAnchor": 0
-          },
-          {
-            "shape": "erdRelation",
-            "relation": "0,n:1",
-            "source": "74c1212e",
-            "target": "790b7fe4",
-            "id": "716621a6",
-            "controlPoints": [
-              {
-                "x": -319.193359375,
-                "y": -327.91279069767444
-              },
-              {
-                "x": -220.5283203125,
-                "y": 102.8061224489796
-              }
-            ],
-            "sourceAnchor": 1,
-            "targetAnchor": 2
-          },
-          {
-            "shape": "erdRelation",
-            "relation": "0,n:1",
-            "source": "d322679a",
-            "target": "0d27a6aa",
-            "id": "0089f427",
-            "controlPoints": [
-              {
-                "x": -249.4375,
-                "y": -717.6209677419355
-              },
-              {
-                "x": 45.0966796875,
-                "y": -647.6309523809524
-              }
-            ],
-            "sourceAnchor": 9,
-            "targetAnchor": 4
-          },
-          {
-            "shape": "erdRelation",
-            "relation": "0,n:1",
-            "source": "8c5195d7",
-            "target": "b7cbf2b0",
-            "id": "c8bcc87f",
-            "controlPoints": [
-              {
-                "x": -39.4716796875,
-                "y": 370.76020408163265
-              },
-              {
-                "x": 123.9853515625,
-                "y": 252.0872093023256
-              }
-            ],
-            "sourceAnchor": 1,
-            "targetAnchor": 0
-          },
-          {
-            "shape": "erdRelation",
-            "relation": "0,n:1",
-            "source": "8c5195d7",
-            "target": "812aea24",
-            "id": "39e51c47",
-            "controlPoints": [
-              {
-                "x": -280.5283203125,
-                "y": 392.8061224489796
-              },
-              {
-                "x": -405.2675606077595,
-                "y": 476.500337322596
-              }
-            ],
-            "sourceAnchor": 2,
-            "targetAnchor": 1
-          },
-          {
-            "shape": "erdRelation",
-            "relation": "0,n:1",
-            "source": "7b985d71",
-            "target": "b7cbf2b0",
-            "id": "f66236ef",
-            "controlPoints": [
-              {
-                "x": 852.423828125,
-                "y": 852.2738095238095
-              },
-              {
-                "x": 596.0146484375,
-                "y": 292.18023255813955
-              }
-            ],
-            "sourceAnchor": 2,
-            "targetAnchor": 5
-          },
-          {
-            "shape": "erdRelation",
-            "relation": "0,n:1",
-            "source": "9a91e3d8",
-            "target": "b7cbf2b0",
-            "id": "c4879008",
-            "controlPoints": [
-              {
-                "x": -15.9775390625,
-                "y": 932.4772727272727
-              },
-              {
-                "x": 123.9853515625,
-                "y": 292.18023255813955
-              }
-            ],
-            "sourceAnchor": 13,
-            "targetAnchor": 4
-          },
-          {
-            "shape": "erdRelation",
-            "relation": "0,n:1",
-            "source": "415141d5",
-            "target": "b7cbf2b0",
-            "id": "695f5cdb",
-            "controlPoints": [
-              {
-                "x": 815.72265625,
-                "y": 462.23
-              },
-              {
-                "x": 596.0146484375,
-                "y": 292.18023255813955
-              }
-            ],
-            "sourceAnchor": 2,
-            "targetAnchor": 5
-          }
-        ]
+        "nodes": [],
+        "edges": []
       }
     },
     {
@@ -2462,16 +2630,16 @@
             {
               "name": "order_from",
               "type": "Char",
-              "remark": "1：内单，2：外单",
-              "chnname": "订单来源",
+              "remark": "",
+              "chnname": "订单来源（1：内单，2：外单）",
               "defaultValue": "",
               "notNull": true
             },
             {
               "name": "order_class",
               "type": "DefaultString",
-              "remark": "1：正常，2：追加，3：储备，4：新品",
-              "chnname": "订单种类",
+              "remark": "",
+              "chnname": "订单种类:1：正常，2：追加，3：储备，4：新品",
               "defaultValue": "",
               "notNull": true
             },
@@ -2484,7 +2652,7 @@
               "notNull": true
             },
             {
-              "name": "product_material_desc",
+              "name": "product_finished_material_desc",
               "type": "DefaultString",
               "remark": "",
               "chnname": "成品物料描述",
@@ -2554,8 +2722,8 @@
             {
               "name": "del_flag",
               "type": "Char",
-              "remark": "0：有效，1：删除",
-              "chnname": "是否删除",
+              "remark": "",
+              "chnname": "是否删除0：有效，1：删除",
               "defaultValue": "0"
             },
             {
@@ -2594,19 +2762,7 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [
-            {
-              "name": "idx _join_index",
-              "isUnique": true,
-              "fields": [
-                "order_class",
-                "product_material_code",
-                "factory_code",
-                "delivery_date",
-                "place"
-              ]
-            }
-          ],
+          "indexs": [],
           "headers": [
             {
               "fieldName": "chnname",
@@ -2736,8 +2892,8 @@
             {
               "name": "del_flag",
               "type": "Char",
-              "remark": "0：有效，1：删除",
-              "chnname": "是否删除",
+              "remark": "",
+              "chnname": "是否删除0：有效，1：删除",
               "defaultValue": "0"
             },
             {
@@ -2776,17 +2932,7 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [
-            {
-              "name": "idx _join_index",
-              "isUnique": true,
-              "fields": [
-                "pid",
-                "raw_material_code",
-                "bom_version"
-              ]
-            }
-          ],
+          "indexs": [],
           "headers": [
             {
               "fieldName": "chnname",
@@ -2858,8 +3004,8 @@
             {
               "name": "order_from",
               "type": "Char",
-              "remark": "1：内单，2：外单",
-              "chnname": "订单来源",
+              "remark": "",
+              "chnname": "订单来源（1：内单，2：外单）",
               "notNull": true
             },
             {
@@ -2943,8 +3089,8 @@
             {
               "name": "del_flag",
               "type": "Char",
-              "remark": "0：有效，1：删除",
-              "chnname": "是否删除",
+              "remark": "",
+              "chnname": "是否删除0：有效，1：删除",
               "defaultValue": "0"
             },
             {
@@ -2982,21 +3128,7 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [
-            {
-              "name": "idx _join_index",
-              "isUnique": true,
-              "fields": [
-                "product_material_code",
-                "factory_code",
-                "bom_version",
-                "weeks",
-                "place",
-                "delivery_date",
-                "version"
-              ]
-            }
-          ],
+          "indexs": [],
           "headers": [
             {
               "fieldName": "chnname",
@@ -3126,13 +3258,13 @@
               "name": "del_flag",
               "type": "Char",
               "remark": "",
-              "chnname": "是否删除",
+              "chnname": "是否删除0：有效，1：删除",
               "defaultValue": "0"
             },
             {
               "name": "remarks",
               "type": "Intro",
-              "remark": "0：有效，1：删除",
+              "remark": "",
               "chnname": "备注",
               "defaultValue": "''"
             },
@@ -3165,17 +3297,7 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [
-            {
-              "name": "idx _join_index",
-              "isUnique": true,
-              "fields": [
-                "pid",
-                "raw_material_code",
-                "bom_version"
-              ]
-            }
-          ],
+          "indexs": [],
           "headers": [
             {
               "fieldName": "chnname",
@@ -3238,6 +3360,13 @@
               "autoIncrement": true
             },
             {
+              "name": "pid",
+              "type": "BigInt",
+              "remark": "",
+              "chnname": "主表ID",
+              "notNull": true
+            },
+            {
               "name": "order_type",
               "type": "DefaultString",
               "remark": "",
@@ -3247,8 +3376,8 @@
             {
               "name": "order_from",
               "type": "Char",
-              "remark": "1：内单，2：外单",
-              "chnname": "订单来源",
+              "remark": "",
+              "chnname": "订单来源（1：内单，2：外单）",
               "notNull": true
             },
             {
@@ -3331,8 +3460,8 @@
             {
               "name": "del_flag",
               "type": "Char",
-              "remark": "0：有效，1：删除",
-              "chnname": "是否删除",
+              "remark": "",
+              "chnname": "是否删除0：有效，1：删除",
               "defaultValue": "0"
             },
             {
@@ -3371,21 +3500,7 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [
-            {
-              "name": "idx _join_index",
-              "isUnique": true,
-              "fields": [
-                "product_material_code",
-                "factory_code",
-                "bom_version",
-                "version",
-                "delivery_date",
-                "weeks",
-                "place"
-              ]
-            }
-          ],
+          "indexs": [],
           "headers": [
             {
               "fieldName": "chnname",
@@ -3458,7 +3573,7 @@
               "name": "order_class",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "订单种类:1：正常，2：追加，3：储备，4：新品，5：返修",
+              "chnname": "订单种类:1：正常，2：追加，3：储备，4：新品",
               "notNull": true,
               "defaultValue": "''"
             },
@@ -3627,8 +3742,8 @@
             {
               "name": "outsource_type",
               "type": "Char",
-              "remark": "0：半委外，1：全委外",
-              "chnname": "委外方式",
+              "remark": "",
+              "chnname": "委外方式（0：半委外，1：全委外）",
               "defaultValue": "''"
             },
             {
@@ -3641,8 +3756,8 @@
             {
               "name": "csd_flag",
               "type": "Char",
-              "remark": "0：否，1：是",
-              "chnname": "是否卡萨帝",
+              "remark": "",
+              "chnname": "是否卡萨帝（0：否，1：是）",
               "defaultValue": "''"
             },
             {
@@ -3655,24 +3770,24 @@
             {
               "name": "status",
               "type": "DefaultString",
-              "remark": "0：待审核，1：待下达，2：反馈中，3：待调整，4：已调整，5：已下达，6：已关单",
-              "chnname": "状态",
+              "remark": "",
+              "chnname": "状态(0：待审核，1：待下达，2：反馈中，3：待调整，4：已调整，5：已下达，6：已关单)",
               "notNull": true,
               "defaultValue": "0"
             },
             {
               "name": "audit_status",
               "type": "DefaultString",
-              "remark": "0：初始，1：JIT处长已审核",
-              "chnname": "审核状态",
+              "remark": "",
+              "chnname": "审核状态(0：初始，1：JIT处长已审核)",
               "notNull": false,
               "defaultValue": "''"
             },
             {
               "name": "del_flag",
               "type": "Char",
-              "remark": "0：有效，1：删除",
-              "chnname": "是否删除",
+              "remark": "",
+              "chnname": "是否删除0：有效，1：删除",
               "defaultValue": "0"
             },
             {
@@ -3711,20 +3826,7 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [
-            {
-              "name": "idx _join_index",
-              "isUnique": true,
-              "fields": [
-                "order_type",
-                "product_material_code",
-                "factory_code",
-                "produce_line_code",
-                "produce_start_date",
-                "bom_version"
-              ]
-            }
-          ],
+          "indexs": [],
           "headers": [
             {
               "fieldName": "chnname",
@@ -3853,8 +3955,8 @@
             {
               "name": "del_flag",
               "type": "Char",
-              "remark": "0：有效，1：删除",
-              "chnname": "是否删除",
+              "remark": "",
+              "chnname": "是否删除0：有效，1：删除",
               "defaultValue": "0"
             },
             {
@@ -3892,17 +3994,7 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [
-            {
-              "name": "idx _join_index",
-              "isUnique": true,
-              "fields": [
-                "pid",
-                "material_code",
-                "bom_version"
-              ]
-            }
-          ],
+          "indexs": [],
           "headers": [
             {
               "fieldName": "chnname",
@@ -4029,16 +4121,16 @@
             {
               "name": "status",
               "type": "Char",
-              "remark": "0：未审核，1：通过，2：驳回",
-              "chnname": "状态",
+              "remark": "",
+              "chnname": "状态(0：未审核，1：通过，2：驳回)",
               "notNull": true,
               "defaultValue": "0"
             },
             {
               "name": "del_flag",
               "type": "Char",
-              "remark": "0：有效，1：删除",
-              "chnname": "是否删除",
+              "remark": "",
+              "chnname": "是否删除0：有效，1：删除",
               "defaultValue": "0"
             },
             {
@@ -4077,18 +4169,7 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [
-            {
-              "name": "idx _join_index",
-              "isUnique": true,
-              "fields": [
-                "product_material_code",
-                "raw_material_code",
-                "status",
-                "delivery_date"
-              ]
-            }
-          ],
+          "indexs": [],
           "headers": [
             {
               "fieldName": "chnname",
@@ -4217,8 +4298,8 @@
             {
               "name": "del_flag",
               "type": "Char",
-              "remark": "0：有效，1：删除",
-              "chnname": "是否删除",
+              "remark": "",
+              "chnname": "是否删除0：有效，1：删除",
               "defaultValue": "0"
             },
             {
@@ -4385,8 +4466,8 @@
             {
               "name": "del_flag",
               "type": "Char",
-              "remark": "0：有效，1：删除",
-              "chnname": "是否删除",
+              "remark": "",
+              "chnname": "是否删除0：有效，1：删除",
               "defaultValue": "0"
             },
             {
@@ -4472,523 +4553,6 @@
             }
           ],
           "chnname": "内部需求接口表"
-        },
-        {
-          "title": "oms_plan_produce_order_del",
-          "fields": [
-            {
-              "name": "id",
-              "type": "BigInt",
-              "remark": "",
-              "chnname": "主键",
-              "pk": true,
-              "notNull": true,
-              "autoIncrement": true
-            },
-            {
-              "name": "order_from",
-              "type": "Char",
-              "remark": "1：内单，2：外单",
-              "chnname": "订单来源",
-              "notNull": true,
-              "defaultValue": "''"
-            },
-            {
-              "name": "order_class",
-              "type": "DefaultString",
-              "remark": "1：正常，2：追加，3：储备，4：新品",
-              "chnname": "订单种类",
-              "notNull": true,
-              "defaultValue": "''"
-            },
-            {
-              "name": "branch_office",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "分公司",
-              "defaultValue": "''"
-            },
-            {
-              "name": "monitor",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "班长",
-              "defaultValue": "''"
-            },
-            {
-              "name": "product_material_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "成品物料号",
-              "notNull": true
-            },
-            {
-              "name": "product_material_desc",
-              "type": "ShortString",
-              "remark": "",
-              "chnname": "成品物料描述",
-              "defaultValue": "''"
-            },
-            {
-              "name": "factory_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "工厂编码",
-              "notNull": true
-            },
-            {
-              "name": "factory_desc",
-              "type": "ShortString",
-              "remark": "",
-              "chnname": "工厂描述",
-              "defaultValue": "''"
-            },
-            {
-              "name": "order_type",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "订单类型",
-              "notNull": true
-            },
-            {
-              "name": "produce_num",
-              "type": "Money",
-              "remark": "",
-              "chnname": "排产量",
-              "notNull": true
-            },
-            {
-              "name": "unit",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "单位",
-              "notNull": true
-            },
-            {
-              "name": "produce_line_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "线体号",
-              "notNull": true
-            },
-            {
-              "name": "produce_start_date",
-              "type": "Date",
-              "remark": "",
-              "chnname": "生产开始日期",
-              "notNull": true
-            },
-            {
-              "name": "produce_end_date",
-              "type": "Date",
-              "remark": "",
-              "chnname": "生产结束日期",
-              "notNull": true
-            },
-            {
-              "name": "produce_end_time",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "生产结束时间",
-              "notNull": true
-            },
-            {
-              "name": "bom_version",
-              "type": "Integer",
-              "remark": "",
-              "chnname": "BOM版本",
-              "notNull": true
-            },
-            {
-              "name": "sequence",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "顺序",
-              "defaultValue": "''"
-            },
-            {
-              "name": "destination",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "发往地",
-              "notNull": true
-            },
-            {
-              "name": "delivery_date",
-              "type": "Date",
-              "remark": "",
-              "chnname": "交货日期",
-              "notNull": true
-            },
-            {
-              "name": "old_new",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "老品/新品",
-              "defaultValue": "''"
-            },
-            {
-              "name": "use_time",
-              "type": "Double",
-              "remark": "",
-              "chnname": "用时",
-              "notNull": true
-            },
-            {
-              "name": "rhythm",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "节拍",
-              "notNull": true
-            },
-            {
-              "name": "product_quota",
-              "type": "Integer",
-              "remark": "",
-              "chnname": "产品定员",
-              "notNull": true
-            },
-            {
-              "name": "pcb_special_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "PCB专用号",
-              "notNull": true,
-              "defaultValue": "''"
-            },
-            {
-              "name": "process_cost",
-              "type": "Money",
-              "remark": "",
-              "chnname": "加工费",
-              "defaultValue": "0"
-            },
-            {
-              "name": "outsource_type",
-              "type": "Char",
-              "remark": "0：半委外，1：全委外",
-              "chnname": "委外方式",
-              "defaultValue": "''"
-            },
-            {
-              "name": "product_order_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "生产订单号",
-              "defaultValue": "''"
-            },
-            {
-              "name": "csd_flag",
-              "type": "Char",
-              "remark": "0：否，1：是",
-              "chnname": "是否卡萨帝",
-              "defaultValue": "''"
-            },
-            {
-              "name": "product_status",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "产品状态",
-              "defaultValue": "''"
-            },
-            {
-              "name": "status",
-              "type": "DefaultString",
-              "remark": "0：待审核，1：待下达，2：反馈中，3：待调整，4：已调整，5：已下达，6：已关单",
-              "chnname": "状态",
-              "notNull": true,
-              "defaultValue": "0"
-            },
-            {
-              "name": "audit_status",
-              "type": "DefaultString",
-              "remark": "0：初始，1：JIT处长已审核",
-              "chnname": "审核状态",
-              "notNull": false,
-              "defaultValue": "''"
-            },
-            {
-              "name": "del_flag",
-              "type": "Char",
-              "remark": "0：有效，1：删除",
-              "chnname": "是否删除",
-              "defaultValue": "0"
-            },
-            {
-              "name": "remarks",
-              "type": "Intro",
-              "remark": "",
-              "chnname": "备注",
-              "defaultValue": "''"
-            },
-            {
-              "name": "create_time",
-              "type": "DateTime",
-              "remark": "",
-              "chnname": "创建时间",
-              "notNull": true
-            },
-            {
-              "name": "create_by",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "创建人",
-              "notNull": true
-            },
-            {
-              "name": "update_time",
-              "type": "DateTime",
-              "remark": "",
-              "chnname": "更新时间",
-              "defaultValue": ""
-            },
-            {
-              "name": "update_by",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "更新人",
-              "defaultValue": "''"
-            }
-          ],
-          "indexs": [
-            {
-              "name": "idx _join_index",
-              "isUnique": true,
-              "fields": [
-                "product_material_code",
-                "factory_code",
-                "order_type",
-                "produce_line_code",
-                "produce_start_date",
-                "bom_version"
-              ]
-            }
-          ],
-          "headers": [
-            {
-              "fieldName": "chnname",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "name",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "type",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "dataType",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "remark",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "pk",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "notNull",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "autoIncrement",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "defaultValue",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "relationNoShow",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "uiHint",
-              "relationNoShow": true
-            }
-          ],
-          "chnname": "排产订单删除表"
-        },
-        {
-          "title": "oms_plan_produce_order_detail_del",
-          "fields": [
-            {
-              "name": "id",
-              "type": "BigInt",
-              "remark": "",
-              "chnname": "主键",
-              "pk": true,
-              "notNull": true,
-              "relationNoShow": false,
-              "autoIncrement": true
-            },
-            {
-              "name": "pid",
-              "type": "BigInt",
-              "remark": "",
-              "chnname": "主表ID",
-              "notNull": true
-            },
-            {
-              "name": "material_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "原材料号",
-              "notNull": true
-            },
-            {
-              "name": "material_desc",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "原材料描述",
-              "defaultValue": "''"
-            },
-            {
-              "name": "bom_num",
-              "type": "Double",
-              "remark": "",
-              "chnname": "单耗",
-              "notNull": true
-            },
-            {
-              "name": "raw_material_produce_num",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "原材料排产量",
-              "defaultValue": "0",
-              "notNull": true
-            },
-            {
-              "name": "unit",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "单位",
-              "notNull": true
-            },
-            {
-              "name": "bom_version",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "BOM版本",
-              "notNull": true
-            },
-            {
-              "name": "purchase_group",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "采购组",
-              "notNull": true
-            },
-            {
-              "name": "storage_point",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "仓储点",
-              "notNull": true
-            },
-            {
-              "name": "del_flag",
-              "type": "Char",
-              "remark": "0：有效，1：删除",
-              "chnname": "是否删除",
-              "defaultValue": "0"
-            },
-            {
-              "name": "remarks",
-              "type": "Intro",
-              "remark": "",
-              "chnname": "备注",
-              "defaultValue": "''"
-            },
-            {
-              "name": "create_time",
-              "type": "DateTime",
-              "remark": "",
-              "chnname": "创建时间",
-              "notNull": true
-            },
-            {
-              "name": "create_by",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "创建人",
-              "notNull": true
-            },
-            {
-              "name": "update_time",
-              "type": "DateTime",
-              "remark": "",
-              "chnname": "更新时间"
-            },
-            {
-              "name": "update_by",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "更新人",
-              "defaultValue": "''"
-            }
-          ],
-          "indexs": [
-            {
-              "name": "idx _join_index",
-              "isUnique": true,
-              "fields": [
-                "pid",
-                "material_code",
-                "bom_version"
-              ]
-            }
-          ],
-          "headers": [
-            {
-              "fieldName": "chnname",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "name",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "type",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "dataType",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "remark",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "pk",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "notNull",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "autoIncrement",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "defaultValue",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "relationNoShow",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "uiHint",
-              "relationNoShow": true
-            }
-          ],
-          "chnname": "排产订单明细删除表"
         }
       ],
       "graphCanvas": {
@@ -5008,70 +4572,100 @@
               "name": "id",
               "type": "BIGINT_19",
               "remark": "",
-              "chnname": "主键id"
+              "chnname": "主键id",
+              "defaultValue": ""
             },
             {
               "name": "product_no",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "生产订单号"
+              "chnname": "生产订单号",
+              "defaultValue": "''"
             },
             {
               "name": "material_code",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "物料号"
+              "chnname": "物料号",
+              "defaultValue": "''"
             },
             {
               "name": "confirm_amont",
               "type": "INT_10",
               "remark": "",
-              "chnname": "实际数量"
+              "chnname": "实际数量",
+              "defaultValue": "0"
             },
             {
               "name": "act_delivery_date",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "最终交货时间"
+              "chnname": "最终交货时间",
+              "defaultValue": "''"
             },
             {
               "name": "del_flag",
               "type": "CHAR_1",
-              "remark": "",
-              "chnname": "删除状态"
+              "remark": "0：有效，1：删除",
+              "chnname": "删除状态",
+              "defaultValue": "0"
             },
             {
               "name": "remark",
               "type": "VARCHAR_2000",
               "remark": "",
-              "chnname": "备注"
+              "chnname": "备注",
+              "defaultValue": "''"
             },
             {
               "name": "create_by",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "创建人"
+              "chnname": "创建人",
+              "defaultValue": "''"
             },
             {
               "name": "create_time",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "创建时间"
+              "chnname": "创建时间",
+              "defaultValue": "''"
             },
             {
               "name": "update_by",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "更新人"
+              "chnname": "更新人",
+              "defaultValue": "''"
             },
             {
               "name": "update_time",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "更新时间"
+              "chnname": "更新时间",
+              "defaultValue": "''"
             }
           ],
-          "indexs": [],
+          "indexs": [
+            {
+              "name": "sms_delivery_info_pk",
+              "isUnique": true,
+              "fields": [
+                "id"
+              ]
+            },
+            {
+              "name": "idx _join_index",
+              "isUnique": false,
+              "fields": [
+                "product_no",
+                "material_code",
+                "act_delivery_date",
+                "create_time",
+                "update_time"
+              ]
+            }
+          ],
           "headers": [
             {
               "fieldName": "chnname",
@@ -5127,130 +4721,167 @@
               "name": "id",
               "type": "BIGINT_19",
               "remark": "",
-              "chnname": "主键Id"
+              "chnname": "主键Id",
+              "defaultValue": "''"
             },
             {
               "name": "line_no",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "线体号"
+              "chnname": "线体号",
+              "defaultValue": "''"
             },
             {
               "name": "supplier_code",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "供应商编码"
+              "chnname": "供应商编码",
+              "defaultValue": "''"
             },
             {
               "name": "supplier_name",
               "type": "VARCHAR_200",
               "remark": "",
-              "chnname": "供应商名称"
-            },
-            {
-              "name": "order_no",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "订单号"
+              "chnname": "供应商名称",
+              "defaultValue": "''"
             },
             {
               "name": "product_no",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "生产订单号"
+              "chnname": "生产订单号",
+              "defaultValue": "''"
             },
             {
               "name": "order_status",
               "type": "CHAR_1",
-              "remark": "",
-              "chnname": "订单状态（未关单、已关单、待结算、已付款）"
+              "remark": "1未关单、2 已关单、11待结算、12 结算完成",
+              "chnname": "订单状态",
+              "defaultValue": "''"
             },
             {
               "name": "material_code",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "物料号"
+              "chnname": "专用号",
+              "defaultValue": "''"
             },
             {
               "name": "material_name",
               "type": "VARCHAR_200",
               "remark": "",
-              "chnname": "物料名称"
+              "chnname": "专用号名称",
+              "defaultValue": "''"
             },
             {
               "name": "version",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "版本号"
+              "chnname": "BOM版本号",
+              "defaultValue": "''"
             },
             {
               "name": "order_amount",
               "type": "INT_10",
               "remark": "",
-              "chnname": "订单数量"
+              "chnname": "订单数量",
+              "defaultValue": "0"
             },
             {
               "name": "confirm_amont",
               "type": "INT_10",
               "remark": "",
-              "chnname": "交货数量"
-            },
-            {
-              "name": "machining_price",
-              "type": "DECIMAL_6",
-              "remark": "",
-              "chnname": "不含税单价"
+              "chnname": "入库数量",
+              "defaultValue": "0"
             },
             {
               "name": "outsource_way",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "委外方式"
+              "chnname": "委外方式",
+              "defaultValue": "''"
+            },
+            {
+              "name": "machining_price",
+              "type": "DECIMAL_6",
+              "remark": "",
+              "chnname": "不含税单价",
+              "defaultValue": "0"
             },
             {
               "name": "settle_price",
               "type": "DECIMAL_6",
               "remark": "",
-              "chnname": "不含税金额"
+              "chnname": "不含税金额",
+              "defaultValue": "0"
             },
             {
               "name": "del_flag",
               "type": "CHAR_1",
-              "remark": "",
-              "chnname": "删除状态"
+              "remark": "0：有效，1：删除",
+              "chnname": "删除状态",
+              "defaultValue": "0"
             },
             {
               "name": "remark",
               "type": "VARCHAR_1000",
               "remark": "",
-              "chnname": "备注"
+              "chnname": "备注",
+              "defaultValue": "''"
             },
             {
               "name": "create_by",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "创建人"
+              "chnname": "创建人",
+              "defaultValue": "''"
             },
             {
               "name": "create_time",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "创建时间"
+              "chnname": "创建时间",
+              "defaultValue": "''"
             },
             {
               "name": "update_by",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "更新人"
+              "chnname": "更新人",
+              "defaultValue": "''"
             },
             {
               "name": "update_time",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "更新时间"
+              "chnname": "更新时间",
+              "defaultValue": "''"
             }
           ],
-          "indexs": [],
+          "indexs": [
+            {
+              "name": "idx _join_index",
+              "isUnique": false,
+              "fields": [
+                "line_no",
+                "supplier_code",
+                "supplier_name",
+                "product_no",
+                "order_status",
+                "material_code",
+                "material_name",
+                "version",
+                "outsource_way"
+              ]
+            },
+            {
+              "name": "sms_settle_info_pk",
+              "isUnique": true,
+              "fields": [
+                "id"
+              ]
+            }
+          ],
           "headers": [
             {
               "fieldName": "chnname",
@@ -5312,184 +4943,204 @@
               "name": "stuff_no",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "补料单号"
+              "chnname": "物耗单号",
+              "defaultValue": "''"
             },
             {
               "name": "supplier_code",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "供应商编码"
+              "chnname": "供应商编码",
+              "defaultValue": "''"
             },
             {
               "name": "supplier_name",
               "type": "VARCHAR_100",
               "remark": "",
-              "chnname": "供应商名称"
-            },
-            {
-              "name": "order_no",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "订单号"
-            },
-            {
-              "name": "product_no",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "生产订单号"
-            },
-            {
-              "name": "stuff_status",
-              "type": "CHAR_1",
-              "remark": "",
-              "chnname": "订单状态"
-            },
-            {
-              "name": "material_code",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "物料号"
-            },
-            {
-              "name": "material_name",
-              "type": "VARCHAR_100",
-              "remark": "",
-              "chnname": "物料名称"
-            },
-            {
-              "name": "stuff_amount",
-              "type": "INT_10",
-              "remark": "",
-              "chnname": "补料数量"
-            },
-            {
-              "name": "stuff_price",
-              "type": "DECIMAL_6",
-              "remark": "",
-              "chnname": "补料单价"
-            },
-            {
-              "name": "stuff_unit",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "单位"
-            },
-            {
-              "name": "submit_date",
-              "type": "DATETIME",
-              "remark": "",
-              "chnname": "提交时间"
+              "chnname": "供应商名称",
+              "defaultValue": "''"
             },
             {
               "name": "factory",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "工厂"
+              "chnname": "工厂",
+              "defaultValue": "''"
+            },
+            {
+              "name": "product_no",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "生产订单号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "stuff_status",
+              "type": "CHAR_1",
+              "remark": "0 待提交、1jit待审核、2jit驳回、3小微主待审核、4小微主审核通过、5小微主驳回、 6 SAP成功、7 SAP创单失败、 11待结算、 12结算完成",
+              "chnname": "订单状态",
+              "defaultValue": "''"
+            },
+            {
+              "name": "material_code",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "物料号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "material_name",
+              "type": "VARCHAR_100",
+              "remark": "",
+              "chnname": "物料名称",
+              "defaultValue": "''"
+            },
+            {
+              "name": "stuff_amount",
+              "type": "INT_10",
+              "remark": "",
+              "chnname": "申请数量",
+              "defaultValue": "0"
+            },
+            {
+              "name": "stuff_price",
+              "type": "DECIMAL_6",
+              "remark": "",
+              "chnname": "物料单价",
+              "defaultValue": "0"
+            },
+            {
+              "name": "stuff_unit",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "单位",
+              "defaultValue": "''"
+            },
+            {
+              "name": "submit_date",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "提交时间",
+              "defaultValue": "'''"
             },
             {
               "name": "sap_storeage",
               "type": "VARCHAR_200",
               "remark": "",
-              "chnname": "库存地点"
+              "chnname": "库存地点",
+              "defaultValue": "''"
             },
             {
-              "name": "apply_reson",
-              "type": "VARCHAR_200",
+              "name": "sap_result",
+              "type": "DefaultString",
               "remark": "",
-              "chnname": "申请原因"
+              "chnname": "SAP创单结果",
+              "defaultValue": "''"
             },
             {
-              "name": "person_liable",
-              "type": "VARCHAR_32",
+              "name": "sap_remark",
+              "type": "DefaultString",
               "remark": "",
-              "chnname": "责任人"
+              "chnname": "SAP创单备注",
+              "defaultValue": "''"
             },
             {
-              "name": "jit_by",
-              "type": "VARCHAR_32",
+              "name": "posting_no",
+              "type": "DefaultString",
               "remark": "",
-              "chnname": "jit评审人"
+              "chnname": "SAP创单凭证",
+              "defaultValue": "''"
             },
             {
-              "name": "jit_status",
-              "type": "CHAR_1",
+              "name": "sap_date",
+              "type": "DefaultString",
               "remark": "",
-              "chnname": "jit评审状态"
+              "chnname": "SAP创单时间",
+              "defaultValue": "''"
             },
             {
-              "name": "jit_remarks",
-              "type": "VARCHAR_200",
+              "name": "sap_result",
+              "type": "DefaultString",
               "remark": "",
-              "chnname": "jit评审备注"
+              "chnname": "结算单号",
+              "defaultValue": "''"
             },
             {
-              "name": "jit_date",
-              "type": "DATETIME",
+              "name": "settle_fee",
+              "type": "DefaultString",
               "remark": "",
-              "chnname": "jit评审时间"
-            },
-            {
-              "name": "store_by",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "原料库审批人"
-            },
-            {
-              "name": "store_status",
-              "type": "CHAR_1",
-              "remark": "",
-              "chnname": "原料库审批状态"
-            },
-            {
-              "name": "store_remarks",
-              "type": "VARCHAR_200",
-              "remark": "",
-              "chnname": "原料库审批备注"
-            },
-            {
-              "name": "store_date",
-              "type": "DATETIME",
-              "remark": "",
-              "chnname": "原料库审批时间"
+              "chnname": "补料结算费",
+              "defaultValue": "''"
             },
             {
               "name": "del_flag",
               "type": "CHAR_1",
-              "remark": "",
-              "chnname": "删除状态"
+              "remark": "0：有效，1：删除",
+              "chnname": "删除状态",
+              "defaultValue": "0"
             },
             {
               "name": "remark",
               "type": "VARCHAR_2000",
               "remark": "",
-              "chnname": "备注"
+              "chnname": "备注",
+              "defaultValue": "''"
             },
             {
               "name": "create_by",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "创建人"
+              "chnname": "创建人",
+              "defaultValue": "''"
             },
             {
               "name": "create_time",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "创建时间"
+              "chnname": "创建时间",
+              "defaultValue": "''"
             },
             {
               "name": "update_by",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "更新人"
+              "chnname": "更新人",
+              "defaultValue": "''"
             },
             {
               "name": "update_time",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "更新时间"
+              "chnname": "更新时间",
+              "defaultValue": "''"
             }
           ],
-          "indexs": [],
+          "indexs": [
+            {
+              "name": "sms_supplementary_order_pk",
+              "isUnique": true,
+              "fields": [
+                "id"
+              ]
+            },
+            {
+              "name": "idx _join_index",
+              "isUnique": false,
+              "fields": [
+                "stuff_no",
+                "supplier_code",
+                "supplier_name",
+                "factory",
+                "product_no",
+                "stuff_status",
+                "material_code",
+                "material_name",
+                "submit_date",
+                "sap_date",
+                "posting_no"
+              ]
+            }
+          ],
           "headers": [
             {
               "fieldName": "chnname",
@@ -5536,138 +5187,7 @@
               "relationNoShow": true
             }
           ],
-          "chnname": "补料申请单"
-        },
-        {
-          "title": "sms_supplementary_settle",
-          "fields": [
-            {
-              "name": "id",
-              "type": "BIGINT_19",
-              "remark": "",
-              "chnname": "主键ID"
-            },
-            {
-              "name": "stuff_no",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "补料申请单号"
-            },
-            {
-              "name": "supplier_code",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "供应商编码"
-            },
-            {
-              "name": "supplier_name",
-              "type": "VARCHAR_200",
-              "remark": "",
-              "chnname": "供应商名称"
-            },
-            {
-              "name": "settle_no",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "结算单号"
-            },
-            {
-              "name": "settle_status",
-              "type": "CHAR_1",
-              "remark": "",
-              "chnname": "结算状态"
-            },
-            {
-              "name": "settle_ratio",
-              "type": "DECIMAL_6",
-              "remark": "",
-              "chnname": "补料扣款系数"
-            },
-            {
-              "name": "settle_fee",
-              "type": "DECIMAL_6",
-              "remark": "",
-              "chnname": "补料结算费"
-            },
-            {
-              "name": "del_flag",
-              "type": "CHAR_1",
-              "remark": "",
-              "chnname": "删除状态"
-            },
-            {
-              "name": "create_by",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "创建人"
-            },
-            {
-              "name": "create_time",
-              "type": "DATETIME",
-              "remark": "",
-              "chnname": "创建时间"
-            },
-            {
-              "name": "update_by",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "更新人"
-            },
-            {
-              "name": "update_time",
-              "type": "DATETIME",
-              "remark": "",
-              "chnname": "更新时间"
-            }
-          ],
-          "indexs": [],
-          "headers": [
-            {
-              "fieldName": "chnname",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "name",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "type",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "dataType",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "remark",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "pk",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "notNull",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "autoIncrement",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "defaultValue",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "relationNoShow",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "uiHint",
-              "relationNoShow": true
-            }
-          ],
-          "chnname": "补料申请结算"
+          "chnname": "物耗申请单"
         },
         {
           "title": "sms_scrap_order",
@@ -5676,154 +5196,184 @@
               "name": "id",
               "type": "BIGINT_19",
               "remark": "",
-              "chnname": "主键id"
+              "chnname": "主键id",
+              "notNull": true,
+              "pk": true,
+              "autoIncrement": true
             },
             {
               "name": "scrap_no",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "报废单号"
-            },
-            {
-              "name": "supplier_code",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "供应商编码"
-            },
-            {
-              "name": "supplier_name",
-              "type": "VARCHAR_200",
-              "remark": "",
-              "chnname": "供应商名称"
-            },
-            {
-              "name": "order_no",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "订单号"
+              "chnname": "报废单号",
+              "defaultValue": "''"
             },
             {
               "name": "product_no",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "生产订单号"
+              "chnname": "生产订单号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "supplier_code",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "供应商编码",
+              "defaultValue": "''"
+            },
+            {
+              "name": "supplier_name",
+              "type": "VARCHAR_200",
+              "remark": "",
+              "chnname": "供应商名称",
+              "defaultValue": "''"
             },
             {
               "name": "scrap_status",
               "type": "CHAR_1",
-              "remark": "",
-              "chnname": "报废状态"
+              "remark": "0待提交、1业务科待审核、2业务科审核通过、3业务科审核不通过、11待结算、12结算完成",
+              "chnname": "报废状态",
+              "defaultValue": "''"
             },
             {
               "name": "posting_no",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "SAP过账单号"
+              "chnname": "SAP过账单号",
+              "defaultValue": "''"
             },
             {
               "name": "material_code",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "物料号"
+              "chnname": "物料号",
+              "defaultValue": "''"
             },
             {
               "name": "material_name",
               "type": "VARCHAR_200",
               "remark": "",
-              "chnname": "物料名称"
+              "chnname": "物料名称",
+              "defaultValue": "''"
             },
             {
               "name": "scrap_amount",
               "type": "INT_10",
               "remark": "",
-              "chnname": "报废数量"
+              "chnname": "报废数量",
+              "defaultValue": "0"
             },
             {
               "name": "material_price",
               "type": "DECIMAL_6",
               "remark": "",
-              "chnname": "报废单价"
+              "chnname": "报废单价",
+              "defaultValue": "0"
             },
             {
               "name": "scrap_price",
               "type": "DECIMAL_6",
               "remark": "",
-              "chnname": "报废金额"
+              "chnname": "报废金额",
+              "defaultValue": "0"
             },
             {
               "name": "machining_price",
               "type": "DECIMAL_6",
               "remark": "",
-              "chnname": "兑现加工费"
+              "chnname": "兑现加工费",
+              "defaultValue": "0"
             },
             {
               "name": "settle_no",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "结算单号"
+              "chnname": "结算单号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "settle_fee",
+              "type": "DECIMAL_6",
+              "remark": "",
+              "chnname": "结算金额",
+              "defaultValue": "0"
             },
             {
               "name": "submit_date",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "提交时间"
-            },
-            {
-              "name": "audit_by",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "审批人"
-            },
-            {
-              "name": "audit_date",
-              "type": "DATETIME",
-              "remark": "",
-              "chnname": "审批时间"
-            },
-            {
-              "name": "audit_remark",
-              "type": "VARCHAR_2000",
-              "remark": "",
-              "chnname": "审批备注"
+              "chnname": "提交时间",
+              "defaultValue": "''"
             },
             {
               "name": "del_flag",
               "type": "CHAR_1",
-              "remark": "",
-              "chnname": "删除状态"
+              "remark": "0：有效，1：删除",
+              "chnname": "删除状态",
+              "defaultValue": "0"
             },
             {
               "name": "remark",
               "type": "VARCHAR_2000",
               "remark": "",
-              "chnname": "备注"
+              "chnname": "备注",
+              "defaultValue": "''"
             },
             {
               "name": "create_by",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "创建人"
+              "chnname": "创建人",
+              "defaultValue": "''"
             },
             {
               "name": "create_time",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "创建时间"
+              "chnname": "创建时间",
+              "defaultValue": "''"
             },
             {
               "name": "update_by",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "更新人"
+              "chnname": "更新人",
+              "defaultValue": "''"
             },
             {
               "name": "update_time",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "更新时间"
+              "chnname": "更新时间",
+              "defaultValue": "''"
             }
           ],
-          "indexs": [],
+          "indexs": [
+            {
+              "name": "idx _join_index",
+              "isUnique": false,
+              "fields": [
+                "product_no",
+                "supplier_code",
+                "supplier_name",
+                "scrap_status",
+                "posting_no",
+                "material_code",
+                "material_name",
+                "settle_no",
+                "submit_date",
+                "update_time"
+              ]
+            },
+            {
+              "name": "sms_scrap_order_pk",
+              "isUnique": true,
+              "fields": [
+                "id"
+              ]
+            }
+          ],
           "headers": [
             {
               "fieldName": "chnname",
@@ -5879,130 +5429,203 @@
               "name": "id",
               "type": "BIGINT_19",
               "remark": "",
-              "chnname": "主键id"
+              "chnname": "主键id",
+              "pk": true,
+              "notNull": true,
+              "autoIncrement": true
             },
             {
               "name": "quality_no",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "索赔单号"
+              "chnname": "索赔单号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "product_no",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生产订单号",
+              "defaultValue": "''"
             },
             {
               "name": "supplier_code",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "供应商编码"
+              "chnname": "供应商编码",
+              "defaultValue": "''"
             },
             {
               "name": "supplier_name",
               "type": "VARCHAR_100",
               "remark": "",
-              "chnname": "供应商名称"
+              "chnname": "供应商名称",
+              "defaultValue": "''"
+            },
+            {
+              "name": "factory_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "工厂",
+              "defaultValue": "''"
             },
             {
               "name": "quality_status",
               "type": "CHAR_1",
+              "remark": "0待提交、1供应商待确认，2供应商确认，3超时自动确认、4 质量部待审核、5小微主待审核、6小微主审核通过，11待结算、12结算完成",
+              "chnname": "质量索赔状态",
+              "defaultValue": "0"
+            },
+            {
+              "name": "quality_amount",
+              "type": "BIGINT_19",
               "remark": "",
-              "chnname": "质量索赔状态"
+              "chnname": "数量",
+              "defaultValue": "0"
             },
             {
               "name": "project_name",
               "type": "VARCHAR_200",
               "remark": "",
-              "chnname": "项目名称"
+              "chnname": "问题分类",
+              "defaultValue": "''"
+            },
+            {
+              "name": "claim_clause",
+              "type": "VARCHAR_2000",
+              "remark": "",
+              "chnname": "索赔条款",
+              "defaultValue": "''"
             },
             {
               "name": "claim_reason",
               "type": "VARCHAR_100",
               "remark": "",
-              "chnname": "索赔理由"
-            },
-            {
-              "name": "claim_type",
-              "type": "CHAR_1",
-              "remark": "",
-              "chnname": "索赔类型"
+              "chnname": "索赔理由",
+              "defaultValue": "''"
             },
             {
               "name": "claim_amount",
               "type": "DECIMAL_6",
               "remark": "",
-              "chnname": "索赔金额"
+              "chnname": "索赔金额",
+              "defaultValue": "0"
             },
             {
               "name": "submit_date",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "提交时间"
+              "chnname": "提交时间",
+              "defaultValue": "''"
             },
             {
-              "name": "audit_by",
-              "type": "VARCHAR_32",
+              "name": "complaint description",
+              "type": "VARCHAR_1000",
               "remark": "",
-              "chnname": "质量部审批人"
+              "chnname": "申诉描述",
+              "defaultValue": "''"
             },
             {
-              "name": "file_id",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "附件ID"
-            },
-            {
-              "name": "file_name",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "附件名称"
-            },
-            {
-              "name": "audit_date",
+              "name": "complaint date",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "审批时间"
+              "chnname": "申诉时间",
+              "defaultValue": "''"
             },
             {
-              "name": "audit_remark",
-              "type": "VARCHAR_200",
+              "name": "supplier_confirm_date",
+              "type": "DATETIME",
               "remark": "",
-              "chnname": "审批备注"
+              "chnname": "供应商确认时间",
+              "defaultValue": "''"
+            },
+            {
+              "name": "settle_no",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "结算单号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "settle_fee",
+              "type": "DECIMAL_6",
+              "remark": "",
+              "chnname": "结算金额",
+              "defaultValue": "''"
             },
             {
               "name": "del_flag",
               "type": "CHAR_1",
-              "remark": "",
-              "chnname": "删除状态"
+              "remark": "0：有效，1：删除",
+              "chnname": "删除状态",
+              "defaultValue": "0"
             },
             {
               "name": "remark",
               "type": "VARCHAR_2000",
               "remark": "",
-              "chnname": "备注"
+              "chnname": "备注",
+              "defaultValue": "''"
             },
             {
               "name": "create_by",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "创建人"
+              "chnname": "创建人",
+              "defaultValue": "''"
             },
             {
               "name": "create_time",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "创建时间"
+              "chnname": "创建时间",
+              "defaultValue": "''"
             },
             {
               "name": "update_by",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "更新人"
+              "chnname": "更新人",
+              "defaultValue": "''"
             },
             {
               "name": "update_time",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "更新时间"
+              "chnname": "更新时间",
+              "defaultValue": "''"
             }
           ],
-          "indexs": [],
+          "indexs": [
+            {
+              "name": "idx _join_index",
+              "isUnique": false,
+              "fields": [
+                "quality_no",
+                "product_no",
+                "supplier_code",
+                "supplier_name",
+                "factory_code",
+                "quality_status",
+                "project_name",
+                "submit_date",
+                "complaint date",
+                "supplier_confirm_date",
+                "settle_no",
+                "create_by",
+                "update_by",
+                "create_time",
+                "update_time"
+              ]
+            },
+            {
+              "name": "sms_quality_order_pk",
+              "isUnique": true,
+              "fields": [
+                "id"
+              ]
+            }
+          ],
           "headers": [
             {
               "fieldName": "chnname",
@@ -6058,94 +5681,179 @@
               "name": "id",
               "type": "BIGINT_19",
               "remark": "",
-              "chnname": "主键id"
+              "chnname": "主键id",
+              "pk": true,
+              "notNull": true,
+              "autoIncrement": true
             },
             {
               "name": "delays_no",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "索赔单号"
+              "chnname": "索赔单号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "product_no",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "生产单号",
+              "defaultValue": "''"
             },
             {
               "name": "supplier_code",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "供应商编码"
+              "chnname": "供应商编码",
+              "defaultValue": "''"
             },
             {
               "name": "supplier_name",
               "type": "VARCHAR_200",
               "remark": "",
-              "chnname": "供应商名称"
+              "chnname": "供应商名称",
+              "defaultValue": "''"
             },
             {
               "name": "delays_status",
               "type": "CHAR_1",
-              "remark": "",
-              "chnname": "索赔状态"
+              "remark": "1待供应商确认、2 供应商确认、3超期自动确认、4订单待审核、5小微主待审核、6订单驳回、7小微主审核通过、8小微主驳回、11待结算、12已结算",
+              "chnname": "索赔状态",
+              "defaultValue": "''"
             },
             {
               "name": "delivery_date",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "应交付日期"
+              "chnname": "基本完成日期",
+              "defaultValue": "''"
             },
             {
               "name": "act_delivery_date",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "实际交付日期"
+              "chnname": "实际完成日期",
+              "defaultValue": "''"
             },
             {
               "name": "delays_amount",
               "type": "DECIMAL_6",
               "remark": "",
-              "chnname": "索赔金额"
+              "chnname": "索赔金额",
+              "defaultValue": "0"
             },
             {
               "name": "submit_date",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "提交时间"
+              "chnname": "提交时间",
+              "defaultValue": "''"
+            },
+            {
+              "name": "complaint description",
+              "type": "VARCHAR_2000",
+              "remark": "",
+              "chnname": "申诉描述",
+              "defaultValue": "''"
+            },
+            {
+              "name": "complaint date",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "申诉时间",
+              "defaultValue": "''"
+            },
+            {
+              "name": "supplier_confirm_date",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "供应商确认时间",
+              "defaultValue": "''"
+            },
+            {
+              "name": "settle_no",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "结算单号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "settle_fee",
+              "type": "DECIMAL_6",
+              "remark": "",
+              "chnname": "结算金额",
+              "defaultValue": "0"
             },
             {
               "name": "del_flag",
               "type": "CHAR_1",
-              "remark": "",
-              "chnname": "删除状态"
+              "remark": "0：有效，1：删除",
+              "chnname": "删除状态",
+              "defaultValue": "0"
             },
             {
               "name": "remark",
               "type": "VARCHAR_2000",
               "remark": "",
-              "chnname": "备注"
+              "chnname": "备注",
+              "defaultValue": "''"
             },
             {
               "name": "create_by",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "创建人"
+              "chnname": "创建人",
+              "defaultValue": "''"
             },
             {
               "name": "create_time",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "创建时间"
+              "chnname": "创建时间",
+              "defaultValue": "''"
             },
             {
               "name": "update_by",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "更新人"
+              "chnname": "更新人",
+              "defaultValue": "''"
             },
             {
               "name": "update_time",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "更新时间"
+              "chnname": "更新时间",
+              "defaultValue": "''"
             }
           ],
-          "indexs": [],
+          "indexs": [
+            {
+              "name": "idx _join_index",
+              "isUnique": false,
+              "fields": [
+                "delays_no",
+                "product_no",
+                "supplier_code",
+                "supplier_name",
+                "delays_status",
+                "delivery_date",
+                "act_delivery_date",
+                "submit_date",
+                "supplier_confirm_date",
+                "settle_no",
+                "create_time",
+                "id"
+              ]
+            },
+            {
+              "name": "sms_delays_delivery",
+              "isUnique": true,
+              "fields": [
+                "id"
+              ]
+            }
+          ],
           "headers": [
             {
               "fieldName": "chnname",
@@ -6201,115 +5909,143 @@
               "name": "id",
               "type": "BIGINT_19",
               "remark": "",
-              "chnname": "主键id"
+              "chnname": "主键id",
+              "pk": true,
+              "notNull": true,
+              "autoIncrement": true
             },
             {
               "name": "claim_code",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "索赔单号"
-            },
-            {
-              "name": "claim_other_status",
-              "type": "CHAR_1",
-              "remark": "",
-              "chnname": "索赔状态"
-            },
-            {
-              "name": "supplier_code",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "供应商编码"
-            },
-            {
-              "name": "supplier_name",
-              "type": "VARCHAR_200",
-              "remark": "",
-              "chnname": "供应商名称"
-            },
-            {
-              "name": "order_no",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "订单号"
+              "chnname": "索赔单号",
+              "defaultValue": "''"
             },
             {
               "name": "product_no",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "sap生产订单号"
+              "chnname": "生产订单号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "supplier_code",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "供应商编码",
+              "defaultValue": "''"
+            },
+            {
+              "name": "supplier_name",
+              "type": "VARCHAR_200",
+              "remark": "",
+              "chnname": "供应商名称",
+              "defaultValue": "''"
             },
             {
               "name": "claim_reson",
               "type": "VARCHAR_200",
               "remark": "",
-              "chnname": "索赔原因"
+              "chnname": "索赔原因",
+              "defaultValue": "''"
             },
             {
               "name": "claim_price",
               "type": "DECIMAL_6",
               "remark": "",
-              "chnname": "索赔金额"
+              "chnname": "索赔金额",
+              "defaultValue": "0"
+            },
+            {
+              "name": "claim_other_status",
+              "type": "CHAR_1",
+              "remark": "1供应商待确认、2供应商确认、3超期自动确认、3小微主待审核、4小微主审核通过、5小微主驳回、11待结算、12已结算",
+              "chnname": "索赔状态",
+              "defaultValue": "''"
             },
             {
               "name": "submit_date",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "提交时间"
+              "chnname": "提交时间",
+              "defaultValue": "''"
             },
             {
-              "name": "audit_by",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "审核人"
-            },
-            {
-              "name": "audit_date",
-              "type": "DATETIME",
-              "remark": "",
-              "chnname": "审核时间"
-            },
-            {
-              "name": "audit_remarks",
+              "name": "complaint description",
               "type": "VARCHAR_2000",
               "remark": "",
-              "chnname": "审核备注"
+              "chnname": "申诉描述",
+              "defaultValue": "''"
+            },
+            {
+              "name": "complaint date",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "申诉时间",
+              "defaultValue": "''"
+            },
+            {
+              "name": "supplier_confirm_date",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "供应商确认时间",
+              "defaultValue": "''"
+            },
+            {
+              "name": "settle_no",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "结算单号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "settle_fee",
+              "type": "DECIMAL_6",
+              "remark": "",
+              "chnname": "结算金额",
+              "defaultValue": "0"
             },
             {
               "name": "del_flag",
               "type": "CHAR_1",
-              "remark": "",
-              "chnname": "删除状态"
+              "remark": "0：有效，1：删除",
+              "chnname": "删除状态",
+              "defaultValue": "0"
             },
             {
               "name": "remark",
               "type": "VARCHAR_2000",
               "remark": "",
-              "chnname": "备注"
+              "chnname": "备注",
+              "defaultValue": "''"
             },
             {
               "name": "create_by",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "创建人"
+              "chnname": "创建人",
+              "defaultValue": "''"
             },
             {
               "name": "create_time",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "创建时间"
+              "chnname": "创建时间",
+              "defaultValue": "''"
             },
             {
               "name": "update_by",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "更新人"
+              "chnname": "更新人",
+              "defaultValue": "''"
             },
             {
               "name": "update_time",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "更新时间"
+              "chnname": "更新时间",
+              "defaultValue": "''"
             }
           ],
           "indexs": [],
@@ -6362,336 +6098,184 @@
           "chnname": "其他索赔"
         },
         {
-          "title": "sms_mo_claim_info",
-          "fields": [
-            {
-              "name": "id",
-              "type": "BIGINT_19",
-              "remark": "",
-              "chnname": "主键ID"
-            },
-            {
-              "name": "claim_no",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "索赔单号"
-            },
-            {
-              "name": "claim_type",
-              "type": "CHAR_1",
-              "remark": "",
-              "chnname": "索赔单类型"
-            },
-            {
-              "name": "claim_status",
-              "type": "CHAR_1",
-              "remark": "",
-              "chnname": "索赔单状态"
-            },
-            {
-              "name": "line_no",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "线体号"
-            },
-            {
-              "name": "supplier_code",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "供应商编码"
-            },
-            {
-              "name": "supplier_name",
-              "type": "VARCHAR_200",
-              "remark": "",
-              "chnname": "供应商名称"
-            },
-            {
-              "name": "order_no",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "排产订单号"
-            },
-            {
-              "name": "product_no",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "生产订单号"
-            },
-            {
-              "name": "claim_reson",
-              "type": "VARCHAR_200",
-              "remark": "",
-              "chnname": "索赔原因"
-            },
-            {
-              "name": "claim_amount",
-              "type": "DATETIME",
-              "remark": "",
-              "chnname": "索赔单生成时间"
-            },
-            {
-              "name": "appeal_reson",
-              "type": "VARCHAR_2000",
-              "remark": "",
-              "chnname": "申诉原因"
-            },
-            {
-              "name": "appeal_by",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "申诉人"
-            },
-            {
-              "name": "appeal_date",
-              "type": "DATETIME",
-              "remark": "",
-              "chnname": "申诉时间"
-            },
-            {
-              "name": "claim_audit_status",
-              "type": "CHAR_1",
-              "remark": "",
-              "chnname": "审核状态"
-            },
-            {
-              "name": "audit_by",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "审核人"
-            },
-            {
-              "name": "audit_date",
-              "type": "DATETIME",
-              "remark": "",
-              "chnname": "审核时间"
-            },
-            {
-              "name": "file_url",
-              "type": "VARCHAR_200",
-              "remark": "",
-              "chnname": "附件信息"
-            },
-            {
-              "name": "del_flag",
-              "type": "CHAR_1",
-              "remark": "",
-              "chnname": "删除状态"
-            },
-            {
-              "name": "remark",
-              "type": "VARCHAR_2000",
-              "remark": "",
-              "chnname": "备注"
-            },
-            {
-              "name": "create_by",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "创建人"
-            },
-            {
-              "name": "create_time",
-              "type": "DATETIME",
-              "remark": "",
-              "chnname": "创建时间"
-            },
-            {
-              "name": "update_by",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "更新人"
-            },
-            {
-              "name": "update_time",
-              "type": "DATETIME",
-              "remark": "",
-              "chnname": "更新时间"
-            }
-          ],
-          "indexs": [],
-          "headers": [
-            {
-              "fieldName": "chnname",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "name",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "type",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "dataType",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "remark",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "pk",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "notNull",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "autoIncrement",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "defaultValue",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "relationNoShow",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "uiHint",
-              "relationNoShow": true
-            }
-          ],
-          "chnname": "索赔单处理"
-        },
-        {
           "title": "sms_mouth_settle",
           "fields": [
             {
               "name": "id",
               "type": "BIGINT_19",
               "remark": "",
-              "chnname": "主键id"
-            },
-            {
-              "name": "line_no",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "线体号"
-            },
-            {
-              "name": "supplier_code",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "供应商编码"
-            },
-            {
-              "name": "supplier_name",
-              "type": "VARCHAR_200",
-              "remark": "",
-              "chnname": "供应商名称"
-            },
-            {
-              "name": "settle_status",
-              "type": "CHAR_1",
-              "remark": "",
-              "chnname": "结算状态"
+              "chnname": "主键id",
+              "pk": true,
+              "notNull": true,
+              "autoIncrement": true
             },
             {
               "name": "data_moth",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "结算月份"
+              "chnname": "结算月份",
+              "defaultValue": "''"
+            },
+            {
+              "name": "supplier_code",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "供应商编码",
+              "defaultValue": "''"
+            },
+            {
+              "name": "supplier_name",
+              "type": "VARCHAR_200",
+              "remark": "",
+              "chnname": "供应商名称",
+              "defaultValue": "''"
+            },
+            {
+              "name": "factory_code",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "工厂",
+              "defaultValue": "''"
             },
             {
               "name": "machining_amount",
               "type": "DECIMAL_6",
               "remark": "",
-              "chnname": "结算加工费"
+              "chnname": "结算加工费",
+              "defaultValue": "0"
             },
             {
               "name": "stuff_amount",
               "type": "DECIMAL_6",
               "remark": "",
-              "chnname": "补料索赔金额"
+              "chnname": "补料索赔金额",
+              "defaultValue": "0"
             },
             {
               "name": "scrap_amount",
               "type": "DECIMAL_6",
               "remark": "",
-              "chnname": "报废索赔金额"
+              "chnname": "报废索赔金额",
+              "defaultValue": "0"
             },
             {
               "name": "claim_machining_amount",
               "type": "DECIMAL_6",
               "remark": "",
-              "chnname": "索赔报废加工费"
+              "chnname": "索赔报废加工费",
+              "defaultValue": "0"
             },
             {
               "name": "qualiy_amount",
               "type": "DECIMAL_6",
               "remark": "",
-              "chnname": "质量索赔金额"
+              "chnname": "质量索赔金额",
+              "defaultValue": "0"
             },
             {
               "name": "delays_amount",
               "type": "DECIMAL_6",
               "remark": "",
-              "chnname": "延期交货索赔金额"
+              "chnname": "延期交货索赔金额",
+              "defaultValue": "0"
             },
             {
               "name": "other_claim_amount",
               "type": "DECIMAL_6",
               "remark": "",
-              "chnname": "其他索赔金额"
+              "chnname": "其他索赔金额",
+              "defaultValue": "0"
             },
             {
               "name": "total_fee",
               "type": "DECIMAL_6",
               "remark": "",
-              "chnname": "实际付款金额"
+              "chnname": "不含税金额",
+              "defaultValue": "0"
+            },
+            {
+              "name": "tax_inclusive_fee",
+              "type": "DECIMAL_6",
+              "remark": "",
+              "chnname": "含税金额",
+              "defaultValue": "0"
+            },
+            {
+              "name": "invoice_fee",
+              "type": "DECIMAL_6",
+              "remark": "",
+              "chnname": "发票金额",
+              "defaultValue": "0"
             },
             {
               "name": "kms_no",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "财务预算单号"
+              "chnname": "财务预算单号",
+              "defaultValue": "''"
             },
             {
               "name": "kms_status",
               "type": "CHAR_1",
               "remark": "",
-              "chnname": "财务付款状态"
+              "chnname": "财务付款状态",
+              "defaultValue": "''"
             },
             {
               "name": "kms_pay_date",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "财务付款时间"
+              "chnname": "财务付款时间",
+              "defaultValue": "''"
+            },
+            {
+              "name": "settle_status",
+              "type": "CHAR_1",
+              "remark": "11待结算、13内控确认、14小微主确认、15待付款、12结算完成",
+              "chnname": "结算状态",
+              "defaultValue": "''"
             },
             {
               "name": "del_flag",
               "type": "DefaultString",
+              "remark": "0：有效，1：删除",
+              "chnname": "删除状态",
+              "defaultValue": "0"
+            },
+            {
+              "name": "remark",
+              "type": "VARCHAR_2000",
               "remark": "",
-              "chnname": "删除状态"
+              "chnname": "备注",
+              "defaultValue": "''"
             },
             {
               "name": "create_by",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "创建人"
+              "chnname": "创建人",
+              "defaultValue": "''"
             },
             {
               "name": "create_time",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "创建时间"
+              "chnname": "创建时间",
+              "defaultValue": "''"
             },
             {
               "name": "update_by",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "更新人"
+              "chnname": "更新人",
+              "defaultValue": "''"
             },
             {
               "name": "update_time",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "更新时间"
+              "chnname": "更新时间",
+              "defaultValue": "''"
             }
           ],
           "indexs": [],
@@ -6742,6 +6326,174 @@
             }
           ],
           "chnname": "月度结算信息"
+        },
+        {
+          "title": "sms_invoice_info",
+          "fields": [
+            {
+              "name": "id",
+              "type": "BigInt",
+              "remark": "",
+              "chnname": "主键",
+              "pk": true,
+              "notNull": true,
+              "relationNoShow": false,
+              "autoIncrement": true,
+              "defaultValue": "''"
+            },
+            {
+              "name": "mouth_settle_id",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "月度结算单号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "invoice_no",
+              "type": "VARCHAR_64",
+              "remark": "",
+              "chnname": "发票号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "invoice_date",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "发票时间",
+              "defaultValue": "''"
+            },
+            {
+              "name": "invoice_amount",
+              "type": "DECIMAL_2",
+              "remark": "",
+              "chnname": "发票金额",
+              "defaultValue": "''"
+            },
+            {
+              "name": "invoice_rate",
+              "type": "DECIMAL_2",
+              "remark": "",
+              "chnname": "税率",
+              "defaultValue": "''"
+            },
+            {
+              "name": "tax_amount",
+              "type": "DECIMAL_2",
+              "remark": "",
+              "chnname": "税额",
+              "defaultValue": "''"
+            },
+            {
+              "name": "del_flag",
+              "type": "CHAR_1",
+              "remark": "0：有效，1：删除",
+              "chnname": "删除状态",
+              "defaultValue": "0"
+            },
+            {
+              "name": "create_by",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "创建人",
+              "defaultValue": "''"
+            },
+            {
+              "name": "create_time",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "创建时间",
+              "defaultValue": "''"
+            },
+            {
+              "name": "update_by",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "更新人",
+              "defaultValue": "''"
+            },
+            {
+              "name": "update_time",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "更新时间",
+              "defaultValue": "''"
+            },
+            {
+              "name": "remark",
+              "type": "VARCHAR_1000",
+              "remark": "",
+              "chnname": "备注",
+              "defaultValue": "''"
+            }
+          ],
+          "indexs": [
+            {
+              "name": "sms_invoice_info_pk",
+              "isUnique": true,
+              "fields": [
+                "id"
+              ]
+            },
+            {
+              "name": "idx _join_index",
+              "isUnique": false,
+              "fields": [
+                "mouth_settle_id",
+                "invoice_no",
+                "create_by",
+                "create_time",
+                "update_time",
+                "update_by"
+              ]
+            }
+          ],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
+            }
+          ],
+          "chnname": "发票信息表"
         }
       ],
       "graphCanvas": {
@@ -6880,18 +6632,7 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [
-            {
-              "name": "idx _join_index",
-              "isUnique": true,
-              "fields": [
-                "product_material_code",
-                "factory_code",
-                "raw_material_code",
-                "version"
-              ]
-            }
-          ],
+          "indexs": [],
           "headers": [
             {
               "fieldName": "chnname",
@@ -7016,17 +6757,7 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [
-            {
-              "name": "idx _join_index",
-              "isUnique": true,
-              "fields": [
-                "product_material_code",
-                "purchasing_group",
-                "del_flag"
-              ]
-            }
-          ],
+          "indexs": [],
           "headers": [
             {
               "fieldName": "chnname",
@@ -7186,17 +6917,7 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [
-            {
-              "name": "idx _join_index",
-              "isUnique": true,
-              "fields": [
-                "product_material_code",
-                "factory_code",
-                "del_flag"
-              ]
-            }
-          ],
+          "indexs": [],
           "headers": [
             {
               "fieldName": "chnname",
@@ -7328,17 +7049,7 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [
-            {
-              "name": "idx _join_index",
-              "isUnique": true,
-              "fields": [
-                "raw_material_code",
-                "version",
-                "del_flag"
-              ]
-            }
-          ],
+          "indexs": [],
           "headers": [
             {
               "fieldName": "chnname",
@@ -7491,18 +7202,7 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [
-            {
-              "name": "idx _join_index",
-              "isUnique": true,
-              "fields": [
-                "raw_material_code",
-                "factory_code",
-                "del_flag",
-                "storage_point"
-              ]
-            }
-          ],
+          "indexs": [],
           "headers": [
             {
               "fieldName": "chnname",
@@ -7620,16 +7320,7 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [
-            {
-              "name": "idx _join_index",
-              "isUnique": true,
-              "fields": [
-                "factory_code",
-                "del_flag"
-              ]
-            }
-          ],
+          "indexs": [],
           "headers": [
             {
               "fieldName": "chnname",
@@ -7797,6 +7488,152 @@
           "chnname": "供应商信息表"
         },
         {
+          "title": "cd_product_intransit",
+          "fields": [
+            {
+              "name": "id",
+              "type": "BigInt",
+              "remark": "",
+              "chnname": "主键",
+              "pk": true,
+              "notNull": true,
+              "autoIncrement": true
+            },
+            {
+              "name": "product_material_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "成品物料号",
+              "notNull": true
+            },
+            {
+              "name": "product_material_desc",
+              "type": "ShortString",
+              "remark": "",
+              "chnname": "成品物料描述",
+              "defaultValue": "''"
+            },
+            {
+              "name": "factory_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "工厂编码",
+              "notNull": true
+            },
+            {
+              "name": "factory_desc",
+              "type": "ShortString",
+              "remark": "",
+              "chnname": "工厂描述",
+              "defaultValue": "''"
+            },
+            {
+              "name": "type",
+              "type": "Char",
+              "remark": "",
+              "chnname": "类型(1：成品到客户，2：成品-办事处-客户，3：成品-别的公司)",
+              "notNull": true
+            },
+            {
+              "name": "intransit_num",
+              "type": "Money",
+              "remark": "",
+              "chnname": "在途量",
+              "notNull": true
+            },
+            {
+              "name": "del_flag",
+              "type": "Char",
+              "remark": "",
+              "chnname": "是否删除0：有效，1：删除",
+              "defaultValue": "0"
+            },
+            {
+              "name": "remarks",
+              "type": "Intro",
+              "remark": "",
+              "chnname": "备注",
+              "defaultValue": "''"
+            },
+            {
+              "name": "create_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "创建时间",
+              "notNull": true
+            },
+            {
+              "name": "create_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "创建人",
+              "notNull": true
+            },
+            {
+              "name": "update_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "更新时间",
+              "defaultValue": ""
+            },
+            {
+              "name": "update_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "更新人",
+              "defaultValue": "''"
+            }
+          ],
+          "indexs": [],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
+            }
+          ],
+          "chnname": "成品库存在途明细表"
+        },
+        {
           "title": "cd_product_warehouse",
           "fields": [
             {
@@ -7893,18 +7730,7 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [
-            {
-              "name": "idx _join_index",
-              "isUnique": true,
-              "fields": [
-                "product_material_code",
-                "factory_code",
-                "storehouse",
-                "del_flag"
-              ]
-            }
-          ],
+          "indexs": [],
           "headers": [
             {
               "fieldName": "chnname",
@@ -8202,7 +8028,7 @@
             {
               "name": "del_flag",
               "type": "CHAR_1",
-              "remark": "",
+              "remark": "0：有效，1：删除",
               "chnname": "删除状态"
             },
             {
@@ -8523,17 +8349,7 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [
-            {
-              "name": "idx _join_index",
-              "isUnique": true,
-              "fields": [
-                "factory_code",
-                "produce_line_code",
-                "del_flag"
-              ]
-            }
-          ],
+          "indexs": [],
           "headers": [
             {
               "fieldName": "chnname",
@@ -9188,6 +9004,15 @@
           }
         },
         "code": "DECIMAL_6"
+      },
+      {
+        "name": "DECIMAL_2",
+        "apply": {
+          "MYSQL": {
+            "type": "DECIMAL(32,2)"
+          }
+        },
+        "code": "DECIMAL_2"
       }
     ],
     "database": [
@@ -9273,9 +9098,7 @@
       }
     ],
     "defaultFieldsType": "1",
-    "javaConfig": {
-      "JAVA_HOME": "D:\\Java\\JDK1.8"
-    },
+    "javaConfig": {},
     "sqlConfig": ";",
     "dbs": [
       {
