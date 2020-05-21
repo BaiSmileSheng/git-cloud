@@ -48,5 +48,4 @@ public class TokenController {
         }
         return R.ok();
     }
-
 }
