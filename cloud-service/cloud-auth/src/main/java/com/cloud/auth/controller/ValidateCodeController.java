@@ -26,9 +26,6 @@ public class ValidateCodeController {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
-//    @Autowired
-//    private Producer producer;
-
     /**
      * 返回验证码的值和获取验证码的key
      * @return R包含map{"msg": "success","randomStr": "d3eeeb3c0bf94393922ba955afbd6ddd","code": 0,"captcha": "10"
