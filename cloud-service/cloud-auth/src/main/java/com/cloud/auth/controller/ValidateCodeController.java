@@ -29,9 +29,14 @@ public class ValidateCodeController {
     @Autowired
     private DefaultKaptcha captchaProducerMath;
 
+    /**
+     * 返回验证码的值和获取验证码的key
+     * @return R包含map{"msg": "success","randomStr": "d3eeeb3c0bf94393922ba955afbd6ddd","code": 0,"captcha": "10"
+     * }
+     */
     @PostMapping("validateCode")
     @ApiOperation(value = "获取验证码", notes = "获取验证码接口")
-    public R getValidateCode(){
+    public R validateCode(){
         // 生成验证码
         String capText = captchaProducerMath.createText();
         String code = capText.substring(capText.lastIndexOf("@") + 1);
