@@ -45,6 +45,11 @@ public class SysTestLogController extends BaseController {
     private MailService mailService;
 
 
+    /**
+     * 测试导出一个sheet页
+     * @param operLog
+     * @return
+     */
     @OperLog(title = "操作日志", businessType = BusinessType.EXPORT)
     @HasPermissions("monitor:operlog:export")
     @PostMapping("/export")
@@ -54,6 +59,11 @@ public class SysTestLogController extends BaseController {
          return EasyExcelUtil.writeExcel(list,"操作日志.xlsx","sheet",new SysOperLog());
     }
 
+    /**
+     * 测试导出多Sheet
+     * @param operLog
+     * @return
+     */
     @OperLog(title = "操作日志", businessType = BusinessType.EXPORT)
     @HasPermissions("monitor:operlog:export")
     @PostMapping("/exportMulSheet")
@@ -83,6 +93,11 @@ public class SysTestLogController extends BaseController {
         return EasyExcelUtil.writeMultiExcel("操作日志.xlsx",sheetExcelDataList);
     }
 
+    /**
+     * 单sheet文件导入
+     * @param file
+     * @return
+     */
     @PostMapping("/importSingle")
     @ResponseBody
     @ApiOperation(value = "单sheet文件导入")
@@ -91,6 +106,11 @@ public class SysTestLogController extends BaseController {
         return R.ok("success");
     }
 
+    /**
+     * 多sheet文件导入
+     * @param file
+     * @return
+     */
     @PostMapping("/importMul")
     @ResponseBody
     @ApiOperation(value = "多sheet文件导入")
@@ -121,6 +141,10 @@ public class SysTestLogController extends BaseController {
         return result(sysDictTypeService.selectDictTypeList(sysDictType));
     }
 
+    /**
+     * 测试发送文本邮件
+     * @return
+     */
     @GetMapping("sendMailText")
     @ApiOperation(value = "测试发送文本邮件")
     public R sendMailText() {
@@ -132,6 +156,10 @@ public class SysTestLogController extends BaseController {
         return R.ok();
     }
 
+    /**
+     * 测试发送html邮件
+     * @return
+     */
     @GetMapping("sendMailHtml")
     @ApiOperation(value = "测试发送html邮件", response = SysDictType.class)
     public R sendMailHtml() {
@@ -147,6 +175,10 @@ public class SysTestLogController extends BaseController {
         return R.ok();
     }
 
+    /**
+     * 测试发送带附件邮件
+     * @return
+     */
     @GetMapping("sendMailFile")
     @ApiOperation(value = "测试发送File邮件", response = SysDictType.class)
     public R sendMailFile() {
