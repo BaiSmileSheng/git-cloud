@@ -990,6 +990,53 @@
               "autoIncrement": false,
               "defaultValue": ""
             }
+          ],
+          "indexs": [],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
+            }
           ]
         },
         {
@@ -5573,7 +5620,7 @@
             {
               "name": "scrap_status",
               "type": "CHAR_1",
-              "remark": "0待提交、1业务科待审核、2业务科审核通过、3业务科审核不通过、11待结算、12结算完成",
+              "remark": "0待提交、1业务科待审核、2业务科审核通过、3业务科驳回、4 SAP过账成功、5 SAP过账失败、11待结算、12结算完成",
               "chnname": "报废状态",
               "defaultValue": "''"
             },
@@ -6552,7 +6599,7 @@
               "name": "kms_no",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "财务预算单号",
+              "chnname": "KEMS单据号",
               "defaultValue": "''"
             },
             {
@@ -8172,7 +8219,7 @@
               "name": "raw_material_code",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "原材料编码"
+              "chnname": "加工费号"
             },
             {
               "name": "outsource_way",
@@ -8258,7 +8305,7 @@
               "relationNoShow": true
             }
           ],
-          "chnname": "成品和材料对应关系"
+          "chnname": "物料号和加工费号对应关系"
         },
         {
           "title": "cd_settle_ratio",
@@ -8387,18 +8434,6 @@
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "物料描述"
-            },
-            {
-              "name": "cost_price",
-              "type": "DECIMAL_6",
-              "remark": "",
-              "chnname": "成本价"
-            },
-            {
-              "name": "sale_price",
-              "type": "DECIMAL_6",
-              "remark": "",
-              "chnname": "销售价格"
             },
             {
               "name": "process_price",
