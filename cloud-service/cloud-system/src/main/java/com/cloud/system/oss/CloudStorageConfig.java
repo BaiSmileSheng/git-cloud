@@ -48,18 +48,23 @@ public class CloudStorageConfig implements Serializable {
     @NotBlank(message = "阿里云BucketName不能为空", groups = AliyunGroup.class)
     private String aliyunBucketName;
 
+    //华为云EndPoint
     @NotBlank(message = "华为云EndPoint不能为空", groups = HuaweiGroup.class)
     private String hcloudendPoint;
 
+    //华为云接入证书
     @NotBlank(message = "华为云AK不能为空", groups = HuaweiGroup.class)
     private String hcloudAk;
 
+    //华为云安全证书
     @NotBlank(message = "华为云SK不能为空", groups = HuaweiGroup.class)
     private String hcloudSk;
 
+    //华为云桶名
     @NotBlank(message = "华为云BucketName不能为空", groups = HuaweiGroup.class)
     private String hcloudBucketName;
 
+    //华为云下载地址前缀   暂为空
     private String hcloudPrefix;
 
 }

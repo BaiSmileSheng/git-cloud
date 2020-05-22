@@ -88,4 +88,17 @@ public class SysOssServiceImpl implements ISysOssService {
         return sysOssMapper.deleteByIds(ids);
     }
 
+    /**
+     * 根据订单号查询文件列表
+     * @param orderNo
+     * @return
+     */
+    @Override
+    public List<SysOss> selectSysOssListByOrderNo(String orderNo) {
+        Example example = new Example(SysOss.class);
+        Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("orderNo", orderNo);
+        return sysOssMapper.selectByExample(example);
+    }
+
 }

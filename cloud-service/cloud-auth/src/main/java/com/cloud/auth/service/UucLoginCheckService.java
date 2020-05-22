@@ -18,6 +18,11 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @auther cs
+ * @date 2020/5/7 17:26
+ * @description UUC登录校验
+ */
 @Component
 public class UucLoginCheckService {
 

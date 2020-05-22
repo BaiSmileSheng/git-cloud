@@ -14,6 +14,11 @@ public final class OSSFactory {
         OSSFactory.sysConfigService =  ApplicationContextUtil.getBean(ISysConfigService.class);
     }
 
+    /**
+     * 默认查询数据库中sys_config：config_key为sys.oss.cloudStorage的数据
+     * 根据config_value中type值确认云服务：1、华为2、阿里
+     * @return
+     */
     public static CloudStorageService build() {
         String jsonconfig = sysConfigService.selectConfigByKey(CloudConstant.CLOUD_STORAGE_CONFIG_KEY);
         // 获取云存储配置信息
