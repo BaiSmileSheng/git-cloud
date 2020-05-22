@@ -12,6 +12,13 @@ import javax.servlet.http.Cookie;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
+
+/**
+ * mockMvc.perform执行一个请求；
+ * post构造一个请求
+ * andReturn表示执行完成后返回相应的结果。
+ * @throws Exception
+ */
 public class JobInfoControllerTest extends AbstractSpringMvcTest {
 
   private Cookie cookie;

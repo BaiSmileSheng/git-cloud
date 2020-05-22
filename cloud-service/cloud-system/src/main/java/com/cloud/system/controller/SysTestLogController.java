@@ -16,17 +16,13 @@ import com.cloud.system.mail.MailService;
 import com.cloud.system.service.ISysDeptService;
 import com.cloud.system.service.ISysDictTypeService;
 import com.cloud.system.service.ISysOperLogService;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.bouncycastle.cms.Recipient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -49,6 +45,11 @@ public class SysTestLogController extends BaseController {
     private MailService mailService;
 
 
+    /**
+     * 测试导出一个sheet页
+     * @param operLog
+     * @return
+     */
     @OperLog(title = "操作日志", businessType = BusinessType.EXPORT)
     @HasPermissions("monitor:operlog:export")
     @PostMapping("/export")
@@ -58,6 +59,11 @@ public class SysTestLogController extends BaseController {
          return EasyExcelUtil.writeExcel(list,"操作日志.xlsx","sheet",new SysOperLog());
     }
 
+    /**
+     * 测试导出多Sheet
+     * @param operLog
+     * @return
+     */
     @OperLog(title = "操作日志", businessType = BusinessType.EXPORT)
     @HasPermissions("monitor:operlog:export")
     @PostMapping("/exportMulSheet")
@@ -87,18 +93,28 @@ public class SysTestLogController extends BaseController {
         return EasyExcelUtil.writeMultiExcel("操作日志.xlsx",sheetExcelDataList);
     }
 
+    /**
+     * 单sheet文件导入
+     * @param file
+     * @return
+     */
     @PostMapping("/importSingle")
     @ResponseBody
     @ApiOperation(value = "单sheet文件导入")
-    public R singleImport(MultipartFile file) throws IOException {
+    public R singleImport(MultipartFile file){
         List<SysOperLog> userPOList = (List<SysOperLog>) EasyExcelUtil.readSingleExcel(file,new SysOperLog(),1);
         return R.ok("success");
     }
 
+    /**
+     * 多sheet文件导入
+     * @param file
+     * @return
+     */
     @PostMapping("/importMul")
     @ResponseBody
     @ApiOperation(value = "多sheet文件导入")
-    public R mulImport(MultipartFile file) throws IOException {
+    public R mulImport(MultipartFile file) {
         List<SysOperLog> userPOList1 = (List<SysOperLog>) EasyExcelUtil.readMulExcel(file,new SysOperLog());
         return R.ok("success");
     }
@@ -125,8 +141,12 @@ public class SysTestLogController extends BaseController {
         return result(sysDictTypeService.selectDictTypeList(sysDictType));
     }
 
+    /**
+     * 测试发送文本邮件
+     * @return
+     */
     @GetMapping("sendMailText")
-    @ApiOperation(value = "测试发送文本邮件", response = SysDictType.class)
+    @ApiOperation(value = "测试发送文本邮件")
     public R sendMailText() {
         try {
             mailService.sendTextMail("721666450@qq.com", "发送文本邮件", "hello，这是Spring Boot发送的一封文本邮件!");
@@ -136,6 +156,10 @@ public class SysTestLogController extends BaseController {
         return R.ok();
     }
 
+    /**
+     * 测试发送html邮件
+     * @return
+     */
     @GetMapping("sendMailHtml")
     @ApiOperation(value = "测试发送html邮件", response = SysDictType.class)
     public R sendMailHtml() {
@@ -151,6 +175,10 @@ public class SysTestLogController extends BaseController {
         return R.ok();
     }
 
+    /**
+     * 测试发送带附件邮件
+     * @return
+     */
     @GetMapping("sendMailFile")
     @ApiOperation(value = "测试发送File邮件", response = SysDictType.class)
     public R sendMailFile() {

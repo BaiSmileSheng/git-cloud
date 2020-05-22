@@ -16,5 +16,6 @@
         <module>cloud-auth</module>
         <module>cloud-gen</module>
         <module>cloud-activiti</module>
+        <module>cloud-settle</module>
     </modules>
 </project>

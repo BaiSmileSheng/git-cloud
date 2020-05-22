@@ -25,9 +25,10 @@ public enum StatusEnums {
     CAPTCHA_ERROR(500, "验证码错误"),
     PASSWORD_ERROR(500, "密码错误"),
     SERVER_UNAVAILABLE(503, "服务器异常，请稍后重试"),
+    METHOD_NOT_REALIZE(500,"方法暂未实现")
     ;
 
     private int code;
 
-    private String info;
+    private String msg;
 }

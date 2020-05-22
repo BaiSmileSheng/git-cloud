@@ -12,6 +12,7 @@
     <modules>
         <module>cloud-system-api</module>
         <module>cloud-order-api</module>
+        <module>cloud-settle-api</module>
     </modules>
     <dependencies>
         <dependency>

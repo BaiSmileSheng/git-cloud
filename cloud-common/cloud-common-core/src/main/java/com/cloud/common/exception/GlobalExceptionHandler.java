@@ -67,9 +67,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = SkeletonException.class)
     public R globalExceptionHandle(SkeletonException e, HttpServletResponse response) {
-        logger.error("【错误描述】{}", e.getMessage());
-        e.printStackTrace();
-        return R.error(response.getStatus(), e.getMessage());
+        logger.error("【错误描述】{}", e.getStatusEnums().getMsg());
+        return R.error(e.getStatusEnums().getCode(), e.getStatusEnums().getMsg());
     }
 
     /**

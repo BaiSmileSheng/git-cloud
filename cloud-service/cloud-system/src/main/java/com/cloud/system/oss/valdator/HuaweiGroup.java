@@ -1,7 +1,7 @@
 package com.cloud.system.oss.valdator;
 
 /**
- * 七牛
+ * 华为云
  */
-public interface QiniuGroup {
+public interface HuaweiGroup {
 }
