@@ -6157,7 +6157,7 @@
               "defaultValue": "''"
             },
             {
-              "name": "product_no",
+              "name": "product_order_code",
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "生产订单号",
@@ -6192,14 +6192,14 @@
               "defaultValue": "''"
             },
             {
-              "name": "material_code",
+              "name": "product_material_code",
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "物料号",
               "defaultValue": "''"
             },
             {
-              "name": "material_name",
+              "name": "product_material_name",
               "type": "VARCHAR_200",
               "remark": "",
               "chnname": "物料名称",
@@ -6302,13 +6302,10 @@
               "name": "idx _join_index",
               "isUnique": false,
               "fields": [
-                "product_no",
                 "supplier_code",
                 "supplier_name",
                 "scrap_status",
                 "posting_no",
-                "material_code",
-                "material_name",
                 "settle_no",
                 "submit_date",
                 "update_time"
@@ -6390,7 +6387,7 @@
               "defaultValue": "''"
             },
             {
-              "name": "product_no",
+              "name": "product_order_code",
               "type": "DefaultString",
               "remark": "",
               "chnname": "生产订单号",
@@ -6550,7 +6547,6 @@
               "isUnique": false,
               "fields": [
                 "quality_no",
-                "product_no",
                 "supplier_code",
                 "supplier_name",
                 "factory_code",
@@ -6642,7 +6638,7 @@
               "defaultValue": "''"
             },
             {
-              "name": "product_no",
+              "name": "product_order_code",
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "生产单号",
@@ -6781,7 +6777,6 @@
               "isUnique": false,
               "fields": [
                 "delays_no",
-                "product_no",
                 "supplier_code",
                 "supplier_name",
                 "delays_status",
@@ -6870,7 +6865,7 @@
               "defaultValue": "''"
             },
             {
-              "name": "product_no",
+              "name": "product_order_code",
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "生产订单号",
