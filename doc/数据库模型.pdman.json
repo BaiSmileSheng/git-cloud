@@ -5671,7 +5671,11 @@
               "type": "BIGINT_19",
               "remark": "",
               "chnname": "主键Id",
-              "defaultValue": "''"
+              "defaultValue": "",
+              "uiHint": "",
+              "pk": true,
+              "notNull": true,
+              "autoIncrement": true
             },
             {
               "name": "line_no",
@@ -5695,7 +5699,7 @@
               "defaultValue": "''"
             },
             {
-              "name": "product_no",
+              "name": "product_order_code",
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "生产订单号",
@@ -5709,21 +5713,21 @@
               "defaultValue": "''"
             },
             {
-              "name": "material_code",
+              "name": "product_material_code",
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "专用号",
               "defaultValue": "''"
             },
             {
-              "name": "material_name",
+              "name": "product_material_name",
               "type": "VARCHAR_200",
               "remark": "",
               "chnname": "专用号名称",
               "defaultValue": "''"
             },
             {
-              "name": "version",
+              "name": "bom_version",
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "BOM版本号",
@@ -5746,7 +5750,7 @@
             {
               "name": "outsource_way",
               "type": "DefaultString",
-              "remark": "",
+              "remark": "0：半委外，1：全委外",
               "chnname": "委外方式",
               "defaultValue": "''"
             },
@@ -5815,11 +5819,7 @@
                 "line_no",
                 "supplier_code",
                 "supplier_name",
-                "product_no",
                 "order_status",
-                "material_code",
-                "material_name",
-                "version",
                 "outsource_way"
               ]
             },
@@ -5877,7 +5877,7 @@
               "relationNoShow": true
             }
           ],
-          "chnname": "订单结算信息表--加工费结算"
+          "chnname": "加工费结算"
         },
         {
           "title": "sms_supplementary_order",
@@ -5913,14 +5913,14 @@
               "defaultValue": "''"
             },
             {
-              "name": "factory",
+              "name": "factory_code",
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "工厂",
               "defaultValue": "''"
             },
             {
-              "name": "product_no",
+              "name": "product_order_code",
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "生产订单号",
@@ -5934,17 +5934,17 @@
               "defaultValue": "''"
             },
             {
-              "name": "material_code",
+              "name": "raw_material_code",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "物料号",
+              "chnname": "原材料物料号",
               "defaultValue": "''"
             },
             {
-              "name": "material_name",
+              "name": "raw_material_name",
               "type": "VARCHAR_100",
               "remark": "",
-              "chnname": "物料名称",
+              "chnname": "原材料物料名称",
               "defaultValue": "''"
             },
             {
@@ -6082,11 +6082,7 @@
                 "stuff_no",
                 "supplier_code",
                 "supplier_name",
-                "factory",
-                "product_no",
                 "stuff_status",
-                "material_code",
-                "material_name",
                 "submit_date",
                 "sap_date",
                 "posting_no"
