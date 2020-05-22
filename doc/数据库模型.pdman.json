@@ -2388,6 +2388,224 @@
       "chnname": "订单相关",
       "entities": [
         {
+          "title": "oms_internal_order_res",
+          "fields": [
+            {
+              "name": "id",
+              "type": "BigInt",
+              "remark": "",
+              "chnname": "主键",
+              "pk": true,
+              "notNull": true,
+              "relationNoShow": false,
+              "autoIncrement": true
+            },
+            {
+              "name": "order_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "PR/PO号"
+            },
+            {
+              "name": "order_line_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "PR/PO行号"
+            },
+            {
+              "name": "product_material_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "成品物料号"
+            },
+            {
+              "name": "product_material_desc",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "成品物料描述"
+            },
+            {
+              "name": "factory_pl_desc",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "PL工厂描述"
+            },
+            {
+              "name": "factory_pl_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "PL工厂代码"
+            },
+            {
+              "name": "purchase_group_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "采购组"
+            },
+            {
+              "name": "purchase_group_desc",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "采购组描述"
+            },
+            {
+              "name": "supplier_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "供应商代码"
+            },
+            {
+              "name": "supplier_desc",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "供应商描述"
+            },
+            {
+              "name": "delivery_date",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "交付日期"
+            },
+            {
+              "name": "order_num",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "订单数量"
+            },
+            {
+              "name": "delivery_num",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "已交货数量"
+            },
+            {
+              "name": "unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "单位"
+            },
+            {
+              "name": "status",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "状态"
+            },
+            {
+              "name": "create_date_pr",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "PR创建日期"
+            },
+            {
+              "name": "project_type",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "项目类别"
+            },
+            {
+              "name": "mrp_range",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "MRP范围"
+            },
+            {
+              "name": "marker",
+              "type": "DefaultString",
+              "remark": "PR/PO",
+              "chnname": "标记位"
+            },
+            {
+              "name": "del_flag",
+              "type": "Char",
+              "remark": "0：有效，1：删除",
+              "chnname": "是否删除",
+              "defaultValue": "0"
+            },
+            {
+              "name": "remarks",
+              "type": "Intro",
+              "remark": "",
+              "chnname": "备注",
+              "defaultValue": "''"
+            },
+            {
+              "name": "create_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "创建时间",
+              "notNull": true
+            },
+            {
+              "name": "create_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "创建人",
+              "notNull": true
+            },
+            {
+              "name": "update_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "更新时间"
+            },
+            {
+              "name": "update_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "更新人",
+              "defaultValue": "''"
+            }
+          ],
+          "indexs": [],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
+            }
+          ],
+          "chnname": "内单PR/PO原表"
+        },
+        {
           "title": "oms_real_order",
           "fields": [
             {
@@ -2797,224 +3015,6 @@
             }
           ],
           "chnname": "真单明细表"
-        },
-        {
-          "title": "oms_internal_order_res",
-          "fields": [
-            {
-              "name": "id",
-              "type": "BigInt",
-              "remark": "",
-              "chnname": "主键",
-              "pk": true,
-              "notNull": true,
-              "relationNoShow": false,
-              "autoIncrement": true
-            },
-            {
-              "name": "order_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "PR/PO号"
-            },
-            {
-              "name": "order_line_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "PR/PO行号"
-            },
-            {
-              "name": "product_material_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "成品物料号"
-            },
-            {
-              "name": "product_material_desc",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "成品物料描述"
-            },
-            {
-              "name": "factory_pl_desc",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "PL工厂描述"
-            },
-            {
-              "name": "factory_pl_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "PL工厂代码"
-            },
-            {
-              "name": "purchase_group_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "采购组"
-            },
-            {
-              "name": "purchase_group_desc",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "采购组描述"
-            },
-            {
-              "name": "supplier_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "供应商代码"
-            },
-            {
-              "name": "supplier_desc",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "供应商描述"
-            },
-            {
-              "name": "delivery_date",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "交付日期"
-            },
-            {
-              "name": "order_num",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "订单数量"
-            },
-            {
-              "name": "delivery_num",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "已交货数量"
-            },
-            {
-              "name": "unit",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "单位"
-            },
-            {
-              "name": "status",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "状态"
-            },
-            {
-              "name": "create_date_pr",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "PR创建日期"
-            },
-            {
-              "name": "project_type",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "项目类别"
-            },
-            {
-              "name": "mrp_range",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "MRP范围"
-            },
-            {
-              "name": "marker",
-              "type": "DefaultString",
-              "remark": "PR/PO",
-              "chnname": "标记位"
-            },
-            {
-              "name": "del_flag",
-              "type": "Char",
-              "remark": "0：有效，1：删除",
-              "chnname": "是否删除",
-              "defaultValue": "0"
-            },
-            {
-              "name": "remarks",
-              "type": "Intro",
-              "remark": "",
-              "chnname": "备注",
-              "defaultValue": "''"
-            },
-            {
-              "name": "create_time",
-              "type": "DateTime",
-              "remark": "",
-              "chnname": "创建时间",
-              "notNull": true
-            },
-            {
-              "name": "create_by",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "创建人",
-              "notNull": true
-            },
-            {
-              "name": "update_time",
-              "type": "DateTime",
-              "remark": "",
-              "chnname": "更新时间"
-            },
-            {
-              "name": "update_by",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "更新人",
-              "defaultValue": "''"
-            }
-          ],
-          "indexs": [],
-          "headers": [
-            {
-              "fieldName": "chnname",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "name",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "type",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "dataType",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "remark",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "pk",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "notNull",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "autoIncrement",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "defaultValue",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "relationNoShow",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "uiHint",
-              "relationNoShow": true
-            }
-          ],
-          "chnname": "内单明细表"
         },
         {
           "title": "oms_demand_order",
@@ -5104,125 +5104,6 @@
           "chnname": "排产订单删除表"
         },
         {
-          "title": "oms_delivery_info",
-          "fields": [
-            {
-              "name": "id",
-              "type": "BIGINT_19",
-              "remark": "",
-              "chnname": "主键id"
-            },
-            {
-              "name": "product_no",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "生产订单号"
-            },
-            {
-              "name": "product_material_code",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "成品物料号"
-            },
-            {
-              "name": "confirm_amont",
-              "type": "INT_10",
-              "remark": "",
-              "chnname": "实际数量"
-            },
-            {
-              "name": "act_delivery_date",
-              "type": "DATETIME",
-              "remark": "",
-              "chnname": "最终交货时间"
-            },
-            {
-              "name": "del_flag",
-              "type": "CHAR_1",
-              "remark": "",
-              "chnname": "删除状态"
-            },
-            {
-              "name": "remark",
-              "type": "VARCHAR_2000",
-              "remark": "",
-              "chnname": "备注"
-            },
-            {
-              "name": "create_by",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "创建人"
-            },
-            {
-              "name": "create_time",
-              "type": "DATETIME",
-              "remark": "",
-              "chnname": "创建时间"
-            },
-            {
-              "name": "update_by",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "更新人"
-            },
-            {
-              "name": "update_time",
-              "type": "DATETIME",
-              "remark": "",
-              "chnname": "更新时间"
-            }
-          ],
-          "indexs": [],
-          "headers": [
-            {
-              "fieldName": "chnname",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "name",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "type",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "dataType",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "remark",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "pk",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "notNull",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "autoIncrement",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "defaultValue",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "relationNoShow",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "uiHint",
-              "relationNoShow": true
-            }
-          ],
-          "chnname": "订单交货表"
-        },
-        {
           "title": "oms_production_order_detail_del",
           "fields": [
             {
@@ -5399,6 +5280,125 @@
             }
           ],
           "chnname": "排产订单明细删除表"
+        },
+        {
+          "title": "oms_delivery_info",
+          "fields": [
+            {
+              "name": "id",
+              "type": "BIGINT_19",
+              "remark": "",
+              "chnname": "主键id"
+            },
+            {
+              "name": "product_no",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "生产订单号"
+            },
+            {
+              "name": "product_material_code",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "成品物料号"
+            },
+            {
+              "name": "confirm_amont",
+              "type": "INT_10",
+              "remark": "",
+              "chnname": "实际数量"
+            },
+            {
+              "name": "act_delivery_date",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "最终交货时间"
+            },
+            {
+              "name": "del_flag",
+              "type": "CHAR_1",
+              "remark": "",
+              "chnname": "删除状态"
+            },
+            {
+              "name": "remark",
+              "type": "VARCHAR_2000",
+              "remark": "",
+              "chnname": "备注"
+            },
+            {
+              "name": "create_by",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "创建人"
+            },
+            {
+              "name": "create_time",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "创建时间"
+            },
+            {
+              "name": "update_by",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "更新人"
+            },
+            {
+              "name": "update_time",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "更新时间"
+            }
+          ],
+          "indexs": [],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
+            }
+          ],
+          "chnname": "订单交货表"
         },
         {
           "title": "oms_delivery_assess",
@@ -5637,7 +5637,7 @@
               },
               {
                 "x": -4.201171875,
-                "y": -247.9127906976744
+                "y": -267.92021276595744
               }
             ],
             "sourceAnchor": 2,
