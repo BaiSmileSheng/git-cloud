@@ -56,7 +56,11 @@
             <artifactId>cloud-common-auth</artifactId>
             <version>${cloud.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.cloud</groupId>
+            <artifactId>cloud-settle-api</artifactId>
+            <version>${cloud.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

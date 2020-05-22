@@ -64,7 +64,7 @@
         </dependency>
         <dependency>
             <groupId>com.cloud</groupId>
-            <artifactId>cloud-order-api</artifactId>
+            <artifactId>cloud-settle-api</artifactId>
             <version>${cloud.version}</version>
         </dependency>
         <!-- 日志模块 -->
