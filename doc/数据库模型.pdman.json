@@ -5864,6 +5864,20 @@
               "defaultValue": "''"
             },
             {
+              "name": "material_code",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "物料号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "material_name",
+              "type": "VARCHAR_200",
+              "remark": "",
+              "chnname": "物料名称",
+              "defaultValue": "''"
+            },
+            {
               "name": "quality_status",
               "type": "CHAR_1",
               "remark": "0待提交、1供应商待确认，2供应商确认，3超时自动确认、4 质量部待审核、5小微主待审核、6小微主审核通过，11待结算、12结算完成",
@@ -6116,6 +6130,20 @@
               "defaultValue": "''"
             },
             {
+              "name": "material_code",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "物料号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "material_name",
+              "type": "VARCHAR_200",
+              "remark": "",
+              "chnname": "物料名称",
+              "defaultValue": "''"
+            },
+            {
               "name": "delays_status",
               "type": "CHAR_1",
               "remark": "1待供应商确认、2 供应商确认、3超期自动确认、4订单待审核、5小微主待审核、6订单驳回、7小微主审核通过、8小微主驳回、11待结算、12已结算",
@@ -6348,6 +6376,20 @@
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "工厂",
+              "defaultValue": "''"
+            },
+            {
+              "name": "material_code",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "物料号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "material_name",
+              "type": "VARCHAR_200",
+              "remark": "",
+              "chnname": "物料名称",
               "defaultValue": "''"
             },
             {
