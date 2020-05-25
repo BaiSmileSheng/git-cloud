@@ -70,16 +70,14 @@ pagehelper:
   supportMethodsArguments: true
   params: count=countSql
 
-#seata配置,分布式事务
+# seata配置,分布式事务
 seata:
   enabled: true
   application-id: ${spring.application.name}
   #事务组
   tx-service-group: seataGroup-${seata.application-id}
-  config:
-    type: file
-    file:
-      name: 'file.conf'
+  service:
+    vgroup-mapping: 'default'
   #nacos中server-Addr 所在的命名空间
   registry:
     type: nacos
