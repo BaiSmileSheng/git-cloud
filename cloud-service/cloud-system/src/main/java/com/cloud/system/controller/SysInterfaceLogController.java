@@ -7,6 +7,7 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.SysInterfaceLog;
 import com.cloud.system.service.ISysInterfaceLogService;
+import io.seata.core.context.RootContext;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -75,10 +76,11 @@ public class SysInterfaceLogController extends BaseController {
      * @return R {"code":0,"msg":"success","data":"id的值"}
      */
     @PostMapping("save")
-    @OperLog(title = "新增保存接口调用日志表", businessType = BusinessType.INSERT)
     @ApiOperation(value = "新增保存接口调用日志表", response = SysInterfaceLog.class)
     public R addSave(@RequestBody SysInterfaceLog sysInterfaceLog) {
+        RootContext.unbind();
         sysInterfaceLogService.insertUseGeneratedKeys(sysInterfaceLog);
+        RootContext.bind(RootContext.getXID());
         return R.data(sysInterfaceLog.getId());
     }
 

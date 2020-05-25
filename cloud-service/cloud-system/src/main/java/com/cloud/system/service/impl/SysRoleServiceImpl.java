@@ -4,6 +4,8 @@ import com.cloud.common.annotation.DataScope;
 import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.text.Convert;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.common.log.annotation.OperLog;
+import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.system.domain.entity.SysRole;
 import com.cloud.system.domain.entity.SysRoleDept;
@@ -149,6 +151,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
      */
     @Override
     @Transactional
+    @OperLog(title = "角色管理", businessType = BusinessType.INSERT)
     public int insertRole(SysRole role) {
         // 新增角色信息
         roleMapper.insertRole(role);

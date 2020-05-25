@@ -18,14 +18,19 @@ import org.springframework.web.bind.annotation.RestController;
  * @Date 2020-05-22
  */
 @RestController
-@RequestMapping("testSysInterfaceLog")
+@RequestMapping("sysInterfaceLogTestController")
 @Slf4j
 public class SysInterfaceLogTestController  extends BaseController {
 
     @Autowired
     public ISysInterfaceLogTestService sysInterfaceLogTestService;
 
-    @PostMapping("saveTest")
+    /**
+     * 测试 新增保存接口调用日志表
+     * @param sysInterfaceLog 接口调用日志信息
+     * @return R {"code":0,"msg":"success","data":"新增"接口调用日志表的主键id}
+     */
+    @PostMapping("saveInterfaceLogTest")
     @ApiOperation(value = "新增保存接口调用日志表", response = SysInterfaceLog.class)
     public R saveInterfaceLogTest(@RequestBody SysInterfaceLog sysInterfaceLog){
         return sysInterfaceLogTestService.addSave(sysInterfaceLog);
