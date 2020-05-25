@@ -5699,6 +5699,13 @@
               "defaultValue": "''"
             },
             {
+              "name": "factory_code",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "工厂",
+              "defaultValue": "''"
+            },
+            {
               "name": "product_order_code",
               "type": "VARCHAR_32",
               "remark": "",
@@ -5984,44 +5991,44 @@
             },
             {
               "name": "sap_result",
-              "type": "DefaultString",
+              "type": "VARCHAR_200",
               "remark": "",
               "chnname": "SAP创单结果",
               "defaultValue": "''"
             },
             {
               "name": "sap_remark",
-              "type": "DefaultString",
+              "type": "VARCHAR_1000",
               "remark": "",
               "chnname": "SAP创单备注",
               "defaultValue": "''"
             },
             {
               "name": "posting_no",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "SAP创单凭证",
               "defaultValue": "''"
             },
             {
               "name": "sap_date",
-              "type": "DefaultString",
+              "type": "DATETIME",
               "remark": "",
               "chnname": "SAP创单时间",
               "defaultValue": "''"
             },
             {
-              "name": "sap_result",
-              "type": "DefaultString",
+              "name": "settle_no",
+              "type": "VARCHAR_32",
               "remark": "",
               "chnname": "结算单号",
               "defaultValue": "''"
             },
             {
               "name": "settle_fee",
-              "type": "DefaultString",
+              "type": "DECIMAL_2",
               "remark": "",
-              "chnname": "补料结算费",
+              "chnname": "结算金额",
               "defaultValue": "''"
             },
             {
@@ -6082,6 +6089,7 @@
                 "stuff_no",
                 "supplier_code",
                 "supplier_name",
+                "product_no",
                 "stuff_status",
                 "submit_date",
                 "sap_date",
@@ -6409,9 +6417,23 @@
             },
             {
               "name": "factory_code",
-              "type": "DefaultString",
+              "type": "VARCHAR_32",
               "remark": "",
               "chnname": "工厂",
+              "defaultValue": "''"
+            },
+            {
+              "name": "material_code",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "物料号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "material_name",
+              "type": "VARCHAR_200",
+              "remark": "",
+              "chnname": "物料名称",
               "defaultValue": "''"
             },
             {
@@ -6659,6 +6681,27 @@
               "defaultValue": "''"
             },
             {
+              "name": "factory_code",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "工厂",
+              "defaultValue": "''"
+            },
+            {
+              "name": "material_code",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "物料号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "material_name",
+              "type": "VARCHAR_200",
+              "remark": "",
+              "chnname": "物料名称",
+              "defaultValue": "''"
+            },
+            {
               "name": "delays_status",
               "type": "CHAR_1",
               "remark": "1待供应商确认、2 供应商确认、3超期自动确认、4订单待审核、5小微主待审核、6订单驳回、7小微主审核通过、8小微主驳回、11待结算、12已结算",
@@ -6886,6 +6929,27 @@
               "defaultValue": "''"
             },
             {
+              "name": "factory_code",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "工厂",
+              "defaultValue": "''"
+            },
+            {
+              "name": "material_code",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "物料号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "material_name",
+              "type": "VARCHAR_200",
+              "remark": "",
+              "chnname": "物料名称",
+              "defaultValue": "''"
+            },
+            {
               "name": "claim_reson",
               "type": "VARCHAR_200",
               "remark": "",
@@ -6989,6 +7053,12 @@
               "remark": "",
               "chnname": "更新时间",
               "defaultValue": "''"
+            },
+            {
+              "name": "untitled",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": ""
             }
           ],
           "indexs": [],
@@ -7088,58 +7158,30 @@
               "defaultValue": "0"
             },
             {
-              "name": "stuff_amount",
+              "name": "claim_amount_sum",
               "type": "DECIMAL_6",
               "remark": "",
-              "chnname": "补料索赔金额",
+              "chnname": "本月扣款汇总",
               "defaultValue": "0"
             },
             {
-              "name": "scrap_amount",
-              "type": "DECIMAL_6",
+              "name": "last_mouth_amount",
+              "type": "DECIMAL_2",
               "remark": "",
-              "chnname": "报废索赔金额",
-              "defaultValue": "0"
-            },
-            {
-              "name": "claim_machining_amount",
-              "type": "DECIMAL_6",
-              "remark": "",
-              "chnname": "索赔报废加工费",
-              "defaultValue": "0"
-            },
-            {
-              "name": "qualiy_amount",
-              "type": "DECIMAL_6",
-              "remark": "",
-              "chnname": "质量索赔金额",
-              "defaultValue": "0"
-            },
-            {
-              "name": "delays_amount",
-              "type": "DECIMAL_6",
-              "remark": "",
-              "chnname": "延期交货索赔金额",
-              "defaultValue": "0"
-            },
-            {
-              "name": "other_claim_amount",
-              "type": "DECIMAL_6",
-              "remark": "",
-              "chnname": "其他索赔金额",
+              "chnname": "上月未兑现金额",
               "defaultValue": "0"
             },
             {
               "name": "total_fee",
               "type": "DECIMAL_6",
               "remark": "",
-              "chnname": "不含税金额",
+              "chnname": "本月兑现金额",
               "defaultValue": "0"
             },
             {
               "name": "tax_inclusive_fee",
               "type": "DECIMAL_6",
-              "remark": "",
+              "remark": "默认13%的税率，含税金额 = 本月兑现金额 * 1.13",
               "chnname": "含税金额",
               "defaultValue": "0"
             },
@@ -7179,8 +7221,22 @@
               "defaultValue": "''"
             },
             {
+              "name": "interpilot_confirm_date",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "内控确认时间",
+              "defaultValue": "''"
+            },
+            {
+              "name": "fieldmain_confirm_date",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "小微主确认时间",
+              "defaultValue": "''"
+            },
+            {
               "name": "del_flag",
-              "type": "DefaultString",
+              "type": "CHAR_1",
               "remark": "0：有效，1：删除",
               "chnname": "删除状态",
               "defaultValue": "0"
