@@ -2425,16 +2425,16 @@
               "chnname": "成品物料描述"
             },
             {
-              "name": "factory_pl_desc",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "PL工厂描述"
-            },
-            {
-              "name": "factory_pl_code",
+              "name": "pl_factory_code",
               "type": "DefaultString",
               "remark": "",
               "chnname": "PL工厂代码"
+            },
+            {
+              "name": "pl_factory_desc",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "PL工厂描述"
             },
             {
               "name": "purchase_group_code",
@@ -2659,17 +2659,17 @@
               "notNull": true
             },
             {
-              "name": "pl",
+              "name": "pl_factory_code",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL",
+              "chnname": "PL工厂编码",
               "notNull": true
             },
             {
-              "name": "factory_pl",
+              "name": "pl_factory_desc",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL工厂",
+              "chnname": "PL工厂描述",
               "notNull": true
             },
             {
@@ -3066,17 +3066,17 @@
               "defaultValue": "''"
             },
             {
-              "name": "pl",
+              "name": "pl_factory_code",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL",
+              "chnname": "PL工厂编码",
               "notNull": true
             },
             {
-              "name": "factory_pl",
+              "name": "pl_factory_desc",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL工厂",
+              "chnname": "PL工厂描述",
               "notNull": true
             },
             {
@@ -3504,16 +3504,18 @@
               "defaultValue": "''"
             },
             {
-              "name": "pl",
+              "name": "pl_factory_code",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL"
+              "chnname": "PL工厂编码",
+              "notNull": true
             },
             {
-              "name": "factory_pl",
+              "name": "pl_factory_desc",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL工厂"
+              "chnname": "PL工厂描述",
+              "notNull": true
             },
             {
               "name": "factory_code",
@@ -3945,7 +3947,7 @@
             {
               "name": "status",
               "type": "DefaultString",
-              "remark": "0：待审核，1：待下达，2：反馈中，3：待调整，4：已调整，5：已下达，6：已关单",
+              "remark": "0：待评审，1：反馈中，2：待调整，3：已调整，4：待传SAP，5：已传SAP，6：已关单",
               "chnname": "状态",
               "notNull": true,
               "defaultValue": "0"
@@ -3953,7 +3955,7 @@
             {
               "name": "audit_status",
               "type": "DefaultString",
-              "remark": "0：待JIT处长审核，1：JIT处长已审核",
+              "remark": "0：待审核，1：JIT处长已审核",
               "chnname": "审核状态",
               "notNull": false,
               "defaultValue": "''"
@@ -5562,6 +5564,241 @@
             }
           ],
           "chnname": "T-1交付考核报表"
+        },
+        {
+          "title": "oms_production_order_sap",
+          "fields": [
+            {
+              "name": "id",
+              "type": "BigInt",
+              "remark": "",
+              "chnname": "主键",
+              "pk": true,
+              "notNull": true,
+              "autoIncrement": true
+            },
+            {
+              "name": "product_order_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "排产订单号",
+              "notNull": true
+            },
+            {
+              "name": "product_material_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "成品物料号",
+              "notNull": true
+            },
+            {
+              "name": "product_material_desc",
+              "type": "ShortString",
+              "remark": "",
+              "chnname": "成品物料描述",
+              "defaultValue": "''"
+            },
+            {
+              "name": "factory_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "工厂编码",
+              "notNull": true
+            },
+            {
+              "name": "factory_desc",
+              "type": "ShortString",
+              "remark": "",
+              "chnname": "工厂描述",
+              "defaultValue": "''"
+            },
+            {
+              "name": "order_type",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "订单类型",
+              "notNull": true
+            },
+            {
+              "name": "product_num",
+              "type": "Money",
+              "remark": "",
+              "chnname": "排产量",
+              "notNull": true
+            },
+            {
+              "name": "unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "单位",
+              "notNull": true
+            },
+            {
+              "name": "product_line_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "线体号",
+              "notNull": true
+            },
+            {
+              "name": "product_start_date",
+              "type": "Date",
+              "remark": "",
+              "chnname": "生产开始日期",
+              "notNull": true
+            },
+            {
+              "name": "product_end_date",
+              "type": "Date",
+              "remark": "",
+              "chnname": "生产结束日期",
+              "notNull": true
+            },
+            {
+              "name": "product_end_time",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生产结束时间",
+              "notNull": true
+            },
+            {
+              "name": "bom_version",
+              "type": "Integer",
+              "remark": "",
+              "chnname": "BOM版本",
+              "notNull": true
+            },
+            {
+              "name": "sequence",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "顺序",
+              "defaultValue": "''"
+            },
+            {
+              "name": "destination",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "发往地",
+              "notNull": true
+            },
+            {
+              "name": "delivery_date",
+              "type": "Date",
+              "remark": "",
+              "chnname": "交货日期",
+              "notNull": true
+            },
+            {
+              "name": "status",
+              "type": "DefaultString",
+              "remark": "0：待传SAP，1：传SAP中，2：已传SAP",
+              "chnname": "状态",
+              "notNull": true,
+              "defaultValue": "0"
+            },
+            {
+              "name": "del_flag",
+              "type": "Char",
+              "remark": "0：有效，1：删除",
+              "chnname": "是否删除",
+              "defaultValue": "0"
+            },
+            {
+              "name": "remarks",
+              "type": "Intro",
+              "remark": "",
+              "chnname": "备注",
+              "defaultValue": "''"
+            },
+            {
+              "name": "create_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "创建时间",
+              "notNull": true
+            },
+            {
+              "name": "create_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "创建人",
+              "notNull": true
+            },
+            {
+              "name": "update_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "更新时间",
+              "defaultValue": ""
+            },
+            {
+              "name": "update_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "更新人",
+              "defaultValue": "''"
+            }
+          ],
+          "indexs": [
+            {
+              "name": "idx _join_index",
+              "isUnique": true,
+              "fields": [
+                "order_type",
+                "product_material_code",
+                "factory_code",
+                "bom_version"
+              ]
+            }
+          ],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
+            }
+          ],
+          "chnname": "排产订单传SAP自定义表"
         }
       ],
       "graphCanvas": {
