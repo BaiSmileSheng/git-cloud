@@ -72,13 +72,14 @@ public class SysInterfaceLogController extends BaseController {
     /**
      * 新增保存接口调用日志表
      * @param sysInterfaceLog 接口调用日志
-     * @return R 新增结果,成功code:0或失败code:500
+     * @return R {"code":0,"msg":"success","data":"id的值"}
      */
     @PostMapping("save")
     @OperLog(title = "新增保存接口调用日志表", businessType = BusinessType.INSERT)
     @ApiOperation(value = "新增保存接口调用日志表", response = SysInterfaceLog.class)
     public R addSave(@RequestBody SysInterfaceLog sysInterfaceLog) {
-        return toAjax(sysInterfaceLogService.insertUseGeneratedKeys(sysInterfaceLog));
+        sysInterfaceLogService.insertUseGeneratedKeys(sysInterfaceLog);
+        return R.data(sysInterfaceLog.getId());
     }
 
     /**
