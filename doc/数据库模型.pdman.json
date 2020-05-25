@@ -7123,6 +7123,13 @@
               "autoIncrement": true
             },
             {
+              "name": "settle_no",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "结算单号",
+              "defaultValue": "''"
+            },
+            {
               "name": "data_moth",
               "type": "VARCHAR_32",
               "remark": "",
@@ -7147,7 +7154,7 @@
               "name": "factory_code",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "工厂",
+              "chnname": "付款公司",
               "defaultValue": "''"
             },
             {
@@ -7203,15 +7210,21 @@
               "name": "kms_status",
               "type": "CHAR_1",
               "remark": "",
-              "chnname": "财务付款状态",
+              "chnname": "kms返回状态",
               "defaultValue": "''"
             },
             {
               "name": "kms_pay_date",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "财务付款时间",
+              "chnname": "kms返回时间",
               "defaultValue": "''"
+            },
+            {
+              "name": "kms_fail_Reason",
+              "type": "VARCHAR_500",
+              "remark": "",
+              "chnname": "KEMS返回信息"
             },
             {
               "name": "settle_status",
