@@ -7,7 +7,6 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.SysRole;
 import com.cloud.system.service.ISysRoleService;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,11 +46,9 @@ public class SysRoleController extends BaseController {
 
     /**
      * 新增保存角色
-     * @param sysRole 角色信息
-     * @return R 成功或失败
      */
     @PostMapping("save")
-    @ApiOperation(value = "新增保存角色", response = SysRole.class)
+    @OperLog(title = "角色管理", businessType = BusinessType.INSERT)
     public R addSave(@RequestBody SysRole sysRole) {
         return toAjax(sysRoleService.insertRole(sysRole));
     }

@@ -1,6 +1,5 @@
 package com.cloud.system.feign.factory;
 
-import com.cloud.common.core.domain.R;
 import org.springframework.stereotype.Component;
 
 import com.cloud.system.domain.entity.SysRole;
@@ -21,11 +20,6 @@ public class RemoteRoleFallbackFactory implements FallbackFactory<RemoteRoleServ
         return new RemoteRoleService() {
             @Override
             public SysRole selectSysRoleByRoleId(long roleId) {
-                return null;
-            }
-
-            @Override
-            public R addSave(SysRole sysRole) {
                 return null;
             }
         };
