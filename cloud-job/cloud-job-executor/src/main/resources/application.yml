@@ -5,13 +5,24 @@ spring:
 #    nacos:
 #      discovery:
 #        server-addr: 127.0.0.1:8848
+  application:
+    name: cloud-job-executor
   main:
     allow-bean-definition-overriding: true
   profiles:
-    active: dev
+    active: test
 
   # log config
 logging:
   config: classpath:logback-spring.xml
 
+feign:
+  hystrix:
+    enabled: true
+  httpclient:
+    max-connections: 200
+    max-connections-per-route: 50
+    enabled: false
+  okhttp:
+    enabled: true
 

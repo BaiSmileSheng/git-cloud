@@ -10,7 +10,7 @@ spring:
   application:
     name: cloud-order
   profiles:
-    active: dev
+    active: test
   devtools:
     restart:
       enabled: true

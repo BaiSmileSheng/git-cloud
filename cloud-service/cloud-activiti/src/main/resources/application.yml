@@ -11,7 +11,7 @@ spring:
   application:
     name: cloud-activiti
   profiles:
-    active: dev
+    active: test
   devtools:
     restart:
       enabled: true
