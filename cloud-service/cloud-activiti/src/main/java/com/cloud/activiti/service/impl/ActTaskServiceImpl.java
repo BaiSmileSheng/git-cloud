@@ -42,7 +42,7 @@ public class ActTaskServiceImpl implements IActTaskService {
     private IBizBusinessService businessService;
 
     /**
-     * 审批
+     * 审批通用方法  推进流程  设置下一审批人
      *
      * @param bizAudit 审批信息  auditUserId 审批人ID
      * @return 是否成功
@@ -65,6 +65,11 @@ public class ActTaskServiceImpl implements IActTaskService {
         return R.ok();
     }
 
+    /**
+     * 批量审批   与单一审批不同的是  taskIds为数组
+     * @param bizAudit 审批信息  auditUserId 审批人ID
+     * @return 是否成功
+     */
     @Override
     public R auditBatch(BizAudit bizAudit, long auditUserId) {
         SysUser user = remoteUserService.selectSysUserByUserId(auditUserId);

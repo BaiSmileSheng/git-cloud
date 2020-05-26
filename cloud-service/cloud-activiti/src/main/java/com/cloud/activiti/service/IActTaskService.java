@@ -12,7 +12,7 @@ import com.cloud.common.core.domain.R;
 public interface IActTaskService {
 
     /**
-     * 审批
+     * 审批通用方法  推进流程  设置下一审批人
      * @param bizAudit 审批信息  auditUserId 审批人ID
      * @return 是否成功
      */
