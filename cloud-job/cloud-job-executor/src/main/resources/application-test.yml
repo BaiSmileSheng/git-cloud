@@ -1,0 +1,12 @@
+cloud:
+  job:
+    admin:
+      addresses: http://10.133.28.55:8081/job
+    accessToken:
+    executor:
+      appname: cloud-job-executor
+      address:
+      ip:
+      port: 9999
+      logpath: /logs/jobhandler
+      logretentiondays: 30

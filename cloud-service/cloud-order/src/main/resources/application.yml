@@ -10,7 +10,7 @@ spring:
   application:
     name: cloud-order
   profiles:
-    active: dev
+    active: test
   devtools:
     restart:
       enabled: true
@@ -76,10 +76,8 @@ seata:
   application-id: ${spring.application.name}
   #事务组
   tx-service-group: seataGroup-${seata.application-id}
-  config:
-    type: file
-    file:
-      name: 'file.conf'
+  service:
+    vgroup-mapping: 'default'
   #nacos中server-Addr 所在的命名空间
   registry:
     type: nacos
