@@ -19,7 +19,7 @@ public interface RemoteInterfaceLogService {
     /**
      * 新增保存接口调用日志表
      * @param sysInterfaceLog 接口调用日志
-     * @return R 新增结果,成功code:0或失败code:500
+     * @return R 新增结果{"code":0,"msg":"success","data":"新增"接口调用日志表的主键id}
      */
     @PostMapping("/interfaceLog/save")
     public R saveInterfaceLog(SysInterfaceLog sysInterfaceLog);
