@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 文件上传 提供者
@@ -166,10 +167,14 @@ public class SysOssController extends BaseController {
 
     /**
      * 根据订单编号查询文件上传列表
+     * @param orderNo 订单编号
+     * @return R 包含List<SysOss>文件上传集合
      */
     @GetMapping("listByOrderNo")
     @ApiOperation(value = "根据订单编号查询文件上传列表",response = SysOss.class)
     public R listByOrderNo(@RequestParam("orderNo") String orderNo) {
-        return result(sysOssService.selectSysOssListByOrderNo(orderNo));
+        List<SysOss> listResult = sysOssService.selectSysOssListByOrderNo(orderNo);
+        return result(listResult);
     }
+
 }

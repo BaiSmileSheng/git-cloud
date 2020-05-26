@@ -90,8 +90,8 @@ public class SysOssServiceImpl implements ISysOssService {
 
     /**
      * 根据订单号查询文件列表
-     * @param orderNo
-     * @return
+     * @param orderNo 订单编号
+     * @return List<SysOss> 文件上传集合
      */
     @Override
     public List<SysOss> selectSysOssListByOrderNo(String orderNo) {

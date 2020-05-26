@@ -24,7 +24,7 @@ spring:
       discovery:
         server-addr: 10.133.1.8:8848
   profiles:
-    active: dev
+    active: test
   main:
     allow-bean-definition-overriding: true
 

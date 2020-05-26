@@ -1,0 +1,23 @@
+spring:
+  redis:
+    database: 1
+    host: 10.133.116.85
+    port: 6379
+    password: swyl2020     # 密码（默认为空）
+    timeout: 6000ms  # 连接超时时长（毫秒）
+    lettuce:
+      pool:
+        max-active: 1000  # 连接池最大连接数（使用负值表示没有限制）
+        max-wait: -1ms      # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        max-idle: 10      # 连接池中的最大空闲连接
+        min-idle: 5       # 连接池中的最小空闲连接
+uuc:
+  apiUrl: http://uuctest.cosmoplat.com
+  clientId: ZKDDPS
+  clientSecret: 5b638080ef2c95fc8efec2599f7afa86
+  isCheck: false
+huc:
+  apiUrl: https://tuser.haier.net:8182
+  appKey: ZKDDPS
+  secret: 131665df773d7b7b9b816fb46d7569ec
+  isCheck: false
