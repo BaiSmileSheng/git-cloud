@@ -44,8 +44,8 @@ public interface RemoteOssService {
 
     /**
      * 根据订单编号查询文件上传列表
-     * @param orderNo
-     * @return
+     * @param orderNo 订单编号
+     * @return R 包含List<SysOss> 文件上传集合
      */
     @GetMapping("oss/listByOrderNo")
     public R listByOrderNo(String orderNo);
