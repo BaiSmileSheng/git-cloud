@@ -29,7 +29,11 @@
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-okhttp</artifactId>
         </dependency>
-
+        <!--seata分布式事务管理-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
+        </dependency>
         <!--web 模块 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -137,11 +141,6 @@
             <artifactId>gson</artifactId>
         </dependency>
 
-        <!--seata分布式事务管理-->
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
-        </dependency>
         <!--jco 直连SAP-->
         <dependency>
             <groupId>com.github.easonjim</groupId>

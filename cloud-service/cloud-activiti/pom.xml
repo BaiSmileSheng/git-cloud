@@ -14,6 +14,11 @@
     </properties>
     <dependencies>
 
+        <!--seata分布式事务管理-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
@@ -56,14 +61,17 @@
             <artifactId>cloud-common-auth</artifactId>
             <version>${cloud.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.cloud</groupId>
+            <artifactId>cloud-settle-api</artifactId>
+            <version>${cloud.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
-
 
         <!-- spring-boot-devtools -->
         <dependency>
