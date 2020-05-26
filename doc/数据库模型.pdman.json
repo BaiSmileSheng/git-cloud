@@ -9646,10 +9646,10 @@
               "defaultValue": "''"
             },
             {
-              "name": "untitled2",
+              "name": "rate",
               "type": "DECIMAL_2",
               "remark": "",
-              "chnname": "rate",
+              "chnname": "汇率",
               "defaultValue": "''"
             },
             {
