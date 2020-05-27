@@ -10443,7 +10443,7 @@
           "chnname": "总承BOM清单表"
         },
         {
-          "title": "cd_material_info-副本",
+          "title": "cd_material_extend_info",
           "fields": [
             {
               "name": "id",
