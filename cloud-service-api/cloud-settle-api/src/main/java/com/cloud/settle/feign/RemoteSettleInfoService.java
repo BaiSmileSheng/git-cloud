@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 /**
  * 加工费结算
  *@Author Lihongxia
@@ -32,7 +34,7 @@ public interface RemoteSettleInfoService {
      * @return TableDataInfo 加工费结算列表
      */
     @GetMapping("/smsSettleInfo/listByCondition")
-    R listByCondition(@RequestParam("smsSettleInfo") SmsSettleInfo smsSettleInfo);
+    List<SmsSettleInfo> listByCondition(@RequestParam("smsSettleInfo") SmsSettleInfo smsSettleInfo);
 
     /**
      * 修改保存加工费结算

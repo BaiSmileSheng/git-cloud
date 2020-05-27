@@ -8,6 +8,8 @@ import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * 加工费结算
  * @Author Lihongxia
@@ -37,8 +39,8 @@ public class RemoteSettleInfoFallbackFactory implements FallbackFactory<RemoteSe
              * @return R 查询失败
              */
             @Override
-            public R listByCondition(SmsSettleInfo smsSettleInfo) {
-                return R.error("调用settle系统查询加工费列表失败");
+            public List<SmsSettleInfo> listByCondition(SmsSettleInfo smsSettleInfo) {
+                return null;
             }
 
             /**

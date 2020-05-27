@@ -48,7 +48,7 @@ public class SmsSettleInfoController extends BaseController {
     }
 
     /**
-     * 查询加工费结算 列表
+     * 分页查询加工费结算 列表
      * @param smsSettleInfo 加工费结算信息
      * @return TableDataInfo 加工费结算分页列表
      */
@@ -68,13 +68,18 @@ public class SmsSettleInfoController extends BaseController {
         return getDataTable(smsSettleInfoList);
     }
 
+    /**
+     * 查询加工费结算 列表
+     * @param smsSettleInfo 加工费结算信息
+     * @return List<SmsSettleInfo> 加工费结算列表
+     */
     @GetMapping("listByCondition")
     @ApiOperation(value = "加工费结算条件查询", response = SmsSettleInfo.class)
-    public R listByCondition(SmsSettleInfo smsSettleInfo) {
+    public List<SmsSettleInfo> listByCondition(SmsSettleInfo smsSettleInfo) {
         startPage();
         Example example = exampleListCondition(smsSettleInfo);
         List<SmsSettleInfo> smsSettleInfoList = smsSettleInfoService.selectByExample(example);
-        return R.data(smsSettleInfoList);
+        return smsSettleInfoList;
     }
     /**
      * 组装查询条件 加工费结算信息
