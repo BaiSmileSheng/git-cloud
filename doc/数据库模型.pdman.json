@@ -5776,6 +5776,13 @@
               "defaultValue": "0"
             },
             {
+              "name": "settle_no",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "结算单号",
+              "defaultValue": "''"
+            },
+            {
               "name": "del_flag",
               "type": "CHAR_1",
               "remark": "0：有效，1：删除",
@@ -5936,7 +5943,7 @@
             {
               "name": "stuff_status",
               "type": "CHAR_1",
-              "remark": "0 待提交、1jit待审核、2jit驳回、3小微主待审核、4小微主审核通过、5小微主驳回、 6 SAP成功、7 SAP创单失败、 11待结算、 12结算完成",
+              "remark": "0 待提交、1jit待审核、2jit驳回、3小微主待审核、4小微主审核通过、5小微主驳回、 6 SAP成功、7 SAP创单失败、 11待结算、13已兑现、14部分兑现、15未兑现 、12结算完成",
               "chnname": "订单状态",
               "defaultValue": "''"
             },
@@ -6028,8 +6035,20 @@
               "name": "settle_fee",
               "type": "DECIMAL_2",
               "remark": "",
-              "chnname": "结算金额",
+              "chnname": "索赔金额",
               "defaultValue": "''"
+            },
+            {
+              "name": "untitled",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "兑现状态"
+            },
+            {
+              "name": "untitled1",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "兑现金额"
             },
             {
               "name": "del_flag",
@@ -6089,7 +6108,6 @@
                 "stuff_no",
                 "supplier_code",
                 "supplier_name",
-                "product_no",
                 "stuff_status",
                 "submit_date",
                 "sap_date",
@@ -6188,7 +6206,7 @@
             {
               "name": "scrap_status",
               "type": "CHAR_1",
-              "remark": "0待提交、1业务科待审核、2业务科审核通过、3业务科驳回、4 SAP过账成功、5 SAP过账失败、11待结算、12结算完成",
+              "remark": "0待提交、1业务科待审核、2业务科驳回、3 SAP过账成功、4 SAP过账失败、11待结算、12结算完成、13已兑现、14部分兑现、15未兑现",
               "chnname": "报废状态",
               "defaultValue": "''"
             },
@@ -6197,6 +6215,13 @@
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "SAP过账单号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "sap_trans_date",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "SAP过账时间",
               "defaultValue": "''"
             },
             {
@@ -6249,11 +6274,17 @@
               "defaultValue": "''"
             },
             {
-              "name": "settle_fee",
-              "type": "DECIMAL_6",
+              "name": "settle_fee1",
+              "type": "DECIMAL_2",
               "remark": "",
-              "chnname": "结算金额",
-              "defaultValue": "0"
+              "chnname": "索赔金额",
+              "defaultValue": "''"
+            },
+            {
+              "name": "cash_amount",
+              "type": "DECIMAL_2",
+              "remark": "",
+              "chnname": "兑现金额"
             },
             {
               "name": "submit_date",
@@ -6439,7 +6470,7 @@
             {
               "name": "quality_status",
               "type": "CHAR_1",
-              "remark": "0待提交、1供应商待确认，2供应商确认，3超时自动确认、4 质量部待审核、5小微主待审核、6小微主审核通过，11待结算、12结算完成",
+              "remark": "0待提交、1供应商待确认，2供应商确认，3超时自动确认、4 质量部待审核、5小微主待审核、6小微主审核通过， 7供应商待确认(申诉驳回)、 11待结算、12结算完成、、13已兑现、14部分兑现、15未兑现",
               "chnname": "质量索赔状态",
               "defaultValue": "0"
             },
@@ -6514,11 +6545,17 @@
               "defaultValue": "''"
             },
             {
-              "name": "settle_fee",
-              "type": "DECIMAL_6",
+              "name": "settle_fee1",
+              "type": "DECIMAL_2",
               "remark": "",
-              "chnname": "结算金额",
+              "chnname": "索赔金额",
               "defaultValue": "''"
+            },
+            {
+              "name": "cash_amount",
+              "type": "DECIMAL_2",
+              "remark": "",
+              "chnname": "兑现金额"
             },
             {
               "name": "del_flag",
@@ -6704,7 +6741,7 @@
             {
               "name": "delays_status",
               "type": "CHAR_1",
-              "remark": "1待供应商确认、2 供应商确认、3超期自动确认、4订单待审核、5小微主待审核、6订单驳回、7小微主审核通过、8小微主驳回、11待结算、12已结算",
+              "remark": "1待供应商确认、4订单待审核、5小微主待审核、、6小微主审核通过、7 待供应商确认(申诉驳回) 、11待结算、12已结算、13已兑现、14部分兑现、15未兑现",
               "chnname": "索赔状态",
               "defaultValue": "''"
             },
@@ -6765,11 +6802,10 @@
               "defaultValue": "''"
             },
             {
-              "name": "settle_fee",
-              "type": "DECIMAL_6",
+              "name": "cash_amount",
+              "type": "DECIMAL_2",
               "remark": "",
-              "chnname": "结算金额",
-              "defaultValue": "0"
+              "chnname": "兑现金额"
             },
             {
               "name": "del_flag",
@@ -6966,7 +7002,7 @@
             {
               "name": "claim_other_status",
               "type": "CHAR_1",
-              "remark": "1供应商待确认、2供应商确认、3超期自动确认、3小微主待审核、4小微主审核通过、5小微主驳回、11待结算、12已结算",
+              "remark": "1供应商待确认、3小微主待审核、7 供应商待确认 11待结算、12 结算完成 、13已兑现、14部分兑现、15未兑现",
               "chnname": "索赔状态",
               "defaultValue": "''"
             },
@@ -7006,11 +7042,10 @@
               "defaultValue": "''"
             },
             {
-              "name": "settle_fee",
-              "type": "DECIMAL_6",
+              "name": "cash_amount",
+              "type": "DECIMAL_2",
               "remark": "",
-              "chnname": "结算金额",
-              "defaultValue": "0"
+              "chnname": "兑现金额"
             },
             {
               "name": "del_flag",
@@ -7167,19 +7202,19 @@
             {
               "name": "claim_amount_sum",
               "type": "DECIMAL_6",
-              "remark": "",
+              "remark": "本月的索赔汇总金额",
               "chnname": "本月扣款汇总",
               "defaultValue": "0"
             },
             {
               "name": "last_mouth_amount",
               "type": "DECIMAL_2",
-              "remark": "",
-              "chnname": "上月未兑现金额",
+              "remark": "上月历史未兑现金额汇总",
+              "chnname": "历史未兑现金额",
               "defaultValue": "0"
             },
             {
-              "name": "total_fee",
+              "name": "total_claim_fee",
               "type": "DECIMAL_6",
               "remark": "",
               "chnname": "本月兑现金额",
@@ -7506,6 +7541,146 @@
             }
           ],
           "chnname": "发票信息表"
+        },
+        {
+          "title": "sms_claim_cash_detail",
+          "fields": [
+            {
+              "name": "id",
+              "type": "BigInt",
+              "remark": "",
+              "chnname": "主键",
+              "pk": true,
+              "notNull": true,
+              "relationNoShow": false,
+              "autoIncrement": true
+            },
+            {
+              "name": "claim_no",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "索赔单号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "claim_type",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "索赔类型",
+              "defaultValue": "''"
+            },
+            {
+              "name": "cash_amount",
+              "type": "DECIMAL_2",
+              "remark": "",
+              "chnname": "兑现金额",
+              "defaultValue": "0"
+            },
+            {
+              "name": "settle_no",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "结算单号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "should_cash_mounth",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "应兑现月份"
+            },
+            {
+              "name": "del_flag",
+              "type": "CHAR_1",
+              "remark": "0：有效，1：删除",
+              "chnname": "删除状态",
+              "defaultValue": "0"
+            },
+            {
+              "name": "remark",
+              "type": "VARCHAR_2000",
+              "remark": "",
+              "chnname": "备注",
+              "defaultValue": "''"
+            },
+            {
+              "name": "create_by",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "创建人",
+              "defaultValue": "''"
+            },
+            {
+              "name": "create_time",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "创建时间",
+              "defaultValue": "''"
+            },
+            {
+              "name": "update_by",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "更新人",
+              "defaultValue": "''"
+            },
+            {
+              "name": "update_time",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "更新时间",
+              "defaultValue": "''"
+            }
+          ],
+          "indexs": [],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
+            }
+          ],
+          "chnname": "索赔兑现明细",
+          "remark": "跑月度结算的时候，记录兑现的索赔明细，每个模块的索赔单号是不同的，所以记录的是索赔单号。优先兑现本月产生的索赔金额，本月的索赔信息兑现完成后，再兑现历史未兑现完成的索赔信息。例如：1、本月产生加工费1W，本月的索赔费用一共5000,元，将兑现状态改为“已兑现”，然后再兑现历史未兑现或者部分兑现的索赔单，如果兑现到最后，加工费剩50，索赔单金额为100，则索赔单,兑现50，更新状态为“部分兑现”，更新兑现金额50,本月实际结算金额0。2、跑月结的时候，先汇总加工费金额，再兑现本月的索赔。"
         }
       ],
       "graphCanvas": {
@@ -9290,7 +9465,7 @@
               "chnname": "供应商描述",
               "remark": "",
               "pk": false,
-              "notNull": true,
+              "notNull": false,
               "autoIncrement": false,
               "defaultValue": ""
             },
@@ -9299,7 +9474,7 @@
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "采购组",
-              "notNull": true
+              "notNull": false
             },
             {
               "name": "tax_code",
@@ -9398,7 +9573,30 @@
               "chnname": "更新时间"
             }
           ],
-          "indexs": [],
+          "indexs": [
+            {
+              "name": "cd_material_price_info_pk",
+              "isUnique": true,
+              "fields": [
+                "id"
+              ]
+            },
+            {
+              "name": "idx _join_index",
+              "isUnique": false,
+              "fields": [
+                "material_code",
+                "material_desc",
+                "member_code",
+                "member_name",
+                "purchasing_group",
+                "tax_code",
+                "currency",
+                "begin_date",
+                "end_date"
+              ]
+            }
+          ],
           "headers": [
             {
               "fieldName": "chnname",
@@ -9650,7 +9848,7 @@
               "type": "DECIMAL_2",
               "remark": "",
               "chnname": "汇率",
-              "defaultValue": "''"
+              "defaultValue": "0"
             },
             {
               "name": "remarks",
@@ -9661,7 +9859,7 @@
             },
             {
               "name": "del_flag",
-              "type": "Char",
+              "type": "CHAR_1",
               "remark": "0：有效，1：删除",
               "chnname": "是否删除",
               "defaultValue": "0"
@@ -9697,7 +9895,23 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [],
+          "indexs": [
+            {
+              "name": "cd_mouth_rate_pk",
+              "isUnique": true,
+              "fields": [
+                "id"
+              ]
+            },
+            {
+              "name": "idx _join_index",
+              "isUnique": false,
+              "fields": [
+                "year_mouth",
+                "rate"
+              ]
+            }
+          ],
           "headers": [
             {
               "fieldName": "chnname",
@@ -9888,7 +10102,31 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [],
+          "indexs": [
+            {
+              "name": "cd_sap_sale_price_pk",
+              "isUnique": true,
+              "fields": [
+                "id"
+              ]
+            },
+            {
+              "name": "idx _join_index",
+              "isUnique": false,
+              "fields": [
+                "conditions_type",
+                "marketing_organization",
+                "material_code",
+                "begin_date",
+                "end_date",
+                "pricing_record_no",
+                "sale_price",
+                "measure_unit",
+                "unit_pricing",
+                "conditions_monetary"
+              ]
+            }
+          ],
           "headers": [
             {
               "fieldName": "chnname",
