@@ -22,32 +22,44 @@ public class RemoteSettleInfoFallbackFactory implements FallbackFactory<RemoteSe
         return new RemoteSettleInfoService(){
 
             /**
-             * 查询加工费结算 列表
+             * 分页查询加工费结算 列表
              * @param smsSettleInfo 订单结算信息--加工费结算信息
-             * @return TableDataInfo 加工费结算分页列表
+             * @return null
              */
             @Override
             public TableDataInfo list(SmsSettleInfo smsSettleInfo) {
                 return null;
             }
+
+            /**
+             * 查询加工费结算 列表
+             * @param smsSettleInfo 订单结算信息--加工费结算信息
+             * @return R 查询失败
+             */
+            @Override
+            public R listByCondition(SmsSettleInfo smsSettleInfo) {
+                return R.error("调用settle系统查询加工费列表失败");
+            }
+
             /**
              * 修改保存加工费结算
              * @param smsSettleInfo 加工费结算信息
-             * @return R 修改成功或失败
+             * @return R 修改失败
              */
             @Override
             public R editSave(SmsSettleInfo smsSettleInfo) {
-                return null;
+
+                return R.error("调用settle系统修改加工费失败");
             }
 
             /**
              * 新增保存加工费结算
              * @param smsSettleInfo 加工费结算信息
-             * @return R 修改成功或失败
+             * @return R 新增失败
              */
             @Override
             public R addSave(SmsSettleInfo smsSettleInfo) {
-                return null;
+                return R.error("调用settle系统新增加工费失败");
             }
         };
     }

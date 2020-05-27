@@ -19,12 +19,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface RemoteSettleInfoService {
 
     /**
-     * 查询加工费结算 列表
-     * @param smsSettleInfo 订单结算信息--加工费结算信息
+     * 分页查询加工费结算 列表
+     * @param smsSettleInfo 加工费结算信息
      * @return TableDataInfo 加工费结算分页列表
      */
     @GetMapping("/smsSettleInfo/list")
     TableDataInfo list(@RequestParam("smsSettleInfo") SmsSettleInfo smsSettleInfo);
+
+    /**
+     * 查询加工费结算 列表
+     * @param smsSettleInfo 加工费结算信息
+     * @return TableDataInfo 加工费结算列表
+     */
+    @GetMapping("/smsSettleInfo/listByCondition")
+    R listByCondition(@RequestParam("smsSettleInfo") SmsSettleInfo smsSettleInfo);
 
     /**
      * 修改保存加工费结算

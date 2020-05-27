@@ -1,5 +1,10 @@
 package com.cloud.settle.enums;
 
+/**
+ * 结算单订单状态枚举
+ * @Author Lihongxia
+ * @Date 2020-05-26
+ */
 public enum SettleInfoOrderStatusEnum {
 
     ORDER_STATUS_0("0","已提交"),

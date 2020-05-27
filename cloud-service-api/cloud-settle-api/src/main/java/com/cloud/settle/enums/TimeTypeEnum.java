@@ -1,5 +1,10 @@
 package com.cloud.settle.enums;
 
+/**
+ * 结算单时间类型枚举
+ * @Author Lihongxia
+ * @Date 2020-05-26
+ */
 public enum TimeTypeEnum {
 
     BASIC_BEGIN_TIME_TYPE("1","基本开始时间"),

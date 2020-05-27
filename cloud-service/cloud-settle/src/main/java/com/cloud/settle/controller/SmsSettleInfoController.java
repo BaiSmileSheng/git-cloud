@@ -63,10 +63,19 @@ public class SmsSettleInfoController extends BaseController {
     public TableDataInfo list(SmsSettleInfo smsSettleInfo) {
         startPage();
         Example example = exampleListCondition(smsSettleInfo);
+        //TODO 判断用户类型 供应商还是海尔用户
         List<SmsSettleInfo> smsSettleInfoList = smsSettleInfoService.selectByExample(example);
         return getDataTable(smsSettleInfoList);
     }
 
+    @GetMapping("listByCondition")
+    @ApiOperation(value = "加工费结算条件查询", response = SmsSettleInfo.class)
+    public R listByCondition(SmsSettleInfo smsSettleInfo) {
+        startPage();
+        Example example = exampleListCondition(smsSettleInfo);
+        List<SmsSettleInfo> smsSettleInfoList = smsSettleInfoService.selectByExample(example);
+        return R.data(smsSettleInfoList);
+    }
     /**
      * 组装查询条件 加工费结算信息
      * @param smsSettleInfo 加工费信息
@@ -113,7 +122,6 @@ public class SmsSettleInfoController extends BaseController {
             }
         }
 
-        //TODO 判断用户类型
 
         return example;
     }
