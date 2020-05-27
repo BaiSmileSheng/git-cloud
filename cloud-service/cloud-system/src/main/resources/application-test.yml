@@ -12,10 +12,6 @@ spring:
         max-wait: -1ms      # 连接池最大阻塞等待时间（使用负值表示没有限制）
         max-idle: 10      # 连接池中的最大空闲连接
         min-idle: 5       # 连接池中的最小空闲连接
-  cloud:
-    nacos:
-      discovery:
-        namespace: a2eeae72-3ab5-4789-ac7f-7370330f9293
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
@@ -76,8 +72,3 @@ sap:
     user: VPMS_COS
     passwd: qwer1234
     lang: ZH
-#seata命名空间
-seata:
-  registry:
-    nacos:
-      namespace: a2eeae72-3ab5-4789-ac7f-7370330f9293

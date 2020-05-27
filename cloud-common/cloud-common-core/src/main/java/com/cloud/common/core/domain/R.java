@@ -1,5 +1,7 @@
 package com.cloud.common.core.domain;
 
+import com.cloud.common.constant.Constants;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,5 +55,9 @@ public class R extends HashMap<String, Object> {
     public R put(String key, Object value) {
         super.put(key, value);
         return this;
+    }
+
+    public boolean isSuccess() {
+        return Constants.SUCCESS.equals(super.get("code").toString());
     }
 }

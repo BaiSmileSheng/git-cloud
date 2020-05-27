@@ -7123,6 +7123,13 @@
               "autoIncrement": true
             },
             {
+              "name": "settle_no",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "结算单号",
+              "defaultValue": "''"
+            },
+            {
               "name": "data_moth",
               "type": "VARCHAR_32",
               "remark": "",
@@ -7147,7 +7154,7 @@
               "name": "factory_code",
               "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "工厂",
+              "chnname": "付款公司",
               "defaultValue": "''"
             },
             {
@@ -7203,15 +7210,21 @@
               "name": "kms_status",
               "type": "CHAR_1",
               "remark": "",
-              "chnname": "财务付款状态",
+              "chnname": "kms返回状态",
               "defaultValue": "''"
             },
             {
               "name": "kms_pay_date",
               "type": "DATETIME",
               "remark": "",
-              "chnname": "财务付款时间",
+              "chnname": "kms返回时间",
               "defaultValue": "''"
+            },
+            {
+              "name": "kms_fail_Reason",
+              "type": "VARCHAR_500",
+              "remark": "",
+              "chnname": "KEMS返回信息"
             },
             {
               "name": "settle_status",
@@ -9262,6 +9275,93 @@
               "chnname": "加工费价格"
             },
             {
+              "name": "member_code",
+              "type": "VARCHAR_10",
+              "chnname": "供应商",
+              "remark": "",
+              "pk": false,
+              "notNull": false,
+              "autoIncrement": false,
+              "defaultValue": "''"
+            },
+            {
+              "name": "member_name",
+              "type": "VARCHAR_100",
+              "chnname": "供应商描述",
+              "remark": "",
+              "pk": false,
+              "notNull": true,
+              "autoIncrement": false,
+              "defaultValue": ""
+            },
+            {
+              "name": "purchasing_group",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "采购组",
+              "notNull": true
+            },
+            {
+              "name": "tax_code",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "税码"
+            },
+            {
+              "name": "net_worth",
+              "type": "DECIMAL_2",
+              "remark": "",
+              "chnname": "净价值=PB00+ZDLP"
+            },
+            {
+              "name": "kbetr",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "PB00"
+            },
+            {
+              "name": "currency",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "货币"
+            },
+            {
+              "name": "price_unit",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "价格单位"
+            },
+            {
+              "name": "unit",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "单位"
+            },
+            {
+              "name": "agency_fee",
+              "type": "DECIMAL_2",
+              "remark": "",
+              "chnname": "代理费-ZDLP"
+            },
+            {
+              "name": "begin_date",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "有效期开始日期"
+            },
+            {
+              "name": "end_date",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "有效期结束日期"
+            },
+            {
+              "name": "sap_created_date",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "SAP创建日期"
+            },
+            {
               "name": "remark",
               "type": "VARCHAR_32",
               "remark": "",
@@ -9524,6 +9624,318 @@
             }
           ],
           "chnname": "工厂线体关系表"
+        },
+        {
+          "title": "cd_mouth_rate",
+          "fields": [
+            {
+              "name": "id",
+              "type": "BigInt",
+              "remark": "",
+              "chnname": "主键",
+              "pk": true,
+              "notNull": true,
+              "relationNoShow": false,
+              "autoIncrement": true
+            },
+            {
+              "name": "year_mouth",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "年月",
+              "defaultValue": "''"
+            },
+            {
+              "name": "rate",
+              "type": "DECIMAL_2",
+              "remark": "",
+              "chnname": "汇率",
+              "defaultValue": "''"
+            },
+            {
+              "name": "remarks",
+              "type": "VARCHAR_200",
+              "remark": "",
+              "chnname": "备注",
+              "defaultValue": "''"
+            },
+            {
+              "name": "del_flag",
+              "type": "Char",
+              "remark": "0：有效，1：删除",
+              "chnname": "是否删除",
+              "defaultValue": "0"
+            },
+            {
+              "name": "create_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "创建时间",
+              "notNull": false,
+              "defaultValue": "''"
+            },
+            {
+              "name": "create_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "创建人",
+              "notNull": false,
+              "defaultValue": "''"
+            },
+            {
+              "name": "update_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "更新时间",
+              "defaultValue": "''"
+            },
+            {
+              "name": "update_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "更新人",
+              "defaultValue": "''"
+            }
+          ],
+          "indexs": [],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
+            }
+          ],
+          "chnname": "汇率表"
+        },
+        {
+          "title": "cd_sap_sale_price",
+          "fields": [
+            {
+              "name": "id",
+              "type": "BigInt",
+              "remark": "",
+              "chnname": "主键",
+              "pk": true,
+              "notNull": true,
+              "relationNoShow": false,
+              "autoIncrement": true
+            },
+            {
+              "name": "conditions_type",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "条件类型",
+              "defaultValue": "''"
+            },
+            {
+              "name": "marketing_organization",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "销售组织",
+              "defaultValue": "''"
+            },
+            {
+              "name": "material_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "物料",
+              "defaultValue": "''"
+            },
+            {
+              "name": "begin_date",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "有效期从",
+              "defaultValue": "''"
+            },
+            {
+              "name": "end_date",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "有效期到",
+              "defaultValue": "''"
+            },
+            {
+              "name": "pricing_record_no",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "定价记录号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "sale_price",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "价格",
+              "defaultValue": "''"
+            },
+            {
+              "name": "conditions_monetary",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "条件货币",
+              "defaultValue": "''"
+            },
+            {
+              "name": "unit_pricing",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "定价单位",
+              "defaultValue": "''"
+            },
+            {
+              "name": "measure_unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "计量单位",
+              "defaultValue": "''"
+            },
+            {
+              "name": "sap_del_flag",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "删除标识符",
+              "defaultValue": "''"
+            },
+            {
+              "name": "pricing_record_no",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "定价记录号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "remarks",
+              "type": "VARCHAR_200",
+              "remark": "",
+              "chnname": "备注",
+              "defaultValue": "''"
+            },
+            {
+              "name": "del_flag",
+              "type": "Char",
+              "remark": "0：有效，1：删除",
+              "chnname": "是否删除",
+              "defaultValue": "0"
+            },
+            {
+              "name": "create_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "创建时间",
+              "notNull": false,
+              "defaultValue": "''"
+            },
+            {
+              "name": "create_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "创建人",
+              "notNull": false,
+              "defaultValue": "''"
+            },
+            {
+              "name": "update_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "更新时间",
+              "defaultValue": "''"
+            },
+            {
+              "name": "update_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "更新人",
+              "defaultValue": "''"
+            }
+          ],
+          "indexs": [],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
+            }
+          ],
+          "chnname": "成品销售价格表"
         }
       ],
       "graphCanvas": {

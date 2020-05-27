@@ -13,7 +13,7 @@ spring:
     restart:
       enabled: true
   profiles:
-    active: dev
+    active: test
   cloud:
     nacos:
       discovery:
@@ -39,13 +39,6 @@ spring:
           uri: lb://cloud-gen
           predicates:
             - Path=/gen/**
-          filters:
-            - StripPrefix=1
-        # dfs
-        - id: cloud-dfs
-          uri: lb://cloud-dfs
-          predicates:
-            - Path=/dfs/**
           filters:
             - StripPrefix=1
         # act

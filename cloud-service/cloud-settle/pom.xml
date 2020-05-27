@@ -49,6 +49,11 @@
             <groupId>com.alibaba</groupId>
             <artifactId>druid-spring-boot-starter</artifactId>
         </dependency>
+        <!--seata分布式事务管理-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
+        </dependency>
         <!-- Mysql驱动包 -->
         <dependency>
             <groupId>mysql</groupId>
@@ -69,7 +74,7 @@
         </dependency>
         <dependency>
             <groupId>com.cloud</groupId>
-            <artifactId>cloud-order-api</artifactId>
+            <artifactId>cloud-settle-api</artifactId>
             <version>${cloud.version}</version>
         </dependency>
         <!-- 日志模块 -->
@@ -122,11 +127,7 @@
             <artifactId>gson</artifactId>
         </dependency>
 
-        <!--seata分布式事务管理-->
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
-        </dependency>
+
 
     </dependencies>
     <build>
