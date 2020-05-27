@@ -5,10 +5,18 @@
  */
 package com.cloud.activiti.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
+import cn.hutool.core.util.StrUtil;
+import com.cloud.activiti.consts.ActivitiConstant;
+import com.cloud.activiti.domain.BizAudit;
+import com.cloud.activiti.service.IActTaskService;
+import com.cloud.activiti.service.IBizAuditService;
+import com.cloud.activiti.vo.HiTaskVo;
+import com.cloud.activiti.vo.RuTask;
+import com.cloud.common.core.controller.BaseController;
+import com.cloud.common.core.domain.R;
+import com.cloud.common.core.page.PageDomain;
+import com.cloud.system.feign.RemoteUserService;
+import com.google.common.collect.Maps;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -21,21 +29,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.common.collect.Maps;
-import com.cloud.activiti.consts.ActivitiConstant;
-import com.cloud.activiti.domain.BizAudit;
-import com.cloud.activiti.domain.BizBusiness;
-import com.cloud.activiti.service.IBizAuditService;
-import com.cloud.activiti.service.IBizBusinessService;
-import com.cloud.activiti.vo.HiTaskVo;
-import com.cloud.activiti.vo.RuTask;
-import com.cloud.common.core.controller.BaseController;
-import com.cloud.common.core.domain.R;
-import com.cloud.common.core.page.PageDomain;
-import com.cloud.system.domain.entity.SysUser;
-import com.cloud.system.feign.RemoteUserService;
-
-import cn.hutool.core.util.StrUtil;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>File：ActTaskController.java</p>
@@ -63,7 +59,8 @@ public class ActTaskController extends BaseController {
     private RemoteUserService remoteUserService;
 
     @Autowired
-    private IBizBusinessService businessService;
+    private IActTaskService actTaskService;
+
 
     /**
      * task待办
@@ -113,8 +110,7 @@ public class ActTaskController extends BaseController {
     /**
      * task 已办
      *
-     * @param ruTask
-     * @param page
+     * @param hiTaskVo
      * @return
      * @author zmr
      */
@@ -140,7 +136,7 @@ public class ActTaskController extends BaseController {
     }
 
     /**
-     * 审批
+     * 审批  只作为示例
      *
      * @param bizAudit
      * @return
@@ -148,43 +144,18 @@ public class ActTaskController extends BaseController {
      */
     @PostMapping("audit")
     public R audit(@RequestBody BizAudit bizAudit) {
-        Map<String, Object> variables = Maps.newHashMap();
-        variables.put("result", bizAudit.getResult());
-        // 审批
-        taskService.complete(bizAudit.getTaskId(), variables);
-        SysUser user = remoteUserService.selectSysUserByUserId(getCurrentUserId());
-        bizAudit.setAuditor(user.getUserName() + "-" + user.getLoginName());
-        bizAudit.setAuditorId(user.getUserId());
-        bizAuditService.insertBizAudit(bizAudit);
-        BizBusiness bizBusiness = new BizBusiness().setId(bizAudit.getBusinessKey())
-                .setProcInstId(bizAudit.getProcInstId());
-        businessService.setAuditor(bizBusiness, bizAudit.getResult(), getCurrentUserId());
-        return R.ok();
+        //审批 推进工作流
+        return actTaskService.audit(bizAudit,getCurrentUserId());
     }
 
+    /**
+     * 批量审批
+     * @param bizAudit
+     * @return
+     */
     @PostMapping("audit/batch")
     public R auditBatch(@RequestBody BizAudit bizAudit) {
-        SysUser user = remoteUserService.selectSysUserByUserId(getCurrentUserId());
-        for (String taskId : bizAudit.getTaskIds()) {
-            Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-            ProcessInstance pi = runtimeService.createProcessInstanceQuery()
-                    .processInstanceId(task.getProcessInstanceId()).singleResult();
-            BizBusiness bizBusiness = businessService.selectBizBusinessById(pi.getBusinessKey());
-            if (null != bizBusiness) {
-                Map<String, Object> variables = Maps.newHashMap();
-                variables.put("result", bizAudit.getResult());
-                // 审批
-                taskService.complete(taskId, variables);
-                // 构建插入审批记录
-                BizAudit audit = new BizAudit().setTaskId(taskId).setResult(bizAudit.getResult())
-                        .setProcName(bizBusiness.getProcName()).setProcDefKey(bizBusiness.getProcDefKey())
-                        .setApplyer(bizBusiness.getApplyer()).setAuditor(user.getUserName() + "-" + user.getLoginName())
-                        .setAuditorId(user.getUserId());
-                bizAuditService.insertBizAudit(audit);
-                businessService.setAuditor(bizBusiness, audit.getResult(), getCurrentUserId());
-            }
-        }
-        return R.ok();
+        return actTaskService.auditBatch(bizAudit,getCurrentUserId());
     }
 
     /**

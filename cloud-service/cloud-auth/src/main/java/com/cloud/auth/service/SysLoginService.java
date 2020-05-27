@@ -117,6 +117,11 @@ public class SysLoginService {
                 if (!"0".equals(r.get("code").toString())) {
                     throw new UserPasswordNotMatchException();
                 }
+            }else{
+                //如果不检验UUC则校验本系统数据库用户名，密码
+                if (!PasswordUtil.matches(user, password)) {
+                    throw new UserPasswordNotMatchException();
+                }
             }
         } else if ("2".equals(user.getUserType())) {
             if(hucProperties.getIsCheck()){
@@ -128,6 +133,11 @@ public class SysLoginService {
                 }
                 R r = hucLoginCheckService.checkHucUser(username, password, accessToken);
                 if (!"0".equals(r.get("code").toString())) {
+                    throw new UserPasswordNotMatchException();
+                }
+            }else{
+                //如果不检验HUC则校验本系统数据库用户名，密码
+                if (!PasswordUtil.matches(user, password)) {
                     throw new UserPasswordNotMatchException();
                 }
             }
