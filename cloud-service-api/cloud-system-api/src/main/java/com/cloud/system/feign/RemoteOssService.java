@@ -27,7 +27,7 @@ public interface RemoteOssService {
      * @return
      */
     @PostMapping("oss/upload")
-    R uploadFile(@RequestParam("file") MultipartFile file,@RequestParam("orderNo") String orderNo);
+    R uploadFile(@RequestParam("file") MultipartFile file,@RequestParam(value = "orderNo",required = false) String orderNo);
 
     /**
      * 下载文件

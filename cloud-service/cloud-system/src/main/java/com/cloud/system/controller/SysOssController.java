@@ -108,7 +108,7 @@ public class SysOssController extends BaseController {
      * @throws IOException
      */
     @PostMapping("upload")
-    public R editSave(@RequestParam("file") MultipartFile file,@RequestParam("orderNo") String orderNo) throws IOException {
+    public R editSave(@RequestParam("file") MultipartFile file,@RequestParam(value = "orderNo",required = false) String orderNo) throws IOException {
         if (file.isEmpty()) {
             throw new OssException("上传文件不能为空");
         }
