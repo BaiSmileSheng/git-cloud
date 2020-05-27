@@ -7609,66 +7609,36 @@
               "defaultValue": "0"
             },
             {
-              "name": "stuff_amount",
+              "name": "claim_amount",
               "type": "DECIMAL_6",
-              "remark": "本月的索赔汇总金额",
-              "chnname": "本月扣款汇总",
               "remark": "",
-              "chnname": "补料索赔金额",
+              "chnname": "本月应扣款汇总",
               "defaultValue": "0"
             },
             {
-              "name": "last_mouth_amount",
-              "type": "DECIMAL_2",
-              "remark": "上月历史未兑现金额汇总",
+              "name": "no_cash_amount",
+              "type": "DECIMAL_6",
+              "remark": "",
               "chnname": "历史未兑现金额",
-              "name": "scrap_amount",
-              "type": "DECIMAL_6",
-              "remark": "",
-              "chnname": "报废索赔金额",
               "defaultValue": "0"
             },
             {
-              "name": "claim_machining_amount",
+              "name": "cash_amount",
               "type": "DECIMAL_6",
               "remark": "",
-              "chnname": "索赔报废加工费",
-              "defaultValue": "0"
+              "chnname": "本月兑现金额"
             },
             {
-              "name": "qualiy_amount",
+              "name": "excluding_fee",
               "type": "DECIMAL_6",
               "remark": "",
-              "chnname": "质量索赔金额",
-              "defaultValue": "0"
+              "chnname": "不含税金额"
             },
             {
-              "name": "delays_amount",
+              "name": "include_taxe_fee",
               "type": "DECIMAL_6",
               "remark": "",
-              "chnname": "延期交货索赔金额",
-              "defaultValue": "0"
-            },
-            {
-              "name": "other_claim_amount",
-              "type": "DECIMAL_6",
-              "remark": "",
-              "chnname": "其他索赔金额",
-              "defaultValue": "0"
-            },
-            {
-              "name": "total_claim_fee",
-              "type": "DECIMAL_6",
-              "remark": "",
-              "chnname": "不含税金额",
-              "defaultValue": "0"
-            },
-            {
-              "name": "tax_inclusive_fee",
-              "type": "DECIMAL_6",
-              "remark": "",
-              "chnname": "含税金额",
-              "defaultValue": "0"
+              "chnname": "含税金额"
             },
             {
               "name": "invoice_fee",
