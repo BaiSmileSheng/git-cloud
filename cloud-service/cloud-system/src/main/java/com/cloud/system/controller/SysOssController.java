@@ -106,7 +106,7 @@ public class SysOssController extends BaseController {
      * @throws IOException
      */
     @PostMapping("upload")
-    public R editSave(@RequestParam("file") MultipartFile file) throws IOException {
+    public R editSave(@RequestParam("file") MultipartFile file,@RequestParam("orderNo") String orderNo) throws IOException {
         if (file.isEmpty()) {
             throw new OssException("上传文件不能为空");
         }
@@ -123,6 +123,7 @@ public class SysOssController extends BaseController {
         ossEntity.setFileName(fileName);
         ossEntity.setCreateTime(new Date());
         ossEntity.setService(storage.getService());
+        ossEntity.setOrderNo(orderNo);
         return toAjax(sysOssService.insertSysOss(ossEntity));
     }
 
