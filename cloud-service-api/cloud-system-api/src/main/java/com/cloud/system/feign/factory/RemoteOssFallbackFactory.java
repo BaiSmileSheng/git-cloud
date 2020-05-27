@@ -1,11 +1,14 @@
 package com.cloud.system.feign.factory;
 
 import com.cloud.common.core.domain.R;
+import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.feign.RemoteOssService;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 
 @Slf4j
@@ -24,7 +27,7 @@ public class RemoteOssFallbackFactory implements FallbackFactory<RemoteOssServic
              * @return
              */
             @Override
-            public R uploadFile(MultipartFile file) {
+            public R uploadFile(MultipartFile file, String orderNo) {
                 return R.error();
             }
 
@@ -54,7 +57,7 @@ public class RemoteOssFallbackFactory implements FallbackFactory<RemoteOssServic
              * @return R 包含List<SysOss> 文件上传集合
              */
             @Override
-            public R listByOrderNo(String orderNo) {
+            public List<SysOss> listByOrderNo(String orderNo) {
                 return null;
             }
         };
