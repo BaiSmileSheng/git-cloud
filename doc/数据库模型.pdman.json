@@ -4459,6 +4459,13 @@
               "defaultValue": "''"
             },
             {
+              "name": "life_cycle",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生命周期",
+              "defaultValue": "''"
+            },
+            {
               "name": "status",
               "type": "DefaultString",
               "remark": "0：待评审，1：反馈中，2：待调整，3：已调整，4：待传SAP，5：已传SAP，6：已关单",
@@ -8080,31 +8087,60 @@
               "defaultValue": "''"
             },
             {
-              "name": "purchasing_group",
+              "name": "material_type",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "物料类型",
+              "notNull": true
+            },
+            {
+              "name": "primary_uom",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "基本单位",
+              "notNull": true
+            },
+            {
+              "name": "mtl_group_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "物料组",
+              "notNull": true
+            },
+            {
+              "name": "purchase_group_code",
               "type": "DefaultString",
               "remark": "",
               "chnname": "采购组",
               "notNull": true
             },
             {
-              "name": "unit",
-              "type": "DefaultString",
+              "name": "plant_code",
+              "type": "VARCHAR_10",
               "remark": "",
-              "chnname": "单位",
+              "chnname": "工厂",
               "notNull": true
             },
             {
-              "name": "version",
-              "type": "DefaultString",
+              "name": "rounding_quantit",
+              "type": "DECIMAL_6",
               "remark": "",
-              "chnname": "版本",
+              "chnname": "舍入值",
+              "notNull": true
+            },
+            {
+              "name": "last_update",
+              "type": "Date",
+              "remark": "",
+              "chnname": "最后更新时间",
               "notNull": true
             },
             {
               "name": "product_quota",
               "type": "Integer",
               "remark": "",
-              "chnname": "产品定员"
+              "chnname": "产品定员",
+              "defaultValue": "''"
             },
             {
               "name": "del_flag",
@@ -8139,7 +8175,7 @@
               "type": "DateTime",
               "remark": "",
               "chnname": "更新时间",
-              "defaultValue": ""
+              "defaultValue": "''"
             },
             {
               "name": "update_by",
@@ -8154,7 +8190,6 @@
               "name": "idx _join_index",
               "isUnique": true,
               "fields": [
-                "purchasing_group",
                 "del_flag"
               ]
             }
