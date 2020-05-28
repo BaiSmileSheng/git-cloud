@@ -5,10 +5,10 @@
  */
 package com.cloud.activiti.service;
 
-import java.util.List;
-
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.vo.HiTaskVo;
+
+import java.util.List;
 
 /**
  * <p>File：IBizAuditService.java</p>
@@ -85,4 +85,12 @@ public interface IBizAuditService {
      * @author zmr
      */
     List<HiTaskVo> getHistoryTaskList(HiTaskVo hiTaskVo);
+
+    /**
+     * task 流转历史  一个订单有多次审核
+     * @param tableId
+     * @param procDefKey
+     * @return
+     */
+    List<HiTaskVo> getHistoryTaskList(String tableId,String procDefKey);
 }

@@ -5,11 +5,12 @@
  */
 package com.cloud.activiti.mapper;
 
-import java.util.List;
-
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.vo.HiTaskVo;
 import com.cloud.common.core.dao.BaseMapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>File：BizAuditMapper.java</p>
@@ -23,6 +24,14 @@ import com.cloud.common.core.dao.BaseMapper;
  */
 public interface BizAuditMapper extends BaseMapper<BizAudit> {
     List<HiTaskVo> getHistoryTaskList(HiTaskVo hiTaskVo);
+
+    /**
+     * task 流转历史  一个订单有多次审核
+     * @param tableId
+     * @param procDefKey
+     * @return
+     */
+    List<HiTaskVo> getHistoryTaskListForMore(@Param("tableId") String tableId, @Param("procDefKey") String procDefKey);
 
     /**
      * logic删除
