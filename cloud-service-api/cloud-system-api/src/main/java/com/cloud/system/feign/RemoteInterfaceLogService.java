@@ -6,6 +6,7 @@ import com.cloud.system.domain.entity.SysInterfaceLog;
 import com.cloud.system.feign.factory.RemoteInterfaceLogFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 /**
  * 接口调用日志
@@ -22,7 +23,7 @@ public interface RemoteInterfaceLogService {
      * @return R 新增结果{"code":0,"msg":"success","data":"新增"接口调用日志表的主键id}
      */
     @PostMapping("/interfaceLog/save")
-    public R saveInterfaceLog(SysInterfaceLog sysInterfaceLog);
+    public R saveInterfaceLog(@RequestBody SysInterfaceLog sysInterfaceLog);
 
     /**
      * 修改保存接口调用日志表
@@ -30,5 +31,5 @@ public interface RemoteInterfaceLogService {
      * @return 修改结果,成功code:0或失败code:500
      */
     @PostMapping("/interfaceLog/update")
-    public R updateInterfaceLog(SysInterfaceLog sysInterfaceLog);
+    public R updateInterfaceLog(@RequestBody SysInterfaceLog sysInterfaceLog);
 }
