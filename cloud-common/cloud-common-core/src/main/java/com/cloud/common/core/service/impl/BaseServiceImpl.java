@@ -9,7 +9,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import tk.mybatis.mapper.entity.Example;
-import tk.mybatis.mapper.util.Sqls;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
@@ -165,5 +164,11 @@ public class BaseServiceImpl<T> implements BaseService<T> {
             throw new SkeletonException(StatusEnums.PARAM_NOT_NULL);
         }
         return baseMapper.selectCountByExample(example);
+    }
+
+    @Override
+    public T findByExampleOne(Example example) {
+        List<T> list = selectByExample(example);
+        return list.isEmpty() ? null : list.get(0);
     }
 }

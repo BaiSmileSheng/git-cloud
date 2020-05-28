@@ -171,4 +171,11 @@ public interface BaseService<T> {
      * @return
      */
     int selectCountByExample(Object example);
+
+    /**
+     * 根据构造查询出一条数据
+     * @param example
+     * @return
+     */
+    T findByExampleOne(Example example);
 }
