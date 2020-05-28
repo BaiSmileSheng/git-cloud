@@ -1855,8 +1855,8 @@
           "fields": [
             {
               "name": "id",
-              "type": "BIGINT UNSIGNED_20",
-              "chnname": "",
+              "type": "BigInt",
+              "chnname": "主键",
               "remark": "",
               "pk": true,
               "notNull": true,
@@ -1882,6 +1882,53 @@
               "notNull": true,
               "autoIncrement": false,
               "defaultValue": ""
+            }
+          ],
+          "indexs": [],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
             }
           ]
         }
@@ -2180,7 +2227,7 @@
             "controlPoints": [
               {
                 "x": -117.287109375,
-                "y": -147.19387755102042
+                "y": -147.18085106382978
               },
               {
                 "x": -343.169921875,
@@ -2199,7 +2246,7 @@
             "controlPoints": [
               {
                 "x": 117.287109375,
-                "y": -169.23979591836735
+                "y": -167.71808510638297
               },
               {
                 "x": 271.6337890625,
@@ -2218,7 +2265,7 @@
             "controlPoints": [
               {
                 "x": 14.2001953125,
-                "y": 80.76020408163265
+                "y": 82.28191489361703
               },
               {
                 "x": 131.62890625,
@@ -2237,7 +2284,7 @@
             "controlPoints": [
               {
                 "x": 14.2001953125,
-                "y": 102.8061224489796
+                "y": 102.81914893617022
               },
               {
                 "x": 271.6337890625,
@@ -2256,7 +2303,7 @@
             "controlPoints": [
               {
                 "x": -45.7998046875,
-                "y": 370.76020408163265
+                "y": 372.281914893617
               },
               {
                 "x": 131.62890625,
@@ -2298,7 +2345,7 @@
               },
               {
                 "x": -274.2001953125,
-                "y": 392.8061224489796
+                "y": 392.8191489361702
               }
             ],
             "sourceAnchor": 1,
@@ -2312,8 +2359,8 @@
             "id": "15b52487",
             "controlPoints": [
               {
-                "x": 872.857421875,
-                "y": 242.47037037037035
+                "x": 893.9658203125,
+                "y": 242.63888888888889
               },
               {
                 "x": 588.37109375,
@@ -2369,8 +2416,8 @@
             "id": "a9409d8e",
             "controlPoints": [
               {
-                "x": 1227.142578125,
-                "y": 262.52407407407406
+                "x": 1206.0341796875,
+                "y": 262.8611111111111
               },
               {
                 "x": 1462.9697265625,
@@ -2702,6 +2749,12 @@
               "chnname": "BOM版本",
               "defaultValue": "",
               "notNull": true
+            },
+            {
+              "name": "purchase_group_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "采购组"
             },
             {
               "name": "order_num",
@@ -3108,6 +3161,12 @@
               "notNull": true
             },
             {
+              "name": "purchase_group_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "采购组"
+            },
+            {
               "name": "place",
               "type": "DefaultString",
               "remark": "",
@@ -3360,6 +3419,12 @@
               "notNull": true
             },
             {
+              "name": "purchase_group_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "采购组"
+            },
+            {
               "name": "place",
               "type": "DefaultString",
               "remark": "",
@@ -3609,6 +3674,12 @@
               "remark": "",
               "chnname": "BOM版本",
               "notNull": true
+            },
+            {
+              "name": "purchase_group_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "采购组"
             },
             {
               "name": "place",
@@ -3870,6 +3941,12 @@
               "remark": "",
               "chnname": "BOM版本",
               "notNull": true
+            },
+            {
+              "name": "purchase_group_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "采购组"
             },
             {
               "name": "place",
@@ -5853,6 +5930,12 @@
               "remark": "",
               "chnname": "BOM版本",
               "notNull": true
+            },
+            {
+              "name": "purchase_group_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "采购组"
             },
             {
               "name": "sequence",
