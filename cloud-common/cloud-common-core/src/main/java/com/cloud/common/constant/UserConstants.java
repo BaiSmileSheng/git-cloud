@@ -37,6 +37,13 @@ public class UserConstants {
     public static final String DEPT_NORMAL = "0";
 
     /**
+     * 用户类型
+     */
+    public static final String USER_TYPE_HR = "1";
+    public static final String USER_TYPE_WB = "2";
+
+
+    /**
      * 用户名长度限制
      */
     public static final int USERNAME_MIN_LENGTH = 2;
