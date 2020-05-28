@@ -14,7 +14,9 @@ import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.IpUtils;
 import com.cloud.common.utils.MessageUtils;
 import com.cloud.common.utils.ServletUtils;
+import com.cloud.system.domain.entity.CdSupplierInfo;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.feign.RemoteSupplierInfoService;
 import com.cloud.system.feign.RemoteUserService;
 import com.cloud.system.util.PasswordUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +28,9 @@ public class SysLoginService {
 
     @Autowired
     private RemoteUserService userService;
+
+    @Autowired
+    private RemoteSupplierInfoService supplierInfoService;
 
     @Autowired
     private UucLoginCheckService uucLoginCheckService;
@@ -140,6 +145,11 @@ public class SysLoginService {
                 if (!PasswordUtil.matches(user, password)) {
                     throw new UserPasswordNotMatchException();
                 }
+            }
+            //外部用户根据登录名查询供应商V码
+            CdSupplierInfo cdSupplierInfo = supplierInfoService.getByNick(user.getLoginName());
+            if (cdSupplierInfo != null) {
+                user.setSupplierCode(cdSupplierInfo.getSupplierCode());
             }
         }else{
             throw new UserException("user.type.null",null);

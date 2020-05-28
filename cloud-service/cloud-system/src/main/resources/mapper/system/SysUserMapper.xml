@@ -28,6 +28,7 @@
         <association property="dept" column="dept_id" javaType="SysDept" resultMap="deptResult"/>
         <collection property="roles" javaType="java.util.List" resultMap="RoleResult"/>
         <collection property="roleIds" javaType="java.util.List" resultMap="RoleIdsResult"/>
+        <collection property="roleKeys" ofType="java.lang.String" javaType="java.util.List" resultMap="RoleKeysResult"/>
     </resultMap>
 
     <resultMap id="deptResult" type="SysDept">
@@ -40,6 +41,10 @@
 
     <resultMap id="RoleIdsResult" type="Long">
         <id property="roleId" column="role_id"/>
+    </resultMap>
+
+    <resultMap id="RoleKeysResult" type="String">
+        <id property="roleKey" column="role_key"/>
     </resultMap>
 
     <resultMap id="RoleResult" type="SysRole">

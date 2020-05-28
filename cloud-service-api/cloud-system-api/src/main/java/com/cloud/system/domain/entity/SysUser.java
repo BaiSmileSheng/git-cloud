@@ -1,22 +1,22 @@
 package com.cloud.system.domain.entity;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.cloud.common.core.domain.BaseEntity;
 import com.cloud.common.easyexcel.converter.SexConverter;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.cloud.common.annotation.Excel;
-import com.cloud.common.annotation.Excel.Type;
-import com.cloud.common.core.domain.BaseEntity;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 用户对象 sys_user
@@ -126,9 +126,14 @@ public class SysUser extends BaseEntity {
     private List<SysRole> roles;
 
     /**
-     * 角色组
+     * 角色Id组
      */
     private List<Long> roleIds;
+
+    /**
+     * 角色名称组
+     */
+    private List<String> roleKeys;
 
     /**
      * 岗位组
@@ -136,6 +141,11 @@ public class SysUser extends BaseEntity {
     private Long[] postIds;
 
     private Set<String> buttons;
+
+    /**
+     * 外部用户 供应商V码
+     */
+    private String supplierCode;
 
     public Long getUserId() {
         return userId;
@@ -308,6 +318,30 @@ public class SysUser extends BaseEntity {
 
     public void setButtons(Set<String> buttons) {
         this.buttons = buttons;
+    }
+
+    public String getUserType() {
+        return userType;
+    }
+
+    public void setUserType(String userType) {
+        this.userType = userType;
+    }
+
+    public String getSupplierCode() {
+        return supplierCode;
+    }
+
+    public void setSupplierCode(String supplierCode) {
+        this.supplierCode = supplierCode;
+    }
+
+    public List<String> getRoleKeys() {
+        return roleKeys;
+    }
+
+    public void setRoleKeys(List<String> roleKeys) {
+        this.roleKeys = roleKeys;
     }
 
     @Override
