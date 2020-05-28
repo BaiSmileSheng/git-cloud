@@ -93,7 +93,7 @@ public class ActSettleTestActController extends BaseController {
         BizBusiness business = new BizBusiness();
         business.setTableId(settleTestAct.getId().toString());
         business.setProcDefId(settleTestAct.getProcDefId());
-        business.setTitle(ActivitiProTitleConstants.Activiti_PRO_TITLE_SETTLE_TEST);
+        business.setTitle(ActivitiProTitleConstants.ACTIVITI_PRO_TITLE_SETTLE_TEST);
         business.setProcName(settleTestAct.getProcName());
         long userId = getCurrentUserId();
         business.setUserId(userId);

@@ -102,11 +102,13 @@ public class SysOssController extends BaseController {
 
     /**
      * 修改保存文件上传
-     *
+     * @param file 文件
+     * @param orderNo 订单号
+     * @return 上传是否成功
      * @throws IOException
      */
     @PostMapping("upload")
-    public R editSave(@RequestParam("file") MultipartFile file) throws IOException {
+    public R editSave(@RequestParam("file") MultipartFile file,@RequestParam(value = "orderNo",required = false) String orderNo) throws IOException {
         if (file.isEmpty()) {
             throw new OssException("上传文件不能为空");
         }
@@ -123,6 +125,7 @@ public class SysOssController extends BaseController {
         ossEntity.setFileName(fileName);
         ossEntity.setCreateTime(new Date());
         ossEntity.setService(storage.getService());
+        ossEntity.setOrderNo(orderNo);
         return toAjax(sysOssService.insertSysOss(ossEntity));
     }
 
@@ -168,13 +171,13 @@ public class SysOssController extends BaseController {
     /**
      * 根据订单编号查询文件上传列表
      * @param orderNo 订单编号
-     * @return R 包含List<SysOss>文件上传集合
+     * @return List<SysOss> 文件上传集合
      */
     @GetMapping("listByOrderNo")
     @ApiOperation(value = "根据订单编号查询文件上传列表",response = SysOss.class)
-    public R listByOrderNo(@RequestParam("orderNo") String orderNo) {
+    public List<SysOss> listByOrderNo(@RequestParam("orderNo") String orderNo) {
         List<SysOss> listResult = sysOssService.selectSysOssListByOrderNo(orderNo);
-        return result(listResult);
+        return listResult;
     }
 
 }

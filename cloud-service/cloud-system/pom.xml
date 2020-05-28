@@ -63,7 +63,6 @@
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
 
-
         <!-- 系统模块 -->
         <dependency>
             <groupId>com.cloud</groupId>

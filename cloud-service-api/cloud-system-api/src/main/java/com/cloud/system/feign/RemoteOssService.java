@@ -2,12 +2,15 @@ package com.cloud.system.feign;
 
 import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.common.core.domain.R;
+import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.feign.factory.RemoteOssFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 
 /**
@@ -24,7 +27,7 @@ public interface RemoteOssService {
      * @return
      */
     @PostMapping("oss/upload")
-    R uploadFile(@RequestParam("file") MultipartFile file);
+    R uploadFile(@RequestParam("file") MultipartFile file,@RequestParam(value = "orderNo",required = false) String orderNo);
 
     /**
      * 下载文件
@@ -48,6 +51,6 @@ public interface RemoteOssService {
      * @return R 包含List<SysOss> 文件上传集合
      */
     @GetMapping("oss/listByOrderNo")
-    public R listByOrderNo(String orderNo);
+    public List<SysOss> listByOrderNo(String orderNo);
 
 }
