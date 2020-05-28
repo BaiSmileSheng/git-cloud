@@ -81,7 +81,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
      * @param files 质量索赔对应的文件信息
      * @return
      */
-    @GlobalTransactional
+//    @GlobalTransactional
     @Override
     public R addSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder, MultipartFile[] files) {
         //索赔单号生成规则 ZL+年月日+4位顺序号，循序号每日清零
@@ -103,7 +103,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
         return R.data(smsQualityOrder.getId());
     }
 
-    @GlobalTransactional
+//    @GlobalTransactional
     @Override
     public R updateSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder, MultipartFile[] files) {
         //1.查询索赔单数据,判断状态是否是待提交,待提交可修改
@@ -145,8 +145,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
         return R.ok();
     }
 
-    @GlobalTransactional
-    //TODO java.net.SocketTimeoutException: Read timed out
+//    @GlobalTransactional
     @Override
     public R deleteSmsQualityOrderAndSysOss(String ids, List<SmsQualityOrder> smsQualityOrderList) {
         //根据订单号查文件
