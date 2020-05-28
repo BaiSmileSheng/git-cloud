@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.system.mapper.CdSupplierInfoMapper">
+
+    <resultMap type="CdSupplierInfo" id="CdSupplierInfoResult">
+        <result property="id" column="id"/>
+        <result property="nick" column="nick"/>
+        <result property="accountType" column="account_type"/>
+        <result property="supplierCode" column="supplier_code"/>
+        <result property="approveStatus" column="approve_status"/>
+        <result property="enterPassAt" column="enter_pass_at"/>
+        <result property="origin" column="origin"/>
+        <result property="corporation" column="corporation"/>
+        <result property="corpAddr" column="corp_addr"/>
+        <result property="zipcode" column="zipcode"/>
+        <result property="initAgent" column="init_agent"/>
+        <result property="fixedAssets" column="fixed_assets"/>
+        <result property="faCoinType" column="fa_coin_type"/>
+        <result property="regCapital" column="reg_capital"/>
+        <result property="rcCoinType" column="rc_coin_type"/>
+        <result property="officialWebsite" column="official_website"/>
+        <result property="personScale" column="person_scale"/>
+        <result property="foundAt" column="found_at"/>
+        <result property="listedStatus" column="listed_status"/>
+        <result property="listedRegion" column="listed_region"/>
+        <result property="ticker" column="ticker"/>
+        <result property="customers" column="customers"/>
+        <result property="factories" column="factories"/>
+        <result property="name" column="name"/>
+        <result property="department" column="department"/>
+        <result property="duty" column="duty"/>
+        <result property="mobile" column="mobile"/>
+        <result property="officePhone" column="office_phone"/>
+        <result property="email" column="email"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="remarks" column="remarks"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+    </resultMap>
+
+    <sql id="selectCdSupplierInfoVo">
+        select id,
+               nick,
+               account_type,
+               supplier_code,
+               approve_status,
+               enter_pass_at,
+               origin,
+               corporation,
+               corp_addr,
+               zipcode,
+               init_agent,
+               fixed_assets,
+               fa_coin_type,
+               reg_capital,
+               rc_coin_type,
+               official_website,
+               person_scale,
+               found_at,
+               listed_status,
+               listed_region,
+               ticker,
+               customers,
+               factories,
+               name,
+               department,
+               duty,
+               mobile,
+               office_phone,
+               email,
+               del_flag,
+               remarks,
+               create_time,
+               create_by,
+               update_time,
+               update_by
+        from cd_supplier_info
+    </sql>
+
+
+</mapper>
