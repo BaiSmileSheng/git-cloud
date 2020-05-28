@@ -6336,6 +6336,27 @@
               "remark": "",
               "chnname": "更新时间",
               "defaultValue": "''"
+            },
+            {
+              "name": "product_start_date",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "基本开始日期",
+              "defaultValue": "\""
+            },
+            {
+              "name": "product_end_date",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "基本结束日期",
+              "defaultValue": "\""
+            },
+            {
+              "name": "actual_end_date",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "实际结束日期",
+              "defaultValue": "\""
             }
           ],
           "indexs": [
@@ -6992,6 +7013,20 @@
               "defaultValue": "''"
             },
             {
+              "name": "product_material_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "专用号",
+              "defaultValue": "\""
+            },
+            {
+              "name": "product_material_name",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "专用号名称",
+              "defaultValue": "\""
+            },
+            {
               "name": "compony_code",
               "type": "VARCHAR_32",
               "remark": "",
@@ -7079,7 +7114,7 @@
               "name": "settle_fee",
               "type": "DECIMAL_2",
               "remark": "",
-              "chnname": "索赔金额",
+              "chnname": "结算金额",
               "defaultValue": "''"
             },
             {
