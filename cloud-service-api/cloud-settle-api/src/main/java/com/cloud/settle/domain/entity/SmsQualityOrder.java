@@ -22,7 +22,7 @@ import java.util.Date;
  * 质量索赔 对象 sms_quality_order
  *
  * @author cs
- * @date 2020-05-27
+ * @date 2020-05-28
  */
 @ExcelIgnoreUnannotated
 @Data
@@ -90,10 +90,10 @@ public class SmsQualityOrder extends BaseEntity {
     private String productMaterialName;
 
     /**
-     * 质量索赔状态 0待提交、1供应商待确认，2供应商确认，3超时自动确认、4 质量部待审核、5小微主待审核、6小微主审核通过，11待结算、12结算完成
+     * 质量索赔状态 0待提交、1供应商待确认，2供应商确认，3超时自动确认、4 质量部待审核、5小微主待审核、6小微主审核通过， 7供应商待确认(申诉驳回)、 11待结算、12结算完成
      */
-    @ExcelProperty(value = "质量索赔状态 0待提交、1供应商待确认，2供应商确认，3超时自动确认、4 质量部待审核、5小微主待审核、6小微主审核通过，11待结算、12结算完成")
-    @ApiModelProperty(value = "质量索赔状态 0待提交、1供应商待确认，2供应商确认，3超时自动确认、4 质量部待审核、5小微主待审核、6小微主审核通过，11待结算、12结算完成")
+    @ExcelProperty(value = "质量索赔状态 0待提交、1供应商待确认，2供应商确认，3超时自动确认、4 质量部待审核、5小微主待审核、6小微主审核通过， 7供应商待确认(申诉驳回)、 11待结算、12结算完成")
+    @ApiModelProperty(value = "质量索赔状态 0待提交、1供应商待确认，2供应商确认，3超时自动确认、4 质量部待审核、5小微主待审核、6小微主审核通过， 7供应商待确认(申诉驳回)、 11待结算、12结算完成")
     private String qualityStatus;
 
     /**
@@ -172,6 +172,13 @@ public class SmsQualityOrder extends BaseEntity {
     @ExcelProperty(value = "结算金额")
     @ApiModelProperty(value = "结算金额")
     private BigDecimal settleFee;
+
+    /**
+     * 兑现金额
+     */
+    @ExcelProperty(value = "兑现金额")
+    @ApiModelProperty(value = "兑现金额")
+    private BigDecimal cashAmount;
 
     /**
      * 删除状态 0：有效，1：删除

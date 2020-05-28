@@ -25,6 +25,7 @@
                     <result property="supplierConfirmDate" column="supplier_confirm_date"/>
                     <result property="settleNo" column="settle_no"/>
                     <result property="settleFee" column="settle_fee"/>
+                    <result property="cashAmount" column="cash_amount"/>
                     <result property="delFlag" column="del_flag"/>
                     <result property="remark" column="remark"/>
                     <result property="createBy" column="create_by"/>
@@ -34,7 +35,7 @@
                     </resultMap>
 
     <sql id="selectSmsQualityOrderVo">
-        select id, quality_no, product_order_code, supplier_code, supplier_name, factory_code, product_material_code, product_material_name, quality_status, quality_amount, project_name, claim_clause, claim_reason, claim_amount, submit_date, complaint_description, complaint_date, supplier_confirm_date, settle_no, settle_fee, del_flag, remark, create_by, create_time, update_by, update_time from sms_quality_order
+        select id, quality_no, product_order_code, supplier_code, supplier_name, factory_code, product_material_code, product_material_name, quality_status, quality_amount, project_name, claim_clause, claim_reason, claim_amount, submit_date, complaint_description, complaint_date, supplier_confirm_date, settle_no, settle_fee, cash_amount, del_flag, remark, create_by, create_time, update_by, update_time from sms_quality_order
     </sql>
 
 
