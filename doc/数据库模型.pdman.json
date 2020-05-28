@@ -6205,6 +6205,13 @@
               "defaultValue": "''"
             },
             {
+              "name": "factory_code",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "工厂",
+              "defaultValue": "''"
+            },
+            {
               "name": "product_order_code",
               "type": "VARCHAR_32",
               "remark": "",
@@ -6322,6 +6329,27 @@
               "remark": "",
               "chnname": "更新时间",
               "defaultValue": "''"
+            },
+            {
+              "name": "product_start_date",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "基本开始日期",
+              "defaultValue": "\""
+            },
+            {
+              "name": "product_end_date",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "基本结束日期",
+              "defaultValue": "\""
+            },
+            {
+              "name": "actual_end_date",
+              "type": "DATETIME",
+              "remark": "",
+              "chnname": "实际结束日期",
+              "defaultValue": "\""
             }
           ],
           "indexs": [
@@ -6957,6 +6985,20 @@
               "defaultValue": "''"
             },
             {
+              "name": "product_material_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "专用号",
+              "defaultValue": "\""
+            },
+            {
+              "name": "product_material_name",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "专用号名称",
+              "defaultValue": "\""
+            },
+            {
               "name": "quality_status",
               "type": "CHAR_1",
               "remark": "0待提交、1供应商待确认，2供应商确认，3超时自动确认、4 质量部待审核、5小微主待审核、6小微主审核通过， 7供应商待确认(申诉驳回)、 11待结算、12结算完成、、13已兑现、14部分兑现、15未兑现",
@@ -7037,7 +7079,7 @@
               "name": "settle_fee1",
               "type": "DECIMAL_2",
               "remark": "",
-              "chnname": "索赔金额",
+              "chnname": "结算金额",
               "defaultValue": "''"
             },
             {
@@ -9507,6 +9549,124 @@
           "chnname": "成品库存在库明细表"
         },
         {
+          "title": "cd_production_line_info",
+          "fields": [
+            {
+              "name": "id",
+              "type": "BigInt",
+              "remark": "",
+              "chnname": "主键",
+              "pk": true,
+              "notNull": true,
+              "autoIncrement": true
+            },
+            {
+              "name": "produce_line_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "线体编码",
+              "notNull": true
+            },
+            {
+              "name": "produce_line_desc",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "线体描述",
+              "defaultValue": "''"
+            },
+            {
+              "name": "del_flag",
+              "type": "Char",
+              "remark": "",
+              "chnname": "是否删除0：有效，1：删除",
+              "defaultValue": "0"
+            },
+            {
+              "name": "remarks",
+              "type": "Intro",
+              "remark": "",
+              "chnname": "备注",
+              "defaultValue": "''"
+            },
+            {
+              "name": "create_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "创建时间",
+              "notNull": true
+            },
+            {
+              "name": "create_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "创建人",
+              "notNull": true
+            },
+            {
+              "name": "update_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "更新时间",
+              "defaultValue": ""
+            },
+            {
+              "name": "update_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "更新人",
+              "defaultValue": "''"
+            }
+          ],
+          "indexs": [],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
+            }
+          ],
+          "chnname": "线体信息表"
+        },
+        {
           "title": "cd_settle_product_material",
           "fields": [
             {
@@ -10003,14 +10163,8 @@
               "name": "branch_office",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "分公司主管",
+              "chnname": "分公司",
               "notNull": true
-            },
-            {
-              "name": "branch_office_email",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "分公司主管邮箱"
             },
             {
               "name": "monitor",
@@ -10018,12 +10172,6 @@
               "remark": "",
               "chnname": "班长",
               "notNull": true
-            },
-            {
-              "name": "monitor_email",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "班长邮箱"
             },
             {
               "name": "attribute",
