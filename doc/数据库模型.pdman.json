@@ -6532,22 +6532,25 @@
             },
             {
               "name": "settle_fee",
-              "type": "DefaultString",
+              "type": "DECIMAL_2",
               "remark": "",
               "chnname": "索赔金额",
               "defaultValue": "''"
             },
             {
-              "name": "untitled",
-              "type": "DefaultString",
+              "name": "cash_amount",
+              "type": "DECIMAL_2",
               "remark": "",
-              "chnname": "兑现状态"
+              "chnname": "兑现金额",
+              "defaultValue": "0"
             },
             {
-              "name": "untitled1",
-              "type": "DefaultString",
+              "name": "purchase_group_code",
+              "type": "VARCHAR_32",
               "remark": "",
-              "chnname": "兑现金额"
+              "chnname": "采购组",
+              "notNull": false,
+              "defaultValue": "''"
             },
             {
               "name": "del_flag",
@@ -6783,7 +6786,8 @@
               "name": "cash_amount",
               "type": "DECIMAL_2",
               "remark": "",
-              "chnname": "兑现金额"
+              "chnname": "兑现金额",
+              "defaultValue": "0"
             },
             {
               "name": "submit_date",
