@@ -2,8 +2,10 @@ package com.cloud.settle.service.impl;
 
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.enums.QualityStatusEnum;
+import com.cloud.settle.service.ISequeceService;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.feign.RemoteOssService;
 import io.seata.spring.annotation.GlobalTransactional;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -34,11 +38,27 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
     private SmsQualityOrderMapper smsQualityOrderMapper;
     @Autowired
     private RemoteOssService remoteOssService;
+    @Autowired
+    private ISequeceService sequeceService;
 
     /**
      * 索赔单所对应的文件订单号后缀
      */
     private static final String ORDER_NO_QUALITY_END = "_01";
+
+    /**
+     * 索赔单序列号生成所对应的序列
+     */
+    private static final String QUALITY_SEQ_NAME = "quality_id";
+    /**
+     * 索赔单序列号生成所对应的序列长度
+     */
+    private static final int QUALITY_SEQ_LENGTH = 4;
+
+    /**
+     * 生成索赔单前缀
+     */
+    private static final String QUALITY_ORDER_PRE = "ZL";
 
     @Override
     public R selectById(Long id) {
@@ -61,10 +81,15 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
      * @param files 质量索赔对应的文件信息
      * @return
      */
+    @GlobalTransactional
     @Override
     public R addSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder, MultipartFile[] files) {
-        //TODO 索赔单号生成规则
-        smsQualityOrder.setQualityNo(System.currentTimeMillis()+"");
+        //索赔单号生成规则 ZL+年月日+4位顺序号，循序号每日清零
+        StringBuffer qualityNoBuffer = new StringBuffer(QUALITY_ORDER_PRE);
+        qualityNoBuffer.append(DateUtils.getDate());
+        String seq = sequeceService.selectSeq(QUALITY_SEQ_NAME,QUALITY_SEQ_LENGTH);
+        qualityNoBuffer.append(seq);
+        smsQualityOrder.setQualityNo(qualityNoBuffer.toString());
         this.insertSelective(smsQualityOrder);
         //上传质量索赔附件上传的时候order_no 为 索赔单号_01
         for(MultipartFile file : files){
@@ -78,7 +103,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
         return R.data(smsQualityOrder.getId());
     }
 
-    //@GlobalTransactional
+    @GlobalTransactional
     @Override
     public R updateSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder, MultipartFile[] files) {
         //1.查询索赔单数据,判断状态是否是待提交,待提交可修改
@@ -120,7 +145,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
         return R.ok();
     }
 
-    //@GlobalTransactional
+    @GlobalTransactional
     //TODO java.net.SocketTimeoutException: Read timed out
     @Override
     public R deleteSmsQualityOrderAndSysOss(String ids, List<SmsQualityOrder> smsQualityOrderList) {

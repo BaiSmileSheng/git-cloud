@@ -117,8 +117,6 @@ public class SmsQualityOrderController extends BaseController {
      * @return 新增id
      */
     @PostMapping("save")
-    //@OperLog(title = "新增保存质量索赔 ", businessType = BusinessType.INSERT)
-    //TODO files加日志时参数转换有问题
     @ApiOperation(value = "新增保存质量索赔 ", response = SmsQualityOrder.class)
     public R addSave(@RequestParam("smsQualityOrderReq") String smsQualityOrderReq,@RequestParam("files") MultipartFile[] files) {
         try{
@@ -136,8 +134,6 @@ public class SmsQualityOrderController extends BaseController {
      * @return 修改结果成功或失败
      */
     @PostMapping("update")
-    //@OperLog(title = "修改保存质量索赔 ", businessType = BusinessType.UPDATE)
-    //TODO
     @ApiOperation(value = "修改保存质量索赔 ", response = SmsQualityOrder.class)
     public R editSave(@RequestParam("smsQualityOrder") String smsQualityOrderReq,@RequestParam("files") MultipartFile[] files) {
         try{
@@ -154,8 +150,6 @@ public class SmsQualityOrderController extends BaseController {
      * @return 删除结果成功或失败
      */
     @PostMapping("remove")
-    //@OperLog(title = "删除质量索赔 ", businessType = BusinessType.DELETE)
-    //TODO class com.cloud.system.domain.entity.SysOperLog is not a type supported by this encoder
     @ApiOperation(value = "删除质量索赔 ", response = SmsQualityOrder.class)
     public R remove(String ids) {
         try{
