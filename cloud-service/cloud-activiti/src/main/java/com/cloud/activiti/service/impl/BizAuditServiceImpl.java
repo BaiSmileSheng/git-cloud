@@ -5,15 +5,14 @@
  */
 package com.cloud.activiti.service.impl;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.mapper.BizAuditMapper;
 import com.cloud.activiti.service.IBizAuditService;
 import com.cloud.activiti.vo.HiTaskVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * <p>File：BizAuditServiceImpl.java</p>
@@ -113,5 +112,10 @@ public class BizAuditServiceImpl implements IBizAuditService {
     @Override
     public List<HiTaskVo> getHistoryTaskList(HiTaskVo hiTaskVo) {
         return auditMapper.getHistoryTaskList(hiTaskVo);
+    }
+
+    @Override
+    public List<HiTaskVo> getHistoryTaskList(String tableId, String procDefKey) {
+        return auditMapper.getHistoryTaskListForMore(tableId,procDefKey);
     }
 }

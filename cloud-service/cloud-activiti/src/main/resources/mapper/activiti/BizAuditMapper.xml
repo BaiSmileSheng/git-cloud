@@ -65,6 +65,43 @@
         order by ht.START_TIME_ desc
     </select>
 
+    <select id="getHistoryTaskListForMore" resultMap="HiTaskVoResult">
+        SELECT
+        ht.ID_ AS id,
+        ht.PROC_DEF_ID_ AS proc_def_id,
+        ht.PROC_INST_ID_ AS proc_inst_id,
+        ht.TASK_DEF_KEY_ AS task_def_key,
+        ht.NAME_ AS task_name,
+        ht.START_TIME_ AS start_time,
+        ht.END_TIME_ AS end_time,
+        ht.DURATION_ AS duration,
+        ht.DELETE_REASON_ AS delete_reason,
+        ba.id as audit_id,
+        ba.result,
+        ba.`comment`,
+        ba.proc_def_key,
+        ba.proc_name,
+        ba.applyer,
+        ba.auditor,
+        ba.auditor_id,
+        ba.del_flag,
+        hp.BUSINESS_KEY_ AS business_key,
+        hp.NAME_ AS title,
+        hp.START_USER_ID_ AS start_user_id
+        FROM
+        act_hi_taskinst ht
+        LEFT JOIN biz_audit ba ON ht.ID_ = ba.task_id
+        LEFT JOIN act_hi_procinst hp ON ht.PROC_INST_ID_ = hp.ID_
+        WHERE
+            ht.PROC_INST_ID_ IN (
+            SELECT
+            proc_inst_id FROM biz_business
+            WHERE
+            table_id = #{tableId}
+          AND proc_def_key = #{procDefKey})
+        order by ht.START_TIME_ desc
+    </select>
+
     <update id="deleteLogic">
         update biz_audit set del_flag=true where id in
         <foreach item="id" collection="array" open="(" separator="," close=")">
