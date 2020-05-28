@@ -10,6 +10,8 @@ import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.domain.entity.SmsQualityOrder;
 import com.cloud.settle.enums.QualityStatusEnum;
 import com.cloud.settle.service.ISmsQualityOrderService;
+import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.enums.UserTypeEnum;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -96,8 +98,13 @@ public class SmsQualityOrderController extends BaseController {
         if(StringUtils.isNotBlank(smsQualityOrder.getEndTime())){
             criteria.andLessThanOrEqualTo("createTime",smsQualityOrder.getEndTime());
         }
-        //TODO 区分供应商类型和海尔数据
-
+        //供应商类型和海尔数据,如果是供应商则将供应商V码赋给供应商编号
+        SysUser sysUser = getUserInfo(SysUser.class);
+        Boolean flagUserType = UserTypeEnum.USER_TYPE_2.getCode().equals(sysUser.getUserType());
+        if(flagUserType){
+            String supplierCode = sysUser.getSupplierCode();
+            criteria.andEqualTo("supplierCode",supplierCode);
+        }
         startPage();
         List<SmsQualityOrder> smsQualityOrderList = smsQualityOrderService.selectByExample(example);
         return getDataTable(smsQualityOrderList);
