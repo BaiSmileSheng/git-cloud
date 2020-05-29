@@ -8,6 +8,8 @@ import com.cloud.common.log.enums.BusinessType;
 import com.cloud.settle.domain.entity.SmsSettleInfo;
 import com.cloud.settle.enums.TimeTypeEnum;
 import com.cloud.settle.service.ISmsSettleInfoService;
+import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.enums.UserTypeEnum;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -63,7 +65,7 @@ public class SmsSettleInfoController extends BaseController {
     public TableDataInfo list(SmsSettleInfo smsSettleInfo) {
         startPage();
         Example example = exampleListCondition(smsSettleInfo);
-        //TODO 判断用户类型 供应商还是海尔用户
+
         List<SmsSettleInfo> smsSettleInfoList = smsSettleInfoService.selectByExample(example);
         return getDataTable(smsSettleInfoList);
     }
@@ -127,7 +129,13 @@ public class SmsSettleInfoController extends BaseController {
             }
         }
 
-
+        //供应商类型和海尔数据,如果是供应商则将供应商V码赋给供应商编号
+        SysUser sysUser = getUserInfo(SysUser.class);
+        Boolean flagUserType = UserTypeEnum.USER_TYPE_2.getCode().equals(sysUser.getUserType());
+        if(flagUserType){
+            String supplierCode = sysUser.getSupplierCode();
+            criteria.andEqualTo("supplierCode",supplierCode);
+        }
         return example;
     }
 
