@@ -4310,7 +4310,7 @@
               "autoIncrement": true
             },
             {
-              "name": "product_order_code",
+              "name": "order_code",
               "type": "DefaultString",
               "remark": "",
               "chnname": "排产订单号",
