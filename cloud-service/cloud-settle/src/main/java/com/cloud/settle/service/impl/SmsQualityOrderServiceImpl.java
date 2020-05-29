@@ -167,7 +167,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
      * @param ids 主键id
      * @return 删除结果成功或失败
      */
-//    @GlobalTransactional
+    @GlobalTransactional
     @Override
     public R deleteSmsQualityOrderAndSysOss(String ids) {
         //根据订单号查文件
