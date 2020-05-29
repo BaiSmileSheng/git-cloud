@@ -1,4 +1,4 @@
-package com.cloud.resolver;
+package com.cloud.settle.resolver;
 
 import com.cloud.common.annotation.LoginUser;
 import com.cloud.common.constant.Constants;
