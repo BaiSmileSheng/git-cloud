@@ -85,7 +85,8 @@ public class Constants {
     /**
      * 用户redis数据权限标记
      */
-    public final static String ACCESS_USERID_SCOPE = "access_userid_scope_";
+    public final static String ACCESS_USERID_SCOPE_FACTORY = "access_userid_scope_factory";//工厂
+    public final static String ACCESS_USERID_SCOPE_PURCHASE = "access_userid_scope_purchase";//采购组
 
     public static final String RESOURCE_PREFIX = "/profile";
 

@@ -15,8 +15,15 @@ public class RemoteUserSocopeFallbackFactory implements FallbackFactory<RemoteUs
         log.error(throwable.getMessage());
         return new RemoteUserScopeService() {
 
+
+            /**
+             * 根据用户Id和类型获取用户物料权限
+             * @param userId
+             * @param type
+             * @return
+             */
             @Override
-            public String selectDataScopeIdByUserId(Long userId) {
+            public String selectDataScopeIdByUserIdAndType(Long userId, String type) {
                 return null;
             }
         };
