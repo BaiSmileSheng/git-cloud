@@ -60,6 +60,11 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
      */
     private static final String QUALITY_ORDER_PRE = "ZL";
 
+    /**
+     * 查询质量索赔详情
+     * @param id 主键id
+     * @return 索赔信息(包括文件信息)
+     */
     @Override
     public R selectById(Long id) {
         SmsQualityOrder smsQualityOrderRes = this.selectByPrimaryKey(id);
@@ -103,6 +108,12 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
         return R.data(smsQualityOrder.getId());
     }
 
+    /**
+     * 修改质量索赔信息
+     * @param smsQualityOrder 质量索赔信息
+     * @param files 质量索赔对应的文件信息
+     * @return
+     */
 //    @GlobalTransactional
     @Override
     public R updateSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder, MultipartFile[] files) {
@@ -145,13 +156,28 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
         return R.ok();
     }
 
+    /**
+     * 删除质量索赔信息
+     * @param ids 主键id
+     * @return 删除结果成功或失败
+     */
 //    @GlobalTransactional
     @Override
-    public R deleteSmsQualityOrderAndSysOss(String ids, List<SmsQualityOrder> smsQualityOrderList) {
+    public R deleteSmsQualityOrderAndSysOss(String ids) {
         //根据订单号查文件
+        List<SmsQualityOrder> selectListResult =  this.selectListById(ids);
+        if(CollectionUtils.isEmpty(selectListResult)){
+            return R.error("索赔单不存在");
+        }
+        for(SmsQualityOrder smsQualityOrder : selectListResult){
+            Boolean flagResult = QualityStatusEnum.QUALITY_STATUS_0.getCode().equals(smsQualityOrder.getQualityStatus());
+            if(!flagResult){
+                return R.error("请确认索赔单状态是否为待提交");
+            }
+        }
         //根据id删除文件
         StringBuffer stringBuffer = new StringBuffer();
-        for(SmsQualityOrder smsQualityOrder : smsQualityOrderList){
+        for(SmsQualityOrder smsQualityOrder : selectListResult){
             String orderNo = smsQualityOrder.getQualityNo() + ORDER_NO_QUALITY_END;
             List<SysOss> sysOssList = remoteOssService.listByOrderNo(orderNo);
             if(CollectionUtils.isEmpty(sysOssList)){
@@ -170,9 +196,53 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
         return R.ok();
     }
 
+    /**
+     * 根据索赔单主键批量查询
+     * @param ids 主键
+     * @return 索赔单集合
+     */
     @Override
     public List<SmsQualityOrder> selectListById(String ids) {
         List<SmsQualityOrder> smsQualityOrderList = smsQualityOrderMapper.selectByIds(ids);
         return smsQualityOrderList;
+    }
+
+    /**
+     * 提交索赔单
+     * @param ids 主键id
+     * @return 提交结果成功或失败
+     */
+    @Override
+    public R submit(String ids) {
+        List<SmsQualityOrder> selectListResult =  this.selectListById(ids);
+        for(SmsQualityOrder smsQualityOrder : selectListResult){
+            Boolean flagResult = QualityStatusEnum.QUALITY_STATUS_0.getCode().equals(smsQualityOrder.getQualityStatus());
+            if(!flagResult){
+                return R.error("请确认索赔单状态是否为待提交");
+            }
+            smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_1.getCode());
+        }
+        Integer count =  this.updateBatchByPrimaryKeySelective(selectListResult);
+        return R.data(count);
+    }
+
+    /**
+     * 供应商确认索赔单
+     * @param ids 主键id
+     * @return 供应商确认成功或失败
+     */
+    @Override
+    public R supplierConfirm(String ids) {
+        List<SmsQualityOrder> selectListResult =  this.selectListById(ids);
+        for(SmsQualityOrder smsQualityOrder : selectListResult){
+            Boolean flagResult = QualityStatusEnum.QUALITY_STATUS_0.getCode().equals(smsQualityOrder.getQualityStatus())
+                    ||QualityStatusEnum.QUALITY_STATUS_7.getCode().equals(smsQualityOrder.getQualityStatus());
+            if(!flagResult){
+                return R.error("请确认索赔单状态是否为待供应商确认");
+            }
+            smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_2.getCode());
+        }
+        int count = this.updateBatchByPrimaryKeySelective(selectListResult);
+        return R.data(count);
     }
 }

@@ -153,17 +153,7 @@ public class SmsQualityOrderController extends BaseController {
     @ApiOperation(value = "删除质量索赔 ", response = SmsQualityOrder.class)
     public R remove(String ids) {
         try{
-            List<SmsQualityOrder> selectListResult =  smsQualityOrderService.selectListById(ids);
-            if(CollectionUtils.isEmpty(selectListResult)){
-                return R.error("索赔单不存在");
-            }
-            for(SmsQualityOrder smsQualityOrder : selectListResult){
-                Boolean flagResult = QualityStatusEnum.QUALITY_STATUS_0.getCode().equals(smsQualityOrder.getQualityStatus());
-                if(!flagResult){
-                    return R.error("请确认索赔单状态是否为待提交");
-                }
-            }
-            return smsQualityOrderService.deleteSmsQualityOrderAndSysOss(ids,selectListResult);
+            return smsQualityOrderService.deleteSmsQualityOrderAndSysOss(ids);
         }catch (Exception e){
             return R.error(e.getMessage());
         }
@@ -179,16 +169,7 @@ public class SmsQualityOrderController extends BaseController {
     @ApiOperation(value = "提交索赔单 ", response = SmsQualityOrder.class)
     public R submit(String ids){
         try{
-            List<SmsQualityOrder> selectListResult =  smsQualityOrderService.selectListById(ids);
-            for(SmsQualityOrder smsQualityOrder : selectListResult){
-                Boolean flagResult = QualityStatusEnum.QUALITY_STATUS_0.getCode().equals(smsQualityOrder.getQualityStatus());
-                if(!flagResult){
-                    return R.error("请确认索赔单状态是否为待提交");
-                }
-                smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_1.getCode());
-            }
-            int count =  smsQualityOrderService.updateBatchByPrimaryKeySelective(selectListResult);
-            return toAjax(count);
+            return smsQualityOrderService.submit(ids);
         }catch (Exception e){
             return R.error(e.getMessage());
         }
@@ -204,17 +185,7 @@ public class SmsQualityOrderController extends BaseController {
     @ApiOperation(value = "供应商确认索赔单 ", response = SmsQualityOrder.class)
     public R supplierConfirm(String ids){
         try{
-            List<SmsQualityOrder> selectListResult =  smsQualityOrderService.selectListById(ids);
-            for(SmsQualityOrder smsQualityOrder : selectListResult){
-                Boolean flagResult = QualityStatusEnum.QUALITY_STATUS_0.getCode().equals(smsQualityOrder.getQualityStatus())
-                        ||QualityStatusEnum.QUALITY_STATUS_7.getCode().equals(smsQualityOrder.getQualityStatus());
-                if(!flagResult){
-                    return R.error("请确认索赔单状态是否为待供应商确认");
-                }
-                smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_2.getCode());
-            }
-            int count = smsQualityOrderService.updateBatchByPrimaryKeySelective(selectListResult);
-            return toAjax(count);
+            return smsQualityOrderService.supplierConfirm(ids);
         }catch (Exception e){
             return R.error(e.getMessage());
         }
