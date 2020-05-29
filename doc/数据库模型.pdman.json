@@ -6587,12 +6587,33 @@
               "defaultValue": "0"
             },
             {
+              "name": "cash_amount1",
+              "type": "DECIMAL_2",
+              "remark": "",
+              "chnname": "未兑现金额",
+              "defaultValue": "0"
+            },
+            {
               "name": "purchase_group_code",
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "采购组",
               "notNull": false,
               "defaultValue": "''"
+            },
+            {
+              "name": "currency",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "币种",
+              "defaultValue": "''"
+            },
+            {
+              "name": "rate",
+              "type": "DECIMAL_2",
+              "remark": "",
+              "chnname": "汇率",
+              "defaultValue": "0"
             },
             {
               "name": "del_flag",
@@ -6843,6 +6864,13 @@
               "type": "DECIMAL_2",
               "remark": "",
               "chnname": "兑现金额",
+              "defaultValue": "0"
+            },
+            {
+              "name": "cash_amount1",
+              "type": "DECIMAL_2",
+              "remark": "",
+              "chnname": "未兑现金额",
               "defaultValue": "0"
             },
             {
@@ -7124,6 +7152,12 @@
               "chnname": "兑现金额"
             },
             {
+              "name": "cash_amount1",
+              "type": "DECIMAL_2",
+              "remark": "",
+              "chnname": "未兑现金额"
+            },
+            {
               "name": "del_flag",
               "type": "CHAR_1",
               "remark": "0：有效，1：删除",
@@ -7351,6 +7385,12 @@
               "type": "DECIMAL_2",
               "remark": "",
               "chnname": "兑现金额"
+            },
+            {
+              "name": "cash_amount1",
+              "type": "DECIMAL_2",
+              "remark": "",
+              "chnname": "未兑现金额"
             },
             {
               "name": "del_flag",
@@ -7584,6 +7624,12 @@
               "type": "DECIMAL_2",
               "remark": "",
               "chnname": "兑现金额"
+            },
+            {
+              "name": "cash_amount1",
+              "type": "DECIMAL_2",
+              "remark": "",
+              "chnname": "未兑现金额"
             },
             {
               "name": "del_flag",
