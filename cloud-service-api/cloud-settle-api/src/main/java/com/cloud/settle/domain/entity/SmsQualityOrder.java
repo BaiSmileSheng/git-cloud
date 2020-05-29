@@ -12,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 import tk.mybatis.mapper.annotation.KeySql;
 
@@ -184,5 +185,17 @@ public class SmsQualityOrder extends BaseEntity {
      * 删除状态 0：有效，1：删除
      */
     private String delFlag;
+
+    /**
+     * 流程实例ID
+     */
+    @Transient
+    private String procDefId;
+
+    /**
+     * 流程实例名称
+     */
+    @Transient
+    private String procName;
 
 }

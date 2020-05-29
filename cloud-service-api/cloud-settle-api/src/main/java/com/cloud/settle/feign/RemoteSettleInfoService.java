@@ -4,6 +4,7 @@ import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.settle.domain.entity.SmsSettleInfo;
+import com.cloud.settle.feign.factory.RemoteSettleInfoFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,7 +18,7 @@ import java.util.List;
  *@Author Lihongxia
  * @Date 2020-05-26
  */
-@FeignClient(name = ServiceNameConstants.SETTLE_SERVICE)
+@FeignClient(name = ServiceNameConstants.SETTLE_SERVICE,fallbackFactory = RemoteSettleInfoFallbackFactory.class)
 public interface RemoteSettleInfoService {
 
     /**
