@@ -6587,7 +6587,7 @@
               "defaultValue": "0"
             },
             {
-              "name": "cash_amount1",
+              "name": "uncash_amount",
               "type": "DECIMAL_2",
               "remark": "",
               "chnname": "未兑现金额",
@@ -6867,7 +6867,7 @@
               "defaultValue": "0"
             },
             {
-              "name": "cash_amount1",
+              "name": "uncash_amount",
               "type": "DECIMAL_2",
               "remark": "",
               "chnname": "未兑现金额",
@@ -7152,7 +7152,7 @@
               "chnname": "兑现金额"
             },
             {
-              "name": "cash_amount1",
+              "name": "uncash_amount",
               "type": "DECIMAL_2",
               "remark": "",
               "chnname": "未兑现金额"
@@ -7387,7 +7387,7 @@
               "chnname": "兑现金额"
             },
             {
-              "name": "cash_amount1",
+              "name": "uncash_amount",
               "type": "DECIMAL_2",
               "remark": "",
               "chnname": "未兑现金额"
@@ -7626,7 +7626,7 @@
               "chnname": "兑现金额"
             },
             {
-              "name": "cash_amount1",
+              "name": "uncash_amount",
               "type": "DECIMAL_2",
               "remark": "",
               "chnname": "未兑现金额"
