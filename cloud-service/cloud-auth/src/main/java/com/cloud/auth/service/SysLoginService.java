@@ -111,7 +111,7 @@ public class SysLoginService {
             return user;
         }
         //如果是海尔用户  UUC校验
-        if("1".equals(user.getUserType())){
+        if(UserConstants.USER_TYPE_HR.equals(user.getUserType())){
             if(uucProperties.getIsCheck()){
                 //先从redis中获取accessToken，如果没有，重新获取token。从uuc校验用户名密码
                 String accessToken = uucLoginCheckService.getAccessToken();
@@ -119,7 +119,7 @@ public class SysLoginService {
                     throw new BusinessException("获取UUC token失败！");
                 }
                 R r = uucLoginCheckService.checkUucUser(username, password, accessToken);
-                if (!"0".equals(r.get("code").toString())) {
+                if (!r.isSuccess()) {
                     throw new UserPasswordNotMatchException();
                 }
             }else{
@@ -128,7 +128,7 @@ public class SysLoginService {
                     throw new UserPasswordNotMatchException();
                 }
             }
-        } else if ("2".equals(user.getUserType())) {
+        } else if (UserConstants.USER_TYPE_WB.equals(user.getUserType())) {
             if(hucProperties.getIsCheck()){
                 //HUC校验外部用户
                 //先从redis中获取accessToken，如果没有，重新获取token。从uuc校验用户名密码
@@ -137,7 +137,7 @@ public class SysLoginService {
                     throw new BusinessException("获取UUC token失败！");
                 }
                 R r = hucLoginCheckService.checkHucUser(username, password, accessToken);
-                if (!"0".equals(r.get("code").toString())) {
+                if (!r.isSuccess()) {
                     throw new UserPasswordNotMatchException();
                 }
             }else{

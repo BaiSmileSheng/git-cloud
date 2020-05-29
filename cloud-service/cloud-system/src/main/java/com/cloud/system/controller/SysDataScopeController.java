@@ -1,24 +1,21 @@
 package com.cloud.system.controller;
-import java.util.*;
-
+import cn.hutool.core.collection.CollUtil;
+import com.cloud.common.core.controller.BaseController;
+import com.cloud.common.core.domain.R;
+import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.system.domain.entity.SysDataScope;
+import com.cloud.system.service.ISysDataScopeService;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import tk.mybatis.mapper.entity.Example;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.cloud.common.core.domain.R;
-import com.cloud.common.core.controller.BaseController;
-import com.cloud.system.service.ISysDataScopeService;
-import com.cloud.common.core.page.TableDataInfo;
+import org.springframework.web.bind.annotation.*;
+import tk.mybatis.mapper.entity.Example;
+
+import java.util.*;
 
 /**
  *  数据权限 提供者
@@ -111,11 +108,20 @@ public class SysDataScopeController extends BaseController {
      */
     @GetMapping("getUserScopeIds")
     public Set<String> getUserScopeIds(Long userId) {
-        String scopes = getUserScopes(userId);
-        if(StringUtils.isBlank(scopes)){
+        //工厂权限
+        String scopeFactory = getUserFactoryScopes(userId);
+        //采购组权限
+        String scopePurchase = getUserPurchaseScopes(userId);
+        if(StringUtils.isBlank(scopeFactory)&&StringUtils.isBlank(scopePurchase)){
             return new HashSet<>();
         }
-        Set<String> scopeSet = new HashSet<>(Arrays.asList(scopes.split(",")));
+        Set<String> scopeSet=new HashSet<> ();
+        if(StringUtils.isNotBlank(scopeFactory)){
+            CollUtil.addAll(scopeSet, Arrays.asList(scopeFactory.split(",")));
+        }
+        if(StringUtils.isNotBlank(scopePurchase)){
+            CollUtil.addAll(scopeSet, Arrays.asList(scopePurchase.split(",")));
+        }
         return scopeSet;
     }
 

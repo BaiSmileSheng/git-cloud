@@ -18,11 +18,19 @@ public class SysUserScopeServiceImpl extends BaseServiceImpl<SysUserScope> imple
     private SysUserScopeMapper sysUserScopeMapper;
 
 
+    /**
+     * 根据用户Id和类型获取用户物料权限
+     * @return
+     */
     @Override
-    public String selectDataScopeIdByUserId(Long userId) {
-        return sysUserScopeMapper.selectDataScopeIdByUserId(userId);
+    public String selectDataScopeIdByUserIdAndType(Long userId,String type) {
+        return sysUserScopeMapper.selectDataScopeIdByUserIdAndType(userId,type);
     }
 
+    /**
+     * 删除原有的权限
+     * @param userId
+     */
     @Override
     public void deleteByUserId(Long userId) {
         sysUserScopeMapper.deleteByUserId(userId);
