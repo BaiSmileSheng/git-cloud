@@ -60,16 +60,16 @@
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
 
-
+        <!-- 结算模块 -->
+        <dependency>
+            <groupId>com.cloud</groupId>
+            <artifactId>cloud-settle-api</artifactId>
+            <version>${cloud.version}</version>
+        </dependency>
         <!-- 系统模块 -->
         <dependency>
             <groupId>com.cloud</groupId>
             <artifactId>cloud-system-api</artifactId>
-            <version>${cloud.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.cloud</groupId>
-            <artifactId>cloud-settle-api</artifactId>
             <version>${cloud.version}</version>
         </dependency>
         <!-- 日志模块 -->

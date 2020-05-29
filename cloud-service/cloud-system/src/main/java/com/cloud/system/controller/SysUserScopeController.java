@@ -1,20 +1,20 @@
 package com.cloud.system.controller;
 
-import java.util.*;
-
-import com.cloud.common.constant.Constants;
+import com.cloud.common.core.controller.BaseController;
+import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.redis.util.RedisUtils;
 import com.cloud.common.utils.StringUtils;
+import com.cloud.system.domain.entity.SysUserScope;
 import com.cloud.system.service.ISysUserScopeService;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.cloud.common.core.domain.R;
-import com.cloud.common.core.controller.BaseController;
-import com.cloud.system.domain.entity.SysUserScope;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 用户和数据权限 提供者
@@ -84,13 +84,13 @@ public class SysUserScopeController extends BaseController {
     }
 
     /**
-     * 查询用户所有有效数据权限
+     * 根据用户Id和类型获取用户物料权限
      *
      * @return
      */
     @GetMapping("getScopes")
-    public String selectDataScopeIdByUserId(@RequestParam("userId") Long userId) {
-        return sysUserScopeService.selectDataScopeIdByUserId(userId);
+    public String selectDataScopeIdByUserIdAndType(@RequestParam("userId") Long userId,@RequestParam("type") String type) {
+        return sysUserScopeService.selectDataScopeIdByUserIdAndType(userId,type);
     }
 
     /**
@@ -119,8 +119,8 @@ public class SysUserScopeController extends BaseController {
                 }
                 sysUserScopeService.insertList(sysUserScopePoList);
             }
-            //更新redis
-            redis.set(Constants.ACCESS_USERID_SCOPE + userId, scopes, Constants.EXPIRE);
+//            //更新redis
+//            redis.set(Constants.ACCESS_USERID_SCOPE + userId, scopes, Constants.EXPIRE);
         } catch (Exception e) {
             e.printStackTrace();
             throw new BusinessException("系统错误！");

@@ -68,6 +68,12 @@ public class SysDataScope extends BaseEntity {
     private String status;
 
     /**
+     * 类型：1、工厂 2、采购组
+     */
+    @ExcelProperty(value = "类型")
+    private String type;
+
+    /**
      * 删除标志（0代表存在 1代表删除）
      */
     private String delFlag;

@@ -17,6 +17,8 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.PageDomain;
 import com.cloud.system.feign.RemoteUserService;
 import com.google.common.collect.Maps;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -24,10 +26,7 @@ import org.activiti.engine.task.IdentityLink;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +44,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("task")
+@Api(value = "审核流转")
 public class ActTaskController extends BaseController {
     @Autowired
     private TaskService taskService;
@@ -133,6 +133,19 @@ public class ActTaskController extends BaseController {
     public R flow(HiTaskVo hiTaskVo) {
         startPage();
         return result(bizAuditService.getHistoryTaskList(hiTaskVo));
+    }
+
+    /**
+     * task 流转历史  一个订单有多次审核
+     * @param tableId
+     * @param procDefKey
+     * @return
+     */
+    @GetMapping(value = "flowList")
+    @ApiOperation(value = "审核历史-多次",response = HiTaskVo.class)
+    public R flow(String tableId,String procDefKey) {
+        startPage();
+        return result(bizAuditService.getHistoryTaskList(tableId,procDefKey));
     }
 
     /**

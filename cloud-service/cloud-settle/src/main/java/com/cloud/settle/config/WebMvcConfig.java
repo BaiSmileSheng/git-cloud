@@ -1,6 +1,6 @@
 package com.cloud.settle.config;
 
-import com.cloud.resolver.LoginUserHandlerResolver;
+import com.cloud.settle.resolver.LoginUserHandlerResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;

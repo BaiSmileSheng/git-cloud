@@ -2,12 +2,19 @@ package com.cloud.system.feign;
 
 import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.common.core.domain.R;
+import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.feign.factory.RemoteOssFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 
 /**
@@ -23,8 +30,10 @@ public interface RemoteOssService {
      * @param file
      * @return
      */
-    @PostMapping("oss/upload")
-    R uploadFile(@RequestParam("file") MultipartFile file);
+    @RequestMapping(value = "oss/upload", method = RequestMethod.POST,
+            produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    R uploadFile(@RequestPart(value = "file") MultipartFile file, @RequestParam(value = "orderNo",required = false) String orderNo);
 
     /**
      * 下载文件
@@ -40,7 +49,7 @@ public interface RemoteOssService {
      * @return
      */
     @PostMapping("oss/remove")
-    R remove(String ids);
+    R remove(@RequestParam("ids") String ids);
 
     /**
      * 根据订单编号查询文件上传列表
@@ -48,6 +57,6 @@ public interface RemoteOssService {
      * @return R 包含List<SysOss> 文件上传集合
      */
     @GetMapping("oss/listByOrderNo")
-    public R listByOrderNo(String orderNo);
+    public List<SysOss> listByOrderNo(@RequestParam("orderNo") String orderNo);
 
 }

@@ -14,7 +14,9 @@ import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.IpUtils;
 import com.cloud.common.utils.MessageUtils;
 import com.cloud.common.utils.ServletUtils;
+import com.cloud.system.domain.entity.CdSupplierInfo;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.feign.RemoteSupplierInfoService;
 import com.cloud.system.feign.RemoteUserService;
 import com.cloud.system.util.PasswordUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +28,9 @@ public class SysLoginService {
 
     @Autowired
     private RemoteUserService userService;
+
+    @Autowired
+    private RemoteSupplierInfoService supplierInfoService;
 
     @Autowired
     private UucLoginCheckService uucLoginCheckService;
@@ -106,7 +111,7 @@ public class SysLoginService {
             return user;
         }
         //如果是海尔用户  UUC校验
-        if("1".equals(user.getUserType())){
+        if(UserConstants.USER_TYPE_HR.equals(user.getUserType())){
             if(uucProperties.getIsCheck()){
                 //先从redis中获取accessToken，如果没有，重新获取token。从uuc校验用户名密码
                 String accessToken = uucLoginCheckService.getAccessToken();
@@ -114,7 +119,7 @@ public class SysLoginService {
                     throw new BusinessException("获取UUC token失败！");
                 }
                 R r = uucLoginCheckService.checkUucUser(username, password, accessToken);
-                if (!"0".equals(r.get("code").toString())) {
+                if (!r.isSuccess()) {
                     throw new UserPasswordNotMatchException();
                 }
             }else{
@@ -123,7 +128,7 @@ public class SysLoginService {
                     throw new UserPasswordNotMatchException();
                 }
             }
-        } else if ("2".equals(user.getUserType())) {
+        } else if (UserConstants.USER_TYPE_WB.equals(user.getUserType())) {
             if(hucProperties.getIsCheck()){
                 //HUC校验外部用户
                 //先从redis中获取accessToken，如果没有，重新获取token。从uuc校验用户名密码
@@ -132,7 +137,7 @@ public class SysLoginService {
                     throw new BusinessException("获取UUC token失败！");
                 }
                 R r = hucLoginCheckService.checkHucUser(username, password, accessToken);
-                if (!"0".equals(r.get("code").toString())) {
+                if (!r.isSuccess()) {
                     throw new UserPasswordNotMatchException();
                 }
             }else{
@@ -140,6 +145,11 @@ public class SysLoginService {
                 if (!PasswordUtil.matches(user, password)) {
                     throw new UserPasswordNotMatchException();
                 }
+            }
+            //外部用户根据登录名查询供应商V码
+            CdSupplierInfo cdSupplierInfo = supplierInfoService.getByNick(user.getLoginName());
+            if (cdSupplierInfo != null) {
+                user.setSupplierCode(cdSupplierInfo.getSupplierCode());
             }
         }else{
             throw new UserException("user.type.null",null);

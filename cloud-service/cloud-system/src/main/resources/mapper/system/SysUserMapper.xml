@@ -4,6 +4,34 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.cloud.system.mapper.SysUserMapper">
 
+    <resultMap type="SysUser" id="SysUserResultVO">
+        <id property="userId" column="user_id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="loginName" column="login_name"/>
+        <result property="userName" column="user_name"/>
+        <result property="email" column="email"/>
+        <result property="phonenumber" column="phonenumber"/>
+        <result property="sex" column="sex"/>
+        <result property="avatar" column="avatar"/>
+        <result property="password" column="password"/>
+        <result property="salt" column="salt"/>
+        <result property="status" column="status"/>
+        <result property="userType" column="user_type"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="loginIp" column="login_ip"/>
+        <result property="loginDate" column="login_date"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <association property="dept" column="dept_id" javaType="SysDept" resultMap="deptResult"/>
+        <collection property="roles" javaType="java.util.List" resultMap="RoleResult"/>
+        <collection property="roleIds" javaType="java.util.List" resultMap="RoleIdsResult"/>
+        <collection property="roleKeys" ofType="java.lang.String" javaType="java.util.List" resultMap="RoleKeysResult"/>
+    </resultMap>
+
+
     <resultMap type="SysUser" id="SysUserResult">
         <id property="userId" column="user_id"/>
         <result property="deptId" column="dept_id"/>
@@ -40,6 +68,10 @@
 
     <resultMap id="RoleIdsResult" type="Long">
         <id property="roleId" column="role_id"/>
+    </resultMap>
+
+    <resultMap id="RoleKeysResult" type="String">
+        <id property="roleKey" column="role_key"/>
     </resultMap>
 
     <resultMap id="RoleResult" type="SysRole">
@@ -129,17 +161,17 @@
         ${params.dataScope}
     </select>
 
-    <select id="selectUserByLoginName" parameterType="String" resultMap="SysUserResult">
+    <select id="selectUserByLoginName" parameterType="String" resultMap="SysUserResultVO">
         <include refid="selectUserVo"/>
         where u.login_name = #{userName}
     </select>
 
-    <select id="selectUserByPhoneNumber" parameterType="String" resultMap="SysUserResult">
+    <select id="selectUserByPhoneNumber" parameterType="String" resultMap="SysUserResultVO">
         <include refid="selectUserVo"/>
         where u.phonenumber = #{phonenumber}
     </select>
 
-    <select id="selectUserByEmail" parameterType="String" resultMap="SysUserResult">
+    <select id="selectUserByEmail" parameterType="String" resultMap="SysUserResultVO">
         <include refid="selectUserVo"/>
         where u.email = #{email}
     </select>
@@ -156,7 +188,7 @@
 		select user_id, email from sys_user where email=#{email}
 	</select>
 
-    <select id="selectUserById" parameterType="Long" resultMap="SysUserResult">
+    <select id="selectUserById" parameterType="Long" resultMap="SysUserResultVO">
         <include refid="selectUserVo"/>
         where u.user_id = #{userId}
     </select>

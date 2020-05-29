@@ -1,4 +1,4 @@
-package com.cloud.resolver;
+package com.cloud.settle.resolver;
 
 import com.cloud.common.annotation.LoginUser;
 import com.cloud.common.constant.Constants;
@@ -19,8 +19,8 @@ import javax.servlet.http.HttpServletRequest;
  */
 @Configuration
 public class LoginUserHandlerResolver implements HandlerMethodArgumentResolver {
-    @Autowired
-    private RemoteUserService userService;
+//    @Autowired
+//    private RemoteUserService userService;
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -37,6 +37,7 @@ public class LoginUserHandlerResolver implements HandlerMethodArgumentResolver {
         if (userid == null) {
             return null;
         }
-        return userService.selectSysUserByUserId(userid);
+//        return userService.selectSysUserByUserId(userid);
+        return null;
     }
 }
