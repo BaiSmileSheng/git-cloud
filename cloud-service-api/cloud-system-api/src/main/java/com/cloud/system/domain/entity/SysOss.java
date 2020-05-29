@@ -7,16 +7,24 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 文件上传
  */
+@ExcelIgnoreUnannotated
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @ApiModel(value = "文件上传")
 @Table(name = "sys_oss")
 public class SysOss implements Serializable {
@@ -76,6 +84,5 @@ public class SysOss implements Serializable {
      */
     @ApiModelProperty(value = "订单号")
     private String orderNo;
-
 
 }
