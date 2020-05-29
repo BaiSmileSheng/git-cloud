@@ -19,8 +19,8 @@ public class SysUserScopeServiceImpl extends BaseServiceImpl<SysUserScope> imple
 
 
     @Override
-    public String selectDataScopeIdByUserId(Long userId) {
-        return sysUserScopeMapper.selectDataScopeIdByUserId(userId);
+    public String selectDataScopeIdByUserIdAndType(Long userId,String type) {
+        return sysUserScopeMapper.selectDataScopeIdByUserIdAndType(userId,type);
     }
 
     @Override

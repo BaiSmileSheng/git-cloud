@@ -42,6 +42,12 @@ public class UserConstants {
     public static final String USER_TYPE_HR = "1";
     public static final String USER_TYPE_WB = "2";
 
+    /**
+     * 用户权限类型
+     */
+    public static final String USER_SCOPE_TYPE_FACTORY = "1";
+    public static final String USER_SCOPE_TYPE_PURCHASE = "2";
+
 
     /**
      * 用户名长度限制

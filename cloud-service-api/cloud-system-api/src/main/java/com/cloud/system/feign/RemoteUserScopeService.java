@@ -21,6 +21,6 @@ public interface RemoteUserScopeService {
      * @author zmr
      */
     @GetMapping("userScope/getScopes")
-    public String selectDataScopeIdByUserId(@RequestParam("userId") Long userId);
+    public String selectDataScopeIdByUserIdAndType(@RequestParam("userId") Long userId,@RequestParam("type") String type);
 
 }

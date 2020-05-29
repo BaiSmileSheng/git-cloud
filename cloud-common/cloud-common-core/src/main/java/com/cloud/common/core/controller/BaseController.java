@@ -110,12 +110,22 @@ public class BaseController {
     }
 
     /**
-     * 根据用户id从redis取数据权限
+     * 根据用户id从redis取数据权限(工厂)
      * @param userId
      * @return
      */
-    public String getUserScopes(Long userId) {
-        String scocpes = redis.get(Constants.ACCESS_USERID_SCOPE + userId);
+    public String getUserFactoryScopes(Long userId) {
+        String scocpes = redis.get(Constants.ACCESS_USERID_SCOPE_FACTORY + userId);
+        return scocpes;
+    }
+
+    /**
+     * 根据用户id从redis取数据权限(采购组)
+     * @param userId
+     * @return
+     */
+    public String getUserPurchaseScopes(Long userId) {
+        String scocpes = redis.get(Constants.ACCESS_USERID_SCOPE_PURCHASE + userId);
         return scocpes;
     }
 

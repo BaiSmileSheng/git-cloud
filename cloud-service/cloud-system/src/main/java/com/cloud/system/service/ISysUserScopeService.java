@@ -16,7 +16,7 @@ public interface ISysUserScopeService extends BaseService<SysUserScope>{
      * @param userId
      * @return
      */
-    String selectDataScopeIdByUserId(Long userId);
+    String selectDataScopeIdByUserIdAndType(Long userId,String type);
 
     /**
      * 物理删除用户当前物料权限
