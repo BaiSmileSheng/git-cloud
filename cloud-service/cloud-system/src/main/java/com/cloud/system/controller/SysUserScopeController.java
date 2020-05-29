@@ -84,7 +84,7 @@ public class SysUserScopeController extends BaseController {
     }
 
     /**
-     * 查询用户所有有效数据权限
+     * 根据用户Id和类型获取用户物料权限
      *
      * @return
      */
