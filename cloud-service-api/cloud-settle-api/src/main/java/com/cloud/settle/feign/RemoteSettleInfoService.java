@@ -34,8 +34,8 @@ public interface RemoteSettleInfoService {
      * @param smsSettleInfo 加工费结算信息
      * @return TableDataInfo 加工费结算列表
      */
-    @GetMapping("/smsSettleInfo/listByCondition")
-    List<SmsSettleInfo> listByCondition(@RequestParam("smsSettleInfo") SmsSettleInfo smsSettleInfo);
+    @PostMapping(value = "/smsSettleInfo/listByCondition")
+    List<SmsSettleInfo> listByCondition(@RequestBody SmsSettleInfo smsSettleInfo);
 
     /**
      * 修改保存加工费结算
@@ -53,4 +53,11 @@ public interface RemoteSettleInfoService {
      */
     @PostMapping("/smsSettleInfo/save")
     R addSave(@RequestBody SmsSettleInfo smsSettleInfo);
+
+    /**
+     * 计算加工费(定时任务调用)
+     * @return 成功或失败
+     */
+    @PostMapping("/smsSettleInfo/smsSettleInfoCalculate")
+    R smsSettleInfoCalculate();
 }

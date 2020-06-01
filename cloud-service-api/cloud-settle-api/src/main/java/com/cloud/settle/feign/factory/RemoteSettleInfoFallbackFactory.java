@@ -63,6 +63,15 @@ public class RemoteSettleInfoFallbackFactory implements FallbackFactory<RemoteSe
             public R addSave(SmsSettleInfo smsSettleInfo) {
                 return R.error("调用settle系统新增加工费失败");
             }
+
+            /**
+             * 计算加工费(定时任务调用)
+             * @return 成功或失败
+             */
+            @Override
+            public R smsSettleInfoCalculate() {
+                return R.error("定时任务计算加工费失败");
+            }
         };
     }
 }
