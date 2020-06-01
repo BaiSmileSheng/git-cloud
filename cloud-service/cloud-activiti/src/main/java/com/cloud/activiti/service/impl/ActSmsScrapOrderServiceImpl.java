@@ -37,7 +37,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
 
     /**
      * 开启流程 报废申请单逻辑
-     *
+     * 待加全局事务
      * @param smsScrapOrder
      * @return R
      */
@@ -57,6 +57,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
 
     /**
      * 审批流程 报废申请单逻辑
+     * 待加全局事务
      * @param bizAudit
      * @param smsScrapOrder
      * @param userId

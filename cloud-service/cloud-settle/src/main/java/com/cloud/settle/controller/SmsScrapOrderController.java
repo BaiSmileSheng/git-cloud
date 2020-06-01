@@ -1,7 +1,8 @@
 package com.cloud.settle.controller;
 
 import cn.hutool.core.util.StrUtil;
-import com.cloud.common.annotation.LoginUser;
+import com.cloud.common.constant.RoleConstants;
+import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -12,6 +13,7 @@ import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
 import com.cloud.settle.enums.ScrapOrderStatusEnum;
 import com.cloud.settle.service.ISmsScrapOrderService;
+import com.cloud.settle.util.DataScopeUtil;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteCdMaterialPriceInfoService;
 import io.swagger.annotations.*;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -68,7 +71,7 @@ public class SmsScrapOrderController extends BaseController {
             @ApiImplicitParam(name = "beginTime", value = "创建日期", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "endTime", value = "到", required = false, paramType = "query", dataType = "String")
     })
-    public TableDataInfo list(@ApiIgnore() SmsScrapOrder smsScrapOrder,@ApiIgnore() @LoginUser SysUser sysUser) {
+    public TableDataInfo list(@ApiIgnore() SmsScrapOrder smsScrapOrder) {
         Example example = new Example(SmsScrapOrder.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo(smsScrapOrder);
@@ -77,6 +80,21 @@ public class SmsScrapOrderController extends BaseController {
         }
         if(StrUtil.isNotEmpty(smsScrapOrder.getBeginTime())){
             criteria.andGreaterThanOrEqualTo("createTime", smsScrapOrder.getBeginTime());
+        }
+
+        //供应商：查询本工厂的    业务科：查询
+        SysUser sysUser = getUserInfo(SysUser.class);
+        if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
+            //供应商查询自己工厂下的申请单
+            criteria.andLike("supplierCode", sysUser.getSupplierCode());
+        }else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
+            if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_YWK)){
+                //业务科查询已提交状态自己管理工厂的申请单  采购组权限：sys_data_scope  例：8310,8410
+                criteria.andEqualTo("scrapStatus", ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
+                criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+            }
+        }else{
+            return null;
         }
         startPage();
         List<SmsScrapOrder> smsScrapOrderList = smsScrapOrderService.selectByExample(example);

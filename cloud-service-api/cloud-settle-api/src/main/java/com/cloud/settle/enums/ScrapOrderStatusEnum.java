@@ -7,7 +7,7 @@ package com.cloud.settle.enums;
  */
 public enum ScrapOrderStatusEnum {
 
-    //物耗申请单状态
+    //报废申请单状态
     BF_ORDER_STATUS_DTJ("0","待提交"),
     BF_ORDER_STATUS_YWKSH("1","业务科待审核"),
     BF_ORDER_STATUS_YWKBH("2","业务科驳回"),

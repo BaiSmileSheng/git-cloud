@@ -68,34 +68,34 @@ public class ActSmsScrapOrderActController extends BaseController {
     /**
      * 报废审核开启流程  提交
      *
-     * @param smsSupplementaryOrder
+     * @param smsScrapOrder
      * @return R 成功/失败
      */
     @PostMapping("open")
     @OperLog(title = "报废审核开启流程 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "报废审核开启流程 ", response = R.class)
-    public R addSave(@RequestBody SmsScrapOrder smsSupplementaryOrder) {
+    public R addSave(@RequestBody SmsScrapOrder smsScrapOrder) {
         //判断状态是否是未提交，如果不是则抛出错误
-        Long id = smsSupplementaryOrder.getId();
+        Long id = smsScrapOrder.getId();
         if (id==null) {
             throw new BusinessException("ID不能为空！");
         }
-        SmsScrapOrder smsScrapOrder = remoteSmsScrapOrderService.get(id);
-        if (smsScrapOrder == null) {
+        SmsScrapOrder smsScrapOrderCheck = remoteSmsScrapOrderService.get(id);
+        if (smsScrapOrderCheck == null) {
             throw new BusinessException("未查询到此数据！");
         }
-        if (!ScrapOrderStatusEnum.BF_ORDER_STATUS_DTJ.getCode().equals(smsScrapOrder.getScrapStatus())) {
+        if (!ScrapOrderStatusEnum.BF_ORDER_STATUS_DTJ.getCode().equals(smsScrapOrderCheck.getScrapStatus())) {
             throw new BusinessException("已提交的数据不能操作！");
         }
         //校验物料号是否同步了sap价格
-        R r=remoteCdMaterialPriceInfoService.checkSynchroSAP(smsScrapOrder.getProductMaterialCode());
+        R r=remoteCdMaterialPriceInfoService.checkSynchroSAP(smsScrapOrderCheck.getProductMaterialCode());
         if(!r.isSuccess()){
             throw new BusinessException(r.get("msg").toString());
         }
         //将返回值Map转为CdMaterialPriceInfo
         CdMaterialPriceInfo cdMaterialPriceInfo =BeanUtil.mapToBean((Map<?, ?>) r.get("data"), CdMaterialPriceInfo.class,true);
         //校验修改申请数量是否是最小包装量的整数倍
-        int applyNum=smsSupplementaryOrder.getScrapAmount();//申请量
+        int applyNum=smsScrapOrder.getScrapAmount();//申请量
         //最小包装量
         int minUnit= Integer.parseInt(cdMaterialPriceInfo.getPriceUnit()==null?"0":cdMaterialPriceInfo.getPriceUnit());
         if(minUnit==0){
@@ -105,7 +105,7 @@ public class ActSmsScrapOrderActController extends BaseController {
             throw new BusinessException("申请量必须是最小包装量的整数倍！");
         }
         //开启审核流程
-        return actSmsScrapOrderService.startAct(smsSupplementaryOrder,getCurrentUserId());
+        return actSmsScrapOrderService.startAct(smsScrapOrder,getCurrentUserId());
     }
 
 

@@ -13,4 +13,9 @@ public class ActivitiProTitleConstants {
      * 物耗管理服务相关流程
      */
     public static final String ACTIVITI_PRO_TITLE_SUPPLEMENTARY_TEST = "物耗管理申请流程";
+
+    /**
+     * 报废管理服务相关流程
+     */
+    public static final String ACTIVITI_PRO_TITLE_SCRAP_TEST = "报废管理申请流程";
 }
