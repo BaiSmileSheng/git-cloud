@@ -8,6 +8,7 @@ import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.system.domain.entity.SysDataScope;
 import com.cloud.system.service.ISysDataScopeService;
+import com.cloud.system.util.DataScopeUtil;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -109,9 +110,9 @@ public class SysDataScopeController extends BaseController {
     @GetMapping("getUserScopeIds")
     public Set<String> getUserScopeIds(Long userId) {
         //工厂权限
-        String scopeFactory = getUserFactoryScopes(userId);
+        String scopeFactory = DataScopeUtil.getUserFactoryScopes(userId);
         //采购组权限
-        String scopePurchase = getUserPurchaseScopes(userId);
+        String scopePurchase = DataScopeUtil.getUserPurchaseScopes(userId);
         if(StringUtils.isBlank(scopeFactory)&&StringUtils.isBlank(scopePurchase)){
             return new HashSet<>();
         }
