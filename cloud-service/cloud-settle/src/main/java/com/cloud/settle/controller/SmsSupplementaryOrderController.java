@@ -12,6 +12,7 @@ import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
 import com.cloud.settle.enums.SupplementaryOrderStatusEnum;
 import com.cloud.settle.service.ISmsSupplementaryOrderService;
+import com.cloud.settle.util.DataScopeUtil;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteCdMaterialPriceInfoService;
 import io.swagger.annotations.*;
@@ -78,11 +79,13 @@ public class SmsSupplementaryOrderController extends BaseController {
         }else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
             //海尔内部
             if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_JIT)){
-                //JIT查询已提交状态自己管理采购组的申请单  采购组权限：sys_data_scope  格式：工厂-采购组  例：8310-cg1242
-                criteria.andIn("purchaseGroupCode", Arrays.asList(getUserPurchaseScopes(getCurrentUserId()).split(",")));
+                //JIT查询已提交状态自己管理工厂的申请单  采购组权限：sys_data_scope  例：8310,8410
+                criteria.andEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode());
+                criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
             }else if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ)){
-                //小微主查看jit审核成功的物耗申请单
+                //小微主查看jit审核成功的自己工厂权限下的物耗申请单
                 criteria.andEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode());
+                criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
             }
         }else{
             return null;
@@ -201,6 +204,7 @@ public class SmsSupplementaryOrderController extends BaseController {
             throw new BusinessException("传入参数不能为空！");
         }
         for(String id:ids.split(",")){
+            //校验状态是否是未提交
             checkCondition(Long.valueOf(id));
         }
         return toAjax(smsSupplementaryOrderService.deleteByIds(ids));

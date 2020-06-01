@@ -66,13 +66,13 @@ public class ActSmsSupplementaryOrderActController extends BaseController {
     }
 
     /**
-     * 开启流程  提交
+     * 物耗审核开启流程  提交
      *
      * @param smsSupplementaryOrder
      * @return R 成功/失败
      */
     @PostMapping("open")
-    @OperLog(title = "开启流程 ", businessType = BusinessType.UPDATE)
+    @OperLog(title = "物耗审核开启流程 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "开启流程 ", response = R.class)
     public R addSave(@RequestBody SmsSupplementaryOrder smsSupplementaryOrder) {
         //判断状态是否是未提交，如果不是则抛出错误
@@ -111,12 +111,12 @@ public class ActSmsSupplementaryOrderActController extends BaseController {
 
 
     /**
-     * 流程审批
+     * 物耗流程审批
      * @param bizAudit
      * @return 成功/失败
      */
     @PostMapping("audit")
-    @ApiOperation(value = "流程审批 ", response = R.class)
+    @ApiOperation(value = "物耗流程审批 ", response = R.class)
     public R audit(@RequestBody BizAudit bizAudit) {
         //流程审核业务表
         BizBusiness bizBusiness = bizBusinessService.selectBizBusinessById(bizAudit.getBusinessKey().toString());

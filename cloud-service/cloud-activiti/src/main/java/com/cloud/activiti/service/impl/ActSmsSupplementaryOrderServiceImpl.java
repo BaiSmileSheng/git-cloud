@@ -37,7 +37,7 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
 
     /**
      * 开启流程 物耗申请单逻辑
-     *
+     * 待加全局事务
      * @param smsSupplementaryOrder
      * @return R
      */
@@ -57,6 +57,7 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
 
     /**
      * 审批流程 物耗申请单逻辑
+     * 待加全局事务
      * @param bizAudit
      * @param smsSupplementaryOrder
      * @param userId
@@ -76,7 +77,8 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
             if (SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode().equals(smsSupplementaryOrder.getStuffStatus())) {
                 smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode());
             } else if (SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode().equals(smsSupplementaryOrder.getStuffStatus())) {
-                smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZSHTG.getCode());
+                //TODO:小微主审核通过   传SAP
+
             } else {
                 throw new BusinessException("状态错误！");
             }
