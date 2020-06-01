@@ -157,6 +157,14 @@ public class SmsDelaysDelivery extends BaseEntity {
     private String settleNo;
 
     /**
+     * 结算金额
+     */
+    @ExcelProperty(value = "结算金额")
+    @ApiModelProperty(value = "结算金额")
+    private BigDecimal settleFee;
+
+
+    /**
      * 兑现金额
      */
     @ExcelProperty(value = "兑现金额")

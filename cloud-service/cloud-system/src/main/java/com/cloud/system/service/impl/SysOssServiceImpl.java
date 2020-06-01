@@ -1,15 +1,26 @@
 package com.cloud.system.service.impl;
 
+import com.cloud.common.constant.Constants;
+import com.cloud.common.core.domain.R;
+import com.cloud.common.exception.BusinessException;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.mapper.SysOssMapper;
+import com.cloud.system.oss.CloudStorageService;
+import com.cloud.system.oss.OSSFactory;
 import com.cloud.system.service.ISysOssService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.entity.Example.Criteria;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import static com.cloud.common.utils.ServletUtils.getRequest;
 
 /**
  * 文件上传 服务层实现
@@ -99,6 +110,50 @@ public class SysOssServiceImpl implements ISysOssService {
         Criteria criteria = example.createCriteria();
         criteria.andEqualTo("orderNo", orderNo);
         return sysOssMapper.selectByExample(example);
+    }
+
+    /**
+     * 根据订单编号修改文件上传列表
+     * @param orderNo 订单编号
+     * @param files 文件数组
+     * @return 成功或失败
+     */
+    @Override
+    public R updateListByOrderNo(String orderNo, MultipartFile[] files) {
+        try {
+            //根据订单号删除文件列表
+            Example example = new Example(SysOss.class);
+            Criteria criteria = example.createCriteria();
+            criteria.andEqualTo("orderNo", orderNo);
+            List<SysOss> sysOssList = sysOssMapper.selectByExample(example);
+            CloudStorageService storage = OSSFactory.build();
+            for(SysOss sysOss:sysOssList){
+                storage.deleteFile(sysOss.getUrl());
+            }
+            //根据订单号新增文件列表
+            List<SysOss> sysOssListReq = new ArrayList<>();
+
+            for(MultipartFile file : files){
+                String fileName = file.getOriginalFilename();
+                String suffix = fileName.substring(fileName.lastIndexOf("."));
+                String url = storage.uploadSuffix(file.getBytes(), suffix);
+                SysOss ossReq = new SysOss();
+                ossReq.setUrl(url);
+                ossReq.setFileSuffix(suffix);
+                ossReq.setCreateBy(getRequest().getHeader(Constants.CURRENT_USERNAME));
+                ossReq.setFileName(fileName);
+                ossReq.setCreateTime(new Date());
+                ossReq.setService(storage.getService());
+                ossReq.setOrderNo(orderNo);
+                sysOssListReq.add(ossReq);
+            }
+            // 保存文件信息
+            int count = sysOssMapper.insertList(sysOssListReq);
+            return R.ok();
+        }catch (Exception e){
+            return R.error("修改文件信息失败");
+        }
+
     }
 
 }

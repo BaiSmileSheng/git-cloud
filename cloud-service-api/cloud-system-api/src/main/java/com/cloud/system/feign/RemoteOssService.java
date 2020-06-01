@@ -59,4 +59,13 @@ public interface RemoteOssService {
     @GetMapping("oss/listByOrderNo")
     public List<SysOss> listByOrderNo(@RequestParam("orderNo") String orderNo);
 
+    /**
+     * 根据订单编号修改文件上传列表
+     * @param orderNo 订单编号
+     * @param files 文件数组
+     * @return 成功或失败
+     */
+    @GetMapping("oss/updateListByOrderNo")
+    public R updateListByOrderNo(@RequestParam("orderNo") String orderNo,@RequestParam("files") MultipartFile[] files);
+
 }
