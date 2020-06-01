@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.system.mapper.CdFactoryLineInfoMapper">
+
+    <resultMap type="CdFactoryLineInfo" id="CdFactoryLineInfoResult">
+        <result property="id" column="id"/>
+        <result property="supplierCode" column="supplier_code"/>
+        <result property="supplierDesc" column="supplier_desc"/>
+        <result property="factoryCode" column="factory_code"/>
+        <result property="factoryDesc" column="factory_desc"/>
+        <result property="produceLineCode" column="produce_line_code"/>
+        <result property="produceLineDesc" column="produce_line_desc"/>
+        <result property="branchOffice" column="branch_office"/>
+        <result property="branchOfficeEmail" column="branch_office_email"/>
+        <result property="monitor" column="monitor"/>
+        <result property="monitorEmail" column="monitor_email"/>
+        <result property="attribute" column="attribute"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="remarks" column="remarks"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+    </resultMap>
+
+    <sql id="selectCdFactoryLineInfoVo">
+        select id,
+               supplier_code,
+               supplier_desc,
+               factory_code,
+               factory_desc,
+               produce_line_code,
+               produce_line_desc,
+               branch_office,
+               branch_office_email,
+               monitor,
+               monitor_email,
+               attribute,
+               del_flag,
+               remarks,
+               create_time,
+               create_by,
+               update_time,
+               update_by
+        from cd_factory_line_info
+    </sql>
+
+
+</mapper>
