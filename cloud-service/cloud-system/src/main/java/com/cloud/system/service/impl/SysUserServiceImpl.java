@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +48,9 @@ public class SysUserServiceImpl implements ISysUserService {
 
     @Autowired
     private ISysConfigService configService;
+
+    @Autowired
+    private CdSupplierInfoMapper cdSupplierInfoMapper;
 
     /**
      * 根据条件分页查询用户列表
@@ -429,5 +433,25 @@ public class SysUserServiceImpl implements ISysUserService {
     @Override
     public Set<Long> selectUserIdsInDepts(Long[] deptIds) {
         return ArrayUtil.isNotEmpty(deptIds) ? userMapper.selectUserIdsInDepts(deptIds) : null;
+    }
+
+    /**
+     * 根据供应商V码查询供应商信息
+     * @param supplierCode 供应商编号
+     * @return 用户信息
+     */
+    @Override
+    public SysUser findUserBySupplierCode(String supplierCode) {
+        SysUser sysUser = new SysUser();
+        Example exampleCdSupplierInfo = new Example(CdSupplierInfo.class);
+        Example.Criteria criteriaCdSupplierInfo = exampleCdSupplierInfo.createCriteria();
+        criteriaCdSupplierInfo.andEqualTo("supplierCode", supplierCode);
+        CdSupplierInfo cdSupplierInfo = cdSupplierInfoMapper.selectOneByExample(criteriaCdSupplierInfo);
+        if(null != cdSupplierInfo){
+            sysUser.setCorporation(cdSupplierInfo.getCorporation());
+            String userName = cdSupplierInfo.getNick();
+            sysUser = userMapper.selectUserByLoginName(userName);
+        }
+        return sysUser;
     }
 }

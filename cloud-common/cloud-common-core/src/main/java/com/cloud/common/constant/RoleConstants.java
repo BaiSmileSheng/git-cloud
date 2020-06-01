@@ -12,6 +12,7 @@ public class RoleConstants {
      */
     public final static String ROLE_KEY_JIT = "JIT"; //jit
     public final static String ROLE_KEY_XWZ = "XWZ"; //小微主
+    public final static String ROLE_KEY_ZLBBZ = "ZLBBZ"; //质量部部长
 
 
 }

@@ -5,9 +5,12 @@ import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.enums.QualityStatusEnum;
+import com.cloud.settle.mail.MailService;
 import com.cloud.settle.service.ISequeceService;
 import com.cloud.system.domain.entity.SysOss;
+import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteOssService;
+import com.cloud.system.feign.RemoteUserService;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +40,10 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
     private RemoteOssService remoteOssService;
     @Autowired
     private ISequeceService sequeceService;
+    @Autowired
+    private RemoteUserService remoteUserService;
+    @Autowired
+    private MailService mailService;
 
     /**
      * 索赔单所对应的索赔文件订单号后缀
@@ -112,6 +119,18 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
                 throw new BusinessException("新增文件失败");
             }
         }
+        //发送邮件
+        String supplierCode = smsQualityOrder.getSupplierCode();
+        //根据供应商编号查询供应商信息
+        SysUser sysUser = remoteUserService.findUserBySupplierCode(supplierCode);
+        String mailSubject = "延期索赔邮件";
+        StringBuffer mailTextBuffer = new StringBuffer();
+        // 供应商名称 +V码+公司  您有一条延期交付订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
+        mailTextBuffer.append(smsQualityOrder.getSupplierName()).append("+").append(supplierCode).append("+")
+                .append(sysUser.getCorporation()).append(" ").append("您有一条延期交付订单，订单号")
+                .append(smsQualityOrder.getProductOrderCode()).append(",请及时处理，如不处理，3天后系统自动确认，无法申诉");
+        String toSupplier = sysUser.getEmail();
+        mailService.sendTextMail(mailSubject,mailTextBuffer.toString(),toSupplier);
         return R.data(smsQualityOrder.getId());
     }
 

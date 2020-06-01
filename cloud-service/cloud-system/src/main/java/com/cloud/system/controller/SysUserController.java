@@ -13,6 +13,7 @@ import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.service.ISysMenuService;
 import com.cloud.system.service.ISysUserService;
 import com.cloud.system.util.PasswordUtil;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -185,5 +186,16 @@ public class SysUserController extends BaseController {
     @PostMapping("remove")
     public R remove(String ids) throws Exception {
         return toAjax(sysUserService.deleteUserByIds(ids));
+    }
+
+    /**
+     * 根据供应商V码查询供应商信息
+     * @param supplierCode 供应商编号
+     * @return 用户信息
+     */
+    @ApiOperation(value = "根据id查询延期交付索赔 ", response = SysUser.class)
+    @GetMapping("find/{supplierCode}")
+    public SysUser findUserBySupplierCode(@PathVariable("supplierCode") String supplierCode) {
+        return sysUserService.findUserBySupplierCode(supplierCode);
     }
 }

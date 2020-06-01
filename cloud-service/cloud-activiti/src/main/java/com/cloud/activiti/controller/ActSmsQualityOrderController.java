@@ -6,6 +6,7 @@ import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
 import com.cloud.common.constant.ActivitiProTitleConstants;
+import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.settle.domain.entity.SmsQualityOrder;
@@ -117,7 +118,18 @@ public class ActSmsQualityOrderController extends BaseController {
             return R.error();
         }
         smsQualityOrder.setRemark("我已经审批了，审批结果：" + bizAudit.getResult());
-        //TODO 根据角色...设置状态   质量部长审核后5小微主待审核   小微主审核后 6小微主审核通过
+        //根据角色...设置状态   质量部长审核后5小微主待审核   小微主审核后 6小微主审核通过
+        SysUser sysUser = getUserInfo(SysUser.class);
+        if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_ZLBBZ)){
+            if(flagStatus4){
+                smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_5.getCode());
+            }
+        }
+        if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ)){
+            if(flagStatus5){
+                smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_11.getCode());
+            }
+        }
         R updateResult = remoteQualityOrderService.editSave(smsQualityOrder);
         if("0".equals(updateResult.get("code").toString())){
             //审批 推进工作流
