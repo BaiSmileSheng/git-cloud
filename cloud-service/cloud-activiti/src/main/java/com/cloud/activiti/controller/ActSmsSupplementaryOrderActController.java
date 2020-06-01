@@ -1,6 +1,7 @@
 package com.cloud.activiti.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.service.IActSmsSupplementaryOrderService;
@@ -87,22 +88,25 @@ public class ActSmsSupplementaryOrderActController extends BaseController {
         if (!SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DTJ.getCode().equals(smsSupplementaryOrderCheck.getStuffStatus())) {
             throw new BusinessException("已提交的数据不能操作！");
         }
-        //校验物料号是否同步了sap价格
-        R r=remoteCdMaterialPriceInfoService.checkSynchroSAP(smsSupplementaryOrderCheck.getRawMaterialCode());
-        if(!r.isSuccess()){
-            throw new BusinessException(r.get("msg").toString());
-        }
-        //将返回值Map转为CdMaterialPriceInfo
-        CdMaterialPriceInfo cdMaterialPriceInfo =BeanUtil.mapToBean((Map<?, ?>) r.get("data"), CdMaterialPriceInfo.class,true);
-        //校验修改申请数量是否是最小包装量的整数倍
-        int applyNum=smsSupplementaryOrder.getStuffAmount();//申请量
-        //最小包装量
-        int minUnit= Integer.parseInt(cdMaterialPriceInfo.getPriceUnit()==null?"0":cdMaterialPriceInfo.getPriceUnit());
-        if(minUnit==0){
-            throw new BusinessException("最小包装量不正确！");
-        }
-        if(applyNum%minUnit!=0){
-            throw new BusinessException("申请量必须是最小包装量的整数倍！");
+        //如果申请数量没有值,则是列表直接提交，无需判断最小包装量、是否同步SAP
+        if(smsSupplementaryOrder.getStuffAmount()!=null&&smsSupplementaryOrder.getStuffAmount().intValue()>0&&StrUtil.isNotBlank(smsSupplementaryOrder.getRawMaterialCode())){
+            //校验物料号是否同步了sap价格
+            R r=remoteCdMaterialPriceInfoService.checkSynchroSAP(smsSupplementaryOrder.getRawMaterialCode());
+            if(!r.isSuccess()){
+                throw new BusinessException(r.get("msg").toString());
+            }
+            //将返回值Map转为CdMaterialPriceInfo
+            CdMaterialPriceInfo cdMaterialPriceInfo =BeanUtil.mapToBean((Map<?, ?>) r.get("data"), CdMaterialPriceInfo.class,true);
+            //校验修改申请数量是否是最小包装量的整数倍
+            int applyNum=smsSupplementaryOrder.getStuffAmount();//申请量
+            //最小包装量
+            int minUnit= Integer.parseInt(cdMaterialPriceInfo.getPriceUnit()==null?"0":cdMaterialPriceInfo.getPriceUnit());
+            if(minUnit==0){
+                throw new BusinessException("最小包装量不正确！");
+            }
+            if(applyNum%minUnit!=0){
+                throw new BusinessException("申请量必须是最小包装量的整数倍！");
+            }
         }
         //开启审核流程
         return actSmsSupplementaryOrderService.startAct(smsSupplementaryOrder,getCurrentUserId());

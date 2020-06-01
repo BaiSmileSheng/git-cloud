@@ -130,10 +130,9 @@ public class SmsScrapOrderController extends BaseController {
     public R editSave(@RequestBody SmsScrapOrder smsScrapOrder) {
         Long id = smsScrapOrder.getId();
         //判断状态是否是未提交
-        R rCheck=checkCondition(id);
-        SmsScrapOrder smsScrapOrderCheck = (SmsScrapOrder) rCheck.get("data");
+        checkCondition(id);
         //校验物料号是否同步了sap价格
-        R r=remoteCdMaterialPriceInfoService.checkSynchroSAP(smsScrapOrderCheck.getProductMaterialCode());
+        R r=remoteCdMaterialPriceInfoService.checkSynchroSAP(smsScrapOrder.getProductMaterialCode());
         if(r.isSuccess()){
             return toAjax(smsScrapOrderService.updateByPrimaryKeySelective(smsScrapOrder));
         }else {

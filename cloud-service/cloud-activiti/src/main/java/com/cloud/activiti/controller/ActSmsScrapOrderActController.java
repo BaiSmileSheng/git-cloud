@@ -1,6 +1,6 @@
 package com.cloud.activiti.controller;
 
-import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.service.IActSmsScrapOrderService;
@@ -13,14 +13,11 @@ import com.cloud.common.log.enums.BusinessType;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
 import com.cloud.settle.enums.ScrapOrderStatusEnum;
 import com.cloud.settle.feign.RemoteSmsScrapOrderService;
-import com.cloud.system.domain.entity.CdMaterialPriceInfo;
 import com.cloud.system.feign.RemoteCdMaterialPriceInfoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 /**
  * 报废申请单 审核流程
@@ -72,8 +69,8 @@ public class ActSmsScrapOrderActController extends BaseController {
      * @return R 成功/失败
      */
     @PostMapping("open")
-    @OperLog(title = "报废审核开启流程 ", businessType = BusinessType.UPDATE)
-    @ApiOperation(value = "报废审核开启流程 ", response = R.class)
+    @OperLog(title = "报废审核开启流程", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "报废审核开启流程", response = R.class)
     public R addSave(@RequestBody SmsScrapOrder smsScrapOrder) {
         //判断状态是否是未提交，如果不是则抛出错误
         Long id = smsScrapOrder.getId();
@@ -87,22 +84,13 @@ public class ActSmsScrapOrderActController extends BaseController {
         if (!ScrapOrderStatusEnum.BF_ORDER_STATUS_DTJ.getCode().equals(smsScrapOrderCheck.getScrapStatus())) {
             throw new BusinessException("已提交的数据不能操作！");
         }
-        //校验物料号是否同步了sap价格
-        R r=remoteCdMaterialPriceInfoService.checkSynchroSAP(smsScrapOrderCheck.getProductMaterialCode());
-        if(!r.isSuccess()){
-            throw new BusinessException(r.get("msg").toString());
-        }
-        //将返回值Map转为CdMaterialPriceInfo
-        CdMaterialPriceInfo cdMaterialPriceInfo =BeanUtil.mapToBean((Map<?, ?>) r.get("data"), CdMaterialPriceInfo.class,true);
-        //校验修改申请数量是否是最小包装量的整数倍
-        int applyNum=smsScrapOrder.getScrapAmount();//申请量
-        //最小包装量
-        int minUnit= Integer.parseInt(cdMaterialPriceInfo.getPriceUnit()==null?"0":cdMaterialPriceInfo.getPriceUnit());
-        if(minUnit==0){
-            throw new BusinessException("最小包装量不正确！");
-        }
-        if(applyNum%minUnit!=0){
-            throw new BusinessException("申请量必须是最小包装量的整数倍！");
+        //如果申请数量没有值,则是列表直接提交，无需判断是否同步SAP
+        if(smsScrapOrder.getScrapAmount()!=null&&smsScrapOrder.getScrapAmount().intValue()>0&& StrUtil.isNotBlank(smsScrapOrder.getProductMaterialCode())){
+            //校验物料号是否同步了sap价格
+            R r=remoteCdMaterialPriceInfoService.checkSynchroSAP(smsScrapOrder.getProductMaterialCode());
+            if(!r.isSuccess()){
+                throw new BusinessException(r.get("msg").toString());
+            }
         }
         //开启审核流程
         return actSmsScrapOrderService.startAct(smsScrapOrder,getCurrentUserId());

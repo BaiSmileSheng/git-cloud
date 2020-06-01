@@ -6,6 +6,7 @@ import com.cloud.system.feign.factory.RemoteCdMaterialPriceInfoFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import tk.mybatis.mapper.entity.Example;
 
 /**
@@ -31,5 +32,5 @@ public interface RemoteCdMaterialPriceInfoService {
      * @return R CdMaterialPriceInfo对象
      */
     @PostMapping("materialPrice/checkSynchroSAP")
-    R checkSynchroSAP(String materialCode);
+    R checkSynchroSAP(@RequestParam(value = "materialCode") String materialCode);
 }

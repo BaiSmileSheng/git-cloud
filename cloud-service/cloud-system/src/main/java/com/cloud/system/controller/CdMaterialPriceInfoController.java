@@ -1,5 +1,6 @@
 package com.cloud.system.controller;
 
+import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -112,6 +113,9 @@ public class CdMaterialPriceInfoController extends BaseController {
      */
     @PostMapping("checkSynchroSAP")
     public R checkSynchroSAP(String materialCode){
+        if (StrUtil.isBlank(materialCode)) {
+            throw new BusinessException("参数：物料号为空！");
+        }
         String dateStr = DateUtils.getTime();
         Example example = new Example(CdMaterialPriceInfo.class);
         Example.Criteria criteria = example.createCriteria();

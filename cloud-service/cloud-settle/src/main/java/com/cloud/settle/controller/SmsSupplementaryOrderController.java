@@ -1,5 +1,6 @@
 package com.cloud.settle.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.controller.BaseController;
@@ -13,6 +14,7 @@ import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
 import com.cloud.settle.enums.SupplementaryOrderStatusEnum;
 import com.cloud.settle.service.ISmsSupplementaryOrderService;
 import com.cloud.settle.util.DataScopeUtil;
+import com.cloud.system.domain.entity.CdMaterialPriceInfo;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteCdMaterialPriceInfoService;
 import io.swagger.annotations.*;
@@ -23,6 +25,8 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+
 /**
  * 物耗申请单
  *
@@ -180,16 +184,26 @@ public class SmsSupplementaryOrderController extends BaseController {
     public R editSave(@RequestBody SmsSupplementaryOrder smsSupplementaryOrder) {
         Long id = smsSupplementaryOrder.getId();
         //判断状态是否是未提交
-        R rCheck=checkCondition(id);
-        SmsSupplementaryOrder smsSupplementaryOrderCheck = (SmsSupplementaryOrder) rCheck.get("data");
+        checkCondition(id);
         //校验物料号是否同步了sap价格
-        R r=remoteCdMaterialPriceInfoService.checkSynchroSAP(smsSupplementaryOrderCheck.getRawMaterialCode());
+        R r=remoteCdMaterialPriceInfoService.checkSynchroSAP(smsSupplementaryOrder.getRawMaterialCode());
         if(r.isSuccess()){
+            //将返回值Map转为CdMaterialPriceInfo
+            CdMaterialPriceInfo cdMaterialPriceInfo = BeanUtil.mapToBean((Map<?, ?>) r.get("data"), CdMaterialPriceInfo.class,true);
+            //校验申请数量是否是最小包装量的整数倍
+            int applyNum=smsSupplementaryOrder.getStuffAmount();//申请量
+            //最小包装量
+            int minUnit= Integer.parseInt(cdMaterialPriceInfo.getPriceUnit()==null?"0":cdMaterialPriceInfo.getPriceUnit());
+            if(minUnit==0){
+                throw new BusinessException("最小包装量不正确！");
+            }
+            if(applyNum%minUnit!=0){
+                throw new BusinessException("申请量必须是最小包装量的整数倍！");
+            }
             return toAjax(smsSupplementaryOrderService.updateByPrimaryKeySelective(smsSupplementaryOrder));
         }else {
             return r;
         }
-
     }
 
     /**
