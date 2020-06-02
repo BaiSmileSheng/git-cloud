@@ -52,6 +52,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
         List<CdMaterialInfo> cdMaterialInfosInsert = new ArrayList<>();
         List<CdMaterialInfo> cdMaterialInfosUpdate = new ArrayList<>();
         try {
+            //接口获取物料数据
             R r = materialInfoInterface(list, 0, null);
             SimpleDateFormat sft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             if (r.isSuccess()) {
@@ -59,6 +60,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
                 for (RowRisk rowRisk : list) {
                     CdMaterialInfo cdMaterialInfo = new CdMaterialInfo();
                     cdMaterialInfo.setMaterialCode(rowRisk.getMATERIAL_CODE());
+                    //查询物料数据
                     CdMaterialInfo materialInfo = cdMaterialInfoMapper.selectOne(cdMaterialInfo);
                     cdMaterialInfo.setMaterialDesc(rowRisk.getMATERIAL_DESCRITION());
                     cdMaterialInfo.setMaterialType(rowRisk.getMATERIAL_TYPE());
@@ -71,6 +73,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
                     cdMaterialInfo.setCreateTime(new Date());
                     cdMaterialInfo.setCreateBy("systemJob");
                     cdMaterialInfo.setDelFlag("0");
+                    //判断物料是否已存在
                     if (materialInfo != null) {
                         cdMaterialInfo.setId(materialInfo.getId());
                         cdMaterialInfo.setUpdateBy("systemJob");
@@ -80,8 +83,10 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
                     }
                 }
                 if (cdMaterialInfosInsert.size() > 0) {
+                    //插入新数据
                     cdMaterialInfoMapper.insertList(cdMaterialInfosInsert);
                 } else if (cdMaterialInfosUpdate.size() > 0) {
+                    //更新数据
                     cdMaterialInfoMapper.updateBatchByPrimaryKeySelective(cdMaterialInfosUpdate);
                 }
             } else {
@@ -125,18 +130,20 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
             String startDateString = sft.format(cl.getTime());
             String endDateString = sft.format(endDateTime);
             //获取链接
-            GeneralMDMDataReleaseBindingStub generalMDMDataReleaseBindingStub = (GeneralMDMDataReleaseBindingStub) new Generalmdmdatarelease_client_epLocator(mdmConnConfig).getGeneralMDMDataRelease_pt();
+            GeneralMDMDataReleaseBindingStub generalMDMDataReleaseBindingStub =
+                    (GeneralMDMDataReleaseBindingStub) new Generalmdmdatarelease_client_epLocator(mdmConnConfig).getGeneralMDMDataRelease_pt();
             //调外部接口方法
             generalMDMDataReleaseBindingStub.process(mdmConnConfig.getSysName(), mdmConnConfig.getMasterType(),
-                    mdmConnConfig.getTableName(), startDateString, endDateString,
-                    String.valueOf(page), batchId, outPage, outResult, outRetcode, outAllNum, outPageCon, pageAll, outRetmsg, onBatchId);
+                    mdmConnConfig.getTableName(), startDateString, endDateString, String.valueOf(page), batchId,
+                    outPage, outResult, outRetcode, outAllNum, outPageCon, pageAll, outRetmsg, onBatchId);
             //判断返回的状态
             if (!"S".equals(outRetcode.value)) {
                 log.error("获取物料主数据接口调用失败:" + outRetmsg.value);
                 return R.error("获取物料主数据接口调用失败:" + outRetmsg.value);
             }
             //处理返回的xml字符串
-            String xml1 = outResult.value.substring(0, outResult.value.indexOf("<NAME>")) + outResult.value.substring(outResult.value.indexOf("<ROW>"));
+            String xml1 = outResult.value.substring(0, outResult.value.indexOf("<NAME>"))
+                    + outResult.value.substring(outResult.value.indexOf("<ROW>"));
             //xml ——>list<bean>
             Object obj = XmlUtil.xmlToListBean(xml1, "OUTPUT", ProcessResponse.class
                     , new String[]{"ROW"}, new String[]{"ROWSET"}, new Class[]{RowRisk.class});
