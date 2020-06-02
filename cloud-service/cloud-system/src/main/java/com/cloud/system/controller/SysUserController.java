@@ -194,7 +194,7 @@ public class SysUserController extends BaseController {
      * @return 用户信息
      */
     @ApiOperation(value = "根据id查询延期交付索赔 ", response = SysUser.class)
-    @GetMapping("find/{supplierCode}")
+    @GetMapping("findUserBySupplierCode/{supplierCode}")
     public SysUser findUserBySupplierCode(@PathVariable("supplierCode") String supplierCode) {
         return sysUserService.findUserBySupplierCode(supplierCode);
     }

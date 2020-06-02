@@ -51,6 +51,7 @@
                complaint_date,
                supplier_confirm_date,
                settle_no,
+               settle_fee,
                cash_amount,
                uncash_amount,
                del_flag,

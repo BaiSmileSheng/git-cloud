@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * 加工费结算
+ * 质量索赔
  * @Author Lihongxia
  * @Date 2020-05-26
  */

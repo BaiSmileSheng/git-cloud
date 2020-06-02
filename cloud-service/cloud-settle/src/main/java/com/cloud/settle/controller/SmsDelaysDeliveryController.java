@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
@@ -75,9 +76,17 @@ public class SmsDelaysDeliveryController extends BaseController {
             @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required =true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "sortField", value = "排序列", required = false,paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false,paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "delaysNo", value = "索赔单号", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "supplierCode", value = "供应商编号", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "delaysStatus", value = "索赔状态", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productLineCode", value = "线体号", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productOrderCode", value = "生成订单号", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "beginTime", value = "开始时间", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", required = false,paramType = "query", dataType = "String"),
+
     })
-    public TableDataInfo list(SmsDelaysDelivery smsDelaysDelivery) {
+    public TableDataInfo list(@ApiIgnore SmsDelaysDelivery smsDelaysDelivery) {
         Example example = new Example(SmsDelaysDelivery.class);
         Example.Criteria criteria = example.createCriteria();
         if(StringUtils.isNotBlank(smsDelaysDelivery.getDelaysNo())){

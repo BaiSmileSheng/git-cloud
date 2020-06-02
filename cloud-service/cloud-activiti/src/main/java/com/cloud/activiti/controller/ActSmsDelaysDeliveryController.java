@@ -9,9 +9,9 @@ import com.cloud.common.constant.ActivitiProTitleConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
-import com.cloud.settle.domain.entity.SmsQualityOrder;
-import com.cloud.settle.enums.QualityStatusEnum;
-import com.cloud.settle.feign.RemoteQualityOrderService;
+import com.cloud.settle.domain.entity.SmsDelaysDelivery;
+import com.cloud.settle.enums.DeplayStatusEnum;
+import com.cloud.settle.feign.RemoteDelaysDeliveryService;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteUserService;
 import com.google.common.collect.Maps;
@@ -33,14 +33,14 @@ import java.util.Map;
  * @Date 2020-05-29
  */
 @RestController
-@RequestMapping("actSmsQuality")
-public class ActSmsQualityOrderController extends BaseController {
+@RequestMapping("actSmsDelaysDelivery")
+public class ActSmsDelaysDeliveryController extends BaseController {
 
     @Autowired
     private IBizBusinessService bizBusinessService;
 
     @Autowired
-    private RemoteQualityOrderService remoteQualityOrderService;
+    private RemoteDelaysDeliveryService remoteDelaysDeliveryService;
 
     @Autowired
     private RemoteUserService remoteUserService;
@@ -50,31 +50,31 @@ public class ActSmsQualityOrderController extends BaseController {
 
 
     /**
-     * 根据业务key获取质量索赔信息
+     * 根据业务key获取延期索赔信息
      * @param businessKey biz_business的主键
      * @return 查询结果包含 质量索赔信息
      */
     @GetMapping("biz/{businessKey}")
-    @ApiOperation(value = "根据业务key获取质量索赔信息",response = SmsQualityOrder.class)
+    @ApiOperation(value = "根据业务key获取延期索赔信息",response = SmsDelaysDelivery.class)
     public R getBizInfoByTableId(@PathVariable("businessKey") String businessKey) {
         BizBusiness business = bizBusinessService.selectBizBusinessById(businessKey);
         if (null != business) {
-            SmsQualityOrder smsQualityOrder  = remoteQualityOrderService.get(Long.valueOf(business.getTableId()));
-            return R.data(smsQualityOrder);
+            SmsDelaysDelivery smsDelaysDelivery  = remoteDelaysDeliveryService.get(Long.valueOf(business.getTableId()));
+            return R.data(smsDelaysDelivery);
         }
         return R.error("no record");
     }
 
     /**
      * 开启流程
-     * @param smsQualityOrder
+     * @param smsDelaysDelivery
      * @return
      */
     @PostMapping("save")
-    @ApiOperation(value = "开启质量索赔流程",response = SmsQualityOrder.class)
-    public R addSave(@RequestBody SmsQualityOrder smsQualityOrder) {
+    @ApiOperation(value = "开启延期索赔流程",response = SmsDelaysDelivery.class)
+    public R addSave(@RequestBody SmsDelaysDelivery smsDelaysDelivery) {
 
-        BizBusiness business = initBusiness(smsQualityOrder);
+        BizBusiness business = initBusiness(smsDelaysDelivery);
         bizBusinessService.insertBizBusiness(business);
         Map<String, Object> variables = Maps.newHashMap();
         bizBusinessService.startProcess(business, variables);
@@ -83,15 +83,15 @@ public class ActSmsQualityOrderController extends BaseController {
 
     /**
      * biz构造业务信息
-     * @param smsQualityOrder
+     * @param smsDelaysDelivery
      * @return
      */
-    private BizBusiness initBusiness(SmsQualityOrder smsQualityOrder) {
+    private BizBusiness initBusiness(SmsDelaysDelivery smsDelaysDelivery) {
         BizBusiness business = new BizBusiness();
-        business.setTableId(smsQualityOrder.getId().toString());
-        business.setProcDefId(smsQualityOrder.getProcDefId());
-        business.setTitle(ActivitiProTitleConstants.ACTIVITI_PRO_TITLE_SQUALITY_TEST);
-        business.setProcName(smsQualityOrder.getProcName());
+        business.setTableId(smsDelaysDelivery.getId().toString());
+        business.setProcDefId(smsDelaysDelivery.getProcDefId());
+        business.setTitle(ActivitiProTitleConstants.ACTIVITI_PRO_TITLE_SDEPALYS_TEST);
+        business.setProcName(smsDelaysDelivery.getProcName());
         long userId = getCurrentUserId();
         business.setUserId(userId);
         SysUser user = remoteUserService.selectSysUserByUserId(userId);
@@ -108,33 +108,33 @@ public class ActSmsQualityOrderController extends BaseController {
      * @return 成功/失败
      */
     @PostMapping("audit")
-    @ApiOperation(value = "索赔流程审批",response = SmsQualityOrder.class)
+    @ApiOperation(value = "延期索赔流程审批",response = SmsDelaysDelivery.class)
     public R audit(@RequestBody BizAudit bizAudit) {
         //可处理业务逻辑
         BizBusiness bizBusiness = bizBusinessService.selectBizBusinessById(bizAudit.getBusinessKey().toString());
         if (bizBusiness == null) {
             return R.error();
         }
-        SmsQualityOrder smsQualityOrder = remoteQualityOrderService.get(Long.valueOf(bizBusiness.getTableId()));
-        Boolean flagStatus4 = QualityStatusEnum.QUALITY_STATUS_4.getCode().equals(smsQualityOrder.getQualityStatus());
-        Boolean flagStatus5 = QualityStatusEnum.QUALITY_STATUS_5.getCode().equals(smsQualityOrder.getQualityStatus());
-        if (null == smsQualityOrder || !flagStatus4 || !flagStatus5) {
+        SmsDelaysDelivery smsDelaysDelivery = remoteDelaysDeliveryService.get(Long.valueOf(bizBusiness.getTableId()));
+        Boolean flagStatus4 = DeplayStatusEnum.DELAYS_STATUS_4.getCode().equals(smsDelaysDelivery.getDelaysStatus());
+        Boolean flagStatus5 = DeplayStatusEnum.DELAYS_STATUS_5.getCode().equals(smsDelaysDelivery.getDelaysStatus());
+        if (null == smsDelaysDelivery || !flagStatus4 || !flagStatus5) {
             return R.error();
         }
-        smsQualityOrder.setRemark("我已经审批了，审批结果：" + bizAudit.getResult());
-        //根据角色...设置状态   质量部长审核后5小微主待审核   小微主审核后 6小微主审核通过
+        smsDelaysDelivery.setRemark("我已经审批了，审批结果：" + bizAudit.getResult());
+        //根据角色...设置状态   订单部长审核后5小微主待审核   小微主审核后 11待结算
         SysUser sysUser = getUserInfo(SysUser.class);
-        if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_ZLBBZ)){
+        if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_DDBBZ)){
             if(flagStatus4){
-                smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_5.getCode());
+                smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_5.getCode());
             }
         }
         if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ)){
             if(flagStatus5){
-                smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_11.getCode());
+                smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_11.getCode());
             }
         }
-        R updateResult = remoteQualityOrderService.editSave(smsQualityOrder);
+        R updateResult = remoteDelaysDeliveryService.editSave(smsDelaysDelivery);
         if("0".equals(updateResult.get("code").toString())){
             //审批 推进工作流
             return actTaskService.audit(bizAudit, getCurrentUserId());

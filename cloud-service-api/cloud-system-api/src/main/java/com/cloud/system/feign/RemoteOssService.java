@@ -65,7 +65,9 @@ public interface RemoteOssService {
      * @param files 文件数组
      * @return 成功或失败
      */
-    @GetMapping("oss/updateListByOrderNo")
-    public R updateListByOrderNo(@RequestParam("orderNo") String orderNo,@RequestParam("files") MultipartFile[] files);
+    @RequestMapping(value = "oss/updateListByOrderNo", method = RequestMethod.POST,
+            produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public R updateListByOrderNo(@RequestParam("orderNo") String orderNo,@RequestPart("files") MultipartFile[] files);
 
 }

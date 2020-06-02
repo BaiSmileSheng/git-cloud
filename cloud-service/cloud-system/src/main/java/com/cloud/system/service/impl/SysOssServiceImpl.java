@@ -127,23 +127,28 @@ public class SysOssServiceImpl implements ISysOssService {
             criteria.andEqualTo("orderNo", orderNo);
             List<SysOss> sysOssList = sysOssMapper.selectByExample(example);
             CloudStorageService storage = OSSFactory.build();
+            StringBuffer idsBuffer = new StringBuffer();
             for(SysOss sysOss:sysOssList){
                 storage.deleteFile(sysOss.getUrl());
+                idsBuffer.append(sysOss.getId()).append(",");
             }
+            String idsAll = idsBuffer.toString();
+            String ids = idsAll.substring(0,idsAll.length()-1);
+            sysOssMapper.deleteByIds(ids);
             //根据订单号新增文件列表
             List<SysOss> sysOssListReq = new ArrayList<>();
-
             for(MultipartFile file : files){
                 String fileName = file.getOriginalFilename();
                 String suffix = fileName.substring(fileName.lastIndexOf("."));
-                String url = storage.uploadSuffix(file.getBytes(), suffix);
+                CloudStorageService storageAdd = OSSFactory.build();
+                String url = storageAdd.uploadSuffix(file.getBytes(), suffix);
                 SysOss ossReq = new SysOss();
                 ossReq.setUrl(url);
                 ossReq.setFileSuffix(suffix);
-                ossReq.setCreateBy(getRequest().getHeader(Constants.CURRENT_USERNAME));
+                ossReq.setCreateBy(getLoginName());
                 ossReq.setFileName(fileName);
                 ossReq.setCreateTime(new Date());
-                ossReq.setService(storage.getService());
+                ossReq.setService(storageAdd.getService());
                 ossReq.setOrderNo(orderNo);
                 sysOssListReq.add(ossReq);
             }
@@ -151,9 +156,19 @@ public class SysOssServiceImpl implements ISysOssService {
             int count = sysOssMapper.insertList(sysOssListReq);
             return R.ok();
         }catch (Exception e){
+            e.printStackTrace();
             return R.error("修改文件信息失败");
         }
 
+    }
+
+    /**
+     * 获取登录人名称
+     * @return 登录人名称
+     */
+    public String getLoginName() {
+        String userName = getRequest().getHeader(Constants.CURRENT_USERNAME);
+        return userName == null ? " " : userName;
     }
 
 }

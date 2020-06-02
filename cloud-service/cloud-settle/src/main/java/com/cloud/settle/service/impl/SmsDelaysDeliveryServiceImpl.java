@@ -166,19 +166,20 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
         Boolean flagSelect = (null == selectSmsDelaysDelivery || null == selectSmsDelaysDelivery.getDelaysStatus());
         if(flagSelect){
             logger.info("延期索赔单申诉异常 索赔单号:{}",smsDelaysDeliveryReq.getDelaysNo());
-            return R.error("此订单不存在");
+            return R.error("此延期索赔单不存在");
         }
         Boolean flagSelectStatus = DeplayStatusEnum.DELAYS_STATUS_1.getCode().equals(selectSmsDelaysDelivery.getDelaysStatus())
                 ||DeplayStatusEnum.DELAYS_STATUS_7.getCode().equals(selectSmsDelaysDelivery.getDelaysStatus());
         if(!flagSelectStatus){
             logger.info("延期索赔单申诉状态异常 索赔单号:{}",smsDelaysDeliveryReq.getDelaysNo());
-            return R.error("此订单不可再申诉");
+            return R.error("此延期索赔单不可再申诉");
         }
         //修改延期索赔单
+        smsDelaysDeliveryReq.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_4.getCode());
         smsDelaysDeliveryReq.setComplaintDate(new Date());
         this.updateByPrimaryKeySelective(smsDelaysDeliveryReq);
         //修改文件信息
-        String orderNo = smsDelaysDeliveryReq.getDelaysNo();
+        String orderNo = selectSmsDelaysDelivery.getDelaysNo();
         R result = remoteOssService.updateListByOrderNo(orderNo,files);
         return result;
     }

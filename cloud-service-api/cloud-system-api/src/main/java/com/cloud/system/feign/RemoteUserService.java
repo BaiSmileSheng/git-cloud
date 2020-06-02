@@ -56,6 +56,6 @@ public interface RemoteUserService {
      * @param supplierCode 供应商编号
      * @return 用户信息
      */
-    @GetMapping("user/find/{supplierCode}")
+    @GetMapping("user/findUserBySupplierCode/{supplierCode}")
     public SysUser findUserBySupplierCode(@PathVariable("supplierCode") String supplierCode);
 }
