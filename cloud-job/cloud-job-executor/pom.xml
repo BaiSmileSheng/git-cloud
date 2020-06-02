@@ -43,6 +43,18 @@
             <artifactId>cloud-settle-api</artifactId>
             <version>${cloud.version}</version>
         </dependency>
+
+        <!-- system模块-->
+        <dependency>
+            <groupId>com.cloud</groupId>
+            <artifactId>cloud-system-api</artifactId>
+            <version>${cloud.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
