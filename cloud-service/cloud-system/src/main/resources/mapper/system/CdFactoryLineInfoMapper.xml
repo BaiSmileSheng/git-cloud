@@ -48,4 +48,8 @@
     </sql>
 
 
+    <select id="selectLineCodeBySupplierCode" resultType="java.lang.String">
+        select group_concat(produce_line_code) from cd_factory_line_info
+        WHERE supplier_code=#{supplierCode} and del_flag='0' GROUP BY supplier_code
+    </select>
 </mapper>

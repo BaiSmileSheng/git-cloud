@@ -10,4 +10,10 @@ import com.cloud.common.core.dao.BaseMapper;
  */
 public interface CdFactoryLineInfoMapper extends BaseMapper<CdFactoryLineInfo>{
 
+    /**
+     * 根据供应商编号查询线体
+     * @param supplierCode
+     * @return 逗号分隔线体编号
+     */
+    String selectLineCodeBySupplierCode(String supplierCode);
 }

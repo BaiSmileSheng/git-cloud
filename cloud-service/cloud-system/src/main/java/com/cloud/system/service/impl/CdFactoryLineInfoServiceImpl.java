@@ -1,5 +1,6 @@
 package com.cloud.system.service.impl;
 
+    import com.cloud.common.core.domain.R;
     import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.mapper.CdFactoryLineInfoMapper;
@@ -17,5 +18,13 @@ public class CdFactoryLineInfoServiceImpl extends BaseServiceImpl<CdFactoryLineI
     @Autowired
     private CdFactoryLineInfoMapper cdFactoryLineInfoMapper;
 
-
+    /**
+     * 根据供应商编号查询线体
+     * @param supplierCode
+     * @return 逗号分隔线体编号
+     */
+    @Override
+    public R selectLineCodeBySupplierCode(String supplierCode) {
+        return R.data(cdFactoryLineInfoMapper.selectLineCodeBySupplierCode(supplierCode));
     }
+}

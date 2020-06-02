@@ -7,10 +7,10 @@ import com.cloud.system.feign.factory.RemoteFactoryLineInfoFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * 工厂线体关系 Feign服务层
- *
  * @author cs
  * @date 2020-06-01
  */
@@ -23,4 +23,12 @@ public interface RemoteFactoryLineInfoService {
      */
     @PostMapping("factoryLine/listByExample")
     R listByExample(@RequestBody CdFactoryLineInfo cdFactoryLineInfo);
+
+    /**
+     * 查询工厂线体关系
+     * @param supplierCode
+     * @return 逗号分隔线体编号
+     */
+    @PostMapping("factoryLine/selectLineCodeBySupplierCode")
+    R selectLineCodeBySupplierCode(@RequestParam(value = "supplierCode") String supplierCode);
 }

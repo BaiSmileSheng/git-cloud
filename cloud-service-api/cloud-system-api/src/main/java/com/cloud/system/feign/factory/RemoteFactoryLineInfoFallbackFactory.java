@@ -25,6 +25,16 @@ public class RemoteFactoryLineInfoFallbackFactory implements FallbackFactory<Rem
             public R listByExample(CdFactoryLineInfo cdFactoryLineInfo) {
                 return null;
             }
+
+            /**
+             * 查询工厂线体关系
+             * @param supplierCode
+             * @return 逗号分隔线体编号
+             */
+            @Override
+            public R selectLineCodeBySupplierCode(String supplierCode) {
+                return null;
+            }
         };
     }
 }

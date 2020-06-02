@@ -117,4 +117,14 @@ public class CdFactoryLineInfoController extends BaseController {
         return toAjax(cdFactoryLineInfoService.deleteByIds(ids));
     }
 
+    /**
+     * 根据供应商编号查询线体
+     * @param supplierCode
+     * @return 逗号分隔线体编号
+     */
+    @PostMapping("selectLineCodeBySupplierCode")
+    @ApiOperation(value = "根据供应商编号查询线体", response = CdFactoryLineInfo.class)
+    public R selectLineCodeBySupplierCode(String supplierCode) {
+        return cdFactoryLineInfoService.selectLineCodeBySupplierCode(supplierCode);
+    }
 }
