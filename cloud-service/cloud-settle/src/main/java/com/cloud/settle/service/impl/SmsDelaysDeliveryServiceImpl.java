@@ -194,8 +194,7 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
                 return R.error("请确认延期索赔单状态是否为待供应商确认");
             }
             smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_11.getCode());
-            //TODO 结算金额
-            //smsDelaysDelivery.setSettleFee(smsDelaysDelivery.getDelaysAmount());
+            smsDelaysDelivery.setSettleFee(smsDelaysDelivery.getDelaysAmount());
             smsDelaysDelivery.setSupplierConfirmDate(new Date());
         }
         int count = this.updateBatchByPrimaryKeySelective(selectListResult);
