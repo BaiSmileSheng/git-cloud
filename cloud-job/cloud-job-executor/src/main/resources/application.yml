@@ -1,6 +1,10 @@
 server:
   port: 8082
 spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 10.133.1.8:8848
 #  cloud:
 #    nacos:
 #      discovery:

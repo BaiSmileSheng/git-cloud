@@ -66,4 +66,11 @@ public interface ISmsQualityOrderService extends BaseService<SmsQualityOrder> {
      */
     R supplierConfirm(String ids);
 
+    /**
+     * 索赔单供应商申诉(包含文件信息)
+     * @param smsQualityOrder 质量索赔信息
+     * @return 索赔单供应商申诉结果成功或失败
+     */
+    R supplierAppeal(SmsQualityOrder smsQualityOrder, MultipartFile[] files);
+
 }

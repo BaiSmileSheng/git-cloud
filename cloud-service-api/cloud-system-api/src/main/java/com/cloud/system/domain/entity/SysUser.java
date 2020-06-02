@@ -147,6 +147,11 @@ public class SysUser extends BaseEntity {
      */
     private String supplierCode;
 
+    /**
+     * 法人公司
+     */
+    private String corporation;
+
     public Long getUserId() {
         return userId;
     }

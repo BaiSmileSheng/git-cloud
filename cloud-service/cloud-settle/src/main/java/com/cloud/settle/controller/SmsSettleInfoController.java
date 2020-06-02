@@ -83,6 +83,17 @@ public class SmsSettleInfoController extends BaseController {
         List<SmsSettleInfo> smsSettleInfoList = smsSettleInfoService.selectByExample(example);
         return smsSettleInfoList;
     }
+
+    /**
+     * 计算加工费(定时任务调用)
+     * @return 成功或失败
+     */
+    @PostMapping(value = "smsSettleInfoCalculate")
+    @ApiOperation(value = "计算加工费(定时任务调用)", response = SmsSettleInfo.class)
+    public R smsSettleInfoCalculate() {
+        R result = smsSettleInfoService.smsSettleInfoCalculate();
+        return result;
+    }
     /**
      * 组装查询条件 加工费结算信息
      * @param smsSettleInfo 加工费信息
