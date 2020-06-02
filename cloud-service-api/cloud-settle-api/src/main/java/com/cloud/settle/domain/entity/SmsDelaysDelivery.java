@@ -20,18 +20,18 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
- * 质量索赔 对象 sms_quality_order
+ * 延期交付索赔 对象 sms_delays_delivery
  *
  * @author cs
- * @date 2020-05-28
+ * @date 2020-06-01
  */
 @ExcelIgnoreUnannotated
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ApiModel(value = "质量索赔 ")
-public class SmsQualityOrder extends BaseEntity {
+@ApiModel(value = "延期交付索赔 ")
+public class SmsDelaysDelivery extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -42,39 +42,25 @@ public class SmsQualityOrder extends BaseEntity {
     private Long id;
 
     /**
+     * 线体号
+     */
+    @ExcelProperty(value = "线体号")
+    @ApiModelProperty(value = "线体号")
+    private String productLineCode;
+
+    /**
      * 索赔单号
      */
     @ExcelProperty(value = "索赔单号")
     @ApiModelProperty(value = "索赔单号")
-    private String qualityNo;
+    private String delaysNo;
 
     /**
-     * 生产订单号
+     * 生产单号
      */
-    @ExcelProperty(value = "生产订单号")
-    @ApiModelProperty(value = "生产订单号")
+    @ExcelProperty(value = "生产单号")
+    @ApiModelProperty(value = "生产单号")
     private String productOrderCode;
-
-    /**
-     * 供应商编码
-     */
-    @ExcelProperty(value = "供应商编码")
-    @ApiModelProperty(value = "供应商编码")
-    private String supplierCode;
-
-    /**
-     * 供应商名称
-     */
-    @ExcelProperty(value = "供应商名称")
-    @ApiModelProperty(value = "供应商名称")
-    private String supplierName;
-
-    /**
-     * 工厂
-     */
-    @ExcelProperty(value = "工厂")
-    @ApiModelProperty(value = "工厂")
-    private String factoryCode;
 
     /**
      * 专用号
@@ -91,52 +77,54 @@ public class SmsQualityOrder extends BaseEntity {
     private String productMaterialName;
 
     /**
-     * 质量索赔状态 0待提交、1供应商待确认，2供应商确认，3超时自动确认、4 质量部待审核、5小微主待审核、6小微主审核通过， 7供应商待确认(申诉驳回)、 11待结算、12结算完成
+     * 供应商编码
      */
-    @ExcelProperty(value = "质量索赔状态 0待提交、1供应商待确认，2供应商确认，3超时自动确认、4 质量部待审核、5小微主待审核、6小微主审核通过， 7供应商待确认(申诉驳回)、 11待结算、12结算完成")
-    @ApiModelProperty(value = "质量索赔状态 0待提交、1供应商待确认，2供应商确认，3超时自动确认、4 质量部待审核、5小微主待审核、6小微主审核通过， 7供应商待确认(申诉驳回)、 11待结算、12结算完成")
-    private String qualityStatus;
+    @ExcelProperty(value = "供应商编码")
+    @ApiModelProperty(value = "供应商编码")
+    private String supplierCode;
 
     /**
-     * 数量
+     * 供应商名称
      */
-    @ExcelProperty(value = "数量")
-    @ApiModelProperty(value = "数量")
-    private Long qualityAmount;
+    @ExcelProperty(value = "供应商名称")
+    @ApiModelProperty(value = "供应商名称")
+    private String supplierName;
 
     /**
-     * 问题分类
+     * 索赔状态 1待供应商确认、4订单待审核、5小微主待审核、、6小微主审核通过、7 待供应商确认(申诉驳回) 、11待结算、12已结算、13已兑现、14部分兑现、15未兑现
      */
-    @ExcelProperty(value = "问题分类")
-    @ApiModelProperty(value = "问题分类")
-    private String projectName;
+    @ExcelProperty(value = "索赔状态 1待供应商确认、4订单待审核、5小微主待审核、、6小微主审核通过、7 待供应商确认(申诉驳回) 、11待结算、12已结算、13已兑现、14部分兑现、15未兑现")
+    @ApiModelProperty(value = "索赔状态 1待供应商确认、4订单待审核、5小微主待审核、、6小微主审核通过、7 待供应商确认(申诉驳回) 、11待结算、12已结算、13已兑现、14部分兑现、15未兑现")
+    private String delaysStatus;
 
     /**
-     * 索赔条款
+     * 基本完成日期
      */
-    @ExcelProperty(value = "索赔条款")
-    @ApiModelProperty(value = "索赔条款")
-    private String claimClause;
+    @ExcelProperty(value = "基本完成日期")
+    @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @ApiModelProperty(value = "基本完成日期")
+    private Date deliveryDate;
 
     /**
-     * 索赔理由
+     * 实际完成日期
      */
-    @ExcelProperty(value = "索赔理由")
-    @ApiModelProperty(value = "索赔理由")
-    private String claimReason;
+    @ExcelProperty(value = "实际完成日期")
+    @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @ApiModelProperty(value = "实际完成日期")
+    private Date actDeliveryDate;
 
     /**
      * 索赔金额
      */
     @ExcelProperty(value = "索赔金额")
     @ApiModelProperty(value = "索赔金额")
-    private BigDecimal claimAmount;
+    private BigDecimal delaysAmount;
 
     /**
      * 提交时间
      */
     @ExcelProperty(value = "提交时间")
-    @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @ApiModelProperty(value = "提交时间")
     private Date submitDate;
 
     /**
@@ -151,6 +139,7 @@ public class SmsQualityOrder extends BaseEntity {
      */
     @ExcelProperty(value = "申诉时间")
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @ApiModelProperty(value = "申诉时间")
     private Date complaintDate;
 
     /**
@@ -158,6 +147,7 @@ public class SmsQualityOrder extends BaseEntity {
      */
     @ExcelProperty(value = "供应商确认时间")
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @ApiModelProperty(value = "供应商确认时间")
     private Date supplierConfirmDate;
 
     /**
@@ -174,12 +164,20 @@ public class SmsQualityOrder extends BaseEntity {
     @ApiModelProperty(value = "结算金额")
     private BigDecimal settleFee;
 
+
     /**
      * 兑现金额
      */
     @ExcelProperty(value = "兑现金额")
     @ApiModelProperty(value = "兑现金额")
     private BigDecimal cashAmount;
+
+    /**
+     * 未兑现金额
+     */
+    @ExcelProperty(value = "未兑现金额")
+    @ApiModelProperty(value = "未兑现金额")
+    private BigDecimal uncashAmount;
 
     /**
      * 删除状态 0：有效，1：删除
