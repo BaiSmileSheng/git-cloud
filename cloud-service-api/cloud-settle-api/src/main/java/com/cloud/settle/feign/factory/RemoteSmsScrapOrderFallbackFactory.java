@@ -43,6 +43,16 @@ public class RemoteSmsScrapOrderFallbackFactory implements FallbackFactory<Remot
             public R editSave(SmsScrapOrder smsScrapOrder) {
                 return R.error();
             }
+
+            /**
+             * 新增保存报废申请
+             * @param smsScrapOrder
+             * @return 是否成功
+             */
+            @Override
+            public R addSave(SmsScrapOrder smsScrapOrder) {
+                return  R.error();
+            }
         };
     }
 }

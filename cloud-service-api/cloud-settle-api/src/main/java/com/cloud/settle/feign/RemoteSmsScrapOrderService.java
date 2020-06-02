@@ -41,4 +41,12 @@ public interface RemoteSmsScrapOrderService {
      */
     @PostMapping("scrapOrder/editSave")
     R editSave(@RequestBody SmsScrapOrder smsScrapOrder);
+
+    /**
+     * 新增保存报废申请
+     * @param smsScrapOrder
+     * @return 是否成功
+     */
+    @PostMapping("scrapOrder/save")
+    R addSave(@RequestBody SmsScrapOrder smsScrapOrder);
 }

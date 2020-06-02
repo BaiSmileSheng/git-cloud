@@ -41,4 +41,12 @@ public interface RemoteSmsSupplementaryOrderService {
      */
     @PostMapping("supplementary/editSave")
     R editSave(@RequestBody SmsSupplementaryOrder smsSupplementaryOrder);
+
+    /**
+     * 新增保存物耗申请单
+     * @param smsSupplementaryOrder
+     * @return 是否成功
+     */
+    @PostMapping("supplementary/save")
+    R addSave(@RequestBody SmsSupplementaryOrder smsSupplementaryOrder);
 }

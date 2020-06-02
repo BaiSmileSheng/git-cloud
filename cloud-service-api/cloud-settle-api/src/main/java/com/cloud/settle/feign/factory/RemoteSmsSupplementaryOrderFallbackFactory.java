@@ -45,6 +45,16 @@ public class RemoteSmsSupplementaryOrderFallbackFactory implements FallbackFacto
             public R editSave(SmsSupplementaryOrder smsSupplementaryOrder) {
                 return R.error();
             }
+
+            /**
+             * 新增保存物耗申请单
+             * @param smsSupplementaryOrder
+             * @return 是否成功
+             */
+            @Override
+            public R addSave(SmsSupplementaryOrder smsSupplementaryOrder) {
+                return R.error();
+            }
         };
     }
 }
