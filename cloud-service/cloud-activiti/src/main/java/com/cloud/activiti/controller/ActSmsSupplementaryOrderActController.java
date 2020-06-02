@@ -1,15 +1,12 @@
 package com.cloud.activiti.controller;
 
 import com.cloud.activiti.domain.BizAudit;
-import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.service.IActSmsSupplementaryOrderService;
-import com.cloud.activiti.service.IBizBusinessService;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
-import com.cloud.settle.feign.RemoteSmsSupplementaryOrderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,12 +23,6 @@ import org.springframework.web.bind.annotation.*;
 @Api(tags = "物耗申请单审核流程 ")
 public class ActSmsSupplementaryOrderActController extends BaseController {
     @Autowired
-    private IBizBusinessService bizBusinessService;
-
-    @Autowired
-    private RemoteSmsSupplementaryOrderService remoteSmsSupplementaryOrderService;
-
-    @Autowired
     private IActSmsSupplementaryOrderService actSmsSupplementaryOrderService;
 
     /**
@@ -44,14 +35,7 @@ public class ActSmsSupplementaryOrderActController extends BaseController {
     @GetMapping("biz/{businessKey}")
     @ApiOperation(value = "根据业务key获取数据", response = SmsSupplementaryOrder.class)
     public R getBizInfoByTableId(@PathVariable("businessKey") String businessKey) {
-        //查询流程业务表
-        BizBusiness business = bizBusinessService.selectBizBusinessById(businessKey);
-        if (null != business) {
-            //根据流程业务表 tableId 查询业务表信息
-            SmsSupplementaryOrder smsSupplementaryOrder = remoteSmsSupplementaryOrderService.get(Long.valueOf(business.getTableId()));
-            return R.data(smsSupplementaryOrder);
-        }
-        return R.error("no record");
+        return actSmsSupplementaryOrderService.getBizInfoByTableId(businessKey);
     }
 
     /**

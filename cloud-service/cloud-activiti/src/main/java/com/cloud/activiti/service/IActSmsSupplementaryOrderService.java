@@ -31,9 +31,16 @@ public interface IActSmsSupplementaryOrderService {
     /**
      * 审批流程 物耗申请单逻辑
      * @param bizAudit
-     * @param smsSupplementaryOrder
      * @param userId
      * @return R
      */
     R audit(BizAudit bizAudit,long userId);
+
+    /**
+     * 根据业务key获取数据
+     * @param businessKey
+     * @return smsSupplementaryOrder
+     * @author cs
+     */
+    R getBizInfoByTableId(String businessKey);
 }

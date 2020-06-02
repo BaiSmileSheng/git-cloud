@@ -34,4 +34,7 @@ public interface IActSmsScrapOrderService {
      * @return R
      */
     R audit(BizAudit bizAudit,long userId);
+
+
+    R getBizInfoByTableId(String businessKey);
 }

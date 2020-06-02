@@ -180,6 +180,24 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
     }
 
     /**
+     * 根据业务key获取数据
+     * @param businessKey
+     * @return smsSupplementaryOrder
+     * @author cs
+     */
+    @Override
+    public R getBizInfoByTableId(String businessKey) {
+        //查询流程业务表
+        BizBusiness business = bizBusinessService.selectBizBusinessById(businessKey);
+        if (null != business) {
+            //根据流程业务表 tableId 查询业务表信息
+            SmsScrapOrder smsScrapOrder = remoteSmsScrapOrderService.get(Long.valueOf(business.getTableId()));
+            return R.data(smsScrapOrder);
+        }
+        return R.error("no record");
+    }
+
+    /**
      * biz构造业务信息
      *
      * @param smsScrapOrder

@@ -183,6 +183,7 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
      * @return R
      */
     @Override
+//    @GlobalTransactional
     public R audit(BizAudit bizAudit, long userId) {
         //流程审核业务表
         BizBusiness bizBusiness = bizBusinessService.selectBizBusinessById(bizAudit.getBusinessKey().toString());
@@ -227,6 +228,24 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
             return actTaskService.audit(bizAudit, userId);
         }
         return R.error();
+    }
+
+    /**
+     * 根据业务key获取数据
+     * @param businessKey
+     * @return smsSupplementaryOrder
+     * @author cs
+     */
+    @Override
+    public R getBizInfoByTableId(String businessKey) {
+        //查询流程业务表
+        BizBusiness business = bizBusinessService.selectBizBusinessById(businessKey);
+        if (null != business) {
+            //根据流程业务表 tableId 查询业务表信息
+            SmsSupplementaryOrder smsSupplementaryOrder = remoteSmsSupplementaryOrderService.get(Long.valueOf(business.getTableId()));
+            return R.data(smsSupplementaryOrder);
+        }
+        return R.error("no record");
     }
 
     /**
