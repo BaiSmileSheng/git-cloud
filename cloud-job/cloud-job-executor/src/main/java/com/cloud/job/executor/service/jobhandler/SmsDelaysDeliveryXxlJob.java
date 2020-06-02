@@ -23,6 +23,7 @@ public class SmsDelaysDeliveryXxlJob {
 
     /**
      * 定时生成延期索赔单
+     * 每日凌晨执行一次  0 0 0 * * ?
      * @param param
      * @return 成功
      * @throws Exception

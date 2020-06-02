@@ -23,6 +23,7 @@ public class SmsSettleInfoCalculateXxlJob {
 
     /**
      * 定时生成加工费
+     * 每日凌晨执行一次  0 0 0 * * ?
      * @param param
      * @return
      * @throws Exception

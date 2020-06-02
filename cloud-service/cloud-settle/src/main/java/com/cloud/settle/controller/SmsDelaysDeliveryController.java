@@ -181,12 +181,8 @@ public class SmsDelaysDeliveryController extends BaseController {
     @PostMapping("supplierAppeal")
     @ApiOperation(value = "延期索赔单供应商申诉(包含文件信息) ", response = SmsDelaysDelivery.class)
     public R supplierAppeal(@RequestParam("smsQualityOrder") String smsDelaysDeliveryReq, @RequestParam("files") MultipartFile[] files) {
-        try{
-            SmsDelaysDelivery smsDelaysDelivery = JSONObject.parseObject(smsDelaysDeliveryReq,SmsDelaysDelivery.class);
-            return smsDelaysDeliveryService.supplierAppeal(smsDelaysDelivery,files);
-        }catch (Exception e){
-            return R.error(e.getMessage());
-        }
+        SmsDelaysDelivery smsDelaysDelivery = JSONObject.parseObject(smsDelaysDeliveryReq,SmsDelaysDelivery.class);
+        return smsDelaysDeliveryService.supplierAppeal(smsDelaysDelivery,files);
     }
 
     /**
@@ -197,12 +193,7 @@ public class SmsDelaysDeliveryController extends BaseController {
     @PostMapping("supplierConfirm")
     @ApiOperation(value = "供应商确认延期索赔单", response = SmsDelaysDelivery.class)
     public R supplierConfirm(String ids){
-        try{
-            return smsDelaysDeliveryService.supplierConfirm(ids);
-        }catch (Exception e){
-            return R.error("供应商确认延期索赔单异常");
-
-        }
+        return smsDelaysDeliveryService.supplierConfirm(ids);
     }
 
 }

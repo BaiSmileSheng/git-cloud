@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
@@ -98,7 +97,7 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
      * 定时任务调用批量新增保存延期交付索赔(并发送邮件)
      * @return 成功或失败
      */
-    @Transactional
+    @GlobalTransactional
     @Override
     public R batchAddDelaysDelivery() {
         //TODO 调用订单接口获取 待生成延期索赔的订单(每日凌晨取前一天订单状态为“关单”的排产订单，计算交货时间大于订单应交货日期时)

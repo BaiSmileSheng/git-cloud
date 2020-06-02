@@ -3,6 +3,8 @@ package com.cloud.activiti.controller;
 import com.cloud.activiti.consts.ActivitiConstant;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
+import com.cloud.activiti.service.IActSmsDelaysDeliveryService;
+import com.cloud.activiti.service.IActSmsQualityOrderService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
 import com.cloud.common.constant.ActivitiProTitleConstants;
@@ -37,17 +39,10 @@ import java.util.Map;
 public class ActSmsDelaysDeliveryController extends BaseController {
 
     @Autowired
-    private IBizBusinessService bizBusinessService;
-
-    @Autowired
-    private RemoteDelaysDeliveryService remoteDelaysDeliveryService;
-
-    @Autowired
     private RemoteUserService remoteUserService;
 
     @Autowired
-    private IActTaskService actTaskService;
-
+    private IActSmsDelaysDeliveryService actSmsDelaysDeliveryService;
 
     /**
      * 根据业务key获取延期索赔信息
@@ -57,88 +52,32 @@ public class ActSmsDelaysDeliveryController extends BaseController {
     @GetMapping("biz/{businessKey}")
     @ApiOperation(value = "根据业务key获取延期索赔信息",response = SmsDelaysDelivery.class)
     public R getBizInfoByTableId(@PathVariable("businessKey") String businessKey) {
-        BizBusiness business = bizBusinessService.selectBizBusinessById(businessKey);
-        if (null != business) {
-            SmsDelaysDelivery smsDelaysDelivery  = remoteDelaysDeliveryService.get(Long.valueOf(business.getTableId()));
-            return R.data(smsDelaysDelivery);
-        }
-        return R.error("no record");
+        return actSmsDelaysDeliveryService.getBizInfoByTableId(businessKey);
     }
 
     /**
-     * 开启流程
-     * @param smsDelaysDelivery
-     * @return
+     * 开启延期索赔流程
+     * @param smsDelaysDelivery 延期索赔信息
+     * @return 成功或失败
      */
     @PostMapping("save")
     @ApiOperation(value = "开启延期索赔流程",response = SmsDelaysDelivery.class)
     public R addSave(@RequestBody SmsDelaysDelivery smsDelaysDelivery) {
-
-        BizBusiness business = initBusiness(smsDelaysDelivery);
-        bizBusinessService.insertBizBusiness(business);
-        Map<String, Object> variables = Maps.newHashMap();
-        bizBusinessService.startProcess(business, variables);
-        return R.ok();
+        //获取当前用户登录信息
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return actSmsDelaysDeliveryService.addSave(smsDelaysDelivery,sysUser);
     }
 
     /**
-     * biz构造业务信息
-     * @param smsDelaysDelivery
-     * @return
-     */
-    private BizBusiness initBusiness(SmsDelaysDelivery smsDelaysDelivery) {
-        BizBusiness business = new BizBusiness();
-        business.setTableId(smsDelaysDelivery.getId().toString());
-        business.setProcDefId(smsDelaysDelivery.getProcDefId());
-        business.setTitle(ActivitiProTitleConstants.ACTIVITI_PRO_TITLE_SDEPALYS_TEST);
-        business.setProcName(smsDelaysDelivery.getProcName());
-        long userId = getCurrentUserId();
-        business.setUserId(userId);
-        SysUser user = remoteUserService.selectSysUserByUserId(userId);
-        business.setApplyer(user.getUserName());
-        business.setStatus(ActivitiConstant.STATUS_DEALING);
-        business.setResult(ActivitiConstant.RESULT_DEALING);
-        business.setApplyTime(new Date());
-        return business;
-    }
-
-    /**
-     * 流程审批
+     * 延期索赔流程审批
      * @param bizAudit
      * @return 成功/失败
      */
     @PostMapping("audit")
     @ApiOperation(value = "延期索赔流程审批",response = SmsDelaysDelivery.class)
     public R audit(@RequestBody BizAudit bizAudit) {
-        //可处理业务逻辑
-        BizBusiness bizBusiness = bizBusinessService.selectBizBusinessById(bizAudit.getBusinessKey().toString());
-        if (bizBusiness == null) {
-            return R.error();
-        }
-        SmsDelaysDelivery smsDelaysDelivery = remoteDelaysDeliveryService.get(Long.valueOf(bizBusiness.getTableId()));
-        Boolean flagStatus4 = DeplayStatusEnum.DELAYS_STATUS_4.getCode().equals(smsDelaysDelivery.getDelaysStatus());
-        Boolean flagStatus5 = DeplayStatusEnum.DELAYS_STATUS_5.getCode().equals(smsDelaysDelivery.getDelaysStatus());
-        if (null == smsDelaysDelivery || !flagStatus4 || !flagStatus5) {
-            return R.error();
-        }
-        smsDelaysDelivery.setRemark("我已经审批了，审批结果：" + bizAudit.getResult());
-        //根据角色...设置状态   订单部长审核后5小微主待审核   小微主审核后 11待结算
+        //获取当前用户登录信息
         SysUser sysUser = getUserInfo(SysUser.class);
-        if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_DDBBZ)){
-            if(flagStatus4){
-                smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_5.getCode());
-            }
-        }
-        if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ)){
-            if(flagStatus5){
-                smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_11.getCode());
-            }
-        }
-        R updateResult = remoteDelaysDeliveryService.editSave(smsDelaysDelivery);
-        if("0".equals(updateResult.get("code").toString())){
-            //审批 推进工作流
-            return actTaskService.audit(bizAudit, getCurrentUserId());
-        }
-        return R.error();
+        return actSmsDelaysDeliveryService.audit(bizAudit,sysUser);
     }
 }
