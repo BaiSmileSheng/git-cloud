@@ -40,8 +40,9 @@ public class SequeceServiceImpl implements ISequeceService {
             stringBuffer.append("0");
         }
         stringBuffer.append(raw);
-
-        return stringBuffer.toString();
+        String seqAll = stringBuffer.toString();
+        String seq = seqAll.substring(seqAll.length()-length);
+        return seq;
     }
 }
 

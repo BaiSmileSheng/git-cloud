@@ -71,6 +71,11 @@ public class RemoteOssFallbackFactory implements FallbackFactory<RemoteOssServic
             public R updateListByOrderNo(String orderNo, MultipartFile[] files) {
                 return R.error("根据订单号修改文件信息失败");
             }
+
+            @Override
+            public R deleteListByOrderNo(String orderNo) {
+                return R.error("根据订单号删除文件信息失败");
+            }
         };
     }
 }

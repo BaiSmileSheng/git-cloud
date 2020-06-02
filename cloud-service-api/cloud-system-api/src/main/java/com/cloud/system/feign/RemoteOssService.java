@@ -70,4 +70,12 @@ public interface RemoteOssService {
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public R updateListByOrderNo(@RequestParam("orderNo") String orderNo,@RequestPart("files") MultipartFile[] files);
 
+    /**
+     * 根据订单编号删除文件上传列表
+     * @param orderNo 订单编号
+     * @return 成功或失败
+     */
+    @PostMapping("oss/deleteListByOrderNo")
+    public R deleteListByOrderNo(@RequestParam("orderNo") String orderNo);
+
 }
