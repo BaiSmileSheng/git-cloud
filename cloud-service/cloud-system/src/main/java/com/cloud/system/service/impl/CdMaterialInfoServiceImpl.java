@@ -1,7 +1,6 @@
 package com.cloud.system.service.impl;
 
 import com.cloud.common.core.domain.R;
-import com.cloud.common.exception.base.BaseException;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.common.utils.XmlUtil;
 import com.cloud.system.config.MdmConnConfig;
@@ -17,6 +16,7 @@ import com.cloud.system.mapper.CdMaterialInfoMapper;
 import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.service.ICdMaterialInfoService;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
+
 import javax.xml.rpc.holders.StringHolder;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -40,7 +40,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
     private MdmConnConfig mdmConnConfig;
 
     /**
-     * @Description:
+     * @Description: 保存MDM接口获取的物料信息数据
      * @Param: []
      * @return: com.cloud.common.core.domain.R
      * @Author: ltq
@@ -52,7 +52,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
         List<CdMaterialInfo> cdMaterialInfosInsert = new ArrayList<>();
         List<CdMaterialInfo> cdMaterialInfosUpdate = new ArrayList<>();
         try {
-            R r = materialInfoInterface(list, 0,null);
+            R r = materialInfoInterface(list, 0, null);
             SimpleDateFormat sft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             if (r.isSuccess()) {
                 list = (List<RowRisk>) r.get("list");
@@ -84,12 +84,15 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
                 } else if (cdMaterialInfosUpdate.size() > 0) {
                     cdMaterialInfoMapper.updateBatchByPrimaryKeySelective(cdMaterialInfosUpdate);
                 }
+            } else {
+                log.error(r.get("msg").toString());
+                return R.error(r.get("msg").toString());
             }
         } catch (Exception e) {
             log.error("保存物料主数据失败！");
-            throw new BaseException("保存物料主数据失败,异常：" + e);
+            return R.error("保存物料主数据失败:" + e);
         }
-        return new R();
+        return R.ok();
     }
 
     /**
@@ -100,7 +103,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
      * @Date: 2020/5/29
      */
     @Override
-    public R materialInfoInterface(List<RowRisk> list,int page, String batchId) {
+    public R materialInfoInterface(List<RowRisk> list, int page, String batchId) {
         page += 1;
         //定义返回对象
         R r = new R();
@@ -116,7 +119,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
         Date endDateTime = new Date();
         Date startDateTime = new Date();
         try {
-            java.util.Calendar cl =Calendar.getInstance();
+            Calendar cl = Calendar.getInstance();
             cl.setTime(startDateTime);
             cl.add(Calendar.DATE, -1);//减一天
             String startDateString = sft.format(cl.getTime());
@@ -129,8 +132,8 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
                     String.valueOf(page), batchId, outPage, outResult, outRetcode, outAllNum, outPageCon, pageAll, outRetmsg, onBatchId);
             //判断返回的状态
             if (!"S".equals(outRetcode.value)) {
-                log.error("获取物料主数据接口调用失败!");
-                throw new BaseException("获取物料主数据接口调用失败!");
+                log.error("获取物料主数据接口调用失败:" + outRetmsg.value);
+                return R.error("获取物料主数据接口调用失败:" + outRetmsg.value);
             }
             //处理返回的xml字符串
             String xml1 = outResult.value.substring(0, outResult.value.indexOf("<NAME>")) + outResult.value.substring(outResult.value.indexOf("<ROW>"));
@@ -149,14 +152,14 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
             r.put("batchId", onBatchId.value);
         } catch (Exception e) {
             log.error("获取物料主数据异常:" + e);
-            throw new BaseException("获取物料主数据异常！");
+            return R.error("获取物料主数据异常" + e);
         }
         //判断当前页数是否到最大页数
         if (page == Integer.parseInt(pageAll.value)) {
             return r;
         }
         //递归调用
-        materialInfoInterface(list,page, onBatchId.value);
+        materialInfoInterface(list, page, onBatchId.value);
         return r;
     }
 

@@ -21,14 +21,18 @@ public class CdMaterialInfoXxlJob {
     @XxlJob("cdMaterialInfoXxlJobHandler")
     public ReturnT<String> cdMaterialInfoXxlJobHandler(String param) throws Exception {
         XxlJobLogger.log("==============执行获取MDM系统物料主数据定时任务开始============");
-        R r = new R();
+
         try {
             XxlJobLogger.log("==============调用保存物料主数据服务开始============");
-            r = remoteMaterialService.saveMaterialInfo();
+            R r = remoteMaterialService.saveMaterialInfo();
+            if (!r.isSuccess()) {
+                XxlJobLogger.log("==============定时任务执行异常============:"+r.get("msg"));
+                return ReturnT.FAIL;
+            }
             XxlJobLogger.log("==============调用保存物料主数据服务结束============");
         } catch (Exception e) {
             XxlJobLogger.log("定时任务执行异常："+e);
-            throw new BaseException("定时任务执行异常："+e);
+            return ReturnT.FAIL;
         }
         XxlJobLogger.log("==============执行获取MDM系统物料主数据定时任务结束============");
         return ReturnT.SUCCESS;
