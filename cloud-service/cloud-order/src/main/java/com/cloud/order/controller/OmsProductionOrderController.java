@@ -15,6 +15,7 @@ import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.service.IOmsProductionOrderService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.feign.RemoteFactoryLineInfoService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +38,9 @@ public class OmsProductionOrderController extends BaseController {
 
     @Autowired
     private IOmsProductionOrderService omsProductionOrderService;
+
+    @Autowired
+    private RemoteFactoryLineInfoService remoteFactoryLineInfoService;
 
     /**
      * 查询排产订单
@@ -93,16 +97,18 @@ public class OmsProductionOrderController extends BaseController {
 
         SysUser sysUser = getUserInfo(SysUser.class);
         if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
-            //TODO:供应商查询与自己有关的线体数据
-
+            R r = remoteFactoryLineInfoService.selectLineCodeBySupplierCode(sysUser.getSupplierCode());
+            if (r.get("data") == null || StrUtil.isBlank(r.get("data").toString())) {
+                return null;
+            }
+            String lineCodes = r.get("data").toString();
+            criteria.andIn("productLineCode",CollectionUtil.toList(lineCodes.split(",")));
         }else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
             //班长、分主管查询工厂下的数据
             if(CollectionUtil.contains(sysUser.getRoleKeys(),RoleConstants.ROLE_KEY_BZ)
             ||CollectionUtil.contains(sysUser.getRoleKeys(),RoleConstants.ROLE_KEY_FZG)){
                 criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
             }
-        }else{
-            return null;
         }
         startPage();
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderService.selectByExample(example);

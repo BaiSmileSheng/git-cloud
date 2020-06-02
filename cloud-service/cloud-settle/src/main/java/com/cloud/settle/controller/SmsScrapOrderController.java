@@ -89,8 +89,6 @@ public class SmsScrapOrderController extends BaseController {
                 criteria.andEqualTo("scrapStatus", ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
                 criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
             }
-        }else{
-            return null;
         }
         startPage();
         List<SmsScrapOrder> smsScrapOrderList = smsScrapOrderService.selectByExample(example);

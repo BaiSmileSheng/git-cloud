@@ -85,8 +85,6 @@ public class SmsSupplementaryOrderController extends BaseController {
                 criteria.andEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode());
                 criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
             }
-        }else{
-            return null;
         }
         startPage();
         List<SmsSupplementaryOrder> smsSupplementaryOrderList = smsSupplementaryOrderService.selectByExample(example);
