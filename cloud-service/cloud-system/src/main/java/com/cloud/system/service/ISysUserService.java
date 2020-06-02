@@ -191,4 +191,11 @@ public interface ISysUserService {
      * @author zmr
      */
     public Set<Long> selectUserIdsInDepts(Long[] deptIds);
+
+    /**
+     * 根据供应商V码查询供应商信息
+     * @param supplierCode 供应商编号
+     * @return 用户信息
+     */
+    SysUser findUserBySupplierCode(String supplierCode);
 }

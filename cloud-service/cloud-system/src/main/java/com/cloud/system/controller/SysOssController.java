@@ -180,4 +180,17 @@ public class SysOssController extends BaseController {
         return listResult;
     }
 
+    /**
+     * 根据订单编号修改文件上传列表
+     * @param orderNo 订单编号
+     * @param files 文件数组
+     * @return 成功或失败
+     */
+    @PostMapping("updateListByOrderNo")
+    @ApiOperation(value = "根据订单编号修改文件上传列表",response = SysOss.class)
+    public R updateListByOrderNo(@RequestParam("orderNo") String orderNo,@RequestParam("files") MultipartFile[] files) {
+        R result = sysOssService.updateListByOrderNo(orderNo,files);
+        return result;
+    }
+
 }

@@ -50,4 +50,12 @@ public interface RemoteUserService {
      */
     @GetMapping("user/inDepts")
     public Set<Long> selectUserIdsInDepts(@RequestParam("deptIds") String deptIds);
+
+    /**
+     * 根据供应商V码查询供应商信息
+     * @param supplierCode 供应商编号
+     * @return 用户信息
+     */
+    @GetMapping("user/findUserBySupplierCode/{supplierCode}")
+    public SysUser findUserBySupplierCode(@PathVariable("supplierCode") String supplierCode);
 }

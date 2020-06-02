@@ -8,7 +8,6 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.domain.entity.SmsQualityOrder;
-import com.cloud.settle.enums.QualityStatusEnum;
 import com.cloud.settle.service.ISmsQualityOrderService;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.enums.UserTypeEnum;
@@ -16,9 +15,9 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -130,12 +129,24 @@ public class SmsQualityOrderController extends BaseController {
 
     /**
      * 修改保存质量索赔
+     * @param smsQualityOrder 质量索赔信息
+     * @return 修改成功或失败
+     */
+    @PostMapping("editSave")
+    @OperLog(title = "修改保存质量索赔 ", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "修改保存质量索赔 ", response = R.class)
+    public R editSave(@RequestBody SmsQualityOrder smsQualityOrder) {
+        return toAjax(smsQualityOrderService.updateByPrimaryKeySelective(smsQualityOrder));
+    }
+
+    /**
+     * 修改保存质量索赔(包含文件信息)
      * @param smsQualityOrderReq 质量索赔信息
      * @return 修改结果成功或失败
      */
     @PostMapping("update")
-    @ApiOperation(value = "修改保存质量索赔 ", response = SmsQualityOrder.class)
-    public R editSave(@RequestParam("smsQualityOrder") String smsQualityOrderReq,@RequestParam("files") MultipartFile[] files) {
+    @ApiOperation(value = "修改保存质量索赔(包含文件信息)", response = SmsQualityOrder.class)
+    public R updateQuality(@RequestParam("smsQualityOrder") String smsQualityOrderReq,@RequestParam("files") MultipartFile[] files) {
         try{
             SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq,SmsQualityOrder.class);
             return smsQualityOrderService.updateSmsQualityOrderAndSysOss(smsQualityOrder,files);
@@ -191,4 +202,19 @@ public class SmsQualityOrderController extends BaseController {
         }
     }
 
+    /**
+     * 索赔单供应商申诉(包含文件信息)
+     * @param smsQualityOrderReq 质量索赔信息
+     * @return 索赔单供应商申诉结果成功或失败
+     */
+    @PostMapping("supplierAppeal")
+    @ApiOperation(value = "索赔单供应商申诉 ", response = SmsQualityOrder.class)
+    public R supplierAppeal(@RequestParam("smsQualityOrder") String smsQualityOrderReq,@RequestParam("files") MultipartFile[] files) {
+        try{
+            SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq,SmsQualityOrder.class);
+            return smsQualityOrderService.supplierAppeal(smsQualityOrder,files);
+        }catch (Exception e){
+            return R.error(e.getMessage());
+        }
+    }
 }
