@@ -30,7 +30,7 @@ public class CdMaterialInfoXxlJob {
             XxlJobLogger.log("定时任务执行异常："+e);
             throw new BaseException("定时任务执行异常："+e);
         }
-        XxlJobLogger.log("==============执行获取MDM系统物料主数据定时任务开始============");
+        XxlJobLogger.log("==============执行获取MDM系统物料主数据定时任务结束============");
         return ReturnT.SUCCESS;
     }
 }
