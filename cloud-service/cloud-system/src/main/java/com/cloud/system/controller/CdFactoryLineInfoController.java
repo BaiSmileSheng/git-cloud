@@ -5,6 +5,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.common.utils.StringUtils;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.service.ICdFactoryLineInfoService;
 import io.swagger.annotations.ApiImplicitParam;
@@ -59,6 +60,30 @@ public class CdFactoryLineInfoController extends BaseController {
         return getDataTable(cdFactoryLineInfoList);
     }
 
+
+    /**
+     * 查询工厂线体关系 列表
+     */
+    @PostMapping("listByExample")
+    @ApiOperation(value = "工厂线体关系", response = CdFactoryLineInfo.class)
+    public R listByExample(CdFactoryLineInfo cdFactoryLineInfo) {
+        Example example = new Example(CdFactoryLineInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        listCondition(cdFactoryLineInfo, criteria);
+        List<CdFactoryLineInfo> cdFactoryLineInfoList = cdFactoryLineInfoService.selectByExample(example);
+        return R.data(cdFactoryLineInfoList);
+    }
+
+    /**
+     * 分页查询条件
+     * @param cdFactoryLineInfo
+     * @param criteria
+     */
+    void listCondition(CdFactoryLineInfo cdFactoryLineInfo, Example.Criteria criteria) {
+        if (StringUtils.isNotBlank(cdFactoryLineInfo.getSupplierCode())) {
+            criteria.andLike("supplierCode", cdFactoryLineInfo.getSupplierCode());
+        }
+    }
 
     /**
      * 新增保存工厂线体关系

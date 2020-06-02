@@ -34,6 +34,11 @@ public class RemoteCdMaterialPriceInfoFallbackFactory implements FallbackFactory
             public R checkSynchroSAP(String materialCode) {
                 return R.error("校验物料号同步sap价格失败");
             }
+
+            @Override
+            public R checkIsMinUnit(String materialCode, int applyNum) {
+                return R.error("校验申请数量是否是最小包装量的整数倍失败");
+            }
         };
     }
 }

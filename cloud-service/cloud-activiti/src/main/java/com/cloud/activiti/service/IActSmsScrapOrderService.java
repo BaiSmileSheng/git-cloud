@@ -12,20 +12,26 @@ import com.cloud.settle.domain.entity.SmsScrapOrder;
  */
 public interface IActSmsScrapOrderService {
     /**
-     * 开启流程 报废申请单逻辑
+     * 开启流程 报废申请单逻辑(编辑、新增提交)
      *
      * @param smsScrapOrder
      * @return R
      */
     R startAct(SmsScrapOrder smsScrapOrder,long userId);
 
+    /**
+     * 开启流程 报废申请单逻辑(列表提交)
+     *
+     * @param smsScrapOrder
+     * @return R
+     */
+    R startActOnlyForList(SmsScrapOrder smsScrapOrder,long userId);
 
     /**
      * 审批流程 报废申请单逻辑
      * @param bizAudit
-     * @param smsScrapOrder
      * @param userId
      * @return R
      */
-    R audit(BizAudit bizAudit,SmsScrapOrder smsScrapOrder,long userId);
+    R audit(BizAudit bizAudit,long userId);
 }

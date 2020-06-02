@@ -1,13 +1,10 @@
 package com.cloud.system.controller;
 
-import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.exception.BusinessException;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
-import com.cloud.common.utils.DateUtils;
 import com.cloud.system.domain.entity.CdMaterialPriceInfo;
 import com.cloud.system.service.ICdMaterialPriceInfoService;
 import io.swagger.annotations.*;
@@ -15,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -113,28 +109,17 @@ public class CdMaterialPriceInfoController extends BaseController {
      */
     @PostMapping("checkSynchroSAP")
     public R checkSynchroSAP(String materialCode){
-        if (StrUtil.isBlank(materialCode)) {
-            throw new BusinessException("参数：物料号为空！");
-        }
-        String dateStr = DateUtils.getTime();
-        Example example = new Example(CdMaterialPriceInfo.class);
-        Example.Criteria criteria = example.createCriteria();
-        //根据物料号  有效期查询SAP价格
-        criteria.andEqualTo("materialCode", materialCode)
-                .andLessThanOrEqualTo("beginDate", dateStr)
-                .andGreaterThanOrEqualTo("endDate", dateStr);
-        R r = findByExample(example);
-        if(r==null){
-            throw new BusinessException("校验价格同步SAP失败！");
-        }
-        List<CdMaterialPriceInfo> materialPrices = (List<CdMaterialPriceInfo>) r.get("data");
-        if(materialPrices==null||materialPrices.size()==0){
-            throw new BusinessException("物料号未同步SAP价格！");
-        }
-        CdMaterialPriceInfo materialPrice = materialPrices.get(0);
-        if(materialPrice==null||materialPrice.getProcessPrice()==null||materialPrice.getProcessPrice().compareTo(BigDecimal.ZERO)<0){
-            throw new BusinessException("物料号未同步SAP价格！");
-        }
-        return R.data(materialPrice);
+        return cdMaterialPriceInfoService.checkSynchroSAP(materialCode);
+    }
+
+
+    /**
+     * 校验申请数量是否是最小包装量的整数倍
+     * @param materialCode applyNum
+     * @return R
+     */
+    @PostMapping("checkIsMinUnit")
+    public R checkIsMinUnit(String materialCode,int applyNum){
+        return cdMaterialPriceInfoService.checkIsMinUnit(materialCode,applyNum);
     }
 }

@@ -144,29 +144,10 @@ public class CdBomController extends BaseController {
      * @param productMaterialCode
      * @param rawMaterialCode
      * @param applyNum
-     * @return R
+     * @return R 单耗
      */
     @PostMapping("checkBomNum")
     public R checkBomNum(String productMaterialCode,String rawMaterialCode,int applyNum){
-        if (StrUtil.isBlank(productMaterialCode)) {
-            return R.error("参数：成品物料号为空！");
-        }
-        if (StrUtil.isBlank(rawMaterialCode)) {
-            return R.error("参数：原材料物料号为空！");
-        }
-        if (applyNum==0) {
-            return R.error("参数：申请量为空！");
-        }
-        Example example = new Example(CdBom.class);
-        Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("productMaterialCode",productMaterialCode);
-        criteria.andEqualTo("rawMaterialCode",rawMaterialCode);
-        criteria.andEqualTo("delFlag","0");
-        CdBom cdBom = cdBomService.findByExampleOne(example);
-        int bomNum = cdBom.getBomNum().intValue();//单耗
-        if(applyNum%bomNum!=0){
-            return R.error("申请量必须是单耗的整数倍！");
-        }
-        return R.data(bomNum);
+        return cdBomService.checkBomNum(productMaterialCode,rawMaterialCode,applyNum);
     }
 }

@@ -1,12 +1,10 @@
 package com.cloud.settle.controller;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.exception.BusinessException;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
@@ -14,9 +12,7 @@ import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
 import com.cloud.settle.enums.SupplementaryOrderStatusEnum;
 import com.cloud.settle.service.ISmsSupplementaryOrderService;
 import com.cloud.settle.util.DataScopeUtil;
-import com.cloud.system.domain.entity.CdMaterialPriceInfo;
 import com.cloud.system.domain.entity.SysUser;
-import com.cloud.system.feign.RemoteCdMaterialPriceInfoService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +21,6 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 物耗申请单
@@ -41,8 +36,7 @@ public class SmsSupplementaryOrderController extends BaseController {
     @Autowired
     private ISmsSupplementaryOrderService smsSupplementaryOrderService;
 
-    @Autowired
-    private RemoteCdMaterialPriceInfoService remoteCdMaterialPriceInfoService;
+
 
     /**
      * 查询物耗申请单
@@ -176,34 +170,13 @@ public class SmsSupplementaryOrderController extends BaseController {
     }
 
     /**
-     * 编辑物耗申请单功能  --有状态校验
+     * 编辑保存物耗申请单功能  --有逻辑校验
      */
     @PostMapping("editSave")
     @OperLog(title = "修改保存物耗申请单 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存物耗申请单 ", response = R.class)
     public R editSave(@RequestBody SmsSupplementaryOrder smsSupplementaryOrder) {
-        Long id = smsSupplementaryOrder.getId();
-        //判断状态是否是未提交
-        checkCondition(id);
-        //校验物料号是否同步了sap价格
-        R r=remoteCdMaterialPriceInfoService.checkSynchroSAP(smsSupplementaryOrder.getRawMaterialCode());
-        if(r.isSuccess()){
-            //将返回值Map转为CdMaterialPriceInfo
-            CdMaterialPriceInfo cdMaterialPriceInfo = BeanUtil.mapToBean((Map<?, ?>) r.get("data"), CdMaterialPriceInfo.class,true);
-            //校验申请数量是否是最小包装量的整数倍
-            int applyNum=smsSupplementaryOrder.getStuffAmount();//申请量
-            //最小包装量
-            int minUnit= Integer.parseInt(cdMaterialPriceInfo.getPriceUnit()==null?"0":cdMaterialPriceInfo.getPriceUnit());
-            if(minUnit==0){
-                throw new BusinessException("最小包装量不正确！");
-            }
-            if(applyNum%minUnit!=0){
-                throw new BusinessException("申请量必须是最小包装量的整数倍！");
-            }
-            return toAjax(smsSupplementaryOrderService.updateByPrimaryKeySelective(smsSupplementaryOrder));
-        }else {
-            return r;
-        }
+        return smsSupplementaryOrderService.editSave(smsSupplementaryOrder);
     }
 
     /**
@@ -214,32 +187,8 @@ public class SmsSupplementaryOrderController extends BaseController {
     @ApiOperation(value = "删除物耗申请单 ", response = R.class)
     @ApiParam(name = "ids", value = "需删除数据的id")
     public R remove(@RequestBody String ids) {
-        if(StringUtils.isBlank(ids)){
-            throw new BusinessException("传入参数不能为空！");
-        }
-        for(String id:ids.split(",")){
-            //校验状态是否是未提交
-            checkCondition(Long.valueOf(id));
-        }
-        return toAjax(smsSupplementaryOrderService.deleteByIds(ids));
+        return smsSupplementaryOrderService.remove(ids);
     }
 
-    /**
-     * 校验状态是否是未提交，如果不是则抛出错误
-     * @param id
-     * @return 返回SmsSupplementaryOrder信息
-     */
-    public R checkCondition(Long id){
-        if (id==null) {
-            throw new BusinessException("ID不能为空！");
-        }
-        SmsSupplementaryOrder smsSupplementaryOrderCheck = smsSupplementaryOrderService.selectByPrimaryKey(id);
-        if (smsSupplementaryOrderCheck == null) {
-            throw new BusinessException("未查询到此数据！");
-        }
-        if (!SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DTJ.getCode().equals(smsSupplementaryOrderCheck.getStuffStatus())) {
-            throw new BusinessException("已提交的数据不能操作！");
-        }
-        return R.data(smsSupplementaryOrderCheck);
-    }
+
 }

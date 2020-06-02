@@ -12,12 +12,20 @@ import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
  */
 public interface IActSmsSupplementaryOrderService {
     /**
-     * 开启流程 物耗申请单逻辑
+     * 开启流程 物耗申请单逻辑  新增、编辑提交时开启
      *
      * @param smsSupplementaryOrder
      * @return R
      */
     R startAct(SmsSupplementaryOrder smsSupplementaryOrder,long userId);
+
+    /**
+     * 开启流程 物耗申请单逻辑  列表提交时开启
+     *
+     * @param smsSupplementaryOrder
+     * @return R
+     */
+    R startActOnlyForList(SmsSupplementaryOrder smsSupplementaryOrder,long userId);
 
 
     /**
@@ -27,5 +35,5 @@ public interface IActSmsSupplementaryOrderService {
      * @param userId
      * @return R
      */
-    R audit(BizAudit bizAudit,SmsSupplementaryOrder smsSupplementaryOrder,long userId);
+    R audit(BizAudit bizAudit,long userId);
 }

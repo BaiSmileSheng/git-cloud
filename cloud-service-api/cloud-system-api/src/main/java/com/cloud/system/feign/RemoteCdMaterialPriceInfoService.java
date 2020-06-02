@@ -33,4 +33,12 @@ public interface RemoteCdMaterialPriceInfoService {
      */
     @PostMapping("materialPrice/checkSynchroSAP")
     R checkSynchroSAP(@RequestParam(value = "materialCode") String materialCode);
+
+    /**
+     * 校验申请数量是否是最小包装量的整数倍
+     * @param materialCode applyNum
+     * @return R
+     */
+    @PostMapping("materialPrice/checkIsMinUnit")
+    R checkIsMinUnit(@RequestParam(value = "materialCode") String materialCode,@RequestParam(value = "applyNum") int applyNum);
 }

@@ -6,16 +6,13 @@ import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.exception.BusinessException;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
-import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
 import com.cloud.settle.enums.ScrapOrderStatusEnum;
 import com.cloud.settle.service.ISmsScrapOrderService;
 import com.cloud.settle.util.DataScopeUtil;
 import com.cloud.system.domain.entity.SysUser;
-import com.cloud.system.feign.RemoteCdMaterialPriceInfoService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -40,8 +37,7 @@ public class SmsScrapOrderController extends BaseController {
     private ISmsScrapOrderService smsScrapOrderService;
 
 
-    @Autowired
-    private RemoteCdMaterialPriceInfoService remoteCdMaterialPriceInfoService;
+
     /**
      * 查询报废申请
      */
@@ -122,22 +118,13 @@ public class SmsScrapOrderController extends BaseController {
     }
 
     /**
-     * 编辑物耗申请单功能  --有状态校验
+     * 编辑报废申请单功能  --有状态校验
      */
     @PostMapping("editSave")
     @OperLog(title = "修改保存报废申请 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存报废申请 ", response = R.class)
     public R editSave(@RequestBody SmsScrapOrder smsScrapOrder) {
-        Long id = smsScrapOrder.getId();
-        //判断状态是否是未提交
-        checkCondition(id);
-        //校验物料号是否同步了sap价格
-        R r=remoteCdMaterialPriceInfoService.checkSynchroSAP(smsScrapOrder.getProductMaterialCode());
-        if(r.isSuccess()){
-            return toAjax(smsScrapOrderService.updateByPrimaryKeySelective(smsScrapOrder));
-        }else {
-            return r;
-        }
+        return smsScrapOrderService.editSave(smsScrapOrder);
 
     }
 
@@ -149,33 +136,6 @@ public class SmsScrapOrderController extends BaseController {
     @ApiOperation(value = "删除报废申请 ", response = R.class)
     @ApiParam(name = "ids", value = "需删除数据的id")
     public R remove(@RequestBody String ids) {
-        if(StringUtils.isBlank(ids)){
-            throw new BusinessException("传入参数不能为空！");
-        }
-        for(String id:ids.split(",")){
-            //校验状态是否是未提交
-            checkCondition(Long.valueOf(id));
-        }
-        return toAjax(smsScrapOrderService.deleteByIds(ids));
-    }
-
-
-    /**
-     * 校验状态是否是未提交，如果不是则抛出错误
-     * @param id
-     * @return 返回SmsScrapOrder信息
-     */
-    public R checkCondition(Long id){
-        if (id==null) {
-            throw new BusinessException("ID不能为空！");
-        }
-        SmsScrapOrder smsScrapOrder = smsScrapOrderService.selectByPrimaryKey(id);
-        if (smsScrapOrder == null) {
-            throw new BusinessException("未查询到此数据！");
-        }
-        if (!ScrapOrderStatusEnum.BF_ORDER_STATUS_DTJ.getCode().equals(smsScrapOrder.getScrapStatus())) {
-            throw new BusinessException("已提交的数据不能操作！");
-        }
-        return R.data(smsScrapOrder);
+        return smsScrapOrderService.remove(ids);
     }
 }

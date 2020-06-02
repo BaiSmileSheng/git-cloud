@@ -7,6 +7,7 @@ import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
+import com.cloud.common.exception.BusinessException;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.order.domain.entity.OmsProductionOrder;
@@ -106,6 +107,23 @@ public class OmsProductionOrderController extends BaseController {
         startPage();
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderService.selectByExample(example);
         return getDataTable(omsProductionOrderList);
+    }
+
+    /**
+     * 根据生产订单号查询排产订单信息
+     * @param prodctOrderCode
+     * @return OmsProductionOrder
+     */
+    @GetMapping("selectByProdctOrderCode")
+    public OmsProductionOrder selectByProdctOrderCode(String prodctOrderCode) {
+        if (StrUtil.isBlank(prodctOrderCode)) {
+            throw new BusinessException("参数：生产订单号为空！");
+        }
+        Example example = new Example(OmsProductionOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("productOrderCode",prodctOrderCode);
+        OmsProductionOrder productionOrder = omsProductionOrderService.findByExampleOne(example);
+        return productionOrder;
     }
 
     /**

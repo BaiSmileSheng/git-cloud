@@ -1,6 +1,7 @@
 package com.cloud.activiti.service.impl;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.consts.ActivitiConstant;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
@@ -10,10 +11,13 @@ import com.cloud.activiti.service.IBizBusinessService;
 import com.cloud.common.constant.ActivitiProTitleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.order.domain.entity.OmsProductionOrder;
+import com.cloud.order.feign.RemoteProductionOrderService;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
 import com.cloud.settle.enums.ScrapOrderStatusEnum;
 import com.cloud.settle.feign.RemoteSmsScrapOrderService;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.feign.RemoteCdMaterialPriceInfoService;
 import com.cloud.system.feign.RemoteUserService;
 import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,41 +37,121 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
     private RemoteSmsScrapOrderService remoteSmsScrapOrderService;
     @Autowired
     private IActTaskService actTaskService;
+    @Autowired
+    private RemoteCdMaterialPriceInfoService remoteCdMaterialPriceInfoService;
+    @Autowired
+    private RemoteProductionOrderService remoteProductionOrderService;
 
 
     /**
-     * 开启流程 报废申请单逻辑
+     * 开启流程 报废申请单逻辑(编辑、新增提交)
      * 待加全局事务
+     *
      * @param smsScrapOrder
      * @return R
      */
     @Override
-    public R startAct(SmsScrapOrder smsScrapOrder,long userId) {
+//    @GlobalTransactional
+    public R startAct(SmsScrapOrder smsScrapOrder, long userId) {
+        //判断状态是否是未提交，如果不是则抛出错误
+        Long id = smsScrapOrder.getId();
+        if (id != null) {
+            //编辑提交
+            SmsScrapOrder smsScrapOrderCheck = remoteSmsScrapOrderService.get(id);
+            if (smsScrapOrderCheck == null) {
+                return R.error("未查询到此数据！");
+            }
+            if (!ScrapOrderStatusEnum.BF_ORDER_STATUS_DTJ.getCode().equals(smsScrapOrderCheck.getScrapStatus())) {
+                return R.error("已提交的数据不能操作！");
+            }
+        }
+        /**--------------校验开始--------------**/
+        //校验物料号是否同步了sap价格
+        R r = remoteCdMaterialPriceInfoService.checkSynchroSAP(smsScrapOrder.getProductMaterialCode());
+        if (!r.isSuccess()) {
+            throw new BusinessException(r.get("msg").toString());
+        }
+        /**--------------校验结束--------------**/
+        if (id == null) {
+            //TODO:新增提交   获取数据  插入数据
+            //新增提交  需传生产订单号
+            //生产单号获取排产订单信息
+            String productOrderCode = smsScrapOrder.getProductOrderCode();
+            if (StrUtil.isBlank(productOrderCode)) {
+                return R.error("生产订单号为空！");
+            }
+            OmsProductionOrder omsProductionOrder = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
+        } else {
+            //编辑提交  更新数据
+            smsScrapOrder.setSubmitDate(DateUtil.date());
+            smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
+            R rUpdate = remoteSmsScrapOrderService.update(smsScrapOrder);
+            if (!rUpdate.isSuccess()) {
+                return rUpdate;
+            }
+        }
         //插入流程物业表  并开启流程
-        BizBusiness business = initBusiness(smsScrapOrder,userId);
+        BizBusiness business = initBusiness(smsScrapOrder, userId);
         bizBusinessService.insertBizBusiness(business);
         Map<String, Object> variables = Maps.newHashMap();
         bizBusinessService.startProcess(business, variables);
+        return R.ok("提交成功！");
+    }
 
-        //修改状态 jit待审核
+    /**
+     * 开启流程 报废申请单逻辑(列表提交)
+     * 待加全局事务
+     *
+     * @param smsScrapOrder
+     * @return R
+     */
+    @Override
+//    @GlobalTransactional
+    public R startActOnlyForList(SmsScrapOrder smsScrapOrder, long userId) {
+        //判断状态是否是未提交，如果不是则抛出错误
+        Long id = smsScrapOrder.getId();
+        if (id != null) {
+            return R.error("id不能为空！");
+        }
+        //更新数据
         smsScrapOrder.setSubmitDate(DateUtil.date());
         smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
-        return remoteSmsScrapOrderService.update(smsScrapOrder);
+        R rUpdate = remoteSmsScrapOrderService.update(smsScrapOrder);
+        if (!rUpdate.isSuccess()) {
+            return rUpdate;
+        }
+        //插入流程物业表  并开启流程
+        BizBusiness business = initBusiness(smsScrapOrder, userId);
+        bizBusinessService.insertBizBusiness(business);
+        Map<String, Object> variables = Maps.newHashMap();
+        bizBusinessService.startProcess(business, variables);
+        return R.ok("提交成功！");
     }
 
     /**
      * 审批流程 报废申请单逻辑
      * 待加全局事务
+     *
      * @param bizAudit
-     * @param smsScrapOrder
      * @param userId
      * @return R
      */
     @Override
-    public R audit(BizAudit bizAudit, SmsScrapOrder smsScrapOrder, long userId) {
+//    @GlobalTransactional
+    public R audit(BizAudit bizAudit, long userId) {
+        //流程审核业务表
+        BizBusiness bizBusiness = bizBusinessService.selectBizBusinessById(bizAudit.getBusinessKey().toString());
+        if (bizBusiness == null) {
+            return R.error("流程业务表数据为空！");
+        }
+        //查询物耗表信息
+        SmsScrapOrder smsScrapOrder = remoteSmsScrapOrderService.get(Long.valueOf(bizBusiness.getTableId()));
+        if (smsScrapOrder == null) {
+            return R.error("未找到此业务数据！");
+        }
         //审批结果
         Boolean result = false;
-        if(bizAudit.getResult().intValue()==2){
+        if (bizAudit.getResult().intValue() == 2) {
             result = true;
         }
         //判断下级审批  修改状态
@@ -77,18 +161,18 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
                 //TODO:业务科审核通过  传SAP
 
             } else {
-                throw new BusinessException("状态错误！");
+                return R.error("状态错误！");
             }
-        }else{
+        } else {
             //审批驳回
             if (ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode().equals(smsScrapOrder.getScrapStatus())) {
                 smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKBH.getCode());
-            }  else {
-                throw new BusinessException("状态错误！");
+            } else {
+                return R.error("状态错误！");
             }
         }
-        R r=remoteSmsScrapOrderService.update(smsScrapOrder);
-        if(r.isSuccess()){
+        R r = remoteSmsScrapOrderService.update(smsScrapOrder);
+        if (r.isSuccess()) {
             //审批 推进工作流
             return actTaskService.audit(bizAudit, userId);
         }
@@ -102,7 +186,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
      * @return
      * @author cs
      */
-    private BizBusiness initBusiness(SmsScrapOrder smsScrapOrder,long userId) {
+    private BizBusiness initBusiness(SmsScrapOrder smsScrapOrder, long userId) {
         BizBusiness business = new BizBusiness();
         business.setTableId(smsScrapOrder.getId().toString());
         business.setProcDefId(smsScrapOrder.getProcDefId());
