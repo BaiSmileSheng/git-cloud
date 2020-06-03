@@ -151,8 +151,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
                 .append(sysUser.getCorporation()).append(" ").append("您有一条索赔索赔订单，订单号")
                 .append(smsClaimOther.getClaimCode()).append(",请及时处理，如不处理，3天后系统自动确认，无法申诉");
         String toSupplier = sysUser.getEmail();
-        //TODO 发邮件
-//        mailService.sendTextMail(mailSubject,mailTextBuffer.toString(),toSupplier);
+        mailService.sendTextMail(toSupplier,mailTextBuffer.toString(),mailSubject);
         return R.data(smsClaimOther.getId());
     }
 
