@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.system.mapper.CdSapSalePriceMapper">
+
+    <resultMap type="CdSapSalePrice" id="CdSapSalePriceResult">
+        <result property="id" column="id"/>
+        <result property="conditionsType" column="conditions_type"/>
+        <result property="marketingOrganization" column="marketing_organization"/>
+        <result property="materialCode" column="material_code"/>
+        <result property="beginDate" column="begin_date"/>
+        <result property="endDate" column="end_date"/>
+        <result property="pricingRecordNo" column="pricing_record_no"/>
+        <result property="salePrice" column="sale_price"/>
+        <result property="conditionsMonetary" column="conditions_monetary"/>
+        <result property="unitPricing" column="unit_pricing"/>
+        <result property="measureUnit" column="measure_unit"/>
+        <result property="sapDelFlag" column="sap_del_flag"/>
+        <result property="remarks" column="remarks"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+    </resultMap>
+
+    <sql id="selectCdSapSalePriceVo">
+        select id,
+               conditions_type,
+               marketing_organization,
+               material_code,
+               begin_date,
+               end_date,
+               pricing_record_no,
+               sale_price,
+               conditions_monetary,
+               unit_pricing,
+               measure_unit,
+               sap_del_flag,
+               remarks,
+               del_flag,
+               create_time,
+               create_by,
+               update_time,
+               update_by
+        from cd_sap_sale_price
+    </sql>
+
+
+</mapper>
