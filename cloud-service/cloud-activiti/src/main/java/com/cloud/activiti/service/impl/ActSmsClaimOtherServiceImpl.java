@@ -149,8 +149,7 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         BizBusiness business = new BizBusiness();
         business.setTableId(smsClaimOther.getId().toString());
         business.setProcDefId(smsClaimOther.getProcDefId());
-        //TODO
-        business.setTitle("其他索赔申请流程");
+        business.setTitle(ActivitiProTitleConstants.ACTIVITI_PRO_TITLE_SCHAIM_TEST);
         business.setProcName(smsClaimOther.getProcName());
         business.setUserId(sysUser.getUserId());
         business.setApplyer(sysUser.getUserName());
