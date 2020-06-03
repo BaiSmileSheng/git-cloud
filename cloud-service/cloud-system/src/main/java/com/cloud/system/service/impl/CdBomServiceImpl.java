@@ -43,8 +43,10 @@ public class CdBomServiceImpl extends BaseServiceImpl<CdBom> implements ICdBomSe
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("productMaterialCode",productMaterialCode);
         criteria.andEqualTo("rawMaterialCode",rawMaterialCode);
-        criteria.andEqualTo("delFlag","0");
         CdBom cdBom = findByExampleOne(example);
+        if (cdBom==null||cdBom.getBomNum() == null) {
+            return R.error("未维护BOM！");
+        }
         int bomNum = cdBom.getBomNum().intValue();//单耗
         if(applyNum%bomNum!=0){
             return R.error("申请量必须是单耗的整数倍！");

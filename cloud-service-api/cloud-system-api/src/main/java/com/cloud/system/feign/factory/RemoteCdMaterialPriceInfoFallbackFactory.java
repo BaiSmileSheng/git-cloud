@@ -19,11 +19,13 @@ public class RemoteCdMaterialPriceInfoFallbackFactory implements FallbackFactory
         return new RemoteCdMaterialPriceInfoService(){
             /**
              * 根据Example条件查询列表
-             * @param cdMaterialPriceInfo
+             * @param materialCode
+             * @param beginDate
+             * @param endDate
              * @return List<CdMaterialPriceInfo>
              */
             @Override
-            public List<CdMaterialPriceInfo> findByExample(CdMaterialPriceInfo cdMaterialPriceInfo) {
+            public List<CdMaterialPriceInfo> findByMaterialCode(String materialCode, String beginDate, String endDate) {
                 return null;
             }
 

@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -100,15 +99,12 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
 
 
         //根据物料号  有效期查询SAP价格
-        Date date = DateUtils.getNowDate();
-        CdMaterialPriceInfo cdMaterialPriceInfo = new CdMaterialPriceInfo();
-        cdMaterialPriceInfo.setMaterialCode(rawMaterialCode);
-        cdMaterialPriceInfo.setBeginDate(date);
-        cdMaterialPriceInfo.setEndDate(date);
-//                .builder().materialCode(rawMaterialCode)
-//                .beginDate(date).endDate(date).build();
-        List<CdMaterialPriceInfo> materialPrices = remoteCdMaterialPriceInfoService.findByExample(cdMaterialPriceInfo);
-        cdMaterialPriceInfo = materialPrices.get(0);
+        String date = DateUtils.getTime();
+        List<CdMaterialPriceInfo> materialPrices = remoteCdMaterialPriceInfoService.findByMaterialCode(rawMaterialCode,date,date);
+        if (materialPrices == null || materialPrices.size() == 0) {
+            return R.error("物料成本价格未维护！");
+        }
+        CdMaterialPriceInfo cdMaterialPriceInfo = materialPrices.get(0);
 
         //开始插入
         String seq = remoteSequeceService.selectSeq("supplementary_seq", 4);
@@ -124,12 +120,13 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         }
         smsSupplementaryOrder.setFactoryCode(omsProductionOrder.getFactoryCode());
         smsSupplementaryOrder.setProductOrderCode(omsProductionOrder.getProductOrderCode());//生产订单号
-        smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DTJ.getCode());//状态：待提交
+        if (StrUtil.isBlank(smsSupplementaryOrder.getStuffStatus())) {
+            smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DTJ.getCode());//状态：待提交
+        }
         smsSupplementaryOrder.setStuffPrice(cdMaterialPriceInfo.getNetWorth());//单价  取得materialPrice表的净价值
         smsSupplementaryOrder.setStuffUnit(cdMaterialPriceInfo.getUnit());
         smsSupplementaryOrder.setCurrency(cdMaterialPriceInfo.getCurrency());//币种
         CdBom cdBom = remoteBomService.listByProductAndMaterial(productMaterialCode, rawMaterialCode);
-//            smsSupplementaryOrder.setRate();
         smsSupplementaryOrder.setSapStoreage(cdBom.getStoragePoint());
         smsSupplementaryOrder.setPurchaseGroupCode(cdBom.getPurchaseGroup());
         smsSupplementaryOrder.setDelFlag("0");

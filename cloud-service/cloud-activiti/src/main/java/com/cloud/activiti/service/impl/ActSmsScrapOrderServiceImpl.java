@@ -49,17 +49,21 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
      */
     @Override
 //    @GlobalTransactional
-    public R startAct(SmsScrapOrder smsScrapOrder, long userId) {
+    public R startAct(SmsScrapOrder smsScrapOrder, SysUser sysUser) {
         //判断状态是否是未提交，如果不是则抛出错误
         if (smsScrapOrder.getId() == null) {
+            smsScrapOrder.setCreateBy(sysUser.getLoginName());
+            smsScrapOrder.setSubmitDate(DateUtil.date());
+            smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
             R rAdd = remoteSmsScrapOrderService.addSave(smsScrapOrder);
             if (!rAdd.isSuccess()) {
                 return rAdd;
             }
-            Long id = (Long) rAdd.get("data");
+            Long id = Long.valueOf(rAdd.get("data").toString());
             smsScrapOrder.setId(id);
         } else {
             //编辑提交  更新数据
+            smsScrapOrder.setUpdateBy(sysUser.getLoginName());
             smsScrapOrder.setSubmitDate(DateUtil.date());
             smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
             R rUpdate = remoteSmsScrapOrderService.editSave(smsScrapOrder);
@@ -68,7 +72,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
             }
         }
         //插入流程物业表  并开启流程
-        BizBusiness business = initBusiness(smsScrapOrder, userId);
+        BizBusiness business = initBusiness(smsScrapOrder, sysUser.getUserId());
         bizBusinessService.insertBizBusiness(business);
         Map<String, Object> variables = Maps.newHashMap();
         bizBusinessService.startProcess(business, variables);

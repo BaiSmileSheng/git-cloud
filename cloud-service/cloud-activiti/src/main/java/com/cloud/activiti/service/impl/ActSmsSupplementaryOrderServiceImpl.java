@@ -48,6 +48,8 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
         if (smsSupplementaryOrder.getId() == null) {
             //新增提交  校验  获取数据  插入数据  开启流程
             smsSupplementaryOrder.setCreateBy(sysUser.getLoginName());
+            smsSupplementaryOrder.setSubmitDate(DateUtil.date());
+            smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode());
             R rAdd = remoteSmsSupplementaryOrderService.addSave(smsSupplementaryOrder);
             if (!rAdd.isSuccess()) {
                 return rAdd;
@@ -56,6 +58,7 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
             smsSupplementaryOrder.setId(id);
         } else {
             //修改提交  校验  更新数据  开启流程
+            smsSupplementaryOrder.setUpdateBy(sysUser.getLoginName());
             smsSupplementaryOrder.setSubmitDate(DateUtil.date());
             smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode());
             R rUpdate = remoteSmsSupplementaryOrderService.editSave(smsSupplementaryOrder);

@@ -12,13 +12,16 @@ import com.cloud.settle.domain.entity.SmsScrapOrder;
 import com.cloud.settle.enums.ScrapOrderStatusEnum;
 import com.cloud.settle.mapper.SmsScrapOrderMapper;
 import com.cloud.settle.service.ISmsScrapOrderService;
+import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
-import com.cloud.system.domain.entity.SysUser;
-import com.cloud.system.feign.RemoteCdMaterialPriceInfoService;
-import com.cloud.system.feign.RemoteFactoryLineInfoService;
+import com.cloud.system.domain.entity.CdSapSalePrice;
+import com.cloud.system.feign.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 报废申请 Service业务层处理
@@ -32,11 +35,15 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
     @Autowired
     private SmsScrapOrderMapper smsScrapOrderMapper;
     @Autowired
-    private RemoteCdMaterialPriceInfoService remoteCdMaterialPriceInfoService;
-    @Autowired
     private RemoteProductionOrderService remoteProductionOrderService;
     @Autowired
     private RemoteFactoryLineInfoService remotefactoryLineInfoService;
+    @Autowired
+    private RemoteCdSapSalePriceInfoService remoteCdSapSalePriceInfoService;
+    @Autowired
+    private RemoteFactoryInfoService remoteFactoryInfoService;
+    @Autowired
+    private RemoteSequeceService remoteSequeceService;
 
     /**
      * 编辑报废申请单功能  --有状态校验
@@ -65,7 +72,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
      * @return
      */
     @Override
-    public R addSave(SmsScrapOrder smsScrapOrder, SysUser sysUser) {
+    public R addSave(SmsScrapOrder smsScrapOrder) {
         //生产订单号
         String productOrderCode = smsScrapOrder.getProductOrderCode();
         //校验
@@ -74,7 +81,11 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             return rCheck;
         }
 
-        //TODO:新增提交   获取数据  插入数据
+        String seq = remoteSequeceService.selectSeq("scrap_seq", 4);
+        StringBuffer scrapNo = new StringBuffer();
+        //WH+年月日+4位顺序号
+        scrapNo.append("BF").append(DateUtils.dateTime()).append(seq);
+        smsScrapOrder.setScrapNo(scrapNo.toString());
         //生产单号获取排产订单信息
         OmsProductionOrder omsProductionOrder = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
         //根据线体号查询供应商编码
@@ -84,11 +95,24 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             smsScrapOrder.setSupplierName(factoryLineInfo.getSupplierDesc());
         }
         smsScrapOrder.setFactoryCode(omsProductionOrder.getFactoryCode());
-//        smsScrapOrder.setComponyCode();
-        smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_DTJ.getCode());
-//        smsScrapOrder.setMaterialPrice();
+        CdFactoryInfo cdFactoryInfo = remoteFactoryInfoService.selectOneByFactory(omsProductionOrder.getFactoryCode());
+        if (cdFactoryInfo == null) {
+            return R.error("公司信息为空！");
+        }
+        smsScrapOrder.setComponyCode(cdFactoryInfo.getCompanyCode());
+        if (StrUtil.isBlank(smsScrapOrder.getScrapStatus())) {
+            smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_DTJ.getCode());
+        }
+        //根据物料号  有效期查询成品销售价格
+        String date = DateUtils.getTime();
+        List<CdSapSalePrice> sapSalePrices = remoteCdSapSalePriceInfoService.findByMaterialCode(smsScrapOrder.getProductMaterialCode(),date,date);
+        if (sapSalePrices == null || sapSalePrices.size() == 0) {
+            return R.error("物料销售价格未维护！");
+        }
+        CdSapSalePrice cdSapSalePrice = sapSalePrices.get(0);
+        smsScrapOrder.setMaterialPrice(new BigDecimal(cdSapSalePrice.getSalePrice()));
         smsScrapOrder.setDelFlag("0");
-        smsScrapOrder.setCreateBy(sysUser.getLoginName());
+//        smsScrapOrder.setCreateBy(sysUser.getLoginName());
         smsScrapOrder.setCreateTime(DateUtils.getNowDate());
         int rows=insertSelective(smsScrapOrder);
         if (rows > 0) {
@@ -111,10 +135,13 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         if (productOrderCode == null) {
             return R.error("生产订单号为空！");
         }
-        //校验物料号是否同步了sap价格
-        R r=remoteCdMaterialPriceInfoService.checkSynchroSAP(smsScrapOrder.getProductMaterialCode());
-        if(!r.isSuccess()){
-            return r;
+        int applyNum = smsScrapOrder.getScrapAmount();//申请量
+        //生产单号获取排产订单信息
+        OmsProductionOrder omsProductionOrder = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
+        //5、校验申请量是否大于订单量
+        BigDecimal productNum = omsProductionOrder.getProductNum();
+        if (new BigDecimal(applyNum).compareTo(productNum) > 0) {
+            return R.error("申请量不得大于订单量");
         }
         return R.ok();
     }
