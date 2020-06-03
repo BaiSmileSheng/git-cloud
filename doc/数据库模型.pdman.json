@@ -6074,6 +6074,250 @@
             }
           ],
           "chnname": "排产订单传SAP自定义表"
+        },
+        {
+          "title": "oms_2weeks_demand_order",
+          "fields": [
+            {
+              "name": "id",
+              "type": "BigInt",
+              "remark": "",
+              "chnname": "主键",
+              "pk": true,
+              "notNull": true,
+              "relationNoShow": false,
+              "autoIncrement": true
+            },
+            {
+              "name": "demand_order_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "需求订单号",
+              "pk": false,
+              "notNull": true
+            },
+            {
+              "name": "order_type",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "订单类型",
+              "notNull": true
+            },
+            {
+              "name": "demand_from",
+              "type": "Char",
+              "remark": "1：客户导入，2：事业部接入",
+              "chnname": "需求来源",
+              "notNull": true
+            },
+            {
+              "name": "product_material_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "成品物料号",
+              "notNull": true
+            },
+            {
+              "name": "product_material_desc",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "成品物料描述",
+              "defaultValue": "''"
+            },
+            {
+              "name": "pl_factory_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "PL工厂编码",
+              "notNull": true
+            },
+            {
+              "name": "pl_factory_desc",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "PL工厂描述",
+              "notNull": true
+            },
+            {
+              "name": "factory_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "工厂编码",
+              "notNull": true
+            },
+            {
+              "name": "factory_desc",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "工厂描述",
+              "defaultValue": "''"
+            },
+            {
+              "name": "mrp_range",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "MRP范围",
+              "notNull": true
+            },
+            {
+              "name": "bom_version",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "BOM版本",
+              "notNull": true
+            },
+            {
+              "name": "purchase_group_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "采购组"
+            },
+            {
+              "name": "place",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "地点",
+              "notNull": true
+            },
+            {
+              "name": "delivery_date",
+              "type": "Date",
+              "remark": "",
+              "chnname": "交付日期",
+              "notNull": true
+            },
+            {
+              "name": "year",
+              "type": "DefaultString",
+              "remark": "交货日期年度",
+              "chnname": "年度",
+              "notNull": true
+            },
+            {
+              "name": "weeks",
+              "type": "DefaultString",
+              "remark": "交货日期周数",
+              "chnname": "周数",
+              "notNull": true
+            },
+            {
+              "name": "order_num",
+              "type": "BigInt",
+              "remark": "",
+              "chnname": "订单数量",
+              "defaultValue": "0",
+              "notNull": true
+            },
+            {
+              "name": "version",
+              "type": "DefaultString",
+              "remark": "年度-周数",
+              "chnname": "数据版本",
+              "notNull": true
+            },
+            {
+              "name": "plan_order_order",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "计划订单号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "sap_messages",
+              "type": "Intro",
+              "remark": "传SAP返回信息",
+              "chnname": "SAP返回信息"
+            },
+            {
+              "name": "del_flag",
+              "type": "Char",
+              "remark": "0：有效，1：删除",
+              "chnname": "是否删除",
+              "defaultValue": "0"
+            },
+            {
+              "name": "remarks",
+              "type": "Intro",
+              "remark": "",
+              "chnname": "备注",
+              "defaultValue": "''"
+            },
+            {
+              "name": "create_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "创建时间",
+              "notNull": true
+            },
+            {
+              "name": "create_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "创建人",
+              "notNull": true
+            },
+            {
+              "name": "update_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "更新时间"
+            },
+            {
+              "name": "update_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "更新人",
+              "defaultValue": "''"
+            }
+          ],
+          "indexs": [],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
+            }
+          ],
+          "chnname": "T+1-T+2周需求表"
         }
       ],
       "graphCanvas": {
