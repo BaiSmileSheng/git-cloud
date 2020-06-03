@@ -10,6 +10,11 @@ public class ActivitiProDefKeyConstants {
     public static final String ACTIVITI_PRO_DEF_KEY_SUPPLEMENTARY_TEST = "supplementary";
 
     /**
+     * 报废管理服务相关流程key
+     */
+    public static final String ACTIVITI_PRO_DEF_KEY_SCRAP_TEST = "scrap";
+
+    /**
      * 质量索赔管理服务相关流程key
      */
     public static final String ACTIVITI_PRO_DEF_KEY_QUALITY_TEST = "quality";

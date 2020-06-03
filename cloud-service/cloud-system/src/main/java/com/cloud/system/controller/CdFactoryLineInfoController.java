@@ -5,6 +5,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.common.utils.StringUtils;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.service.ICdFactoryLineInfoService;
 import io.swagger.annotations.ApiImplicitParam;
@@ -61,6 +62,30 @@ public class CdFactoryLineInfoController extends BaseController {
 
 
     /**
+     * 查询工厂线体关系 列表
+     */
+    @PostMapping("listByExample")
+    @ApiOperation(value = "工厂线体关系", response = CdFactoryLineInfo.class)
+    public R listByExample(CdFactoryLineInfo cdFactoryLineInfo) {
+        Example example = new Example(CdFactoryLineInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        listCondition(cdFactoryLineInfo, criteria);
+        List<CdFactoryLineInfo> cdFactoryLineInfoList = cdFactoryLineInfoService.selectByExample(example);
+        return R.data(cdFactoryLineInfoList);
+    }
+
+    /**
+     * 分页查询条件
+     * @param cdFactoryLineInfo
+     * @param criteria
+     */
+    void listCondition(CdFactoryLineInfo cdFactoryLineInfo, Example.Criteria criteria) {
+        if (StringUtils.isNotBlank(cdFactoryLineInfo.getSupplierCode())) {
+            criteria.andLike("supplierCode", cdFactoryLineInfo.getSupplierCode());
+        }
+    }
+
+    /**
      * 新增保存工厂线体关系
      */
     @PostMapping("save")
@@ -92,4 +117,25 @@ public class CdFactoryLineInfoController extends BaseController {
         return toAjax(cdFactoryLineInfoService.deleteByIds(ids));
     }
 
+    /**
+     * 根据供应商编号查询线体
+     * @param supplierCode
+     * @return 逗号分隔线体编号
+     */
+    @PostMapping("selectLineCodeBySupplierCode")
+    @ApiOperation(value = "根据供应商编号查询线体", response = CdFactoryLineInfo.class)
+    public R selectLineCodeBySupplierCode(String supplierCode) {
+        return cdFactoryLineInfoService.selectLineCodeBySupplierCode(supplierCode);
+    }
+
+    /**
+     * 根据线体查询信息
+     * @param produceLineCode
+     * @return CdFactoryLineInfo
+     */
+    @PostMapping("selectInfoByCodeLineCode")
+    @ApiOperation(value = "根据供应商编号查询线体", response = CdFactoryLineInfo.class)
+    public CdFactoryLineInfo selectInfoByCodeLineCode(String produceLineCode) {
+        return cdFactoryLineInfoService.selectInfoByCodeLineCode(produceLineCode);
+    }
 }
