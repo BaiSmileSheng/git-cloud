@@ -19,4 +19,11 @@ public interface ICdFactoryLineInfoService extends BaseService<CdFactoryLineInfo
      */
     R selectLineCodeBySupplierCode(String supplierCode);
 
+    /**
+     * 根据线体查询信息
+     * @param produceLineCode
+     * @return 供应商编码
+     */
+    CdFactoryLineInfo selectInfoByCodeLineCode(String produceLineCode);
+
 }

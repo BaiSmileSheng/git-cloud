@@ -35,6 +35,16 @@ public class RemoteFactoryLineInfoFallbackFactory implements FallbackFactory<Rem
             public R selectLineCodeBySupplierCode(String supplierCode) {
                 return null;
             }
+
+            /**
+             * 根据线体查询信息
+             * @param produceLineCode
+             * @return 供应商编码
+             */
+            @Override
+            public CdFactoryLineInfo selectInfoByCodeLineCode(String produceLineCode) {
+                return null;
+            }
         };
     }
 }

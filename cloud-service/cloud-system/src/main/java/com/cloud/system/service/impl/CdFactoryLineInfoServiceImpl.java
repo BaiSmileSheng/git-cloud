@@ -27,4 +27,14 @@ public class CdFactoryLineInfoServiceImpl extends BaseServiceImpl<CdFactoryLineI
     public R selectLineCodeBySupplierCode(String supplierCode) {
         return R.data(cdFactoryLineInfoMapper.selectLineCodeBySupplierCode(supplierCode));
     }
+
+    /**
+     * 根据线体查询信息
+     * @param produceLineCode
+     * @return 供应商编码
+     */
+    @Override
+    public CdFactoryLineInfo selectInfoByCodeLineCode(String produceLineCode) {
+        return cdFactoryLineInfoMapper.selectInfoByCodeLineCode(produceLineCode);
+    }
 }

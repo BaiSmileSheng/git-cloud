@@ -2,12 +2,14 @@ package com.cloud.system.feign;
 
 import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.common.core.domain.R;
+import com.cloud.system.domain.entity.CdMaterialPriceInfo;
 import com.cloud.system.feign.factory.RemoteCdMaterialPriceInfoFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import tk.mybatis.mapper.entity.Example;
+
+import java.util.List;
 
 /**
  * 用户 Feign服务层
@@ -19,11 +21,11 @@ import tk.mybatis.mapper.entity.Example;
 public interface RemoteCdMaterialPriceInfoService {
     /**
      * 根据Example条件查询列表
-     * @param example
+     * @param cdMaterialPriceInfo
      * @return List<CdMaterialPriceInfo>
      */
     @GetMapping("materialPrice/example")
-    R findByExample(Example example);
+    List<CdMaterialPriceInfo> findByExample(@RequestParam("cdMaterialPriceInfo") CdMaterialPriceInfo cdMaterialPriceInfo);
 
 
     /**

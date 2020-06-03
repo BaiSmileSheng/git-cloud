@@ -155,8 +155,7 @@ public class SmsSupplementaryOrderController extends BaseController {
     @OperLog(title = "新增保存物耗申请单 ", businessType = BusinessType.INSERT)
     @ApiOperation(value = "新增保存物耗申请单 ", response = R.class)
     public R addSave(@RequestBody SmsSupplementaryOrder smsSupplementaryOrder) {
-        smsSupplementaryOrderService.insertSelective(smsSupplementaryOrder);
-        return R.data(smsSupplementaryOrder.getId());
+        return smsSupplementaryOrderService.addSave(smsSupplementaryOrder);
     }
 
     /**

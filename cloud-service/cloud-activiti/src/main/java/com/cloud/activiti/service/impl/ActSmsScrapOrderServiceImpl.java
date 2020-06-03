@@ -1,7 +1,6 @@
 package com.cloud.activiti.service.impl;
 
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.consts.ActivitiConstant;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
@@ -10,8 +9,6 @@ import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
 import com.cloud.common.constant.ActivitiProTitleConstants;
 import com.cloud.common.core.domain.R;
-import com.cloud.common.exception.BusinessException;
-import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.feign.RemoteProductionOrderService;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
 import com.cloud.settle.enums.ScrapOrderStatusEnum;
@@ -54,38 +51,18 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
 //    @GlobalTransactional
     public R startAct(SmsScrapOrder smsScrapOrder, long userId) {
         //判断状态是否是未提交，如果不是则抛出错误
-        Long id = smsScrapOrder.getId();
-        if (id != null) {
-            //编辑提交
-            SmsScrapOrder smsScrapOrderCheck = remoteSmsScrapOrderService.get(id);
-            if (smsScrapOrderCheck == null) {
-                return R.error("未查询到此数据！");
+        if (smsScrapOrder.getId() == null) {
+            R rAdd = remoteSmsScrapOrderService.addSave(smsScrapOrder);
+            if (!rAdd.isSuccess()) {
+                return rAdd;
             }
-            if (!ScrapOrderStatusEnum.BF_ORDER_STATUS_DTJ.getCode().equals(smsScrapOrderCheck.getScrapStatus())) {
-                return R.error("已提交的数据不能操作！");
-            }
-        }
-        /**--------------校验开始--------------**/
-        //校验物料号是否同步了sap价格
-        R r = remoteCdMaterialPriceInfoService.checkSynchroSAP(smsScrapOrder.getProductMaterialCode());
-        if (!r.isSuccess()) {
-            throw new BusinessException(r.get("msg").toString());
-        }
-        /**--------------校验结束--------------**/
-        if (id == null) {
-            //TODO:新增提交   获取数据  插入数据
-            //新增提交  需传生产订单号
-            //生产单号获取排产订单信息
-            String productOrderCode = smsScrapOrder.getProductOrderCode();
-            if (StrUtil.isBlank(productOrderCode)) {
-                return R.error("生产订单号为空！");
-            }
-            OmsProductionOrder omsProductionOrder = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
+            Long id = (Long) rAdd.get("data");
+            smsScrapOrder.setId(id);
         } else {
             //编辑提交  更新数据
             smsScrapOrder.setSubmitDate(DateUtil.date());
             smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
-            R rUpdate = remoteSmsScrapOrderService.update(smsScrapOrder);
+            R rUpdate = remoteSmsScrapOrderService.editSave(smsScrapOrder);
             if (!rUpdate.isSuccess()) {
                 return rUpdate;
             }
@@ -112,6 +89,10 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         Long id = smsScrapOrder.getId();
         if (id != null) {
             return R.error("id不能为空！");
+        }
+        SmsScrapOrder smsScrapOrderCheck = remoteSmsScrapOrderService.get(id);
+        if (!ScrapOrderStatusEnum.BF_ORDER_STATUS_DTJ.getCode().equals(smsScrapOrder.getScrapStatus())) {
+            return R.error("只有待提交状态数据可以提交！");
         }
         //更新数据
         smsScrapOrder.setSubmitDate(DateUtil.date());
@@ -181,6 +162,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
 
     /**
      * 根据业务key获取数据
+     *
      * @param businessKey
      * @return smsSupplementaryOrder
      * @author cs

@@ -31,4 +31,12 @@ public interface RemoteFactoryLineInfoService {
      */
     @PostMapping("factoryLine/selectLineCodeBySupplierCode")
     R selectLineCodeBySupplierCode(@RequestParam(value = "supplierCode") String supplierCode);
+
+    /**
+     * 根据线体查询信息
+     * @param produceLineCode
+     * @return 供应商编码
+     */
+    @PostMapping("factoryLine/selectInfoByCodeLineCode")
+    CdFactoryLineInfo selectInfoByCodeLineCode(@RequestParam(value = "produceLineCode") String produceLineCode);
 }

@@ -1,5 +1,4 @@
 package com.cloud.settle.controller;
-
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.UserConstants;
@@ -103,8 +102,7 @@ public class SmsScrapOrderController extends BaseController {
     @OperLog(title = "新增保存报废申请 ", businessType = BusinessType.INSERT)
     @ApiOperation(value = "新增保存报废申请 ", response = R.class)
     public R addSave(@RequestBody SmsScrapOrder smsScrapOrder) {
-        smsScrapOrderService.insertSelective(smsScrapOrder);
-        return R.data(smsScrapOrder.getId());
+        return smsScrapOrderService.addSave(smsScrapOrder,getUserInfo(SysUser.class));
     }
 
     /**

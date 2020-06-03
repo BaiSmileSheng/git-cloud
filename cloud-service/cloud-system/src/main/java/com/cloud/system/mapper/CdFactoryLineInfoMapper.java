@@ -16,4 +16,11 @@ public interface CdFactoryLineInfoMapper extends BaseMapper<CdFactoryLineInfo>{
      * @return 逗号分隔线体编号
      */
     String selectLineCodeBySupplierCode(String supplierCode);
+
+    /**
+     * 根据线体查询信息
+     * @param produceLineCode
+     * @return 供应商编码
+     */
+    CdFactoryLineInfo selectInfoByCodeLineCode(String produceLineCode);
 }

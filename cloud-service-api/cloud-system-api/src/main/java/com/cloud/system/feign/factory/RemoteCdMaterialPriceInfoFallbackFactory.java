@@ -1,11 +1,13 @@
 package com.cloud.system.feign.factory;
 
 import com.cloud.common.core.domain.R;
+import com.cloud.system.domain.entity.CdMaterialPriceInfo;
 import com.cloud.system.feign.RemoteCdMaterialPriceInfoService;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import tk.mybatis.mapper.entity.Example;
+
+import java.util.List;
 
 @Slf4j
 @Component
@@ -17,11 +19,11 @@ public class RemoteCdMaterialPriceInfoFallbackFactory implements FallbackFactory
         return new RemoteCdMaterialPriceInfoService(){
             /**
              * 根据Example条件查询列表
-             * @param example
+             * @param cdMaterialPriceInfo
              * @return List<CdMaterialPriceInfo>
              */
             @Override
-            public R findByExample(Example example) {
+            public List<CdMaterialPriceInfo> findByExample(CdMaterialPriceInfo cdMaterialPriceInfo) {
                 return null;
             }
 

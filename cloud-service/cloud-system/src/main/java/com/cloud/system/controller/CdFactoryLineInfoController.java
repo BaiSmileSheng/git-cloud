@@ -127,4 +127,15 @@ public class CdFactoryLineInfoController extends BaseController {
     public R selectLineCodeBySupplierCode(String supplierCode) {
         return cdFactoryLineInfoService.selectLineCodeBySupplierCode(supplierCode);
     }
+
+    /**
+     * 根据线体查询信息
+     * @param produceLineCode
+     * @return CdFactoryLineInfo
+     */
+    @PostMapping("selectInfoByCodeLineCode")
+    @ApiOperation(value = "根据供应商编号查询线体", response = CdFactoryLineInfo.class)
+    public CdFactoryLineInfo selectInfoByCodeLineCode(String produceLineCode) {
+        return cdFactoryLineInfoService.selectInfoByCodeLineCode(produceLineCode);
+    }
 }

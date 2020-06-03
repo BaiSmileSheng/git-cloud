@@ -107,7 +107,7 @@ public class SmsSupplementaryOrder extends BaseEntity {
      */
     @ExcelProperty(value = "物料单价")
     @ApiModelProperty(value = "物料单价")
-    private Double stuffPrice;
+    private BigDecimal stuffPrice;
 
     /**
      * 单位

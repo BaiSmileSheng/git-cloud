@@ -1,5 +1,6 @@
 package com.cloud.system.controller;
 
+import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -93,13 +94,26 @@ public class CdMaterialPriceInfoController extends BaseController {
 
     /**
      * 根据Example条件查询列表
-     * @param example
+     * @param cdMaterialPriceInfo
      * @return CdMaterialPriceInfo  list
      */
     @GetMapping("example")
-    public R findByExample(Example example){
+    public List<CdMaterialPriceInfo> findByExample(CdMaterialPriceInfo cdMaterialPriceInfo){
+        //查询CdMaterialPriceInfo
+        Example example = new Example(CdMaterialPriceInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        if (StrUtil.isNotBlank(cdMaterialPriceInfo.getMaterialCode())) {
+            criteria.andEqualTo("materialCode", cdMaterialPriceInfo.getMaterialCode());
+        }
+        if (cdMaterialPriceInfo.getBeginDate()!=null) {
+            criteria.andLessThanOrEqualTo("beginDate", cdMaterialPriceInfo.getBeginDate());
+        }
+        if (cdMaterialPriceInfo.getBeginDate()!=null) {
+            criteria.andGreaterThanOrEqualTo("endDate", cdMaterialPriceInfo.getBeginDate());
+        }
+
         List<CdMaterialPriceInfo> cdMaterialPriceInfoList = cdMaterialPriceInfoService.selectByExample(example);
-        return R.data(cdMaterialPriceInfoList);
+        return cdMaterialPriceInfoList;
     }
 
     /**

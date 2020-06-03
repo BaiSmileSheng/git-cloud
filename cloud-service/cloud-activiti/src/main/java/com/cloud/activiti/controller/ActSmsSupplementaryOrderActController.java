@@ -7,6 +7,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
+import com.cloud.system.domain.entity.SysUser;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +50,7 @@ public class ActSmsSupplementaryOrderActController extends BaseController {
     @ApiOperation(value = "开启流程(新增、编辑) ", response = R.class)
     public R addSave(@RequestBody SmsSupplementaryOrder smsSupplementaryOrder) {
         //开启审核流程
-        return actSmsSupplementaryOrderService.startAct(smsSupplementaryOrder,getCurrentUserId());
+        return actSmsSupplementaryOrderService.startAct(smsSupplementaryOrder,getUserInfo(SysUser.class));
     }
 
     /**

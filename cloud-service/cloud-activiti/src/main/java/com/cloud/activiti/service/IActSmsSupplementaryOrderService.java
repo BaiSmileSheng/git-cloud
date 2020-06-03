@@ -3,6 +3,7 @@ package com.cloud.activiti.service;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.common.core.domain.R;
 import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
+import com.cloud.system.domain.entity.SysUser;
 
 /**
  * 物耗申请单 审核
@@ -17,7 +18,7 @@ public interface IActSmsSupplementaryOrderService {
      * @param smsSupplementaryOrder
      * @return R
      */
-    R startAct(SmsSupplementaryOrder smsSupplementaryOrder,long userId);
+    R startAct(SmsSupplementaryOrder smsSupplementaryOrder, SysUser SysUser);
 
     /**
      * 开启流程 物耗申请单逻辑  列表提交时开启

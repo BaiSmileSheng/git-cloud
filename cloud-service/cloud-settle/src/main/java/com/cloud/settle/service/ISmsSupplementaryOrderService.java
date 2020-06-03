@@ -25,4 +25,11 @@ public interface ISmsSupplementaryOrderService extends BaseService<SmsSupplement
      * @return
      */
     R remove(String ids);
+
+    /**
+     * 新增保存物耗申请单
+     * @param smsSupplementaryOrder
+     * @return
+     */
+    R addSave(SmsSupplementaryOrder smsSupplementaryOrder);
 }
