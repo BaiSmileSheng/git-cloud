@@ -15,7 +15,7 @@ spring:
   cloud:
     nacos:
       discovery:
-        namespace: a2eeae72-3ab5-4789-ac7f-7370330f9293
+        namespace: 6715aafb-eb61-4cf5-9342-6fadf96b80ef
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
@@ -80,4 +80,12 @@ sap:
 seata:
   registry:
     nacos:
-      namespace: a2eeae72-3ab5-4789-ac7f-7370330f9293
+      namespace: 6715aafb-eb61-4cf5-9342-6fadf96b80ef
+mdm:
+  material:
+    serviceUrl: http://bpel.mdm.haier.com:7778/soa-infra/services/interface/GeneralMDMDataRelease/generalmdmdatarelease_client_ep
+    sysName: S01992
+    masterType: HAIERMDM
+    tableName: HRDDPS_MTL_INFO
+
+

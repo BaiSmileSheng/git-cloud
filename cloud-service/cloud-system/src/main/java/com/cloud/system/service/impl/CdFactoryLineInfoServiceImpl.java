@@ -1,7 +1,7 @@
 package com.cloud.system.service.impl;
 
-    import com.cloud.common.core.domain.R;
-    import com.cloud.common.core.service.impl.BaseServiceImpl;
+import com.cloud.common.core.domain.R;
+import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.mapper.CdFactoryLineInfoMapper;
 import com.cloud.system.service.ICdFactoryLineInfoService;
