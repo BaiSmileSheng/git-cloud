@@ -10,3 +10,9 @@ cloud:
       port: 9999
       logpath: /logs/jobhandler
       logretentiondays: 30
+spring:
+  cloud:
+    nacos:
+      discovery:
+        namespace: 6715aafb-eb61-4cf5-9342-6fadf96b80ef
+
