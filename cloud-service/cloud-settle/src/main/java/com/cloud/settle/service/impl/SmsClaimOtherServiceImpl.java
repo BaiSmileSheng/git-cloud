@@ -8,7 +8,6 @@ import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.enums.ClaimOtherStatusEnum;
 import com.cloud.settle.mail.MailService;
-import com.cloud.settle.service.ISequeceService;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteOssService;
@@ -23,7 +22,6 @@ import com.cloud.settle.mapper.SmsClaimOtherMapper;
 import com.cloud.settle.domain.entity.SmsClaimOther;
 import com.cloud.settle.service.ISmsClaimOtherService;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -112,7 +110,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
     //@GlobalTransactional
     @Override
     public R insertClaimOtherAndOss(SmsClaimOther smsClaimOther, MultipartFile[] files) {
-        //索赔单号生成规则 QT+年月日+4位顺序号，循序号每日清零
+        //1.生成单号 索赔单号生成规则 QT+年月日+4位顺序号，循序号每日清零
         StringBuffer qualityNoBuffer = new StringBuffer(OTHER_ORDER_PRE);
         qualityNoBuffer.append(DateUtils.getDate().replace("-",""));
         String seq = remoteSequeceService.selectSeq(OTHER_SEQ_NAME,OTHER_SEQ_LENGTH);
@@ -123,20 +121,20 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         qualityNoBuffer.append(seq);
         smsClaimOther.setClaimCode(qualityNoBuffer.toString());
         smsClaimOther.setClaimOtherStatus(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_0.getCode());
+        //2.插入其他索赔信息
         smsClaimOtherMapper.insertSelective(smsClaimOther);
         logger.info("新增其他索赔信息时成功后 主键id:{},索赔单号:{}",smsClaimOther.getId(),smsClaimOther.getClaimCode());
 
         //上传其他索赔附件上传的时候order_no 为 索赔单号_01
-        for(MultipartFile file : files){
-            String orderNo = smsClaimOther.getClaimCode() + ORDER_NO_OTHER_CLAIM_END;
-            R uplodeFileResult = remoteOssService.uploadFile(file,orderNo);
-            Boolean flagResult = "0".equals(uplodeFileResult.get("code").toString());
-            if(!flagResult){
-                logger.error("新增其他索赔时新增文件失败订单号 orderNo:{},res:{}",orderNo, JSONObject.toJSON(uplodeFileResult));
-                throw new BusinessException("新增其他索赔时新增质新增文件失败");
-            }
+        //3.根据订单号新增文件
+        String orderNo = smsClaimOther.getClaimCode() + ORDER_NO_OTHER_CLAIM_END;
+        R uplodeFileResult = remoteOssService.updateListByOrderNo(orderNo,files);
+        Boolean flagResult = "0".equals(uplodeFileResult.get("code").toString());
+        if(!flagResult){
+            logger.error("新增其他索赔时新增文件失败订单号 orderNo:{},res:{}",orderNo, JSONObject.toJSON(uplodeFileResult));
+            throw new BusinessException("新增其他索赔时新增质新增文件失败");
         }
-        //发送邮件
+        //4.发送邮件
         String supplierCode = smsClaimOther.getSupplierCode();
         //根据供应商编号查询供应商信息
         SysUser sysUser = remoteUserService.findUserBySupplierCode(supplierCode);
@@ -318,17 +316,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         smsClaimOtherMapper.updateByPrimaryKeySelective(smsClaimOtherRes);
         //3.根据索赔单号所对应的申诉文件订单号查文件
         String orderNo = smsClaimOtherRes.getClaimCode() + ORDER_NO_OTHER_APPEAL_END;
-        List<SysOss> sysOssList =  remoteOssService.listByOrderNo(orderNo);
-        if(!CollectionUtils.isEmpty(sysOssList)){
-            //4.根据订单号删除文件
-            R deleteSysOssResult = remoteOssService.deleteListByOrderNo(orderNo);
-            flagResult = "0".equals(deleteSysOssResult.get("code").toString());
-            if(!flagResult){
-                logger.error("其他索赔单供应商申诉时根据订单号删除文件失败 orderNo:{}",orderNo);
-                throw new BusinessException("根据订单号删除文件失败");
-            }
-        }
-        //5.根据订单号新增文件
+        //3.根据订单号新增文件
         R uplodeFileResult = remoteOssService.updateListByOrderNo(orderNo,files);
         flagResult = "0".equals(uplodeFileResult.get("code").toString());
         if(!flagResult){
