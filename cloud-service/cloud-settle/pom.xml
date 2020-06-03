@@ -72,6 +72,11 @@
             <artifactId>cloud-system-api</artifactId>
             <version>${cloud.version}</version>
         </dependency>
+        <!-- 订单模块 -->
+        <dependency>
+            <groupId>com.cloud</groupId>
+            <artifactId>cloud-order-api</artifactId>
+        </dependency>
         <!-- 日志模块 -->
         <dependency>
             <groupId>com.cloud</groupId>

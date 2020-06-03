@@ -66,6 +66,11 @@
             <artifactId>cloud-settle-api</artifactId>
             <version>${cloud.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.cloud</groupId>
+            <artifactId>cloud-order-api</artifactId>
+            <version>${cloud.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -156,6 +161,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
 
 
     </dependencies>

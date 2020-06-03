@@ -16,16 +16,31 @@ public class RemoteSettleTestActFallbackFactory implements FallbackFactory<Remot
     public RemoteSettleTestActService create(Throwable throwable) {
         return new RemoteSettleTestActService(){
 
+            /**
+             * 根据ID查询测试审批流列表
+             * @param id
+             * @return null
+             */
             @Override
             public SettleTestAct get(Long id) {
                 return null;
             }
 
+            /**
+             * 新增或保存测试审批流
+             * @param settleTestAct
+             * @return null
+             */
             @Override
             public R addSave(SettleTestAct settleTestAct) {
                 return null;
             }
 
+            /**
+             * 修改保存测试审批流
+             * @param settleTestAct
+             * @return null
+             */
             @Override
             public R editSave(SettleTestAct settleTestAct) {
                 return null;
