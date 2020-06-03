@@ -95,7 +95,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
             String appealOrderNo = smsClaimOtherRes.getClaimCode() + ORDER_NO_OTHER_APPEAL_END;
             List<SysOss> appealListReault = remoteOssService.listByOrderNo(appealOrderNo);
             Map<String,Object> map = new HashMap<>();
-            map.put("smsQualityOrder",smsClaimOtherRes);
+            map.put("smsClaimOther",smsClaimOtherRes);
             map.put("claimSysOssList",claimListReault);
             map.put("appealSysOssList",appealListReault);
             return R.ok(map);
