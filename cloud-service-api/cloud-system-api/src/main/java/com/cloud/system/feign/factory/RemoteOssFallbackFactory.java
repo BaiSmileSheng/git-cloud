@@ -72,6 +72,11 @@ public class RemoteOssFallbackFactory implements FallbackFactory<RemoteOssServic
                 return R.error("根据订单号修改文件信息失败");
             }
 
+            /**
+             * 根据订单编号删除文件上传列表
+             * @param orderNo 订单编号
+             * @return 成功或失败
+             */
             @Override
             public R deleteListByOrderNo(String orderNo) {
                 return R.error("根据订单号删除文件信息失败");
