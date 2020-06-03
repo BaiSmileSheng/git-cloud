@@ -314,7 +314,6 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         smsClaimOtherRes.setClaimOtherStatus(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_3.getCode());
         smsClaimOtherRes.setComplaintDate(new Date());
         smsClaimOtherMapper.updateByPrimaryKeySelective(smsClaimOtherRes);
-        //3.根据索赔单号所对应的申诉文件订单号查文件
         String orderNo = smsClaimOtherRes.getClaimCode() + ORDER_NO_OTHER_APPEAL_END;
         //3.根据订单号新增文件
         R uplodeFileResult = remoteOssService.updateListByOrderNo(orderNo,files);
