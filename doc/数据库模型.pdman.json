@@ -7540,6 +7540,13 @@
               "autoIncrement": true
             },
             {
+              "name": "product_line_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "线体号",
+              "defaultValue": "''"
+            },
+            {
               "name": "delays_no",
               "type": "VARCHAR_32",
               "remark": "",
@@ -7551,6 +7558,27 @@
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "生产单号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "factory_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "工厂",
+              "defaultValue": "''"
+            },
+            {
+              "name": "product_material_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "专用号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "product_material_name",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "专用号名称",
               "defaultValue": "''"
             },
             {
@@ -7628,6 +7656,13 @@
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "结算单号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "settle_fee",
+              "type": "DECIMAL_2",
+              "remark": "",
+              "chnname": "结算金额",
               "defaultValue": "''"
             },
             {
@@ -7867,6 +7902,13 @@
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "结算单号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "settle_fe",
+              "type": "DECIMAL_2",
+              "remark": "",
+              "chnname": "结算金额",
               "defaultValue": "''"
             },
             {
@@ -8393,12 +8435,6 @@
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "应兑现月份"
-            },
-            {
-              "name": "actual_cash_mounth1",
-              "type": "VARCHAR_32",
-              "remark": "",
-              "chnname": "实际兑现月份"
             },
             {
               "name": "del_flag",

@@ -5,19 +5,28 @@
 <mapper namespace="com.cloud.system.mapper.CdSettleRatioMapper">
 
     <resultMap type="CdSettleRatio" id="CdSettleRatioResult">
-                    <result property="id" column="id"/>
-                    <result property="claimType" column="claim_type"/>
-                    <result property="ratio" column="ratio"/>
-                    <result property="delFlag" column="del_flag"/>
-                    <result property="remark" column="remark"/>
-                    <result property="createBy" column="create_by"/>
-                    <result property="createTime" column="create_time"/>
-                    <result property="updateBy" column="update_by"/>
-                    <result property="updateTime" column="update_time"/>
-                    </resultMap>
+        <result property="id" column="id"/>
+        <result property="claimType" column="claim_type"/>
+        <result property="ratio" column="ratio"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
 
     <sql id="selectCdSettleRatioVo">
-        select id, claim_type, ratio, del_flag, remark, create_by, create_time, update_by, update_time from cd_settle_ratio
+        select id,
+               claim_type,
+               ratio,
+               del_flag,
+               remark,
+               create_by,
+               create_time,
+               update_by,
+               update_time
+        from cd_settle_ratio
     </sql>
 
 
