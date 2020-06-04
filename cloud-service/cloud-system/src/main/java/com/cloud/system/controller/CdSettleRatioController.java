@@ -101,7 +101,8 @@ public class CdSettleRatioController extends BaseController {
         if(StringUtils.isBlank(cdSettleRatio.getClaimType())){
             return R.error("新增保存结算索赔系数时索赔类型为空");
         }
-        return cdSettleRatioService.addSaveVerifyClaimType(cdSettleRatio);
+        cdSettleRatioService.addSaveVerifyClaimType(cdSettleRatio);
+        return R.data(cdSettleRatio.getId());
     }
 
     /**

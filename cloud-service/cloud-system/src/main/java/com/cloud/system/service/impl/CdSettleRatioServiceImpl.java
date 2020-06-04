@@ -1,6 +1,7 @@
 package com.cloud.system.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.core.domain.R;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -11,7 +12,6 @@ import com.cloud.system.mapper.CdSettleRatioMapper;
 import com.cloud.system.domain.entity.CdSettleRatio;
 import com.cloud.system.service.ICdSettleRatioService;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
-import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 /**
@@ -81,6 +81,7 @@ public class CdSettleRatioServiceImpl extends BaseServiceImpl<CdSettleRatio> imp
         Example example = new Example(CdSettleRatio.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("claimType",claimType);
+        criteria.andEqualTo("delFlag", DeleteFlagConstants.NO_DELETED);
         return cdSettleRatioMapper.selectOneByExample(example);
     }
 }
