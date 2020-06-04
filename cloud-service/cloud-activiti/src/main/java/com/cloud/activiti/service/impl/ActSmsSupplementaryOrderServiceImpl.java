@@ -8,7 +8,7 @@ import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.service.IActSmsSupplementaryOrderService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
-import com.cloud.common.constant.ActivitiProTitleConstants;
+import com.cloud.activiti.consts.ActivitiProTitleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.settle.domain.entity.SmsSupplementaryOrder;

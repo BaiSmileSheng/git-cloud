@@ -1,4 +1,4 @@
-package com.cloud.common.constant;
+package com.cloud.activiti.consts;
 
 /**
  * 流程key定义

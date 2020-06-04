@@ -4,6 +4,7 @@ import com.cloud.activiti.domain.BizAudit;
 import com.cloud.common.core.domain.R;
 import com.cloud.settle.domain.entity.SmsQualityOrder;
 import com.cloud.system.domain.entity.SysUser;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 质量索赔审核工作流
@@ -21,11 +22,11 @@ public interface IActSmsQualityOrderService {
 
     /**
      * 质量索赔信息开启流程
-     * @param smsQualityOrder 质量索赔信息
+     * @param smsQualityOrderReq 质量索赔信息
      * @param sysUser 当前用户信息
      * @return 成功或失败
      */
-    R addSave(SmsQualityOrder smsQualityOrder,SysUser sysUser);
+    R addSave(String smsQualityOrderReq,MultipartFile[] files, SysUser sysUser);
 
     /**
      * 质量索赔审批流程
