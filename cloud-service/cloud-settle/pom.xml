@@ -76,6 +76,7 @@
         <dependency>
             <groupId>com.cloud</groupId>
             <artifactId>cloud-order-api</artifactId>
+            <version>${cloud.version}</version>
         </dependency>
         <!-- 日志模块 -->
         <dependency>

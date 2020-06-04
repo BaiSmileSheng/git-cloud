@@ -1,13 +1,12 @@
 package com.cloud.activiti.controller;
 
 import com.cloud.activiti.domain.BizAudit;
-import com.cloud.activiti.service.IActSmsDelaysDeliveryService;
+import com.cloud.activiti.service.IActSmsClaimOtherService;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
-import com.cloud.settle.domain.entity.SmsDelaysDelivery;
+import com.cloud.settle.domain.entity.SmsQualityOrder;
 import com.cloud.system.domain.entity.SysUser;
-import com.cloud.system.feign.RemoteUserService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,56 +19,57 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * 质量索赔审核工作流
+ * 其他索赔审核工作流
  * @Author Lihongxia
  * @Date 2020-05-29
  */
 @RestController
-@RequestMapping("actSmsDelaysDelivery")
-public class ActSmsDelaysDeliveryController extends BaseController {
+@RequestMapping("actSmsClaimOther")
+public class ActSmsClaimOtherController extends BaseController {
 
     @Autowired
-    private IActSmsDelaysDeliveryService actSmsDelaysDeliveryService;
+    private IActSmsClaimOtherService actSmsClaimOtherService;
+
 
     /**
-     * 根据业务key获取延期索赔信息
+     * 根据业务key获取其他索赔信息
      * @param businessKey biz_business的主键
-     * @return 查询结果包含 质量索赔信息
+     * @return 查询结果包含 其他索赔信息
      */
     @GetMapping("biz/{businessKey}")
-    @ApiOperation(value = "根据业务key获取延期索赔信息",response = SmsDelaysDelivery.class)
+    @ApiOperation(value = "根据业务key获取其他索赔信息",response = SmsQualityOrder.class)
     public R getBizInfoByTableId(@PathVariable("businessKey") String businessKey) {
-        return actSmsDelaysDeliveryService.getBizInfoByTableId(businessKey);
+        return actSmsClaimOtherService.getBizInfoByTableId(businessKey);
     }
 
     /**
-     * 供应商申诉延期索赔开启流程
-     * @param smsDelaysDeliveryReq 延期索赔信息
+     * 其他索赔开启流程
+     * @param smsClaimOtherReq 其他索赔信息
+     * @param files 文件信息
      * @return 成功或失败
      */
     @PostMapping("save")
-    @ApiOperation(value = "开启延期索赔流程",response = SmsDelaysDelivery.class)
-    public R addSave(@RequestParam("smsDelaysDelivery") String smsDelaysDeliveryReq,@RequestParam("files") MultipartFile[] files) {
+    @ApiOperation(value = "供应商申诉时开启其他索赔流程",response = SmsQualityOrder.class)
+    public R addSave(@RequestParam("smsClaimOther") String smsClaimOtherReq, @RequestParam("files") MultipartFile[] files) {
         //获取当前用户登录信息
         SysUser sysUser = getUserInfo(SysUser.class);
-        return actSmsDelaysDeliveryService.addSave(smsDelaysDeliveryReq,files,sysUser);
+        return actSmsClaimOtherService.addSave(smsClaimOtherReq,files,sysUser);
     }
 
     /**
-     * 延期索赔流程审批
+     * 其他索赔流程审批
      * @param bizAudit
      * @return 成功/失败
      */
     @PostMapping("audit")
-    @ApiOperation(value = "延期索赔流程审批",response = SmsDelaysDelivery.class)
+    @ApiOperation(value = "索赔流程审批",response = SmsQualityOrder.class)
     public R audit(@RequestBody BizAudit bizAudit) {
         //获取当前用户登录信息
         SysUser sysUser = getUserInfo(SysUser.class);
-        Boolean flagRole = sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_DDBBZ)
-                ||sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ);
-        if(!flagRole){
+        //判断当前用户是否有权限操作
+        if(!sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ) ){
             return R.error("没有权限进行审批");
         }
-        return actSmsDelaysDeliveryService.audit(bizAudit,sysUser);
+        return actSmsClaimOtherService.audit(bizAudit,sysUser);
     }
 }

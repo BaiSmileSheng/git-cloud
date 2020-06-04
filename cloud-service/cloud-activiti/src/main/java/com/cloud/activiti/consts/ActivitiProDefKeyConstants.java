@@ -1,4 +1,4 @@
-package com.cloud.common.constant;
+package com.cloud.activiti.consts;
 
 /**
  * 流程key定义
@@ -23,5 +23,10 @@ public class ActivitiProDefKeyConstants {
      * 延期索赔管理服务相关流程key
      */
     public static final String ACTIVITI_PRO_DEF_KEY_DELAYS_TEST = "delays";
+
+    /**
+     * 其他索赔管理服务相关流程key
+     */
+    public static final String ACTIVITI_PRO_DEF_KEY_CHAIM_OTHER_TEST = "chaimOther";
 
 }

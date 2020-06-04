@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * 延期索赔相关定时任务
+ * 每日凌晨执行一次  0 0 0 * * ?
  * @Author Lihongxia
  * @Date 2020-05-26
  */

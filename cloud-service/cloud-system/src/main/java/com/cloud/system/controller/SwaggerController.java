@@ -21,7 +21,20 @@ public class SwaggerController {
             @ApiResponse(code=200,message="成功"),
             @ApiResponse(code=500,message="发生错误")
     })
-    public String get(String name) {
+    public String get(String name) throws InterruptedException {
+        Thread.sleep(20000);
+        return "hello " + name;
+    }
+
+    @ApiOperation(value = "hello ~", notes = "欢迎", response = SysUser.class)
+    @ApiImplicitParams({@ApiImplicitParam(name = "name", value = "名字", required = true)})
+    @GetMapping("/hello")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "成功"),
+            @ApiResponse(code = 500, message = "发生错误")
+    })
+    public String get1(String name) throws InterruptedException {
+        Thread.sleep(20000);
         return "hello " + name;
     }
 }

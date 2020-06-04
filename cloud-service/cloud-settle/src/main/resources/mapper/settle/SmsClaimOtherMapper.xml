@@ -2,22 +2,19 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.cloud.settle.mapper.SmsDelaysDeliveryMapper">
+<mapper namespace="com.cloud.settle.mapper.SmsClaimOtherMapper">
 
-    <resultMap type="SmsDelaysDelivery" id="SmsDelaysDeliveryResult">
+    <resultMap type="SmsClaimOther" id="SmsClaimOtherResult">
         <result property="id" column="id"/>
-        <result property="productLineCode" column="product_line_code"/>
-        <result property="delaysNo" column="delays_no"/>
+        <result property="claimCode" column="claim_code"/>
         <result property="productOrderCode" column="product_order_code"/>
-        <result property="factoryCode" column="factory_code"/>
-        <result property="productMaterialCode" column="product_material_code"/>
-        <result property="productMaterialName" column="product_material_name"/>
         <result property="supplierCode" column="supplier_code"/>
         <result property="supplierName" column="supplier_name"/>
-        <result property="delaysStatus" column="delays_status"/>
-        <result property="deliveryDate" column="delivery_date"/>
-        <result property="actDeliveryDate" column="act_delivery_date"/>
-        <result property="delaysAmount" column="delays_amount"/>
+        <result property="factoryCode" column="factory_code"/>
+        <result property="componyCode" column="compony_code"/>
+        <result property="claimReson" column="claim_reson"/>
+        <result property="claimPrice" column="claim_price"/>
+        <result property="claimOtherStatus" column="claim_other_status"/>
         <result property="submitDate" column="submit_date"/>
         <result property="complaintDescription" column="complaint_description"/>
         <result property="complaintDate" column="complaint_date"/>
@@ -34,20 +31,17 @@
         <result property="updateTime" column="update_time"/>
     </resultMap>
 
-    <sql id="selectSmsDelaysDeliveryVo">
+    <sql id="selectSmsClaimOtherVo">
         select id,
-               product_line_code,
-               delays_no,
+               claim_code,
                product_order_code,
-               factory_code,
-               product_material_code,
-               product_material_name,
                supplier_code,
                supplier_name,
-               delays_status,
-               delivery_date,
-               act_delivery_date,
-               delays_amount,
+               factory_code,
+               compony_code,
+               claim_reson,
+               claim_price,
+               claim_other_status,
                submit_date,
                complaint_description,
                complaint_date,
@@ -62,7 +56,7 @@
                create_time,
                update_by,
                update_time
-        from sms_delays_delivery
+        from sms_claim_other
     </sql>
 
 
