@@ -5,6 +5,7 @@ import com.cloud.system.domain.entity.CdSupplierInfo;
 import com.cloud.system.feign.factory.RemoteSupplierInfoFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * 用户 Feign服务层
@@ -18,5 +19,5 @@ public interface RemoteSupplierInfoService {
      * @return CdSupplierInfo
      */
     @GetMapping("supplier/getByNick")
-    CdSupplierInfo getByNick(String loginName);
+    CdSupplierInfo getByNick(@RequestParam(value = "loginName") String loginName);
 }
