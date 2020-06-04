@@ -84,6 +84,13 @@ public class SmsQualityOrder extends BaseEntity {
     private String productMaterialCode;
 
     /**
+     * 付款公司
+     */
+    @ExcelProperty(value = "付款公司")
+    @ApiModelProperty(value = "付款公司")
+    private String componyCode;
+
+    /**
      * 专用号名称
      */
     @ExcelProperty(value = "专用号名称")
