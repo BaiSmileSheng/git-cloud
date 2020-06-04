@@ -8395,6 +8395,12 @@
               "chnname": "应兑现月份"
             },
             {
+              "name": "actual_cash_mounth1",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "实际兑现月份"
+            },
+            {
               "name": "del_flag",
               "type": "CHAR_1",
               "remark": "0：有效，1：删除",

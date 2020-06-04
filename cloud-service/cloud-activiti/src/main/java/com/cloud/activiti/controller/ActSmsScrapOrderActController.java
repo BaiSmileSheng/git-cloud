@@ -7,6 +7,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
+import com.cloud.system.domain.entity.SysUser;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,7 @@ public class ActSmsScrapOrderActController extends BaseController {
     @OperLog(title = "报废审核开启流程(编辑、新增提交)", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "报废审核开启流程(编辑、新增提交)", response = R.class)
     public R addSave(@RequestBody SmsScrapOrder smsScrapOrder) {
-        return actSmsScrapOrderService.startAct(smsScrapOrder,getCurrentUserId());
+        return actSmsScrapOrderService.startAct(smsScrapOrder,getUserInfo(SysUser.class));
     }
 
     /**

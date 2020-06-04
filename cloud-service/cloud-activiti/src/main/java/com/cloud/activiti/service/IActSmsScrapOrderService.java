@@ -3,6 +3,7 @@ package com.cloud.activiti.service;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.common.core.domain.R;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
+import com.cloud.system.domain.entity.SysUser;
 
 /**
  * 报废申请单 审核
@@ -17,7 +18,7 @@ public interface IActSmsScrapOrderService {
      * @param smsScrapOrder
      * @return R
      */
-    R startAct(SmsScrapOrder smsScrapOrder,long userId);
+    R startAct(SmsScrapOrder smsScrapOrder, SysUser sysUser);
 
     /**
      * 开启流程 报废申请单逻辑(列表提交)

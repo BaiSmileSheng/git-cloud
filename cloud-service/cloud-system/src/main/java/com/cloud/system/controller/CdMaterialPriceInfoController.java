@@ -94,24 +94,25 @@ public class CdMaterialPriceInfoController extends BaseController {
 
     /**
      * 根据Example条件查询列表
-     * @param cdMaterialPriceInfo
+     * @param materialCode
+     * @param beginDate
+     * @param endDate
      * @return CdMaterialPriceInfo  list
      */
-    @GetMapping("example")
-    public List<CdMaterialPriceInfo> findByExample(CdMaterialPriceInfo cdMaterialPriceInfo){
+    @GetMapping("findByMaterialCode")
+    public List<CdMaterialPriceInfo> findByMaterialCode(String materialCode, String beginDate, String endDate){
         //查询CdMaterialPriceInfo
         Example example = new Example(CdMaterialPriceInfo.class);
         Example.Criteria criteria = example.createCriteria();
-        if (StrUtil.isNotBlank(cdMaterialPriceInfo.getMaterialCode())) {
-            criteria.andEqualTo("materialCode", cdMaterialPriceInfo.getMaterialCode());
+        if (StrUtil.isNotBlank(materialCode)) {
+            criteria.andEqualTo("materialCode", materialCode);
         }
-        if (cdMaterialPriceInfo.getBeginDate()!=null) {
-            criteria.andLessThanOrEqualTo("beginDate", cdMaterialPriceInfo.getBeginDate());
+        if (StrUtil.isNotBlank(beginDate)) {
+            criteria.andLessThanOrEqualTo("beginDate", beginDate);
         }
-        if (cdMaterialPriceInfo.getBeginDate()!=null) {
-            criteria.andGreaterThanOrEqualTo("endDate", cdMaterialPriceInfo.getBeginDate());
+        if (StrUtil.isNotBlank(endDate)) {
+            criteria.andGreaterThanOrEqualTo("endDate", endDate);
         }
-
         List<CdMaterialPriceInfo> cdMaterialPriceInfoList = cdMaterialPriceInfoService.selectByExample(example);
         return cdMaterialPriceInfoList;
     }

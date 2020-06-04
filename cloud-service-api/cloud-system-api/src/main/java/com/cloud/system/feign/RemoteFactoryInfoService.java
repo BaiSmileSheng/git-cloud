@@ -4,7 +4,7 @@ import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.feign.factory.RemoteFactoryInfoFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -19,6 +19,6 @@ public interface RemoteFactoryInfoService {
      * @param factoryCode
      * @return 工厂信息
      */
-    @PostMapping("factoryInfo/getOne")
+    @GetMapping("factoryInfo/getOne")
     CdFactoryInfo selectOneByFactory(@RequestParam(value = "factoryCode") String factoryCode);
 }

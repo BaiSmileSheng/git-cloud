@@ -1,5 +1,6 @@
 package com.cloud.system.controller;
 
+import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -59,6 +60,31 @@ public class CdSapSalePriceController extends BaseController {
         return getDataTable(cdSapSalePriceList);
     }
 
+    /**
+     * 根据Example条件查询列表
+     * @param materialCode
+     * @param beginDate
+     * @param endDate
+     * @return List<CdSapSalePrice>
+     */
+    @GetMapping("findByMaterialCode")
+    public List<CdSapSalePrice> findByMaterialCode(String materialCode, String beginDate, String endDate){
+        //查询CdMaterialPriceInfo
+        Example example = new Example(CdSapSalePrice.class);
+        Example.Criteria criteria = example.createCriteria();
+        if (StrUtil.isNotBlank(materialCode)) {
+            criteria.andEqualTo("materialCode", materialCode);
+        }
+        if (StrUtil.isNotBlank(beginDate)) {
+            criteria.andLessThanOrEqualTo("beginDate", beginDate);
+        }
+        if (StrUtil.isNotBlank(endDate)) {
+            criteria.andGreaterThanOrEqualTo("endDate", endDate);
+        }
+
+        List<CdSapSalePrice> cdSapSalePriceList = cdSapSalePriceService.selectByExample(example);
+        return cdSapSalePriceList;
+    }
 
     /**
      * 新增保存成品销售价格

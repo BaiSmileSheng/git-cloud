@@ -29,7 +29,7 @@ public interface ISmsSupplementaryOrderService extends BaseService<SmsSupplement
     /**
      * 新增保存物耗申请单
      * @param smsSupplementaryOrder
-     * @return
+     * @return id
      */
     R addSave(SmsSupplementaryOrder smsSupplementaryOrder);
 }
