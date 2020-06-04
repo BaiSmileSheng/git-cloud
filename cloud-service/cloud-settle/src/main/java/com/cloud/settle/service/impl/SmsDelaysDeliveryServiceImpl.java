@@ -2,6 +2,7 @@ package com.cloud.settle.service.impl;
 
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
+import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.domain.entity.SmsDelaysDelivery;
@@ -79,13 +80,14 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
      */
     @Override
     public R selectById(Long id) {
-        SmsDelaysDelivery smsDelaysDeliveryRes = this.selectByPrimaryKey(id);
+        logger.info("根据id查询延期索赔单详情 id:{}",id);
+        SmsDelaysDelivery smsDelaysDeliveryRes = smsDelaysDeliveryMapper.selectByPrimaryKey(id);
         if(null != smsDelaysDeliveryRes || StringUtils.isNotBlank(smsDelaysDeliveryRes.getDelaysNo())){
             //索赔文件编号
             String claimOrderNo = smsDelaysDeliveryRes.getDelaysNo();
             List<SysOss> sysOssList = remoteOssService.listByOrderNo(claimOrderNo);
             Map<String,Object> map = new HashMap<>();
-            map.put("smsQualityOrder",smsDelaysDeliveryRes);
+            map.put("smsDelaysDelivery",smsDelaysDeliveryRes);
             map.put("sysOssList",sysOssList);
             return R.ok(map);
         }
@@ -100,6 +102,7 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
     @GlobalTransactional
     @Override
     public R batchAddDelaysDelivery() {
+        logger.info("定时任务调用批量新增保存延期交付索赔");
         //TODO 调用订单接口获取 待生成延期索赔的订单(每日凌晨取前一天订单状态为“关单”的排产订单，计算交货时间大于订单应交货日期时)
         List<SmsDelaysDelivery> smsDelaysDeliveryList = new ArrayList<>();
         //供应商编号
@@ -109,26 +112,32 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
             smsDelaysDelivery.setDelaysAmount(DELAYS_AMOUNT);
             smsDelaysDelivery.setSubmitDate(new Date());
             smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_1.getCode());
-            //获取索赔单号
+            //1.获取索赔单号
             StringBuffer qualityNoBuffer = new StringBuffer(DELAYS_ORDER_PRE);
             qualityNoBuffer.append(DateUtils.getDate().replace("-",""));
             String seq = sequeceService.selectSeq(DELAYS_SEQ_NAME,DELAYS_SEQ_LENGTH);
+            logger.info("新增保存延期交付索赔获取序列号 seq:{}",seq);
             qualityNoBuffer.append(seq);
             smsDelaysDelivery.setDelaysNo(qualityNoBuffer.toString());
 
 //            smsDelaysDeliveryList.add(smsDelaysDelivery);
             supplierSet.add(smsDelaysDelivery.getSupplierCode());
 //        }
-        //插入延期索赔信息
+        //2.插入延期索赔信息
+        logger.info("新增保存延期交付索赔索赔单号 :{}",smsDelaysDelivery.getDelaysNo());
         int count = smsDelaysDeliveryMapper.insertList(smsDelaysDeliveryList);
         //供应商V码对应的供应商信息
         Map<String,SysUser> mapSysUser = new HashMap<>();
         //获取供应商信息
         for(String supplierCode : supplierSet){
+            logger.info("新增保存延期交付索赔时获取供应商信息 supplierCode:{}",supplierCode);
             SysUser sysUser = remoteUserService.findUserBySupplierCode(supplierCode);
+            if(null == sysUser){
+                throw new BusinessException("新增保存延期交付索赔 供应商信息不存在");
+            }
             mapSysUser.put(supplierCode,sysUser);
         }
-        //发送邮件
+        //3.发送邮件
         String mailSubject = "延期索赔邮件";
         for(SmsDelaysDelivery smsDelaysDeliveryMail :smsDelaysDeliveryList ){
             String supplierCode = smsDelaysDeliveryMail.getSupplierCode();
@@ -137,9 +146,9 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
             // 供应商名称 +V码+公司  您有一条延期交付订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
             mailTextBuffer.append(smsDelaysDelivery.getSupplierName()).append("+").append(supplierCode).append("+")
                     .append(sysUser.getCorporation()).append(" ").append("您有一条延期交付订单，订单号")
-                    .append(smsDelaysDelivery.getProductOrderCode()).append(",请及时处理，如不处理，3天后系统自动确认，无法申诉");
+                    .append(smsDelaysDelivery.getDelaysNo()).append(",请及时处理，如不处理，3天后系统自动确认，无法申诉");
             String toSupplier = sysUser.getEmail();
-            mailService.sendTextMail(mailSubject,mailTextBuffer.toString(),toSupplier);
+            mailService.sendTextMail(toSupplier,mailTextBuffer.toString(),mailSubject);
         }
         return R.ok();
     }
@@ -161,22 +170,23 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
     //@GlobalTransactional
     @Override
     public R supplierAppeal(SmsDelaysDelivery smsDelaysDeliveryReq, MultipartFile[] files) {
-        SmsDelaysDelivery selectSmsDelaysDelivery = this.selectByPrimaryKey(smsDelaysDeliveryReq.getId());
+        logger.info("延期索赔单供应商申诉(包含文件信息) 单号:{}",smsDelaysDeliveryReq.getDelaysNo());
+        SmsDelaysDelivery selectSmsDelaysDelivery = smsDelaysDeliveryMapper.selectByPrimaryKey(smsDelaysDeliveryReq.getId());
         Boolean flagSelect = (null == selectSmsDelaysDelivery || null == selectSmsDelaysDelivery.getDelaysStatus());
         if(flagSelect){
             logger.info("延期索赔单申诉异常 索赔单号:{}",smsDelaysDeliveryReq.getDelaysNo());
-            return R.error("此延期索赔单不存在");
+            throw new BusinessException("此延期索赔单不存在");
         }
         Boolean flagSelectStatus = DeplayStatusEnum.DELAYS_STATUS_1.getCode().equals(selectSmsDelaysDelivery.getDelaysStatus())
                 ||DeplayStatusEnum.DELAYS_STATUS_7.getCode().equals(selectSmsDelaysDelivery.getDelaysStatus());
         if(!flagSelectStatus){
             logger.info("延期索赔单申诉状态异常 索赔单号:{}",smsDelaysDeliveryReq.getDelaysNo());
-            return R.error("此延期索赔单不可再申诉");
+            throw new  BusinessException("此延期索赔单不可再申诉");
         }
         //修改延期索赔单
         smsDelaysDeliveryReq.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_4.getCode());
         smsDelaysDeliveryReq.setComplaintDate(new Date());
-        this.updateByPrimaryKeySelective(smsDelaysDeliveryReq);
+        smsDelaysDeliveryMapper.updateByPrimaryKeySelective(smsDelaysDeliveryReq);
         //修改文件信息
         String orderNo = selectSmsDelaysDelivery.getDelaysNo();
         R result = remoteOssService.updateListByOrderNo(orderNo,files);
@@ -196,7 +206,7 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
             smsDelaysDelivery.setSettleFee(smsDelaysDelivery.getDelaysAmount());
             smsDelaysDelivery.setSupplierConfirmDate(new Date());
         }
-        int count = this.updateBatchByPrimaryKeySelective(selectListResult);
+        int count = smsDelaysDeliveryMapper.updateBatchByPrimaryKeySelective(selectListResult);
         return R.data(count);
     }
 }

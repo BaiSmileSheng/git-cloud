@@ -23,7 +23,7 @@ import java.util.Date;
  * 延期交付索赔 对象 sms_delays_delivery
  *
  * @author cs
- * @date 2020-06-01
+ * @date 2020-06-04
  */
 @ExcelIgnoreUnannotated
 @Data
@@ -61,6 +61,13 @@ public class SmsDelaysDelivery extends BaseEntity {
     @ExcelProperty(value = "生产单号")
     @ApiModelProperty(value = "生产单号")
     private String productOrderCode;
+
+    /**
+     * 工厂
+     */
+    @ExcelProperty(value = "工厂")
+    @ApiModelProperty(value = "工厂")
+    private String factoryCode;
 
     /**
      * 专用号
@@ -124,6 +131,7 @@ public class SmsDelaysDelivery extends BaseEntity {
      * 提交时间
      */
     @ExcelProperty(value = "提交时间")
+    @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "提交时间")
     private Date submitDate;
 
@@ -163,7 +171,6 @@ public class SmsDelaysDelivery extends BaseEntity {
     @ExcelProperty(value = "结算金额")
     @ApiModelProperty(value = "结算金额")
     private BigDecimal settleFee;
-
 
     /**
      * 兑现金额

@@ -30,6 +30,16 @@ public class RemoteQualityOrderFallbackFactory implements FallbackFactory<Remote
             }
 
             /**
+             * 查询质量索赔详情
+             * @param id 主键id
+             * @return 质量索赔信息详情(包含文件信息)
+             */
+            @Override
+            public R selectById(Long id) {
+                return null;
+            }
+
+            /**
              * 修改保存质量索赔
              * @param smsQualityOrder 质量索赔信息
              * @return 修改成功或失败

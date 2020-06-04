@@ -25,6 +25,14 @@ public interface RemoteQualityOrderService {
     @GetMapping("qualityOrder/get")
     SmsQualityOrder get(@RequestParam("id") Long id);
 
+    /**
+     * 查询质量索赔详情
+     * @param id 主键id
+     * @return 质量索赔信息详情(包含文件信息)
+     */
+    @GetMapping("qualityOrder/selectById")
+    R selectById(Long id);
+
 
     /**
      * 修改保存质量索赔
