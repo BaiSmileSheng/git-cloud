@@ -5,34 +5,62 @@
 <mapper namespace="com.cloud.settle.mapper.SmsSettleInfoMapper">
 
     <resultMap type="SmsSettleInfo" id="SmsSettleInfoResult">
-                    <result property="id" column="id"/>
-                    <result property="lineNo" column="line_no"/>
-                    <result property="supplierCode" column="supplier_code"/>
-                    <result property="supplierName" column="supplier_name"/>
-                    <result property="factoryCode" column="factory_code"/>
-                    <result property="productOrderCode" column="product_order_code"/>
-                    <result property="orderStatus" column="order_status"/>
-                    <result property="productMaterialCode" column="product_material_code"/>
-                    <result property="productMaterialName" column="product_material_name"/>
-                    <result property="bomVersion" column="bom_version"/>
-                    <result property="orderAmount" column="order_amount"/>
-                    <result property="confirmAmont" column="confirm_amont"/>
-                    <result property="outsourceWay" column="outsource_way"/>
-                    <result property="machiningPrice" column="machining_price"/>
-                    <result property="settlePrice" column="settle_price"/>
-                    <result property="delFlag" column="del_flag"/>
-                    <result property="remark" column="remark"/>
-                    <result property="createBy" column="create_by"/>
-                    <result property="createTime" column="create_time"/>
-                    <result property="updateBy" column="update_by"/>
-                    <result property="updateTime" column="update_time"/>
-                    <result property="productStartDate" column="product_start_date"/>
-                    <result property="productEndDate" column="product_end_date"/>
-                    <result property="actualEndDate" column="actual_end_date"/>
-                    </resultMap>
+        <result property="id" column="id"/>
+        <result property="lineNo" column="line_no"/>
+        <result property="supplierCode" column="supplier_code"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="factoryCode" column="factory_code"/>
+        <result property="productOrderCode" column="product_order_code"/>
+        <result property="orderStatus" column="order_status"/>
+        <result property="componyCode" column="compony_code"/>
+        <result property="productMaterialCode" column="product_material_code"/>
+        <result property="productMaterialName" column="product_material_name"/>
+        <result property="bomVersion" column="bom_version"/>
+        <result property="orderAmount" column="order_amount"/>
+        <result property="confirmAmont" column="confirm_amont"/>
+        <result property="outsourceWay" column="outsource_way"/>
+        <result property="machiningPrice" column="machining_price"/>
+        <result property="settlePrice" column="settle_price"/>
+        <result property="settleNo" column="settle_no"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="productStartDate" column="product_start_date"/>
+        <result property="productEndDate" column="product_end_date"/>
+        <result property="actualEndDate" column="actual_end_date"/>
+    </resultMap>
 
     <sql id="selectSmsSettleInfoVo">
-        select id, line_no, supplier_code, supplier_name, factory_code, product_order_code, order_status, product_material_code, product_material_name, bom_version, order_amount, confirm_amont, outsource_way, machining_price, settle_price, del_flag, remark, create_by, create_time, update_by, update_time, product_start_date, product_end_date, actual_end_date from sms_settle_info
+        select id,
+               line_no,
+               supplier_code,
+               supplier_name,
+               factory_code,
+               product_order_code,
+               order_status,
+               compony_code,
+               product_material_code,
+               product_material_name,
+               bom_version,
+               order_amount,
+               confirm_amont,
+               outsource_way,
+               machining_price,
+               settle_price,
+               settle_no,
+               del_flag,
+               remark,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               product_start_date,
+               product_end_date,
+               actual_end_date
+        from sms_settle_info
     </sql>
 
 

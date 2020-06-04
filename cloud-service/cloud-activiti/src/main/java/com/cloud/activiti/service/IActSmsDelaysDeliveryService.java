@@ -4,6 +4,7 @@ import com.cloud.activiti.domain.BizAudit;
 import com.cloud.common.core.domain.R;
 import com.cloud.settle.domain.entity.SmsDelaysDelivery;
 import com.cloud.system.domain.entity.SysUser;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 延期索赔审核工作流
@@ -20,12 +21,12 @@ public interface IActSmsDelaysDeliveryService {
     R getBizInfoByTableId(String businessKey);
 
     /**
-     * 延期索赔开启流程
-     * @param smsDelaysDelivery 延期索赔嘻嘻
+     * 供应商申诉延期索赔开启流程
+     * @param smsDelaysDeliveryReq 延期索赔嘻嘻
      * @param sysUser 用户信息
      * @return
      */
-    R addSave(SmsDelaysDelivery smsDelaysDelivery, SysUser sysUser);
+    R addSave(String smsDelaysDeliveryReq, MultipartFile[] files, SysUser sysUser);
 
     /**
      * 延期索赔流程审批

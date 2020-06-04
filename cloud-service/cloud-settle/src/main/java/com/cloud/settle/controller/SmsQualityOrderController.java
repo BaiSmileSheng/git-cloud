@@ -118,13 +118,9 @@ public class SmsQualityOrderController extends BaseController {
     @PostMapping("save")
     @ApiOperation(value = "新增保存质量索赔 ", response = SmsQualityOrder.class)
     public R addSave(@RequestParam("smsQualityOrderReq") String smsQualityOrderReq,@RequestParam("files") MultipartFile[] files) {
-        try{
-            SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq,SmsQualityOrder.class);
-            smsQualityOrderService.addSmsQualityOrderAndSysOss(smsQualityOrder,files);
-            return R.data(smsQualityOrder.getId());
-        }catch (Exception e){
-            return R.error(e.getMessage());
-        }
+        SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq,SmsQualityOrder.class);
+        smsQualityOrderService.addSmsQualityOrderAndSysOss(smsQualityOrder,files);
+        return R.data(smsQualityOrder.getId());
     }
 
     /**
@@ -147,12 +143,8 @@ public class SmsQualityOrderController extends BaseController {
     @PostMapping("update")
     @ApiOperation(value = "修改保存质量索赔(包含文件信息)", response = SmsQualityOrder.class)
     public R updateQuality(@RequestParam("smsQualityOrder") String smsQualityOrderReq,@RequestParam("files") MultipartFile[] files) {
-        try{
-            SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq,SmsQualityOrder.class);
-            return smsQualityOrderService.updateSmsQualityOrderAndSysOss(smsQualityOrder,files);
-        }catch (Exception e){
-            return R.error(e.getMessage());
-        }
+        SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq,SmsQualityOrder.class);
+        return smsQualityOrderService.updateSmsQualityOrderAndSysOss(smsQualityOrder,files);
     }
 
     /**
@@ -163,11 +155,7 @@ public class SmsQualityOrderController extends BaseController {
     @PostMapping("remove")
     @ApiOperation(value = "删除质量索赔 ", response = SmsQualityOrder.class)
     public R remove(String ids) {
-        try{
-            return smsQualityOrderService.deleteSmsQualityOrderAndSysOss(ids);
-        }catch (Exception e){
-            return R.error(e.getMessage());
-        }
+        return smsQualityOrderService.deleteSmsQualityOrderAndSysOss(ids);
     }
 
     /**
@@ -179,11 +167,7 @@ public class SmsQualityOrderController extends BaseController {
     @OperLog(title = "提交索赔单 ", businessType = BusinessType.DELETE)
     @ApiOperation(value = "提交索赔单 ", response = SmsQualityOrder.class)
     public R submit(String ids){
-        try{
-            return smsQualityOrderService.submit(ids);
-        }catch (Exception e){
-            return R.error(e.getMessage());
-        }
+        return smsQualityOrderService.submit(ids);
     }
 
     /**
@@ -195,11 +179,7 @@ public class SmsQualityOrderController extends BaseController {
     @OperLog(title = "供应商确认索赔单 ", businessType = BusinessType.DELETE)
     @ApiOperation(value = "供应商确认索赔单 ", response = SmsQualityOrder.class)
     public R supplierConfirm(String ids){
-        try{
-            return smsQualityOrderService.supplierConfirm(ids);
-        }catch (Exception e){
-            return R.error(e.getMessage());
-        }
+        return smsQualityOrderService.supplierConfirm(ids);
     }
 
     /**
@@ -210,11 +190,7 @@ public class SmsQualityOrderController extends BaseController {
     @PostMapping("supplierAppeal")
     @ApiOperation(value = "索赔单供应商申诉 ", response = SmsQualityOrder.class)
     public R supplierAppeal(@RequestParam("smsQualityOrder") String smsQualityOrderReq,@RequestParam("files") MultipartFile[] files) {
-        try{
             SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq,SmsQualityOrder.class);
             return smsQualityOrderService.supplierAppeal(smsQualityOrder,files);
-        }catch (Exception e){
-            return R.error(e.getMessage());
-        }
     }
 }

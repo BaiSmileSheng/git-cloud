@@ -10,12 +10,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.Id;
-import javax.persistence.Transient;
-
 import tk.mybatis.mapper.annotation.KeySql;
-
+import javax.persistence.Transient;
+import javax.persistence.Id;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -23,7 +20,7 @@ import java.util.Date;
  * 加工费结算 对象 sms_settle_info
  *
  * @author cs
- * @date 2020-05-27
+ * @date 2020-06-04
  */
 @ExcelIgnoreUnannotated
 @Data
@@ -84,6 +81,13 @@ public class SmsSettleInfo extends BaseEntity {
     private String orderStatus;
 
     /**
+     * 付款公司
+     */
+    @ExcelProperty(value = "付款公司")
+    @ApiModelProperty(value = "付款公司")
+    private String componyCode;
+
+    /**
      * 专用号
      */
     @ExcelProperty(value = "专用号")
@@ -140,6 +144,13 @@ public class SmsSettleInfo extends BaseEntity {
     private BigDecimal settlePrice;
 
     /**
+     * 结算单号
+     */
+    @ExcelProperty(value = "结算单号")
+    @ApiModelProperty(value = "结算单号")
+    private String settleNo;
+
+    /**
      * 删除状态 0：有效，1：删除
      */
     private String delFlag;
@@ -149,6 +160,7 @@ public class SmsSettleInfo extends BaseEntity {
      */
     @ExcelProperty(value = "基本开始日期")
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @ApiModelProperty(value = "基本开始日期")
     private Date productStartDate;
 
     /**
@@ -156,6 +168,7 @@ public class SmsSettleInfo extends BaseEntity {
      */
     @ExcelProperty(value = "基本结束日期")
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @ApiModelProperty(value = "基本结束日期")
     private Date productEndDate;
 
     /**
@@ -163,6 +176,7 @@ public class SmsSettleInfo extends BaseEntity {
      */
     @ExcelProperty(value = "实际结束日期")
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @ApiModelProperty(value = "实际结束日期")
     private Date actualEndDate;
 
     @Transient

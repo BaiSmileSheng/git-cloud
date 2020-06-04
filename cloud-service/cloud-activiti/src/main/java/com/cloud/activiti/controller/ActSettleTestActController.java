@@ -5,7 +5,7 @@ import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
-import com.cloud.common.constant.ActivitiProTitleConstants;
+import com.cloud.activiti.consts.ActivitiProTitleConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.settle.domain.entity.SettleTestAct;
