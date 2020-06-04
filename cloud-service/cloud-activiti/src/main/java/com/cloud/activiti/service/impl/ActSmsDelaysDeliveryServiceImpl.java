@@ -7,7 +7,7 @@ import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.service.IActSmsDelaysDeliveryService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
-import com.cloud.common.constant.ActivitiProTitleConstants;
+import com.cloud.activiti.consts.ActivitiProTitleConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
