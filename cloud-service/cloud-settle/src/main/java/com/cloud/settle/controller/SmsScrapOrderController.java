@@ -102,7 +102,10 @@ public class SmsScrapOrderController extends BaseController {
     @OperLog(title = "新增保存报废申请 ", businessType = BusinessType.INSERT)
     @ApiOperation(value = "新增保存报废申请 ", response = R.class)
     public R addSave(@RequestBody SmsScrapOrder smsScrapOrder) {
-        return smsScrapOrderService.addSave(smsScrapOrder,getUserInfo(SysUser.class));
+        if (StrUtil.isNotEmpty(getLoginName())) {
+            smsScrapOrder.setCreateBy(getLoginName());
+        }
+        return smsScrapOrderService.addSave(smsScrapOrder);
     }
 
     /**
@@ -120,6 +123,9 @@ public class SmsScrapOrderController extends BaseController {
     @OperLog(title = "修改保存报废申请 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存报废申请 ", response = R.class)
     public R editSave(@RequestBody SmsScrapOrder smsScrapOrder) {
+        if (StrUtil.isNotEmpty(getLoginName())) {
+            smsScrapOrder.setUpdateBy(getLoginName());
+        }
         return smsScrapOrderService.editSave(smsScrapOrder);
 
     }

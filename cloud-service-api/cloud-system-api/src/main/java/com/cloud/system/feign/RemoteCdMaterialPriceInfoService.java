@@ -21,11 +21,15 @@ import java.util.List;
 public interface RemoteCdMaterialPriceInfoService {
     /**
      * 根据Example条件查询列表
-     * @param cdMaterialPriceInfo
+     * @param materialCode
+     * @param beginDate
+     * @param endDate
      * @return List<CdMaterialPriceInfo>
      */
-    @GetMapping("materialPrice/example")
-    List<CdMaterialPriceInfo> findByExample(@RequestParam("cdMaterialPriceInfo") CdMaterialPriceInfo cdMaterialPriceInfo);
+    @GetMapping("materialPrice/findByMaterialCode")
+    List<CdMaterialPriceInfo> findByMaterialCode(@RequestParam(value = "materialCode") String materialCode,
+                                                 @RequestParam(value = "beginDate") String beginDate,
+                                                 @RequestParam(value = "endDate") String endDate);
 
 
     /**
