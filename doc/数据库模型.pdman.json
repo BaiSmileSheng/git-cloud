@@ -2562,6 +2562,12 @@
               "chnname": "标记位"
             },
             {
+              "name": "version",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "版本"
+            },
+            {
               "name": "del_flag",
               "type": "Char",
               "remark": "0：有效，1：删除",
@@ -2776,13 +2782,6 @@
               "type": "Date",
               "remark": "",
               "chnname": "生产日期"
-            },
-            {
-              "name": "weeks",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "周数",
-              "notNull": true
             },
             {
               "name": "place",
@@ -8514,7 +8513,7 @@
       "chnname": "",
       "entities": [
         {
-          "title": "cd_bom",
+          "title": "cd_bom_info",
           "fields": [
             {
               "name": "id",
@@ -8768,6 +8767,12 @@
               "remark": "",
               "chnname": "舍入值",
               "notNull": true
+            },
+            {
+              "name": "uph",
+              "type": "DECIMAL_2",
+              "remark": "",
+              "chnname": "UPH节拍"
             },
             {
               "name": "last_update",
