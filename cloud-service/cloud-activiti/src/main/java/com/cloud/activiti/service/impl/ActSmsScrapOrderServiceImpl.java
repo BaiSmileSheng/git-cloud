@@ -1,6 +1,7 @@
 package com.cloud.activiti.service.impl;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.consts.ActivitiConstant;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
@@ -17,6 +18,7 @@ import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteCdMaterialPriceInfoService;
 import com.cloud.system.feign.RemoteUserService;
 import com.google.common.collect.Maps;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,7 @@ import java.util.Map;
 
 
 @Service
+@Slf4j
 public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
     @Autowired
     private IBizBusinessService bizBusinessService;
@@ -50,6 +53,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
     @Override
 //    @GlobalTransactional
     public R startAct(SmsScrapOrder smsScrapOrder, SysUser sysUser) {
+        log.info(StrUtil.format("报废申请开启流程（编辑、新增）：参数为{}", smsScrapOrder.toString()));
         //判断状态是否是未提交，如果不是则抛出错误
         if (smsScrapOrder.getId() == null) {
             smsScrapOrder.setCreateBy(sysUser.getLoginName());
@@ -89,6 +93,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
     @Override
 //    @GlobalTransactional
     public R startActOnlyForList(SmsScrapOrder smsScrapOrder, long userId) {
+        log.info(StrUtil.format("报废申请开启流程（列表）：参数为{}", smsScrapOrder.toString()));
         //判断状态是否是未提交，如果不是则抛出错误
         Long id = smsScrapOrder.getId();
         if (id != null) {
@@ -124,6 +129,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
     @Override
 //    @GlobalTransactional
     public R audit(BizAudit bizAudit, long userId) {
+        log.info(StrUtil.format("报废申请审核：参数为{}", bizAudit.toString()));
         //流程审核业务表
         BizBusiness bizBusiness = bizBusinessService.selectBizBusinessById(bizAudit.getBusinessKey().toString());
         if (bizBusiness == null) {

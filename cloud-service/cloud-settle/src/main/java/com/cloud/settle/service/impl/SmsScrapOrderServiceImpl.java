@@ -73,6 +73,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
      */
     @Override
     public R addSave(SmsScrapOrder smsScrapOrder) {
+        log.info(StrUtil.format("报废申请新增保存开始：参数为{}", smsScrapOrder.toString()));
         //生产订单号
         String productOrderCode = smsScrapOrder.getProductOrderCode();
         //校验

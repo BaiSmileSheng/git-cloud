@@ -50,6 +50,11 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
     @Autowired
     private RemoteSequeceService remoteSequeceService;
 
+    /**
+     * 编辑保存物耗申请单功能  --有逻辑校验
+     * @param smsSupplementaryOrder
+     * @return
+     */
     @Override
     public R editSave(SmsSupplementaryOrder smsSupplementaryOrder) {
         Long id = smsSupplementaryOrder.getId();
@@ -70,6 +75,11 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         }
     }
 
+    /**
+     * 删除物耗申请单
+     * @param ids
+     * @return
+     */
     @Override
     public R remove(String ids) {
         log.info(StrUtil.format("物耗申请删除开始：id为{}", ids));
@@ -84,8 +94,14 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         return rows > 0 ? R.ok() : R.error("删除错误！");
     }
 
+    /**
+     * 新增保存物耗申请单
+     * @param smsSupplementaryOrder
+     * @return id
+     */
     @Override
     public R addSave(SmsSupplementaryOrder smsSupplementaryOrder) {
+        log.info(StrUtil.format("物耗申请新增保存开始：参数为{}", smsSupplementaryOrder.toString()));
         String productOrderCode = smsSupplementaryOrder.getProductOrderCode();
         //校验
         R rCheck = checkSmsSupplementaryOrderCondition(smsSupplementaryOrder, productOrderCode);
