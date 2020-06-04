@@ -1,5 +1,6 @@
 package com.cloud.settle.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
@@ -12,6 +13,8 @@ import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteOssService;
 import com.cloud.system.feign.RemoteUserService;
 import io.seata.spring.annotation.GlobalTransactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.cloud.settle.mapper.SmsQualityOrderMapper;
@@ -34,6 +37,9 @@ import java.util.Map;
  */
 @Service
 public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder> implements ISmsQualityOrderService {
+
+    private static Logger logger = LoggerFactory.getLogger(SmsQualityOrderServiceImpl.class);
+
     @Autowired
     private SmsQualityOrderMapper smsQualityOrderMapper;
     @Autowired
@@ -76,7 +82,8 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
      */
     @Override
     public R selectById(Long id) {
-        SmsQualityOrder smsQualityOrderRes = this.selectByPrimaryKey(id);
+        logger.info("根据id查询质量索赔单详情 id:{}",id);
+        SmsQualityOrder smsQualityOrderRes = smsQualityOrderMapper.selectByPrimaryKey(id);
         if(null != smsQualityOrderRes || StringUtils.isNotBlank(smsQualityOrderRes.getQualityNo())){
             //索赔文件编号
             String claimOrderNo = smsQualityOrderRes.getQualityNo() + ORDER_NO_QUALITY_CLAIM_END;
@@ -91,7 +98,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
             return R.ok(map);
         }
 
-        return R.error("查询索赔单失败");
+        return R.error("查询质量索赔单失败");
     }
 
     /**
@@ -103,34 +110,27 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
 //    @GlobalTransactional
     @Override
     public R addSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder, MultipartFile[] files) {
-        //索赔单号生成规则 ZL+年月日+4位顺序号，循序号每日清零
+        //1.索赔单号生成规则 ZL+年月日+4位顺序号，循序号每日清零
         StringBuffer qualityNoBuffer = new StringBuffer(QUALITY_ORDER_PRE);
         qualityNoBuffer.append(DateUtils.getDate().replace("-",""));
         String seq = sequeceService.selectSeq(QUALITY_SEQ_NAME,QUALITY_SEQ_LENGTH);
+        if(StringUtils.isBlank(seq)){
+            return R.error("新增质量索赔信息时获取序列号异常");
+        }
+        logger.info("新增质量索赔信息时获取序列号seq:{}",seq);
         qualityNoBuffer.append(seq);
         smsQualityOrder.setQualityNo(qualityNoBuffer.toString());
-        this.insertSelective(smsQualityOrder);
-        //上传质量索赔附件上传的时候order_no 为 索赔单号_01
-        for(MultipartFile file : files){
-            String orderNo = smsQualityOrder.getQualityNo() + ORDER_NO_QUALITY_CLAIM_END;
-            R uplodeFileResult = remoteOssService.uploadFile(file,orderNo);
-            Boolean flagResult = "0".equals(uplodeFileResult.get("code").toString());
-            if(!flagResult){
-                throw new BusinessException("新增文件失败");
-            }
+        smsQualityOrderMapper.insertSelective(smsQualityOrder);
+        logger.info("新增质量索赔信息时成功后 主键id:{},索赔单号:{}",smsQualityOrder.getId(),smsQualityOrder.getQualityNo());
+
+        //2.上传质量索赔附件上传的时候order_no 为 索赔单号_01
+        String orderNo = smsQualityOrder.getQualityNo() + ORDER_NO_QUALITY_CLAIM_END;
+        R uplodeFileResult = remoteOssService.updateListByOrderNo(orderNo,files);
+        Boolean flagResult = "0".equals(uplodeFileResult.get("code").toString());
+        if(!flagResult){
+            logger.error("新增质量索赔时新增文件失败订单号 orderNo:{},res:{}",orderNo, JSONObject.toJSON(uplodeFileResult));
+            throw new BusinessException("新增文件失败");
         }
-        //发送邮件
-        String supplierCode = smsQualityOrder.getSupplierCode();
-        //根据供应商编号查询供应商信息
-        SysUser sysUser = remoteUserService.findUserBySupplierCode(supplierCode);
-        String mailSubject = "延期索赔邮件";
-        StringBuffer mailTextBuffer = new StringBuffer();
-        // 供应商名称 +V码+公司  您有一条延期交付订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
-        mailTextBuffer.append(smsQualityOrder.getSupplierName()).append("+").append(supplierCode).append("+")
-                .append(sysUser.getCorporation()).append(" ").append("您有一条延期交付订单，订单号")
-                .append(smsQualityOrder.getProductOrderCode()).append(",请及时处理，如不处理，3天后系统自动确认，无法申诉");
-        String toSupplier = sysUser.getEmail();
-        mailService.sendTextMail(mailSubject,mailTextBuffer.toString(),toSupplier);
         return R.data(smsQualityOrder.getId());
     }
 
@@ -143,40 +143,28 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
 //    @GlobalTransactional
     @Override
     public R updateSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder, MultipartFile[] files) {
+        logger.info("修改质量索赔单信息 id:{},qualityNo:{}",smsQualityOrder.getId(),smsQualityOrder.getQualityNo());
+
         //1.查询索赔单数据,判断状态是否是待提交,待提交可修改
-        SmsQualityOrder smsQualityOrderRes = this.selectByPrimaryKey(smsQualityOrder.getId());
+        SmsQualityOrder smsQualityOrderRes = smsQualityOrderMapper.selectByPrimaryKey(smsQualityOrder.getId());
         if(null == smsQualityOrderRes){
+            logger.error("根据id查询质量索赔单不存在 id:{}",smsQualityOrder.getId());
             return R.error("索赔单不存在");
         }
         Boolean flagResult = QualityStatusEnum.QUALITY_STATUS_0.getCode().equals(smsQualityOrderRes.getQualityStatus());
         if(!flagResult){
+            logger.error("此索赔单已提交不可再编辑 id:{},qualityStatus:{}",smsQualityOrderRes.getId(),smsQualityOrderRes.getQualityStatus());
             return R.error("此索赔单已提交不可再编辑");
         }
         //2.修改索赔单信息
-        this.updateByPrimaryKeySelective(smsQualityOrder);
+        smsQualityOrderMapper.updateByPrimaryKeySelective(smsQualityOrder);
         //3.根据索赔单号所对应的索赔文件订单号查文件
         String orderNo = smsQualityOrderRes.getQualityNo() + ORDER_NO_QUALITY_CLAIM_END;
-        List<SysOss> sysOssList =  remoteOssService.listByOrderNo(orderNo);
-        if(CollectionUtils.isEmpty(sysOssList)){
-            throw new BusinessException("根据订单号查文件失败");
-        }
-        //4.批量删除文件
-        StringBuffer idBuffer = new StringBuffer();
-        sysOssList.forEach(sysOss -> idBuffer.append(sysOss.getId()).append(","));
-        String idsSelect = idBuffer.toString();
-        String ids = idsSelect.substring(0,idsSelect.length()-1);
-        R deleteSysOssResult = remoteOssService.remove(ids);
-        flagResult = "0".equals(deleteSysOssResult.get("code").toString());
+        R result = remoteOssService.updateListByOrderNo(orderNo,files);
+        flagResult = "0".equals(result.get("code").toString());
         if(!flagResult){
-            throw new BusinessException("根据ids删除文件失败");
-        }
-        //5.新增文件
-        for(MultipartFile file : files){
-            R uplodeFileResult = remoteOssService.uploadFile(file,orderNo);
-            flagResult = "0".equals(uplodeFileResult.get("code").toString());
-            if(!flagResult){
-                throw new BusinessException("新增文件失败");
-            }
+            logger.error("修改质量索赔时修改文件失败订单号 orderNo:{},res:{}",orderNo, JSONObject.toJSON(result));
+            throw new BusinessException("修改质量索赔单时新增文件信息失败");
         }
         return R.ok();
     }
@@ -189,35 +177,32 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
 //    @GlobalTransactional
     @Override
     public R deleteSmsQualityOrderAndSysOss(String ids) {
-        //根据订单号查文件
-        List<SmsQualityOrder> selectListResult =  this.selectListById(ids);
+        logger.info("批量删除质量索赔单 ids:{}",ids);
+        //1.根据ids查质量索赔信息校验状态
+        List<SmsQualityOrder> selectListResult =  smsQualityOrderMapper.selectByIds(ids);
         if(CollectionUtils.isEmpty(selectListResult)){
+            logger.error("删除质量索赔单时失败,质量索赔单不存在 ids:{}",ids);
             return R.error("索赔单不存在");
         }
+        Boolean flagResult;
         for(SmsQualityOrder smsQualityOrder : selectListResult){
-            Boolean flagResult = QualityStatusEnum.QUALITY_STATUS_0.getCode().equals(smsQualityOrder.getQualityStatus());
+            flagResult = QualityStatusEnum.QUALITY_STATUS_0.getCode().equals(smsQualityOrder.getQualityStatus());
             if(!flagResult){
+                logger.error("删除质量索赔单失败 id:{},qualityStatus:{}",smsQualityOrder.getId(),smsQualityOrder.getQualityStatus());
                 return R.error("请确认索赔单状态是否为待提交");
             }
         }
-        //根据id删除文件
-        StringBuffer stringBuffer = new StringBuffer();
+        //2.根据订单号删除文件
         for(SmsQualityOrder smsQualityOrder : selectListResult){
             String orderNo = smsQualityOrder.getQualityNo() + ORDER_NO_QUALITY_CLAIM_END;
-            List<SysOss> sysOssList = remoteOssService.listByOrderNo(orderNo);
-            if(CollectionUtils.isEmpty(sysOssList)){
-                return R.error("查询索赔单文件失败");
+            R resultOss = remoteOssService.deleteListByOrderNo(orderNo);
+            flagResult = "0".equals(resultOss.get("code").toString());
+            if(!flagResult){
+                logger.error("修改质量索赔单时修改文件信息失败 orderNo:{},res:{}",orderNo,JSONObject.toJSON(resultOss));
+                return R.error("修改质量索赔单时修改文件信息失败");
             }
-            sysOssList.forEach(sysOss -> stringBuffer.append(sysOss.getId()).append(","));
         }
-        String sysOssIdsSelect = stringBuffer.toString();
-        String sysOssIds= sysOssIdsSelect.substring(0,sysOssIdsSelect.length()-1);
-        R removeSysOssResult = remoteOssService.remove(sysOssIds);
-        Boolean flagResult = "0".equals(removeSysOssResult.get("code").toString());
-        if(!flagResult){
-            return R.error("删除索赔单文件失败");
-        }
-        this.deleteByIds(ids);
+        smsQualityOrderMapper.deleteByIds(ids);
         return R.ok();
     }
 
@@ -237,17 +222,48 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
      * @param ids 主键id
      * @return 提交结果成功或失败
      */
+    //@GlobalTransactional
     @Override
     public R submit(String ids) {
-        List<SmsQualityOrder> selectListResult =  this.selectListById(ids);
+        logger.info("提交质量索赔单 ids:{}",ids);
+        List<SmsQualityOrder> selectListResult =  smsQualityOrderMapper.selectByIds(ids);
+        if(CollectionUtils.isEmpty(selectListResult)){
+            logger.error("提交质量索赔单失败,质量索赔单不存在 ids:{}",ids);
+            return R.error("质量索赔单不存在");
+        }
+        //1.校验状态 发送邮件
         for(SmsQualityOrder smsQualityOrder : selectListResult){
             Boolean flagResult = QualityStatusEnum.QUALITY_STATUS_0.getCode().equals(smsQualityOrder.getQualityStatus());
             if(!flagResult){
+                logger.error("提交其他索赔单失败,状态异常 id:{},qualityStatus:{}",
+                        smsQualityOrder.getId(),smsQualityOrder.getQualityStatus());
                 return R.error("请确认索赔单状态是否为待提交");
             }
+
+            //发送邮件
+            String supplierCode = smsQualityOrder.getSupplierCode();
+            //根据供应商编号查询供应商信息
+            SysUser sysUser = remoteUserService.findUserBySupplierCode(supplierCode);
+            if(null == sysUser){
+                logger.error("新增质量索赔时查询供应商信息失败供应商编号 supplierCode:{}",supplierCode);
+                throw new BusinessException("新增质量索赔时查询供应商信息失败");
+            }
+            String mailSubject = "质量索赔邮件";
+            StringBuffer mailTextBuffer = new StringBuffer();
+            // 供应商名称 +V码+公司  您有一条质量索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
+            mailTextBuffer.append(smsQualityOrder.getSupplierName()).append("+").append(supplierCode).append("+")
+                    .append(sysUser.getCorporation()).append(" ").append("您有一条质量索赔订单，订单号")
+                    .append(smsQualityOrder.getQualityNo()).append(",请及时处理，如不处理，3天后系统自动确认，无法申诉");
+            String toSupplier = sysUser.getEmail();
+            mailService.sendTextMail(toSupplier,mailTextBuffer.toString(),mailSubject);
+
+            //设置提交状态
             smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_1.getCode());
+            smsQualityOrder.setSubmitDate(new Date());
         }
-        Integer count =  this.updateBatchByPrimaryKeySelective(selectListResult);
+
+        //2.批量修改为提交
+        Integer count =  smsQualityOrderMapper.updateBatchByPrimaryKeySelective(selectListResult);
         return R.data(count);
     }
 
@@ -258,18 +274,26 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
      */
     @Override
     public R supplierConfirm(String ids) {
-        List<SmsQualityOrder> selectListResult =  this.selectListById(ids);
+        logger.info("供应商确认索赔单 ids:{}",ids);
+        List<SmsQualityOrder> selectListResult =  smsQualityOrderMapper.selectByIds(ids);
+        if(CollectionUtils.isEmpty(selectListResult)){
+            logger.error("供应商确认质量索赔单失败,质量索赔单不存在 ids:{}",ids);
+            return R.error("质量索赔单不存在");
+        }
+
         for(SmsQualityOrder smsQualityOrder : selectListResult){
             Boolean flagResult = QualityStatusEnum.QUALITY_STATUS_1.getCode().equals(smsQualityOrder.getQualityStatus())
                     ||QualityStatusEnum.QUALITY_STATUS_7.getCode().equals(smsQualityOrder.getQualityStatus());
             if(!flagResult){
+                logger.error("供应商确认质量索赔单失败,状态异常 id:{},qualityStatus:{}",
+                        smsQualityOrder.getId(),smsQualityOrder.getQualityStatus());
                 return R.error("请确认索赔单状态是否为待供应商确认");
             }
             smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_11.getCode());
             smsQualityOrder.setSettleFee(smsQualityOrder.getClaimAmount());
             smsQualityOrder.setSupplierConfirmDate(new Date());
         }
-        int count = this.updateBatchByPrimaryKeySelective(selectListResult);
+        int count = smsQualityOrderMapper.updateBatchByPrimaryKeySelective(selectListResult);
         return R.data(count);
     }
 
@@ -282,7 +306,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
     @Override
     public R supplierAppeal(SmsQualityOrder smsQualityOrder, MultipartFile[] files) {
         //1.查询索赔单数据,判断状态是否是待提交,待提交可修改
-        SmsQualityOrder smsQualityOrderRes = this.selectByPrimaryKey(smsQualityOrder.getId());
+        SmsQualityOrder smsQualityOrderRes = smsQualityOrderMapper .selectByPrimaryKey(smsQualityOrder.getId());
         if(null == smsQualityOrderRes){
             return R.error("索赔单不存在");
         }
@@ -294,29 +318,13 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
         //2.修改索赔单信息
         smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_4.getCode());
         smsQualityOrder.setComplaintDate(new Date());
-        this.updateByPrimaryKeySelective(smsQualityOrder);
-        //3.根据索赔单号所对应的申诉文件订单号查文件
+        smsQualityOrderMapper.updateByPrimaryKeySelective(smsQualityOrder);
+        //3.根据订单号新增文件
         String orderNo = smsQualityOrderRes.getQualityNo() + ORDER_NO_QUALITY_APPEAL_END;
-        List<SysOss> sysOssList =  remoteOssService.listByOrderNo(orderNo);
-        if(!CollectionUtils.isEmpty(sysOssList)){
-            //4.批量删除文件
-            StringBuffer idBuffer = new StringBuffer();
-            sysOssList.forEach(sysOss -> idBuffer.append(sysOss.getId()).append(","));
-            String idsSelect = idBuffer.toString();
-            String ids = idsSelect.substring(0,idsSelect.length()-1);
-            R deleteSysOssResult = remoteOssService.remove(ids);
-            flagResult = "0".equals(deleteSysOssResult.get("code").toString());
-            if(!flagResult){
-                throw new BusinessException("根据ids删除文件失败");
-            }
-        }
-        //5.新增文件
-        for(MultipartFile file : files){
-            R uplodeFileResult = remoteOssService.uploadFile(file,orderNo);
-            flagResult = "0".equals(uplodeFileResult.get("code").toString());
-            if(!flagResult){
-                throw new BusinessException("新增文件失败");
-            }
+        R uplodeFileResult = remoteOssService.updateListByOrderNo(orderNo,files);
+        flagResult = "0".equals(uplodeFileResult.get("code").toString());
+        if(!flagResult){
+            throw new BusinessException("质量索赔单供应商申诉时新增文件失败");
         }
         return R.ok();
     }

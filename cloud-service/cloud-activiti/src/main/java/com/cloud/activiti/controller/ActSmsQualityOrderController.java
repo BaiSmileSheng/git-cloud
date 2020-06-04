@@ -2,6 +2,7 @@ package com.cloud.activiti.controller;
 
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.service.IActSmsQualityOrderService;
+import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.settle.domain.entity.SmsQualityOrder;
@@ -13,7 +14,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 质量索赔审核工作流
@@ -40,16 +43,16 @@ public class ActSmsQualityOrderController extends BaseController {
     }
 
     /**
-     * 开启流程
-     * @param smsQualityOrder
-     * @return
+     * 供应商申诉时质量索赔开启流程
+     * @param smsQualityOrderReq 质量索赔信息
+     * @return 成功或失败
      */
     @PostMapping("save")
     @ApiOperation(value = "开启质量索赔流程",response = SmsQualityOrder.class)
-    public R addSave(@RequestBody SmsQualityOrder smsQualityOrder) {
+    public R addSave(@RequestParam("smsQualityOrder") String smsQualityOrderReq,@RequestParam("files") MultipartFile[] files) {
         //获取当前用户登录信息
         SysUser sysUser = getUserInfo(SysUser.class);
-        return actSmsQualityOrderService.addSave(smsQualityOrder,sysUser);
+        return actSmsQualityOrderService.addSave(smsQualityOrderReq,files,sysUser);
     }
 
     /**
@@ -62,6 +65,11 @@ public class ActSmsQualityOrderController extends BaseController {
     public R audit(@RequestBody BizAudit bizAudit) {
         //获取当前用户登录信息
         SysUser sysUser = getUserInfo(SysUser.class);
+        Boolean flagRole = sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_ZLBBZ)
+                ||sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ);
+        if(!flagRole){
+            return R.error("没有权限进行审批");
+        }
         return actSmsQualityOrderService.audit(bizAudit,sysUser);
     }
 }

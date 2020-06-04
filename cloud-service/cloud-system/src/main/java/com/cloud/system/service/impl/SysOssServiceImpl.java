@@ -123,11 +123,17 @@ public class SysOssServiceImpl implements ISysOssService {
     @Transactional
     @Override
     public R updateListByOrderNo(String orderNo, MultipartFile[] files) throws IOException {
+        if(files.length == 0){
+            return R.error("上传文件集合不存在");
+        }
         //根据订单号删除文件
         deleteFilesByOrderNo(orderNo);
         //根据订单号新增文件列表
         List<SysOss> sysOssListReq = new ArrayList<>();
         for(MultipartFile file : files){
+            if(file.isEmpty()){
+                throw new BusinessException("上传文件为空");
+            }
             String fileName = file.getOriginalFilename();
             String suffix = fileName.substring(fileName.lastIndexOf("."));
             CloudStorageService storageAdd = OSSFactory.build();
