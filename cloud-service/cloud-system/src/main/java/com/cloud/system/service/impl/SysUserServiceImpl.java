@@ -442,16 +442,23 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public SysUser findUserBySupplierCode(String supplierCode) {
-        SysUser sysUser = new SysUser();
+        log.info("根据供应商V码查询供应商信息 V码:{}",supplierCode);
         Example exampleCdSupplierInfo = new Example(CdSupplierInfo.class);
         Example.Criteria criteriaCdSupplierInfo = exampleCdSupplierInfo.createCriteria();
         criteriaCdSupplierInfo.andEqualTo("supplierCode", supplierCode);
-        CdSupplierInfo cdSupplierInfo = cdSupplierInfoMapper.selectOneByExample(criteriaCdSupplierInfo);
+        CdSupplierInfo cdSupplierInfo = cdSupplierInfoMapper.selectOneByExample(exampleCdSupplierInfo);
         if(null != cdSupplierInfo){
+            SysUser sysUser = new SysUser();
             sysUser.setCorporation(cdSupplierInfo.getCorporation());
             String userName = cdSupplierInfo.getNick();
+            if(StringUtils.isBlank(userName)){
+                log.info("根据供应商V码查询供应商信息登录名称不存在 V码:{}",supplierCode);
+                return null;
+            }
+            log.info("根据供应商V码查询供应商信息 昵称:{}",userName);
             sysUser = userMapper.selectUserByLoginName(userName);
+            return sysUser;
         }
-        return sysUser;
+        return null;
     }
 }

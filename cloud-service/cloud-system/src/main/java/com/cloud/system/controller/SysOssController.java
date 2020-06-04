@@ -188,8 +188,20 @@ public class SysOssController extends BaseController {
      */
     @PostMapping("updateListByOrderNo")
     @ApiOperation(value = "根据订单编号修改文件上传列表",response = SysOss.class)
-    public R updateListByOrderNo(@RequestParam("orderNo") String orderNo,@RequestParam("files") MultipartFile[] files) {
+    public R updateListByOrderNo(@RequestParam("orderNo") String orderNo,@RequestParam("files") MultipartFile[] files) throws IOException {
         R result = sysOssService.updateListByOrderNo(orderNo,files);
+        return result;
+    }
+
+    /**
+     * 根据订单编号删除文件上传列表
+     * @param orderNo 订单编号
+     * @return 成功或失败
+     */
+    @PostMapping("deleteListByOrderNo")
+    @ApiOperation(value = "根据订单编号删除文件上传列表",response = SysOss.class)
+    public R deleteListByOrderNo(@RequestParam("orderNo") String orderNo) {
+        R result = sysOssService.deleteListByOrderNo(orderNo);
         return result;
     }
 
