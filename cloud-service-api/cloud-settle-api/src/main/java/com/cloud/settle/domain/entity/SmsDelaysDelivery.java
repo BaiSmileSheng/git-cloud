@@ -70,6 +70,13 @@ public class SmsDelaysDelivery extends BaseEntity {
     private String factoryCode;
 
     /**
+     * 付款公司
+     */
+    @ExcelProperty(value = "付款公司")
+    @ApiModelProperty(value = "付款公司")
+    private String componyCode;
+
+    /**
      * 专用号
      */
     @ExcelProperty(value = "专用号")
