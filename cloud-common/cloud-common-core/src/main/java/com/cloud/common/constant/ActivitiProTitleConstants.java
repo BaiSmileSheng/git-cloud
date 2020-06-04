@@ -29,5 +29,10 @@ public class ActivitiProTitleConstants {
      * 延期索赔服务相关流程
      */
     public static final String ACTIVITI_PRO_TITLE_SDEPALYS_TEST = "延期索赔申请流程";
+
+    /**
+     * 延期索赔服务相关流程
+     */
+    public static final String ACTIVITI_PRO_TITLE_SCHAIM_TEST = "其他索赔申请流程";
 }
 

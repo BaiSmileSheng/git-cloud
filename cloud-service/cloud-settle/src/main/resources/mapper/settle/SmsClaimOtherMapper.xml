@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.settle.mapper.SmsClaimOtherMapper">
+
+    <resultMap type="SmsClaimOther" id="SmsClaimOtherResult">
+        <result property="id" column="id"/>
+        <result property="claimCode" column="claim_code"/>
+        <result property="productOrderCode" column="product_order_code"/>
+        <result property="supplierCode" column="supplier_code"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="factoryCode" column="factory_code"/>
+        <result property="componyCode" column="compony_code"/>
+        <result property="claimReson" column="claim_reson"/>
+        <result property="claimPrice" column="claim_price"/>
+        <result property="claimOtherStatus" column="claim_other_status"/>
+        <result property="submitDate" column="submit_date"/>
+        <result property="complaintDescription" column="complaint_description"/>
+        <result property="complaintDate" column="complaint_date"/>
+        <result property="supplierConfirmDate" column="supplier_confirm_date"/>
+        <result property="settleNo" column="settle_no"/>
+        <result property="settleFee" column="settle_fee"/>
+        <result property="cashAmount" column="cash_amount"/>
+        <result property="uncashAmount" column="uncash_amount"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectSmsClaimOtherVo">
+        select id,
+               claim_code,
+               product_order_code,
+               supplier_code,
+               supplier_name,
+               factory_code,
+               compony_code,
+               claim_reson,
+               claim_price,
+               claim_other_status,
+               submit_date,
+               complaint_description,
+               complaint_date,
+               supplier_confirm_date,
+               settle_no,
+               settle_fee,
+               cash_amount,
+               uncash_amount,
+               del_flag,
+               remark,
+               create_by,
+               create_time,
+               update_by,
+               update_time
+        from sms_claim_other
+    </sql>
+
+
+</mapper>
