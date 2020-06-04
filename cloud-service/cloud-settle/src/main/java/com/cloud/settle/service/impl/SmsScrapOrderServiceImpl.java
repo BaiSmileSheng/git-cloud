@@ -98,6 +98,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         smsScrapOrder.setFactoryCode(omsProductionOrder.getFactoryCode());
         CdFactoryInfo cdFactoryInfo = remoteFactoryInfoService.selectOneByFactory(omsProductionOrder.getFactoryCode());
         if (cdFactoryInfo == null) {
+            log.error(StrUtil.format("(报废)报废申请修改保存开始：公司信息为空参数为{}", omsProductionOrder.getFactoryCode()));
             return R.error("公司信息为空！");
         }
         smsScrapOrder.setComponyCode(cdFactoryInfo.getCompanyCode());
@@ -108,6 +109,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         String date = DateUtils.getTime();
         List<CdSapSalePrice> sapSalePrices = remoteCdSapSalePriceInfoService.findByMaterialCode(smsScrapOrder.getProductMaterialCode(),date,date);
         if (sapSalePrices == null || sapSalePrices.size() == 0) {
+            log.error(StrUtil.format("(报废)报废申请修改保存开始：物料销售价格未维护参数为{}", smsScrapOrder.getProductMaterialCode()));
             return R.error("物料销售价格未维护！");
         }
         CdSapSalePrice cdSapSalePrice = sapSalePrices.get(0);

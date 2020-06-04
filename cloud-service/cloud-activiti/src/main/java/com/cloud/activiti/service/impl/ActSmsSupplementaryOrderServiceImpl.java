@@ -96,6 +96,7 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
         }
         SmsSupplementaryOrder smsSupplementaryOrderCheck = remoteSmsSupplementaryOrderService.get(id);
         if (!SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DTJ.getCode().equals(smsSupplementaryOrderCheck.getStuffStatus())) {
+            log.error(StrUtil.format("(物耗)只有待提交状态数据可以提交!原状态参数为{}", smsSupplementaryOrderCheck.getStuffStatus()));
             return R.error("只有待提交状态数据可以提交！");
         }
         //更新数据
@@ -128,12 +129,14 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
         //流程审核业务表
         BizBusiness bizBusiness = bizBusinessService.selectBizBusinessById(bizAudit.getBusinessKey().toString());
         if (bizBusiness == null) {
+            log.error(StrUtil.format("(物耗)流程业务表数据为空,id参数为{}", bizAudit.getBusinessKey()));
             return R.error("流程业务表数据为空！");
         }
         //查询物耗表信息
         SmsSupplementaryOrder smsSupplementaryOrder = remoteSmsSupplementaryOrderService.get(Long.valueOf(bizBusiness.getTableId()));
         if (smsSupplementaryOrder == null) {
-            return R.error("未找到此业务数据！");
+            log.error(StrUtil.format("(物耗)物耗表数据为空,id(物耗)参数为{}", bizBusiness.getTableId()));
+            return R.error("未找到物耗业务数据！");
         }
         //审批结果
         Boolean result = false;
@@ -150,7 +153,8 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
                 //TODO:小微主审核通过   传SAP
 
             } else {
-                throw new BusinessException("状态错误！");
+                log.error(StrUtil.format("(物耗)物耗审批通过状态错误：{}", smsSupplementaryOrder.getStuffStatus()));
+                throw new BusinessException("此状态数据不允许审核！");
             }
         } else {
             //审批驳回
@@ -159,7 +163,8 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
             } else if (SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode().equals(smsSupplementaryOrder.getStuffStatus())) {
                 smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZBH.getCode());
             } else {
-                throw new BusinessException("状态错误！");
+                log.error(StrUtil.format("(物耗)物耗审批驳回状态错误：{}", smsSupplementaryOrder.getStuffStatus()));
+                throw new BusinessException("此状态数据不允许审核！");
             }
         }
         R r = remoteSmsSupplementaryOrderService.update(smsSupplementaryOrder);

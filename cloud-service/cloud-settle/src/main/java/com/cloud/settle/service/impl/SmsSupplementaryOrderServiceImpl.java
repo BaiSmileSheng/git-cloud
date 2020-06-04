@@ -118,6 +118,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         String date = DateUtils.getTime();
         List<CdMaterialPriceInfo> materialPrices = remoteCdMaterialPriceInfoService.findByMaterialCode(rawMaterialCode,date,date);
         if (materialPrices == null || materialPrices.size() == 0) {
+            log.error(StrUtil.format("(物耗)物料成本价格未维护!参数为{}", rawMaterialCode));
             return R.error("物料成本价格未维护！");
         }
         CdMaterialPriceInfo cdMaterialPriceInfo = materialPrices.get(0);
@@ -192,12 +193,14 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             return R.error("最小包装量不正确！");
         }
         if (applyNum % minUnit != 0) {
+            log.error(StrUtil.format("(物耗)申请量必须是最小包装量的整数倍参数为{},{}", applyNum,minUnit));
             return R.error("申请量必须是最小包装量的整数倍！");
         }
         //3、校验申请数量是否是单耗的整数倍
         //生产单号获取排产订单信息
         OmsProductionOrder omsProductionOrder = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
         if (omsProductionOrder == null) {
+            log.error(StrUtil.format("(物耗)排产订单信息不存在!排产订单号参数为{}", productOrderCode));
             return R.error("排产订单信息不存在！");
         }
         //根据成品物料号和原材料物料号取bom单耗
