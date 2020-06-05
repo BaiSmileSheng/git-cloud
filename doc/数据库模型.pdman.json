@@ -9157,14 +9157,7 @@
               "name": "current_stock",
               "type": "Money",
               "remark": "",
-              "chnname": "当前可用库存",
-              "notNull": true
-            },
-            {
-              "name": "t_2week_stock",
-              "type": "Money",
-              "remark": "",
-              "chnname": "T+2周库存",
+              "chnname": "可用库存",
               "notNull": true
             },
             {
