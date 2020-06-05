@@ -5,14 +5,18 @@ import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.StringUtils;
+import com.cloud.order.domain.entity.OmsProductionOrder;
+import com.cloud.order.feign.RemoteProductionOrderService;
 import com.cloud.settle.domain.entity.SmsDelaysDelivery;
 import com.cloud.settle.enums.DeplayStatusEnum;
 import com.cloud.settle.mail.MailService;
 import com.cloud.settle.mapper.SmsDelaysDeliveryMapper;
 import com.cloud.settle.service.ISequeceService;
 import com.cloud.settle.service.ISmsDelaysDeliveryService;
+import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.feign.RemoteFactoryLineInfoService;
 import com.cloud.system.feign.RemoteOssService;
 import com.cloud.system.feign.RemoteUserService;
 import io.seata.spring.annotation.GlobalTransactional;
@@ -20,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
@@ -57,6 +62,12 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
     @Autowired
     private RemoteOssService remoteOssService;
 
+    @Autowired
+    private RemoteProductionOrderService remoteProductionOrderService;
+
+    @Autowired
+    private RemoteFactoryLineInfoService remoteFactoryLineInfoService;
+
     /**
      * 索赔单序列号生成所对应的序列
      */
@@ -72,6 +83,11 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
     private static final String DELAYS_ORDER_PRE = "ZL";
 
     private final static BigDecimal DELAYS_AMOUNT = new BigDecimal(-2000);//延期索赔金额
+
+    /**
+     * 用于获取一天前的时间
+     */
+    private final static int dateBeforeOne = -1;
 
     /**
      * 查询延期交付索赔详情
@@ -99,32 +115,16 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
      * 定时任务调用批量新增保存延期交付索赔(并发送邮件)
      * @return 成功或失败
      */
-    @GlobalTransactional
+    //@GlobalTransactional
     @Override
     public R batchAddDelaysDelivery() {
         logger.info("定时任务调用批量新增保存延期交付索赔");
-        //TODO 调用订单接口获取 待生成延期索赔的订单(每日凌晨取前一天订单状态为“关单”的排产订单，计算交货时间大于订单应交货日期时)
-        List<SmsDelaysDelivery> smsDelaysDeliveryList = new ArrayList<>();
         //供应商编号
-        Set<String>  supplierSet = new HashSet<>();
-//        for(){
-            SmsDelaysDelivery smsDelaysDelivery = changeOmsProductionOrder();
-            smsDelaysDelivery.setDelaysAmount(DELAYS_AMOUNT);
-            smsDelaysDelivery.setSubmitDate(new Date());
-            smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_1.getCode());
-            //1.获取索赔单号
-            StringBuffer qualityNoBuffer = new StringBuffer(DELAYS_ORDER_PRE);
-            qualityNoBuffer.append(DateUtils.getDate().replace("-",""));
-            String seq = sequeceService.selectSeq(DELAYS_SEQ_NAME,DELAYS_SEQ_LENGTH);
-            logger.info("新增保存延期交付索赔获取序列号 seq:{}",seq);
-            qualityNoBuffer.append(seq);
-            smsDelaysDelivery.setDelaysNo(qualityNoBuffer.toString());
+        Set<String> supplierSet = new HashSet<>();
+        //1.获取延期索赔信息
+        List<SmsDelaysDelivery> smsDelaysDeliveryList = changeOmsProductionOrder(supplierSet);
 
-//            smsDelaysDeliveryList.add(smsDelaysDelivery);
-            supplierSet.add(smsDelaysDelivery.getSupplierCode());
-//        }
         //2.插入延期索赔信息
-        logger.info("新增保存延期交付索赔索赔单号 :{}",smsDelaysDelivery.getDelaysNo());
         int count = smsDelaysDeliveryMapper.insertList(smsDelaysDeliveryList);
         //供应商V码对应的供应商信息
         Map<String,SysUser> mapSysUser = new HashMap<>();
@@ -144,9 +144,9 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
             SysUser sysUser = mapSysUser.get(supplierCode);
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条延期交付订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
-            mailTextBuffer.append(smsDelaysDelivery.getSupplierName()).append("+").append(supplierCode).append("+")
+            mailTextBuffer.append(smsDelaysDeliveryMail.getSupplierName()).append("+").append(supplierCode).append("+")
                     .append(sysUser.getCorporation()).append(" ").append("您有一条延期交付订单，订单号")
-                    .append(smsDelaysDelivery.getDelaysNo()).append(",请及时处理，如不处理，3天后系统自动确认，无法申诉");
+                    .append(smsDelaysDeliveryMail.getDelaysNo()).append(",请及时处理，如不处理，3天后系统自动确认，无法申诉");
             String toSupplier = sysUser.getEmail();
             mailService.sendTextMail(toSupplier,mailTextBuffer.toString(),mailSubject);
         }
@@ -155,11 +155,55 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
 
 
     /**
-     * 将排产订单信息赋值给延期索赔信息
+     * 每日凌晨查询
+     * 将查询的排产订单信息转换成延期索赔信息
+     * supplierSet 供应商编号,为查供应商邮箱
      * @return
      */
-    private SmsDelaysDelivery changeOmsProductionOrder(){
-        return new SmsDelaysDelivery();
+    private List<SmsDelaysDelivery> changeOmsProductionOrder(Set<String> supplierSet){
+        //每天凌晨获取昨天关单,基本结束时间<昨天的
+        //获取昨天时间
+        String date = DateUtils.getDaysTimeString(dateBeforeOne);
+        List<SmsDelaysDelivery> smsDelaysDeliveryList = new ArrayList<>();
+        List<OmsProductionOrder> listRes = remoteProductionOrderService.listForDelays(date,date,DateUtils.getDate());
+        if(CollectionUtils.isEmpty(listRes)){
+            return null;
+        }
+        for(OmsProductionOrder omsProductionOrderRes : listRes){
+            SmsDelaysDelivery smsDelaysDelivery = new SmsDelaysDelivery();
+            smsDelaysDelivery.setDelaysAmount(DELAYS_AMOUNT);
+            smsDelaysDelivery.setSubmitDate(new Date());
+            smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_1.getCode());
+            //1.获取索赔单号
+            StringBuffer qualityNoBuffer = new StringBuffer(DELAYS_ORDER_PRE);
+            qualityNoBuffer.append(DateUtils.getDate().replace("-",""));
+            String seq = sequeceService.selectSeq(DELAYS_SEQ_NAME,DELAYS_SEQ_LENGTH);
+            logger.info("新增保存延期交付索赔获取序列号 seq:{}",seq);
+            qualityNoBuffer.append(seq);
+            smsDelaysDelivery.setDelaysNo(qualityNoBuffer.toString());
+
+            //将排产订单信息转换成延期索赔数据
+            smsDelaysDelivery.setProductLineCode(omsProductionOrderRes.getProductLineCode());
+            smsDelaysDelivery.setProductOrderCode(omsProductionOrderRes.getProductOrderCode());
+            smsDelaysDelivery.setFactoryCode(omsProductionOrderRes.getFactoryCode());
+            smsDelaysDelivery.setProductMaterialCode(omsProductionOrderRes.getProductMaterialCode());
+            smsDelaysDelivery.setProductMaterialName(omsProductionOrderRes.getProductMaterialDesc());
+            smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_1.getCode());
+            smsDelaysDelivery.setDeliveryDate(omsProductionOrderRes.getProductEndDate());
+            smsDelaysDelivery.setActDeliveryDate(omsProductionOrderRes.getActualEndDate());
+            smsDelaysDelivery.setCreateTime(new Date());
+
+            //根据线体获取供应商信息
+            CdFactoryLineInfo cdFactoryLineInfo =remoteFactoryLineInfoService
+                    .selectInfoByCodeLineCode(omsProductionOrderRes.getProductLineCode());
+            if(null != cdFactoryLineInfo){
+                smsDelaysDelivery.setSupplierCode(cdFactoryLineInfo.getSupplierCode());
+                smsDelaysDelivery.setSupplierName(cdFactoryLineInfo.getSupplierDesc());
+            }
+            smsDelaysDeliveryList.add(smsDelaysDelivery);
+            supplierSet.add(smsDelaysDelivery.getSupplierCode());
+        }
+        return smsDelaysDeliveryList;
     }
 
     /**

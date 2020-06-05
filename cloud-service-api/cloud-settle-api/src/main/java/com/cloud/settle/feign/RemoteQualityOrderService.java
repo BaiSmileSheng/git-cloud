@@ -31,7 +31,7 @@ public interface RemoteQualityOrderService {
      * @return 质量索赔信息详情(包含文件信息)
      */
     @GetMapping("qualityOrder/selectById")
-    R selectById(Long id);
+    R selectById(@RequestParam("id") Long id);
 
 
     /**
