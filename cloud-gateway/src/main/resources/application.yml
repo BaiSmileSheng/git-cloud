@@ -62,10 +62,13 @@ spring:
                 redis-rate-limiter.replenishRate: 10
                 redis-rate-limiter.burstCapacity: 20
               # 降级配置
-            - name: Hystrix
+            - name: SpecialHystrix
               args:
-                name: fallbackcmd
+                id: SpecialHystrix
                 fallbackUri: 'forward:/fallback'
+                timeout:
+                  #指定接口超时处理
+                  test-hell: 6000
         #order 模块
         - id: cloud-order
           uri: lb://cloud-order
@@ -102,27 +105,9 @@ spring:
               args:
                 name: fallbackcmd
                 fallbackUri: 'forward:/fallback'
-        #job 模块
-        - id: cloud-job-executor
-          uri: lb://cloud-job-executor
-          predicates:
-            - Path=/job/**
-          filters:
-            - StripPrefix=1
-            # 限流配置
-            - name: RequestRateLimiter
-              args:
-                key-resolver: '#{@remoteAddrKeyResolver}'
-                redis-rate-limiter.replenishRate: 10
-                redis-rate-limiter.burstCapacity: 20
-              # 降级配置
-            - name: Hystrix
-              args:
-                name: fallbackcmd
-                fallbackUri: 'forward:/fallback'
 ribbon:
   OkToRetryOnAllOperations: false #对所有操作请求都进行重试,默认false
-  ReadTimeout: 8000   #负载均衡超时时间，默认值5000
+  ReadTimeout: 5000   #负载均衡超时时间，默认值5000
   ConnectTimeout: 2000 #ribbon请求连接的超时时间，默认值2000
   MaxAutoRetries: 0     #对当前实例的重试次数，默认0
   MaxAutoRetriesNextServer: 1 #对切换实例的重试次数，默认1
