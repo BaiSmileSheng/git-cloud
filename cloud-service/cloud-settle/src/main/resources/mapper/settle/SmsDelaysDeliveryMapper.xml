@@ -10,7 +10,7 @@
         <result property="delaysNo" column="delays_no"/>
         <result property="productOrderCode" column="product_order_code"/>
         <result property="factoryCode" column="factory_code"/>
-        <result property="componyCode" column="compony_code"/>
+        <result property="companyCode" column="company_code"/>
         <result property="productMaterialCode" column="product_material_code"/>
         <result property="productMaterialName" column="product_material_name"/>
         <result property="supplierCode" column="supplier_code"/>
@@ -41,7 +41,7 @@
                delays_no,
                product_order_code,
                factory_code,
-               compony_code,
+               company_code,
                product_material_code,
                product_material_name,
                supplier_code,
