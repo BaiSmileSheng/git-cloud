@@ -156,13 +156,13 @@ public class XmlUtil {
         if(rootName!=null&&rootCls!=null){
             XStream xs = new XStream(new DomDriver());
             xs.alias(rootName, rootCls);
-            if(elemName!=null&&propName!=null&&beanCls!=null&&elemName.length==propName.length&&elemName.length==beanCls.length){
-                for(int i=0;i<elemName.length;i++){
+            if (elemName != null && propName != null && beanCls != null && elemName.length == propName.length && elemName.length == beanCls.length) {
+                for (int i = 0; i < elemName.length; i++) {
                     xs.alias(elemName[i], beanCls[i]);
                     xs.aliasField(elemName[i], beanCls[i], propName[i]);
                 }
             }
-            xml=xs.toXML(value);
+            xml = xs.toXML(value);
             LOG.info("javabean转成xml为:\n"+xml);
         }else{
             xml=convertToXml(value);
@@ -181,10 +181,10 @@ public class XmlUtil {
      */
     public static Object xmlToListBean(String xml, String rootName, Class rootCls, String[] elemName, String[] propName, Class[] beanCls){
         XStream xs = new XStream(new DomDriver());
-        xs.allowTypesByRegExp(new String[] { ".*" });
+        xs.allowTypesByRegExp(new String[]{".*"});
         xs.alias(rootName, rootCls);
-        if(elemName!=null&&propName!=null&&beanCls!=null&&elemName.length==propName.length&&elemName.length==beanCls.length){
-            for(int i=0;i<elemName.length;i++){
+        if (elemName != null && propName != null && beanCls != null && elemName.length == propName.length && elemName.length == beanCls.length) {
+            for (int i = 0; i < elemName.length; i++) {
                 xs.alias(elemName[i], beanCls[i]);
                 xs.aliasField(elemName[i], beanCls[i], propName[i]);
             }
