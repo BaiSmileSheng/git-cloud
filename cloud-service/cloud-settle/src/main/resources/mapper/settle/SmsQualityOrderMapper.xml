@@ -40,4 +40,17 @@
     </sql>
 
 
+    <select id="selectByMonthAndStatus" resultMap="SmsQualityOrderResult">
+        <include refid="selectSmsQualityOrderVo"/>
+        <where>
+            <if test="month != null">
+                DATE_FORMAT(supplier_confirm_date, '%Y%m') = #{month}
+            </if>
+            AND quality_status in
+            <foreach collection="qualityStatus" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+            and del_flag='0'
+        </where>
+    </select>
 </mapper>

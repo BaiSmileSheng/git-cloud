@@ -17,6 +17,9 @@ public enum QualityStatusEnum {
     QUALITY_STATUS_7("7","供应商待确认(申诉驳回)"),
     QUALITY_STATUS_11("11","待结算"),
     QUALITY_STATUS_12("12","结算完成"),
+    QUALITY_STATUS_13("13","已兑现"),
+    QUALITY_STATUS_14("14","部分兑现"),
+    QUALITY_STATUS_15("15","未兑现"),
 
     ;
     private String code;

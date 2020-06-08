@@ -14,6 +14,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * SAP成本价格 Service业务层处理
@@ -55,35 +56,14 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
     }
 
     /**
-     * 校验申请数量是否是最小包装量的整数倍
-     * @param materialCode
-     * @param applyNum
-     * @return 是否正确
+     * 根据物料号查询
+     * @param materialCodes
+     * @param beginDate
+     * @param endDate
+     * @return Map<materialCode,CdMaterialPriceInfo>
      */
     @Override
-    public R checkIsMinUnit(String materialCode, int applyNum) {
-        if (StrUtil.isBlank(materialCode)) {
-            return R.error("参数：物料号为空！");
-        }
-        if (applyNum==0) {
-            return R.error("参数：申请量为空！");
-        }
-        String dateStr = DateUtils.getTime();
-        Example example = new Example(CdMaterialPriceInfo.class);
-        Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("materialCode",materialCode)
-                .andLessThanOrEqualTo("beginDate", dateStr)
-                .andGreaterThanOrEqualTo("endDate", dateStr)
-                .andEqualTo("delFlag","0");
-        CdMaterialPriceInfo cdMaterialPriceInfo = findByExampleOne(example);
-        //最小包装量
-        int minUnit= Integer.parseInt(cdMaterialPriceInfo.getPriceUnit()==null?"0":cdMaterialPriceInfo.getPriceUnit());
-        if(minUnit==0){
-            return R.error("最小包装量不正确！");
-        }
-        if(applyNum%minUnit!=0){
-            return R.error("申请量必须是最小包装量的整数倍！");
-        }
-        return R.ok();
+    public Map<String, CdMaterialPriceInfo> selectPriceByInMaterialCodeAndDate(List<String> materialCodes, String beginDate, String endDate) {
+        return cdMaterialPriceInfoMapper.selectPriceByInMaterialCodeAndDate(materialCodes,beginDate,endDate);
     }
 }

@@ -4,6 +4,8 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
 
+import java.util.List;
+
 /**
  * 物耗申请单 Service接口
  *
@@ -32,4 +34,12 @@ public interface ISmsSupplementaryOrderService extends BaseService<SmsSupplement
      * @return id
      */
     R addSave(SmsSupplementaryOrder smsSupplementaryOrder);
+
+    /**
+     * 根据月份和状态查询
+     * @param month
+     * @param stuffStatus
+     * @return
+     */
+    List<SmsSupplementaryOrder> selectByMonthAndStatus(String month,List<String> stuffStatus);
 }

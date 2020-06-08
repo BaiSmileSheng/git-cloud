@@ -4,6 +4,8 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
 
+import java.util.List;
+
 /**
  * 报废申请 Service接口
  *
@@ -32,4 +34,12 @@ public interface ISmsScrapOrderService extends BaseService<SmsScrapOrder> {
      * @return
      */
     R remove(String ids);
+
+    /**
+     * 根据月份和状态查询
+     * @param month
+     * @param scrapStatus
+     * @return
+     */
+    List<SmsScrapOrder> selectByMonthAndStatus(String month, List<String> scrapStatus);
 }

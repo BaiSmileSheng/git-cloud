@@ -91,4 +91,15 @@ public class SmsMouthSettleController extends BaseController {
         return toAjax(smsMouthSettleService.deleteByIds(ids));
     }
 
+    /**
+     * 月度结算定时任务
+     * 这是一个大工程
+     * @return
+     */
+    @PostMapping("countMonthSettle")
+    @ApiOperation(value = "月度结算定时任务", response = R.class)
+    public R countMonthSettle(){
+        return smsMouthSettleService.countMonthSettle();
+    }
+
 }

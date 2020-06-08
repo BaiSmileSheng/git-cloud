@@ -68,6 +68,13 @@ public class SmsSupplementaryOrder extends BaseEntity {
     private String factoryCode;
 
     /**
+     * 付款公司
+     */
+    @ExcelProperty(value = "付款公司")
+    @ApiModelProperty(value = "付款公司")
+    private String componyCode;
+
+    /**
      * 生产订单号
      */
     @ExcelProperty(value = "生产订单号")
@@ -184,7 +191,7 @@ public class SmsSupplementaryOrder extends BaseEntity {
      */
     @ExcelProperty(value = "结算金额")
     @ApiModelProperty(value = "结算金额")
-    private Double settleFee;
+    private BigDecimal settleFee;
 
     /** 兑现金额 */
     @ExcelProperty(value = "兑现金额")

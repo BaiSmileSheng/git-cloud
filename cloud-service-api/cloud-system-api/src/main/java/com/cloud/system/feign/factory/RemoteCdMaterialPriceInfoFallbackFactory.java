@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -39,10 +40,18 @@ public class RemoteCdMaterialPriceInfoFallbackFactory implements FallbackFactory
                 return R.error("校验物料号同步sap价格失败");
             }
 
+            /**
+             * 根据物料号查询
+             * @param materialCodes
+             * @param beginDate
+             * @param endDate
+             * @return Map<materialCode,CdMaterialPriceInfo>
+             */
             @Override
-            public R checkIsMinUnit(String materialCode, int applyNum) {
-                return R.error("校验申请数量是否是最小包装量的整数倍失败");
+            public Map<String, CdMaterialPriceInfo> selectPriceByInMaterialCodeAndDate(String materialCodes, String beginDate, String endDate) {
+                return null;
             }
+
         };
     }
 }

@@ -5,38 +5,79 @@
 <mapper namespace="com.cloud.settle.mapper.SmsScrapOrderMapper">
 
     <resultMap type="SmsScrapOrder" id="SmsScrapOrderResult">
-                    <result property="id" column="id"/>
-                    <result property="scrapNo" column="scrap_no"/>
-                    <result property="productOrderCode" column="product_order_code"/>
-                    <result property="supplierCode" column="supplier_code"/>
-                    <result property="supplierName" column="supplier_name"/>
-                    <result property="factoryCode" column="factory_code"/>
-                    <result property="componyCode" column="compony_code"/>
-                    <result property="scrapStatus" column="scrap_status"/>
-                    <result property="postingNo" column="posting_no"/>
-                    <result property="sapTransDate" column="sap_trans_date"/>
-                    <result property="productMaterialCode" column="product_material_code"/>
-                    <result property="productMaterialName" column="product_material_name"/>
-                    <result property="scrapAmount" column="scrap_amount"/>
-                    <result property="materialPrice" column="material_price"/>
-                    <result property="scrapPrice" column="scrap_price"/>
-                    <result property="machiningPrice" column="machining_price"/>
-                    <result property="settleNo" column="settle_no"/>
-                    <result property="settleFee" column="settle_fee"/>
-                    <result property="cashAmount" column="cash_amount"/>
-                    <result property="uncashAmount" column="uncash_amount"/>
-                    <result property="submitDate" column="submit_date"/>
-                    <result property="delFlag" column="del_flag"/>
-                    <result property="remark" column="remark"/>
-                    <result property="createBy" column="create_by"/>
-                    <result property="createTime" column="create_time"/>
-                    <result property="updateBy" column="update_by"/>
-                    <result property="updateTime" column="update_time"/>
-                    </resultMap>
+        <result property="id" column="id"/>
+        <result property="scrapNo" column="scrap_no"/>
+        <result property="productOrderCode" column="product_order_code"/>
+        <result property="supplierCode" column="supplier_code"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="factoryCode" column="factory_code"/>
+        <result property="componyCode" column="compony_code"/>
+        <result property="scrapStatus" column="scrap_status"/>
+        <result property="postingNo" column="posting_no"/>
+        <result property="sapTransDate" column="sap_trans_date"/>
+        <result property="productMaterialCode" column="product_material_code"/>
+        <result property="productMaterialName" column="product_material_name"/>
+        <result property="scrapAmount" column="scrap_amount"/>
+        <result property="materialPrice" column="material_price"/>
+        <result property="currency" column="currency"/>
+        <result property="scrapPrice" column="scrap_price"/>
+        <result property="machiningPrice" column="machining_price"/>
+        <result property="settleNo" column="settle_no"/>
+        <result property="settleFee" column="settle_fee"/>
+        <result property="cashAmount" column="cash_amount"/>
+        <result property="uncashAmount" column="uncash_amount"/>
+        <result property="submitDate" column="submit_date"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
 
     <sql id="selectSmsScrapOrderVo">
-        select id, scrap_no, product_order_code, supplier_code, supplier_name, factory_code, compony_code, scrap_status, posting_no, sap_trans_date, product_material_code, product_material_name, scrap_amount, material_price, scrap_price, machining_price, settle_no, settle_fee, cash_amount, uncash_amount, submit_date, del_flag, remark, create_by, create_time, update_by, update_time from sms_scrap_order
+        select id,
+               scrap_no,
+               product_order_code,
+               supplier_code,
+               supplier_name,
+               factory_code,
+               compony_code,
+               scrap_status,
+               posting_no,
+               sap_trans_date,
+               product_material_code,
+               product_material_name,
+               scrap_amount,
+               material_price,
+               scrap_price,
+               currency,
+               machining_price,
+               settle_no,
+               settle_fee,
+               cash_amount,
+               uncash_amount,
+               submit_date,
+               del_flag,
+               remark,
+               create_by,
+               create_time,
+               update_by,
+               update_time
+        from sms_scrap_order
     </sql>
 
-
+    <select id="selectByMonthAndStatus" resultMap="SmsScrapOrderResult">
+        <include refid="selectSmsScrapOrderVo"/>
+        <where>
+            <if test="month != null">
+                DATE_FORMAT(sap_trans_date, '%Y%m') = #{month}
+            </if>
+            AND scrap_status in
+            <foreach collection="scrapStatus" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+            and del_flag='0'
+        </where>
+    </select>
 </mapper>

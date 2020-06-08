@@ -67,5 +67,17 @@
         from sms_delays_delivery
     </sql>
 
-
+    <select id="selectByMonthAndStatus" resultMap="SmsDelaysDeliveryResult">
+        <include refid="selectSmsDelaysDeliveryVo"/>
+        <where>
+            <if test="month != null">
+                DATE_FORMAT(supplier_confirm_date, '%Y%m') = #{month}
+            </if>
+            AND delays_status in
+            <foreach collection="delaysStatus" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+            and del_flag='0'
+        </where>
+    </select>
 </mapper>
