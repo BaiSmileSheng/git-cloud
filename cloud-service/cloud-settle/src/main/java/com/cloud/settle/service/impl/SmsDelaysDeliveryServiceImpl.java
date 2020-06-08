@@ -20,12 +20,15 @@ import com.cloud.system.feign.RemoteFactoryLineInfoService;
 import com.cloud.system.feign.RemoteOssService;
 import com.cloud.system.feign.RemoteUserService;
 import io.seata.spring.annotation.GlobalTransactional;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.multipart.MultipartFile;
+import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -251,6 +254,77 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
             smsDelaysDelivery.setSupplierConfirmDate(new Date());
         }
         int count = smsDelaysDeliveryMapper.updateBatchByPrimaryKeySelective(selectListResult);
+        return R.data(count);
+    }
+
+    /**
+     * 48未确认超时发送邮件
+     * @return 成功或失败
+     */
+    @Override
+    public R overTimeSendMail() {
+        //1.查询状态是待供应商确认的 提交时间<=2天前的 >3天前的
+        String twoDate = DateUtils.getDaysTimeString(-2);
+        String threeDate = DateUtils.getDaysTimeString(-3);
+        List<SmsDelaysDelivery> smsDelaysDeliveryList = overTimeSelect(twoDate,threeDate);
+        if(CollectionUtils.isEmpty(smsDelaysDeliveryList)){
+            return R.ok();
+        }
+        //2.发送邮件
+        for(SmsDelaysDelivery smsDelaysDelivery : smsDelaysDeliveryList){
+            String supplierCode = smsDelaysDelivery.getSupplierCode();
+            //根据供应商编号查询供应商信息
+            SysUser sysUser = remoteUserService.findUserBySupplierCode(supplierCode);
+            if(null == sysUser){
+                logger.error("定时发送邮件时查询供应商信息失败供应商编号 supplierCode:{}",supplierCode);
+                throw new BusinessException("定时发送邮件时查询供应商信息失败");
+            }
+            String mailSubject = "延期索赔邮件";
+            StringBuffer mailTextBuffer = new StringBuffer();
+            // 供应商名称 +V码+公司  您有一条延期索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
+            mailTextBuffer.append(smsDelaysDelivery.getSupplierName()).append("+").append(supplierCode).append("+")
+                    .append(sysUser.getCorporation()).append(" ").append("您有一条延期索赔订单，订单号")
+                    .append(smsDelaysDelivery.getDelaysNo()).append(",请及时处理，如不处理，1天后系统自动确认，无法申诉");
+            String toSupplier = sysUser.getEmail();
+            mailService.sendTextMail(toSupplier,mailTextBuffer.toString(),mailSubject);
+        }
+        return R.ok();
+    }
+
+    /**
+     * 获取超时未确认的列表
+     * @param submitDateStart 提交时间起始值
+     * @param submitDateEnd 提交时间结束值
+     * @return
+     */
+    private List<SmsDelaysDelivery> overTimeSelect(String submitDateStart,String submitDateEnd){
+        Example example = new Example(SmsDelaysDelivery.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("delaysStatus",DeplayStatusEnum.DELAYS_STATUS_1);
+        criteria.andGreaterThanOrEqualTo("submitDate",submitDateStart);
+        criteria.andLessThan("submitDate",submitDateEnd);
+        List<SmsDelaysDelivery> smsDelaysDeliveryList = smsDelaysDeliveryMapper.selectByExample(example);
+        return smsDelaysDeliveryList;
+    }
+    /**
+     * 72H超时供应商自动确认
+     * @return 成功或失败
+     */
+    @Override
+    public R overTimeConfim() {
+        //1.查询状态是待供应商确认的 提交时间<=3天前的 >4天前的
+        String threeDate = DateUtils.getDaysTimeString(-3);
+        String fourDate = DateUtils.getDaysTimeString(-4);
+        List<SmsDelaysDelivery> smsDelaysDeliveryList = overTimeSelect(threeDate,fourDate);
+        int count = 0;
+        if(!CollectionUtils.isEmpty(smsDelaysDeliveryList)){
+            for(SmsDelaysDelivery smsDelaysDelivery : smsDelaysDeliveryList){
+                smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_11.getCode());
+                smsDelaysDelivery.setSettleFee(smsDelaysDelivery.getDelaysAmount());
+                smsDelaysDelivery.setSupplierConfirmDate(new Date());
+            }
+            count = smsDelaysDeliveryMapper.updateBatchByPrimaryKeySelective(smsDelaysDeliveryList);
+        }
         return R.data(count);
     }
 }

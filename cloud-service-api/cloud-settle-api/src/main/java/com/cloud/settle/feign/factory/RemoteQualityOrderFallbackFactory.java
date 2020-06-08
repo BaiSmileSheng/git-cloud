@@ -46,7 +46,24 @@ public class RemoteQualityOrderFallbackFactory implements FallbackFactory<Remote
              */
             @Override
             public R editSave(SmsQualityOrder smsQualityOrder) {
-                return null;
+                return R.error("修改保存质量索赔失败");
+            }
+            /**
+             * 48H超时未确认发送邮件
+             * @return 成功或失败
+             */
+            @Override
+            public R overTimeSendMail() {
+                return R.error("48H超时未确认发送邮件失败");
+            }
+
+            /**
+             * 72H超时供应商自动确认
+             * @return 成功或失败
+             */
+            @Override
+            public R overTimeConfim() {
+                return R.error("72H超时供应商自动确认失败");
             }
         };
     }

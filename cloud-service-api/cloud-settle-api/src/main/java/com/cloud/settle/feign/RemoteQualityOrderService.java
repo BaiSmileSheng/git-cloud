@@ -41,4 +41,18 @@ public interface RemoteQualityOrderService {
      */
     @PostMapping("qualityOrder/editSave")
     R editSave(@RequestBody SmsQualityOrder smsQualityOrder);
+
+    /**
+     * 48H超时未确认发送邮件
+     * @return 成功或失败
+     */
+    @PostMapping("qualityOrder/overTimeSendMail")
+    R overTimeSendMail();
+
+    /**
+     * 72H超时供应商自动确认
+     * @return 成功或失败
+     */
+    @PostMapping("qualityOrder/overTimeConfim")
+    R overTimeConfim();
 }

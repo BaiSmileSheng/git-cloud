@@ -60,6 +60,24 @@ public class RemoteClaimOtherFallbackFactory implements FallbackFactory<RemoteCl
             public R supplierAppeal(String smsClaimOtherReq, MultipartFile[] files) {
                 return R.error("根据id申诉其他索赔信息失败");
             }
+
+            /**
+             * 48H超时未确认发送邮件
+             * @return 成功或失败
+             */
+            @Override
+            public R overTimeSendMail() {
+                return R.error("48H超时未确认发送邮件失败");
+            }
+
+            /**
+             * 72H超时供应商自动确认
+             * @return 成功或失败
+             */
+            @Override
+            public R overTimeConfim() {
+                return R.error("72H超时供应商自动确认失败");
+            }
         };
     }
 }

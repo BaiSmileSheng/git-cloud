@@ -47,4 +47,18 @@ public interface RemoteDelaysDeliveryService {
      */
     @PostMapping("delaysDelivery/update")
     R editSave(@RequestBody SmsDelaysDelivery smsDelaysDelivery);
+
+    /**
+     * 48H超时未确认发送邮件
+     * @return 成功或失败
+     */
+    @PostMapping("delaysDelivery/overTimeSendMail")
+    R overTimeSendMail();
+
+    /**
+     * 72H超时供应商自动确认
+     * @return 成功或失败
+     */
+    @PostMapping("delaysDelivery/overTimeConfim")
+    R overTimeConfim();
 }

@@ -42,4 +42,16 @@ public interface ISmsDelaysDeliveryService extends BaseService<SmsDelaysDelivery
      */
     R supplierConfirm(String ids);
 
+    /**
+     * 超时发送邮件
+     * @return 成功或失败
+     */
+    R overTimeSendMail();
+
+    /**
+     * 72H超时供应商自动确认
+     * @return 成功或失败
+     */
+    R overTimeConfim();
+
 }

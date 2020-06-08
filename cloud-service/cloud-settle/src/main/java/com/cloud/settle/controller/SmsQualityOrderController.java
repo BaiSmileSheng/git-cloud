@@ -4,13 +4,16 @@ import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
+import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.domain.entity.SmsQualityOrder;
+import com.cloud.settle.enums.QualityStatusEnum;
 import com.cloud.settle.service.ISmsQualityOrderService;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.enums.UserTypeEnum;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -33,6 +36,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("qualityOrder")
+@Api(tags = "质量索赔  提供者")
 public class SmsQualityOrderController extends BaseController {
 
     @Autowired
@@ -74,9 +78,53 @@ public class SmsQualityOrderController extends BaseController {
             @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required =true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "sortField", value = "排序列", required = false,paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false,paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "qualityNo", value = "索赔单号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "supplierCode", value = "供应商编号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "supplierName", value = "供应商名称", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "qualityStatus", value = "状态", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "beginTime", value = "开始时间", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", required = false, paramType = "query", dataType = "String")
     })
     public TableDataInfo list(SmsQualityOrder smsQualityOrder) {
+        Example example = assemblyConditions(smsQualityOrder);
+        startPage();
+        List<SmsQualityOrder> smsQualityOrderList = smsQualityOrderService.selectByExample(example);
+        return getDataTable(smsQualityOrderList);
+    }
+
+    /**
+     * 导出查询质量索赔列表
+     * @param smsQualityOrder  质量索赔信息
+     * @return TableDataInfo 质量索赔分页信息
+     */
+    @GetMapping("export")
+    @ApiOperation(value = "导出查询质量索赔列表", response = SmsQualityOrder.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "qualityNo", value = "索赔单号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "supplierCode", value = "供应商编号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "supplierName", value = "供应商名称", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "qualityStatus", value = "状态", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "beginTime", value = "开始时间", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", required = false, paramType = "query", dataType = "String")
+    })
+    public R export(SmsQualityOrder smsQualityOrder) {
+        Example example = assemblyConditions(smsQualityOrder);
+        List<SmsQualityOrder> smsQualityOrderList = smsQualityOrderService.selectByExample(example);
+        for(SmsQualityOrder smsQualityOrderRes : smsQualityOrderList){
+            String qualityStatus = smsQualityOrderRes.getQualityStatus();
+            smsQualityOrderRes.setQualityStatus(QualityStatusEnum.getMsgByCode(qualityStatus));
+        }
+        String fileName = "质量索赔 .xlsx";
+        return EasyExcelUtil.writeExcel(smsQualityOrderList,fileName,fileName,new SmsQualityOrder());
+    }
+
+    /**
+     * 组装查询条件
+     * @param smsQualityOrder 质量索赔信息
+     * @return
+     */
+    private Example assemblyConditions(SmsQualityOrder smsQualityOrder){
         Example example = new Example(SmsQualityOrder.class);
         Example.Criteria criteria = example.createCriteria();
         if(StringUtils.isNotBlank(smsQualityOrder.getQualityNo())){
@@ -104,11 +152,8 @@ public class SmsQualityOrderController extends BaseController {
             String supplierCode = sysUser.getSupplierCode();
             criteria.andEqualTo("supplierCode",supplierCode);
         }
-        startPage();
-        List<SmsQualityOrder> smsQualityOrderList = smsQualityOrderService.selectByExample(example);
-        return getDataTable(smsQualityOrderList);
+        return example;
     }
-
 
     /**
      * 新增保存质量索赔
@@ -192,5 +237,25 @@ public class SmsQualityOrderController extends BaseController {
     public R supplierAppeal(@RequestParam("smsQualityOrder") String smsQualityOrderReq,@RequestParam("files") MultipartFile[] files) {
             SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq,SmsQualityOrder.class);
             return smsQualityOrderService.supplierAppeal(smsQualityOrder,files);
+    }
+
+    /**
+     * 48H超时未确认发送邮件
+     * @return 成功或失败
+     */
+    @PostMapping("overTimeSendMail")
+    @ApiOperation(value = "48H超时未确认发送邮件 ", response = SmsQualityOrder.class)
+    public R overTimeSendMail(){
+        return smsQualityOrderService.overTimeSendMail();
+    }
+
+    /**
+     * 72H超时供应商自动确认
+     * @return 成功或失败
+     */
+    @PostMapping("overTimeConfim")
+    @ApiOperation(value = "72H超时供应商自动确认 ", response = SmsQualityOrder.class)
+    public R overTimeConfim(){
+        return smsQualityOrderService.overTimeConfim();
     }
 }
