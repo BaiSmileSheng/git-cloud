@@ -180,7 +180,7 @@ public class OmsProductionOrder extends BaseEntity {
      */
     @ExcelProperty(value = "BOM版本")
     @ApiModelProperty(value = "BOM版本")
-    private Long bomVersion;
+    private String bomVersion;
 
     /**
      * 顺序
@@ -292,6 +292,12 @@ public class OmsProductionOrder extends BaseEntity {
      * 是否删除 0：有效，1：删除
      */
     private String delFlag;
+    /**
+     * sap返回信息
+     */
+    @ExcelProperty(value = "sap返回信息")
+    @ApiModelProperty(value = "sap返回信息")
+    private String SapMessages;
 
     /**
      * 查询生产结束日期起始值
