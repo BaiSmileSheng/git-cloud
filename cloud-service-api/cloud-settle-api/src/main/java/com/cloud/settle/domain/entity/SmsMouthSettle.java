@@ -39,6 +39,13 @@ public class SmsMouthSettle extends BaseEntity {
     private Long id;
 
     /**
+     * 结算单号
+     */
+    @ExcelProperty(value = "结算单号")
+    @ApiModelProperty(value = "结算单号")
+    private String settleNo;
+
+    /**
      * 结算月份
      */
     @ExcelProperty(value = "结算月份")
@@ -64,7 +71,7 @@ public class SmsMouthSettle extends BaseEntity {
      */
     @ExcelProperty(value = "付款公司")
     @ApiModelProperty(value = "付款公司")
-    private String componyCode;
+    private String companyCode;
 
     /**
      * 结算加工费

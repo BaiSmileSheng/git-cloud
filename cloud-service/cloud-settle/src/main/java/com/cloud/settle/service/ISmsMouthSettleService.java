@@ -17,4 +17,12 @@ public interface ISmsMouthSettleService extends BaseService<SmsMouthSettle>{
      * @return
      */
     R countMonthSettle();
+
+    /**
+     * 内控确认和小微主确认
+     * @param id
+     * @param settleStatus
+     * @return
+     */
+    R confirm(Long id,String settleStatus);
 }
