@@ -1,11 +1,16 @@
 package com.cloud.settle.service.impl;
 
-    import com.cloud.common.core.service.impl.BaseServiceImpl;
+import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.settle.domain.entity.SmsClaimCashDetail;
 import com.cloud.settle.mapper.SmsClaimCashDetailMapper;
 import com.cloud.settle.service.ISmsClaimCashDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+
 /**
  * 索赔兑现明细 Service业务层处理
  *
@@ -18,4 +23,23 @@ public class SmsClaimCashDetailServiceImpl extends BaseServiceImpl<SmsClaimCashD
     private SmsClaimCashDetailMapper smsClaimCashDetailMapper;
 
 
+    /**
+     * 本月兑现扣款
+     * @param settleNo
+     * @return
+     */
+    @Override
+    public List<Map<String, BigDecimal>> selectSumCashGroupByClaimTypeActual(String settleNo) {
+        return smsClaimCashDetailMapper.selectSumCashGroupByClaimTypeActual(settleNo);
     }
+
+    /**
+     * 历史兑现扣款
+     * @param settleNo
+     * @return
+     */
+    @Override
+    public List<Map<String, BigDecimal>> selectSumCashGroupByClaimTypeHistory(String settleNo) {
+        return smsClaimCashDetailMapper.selectSumCashGroupByClaimTypeHistory(settleNo);
+    }
+}
