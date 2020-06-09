@@ -45,6 +45,14 @@ public class RemoteFactoryLineInfoFallbackFactory implements FallbackFactory<Rem
             public CdFactoryLineInfo selectInfoByCodeLineCode(String produceLineCode) {
                 return null;
             }
+            /**
+             * 定时任务获取工厂线体关系数据，并保存
+             * @return R
+             */
+            @Override
+            public R saveFactoryLineInfo() {
+                return null;
+            }
         };
     }
 }

@@ -146,6 +146,11 @@
             <artifactId>gson</artifactId>
         </dependency>
 
+        <!--jco 直连SAP-->
+        <dependency>
+            <groupId>com.github.easonjim</groupId>
+            <artifactId>com.sap.conn.jco.sapjco3</artifactId>
+        </dependency>
 
     </dependencies>
     <build>

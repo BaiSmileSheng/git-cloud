@@ -15,6 +15,7 @@
                     <result property="plantCode" column="plant_code"/>
                     <result property="roundingQuantit" column="rounding_quantit"/>
                     <result property="lastUpdate" column="last_update"/>
+                    <result property="uph" column="uph"/>
                     <result property="delFlag" column="del_flag"/>
                     <result property="remark" column="remark"/>
                     <result property="createTime" column="create_time"/>
@@ -24,8 +25,42 @@
                     </resultMap>
 
     <sql id="selectCdMaterialInfoVo">
-        select id, material_code, material_desc, material_type, primary_uom, mtl_group_code, purchase_group_code, plant_code, rounding_quantit, last_update, del_flag, remark, create_time, create_by, update_time, update_by from cd_material_info
+        select id, material_code, material_desc, material_type, primary_uom, mtl_group_code, purchase_group_code, plant_code, rounding_quantit, last_update,uph, del_flag, remark, create_time, create_by, update_time, update_by from cd_material_info
     </sql>
 
+    <update id="updateBatchByFactoryAndMaterial" parameterType="List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update cd_material_info
+            <trim prefix="set" suffixOverrides=",">
+                <if test="item.primaryUom != null and item.primaryUom != ''">
+                    primary_uom = #{item.primaryUom}
+                </if>
+                <if test="item.mtlGroupCode != null and item.mtlGroupCode != ''">
+                    mtl_group_code = #{item.mtlGroupCode}
+                </if>
+                <if test="item.purchaseGroupCode != null and item.purchaseGroupCode != ''">
+                    purchase_group_code = #{item.purchaseGroupCode}
+                </if>
+                <if test="item.roundingQuantit != null">
+                    rounding_quantit = #{item.roundingQuantit}
+                </if>
+                <if test="item.lastUpdate != null and item.lastUpdate != ''">
+                    last_update = #{item.lastUpdate}
+                </if>
+                <if test="item.uph != null">
+                    uph = #{item.uph}
+                </if>
+            </trim>
+            <where>
+                1=1
+                <if test="item.plantCode != null and item.plantCode != ''">
+                    and plant_code = #{item.plantCode}
+                </if>
+                <if test="item.materialCode != null and item.materialCode != ''">
+                    and material_code = #{item.materialCode}
+                </if>
+            </where>
+        </foreach>
+    </update>
 
 </mapper>

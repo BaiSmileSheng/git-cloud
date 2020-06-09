@@ -1,5 +1,6 @@
 package com.cloud.system.service;
 
+import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.CdRawMaterialStock;
 import com.cloud.common.core.service.BaseService;
 
@@ -9,6 +10,13 @@ import com.cloud.common.core.service.BaseService;
  * @author ltq
  * @date 2020-06-05
  */
-public interface ICdRawMaterialStockService extends BaseService<CdRawMaterialStock>{
-
-    }
+public interface ICdRawMaterialStockService extends BaseService<CdRawMaterialStock> {
+    /**
+     * @Description: 导出原材料库存报表
+     * @Param: [cdRawMaterialStock]
+     * @return: com.cloud.common.core.domain.R
+     * @Author: ltq
+     * @Date: 2020/6/9
+     */
+    R exportRawMaterialExcel(CdRawMaterialStock cdRawMaterialStock);
+}
