@@ -145,7 +145,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         if (StrUtil.isBlank(smsSupplementaryOrder.getStuffStatus())) {
             smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DTJ.getCode());//状态：待提交
         }
-        CdBom cdBom = remoteBomService.listByProductAndMaterial(productMaterialCode, rawMaterialCode);
+        CdBomInfo cdBom = remoteBomService.listByProductAndMaterial(productMaterialCode, rawMaterialCode);
         smsSupplementaryOrder.setSapStoreage(cdBom.getStoragePoint());
         smsSupplementaryOrder.setPurchaseGroupCode(cdBom.getPurchaseGroup());
         smsSupplementaryOrder.setDelFlag("0");
