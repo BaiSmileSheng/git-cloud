@@ -36,4 +36,13 @@ public enum QualityStatusEnum {
     public String getMsg() {
         return msg;
     }
+
+    public static String getMsgByCode(String code) {
+        for (QualityStatusEnum enums : QualityStatusEnum.values()) {
+            if (enums.getCode().equals(code)) {
+                return enums.getMsg();
+            }
+        }
+        return "";
+    }
 }

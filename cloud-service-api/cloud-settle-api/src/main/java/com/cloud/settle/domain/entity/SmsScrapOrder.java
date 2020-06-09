@@ -79,7 +79,7 @@ public class SmsScrapOrder extends BaseEntity {
      */
     @ExcelProperty(value = "付款公司")
     @ApiModelProperty(value = "付款公司")
-    private String componyCode;
+    private String companyCode;
 
     /**
      * 报废状态 0待提交、1业务科待审核、2业务科驳回、3 SAP过账成功、4 SAP过账失败、11待结算、12结算完成、13已兑现、14部分兑现、15未兑现

@@ -13,7 +13,7 @@
                     <result property="factoryCode" column="factory_code"/>
                     <result property="productMaterialCode" column="product_material_code"/>
                     <result property="productMaterialName" column="product_material_name"/>
-                    <result property="componyCode" column="compony_code"/>
+                    <result property="companyCode" column="company_code"/>
                     <result property="qualityStatus" column="quality_status"/>
                     <result property="qualityAmount" column="quality_amount"/>
                     <result property="projectName" column="project_name"/>
@@ -36,7 +36,7 @@
                     </resultMap>
 
     <sql id="selectSmsQualityOrderVo">
-        select id, quality_no, product_order_code, supplier_code, supplier_name, factory_code, product_material_code, product_material_name,compony_code, quality_status, quality_amount, project_name, claim_clause, claim_reason, claim_amount, submit_date, complaint_description, complaint_date, supplier_confirm_date, settle_no, settle_fee, cash_amount, del_flag, remark, create_by, create_time, update_by, update_time from sms_quality_order
+        select id, quality_no, product_order_code, supplier_code, supplier_name, factory_code, product_material_code, product_material_name,company_code, quality_status, quality_amount, project_name, claim_clause, claim_reason, claim_amount, submit_date, complaint_description, complaint_date, supplier_confirm_date, settle_no, settle_fee, cash_amount, del_flag, remark, create_by, create_time, update_by, update_time from sms_quality_order
     </sql>
 
 

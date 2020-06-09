@@ -1,9 +1,11 @@
 package com.cloud.common.utils;
 
 import java.lang.management.ManagementFactory;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -157,5 +159,27 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         SimpleDateFormat sdf1 = new SimpleDateFormat(format);
         sdf1.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));// 设置时区
         return sdf1.format(date);
+    }
+
+    /**
+     * 获取当前时间的n天后时间
+     */
+    public static Timestamp getDaysTime(int date) {
+        Calendar now = Calendar.getInstance();
+        now.setTime(new Date());
+        now.add(Calendar.DAY_OF_MONTH, date);
+        DateFormat df = new SimpleDateFormat(YYYY_MM_DD_HH_MM_SS);
+        String nowTime = df.format(now.getTime());
+        Timestamp buydate = Timestamp.valueOf(nowTime);
+        return buydate;
+    }
+
+    /**
+     * 获取当前时间的n天后时间 YYYY_MM_DD
+     */
+    public static String getDaysTimeString(int date) {
+        Timestamp timestampDate = getDaysTime(date);
+        String dateString = new SimpleDateFormat(YYYY_MM_DD).format(timestampDate);
+        return dateString;
     }
 }

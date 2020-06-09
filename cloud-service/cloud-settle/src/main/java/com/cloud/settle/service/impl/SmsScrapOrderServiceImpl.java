@@ -105,7 +105,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             log.error(StrUtil.format("(报废)报废申请新增保存开始：公司信息为空参数为{}", omsProductionOrder.getFactoryCode()));
             return R.error("公司信息为空！");
         }
-        smsScrapOrder.setComponyCode(cdFactoryInfo.getCompanyCode());
+        smsScrapOrder.setCompanyCode(cdFactoryInfo.getCompanyCode());
         if (StrUtil.isBlank(smsScrapOrder.getScrapStatus())) {
             smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_DTJ.getCode());
         }

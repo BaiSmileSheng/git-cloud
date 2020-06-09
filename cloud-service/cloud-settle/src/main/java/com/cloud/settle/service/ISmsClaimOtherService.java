@@ -63,4 +63,16 @@ public interface ISmsClaimOtherService extends BaseService<SmsClaimOther> {
      * @return 索赔单供应商申诉结果成功或失败
      */
     R supplierAppeal(SmsClaimOther smsClaimOther,MultipartFile[] files);
+
+    /**
+     * 超时发送邮件
+     * @return 成功或失败
+     */
+    R overTimeSendMail();
+
+    /**
+     * 72H超时供应商自动确认
+     * @return 成功或失败
+     */
+    R overTimeConfim();
 }

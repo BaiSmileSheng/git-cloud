@@ -86,7 +86,7 @@ public class SmsQualityOrder extends BaseEntity {
      */
     @ExcelProperty(value = "付款公司")
     @ApiModelProperty(value = "付款公司")
-    private String componyCode;
+    private String companyCode;
 
     /**
      * 专用号名称
@@ -98,7 +98,7 @@ public class SmsQualityOrder extends BaseEntity {
     /**
      * 质量索赔状态 0待提交、1供应商待确认，2供应商确认，3超时自动确认、4 质量部待审核、5小微主待审核、6小微主审核通过， 7供应商待确认(申诉驳回)、 11待结算、12结算完成
      */
-    @ExcelProperty(value = "质量索赔状态 0待提交、1供应商待确认，2供应商确认，3超时自动确认、4 质量部待审核、5小微主待审核、6小微主审核通过， 7供应商待确认(申诉驳回)、 11待结算、12结算完成")
+    @ExcelProperty(value = "质量索赔状态 ")
     @ApiModelProperty(value = "质量索赔状态 0待提交、1供应商待确认，2供应商确认，3超时自动确认、4 质量部待审核、5小微主待审核、6小微主审核通过， 7供应商待确认(申诉驳回)、 11待结算、12结算完成")
     private String qualityStatus;
 

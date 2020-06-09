@@ -81,7 +81,7 @@ public class SmsClaimOther extends BaseEntity {
      */
     @ExcelProperty(value = "付款公司")
     @ApiModelProperty(value = "付款公司")
-    private String componyCode;
+    private String companyCode;
 
     /**
      * 索赔原因
@@ -100,7 +100,7 @@ public class SmsClaimOther extends BaseEntity {
     /**
      * 索赔状态 1供应商待确认、3小微主待审核、7 供应商待确认 11待结算、12 结算完成 、13已兑现、14部分兑现、15未兑现
      */
-    @ExcelProperty(value = "索赔状态 1供应商待确认、3小微主待审核、7 供应商待确认 11待结算、12 结算完成 、13已兑现、14部分兑现、15未兑现")
+    @ExcelProperty(value = "索赔状态")
     @ApiModelProperty(value = "索赔状态 1供应商待确认、3小微主待审核、7 供应商待确认 11待结算、12 结算完成 、13已兑现、14部分兑现、15未兑现")
     private String claimOtherStatus;
 
@@ -172,12 +172,21 @@ public class SmsClaimOther extends BaseEntity {
      * 流程实例ID
      */
     @Transient
+    @ApiModelProperty(value = "流程实例ID")
     private String procDefId;
 
     /**
      * 流程实例名称
      */
     @Transient
+    @ApiModelProperty(value = "流程实例名称")
     private String procName;
+
+    /**
+     * 提交的标记(新增或修改时直接提交为true)
+     */
+    @Transient
+    @ApiModelProperty(value = "提交的标记(新增或修改时直接提交为true)")
+    private Boolean flagCommit;
 
 }
