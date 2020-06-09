@@ -1,5 +1,7 @@
 package com.cloud.settle.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
@@ -9,22 +11,25 @@ import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.feign.RemoteProductionOrderService;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
+import com.cloud.settle.enums.CurrencyEnum;
 import com.cloud.settle.enums.ScrapOrderStatusEnum;
 import com.cloud.settle.mapper.SmsScrapOrderMapper;
 import com.cloud.settle.service.ISmsScrapOrderService;
 import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.CdSapSalePrice;
-import com.cloud.system.feign.RemoteCdSapSalePriceInfoService;
-import com.cloud.system.feign.RemoteFactoryInfoService;
-import com.cloud.system.feign.RemoteFactoryLineInfoService;
-import com.cloud.system.feign.RemoteSequeceService;
+import com.cloud.system.domain.entity.CdSettleRatio;
+import com.cloud.system.enums.SettleRatioEnum;
+import com.cloud.system.feign.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 报废申请 Service业务层处理
@@ -42,11 +47,15 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
     @Autowired
     private RemoteFactoryLineInfoService remotefactoryLineInfoService;
     @Autowired
-    private RemoteCdSapSalePriceInfoService remoteCdSapSalePriceInfoService;
-    @Autowired
     private RemoteFactoryInfoService remoteFactoryInfoService;
     @Autowired
     private RemoteSequeceService remoteSequeceService;
+    @Autowired
+    private RemoteSettleRatioService remoteSettleRatioService;
+    @Autowired
+    private RemoteCdSapSalePriceInfoService remoteCdSapSalePriceInfoService;
+    @Autowired
+    private RemoteCdMouthRateService remoteCdMouthRateService;
 
     /**
      * 编辑报废申请单功能  --有状态校验
@@ -75,6 +84,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
      * @return
      */
     @Override
+    @Transactional
     public R addSave(SmsScrapOrder smsScrapOrder) {
         log.info(StrUtil.format("报废申请新增保存开始：参数为{}", smsScrapOrder.toString()));
         //生产订单号
@@ -109,16 +119,6 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         if (StrUtil.isBlank(smsScrapOrder.getScrapStatus())) {
             smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_DTJ.getCode());
         }
-        //根据物料号  有效期查询成品销售价格
-        String date = DateUtils.getTime();
-        List<CdSapSalePrice> sapSalePrices = remoteCdSapSalePriceInfoService.findByMaterialCode(smsScrapOrder.getProductMaterialCode(),date,date);
-        if (sapSalePrices == null || sapSalePrices.size() == 0) {
-            log.error(StrUtil.format("(报废)报废申请修改保存开始：物料销售价格未维护参数为{}", smsScrapOrder.getProductMaterialCode()));
-            return R.error("物料销售价格未维护！");
-        }
-        CdSapSalePrice cdSapSalePrice = sapSalePrices.get(0);
-        smsScrapOrder.setCurrency(cdSapSalePrice.getConditionsMonetary());
-        smsScrapOrder.setMaterialPrice(new BigDecimal(cdSapSalePrice.getSalePrice()));
         smsScrapOrder.setDelFlag("0");
 //        smsScrapOrder.setCreateBy(sysUser.getLoginName());
         smsScrapOrder.setCreateTime(DateUtils.getNowDate());
@@ -204,5 +204,71 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
     @Override
     public List<SmsScrapOrder> selectByMonthAndStatus(String month, List<String> scrapStatus) {
         return smsScrapOrderMapper.selectByMonthAndStatus(month,scrapStatus);
+    }
+
+    /**
+     * 定时任务更新指定月份销售价格到报废表
+     * @param month
+     * @return
+     */
+    @Override
+    @Transactional
+    public R updatePriceEveryMonth(String month) {
+        //报废索赔系数
+        CdSettleRatio cdSettleRatioBF = remoteSettleRatioService.selectByClaimType(SettleRatioEnum.SPLX_BF.getCode());
+        if (cdSettleRatioBF == null) {
+            log.error("(月度结算定时任务)报废索赔系数未维护！");
+            throw new BusinessException("报废索赔系数未维护！");
+        }
+        //查询指定月汇率
+        R rRate = remoteCdMouthRateService.findRateByYearMouth(month);
+        if (!rRate.isSuccess()) {
+            throw new BusinessException(StrUtil.format("{}月份未维护费率", month));
+        }
+        BigDecimal rate = new BigDecimal(rRate.get("data").toString());//汇率
+        //从SAP销售价格表取值（销售组织、物料号、有效期）
+        //查询上个月、待结算的物耗申请中的物料号  用途是查询SAP成本价 更新到物耗表
+        List<String> materialCodeList = smsScrapOrderMapper.selectMaterialByMonthAndStatus(month, CollUtil.newArrayList(ScrapOrderStatusEnum.BF_ORDER_STATUS_DJS.getCode()));
+        Map<String, CdSapSalePrice> sapPrice = new ConcurrentHashMap<>();
+        if (materialCodeList != null) {
+            log.info(StrUtil.format("(月度结算定时任务)报废申请需要更新销售价格的物料号:{}", materialCodeList.toString()));
+            String now = DateUtil.now();
+            String materialCodeStr = StrUtil.join(",", materialCodeList);
+            //根据前面查出的物料号查询SAP成本价 map key:物料号  value:CdMaterialPriceInfo
+            sapPrice = remoteCdSapSalePriceInfoService.selectPriceByInMaterialCodeAndDate(materialCodeStr, now, now);
+        }
+        //取得计算月份、待结算的报废数据
+        List<SmsScrapOrder> smsScrapOrderList = selectByMonthAndStatus(month, CollUtil.newArrayList(ScrapOrderStatusEnum.BF_ORDER_STATUS_DJS.getCode()));
+        //循环报废，计算索赔金额
+        if (smsScrapOrderList != null) {
+            for (SmsScrapOrder smsScrapOrder : smsScrapOrderList) {
+                CdSapSalePrice cdSapSalePrice = sapPrice.get(smsScrapOrder.getProductMaterialCode()+smsScrapOrder.getCompanyCode());
+                if (cdSapSalePrice == null) {
+                    //如果没有找到SAP销售价格，则更新备注
+                    log.info(StrUtil.format("(定时任务)SAP销售价格未同步的物料号:{}", smsScrapOrder.getProductMaterialCode()));
+                    smsScrapOrder.setRemark("SAP销售价格未同步！");
+                    updateByPrimaryKeySelective(smsScrapOrder);
+                    continue;
+                }
+                smsScrapOrder.setCurrency(cdSapSalePrice.getConditionsMonetary());
+                smsScrapOrder.setMaterialPrice(new BigDecimal(cdSapSalePrice.getSalePrice()));
+                smsScrapOrder.setScrapPrice(smsScrapOrder.getMaterialPrice().multiply(new BigDecimal(smsScrapOrder.getScrapAmount())));
+                //索赔金额=（Sap成品物料销售价格*报废数量*报废索赔系数）+（报废数量*生产订单加工费单价）
+                BigDecimal scrapPrice ;//索赔金额
+                BigDecimal scrapAmount = new BigDecimal(smsScrapOrder.getScrapAmount());//报废数量
+                BigDecimal materialPrice = smsScrapOrder.getMaterialPrice();//成品物料销售价格
+
+                BigDecimal ratio = cdSettleRatioBF.getRatio();//报废索赔系数
+                BigDecimal machiningPrice = smsScrapOrder.getMachiningPrice();//加工费单价
+                scrapPrice = (materialPrice.multiply(scrapAmount.multiply(ratio))).add(scrapAmount.multiply(machiningPrice));
+                if (CurrencyEnum.CURRENCY_USD.getCode().equals(smsScrapOrder.getCurrency())) {
+                    //如果是美元，还要*汇率
+                    scrapPrice = scrapPrice.multiply(rate);
+                }
+                smsScrapOrder.setSettleFee(scrapPrice);
+            }
+            updateBatchByPrimaryKeySelective(smsScrapOrderList);
+        }
+        return R.ok();
     }
 }

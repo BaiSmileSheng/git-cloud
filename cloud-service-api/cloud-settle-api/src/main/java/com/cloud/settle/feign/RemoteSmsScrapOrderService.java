@@ -49,4 +49,12 @@ public interface RemoteSmsScrapOrderService {
      */
     @PostMapping("scrapOrder/save")
     R addSave(@RequestBody SmsScrapOrder smsScrapOrder);
+
+    /**
+     * 定时任务更新指定月份销售价格到报废表
+     * @param month
+     * @return
+     */
+    @GetMapping("scrapOrder/updatePriceEveryMonth")
+    R updatePriceEveryMonth(@RequestParam("month") String month);
 }

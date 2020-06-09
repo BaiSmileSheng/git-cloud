@@ -187,5 +187,14 @@ public class SmsSupplementaryOrderController extends BaseController {
         return smsSupplementaryOrderService.remove(ids);
     }
 
-
+    /**
+     * 定时任务更新指定月份原材料价格到物耗表
+     * @param month
+     * @return
+     */
+    @GetMapping("updatePriceEveryMonth")
+    @ApiOperation(value = "定时任务更新指定月份原材料价格到物耗表 ", response = R.class)
+    public R updatePriceEveryMonth(String month){
+        return smsSupplementaryOrderService.updatePriceEveryMonth(month);
+    }
 }

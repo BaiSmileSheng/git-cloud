@@ -26,7 +26,7 @@ public class RemoteCdMaterialPriceInfoFallbackFactory implements FallbackFactory
              * @return List<CdMaterialPriceInfo>
              */
             @Override
-            public List<CdMaterialPriceInfo> findByMaterialCode(String materialCode, String beginDate, String endDate) {
+            public List<CdMaterialPriceInfo> findByMaterialCode(String materialCode, String purchasingGroup,String beginDate, String endDate) {
                 return null;
             }
 

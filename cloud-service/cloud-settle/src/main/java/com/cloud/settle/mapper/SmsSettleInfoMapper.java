@@ -28,12 +28,12 @@ public interface SmsSettleInfoMapper extends BaseMapper<SmsSettleInfo> {
      * 根据供应商编码、付款公司、订单状态、月份（基本开始日期）更新数据
      * @param updated
      * @param supplierCode
-     * @param componyCode
+     * @param companyCode
      * @param orderStatus
      * @param month
      * @return
      */
-    int updateBySupplierCodeAndComponyCodeAndOrderStatusAndMonth(@Param("updated")SmsSettleInfo updated,@Param("supplierCode")String supplierCode,@Param("componyCode")String componyCode,@Param("orderStatus")String orderStatus,@Param("month") String month);
+    int updateBySupplierCodeAndCompanyCodeAndOrderStatusAndMonth(@Param("updated")SmsSettleInfo updated,@Param("supplierCode")String supplierCode,@Param("companyCode")String companyCode,@Param("orderStatus")String orderStatus,@Param("month") String month);
 
 
 }

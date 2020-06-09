@@ -5,9 +5,11 @@ import com.cloud.system.domain.entity.CdSapSalePrice;
 import com.cloud.system.feign.factory.RemoteCdSapSalePriceInfoFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用户 Feign服务层
@@ -24,10 +26,22 @@ public interface RemoteCdSapSalePriceInfoService {
      * @param endDate
      * @return List<CdSapSalePrice>
      */
-    @GetMapping(value = "salePrice/findByMaterialCode")
-    List<CdSapSalePrice> findByMaterialCode(@RequestParam(value = "materialCode") String materialCode,
+    @GetMapping(value = "salePrice/findByMaterialCodeAndOraganization")
+    List<CdSapSalePrice> findByMaterialCodeAndOraganization(@RequestParam(value = "materialCode") String materialCode,
+                                                            @RequestParam(value = "oraganization") String oraganization,
                                        @RequestParam(value = "beginDate") String beginDate,
                                        @RequestParam(value = "endDate") String endDate);
+    /**
+     * 根据专用号和销售组织分组查询
+     * @param materialCodes
+     * @param beginDate
+     * @param endDate
+     * @return Map<materialCode+organization,CdMaterialPriceInfo>
+     */
+    @PostMapping("salePrice/selectPriceByInMaterialCodeAndDate")
+    Map<String, CdSapSalePrice> selectPriceByInMaterialCodeAndDate(@RequestParam(value = "materialCodes") String materialCodes,
+                                                                        @RequestParam(value = "beginDate") String beginDate,
+                                                                        @RequestParam(value = "endDate") String endDate);
 
 
 }

@@ -12,7 +12,7 @@
             factory_code,
             product_order_code,
             order_status,
-            compony_code,
+            company_code,
             product_material_code,
             product_material_name,
             bom_version,
@@ -97,7 +97,7 @@
         and del_flag='0'
     </select>
 
-    <update id="updateBySupplierCodeAndComponyCodeAndOrderStatusAndMonth">
+    <update id="updateBySupplierCodeAndCompanyCodeAndOrderStatusAndMonth">
         update sms_settle_info
         <set>
             <if test="updated.id != null">
@@ -121,8 +121,8 @@
             <if test="updated.orderStatus != null and updated.orderStatus != ''">
                 order_status = #{updated.orderStatus},
             </if>
-            <if test="updated.componyCode != null and updated.componyCode != ''">
-                compony_code = #{updated.componyCode},
+            <if test="updated.companyCode != null and updated.companyCode != ''">
+                company_code = #{updated.companyCode},
             </if>
             <if test="updated.productMaterialCode != null and updated.productMaterialCode != ''">
                 product_material_code = #{updated.productMaterialCode},
@@ -183,8 +183,8 @@
             <if test="supplierCode != null and supplierCode != ''">
                 and supplier_code=#{supplierCode}
             </if>
-            <if test="componyCode != null and componyCode != ''">
-                and compony_code=#{componyCode}
+            <if test="companyCode != null and companyCode != ''">
+                and company_code=#{companyCode}
             </if>
             <if test="orderStatus != null and orderStatus != ''">
                 and order_status=#{orderStatus}

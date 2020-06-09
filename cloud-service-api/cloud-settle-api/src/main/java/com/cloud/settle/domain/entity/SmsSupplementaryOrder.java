@@ -72,7 +72,7 @@ public class SmsSupplementaryOrder extends BaseEntity {
      */
     @ExcelProperty(value = "付款公司")
     @ApiModelProperty(value = "付款公司")
-    private String componyCode;
+    private String companyCode;
 
     /**
      * 生产订单号

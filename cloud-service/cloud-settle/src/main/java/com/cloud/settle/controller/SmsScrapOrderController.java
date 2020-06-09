@@ -140,4 +140,15 @@ public class SmsScrapOrderController extends BaseController {
     public R remove(@RequestBody String ids) {
         return smsScrapOrderService.remove(ids);
     }
+
+    /**
+     * 定时任务更新指定月份销售价格到报废表
+     * @param month
+     * @return
+     */
+    @GetMapping("updatePriceEveryMonth")
+    @ApiOperation(value = "定时任务更新指定月份销售价格到报废表 ", response = R.class)
+    public R updatePriceEveryMonth(String month){
+        return smsScrapOrderService.updatePriceEveryMonth(month);
+    }
 }

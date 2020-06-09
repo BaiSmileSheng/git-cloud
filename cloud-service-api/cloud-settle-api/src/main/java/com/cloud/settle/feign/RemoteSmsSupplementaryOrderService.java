@@ -49,4 +49,12 @@ public interface RemoteSmsSupplementaryOrderService {
      */
     @PostMapping("supplementary/save")
     R addSave(@RequestBody SmsSupplementaryOrder smsSupplementaryOrder);
+
+    /**
+     * 定时任务更新指定月份原材料价格到物耗表
+     * @param month
+     * @return
+     */
+    @GetMapping("supplementary/updatePriceEveryMonth")
+    R updatePriceEveryMonth(@RequestParam("month") String month);
 }
