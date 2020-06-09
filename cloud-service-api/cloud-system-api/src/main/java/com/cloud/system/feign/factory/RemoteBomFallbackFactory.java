@@ -1,7 +1,7 @@
 package com.cloud.system.feign.factory;
 
 import com.cloud.common.core.domain.R;
-import com.cloud.system.domain.entity.CdBom;
+import com.cloud.system.domain.entity.CdBomInfo;
 import com.cloud.system.feign.RemoteBomService;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ public class RemoteBomFallbackFactory implements FallbackFactory<RemoteBomServic
              * @return
              */
             @Override
-            public CdBom listByProductAndMaterial(String productMaterialCode, String rawMaterialCode) {
+            public CdBomInfo listByProductAndMaterial(String productMaterialCode, String rawMaterialCode) {
                 return null;
             }
 
