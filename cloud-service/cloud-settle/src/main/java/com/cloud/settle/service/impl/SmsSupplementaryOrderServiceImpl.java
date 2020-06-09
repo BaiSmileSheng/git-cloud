@@ -140,7 +140,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             log.error(StrUtil.format("(物耗)物耗申请新增保存开始：公司信息为空参数为{}", omsProductionOrder.getFactoryCode()));
             return R.error("公司信息为空！");
         }
-        smsSupplementaryOrder.setComponyCode(cdFactoryInfo.getCompanyCode());
+        smsSupplementaryOrder.setCompanyCode(cdFactoryInfo.getCompanyCode());
         smsSupplementaryOrder.setProductOrderCode(omsProductionOrder.getProductOrderCode());//生产订单号
         if (StrUtil.isBlank(smsSupplementaryOrder.getStuffStatus())) {
             smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DTJ.getCode());//状态：待提交
