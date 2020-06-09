@@ -28,6 +28,7 @@
         <result property="createTime" column="create_time"/>
         <result property="updateBy" column="update_by"/>
         <result property="updateTime" column="update_time"/>
+        <result property="mapKey" column="mapKey"/>
     </resultMap>
 
     <sql id="selectCdMaterialPriceInfoVo">
@@ -58,8 +59,33 @@
     </sql>
 
     <select id="selectPriceByInMaterialCodeAndDate" resultMap="CdMaterialPriceInfoResult">
-        <include refid="selectCdMaterialPriceInfoVo"/>
-        where material_code in
+        select id,
+        material_code,
+        material_desc,
+        process_price,
+        member_code,
+        member_name,
+        purchasing_group,
+        tax_code,
+        net_worth,
+        kbetr,
+        currency,
+        price_unit,
+        unit,
+        agency_fee,
+        begin_date,
+        end_date,
+        sap_created_date,
+        remark,
+        del_flag,
+        create_by,
+        create_time,
+        update_by,
+        update_time,CONCAT(material_code,purchasing_organization) as mapKey
+        from cd_material_price_info
+        where
+        del_flag='0' and
+        material_code in
         <foreach collection="materialCodes" item="materialCode" open="(" separator="," close=")">
             #{materialCode}
         </foreach>

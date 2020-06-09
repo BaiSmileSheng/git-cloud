@@ -17,6 +17,7 @@
         <result property="monitor" column="monitor"/>
         <result property="monitorEmail" column="monitor_email"/>
         <result property="attribute" column="attribute"/>
+        <result property="productQuota" column="product_quota"/>
         <result property="delFlag" column="del_flag"/>
         <result property="remarks" column="remarks"/>
         <result property="createTime" column="create_time"/>
@@ -38,6 +39,7 @@
                monitor,
                monitor_email,
                attribute,
+               product_quota,
                del_flag,
                remarks,
                create_time,

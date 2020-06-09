@@ -138,10 +138,12 @@ public class BaseController {
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
     protected TableDataInfo getDataTable(List<?> list) {
+        PageInfo<?> pageInfo = new PageInfo(list);
         TableDataInfo rspData = new TableDataInfo();
         rspData.setCode(0);
         rspData.setRows(list);
-        rspData.setTotal(new PageInfo(list).getTotal());
+        rspData.setTotal(pageInfo.getTotal());
+        rspData.setPageNum(pageInfo.getPageNum());
         return rspData;
     }
 

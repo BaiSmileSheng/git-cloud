@@ -11,7 +11,7 @@
         <result property="supplierCode" column="supplier_code"/>
         <result property="supplierName" column="supplier_name"/>
         <result property="factoryCode" column="factory_code"/>
-        <result property="componyCode" column="compony_code"/>
+        <result property="companyCode" column="company_code"/>
         <result property="scrapStatus" column="scrap_status"/>
         <result property="postingNo" column="posting_no"/>
         <result property="sapTransDate" column="sap_trans_date"/>
@@ -42,7 +42,7 @@
                supplier_code,
                supplier_name,
                factory_code,
-               compony_code,
+               company_code,
                scrap_status,
                posting_no,
                sap_trans_date,
@@ -69,6 +69,22 @@
 
     <select id="selectByMonthAndStatus" resultMap="SmsScrapOrderResult">
         <include refid="selectSmsScrapOrderVo"/>
+        <where>
+            <if test="month != null">
+                DATE_FORMAT(sap_trans_date, '%Y%m') = #{month}
+            </if>
+            AND scrap_status in
+            <foreach collection="scrapStatus" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+            and del_flag='0'
+        </where>
+    </select>
+
+    <select id="selectMaterialByMonthAndStatus" resultType="java.lang.String">
+        select
+        DISTINCT product_material_code
+        from sms_scrap_order
         <where>
             <if test="month != null">
                 DATE_FORMAT(sap_trans_date, '%Y%m') = #{month}

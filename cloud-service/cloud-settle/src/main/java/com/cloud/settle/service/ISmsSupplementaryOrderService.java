@@ -42,4 +42,11 @@ public interface ISmsSupplementaryOrderService extends BaseService<SmsSupplement
      * @return
      */
     List<SmsSupplementaryOrder> selectByMonthAndStatus(String month,List<String> stuffStatus);
+
+
+    /**
+     * 定时任务更新指定月份原材料价格到物耗表
+     * @return
+     */
+    R updatePriceEveryMonth(String month);
 }

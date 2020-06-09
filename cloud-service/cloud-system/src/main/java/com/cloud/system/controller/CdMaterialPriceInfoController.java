@@ -102,12 +102,15 @@ public class CdMaterialPriceInfoController extends BaseController {
      * @return CdMaterialPriceInfo  list
      */
     @GetMapping("findByMaterialCode")
-    public List<CdMaterialPriceInfo> findByMaterialCode(String materialCode, String beginDate, String endDate){
+    public List<CdMaterialPriceInfo> findByMaterialCodeAndPurchasingGroup(String materialCode,String purchasingGroup ,String beginDate, String endDate){
         //查询CdMaterialPriceInfo
         Example example = new Example(CdMaterialPriceInfo.class);
         Example.Criteria criteria = example.createCriteria();
         if (StrUtil.isNotBlank(materialCode)) {
             criteria.andEqualTo("materialCode", materialCode);
+        }
+        if (StrUtil.isNotBlank(purchasingGroup)) {
+            criteria.andEqualTo("purchasingGroup", purchasingGroup);
         }
         if (StrUtil.isNotBlank(beginDate)) {
             criteria.andLessThanOrEqualTo("beginDate", beginDate);
@@ -130,11 +133,11 @@ public class CdMaterialPriceInfoController extends BaseController {
     }
 
     /**
-     * 根据物料号查询
+     * 根据物料号和采购组织分组查询
      * @param materialCodes
      * @param beginDate
      * @param endDate
-     * @return Map<materialCode,CdMaterialPriceInfo>
+     * @return Map<materialCode+organization,CdMaterialPriceInfo>
      */
     @PostMapping("selectPriceByInMaterialCodeAndDate")
     public Map<String, CdMaterialPriceInfo> selectPriceByInMaterialCodeAndDate(String materialCodes, String beginDate, String endDate) {

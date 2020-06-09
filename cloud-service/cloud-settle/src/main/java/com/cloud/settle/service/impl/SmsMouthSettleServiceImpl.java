@@ -16,13 +16,8 @@ import com.cloud.settle.domain.webServicePO.BaseMultiItemClaimSaveRequest;
 import com.cloud.settle.enums.*;
 import com.cloud.settle.mapper.*;
 import com.cloud.settle.service.*;
-import com.cloud.system.domain.entity.CdMaterialPriceInfo;
-import com.cloud.system.domain.entity.CdSettleRatio;
 import com.cloud.system.enums.SettleRatioEnum;
-import com.cloud.system.feign.RemoteCdMaterialPriceInfoService;
-import com.cloud.system.feign.RemoteCdMouthRateService;
-import com.cloud.system.feign.RemoteSequeceService;
-import com.cloud.system.feign.RemoteSettleRatioService;
+import com.cloud.system.feign.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,8 +52,6 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
     @Autowired
     private RemoteCdMouthRateService remoteCdMouthRateService;
     @Autowired
-    private RemoteSettleRatioService remoteSettleRatioService;
-    @Autowired
     private SmsQualityOrderMapper smsQualityOrderMapper;
     @Autowired
     private SmsDelaysDeliveryMapper smsDelaysDeliveryMapper;
@@ -67,15 +60,13 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
     @Autowired
     private RemoteSequeceService remoteSequeceService;
     @Autowired
-    private SmsSupplementaryOrderMapper smsSupplementaryOrderMapper;
-    @Autowired
-    private RemoteCdMaterialPriceInfoService remoteCdMaterialPriceInfoService;
-    @Autowired
     private ISmsClaimCashDetailService smsClaimCashDetailService;
     @Autowired
     private IBaseMutilItemService baseMutilItemService;
     @Autowired
     private ISmsInvoiceInfoService smsInvoiceInfoService;
+
+
 
     /**
      * 月度结算定时任务   计算上个月
@@ -221,7 +212,8 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
                     .companyCode(settleList.get(0).getCompanyCode()).machiningAmount(settlePriceTotal)
                     .claimAmount(claimPrice).noCashAmount(noCashAmount)
                     .cashAmount(cashAmount).excludingFee(excludingFee)
-                    .includeTaxeFee(excludingFee.multiply(BigDecimal.valueOf(1.13))).build();
+                    .includeTaxeFee(excludingFee.multiply(BigDecimal.valueOf(1.13)))
+                    .settleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_JSWC.getCode()).build();
             smsMouthSettle.setDelFlag("0");
             smsMouthSettle.setCreateBy("定时任务");
             smsMouthSettle.setCreateTime(date);
@@ -240,6 +232,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         });
         return R.ok();
     }
+
 
 
     /**
@@ -279,51 +272,10 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
     Map<String, List<SmsSupplementaryOrder>> supplementGroup(String lastMonth, BigDecimal rate) {
         String key;
         Map<String, List<SmsSupplementaryOrder>> mapSupplement = new ConcurrentHashMap<>();
-        //物耗索赔系数
-        CdSettleRatio cdSettleRatioWH = remoteSettleRatioService.selectByClaimType(SettleRatioEnum.SPLX_WH.getCode());
-        if (cdSettleRatioWH == null) {
-            log.error("物耗索赔系数未维护！");
-            throw new BusinessException("物耗索赔系数未维护！");
-        }
-        //查询上个月、待结算的物耗申请中的物料号  用途是查询SAP成本价 更新到物耗表
-        List<String> materialCodeList = smsSupplementaryOrderMapper.selectMaterialByMonthAndStatus(lastMonth, CollUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode()));
-        Map<String, CdMaterialPriceInfo> mapMaterialPrice = new ConcurrentHashMap<>();
-        if (materialCodeList != null) {
-            log.info(StrUtil.format("(月度结算定时任务)物耗申请需要更新成本价格的物料号:{}", materialCodeList.toString()));
-            String now = DateUtil.now();
-            String materialCodeStr = StrUtil.join(",", materialCodeList);
-            //根据前面查出的物料号查询SAP成本价 map key:物料号  value:CdMaterialPriceInfo
-            mapMaterialPrice = remoteCdMaterialPriceInfoService.selectPriceByInMaterialCodeAndDate(materialCodeStr, now, now);
-        }
         //取得计算月份、待结算的物耗申请数据
         List<SmsSupplementaryOrder> smsSupplementaryOrderList = smsSupplementaryOrderService.selectByMonthAndStatus(lastMonth, CollUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode()));
-        //循环物耗，更新成本价格，计算索赔金额
         if (smsSupplementaryOrderList != null) {
             for (SmsSupplementaryOrder smsSupplementaryOrder : smsSupplementaryOrderList) {
-                CdMaterialPriceInfo cdMaterialPriceInfo = mapMaterialPrice.get(smsSupplementaryOrder.getRawMaterialCode());
-                if (cdMaterialPriceInfo == null) {
-                    //如果没有找到SAP价格，则更新备注
-                    log.info(StrUtil.format("(月度结算定时任务)SAP价格未同步的物料号:{}", smsSupplementaryOrder.getRawMaterialCode()));
-                    smsSupplementaryOrder.setRemark("SAP价格未同步！");
-                    smsSupplementaryOrderService.updateByPrimaryKeySelective(smsSupplementaryOrder);
-                    continue;
-                }
-                smsSupplementaryOrder.setStuffPrice(cdMaterialPriceInfo.getNetWorth());//单价  取得materialPrice表的净价值
-                smsSupplementaryOrder.setStuffUnit(cdMaterialPriceInfo.getUnit());
-                smsSupplementaryOrder.setCurrency(cdMaterialPriceInfo.getCurrency());//币种
-                //索赔金额=物耗数量* 原材料单价*物耗申请系数
-                BigDecimal spPrice;//索赔金额
-                BigDecimal stuffAmount = new BigDecimal(smsSupplementaryOrder.getStuffAmount());//物耗数量
-                BigDecimal stuffPrice = smsSupplementaryOrder.getStuffPrice();//原材料单价
-                BigDecimal ratio = cdSettleRatioWH.getRatio();//物耗索赔系数
-                spPrice = stuffAmount.multiply(stuffPrice.multiply(ratio));
-                if (CurrencyEnum.CURRENCY_USD.getCode().equals(smsSupplementaryOrder.getCurrency())) {
-                    //如果是美元，还要*汇率
-                    spPrice = spPrice.multiply(rate);
-                    smsSupplementaryOrder.setRate(rate);
-                }
-                smsSupplementaryOrder.setSettleFee(spPrice);
-
                 //下面开始分组：根据供应商和付款公司分组
                 //key:supplierCode+companyCode
                 key = smsSupplementaryOrder.getSupplierCode() + smsSupplementaryOrder.getCompanyCode();
@@ -485,29 +437,11 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
     Map<String, List<SmsScrapOrder>> scrapGroup(String lastMonth, BigDecimal rate) {
         String key;
         Map<String, List<SmsScrapOrder>> mapScrap = new ConcurrentHashMap<>();
-        //报废索赔系数
-        CdSettleRatio cdSettleRatioBF = remoteSettleRatioService.selectByClaimType(SettleRatioEnum.SPLX_BF.getCode());
-        if (cdSettleRatioBF == null) {
-            log.error("(月度结算定时任务)报废索赔系数未维护！");
-            throw new BusinessException("报废索赔系数未维护！");
-        }
         //取得计算月份、待结算的报废数据
         List<SmsScrapOrder> smsScrapOrderList = smsScrapOrderService.selectByMonthAndStatus(lastMonth, CollUtil.newArrayList(ScrapOrderStatusEnum.BF_ORDER_STATUS_DJS.getCode()));
         //循环报废，计算索赔金额
         if (smsScrapOrderList != null) {
             for (SmsScrapOrder smsScrapOrder : smsScrapOrderList) {
-                //索赔金额=（Sap成品物料销售价格*报废数量*报废索赔系数）+（报废数量*生产订单加工费单价）
-                BigDecimal scrapPrice = BigDecimal.ZERO;//索赔金额
-                BigDecimal scrapAmount = new BigDecimal(smsScrapOrder.getScrapAmount());//报废数量
-                BigDecimal materialPrice = smsScrapOrder.getMaterialPrice();//成品物料销售价格
-                BigDecimal ratio = cdSettleRatioBF.getRatio();//报废索赔系数
-                BigDecimal machiningPrice = smsScrapOrder.getMachiningPrice();//加工费单价
-                scrapPrice = (materialPrice.multiply(scrapAmount.multiply(ratio))).add(scrapAmount.multiply(machiningPrice));
-                if (CurrencyEnum.CURRENCY_USD.getCode().equals(smsScrapOrder.getCurrency())) {
-                    //如果是美元，还要*汇率
-                    scrapPrice = scrapPrice.multiply(rate);
-                }
-                smsScrapOrder.setSettleFee(scrapPrice);
                 //根据供应商和付款公司分组
                 //key:supplierCode+companyCode
                 key = smsScrapOrder.getSupplierCode() + smsScrapOrder.getCompanyCode();
@@ -1151,5 +1085,40 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         map.put("unCashPrice", unCashPrice);
         map.put("claimCashDetailList", claimCashDetailList);
         return map;
+    }
+
+    /**
+     * 内控确认和小微主确认
+     * @param id
+     * @param settleStatus
+     * @return
+     */
+    @Override
+    public R confirm(Long id, String settleStatus) {
+        if (id == null || StrUtil.isBlank(settleStatus)) {
+            return R.error("缺少参数！");
+        }
+        SmsMouthSettle smsMouthSettle=selectByPrimaryKey(id);
+        if(smsMouthSettle==null){
+            return R.error("数据不存在！");
+        }
+        if (!settleStatus.equals(smsMouthSettle.getSettleStatus())) {
+            return R.error("数据状态不允许此操作！");
+        }
+        if(MonthSettleStatusEnum.YD_SETTLE_STATUS_JSWC.getCode().equals(settleStatus)){
+            //内控确认
+            smsMouthSettle.setSettleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_NKQR.getCode());
+            updateByPrimaryKeySelective(smsMouthSettle);
+        }else if(MonthSettleStatusEnum.YD_SETTLE_STATUS_NKQR.getCode().equals(settleStatus)){
+            //小微主确认
+            smsMouthSettle.setSettleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_XWZQR.getCode());
+            updateByPrimaryKeySelective(smsMouthSettle);
+            //TODO：传KMS
+
+        }else{
+            return R.error("状态错误！");
+        }
+        return R.ok();
+
     }
 }

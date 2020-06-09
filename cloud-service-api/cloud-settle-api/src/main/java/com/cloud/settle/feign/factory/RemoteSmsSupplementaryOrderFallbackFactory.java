@@ -55,6 +55,16 @@ public class RemoteSmsSupplementaryOrderFallbackFactory implements FallbackFacto
             public R addSave(SmsSupplementaryOrder smsSupplementaryOrder) {
                 return R.error();
             }
+
+            /**
+             * 定时任务更新指定月份原材料价格到物耗表
+             * @param month
+             * @return
+             */
+            @Override
+            public R updatePriceEveryMonth(String month) {
+                return R.error();
+            }
         };
     }
 }

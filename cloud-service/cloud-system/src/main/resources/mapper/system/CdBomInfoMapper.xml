@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.cloud.system.mapper.CdBomMapper">
+<mapper namespace="com.cloud.system.mapper.CdBomInfoMapper">
 
-    <resultMap type="CdBom" id="CdBomResult">
+    <resultMap type="CdBomInfo" id="CdBomResult">
                     <result property="id" column="id"/>
                     <result property="productMaterialCode" column="product_material_code"/>
                     <result property="productMaterialDesc" column="product_material_desc"/>
@@ -19,7 +19,7 @@
                     <result property="purchaseGroup" column="purchase_group"/>
                     <result property="storagePoint" column="storage_point"/>
                     <result property="delFlag" column="del_flag"/>
-                    <result property="remarks" column="remarks"/>
+                    <result property="remark" column="remark"/>
                     <result property="createTime" column="create_time"/>
                     <result property="createBy" column="create_by"/>
                     <result property="updateTime" column="update_time"/>
@@ -27,7 +27,7 @@
                     </resultMap>
 
     <sql id="selectCdBomVo">
-        select id, product_material_code, product_material_desc, factory_code, raw_material_code, raw_material_desc, basic_num, bom_num, product_unit, component_unit, version, purchase_group, storage_point, del_flag, remarks, create_time, create_by, update_time, update_by from cd_bom
+        select id, product_material_code, product_material_desc, factory_code, raw_material_code, raw_material_desc, basic_num, bom_num, product_unit, component_unit, version, purchase_group, storage_point, del_flag, remark, create_time, create_by, update_time, update_by from cd_bom
     </sql>
 
 

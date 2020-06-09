@@ -138,4 +138,16 @@ public class CdFactoryLineInfoController extends BaseController {
     public CdFactoryLineInfo selectInfoByCodeLineCode(String produceLineCode) {
         return cdFactoryLineInfoService.selectInfoByCodeLineCode(produceLineCode);
     }
+    /**
+     * @Description: 获取SAP系统工厂线体关系数据，保存
+     * @Param: []
+     * @return: com.cloud.common.core.domain.R
+     * @Author: ltq
+     * @Date: 2020/6/8
+     */
+    @PostMapping("saveFactoryLineInfo")
+    @ApiOperation(value = "获取SAP系统工厂线体关系数据，保存", response = R.class)
+    public R saveFactoryLineInfo(){
+        return  cdFactoryLineInfoService.saveFactoryLineInfo();
+    }
 }

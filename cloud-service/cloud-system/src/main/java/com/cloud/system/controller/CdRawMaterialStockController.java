@@ -1,6 +1,9 @@
 package com.cloud.system.controller;
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.common.utils.StringUtils;
+import com.cloud.system.domain.entity.SysDictType;
 import io.swagger.annotations.*;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
@@ -58,6 +61,15 @@ public class CdRawMaterialStockController extends BaseController {
     public TableDataInfo list(@ApiIgnore CdRawMaterialStock cdRawMaterialStock) {
         Example example = new Example(CdRawMaterialStock.class);
         Example.Criteria criteria = example.createCriteria();
+        if (StringUtils.isNotBlank(cdRawMaterialStock.getFactoryCode())) {
+            criteria.andEqualTo("factoryCode",cdRawMaterialStock.getFactoryCode());
+        }
+        if (StringUtils.isNotBlank(cdRawMaterialStock.getRawMaterialCode())) {
+            criteria.andEqualTo("rawMaterialCode",cdRawMaterialStock.getRawMaterialCode());
+        }
+        if (StringUtils.isNotBlank(cdRawMaterialStock.getStoragePoint())) {
+            criteria.andEqualTo("storagePoint",cdRawMaterialStock.getStoragePoint());
+        }
         startPage();
         List<CdRawMaterialStock> cdRawMaterialStockList = cdRawMaterialStockService.selectByExample(example);
         return getDataTable(cdRawMaterialStockList);
@@ -94,6 +106,26 @@ public class CdRawMaterialStockController extends BaseController {
     @ApiParam(name = "ids", value = "需删除数据的id")
     public R remove(@RequestBody String ids) {
         return toAjax(cdRawMaterialStockService.deleteByIds(ids));
+    }
+
+    /**
+     * @Description: 导出原材料库存报表
+     * @Param: [cdRawMaterialStock]
+     * @return: com.cloud.common.core.domain.R
+     * @Author: ltq
+     * @Date: 2020/6/9
+     */
+    @OperLog(title = "导出原材料库存报表", businessType = BusinessType.EXPORT)
+    @HasPermissions("monitor:operlog:export")
+    @PostMapping("/exportRawMaterial")
+    @ApiOperation(value = "导出原材料库存报表", response = CdRawMaterialStock.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "rawMaterialCode", value = "原材料物料号", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "factoryCode", value = "生产工厂", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "storagePoint", value = "仓储点", required = false,paramType = "query", dataType = "String")
+    })
+    public R exportRawMaterialExcel(@ApiIgnore CdRawMaterialStock cdRawMaterialStock){
+        return cdRawMaterialStockService.exportRawMaterialExcel(cdRawMaterialStock);
     }
 
 }

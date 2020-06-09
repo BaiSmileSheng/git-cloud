@@ -1,5 +1,6 @@
 package com.cloud.system.controller;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 成品销售价格  提供者
@@ -67,13 +69,16 @@ public class CdSapSalePriceController extends BaseController {
      * @param endDate
      * @return List<CdSapSalePrice>
      */
-    @GetMapping("findByMaterialCode")
-    public List<CdSapSalePrice> findByMaterialCode(String materialCode, String beginDate, String endDate){
+    @GetMapping("findByMaterialCodeAndOraganization")
+    public List<CdSapSalePrice> findByMaterialCodeAndOraganization(String materialCode,String oraganization, String beginDate, String endDate){
         //查询CdMaterialPriceInfo
         Example example = new Example(CdSapSalePrice.class);
         Example.Criteria criteria = example.createCriteria();
         if (StrUtil.isNotBlank(materialCode)) {
             criteria.andEqualTo("materialCode", materialCode);
+        }
+        if (StrUtil.isNotBlank(oraganization)) {
+            criteria.andEqualTo("marketingOrganization", oraganization);
         }
         if (StrUtil.isNotBlank(beginDate)) {
             criteria.andLessThanOrEqualTo("beginDate", beginDate);
@@ -118,4 +123,17 @@ public class CdSapSalePriceController extends BaseController {
         return toAjax(cdSapSalePriceService.deleteByIds(ids));
     }
 
+
+    /**
+     * 根据专用号和销售组织分组查询
+     * @param materialCodes
+     * @param beginDate
+     * @param endDate
+     * @return Map<materialCode+organization,CdMaterialPriceInfo>
+     */
+    @PostMapping("selectPriceByInMaterialCodeAndDate")
+    public Map<String, CdSapSalePrice> selectPriceByInMaterialCodeAndDate(String materialCodes, String beginDate, String endDate) {
+        List<String> materialCodeList= CollectionUtil.newArrayList(materialCodes.split(","));
+        return cdSapSalePriceService.selectPriceByInMaterialCodeAndDate(materialCodeList,beginDate,endDate);
+    }
 }

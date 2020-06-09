@@ -25,12 +25,12 @@ public interface ISmsSettleInfoService extends BaseService<SmsSettleInfo> {
      * 根据供应商编码、付款公司、订单状态、月份（基本开始日期）更新数据
      * @param updated
      * @param supplierCode
-     * @param componyCode
+     * @param companyCode
      * @param orderStatus
      * @param month
      * @return
      */
-	int updateBySupplierCodeAndComponyCodeAndOrderStatusAndMonth(SmsSettleInfo updated,String supplierCode,String componyCode,String orderStatus,String month);
+	int updateBySupplierCodeAndCompanyCodeAndOrderStatusAndMonth(SmsSettleInfo updated,String supplierCode,String companyCode,String orderStatus,String month);
 
     /**
      * 根据供应商和付款公司分组，计算加工费

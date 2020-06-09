@@ -3,19 +3,17 @@ package com.cloud.activiti.service.impl;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.consts.ActivitiConstant;
+import com.cloud.activiti.consts.ActivitiProTitleConstants;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.service.IActSmsScrapOrderService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
-import com.cloud.activiti.consts.ActivitiProTitleConstants;
 import com.cloud.common.core.domain.R;
-import com.cloud.order.feign.RemoteProductionOrderService;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
 import com.cloud.settle.enums.ScrapOrderStatusEnum;
 import com.cloud.settle.feign.RemoteSmsScrapOrderService;
 import com.cloud.system.domain.entity.SysUser;
-import com.cloud.system.feign.RemoteCdMaterialPriceInfoService;
 import com.cloud.system.feign.RemoteUserService;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
@@ -37,10 +35,6 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
     private RemoteSmsScrapOrderService remoteSmsScrapOrderService;
     @Autowired
     private IActTaskService actTaskService;
-    @Autowired
-    private RemoteCdMaterialPriceInfoService remoteCdMaterialPriceInfoService;
-    @Autowired
-    private RemoteProductionOrderService remoteProductionOrderService;
 
 
     /**

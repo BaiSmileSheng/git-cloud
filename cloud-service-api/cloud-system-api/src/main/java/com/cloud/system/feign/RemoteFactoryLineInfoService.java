@@ -39,4 +39,10 @@ public interface RemoteFactoryLineInfoService {
      */
     @PostMapping("factoryLine/selectInfoByCodeLineCode")
     CdFactoryLineInfo selectInfoByCodeLineCode(@RequestParam(value = "produceLineCode") String produceLineCode);
+    /**
+     * 定时任务获取工厂线体关系数据，并保存
+     * @return R
+     */
+    @PostMapping("factoryLine/saveFactoryLineInfo")
+    R saveFactoryLineInfo();
 }

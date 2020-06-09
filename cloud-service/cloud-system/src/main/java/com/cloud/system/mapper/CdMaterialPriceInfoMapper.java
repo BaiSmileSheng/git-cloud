@@ -15,7 +15,14 @@ import java.util.Map;
  * @date 2020-05-26
  */
 public interface CdMaterialPriceInfoMapper extends BaseMapper<CdMaterialPriceInfo> {
-    @MapKey("materialCode")
+    /**
+     * 根据物料号和采购组织分组查询
+     * @param materialCodes
+     * @param beginDate
+     * @param endDate
+     * @return
+     */
+    @MapKey("mapKey")
     Map<String, CdMaterialPriceInfo> selectPriceByInMaterialCodeAndDate(@Param(value = "materialCodes") List<String> materialCodes,
                                                                @Param(value = "beginDate") String beginDate,
                                                                @Param(value = "endDate") String endDate);
