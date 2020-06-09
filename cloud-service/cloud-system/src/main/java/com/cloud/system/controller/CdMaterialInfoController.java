@@ -1,20 +1,19 @@
 package com.cloud.system.controller;
+import com.cloud.common.core.controller.BaseController;
+import com.cloud.common.core.domain.R;
+import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
-import io.swagger.annotations.*;
-import tk.mybatis.mapper.entity.Example;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.cloud.common.core.domain.R;
-import com.cloud.common.core.controller.BaseController;
 import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.service.ICdMaterialInfoService;
-import com.cloud.common.core.page.TableDataInfo;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import tk.mybatis.mapper.entity.Example;
+
 import java.util.List;
 /**
  * 物料信息  提供者
@@ -30,10 +29,10 @@ public class CdMaterialInfoController extends BaseController {
     private ICdMaterialInfoService cdMaterialInfoService;
 
     /**
-     * 查询物料信息 
+     * 查询物料信息
      */
     @GetMapping("get")
-    @ApiOperation(value = "根据id查询物料信息 ", response = CdMaterialInfo.class)
+    @ApiOperation(value = "根据id查询物料信息", response = CdMaterialInfo.class)
     public CdMaterialInfo get(Long id) {
         return cdMaterialInfoService.selectByPrimaryKey(id);
 
@@ -60,7 +59,7 @@ public class CdMaterialInfoController extends BaseController {
 
 
     /**
-     * 新增保存物料信息 
+     * 新增保存物料信息
      */
     @PostMapping("save")
     @OperLog(title = "新增保存物料信息 ", businessType = BusinessType.INSERT)
@@ -71,7 +70,7 @@ public class CdMaterialInfoController extends BaseController {
     }
 
     /**
-     * 修改保存物料信息 
+     * 修改保存物料信息
      */
     @PostMapping("update")
     @OperLog(title = "修改保存物料信息 ", businessType = BusinessType.UPDATE)
@@ -81,7 +80,7 @@ public class CdMaterialInfoController extends BaseController {
     }
 
     /**
-     * 删除物料信息 
+     * 删除物料信息
      */
     @PostMapping("remove")
     @OperLog(title = "删除物料信息 ", businessType = BusinessType.DELETE)
@@ -98,5 +97,19 @@ public class CdMaterialInfoController extends BaseController {
     @OperLog(title = "保存接口获取的物料信息 ", businessType = BusinessType.INSERT)
     @ApiOperation(value = "保存接口获取的物料信息 ", response = R.class)
     public R saveMaterialInfo(){return cdMaterialInfoService.saveMaterialInfo();}
+
+    /**
+     * 根据物料号查询物料信息
+     * @param materialCode
+     * @return
+     */
+    @GetMapping("getByMaterialCode")
+    public CdMaterialInfo getByMaterialCode(String materialCode) {
+        Example example = new Example(CdMaterialInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("materialCode", materialCode);
+        return cdMaterialInfoService.findByExampleOne(example);
+    }
+
 
 }

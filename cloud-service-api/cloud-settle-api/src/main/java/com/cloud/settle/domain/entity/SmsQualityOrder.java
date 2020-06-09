@@ -10,12 +10,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tk.mybatis.mapper.annotation.KeySql;
 
 import javax.persistence.Id;
 import javax.persistence.Transient;
-
-import tk.mybatis.mapper.annotation.KeySql;
-
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -187,6 +185,13 @@ public class SmsQualityOrder extends BaseEntity {
     @ExcelProperty(value = "兑现金额")
     @ApiModelProperty(value = "兑现金额")
     private BigDecimal cashAmount;
+
+    /**
+     * 未兑现金额
+     */
+    @ExcelProperty(value = "未兑现金额")
+    @ApiModelProperty(value = "未兑现金额")
+    private BigDecimal uncashAmount;
 
     /**
      * 删除状态 0：有效，1：删除

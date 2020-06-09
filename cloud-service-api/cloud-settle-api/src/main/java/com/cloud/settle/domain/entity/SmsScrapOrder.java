@@ -125,6 +125,13 @@ public class SmsScrapOrder extends BaseEntity {
     private Integer scrapAmount;
 
     /**
+     * 币种
+     */
+    @ExcelProperty(value = "币种")
+    @ApiModelProperty(value = "币种")
+    private String currency;
+
+    /**
      * 报废单价
      */
     @ExcelProperty(value = "报废单价")
