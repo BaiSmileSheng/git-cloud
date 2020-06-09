@@ -1,5 +1,5 @@
 
-package com.cloud.system.domain.webServicePO;
+package com.cloud.settle.domain.webServicePO;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

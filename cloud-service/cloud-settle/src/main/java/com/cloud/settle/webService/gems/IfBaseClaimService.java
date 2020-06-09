@@ -1,8 +1,8 @@
 
-package com.cloud.system.webService.gems;
+package com.cloud.settle.webService.gems;
 
-import com.cloud.system.domain.webServicePO.BaseClaimResponse;
-import com.cloud.system.domain.webServicePO.BaseMultiItemClaimSaveRequest;
+import com.cloud.settle.domain.webServicePO.BaseClaimResponse;
+import com.cloud.settle.domain.webServicePO.BaseMultiItemClaimSaveRequest;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;

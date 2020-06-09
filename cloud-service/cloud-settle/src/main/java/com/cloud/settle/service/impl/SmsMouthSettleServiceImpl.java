@@ -75,159 +75,159 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
     @Override
     @Transactional
     public R countMonthSettle() {
-        log.info("----------------------------月度结算定时任务开始------------------------------");
-        Date date = DateUtil.date();//当前时间
-        String lastMonth = DateUtil.format(DateUtil.lastMonth(), "yyyyMM");//计算月份：上个月
-        //查询上个月汇率
-        R rRate = remoteCdMouthRateService.findRateByYearMouth(lastMonth);
-        if (!rRate.isSuccess()) {
-            throw new BusinessException(StrUtil.format("{}月份未维护费率", lastMonth));
-        }
-        BigDecimal rate = new BigDecimal(rRate.get("data").toString());//汇率
-        //将加工费及索赔、历史按照供应商和付款公司分组
-        /**-------------------物耗索赔  分组开始----------------------------------**/
-        //物耗及历史数据分组map
-        Map<String, List<SmsSupplementaryOrder>> mapSupplement = supplementGroup(lastMonth, rate);
-        Map<String, List<SmsSupplementaryOrder>> mapSupplementLS = supplementLSGroup();
-        /**-------------------物耗索赔  分组结束----------------------------------**/
-
-        /**-------------------报废索赔  分组开始----------------------------------**/
-        //报废及历史数据分组map
-        Map<String, List<SmsScrapOrder>> mapScrap = scrapGroup(lastMonth, rate);
-        Map<String, List<SmsScrapOrder>> mapScrapLS = scrapLSGroup();
-        /**-------------------报废索赔  分组结束----------------------------------**/
-
-        /**-------------------质量开始----------------------------------**/
-        //质量及历史数据分组map
-        Map<String, List<SmsQualityOrder>> mapQuality = qualityGroup(lastMonth);
-        Map<String, List<SmsQualityOrder>> mapQualityLS = qualityLSGroup();
-        /**-------------------质量结束----------------------------------**/
-
-        /**-------------------延期分组开始----------------------------------**/
-        //延期及历史数据分组map
-        Map<String, List<SmsDelaysDelivery>> mapDelays = delayGroup(lastMonth);
-        Map<String, List<SmsDelaysDelivery>> mapDelaysLS = delayLSGroup();
-        /**-------------------延期分组结束----------------------------------**/
-
-        /**-------------------其他分组开始----------------------------------**/
-        //其他及历史数据分组map
-        Map<String, List<SmsClaimOther>> mapOther = otherGroup(lastMonth);
-        Map<String, List<SmsClaimOther>> mapOtherLS = otherLSGroup();
-        /**-------------------其他分组结束----------------------------------**/
-
-        /**-------------------加工费分组开始----------------------------------**/
-        //结算分组map
-        Map<String, List<SmsSettleInfo>> mapSettle = settleInfoGroup(lastMonth);
-        /**-------------------加工费分组结束----------------------------------**/
-
-
-        /**----------------------------------------循环分组后的加工费进行计算了-----------------------------------**/
-        mapSettle.forEach((keyCode, settleList) -> {
-            log.info(StrUtil.format("(月度结算定时任务){}开始计算了------------------", keyCode));
-            //索赔兑换明细list 每次有兑现操作都需要插入一条  循环内批量插入用
-            List<SmsClaimCashDetail> claimCashDetailList = new ArrayList<>();
-            //结算单号
-            String seq = remoteSequeceService.selectSeq("month_settle_seq", 4);
-            StringBuffer monthSettleNo = new StringBuffer();
-            //YDJS+年月日+4位顺序号
-            monthSettleNo.append("YDJS").append(DateUtils.dateTime()).append(seq);
-            log.info(StrUtil.format("(月度结算定时任务)结算单号：{}------------------", monthSettleNo.toString()));
-            BigDecimal settlePrice = BigDecimal.ZERO;//加工费(分组总额-计算)
-            BigDecimal settlePriceTotal = BigDecimal.ZERO;//加工费(分组总额-存储)
-            BigDecimal claimPrice = BigDecimal.ZERO;//应扣款(分组总额)
-            BigDecimal unCashPrice = BigDecimal.ZERO;//未兑现金额(分组总额)
-            //加工费循环相加得到settlePrice
-            for (SmsSettleInfo settle : settleList) {
-                settle.setSettleNo(monthSettleNo.toString());//结算单号
-                settle.setOrderStatus(SettleInfoOrderStatusEnum.ORDER_STATUS_12.getCode());//修改状态为已结算
-                settlePrice = settlePrice.add(settle.getSettlePrice());
-            }
-            settlePriceTotal = settlePrice;
-            log.info(StrUtil.format("(月度结算定时任务)加工费：{}------------------", settlePrice));
-
-            Map<String, Object> map;
-            /**-----------------------------本月计算---------------------------**/
-            //物耗索赔
-            map = supplementCompute(mapSupplement, keyCode, monthSettleNo.toString(), settlePrice, claimPrice, lastMonth, claimCashDetailList);
-
-            //报废索赔
-            map = scrapCompute(mapScrap, keyCode, monthSettleNo.toString(), (BigDecimal) map.get("settlePrice"),
-                    (BigDecimal) map.get("claimPrice"), lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
-
-            //质量索赔
-            map = qualityCompute(mapQuality, keyCode, monthSettleNo.toString(), (BigDecimal) map.get("settlePrice"),
-                    (BigDecimal) map.get("claimPrice"), lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
-
-            //延期索赔
-            map = delayCompute(mapDelays, keyCode, monthSettleNo.toString(), (BigDecimal) map.get("settlePrice"),
-                    (BigDecimal) map.get("claimPrice"), lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
-
-            //其他索赔
-            map = otherCompute(mapOther, keyCode, monthSettleNo.toString(), (BigDecimal) map.get("settlePrice"),
-                    (BigDecimal) map.get("claimPrice"), lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
-
-            claimPrice = (BigDecimal) map.get("claimPrice");
-            /**-------------------------历史计算-------------------------**/
-            //物耗索赔历史
-            map = supplementLSCompute(mapSupplementLS, keyCode, monthSettleNo.toString(),
-                    (BigDecimal) map.get("settlePrice"), unCashPrice, lastMonth, claimCashDetailList);
-
-            //报废索赔历史
-            map = scrapLSCompute(mapScrapLS, keyCode, monthSettleNo.toString(), (BigDecimal) map.get("settlePrice"),
-                    (BigDecimal) map.get("unCashPrice"), lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
-
-            //质量索赔历史
-            map = qualityLSCompute(mapQualityLS, keyCode, monthSettleNo.toString(), (BigDecimal) map.get("settlePrice"),
-                    (BigDecimal) map.get("unCashPrice"), lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
-
-            //延期索赔历史
-            map = delayLSCompute(mapDelaysLS, keyCode, monthSettleNo.toString(), (BigDecimal) map.get("settlePrice"),
-                    (BigDecimal) map.get("unCashPrice"), lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
-
-            //其他索赔历史
-            map = otherLSCompute(mapOtherLS, keyCode, monthSettleNo.toString(), (BigDecimal) map.get("settlePrice"),
-                    (BigDecimal) map.get("unCashPrice"), lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
-
-
-            settlePrice = (BigDecimal) map.get("settlePrice");
-            unCashPrice = (BigDecimal) map.get("unCashPrice");
-
-
-            //如果加工费大于等于（应扣款+历史未兑现）：本月兑现金额=应扣款+历史未兑现 不含税金额=加工费-应扣款-历史未兑现
-            //如果加工费小于（应扣款+历史未兑现）：本月兑现金额=加工费 不含税金额=0
-            BigDecimal noCashAmount = unCashPrice;//历史未兑现金额
-            BigDecimal cashAmount;//本月兑现金额
-            BigDecimal excludingFee = settlePriceTotal.subtract(claimPrice).subtract(noCashAmount);//不含税金额
-            if (excludingFee.compareTo(BigDecimal.ZERO) > 0) {
-                cashAmount = claimPrice.add(noCashAmount);
-            } else {
-                cashAmount = settlePrice;
-                excludingFee = BigDecimal.ZERO;
-            }
-
-            //每次循环增加一条月度结算
-            SmsMouthSettle smsMouthSettle = new SmsMouthSettle().builder().settleNo(monthSettleNo.toString()).dataMoth(lastMonth)
-                    .supplierCode(settleList.get(0).getSupplierCode()).supplierName(settleList.get(0).getSupplierName())
-                    .companyCode(settleList.get(0).getCompanyCode()).machiningAmount(settlePriceTotal)
-                    .claimAmount(claimPrice).noCashAmount(noCashAmount)
-                    .cashAmount(cashAmount).excludingFee(excludingFee)
-                    .includeTaxeFee(excludingFee.multiply(BigDecimal.valueOf(1.13))).build();
-            smsMouthSettle.setDelFlag("0");
-            smsMouthSettle.setCreateBy("定时任务");
-            smsMouthSettle.setCreateTime(date);
-            smsMouthSettleMapper.insert(smsMouthSettle);
-
-            //更新加工费结算
-            smsSettleInfoService.updateBatchByPrimaryKeySelective(settleList);
-
-            //增加索赔兑换明细
-            if (map.get("claimCashDetailList") != null) {
-                claimCashDetailList = (List<SmsClaimCashDetail>) map.get("claimCashDetailList");
-                if (claimCashDetailList.size() > 0) {
-                    smsClaimCashDetailService.insertList(claimCashDetailList);
-                }
-            }
-        });
+//        log.info("----------------------------月度结算定时任务开始------------------------------");
+//        Date date = DateUtil.date();//当前时间
+//        String lastMonth = DateUtil.format(DateUtil.lastMonth(), "yyyyMM");//计算月份：上个月
+//        //查询上个月汇率
+//        R rRate = remoteCdMouthRateService.findRateByYearMouth(lastMonth);
+//        if (!rRate.isSuccess()) {
+//            throw new BusinessException(StrUtil.format("{}月份未维护费率", lastMonth));
+//        }
+//        BigDecimal rate = new BigDecimal(rRate.get("data").toString());//汇率
+//        //将加工费及索赔、历史按照供应商和付款公司分组
+//        /**-------------------物耗索赔  分组开始----------------------------------**/
+//        //物耗及历史数据分组map
+//        Map<String, List<SmsSupplementaryOrder>> mapSupplement = supplementGroup(lastMonth, rate);
+//        Map<String, List<SmsSupplementaryOrder>> mapSupplementLS = supplementLSGroup();
+//        /**-------------------物耗索赔  分组结束----------------------------------**/
+//
+//        /**-------------------报废索赔  分组开始----------------------------------**/
+//        //报废及历史数据分组map
+//        Map<String, List<SmsScrapOrder>> mapScrap = scrapGroup(lastMonth, rate);
+//        Map<String, List<SmsScrapOrder>> mapScrapLS = scrapLSGroup();
+//        /**-------------------报废索赔  分组结束----------------------------------**/
+//
+//        /**-------------------质量开始----------------------------------**/
+//        //质量及历史数据分组map
+//        Map<String, List<SmsQualityOrder>> mapQuality = qualityGroup(lastMonth);
+//        Map<String, List<SmsQualityOrder>> mapQualityLS = qualityLSGroup();
+//        /**-------------------质量结束----------------------------------**/
+//
+//        /**-------------------延期分组开始----------------------------------**/
+//        //延期及历史数据分组map
+//        Map<String, List<SmsDelaysDelivery>> mapDelays = delayGroup(lastMonth);
+//        Map<String, List<SmsDelaysDelivery>> mapDelaysLS = delayLSGroup();
+//        /**-------------------延期分组结束----------------------------------**/
+//
+//        /**-------------------其他分组开始----------------------------------**/
+//        //其他及历史数据分组map
+//        Map<String, List<SmsClaimOther>> mapOther = otherGroup(lastMonth);
+//        Map<String, List<SmsClaimOther>> mapOtherLS = otherLSGroup();
+//        /**-------------------其他分组结束----------------------------------**/
+//
+//        /**-------------------加工费分组开始----------------------------------**/
+//        //结算分组map
+//        Map<String, List<SmsSettleInfo>> mapSettle = settleInfoGroup(lastMonth);
+//        /**-------------------加工费分组结束----------------------------------**/
+//
+//
+//        /**----------------------------------------循环分组后的加工费进行计算了-----------------------------------**/
+//        mapSettle.forEach((keyCode, settleList) -> {
+//            log.info(StrUtil.format("(月度结算定时任务){}开始计算了------------------", keyCode));
+//            //索赔兑换明细list 每次有兑现操作都需要插入一条  循环内批量插入用
+//            List<SmsClaimCashDetail> claimCashDetailList = new ArrayList<>();
+//            //结算单号
+//            String seq = remoteSequeceService.selectSeq("month_settle_seq", 4);
+//            StringBuffer monthSettleNo = new StringBuffer();
+//            //YDJS+年月日+4位顺序号
+//            monthSettleNo.append("YDJS").append(DateUtils.dateTime()).append(seq);
+//            log.info(StrUtil.format("(月度结算定时任务)结算单号：{}------------------", monthSettleNo.toString()));
+//            BigDecimal settlePrice = BigDecimal.ZERO;//加工费(分组总额-计算)
+//            BigDecimal settlePriceTotal = BigDecimal.ZERO;//加工费(分组总额-存储)
+//            BigDecimal claimPrice = BigDecimal.ZERO;//应扣款(分组总额)
+//            BigDecimal unCashPrice = BigDecimal.ZERO;//未兑现金额(分组总额)
+//            //加工费循环相加得到settlePrice
+//            for (SmsSettleInfo settle : settleList) {
+//                settle.setSettleNo(monthSettleNo.toString());//结算单号
+//                settle.setOrderStatus(SettleInfoOrderStatusEnum.ORDER_STATUS_12.getCode());//修改状态为已结算
+//                settlePrice = settlePrice.add(settle.getSettlePrice());
+//            }
+//            settlePriceTotal = settlePrice;
+//            log.info(StrUtil.format("(月度结算定时任务)加工费：{}------------------", settlePrice));
+//
+//            Map<String, Object> map;
+//            /**-----------------------------本月计算---------------------------**/
+//            //物耗索赔
+//            map = supplementCompute(mapSupplement, keyCode, monthSettleNo.toString(), settlePrice, claimPrice, lastMonth, claimCashDetailList);
+//
+//            //报废索赔
+//            map = scrapCompute(mapScrap, keyCode, monthSettleNo.toString(), (BigDecimal) map.get("settlePrice"),
+//                    (BigDecimal) map.get("claimPrice"), lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
+//
+//            //质量索赔
+//            map = qualityCompute(mapQuality, keyCode, monthSettleNo.toString(), (BigDecimal) map.get("settlePrice"),
+//                    (BigDecimal) map.get("claimPrice"), lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
+//
+//            //延期索赔
+//            map = delayCompute(mapDelays, keyCode, monthSettleNo.toString(), (BigDecimal) map.get("settlePrice"),
+//                    (BigDecimal) map.get("claimPrice"), lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
+//
+//            //其他索赔
+//            map = otherCompute(mapOther, keyCode, monthSettleNo.toString(), (BigDecimal) map.get("settlePrice"),
+//                    (BigDecimal) map.get("claimPrice"), lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
+//
+//            claimPrice = (BigDecimal) map.get("claimPrice");
+//            /**-------------------------历史计算-------------------------**/
+//            //物耗索赔历史
+//            map = supplementLSCompute(mapSupplementLS, keyCode, monthSettleNo.toString(),
+//                    (BigDecimal) map.get("settlePrice"), unCashPrice, lastMonth, claimCashDetailList);
+//
+//            //报废索赔历史
+//            map = scrapLSCompute(mapScrapLS, keyCode, monthSettleNo.toString(), (BigDecimal) map.get("settlePrice"),
+//                    (BigDecimal) map.get("unCashPrice"), lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
+//
+//            //质量索赔历史
+//            map = qualityLSCompute(mapQualityLS, keyCode, monthSettleNo.toString(), (BigDecimal) map.get("settlePrice"),
+//                    (BigDecimal) map.get("unCashPrice"), lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
+//
+//            //延期索赔历史
+//            map = delayLSCompute(mapDelaysLS, keyCode, monthSettleNo.toString(), (BigDecimal) map.get("settlePrice"),
+//                    (BigDecimal) map.get("unCashPrice"), lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
+//
+//            //其他索赔历史
+//            map = otherLSCompute(mapOtherLS, keyCode, monthSettleNo.toString(), (BigDecimal) map.get("settlePrice"),
+//                    (BigDecimal) map.get("unCashPrice"), lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
+//
+//
+//            settlePrice = (BigDecimal) map.get("settlePrice");
+//            unCashPrice = (BigDecimal) map.get("unCashPrice");
+//
+//
+//            //如果加工费大于等于（应扣款+历史未兑现）：本月兑现金额=应扣款+历史未兑现 不含税金额=加工费-应扣款-历史未兑现
+//            //如果加工费小于（应扣款+历史未兑现）：本月兑现金额=加工费 不含税金额=0
+//            BigDecimal noCashAmount = unCashPrice;//历史未兑现金额
+//            BigDecimal cashAmount;//本月兑现金额
+//            BigDecimal excludingFee = settlePriceTotal.subtract(claimPrice).subtract(noCashAmount);//不含税金额
+//            if (excludingFee.compareTo(BigDecimal.ZERO) > 0) {
+//                cashAmount = claimPrice.add(noCashAmount);
+//            } else {
+//                cashAmount = settlePrice;
+//                excludingFee = BigDecimal.ZERO;
+//            }
+//
+//            //每次循环增加一条月度结算
+//            SmsMouthSettle smsMouthSettle = new SmsMouthSettle().builder().settleNo(monthSettleNo.toString()).dataMoth(lastMonth)
+//                    .supplierCode(settleList.get(0).getSupplierCode()).supplierName(settleList.get(0).getSupplierName())
+//                    .companyCode(settleList.get(0).getCompanyCode()).machiningAmount(settlePriceTotal)
+//                    .claimAmount(claimPrice).noCashAmount(noCashAmount)
+//                    .cashAmount(cashAmount).excludingFee(excludingFee)
+//                    .includeTaxeFee(excludingFee.multiply(BigDecimal.valueOf(1.13))).build();
+//            smsMouthSettle.setDelFlag("0");
+//            smsMouthSettle.setCreateBy("定时任务");
+//            smsMouthSettle.setCreateTime(date);
+//            smsMouthSettleMapper.insert(smsMouthSettle);
+//
+//            //更新加工费结算
+//            smsSettleInfoService.updateBatchByPrimaryKeySelective(settleList);
+//
+//            //增加索赔兑换明细
+//            if (map.get("claimCashDetailList") != null) {
+//                claimCashDetailList = (List<SmsClaimCashDetail>) map.get("claimCashDetailList");
+//                if (claimCashDetailList.size() > 0) {
+//                    smsClaimCashDetailService.insertList(claimCashDetailList);
+//                }
+//            }
+//        });
         return R.ok();
     }
 
@@ -269,59 +269,59 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
     Map<String, List<SmsSupplementaryOrder>> supplementGroup(String lastMonth, BigDecimal rate) {
         String key;
         Map<String, List<SmsSupplementaryOrder>> mapSupplement = new ConcurrentHashMap<>();
-        //物耗索赔系数
-        CdSettleRatio cdSettleRatioWH = remoteSettleRatioService.selectByClaimType(SettleRatioEnum.SPLX_WH.getCode());
-        if (cdSettleRatioWH == null) {
-            log.error("物耗索赔系数未维护！");
-            throw new BusinessException("物耗索赔系数未维护！");
-        }
-        //查询上个月、待结算的物耗申请中的物料号  用途是查询SAP成本价 更新到物耗表
-        List<String> materialCodeList = smsSupplementaryOrderMapper.selectMaterialByMonthAndStatus(lastMonth, CollUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode()));
-        Map<String, CdMaterialPriceInfo> mapMaterialPrice = new ConcurrentHashMap<>();
-        if (materialCodeList != null) {
-            log.info(StrUtil.format("(月度结算定时任务)物耗申请需要更新成本价格的物料号:{}", materialCodeList.toString()));
-            String now = DateUtil.now();
-            String materialCodeStr = StrUtil.join(",", materialCodeList);
-            //根据前面查出的物料号查询SAP成本价 map key:物料号  value:CdMaterialPriceInfo
-            mapMaterialPrice = remoteCdMaterialPriceInfoService.selectPriceByInMaterialCodeAndDate(materialCodeStr, now, now);
-        }
-        //取得计算月份、待结算的物耗申请数据
-        List<SmsSupplementaryOrder> smsSupplementaryOrderList = smsSupplementaryOrderService.selectByMonthAndStatus(lastMonth, CollUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode()));
-        //循环物耗，更新成本价格，计算索赔金额
-        if (smsSupplementaryOrderList != null) {
-            for (SmsSupplementaryOrder smsSupplementaryOrder : smsSupplementaryOrderList) {
-                CdMaterialPriceInfo cdMaterialPriceInfo = mapMaterialPrice.get(smsSupplementaryOrder.getRawMaterialCode());
-                if (cdMaterialPriceInfo == null) {
-                    //如果没有找到SAP价格，则更新备注
-                    log.info(StrUtil.format("(月度结算定时任务)SAP价格未同步的物料号:{}", smsSupplementaryOrder.getRawMaterialCode()));
-                    smsSupplementaryOrder.setRemark("SAP价格未同步！");
-                    smsSupplementaryOrderService.updateByPrimaryKeySelective(smsSupplementaryOrder);
-                    continue;
-                }
-                smsSupplementaryOrder.setStuffPrice(cdMaterialPriceInfo.getNetWorth());//单价  取得materialPrice表的净价值
-                smsSupplementaryOrder.setStuffUnit(cdMaterialPriceInfo.getUnit());
-                smsSupplementaryOrder.setCurrency(cdMaterialPriceInfo.getCurrency());//币种
-                //索赔金额=物耗数量* 原材料单价*物耗申请系数
-                BigDecimal spPrice;//索赔金额
-                BigDecimal stuffAmount = new BigDecimal(smsSupplementaryOrder.getStuffAmount());//物耗数量
-                BigDecimal stuffPrice = smsSupplementaryOrder.getStuffPrice();//原材料单价
-                BigDecimal ratio = cdSettleRatioWH.getRatio();//物耗索赔系数
-                spPrice = stuffAmount.multiply(stuffPrice.multiply(ratio));
-                if (CurrencyEnum.CURRENCY_USD.getCode().equals(smsSupplementaryOrder.getCurrency())) {
-                    //如果是美元，还要*汇率
-                    spPrice = spPrice.multiply(rate);
-                    smsSupplementaryOrder.setRate(rate);
-                }
-                smsSupplementaryOrder.setSettleFee(spPrice);
-
-                //下面开始分组：根据供应商和付款公司分组
-                //key:supplierCode+companyCode
-                key = smsSupplementaryOrder.getSupplierCode() + smsSupplementaryOrder.getCompanyCode();
-                List<SmsSupplementaryOrder> supplementList = mapSupplement.getOrDefault(key, new ArrayList<>());
-                supplementList.add(smsSupplementaryOrder);
-                mapSupplement.put(key, supplementList);
-            }
-        }
+//        //物耗索赔系数
+//        CdSettleRatio cdSettleRatioWH = remoteSettleRatioService.selectByClaimType(SettleRatioEnum.SPLX_WH.getCode());
+//        if (cdSettleRatioWH == null) {
+//            log.error("物耗索赔系数未维护！");
+//            throw new BusinessException("物耗索赔系数未维护！");
+//        }
+//        //查询上个月、待结算的物耗申请中的物料号  用途是查询SAP成本价 更新到物耗表
+//        List<String> materialCodeList = smsSupplementaryOrderMapper.selectMaterialByMonthAndStatus(lastMonth, CollUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode()));
+//        Map<String, CdMaterialPriceInfo> mapMaterialPrice = new ConcurrentHashMap<>();
+//        if (materialCodeList != null) {
+//            log.info(StrUtil.format("(月度结算定时任务)物耗申请需要更新成本价格的物料号:{}", materialCodeList.toString()));
+//            String now = DateUtil.now();
+//            String materialCodeStr = StrUtil.join(",", materialCodeList);
+//            //根据前面查出的物料号查询SAP成本价 map key:物料号  value:CdMaterialPriceInfo
+//            mapMaterialPrice = remoteCdMaterialPriceInfoService.selectPriceByInMaterialCodeAndDate(materialCodeStr, now, now);
+//        }
+//        //取得计算月份、待结算的物耗申请数据
+//        List<SmsSupplementaryOrder> smsSupplementaryOrderList = smsSupplementaryOrderService.selectByMonthAndStatus(lastMonth, CollUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode()));
+//        //循环物耗，更新成本价格，计算索赔金额
+//        if (smsSupplementaryOrderList != null) {
+//            for (SmsSupplementaryOrder smsSupplementaryOrder : smsSupplementaryOrderList) {
+//                CdMaterialPriceInfo cdMaterialPriceInfo = mapMaterialPrice.get(smsSupplementaryOrder.getRawMaterialCode());
+//                if (cdMaterialPriceInfo == null) {
+//                    //如果没有找到SAP价格，则更新备注
+//                    log.info(StrUtil.format("(月度结算定时任务)SAP价格未同步的物料号:{}", smsSupplementaryOrder.getRawMaterialCode()));
+//                    smsSupplementaryOrder.setRemark("SAP价格未同步！");
+//                    smsSupplementaryOrderService.updateByPrimaryKeySelective(smsSupplementaryOrder);
+//                    continue;
+//                }
+//                smsSupplementaryOrder.setStuffPrice(cdMaterialPriceInfo.getNetWorth());//单价  取得materialPrice表的净价值
+//                smsSupplementaryOrder.setStuffUnit(cdMaterialPriceInfo.getUnit());
+//                smsSupplementaryOrder.setCurrency(cdMaterialPriceInfo.getCurrency());//币种
+//                //索赔金额=物耗数量* 原材料单价*物耗申请系数
+//                BigDecimal spPrice;//索赔金额
+//                BigDecimal stuffAmount = new BigDecimal(smsSupplementaryOrder.getStuffAmount());//物耗数量
+//                BigDecimal stuffPrice = smsSupplementaryOrder.getStuffPrice();//原材料单价
+//                BigDecimal ratio = cdSettleRatioWH.getRatio();//物耗索赔系数
+//                spPrice = stuffAmount.multiply(stuffPrice.multiply(ratio));
+//                if (CurrencyEnum.CURRENCY_USD.getCode().equals(smsSupplementaryOrder.getCurrency())) {
+//                    //如果是美元，还要*汇率
+//                    spPrice = spPrice.multiply(rate);
+//                    smsSupplementaryOrder.setRate(rate);
+//                }
+//                smsSupplementaryOrder.setSettleFee(spPrice);
+//
+//                //下面开始分组：根据供应商和付款公司分组
+//                //key:supplierCode+companyCode
+//                key = smsSupplementaryOrder.getSupplierCode() + smsSupplementaryOrder.getCompanyCode();
+//                List<SmsSupplementaryOrder> supplementList = mapSupplement.getOrDefault(key, new ArrayList<>());
+//                supplementList.add(smsSupplementaryOrder);
+//                mapSupplement.put(key, supplementList);
+//            }
+//        }
         return mapSupplement;
     }
 
@@ -338,16 +338,16 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         List<String> statusSup = CollUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_WDX.getCode(), SupplementaryOrderStatusEnum.WH_ORDER_STATUS_BFDX.getCode());
         List<SmsSupplementaryOrder> smsSupplementaryOrderListLS = smsSupplementaryOrderService.selectByMonthAndStatus(null, statusSup);
         //循环物耗，计算索赔金额
-        if (smsSupplementaryOrderListLS != null) {
-            for (SmsSupplementaryOrder smsSupplementaryOrder : smsSupplementaryOrderListLS) {
-                //根据供应商和付款公司分组
-                //key:supplierCode+companyCode
-                key = smsSupplementaryOrder.getSupplierCode() + smsSupplementaryOrder.getCompanyCode();
-                List<SmsSupplementaryOrder> supplementList = mapSupplementLS.getOrDefault(key, new ArrayList<>());
-                supplementList.add(smsSupplementaryOrder);
-                mapSupplementLS.put(key, supplementList);
-            }
-        }
+//        if (smsSupplementaryOrderListLS != null) {
+//            for (SmsSupplementaryOrder smsSupplementaryOrder : smsSupplementaryOrderListLS) {
+//                //根据供应商和付款公司分组
+//                //key:supplierCode+companyCode
+//                key = smsSupplementaryOrder.getSupplierCode() + smsSupplementaryOrder.getCompanyCode();
+//                List<SmsSupplementaryOrder> supplementList = mapSupplementLS.getOrDefault(key, new ArrayList<>());
+//                supplementList.add(smsSupplementaryOrder);
+//                mapSupplementLS.put(key, supplementList);
+//            }
+//        }
         return mapSupplementLS;
     }
 
@@ -493,10 +493,10 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
                 BigDecimal ratio = cdSettleRatioBF.getRatio();//报废索赔系数
                 BigDecimal machiningPrice = smsScrapOrder.getMachiningPrice();//加工费单价
                 scrapPrice = (materialPrice.multiply(scrapAmount.multiply(ratio))).add(scrapAmount.multiply(machiningPrice));
-                if (CurrencyEnum.CURRENCY_USD.getCode().equals(smsScrapOrder.getCurrency())) {
-                    //如果是美元，还要*汇率
-                    scrapPrice = scrapPrice.multiply(rate);
-                }
+//                if (CurrencyEnum.CURRENCY_USD.getCode().equals(smsScrapOrder.getCurrency())) {
+//                    //如果是美元，还要*汇率
+//                    scrapPrice = scrapPrice.multiply(rate);
+//                }
                 smsScrapOrder.setSettleFee(scrapPrice);
                 //根据供应商和付款公司分组
                 //key:supplierCode+companyCode

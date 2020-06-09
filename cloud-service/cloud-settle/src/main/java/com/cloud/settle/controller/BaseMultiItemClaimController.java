@@ -1,14 +1,12 @@
-package com.cloud.system.controller;
+package com.cloud.settle.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.utils.DateUtils;
-import com.cloud.system.domain.webServicePO.BaseClaimResponse;
-import com.cloud.system.domain.webServicePO.BaseMultiItemClaimSaveRequest;
-import com.cloud.system.webService.gems.IfBaseClaimService;
+import com.cloud.settle.domain.webServicePO.BaseClaimResponse;
+import com.cloud.settle.domain.webServicePO.BaseMultiItemClaimSaveRequest;
+import com.cloud.settle.webService.gems.IfBaseClaimService;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;

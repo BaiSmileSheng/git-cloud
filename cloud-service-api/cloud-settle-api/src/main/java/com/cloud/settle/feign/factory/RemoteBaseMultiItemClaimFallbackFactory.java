@@ -1,8 +1,8 @@
-package com.cloud.system.feign.factory;
+package com.cloud.settle.feign.factory;
 
-import com.cloud.system.domain.webServicePO.BaseClaimResponse;
-import com.cloud.system.domain.webServicePO.BaseMultiItemClaimSaveRequest;
-import com.cloud.system.feign.RemoteBaseMultiItemClaimService;
+import com.cloud.settle.domain.webServicePO.BaseClaimResponse;
+import com.cloud.settle.domain.webServicePO.BaseMultiItemClaimSaveRequest;
+import com.cloud.settle.feign.RemoteBaseMultiItemClaimService;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

@@ -1,9 +1,9 @@
-package com.cloud.system.feign;
+package com.cloud.settle.feign;
 
 import com.cloud.common.constant.ServiceNameConstants;
-import com.cloud.system.domain.webServicePO.BaseClaimResponse;
-import com.cloud.system.domain.webServicePO.BaseMultiItemClaimSaveRequest;
-import com.cloud.system.feign.factory.RemoteBaseMultiItemClaimFallbackFactory;
+import com.cloud.settle.domain.webServicePO.BaseClaimResponse;
+import com.cloud.settle.domain.webServicePO.BaseMultiItemClaimSaveRequest;
+import com.cloud.settle.feign.factory.RemoteBaseMultiItemClaimFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @author Lihongxia
  * @date 2020-06-08
  */
-@FeignClient(name = ServiceNameConstants.SYSTEM_SERVICE, fallbackFactory = RemoteBaseMultiItemClaimFallbackFactory.class)
+@FeignClient(name = ServiceNameConstants.SETTLE_SERVICE, fallbackFactory = RemoteBaseMultiItemClaimFallbackFactory.class)
 public interface RemoteBaseMultiItemClaimService {
 
     /**
