@@ -17,7 +17,8 @@ import javax.xml.ws.WebServiceFeature;
  * Generated source version: 2.2
  */
 @WebServiceClient(name = "IfBaseClaim_Srv", targetNamespace = "http://gems.haier.com/IfBaseClaim_Srv", wsdlLocation = "http://10.133.28.51:8001/gems/services/baseClaim/ifBaseClaim_Srv?wsdl")
-public class IfBaseClaimSrv extends Service {
+public class IfBaseClaimSrv
+        extends Service {
 
     private final static URL IFBASECLAIMSRV_WSDL_LOCATION;
     private final static WebServiceException IFBASECLAIMSRV_EXCEPTION;

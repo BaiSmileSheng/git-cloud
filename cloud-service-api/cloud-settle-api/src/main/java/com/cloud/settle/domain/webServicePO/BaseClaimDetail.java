@@ -48,18 +48,18 @@ import javax.xml.datatype.XMLGregorianCalendar;
 @ApiModel(value = "发票信息")
 public class BaseClaimDetail {
 
-    @ApiModelProperty(value = "申请金额，若有发票，则为含税金额")
+    @ApiModelProperty(value = "申请金额，若有发票，则为含税金额",required = true)
     protected BigDecimal applyAmount;
     @ApiModelProperty(value = "费用项目编码    ，传其他加工费编码：6666021702",required = false)
     protected String expenseItem = "6666021702";
-    @ApiModelProperty(value = "发票日期（yyyy-MM-dd），若paymentType=01，则必填")
+    @ApiModelProperty(value = "发票日期（yyyy-MM-dd），若paymentType=01，则必填",required = true)
     @XmlSchemaType(name = "dateTime")
     protected XMLGregorianCalendar invoiceDate;
-    @ApiModelProperty(value = "发票号，若paymentType=01，则必填")
+    @ApiModelProperty(value = "发票号，若paymentType=01，则必填",required = true)
     protected String invoiceNo;
-    @ApiModelProperty(value = "税额，若paymentType=01，则必填")
+    @ApiModelProperty(value = "税额，若paymentType=01，则必填",required = true)
     protected BigDecimal taxAmount;
-    @ApiModelProperty(value = "税率（如13%，传0.13），若paymentType=01，则必填")
+    @ApiModelProperty(value = "税率（如13%，传0.13），若paymentType=01，则必填",required = true)
     protected BigDecimal taxRate;
 
     /**

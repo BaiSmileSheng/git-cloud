@@ -4,11 +4,15 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.settle.domain.entity.*;
+import com.cloud.settle.domain.webServicePO.BaseClaimDetail;
+import com.cloud.settle.domain.webServicePO.BaseClaimResponse;
+import com.cloud.settle.domain.webServicePO.BaseMultiItemClaimSaveRequest;
 import com.cloud.settle.enums.*;
 import com.cloud.settle.mapper.*;
 import com.cloud.settle.service.*;
@@ -23,7 +27,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tk.mybatis.mapper.entity.Example;
 
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -66,6 +72,10 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
     private RemoteCdMaterialPriceInfoService remoteCdMaterialPriceInfoService;
     @Autowired
     private ISmsClaimCashDetailService smsClaimCashDetailService;
+    @Autowired
+    private IBaseMutilItemService baseMutilItemService;
+    @Autowired
+    private ISmsInvoiceInfoService smsInvoiceInfoService;
 
     /**
      * 月度结算定时任务   计算上个月

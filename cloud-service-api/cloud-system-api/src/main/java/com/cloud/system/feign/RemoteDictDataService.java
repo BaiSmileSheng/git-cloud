@@ -26,5 +26,5 @@ public interface RemoteDictDataService {
      * @return 字典标签
      */
     @GetMapping("dict/data/label")
-    String getLabel(String dictType, String dictValue);
+    String getLabel(@RequestParam("dictType")String dictType, @RequestParam("dictValue") String dictValue);
 }

@@ -109,10 +109,10 @@ public class BaseMultiItemClaimSaveRequest {
     protected String applyDate;
     @ApiModelProperty(value = "业务类型，默认传：666617",required = false)
     protected String businessType = "666617";//业务类型，默认传：666617
-    @ApiModelProperty(value = "发票信息集合")
+    @ApiModelProperty(value = "发票信息集合",required = true)
     @XmlElement(nillable = true)
     protected List<BaseClaimDetail> claimDetailList;
-    @ApiModelProperty(value = "付款公司编码")
+    @ApiModelProperty(value = "付款公司编码",required = true)
     protected String companyCode;
     @ApiModelProperty(value = "合同号",required = false)
     protected String contractCode;
@@ -124,7 +124,7 @@ public class BaseMultiItemClaimSaveRequest {
     protected String legContractNo;
     @ApiModelProperty(value = "订单号",required = false)
     protected String orderCode;
-    @ApiModelProperty(value = "外围系统单号")
+    @ApiModelProperty(value = "外围系统单号",required = true)
     protected String originDocNo;
     @ApiModelProperty(value = "来源系统，  默认传：DDPS",required = false)
     protected String originSystem = "DDPS";
@@ -162,9 +162,9 @@ public class BaseMultiItemClaimSaveRequest {
     protected BigDecimal reserved5;
     @ApiModelProperty(value = "保留字段")
     protected BigDecimal reserved6;
-    @ApiModelProperty(value = "申请人工号")
+    @ApiModelProperty(value = "申请人工号",required = true)
     protected String userNo;
-    @ApiModelProperty(value = "供应商编码")
+    @ApiModelProperty(value = "供应商编码",required = true)
     protected String vendorCode;
 
     /**
@@ -918,6 +918,10 @@ public class BaseMultiItemClaimSaveRequest {
      */
     public String getVendorCode() {
         return vendorCode;
+    }
+
+    public void setClaimDetailList(List<BaseClaimDetail> claimDetailList) {
+        this.claimDetailList = claimDetailList;
     }
 
     /**
