@@ -20,4 +20,13 @@ public interface SmsScrapOrderMapper extends BaseMapper<SmsScrapOrder>{
      * @return
      */
     List<SmsScrapOrder> selectByMonthAndStatus(@Param("month") String month, @Param("scrapStatus") List<String> scrapStatus);
+
+    /**
+     * 根据月份和状态查询物料号
+     * @param month
+     * @param scrapStatus
+     * @return
+     */
+    List<String> selectMaterialByMonthAndStatus(@Param("month") String month,@Param("scrapStatus") List<String> scrapStatus);
+
 }

@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -17,9 +18,27 @@ public class RemoteCdSapSalePriceInfoFallbackFactory implements FallbackFactory<
     public RemoteCdSapSalePriceInfoService create(Throwable throwable) {
         return new RemoteCdSapSalePriceInfoService(){
 
-
+            /**
+             * 根据Example条件查询列表
+             * @param materialCode
+             * @param beginDate
+             * @param endDate
+             * @return null
+             */
             @Override
-            public List<CdSapSalePrice> findByMaterialCode(String materialCode, String beginDate, String endDate) {
+            public List<CdSapSalePrice> findByMaterialCodeAndOraganization(String materialCode, String oraganization,String beginDate, String endDate) {
+                return null;
+            }
+
+            /**
+             * 根据专用号和销售组织分组查询
+             * @param materialCodes
+             * @param beginDate
+             * @param endDate
+             * @return null
+             */
+            @Override
+            public Map<String, CdSapSalePrice> selectPriceByInMaterialCodeAndDate(String materialCodes, String beginDate, String endDate) {
                 return null;
             }
         };

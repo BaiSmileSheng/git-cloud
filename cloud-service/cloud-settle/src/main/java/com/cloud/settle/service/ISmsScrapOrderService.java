@@ -42,4 +42,11 @@ public interface ISmsScrapOrderService extends BaseService<SmsScrapOrder> {
      * @return
      */
     List<SmsScrapOrder> selectByMonthAndStatus(String month, List<String> scrapStatus);
+
+    /**
+     * 定时任务更新指定月份销售价格到报废表
+     * @param month
+     * @return
+     */
+    R updatePriceEveryMonth(String month);
 }

@@ -4,6 +4,7 @@ import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
 import tk.mybatis.mapper.annotation.KeySql;
 
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import java.util.Date;
 
 /**
@@ -120,5 +122,12 @@ public class CdSapSalePrice extends BaseEntity {
      * 是否删除 0：有效，1：删除
      */
     private String delFlag;
+
+    /**
+     * 根据专用号和销售组织分组
+     */
+    @JsonIgnore //swagger 不显示字段
+    @Transient  //tk 不操作字段
+    private String mapKey;
 
 }
