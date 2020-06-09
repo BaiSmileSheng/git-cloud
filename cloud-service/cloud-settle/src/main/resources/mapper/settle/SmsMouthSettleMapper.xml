@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.settle.mapper.SmsMouthSettleMapper">
+
+    <resultMap type="SmsMouthSettle" id="SmsMouthSettleResult">
+        <result property="id" column="id"/>
+        <result property="settleNo" column="settle_no"/>
+        <result property="dataMoth" column="data_moth"/>
+        <result property="supplierCode" column="supplier_code"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="companyCode" column="company_code"/>
+        <result property="machiningAmount" column="machining_amount"/>
+        <result property="claimAmount" column="claim_amount"/>
+        <result property="noCashAmount" column="no_cash_amount"/>
+        <result property="cashAmount" column="cash_amount"/>
+        <result property="excludingFee" column="excluding_fee"/>
+        <result property="includeTaxeFee" column="include_taxe_fee"/>
+        <result property="invoiceFee" column="invoice_fee"/>
+        <result property="kmsNo" column="kms_no"/>
+        <result property="kmsStatus" column="kms_status"/>
+        <result property="kmsPayDate" column="kms_pay_date"/>
+        <result property="settleStatus" column="settle_status"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectSmsMouthSettleVo">
+        select id,
+               settle_no,
+               data_moth,
+               supplier_code,
+               supplier_name,
+               company_code,
+               machining_amount,
+               claim_amount,
+               no_cash_amount,
+               cash_amount,
+               excluding_fee,
+               include_taxe_fee,
+               invoice_fee,
+               kms_no,
+               kms_status,
+               kms_pay_date,
+               settle_status,
+               del_flag,
+               remark,
+               create_by,
+               create_time,
+               update_by,
+               update_time
+        from sms_mouth_settle
+    </sql>
+
+
+</mapper>

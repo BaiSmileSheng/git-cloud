@@ -92,4 +92,13 @@ public class CdMouthRateController extends BaseController {
         return toAjax(cdMouthRateService.deleteByIds(ids));
     }
 
+    /**
+     * 根据月份查询汇率
+     * @param yearMouth
+     * @return rate
+     */
+    @GetMapping(value = "findRate")
+    public R findRateByYearMouth(String yearMouth){
+        return R.data(cdMouthRateService.findRateByYearMouth(yearMouth));
+    }
 }

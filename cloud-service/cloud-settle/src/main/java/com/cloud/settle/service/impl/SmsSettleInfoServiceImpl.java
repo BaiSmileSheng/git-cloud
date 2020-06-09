@@ -51,11 +51,30 @@ public class SmsSettleInfoServiceImpl extends BaseServiceImpl<SmsSettleInfo> imp
             if (null != smsSettleInfo.getMachiningPrice() && null != smsSettleInfo.getConfirmAmont()) {
                 BigDecimal settlePrice = smsSettleInfo.getMachiningPrice().multiply(new BigDecimal(smsSettleInfo.getConfirmAmont()));
                 smsSettleInfo.setSettlePrice(settlePrice);
-                smsSettleInfo.setOrderStatus(SettleInfoOrderStatusEnum.ORDER_STATUS_3.getCode());
+                smsSettleInfo.setOrderStatus(SettleInfoOrderStatusEnum.ORDER_STATUS_11.getCode());
                 this.updateByPrimaryKeySelective(smsSettleInfo);
             }
         }
         logger.info("加工费生成结束");
         return R.ok();
+    }
+
+    /**
+     * 根据供应商编码、付款公司、订单状态、月份（基本开始日期）更新数据
+     * @param updated
+     * @param supplierCode
+     * @param componyCode
+     * @param orderStatus
+     * @param month
+     * @return
+     */
+	@Override
+	public int updateBySupplierCodeAndComponyCodeAndOrderStatusAndMonth(SmsSettleInfo updated,String supplierCode,String componyCode,String orderStatus,String month){
+		 return smsSettleInfoMapper.updateBySupplierCodeAndComponyCodeAndOrderStatusAndMonth(updated,supplierCode,componyCode,orderStatus,month);
+	}
+
+    @Override
+    public List<SmsSettleInfo> selectForMonthSettle(String month, String orderStatus) {
+        return smsSettleInfoMapper.selectForMonthSettle(month,orderStatus);
     }
 }

@@ -10,6 +10,7 @@
         <result property="supplierCode" column="supplier_code"/>
         <result property="supplierName" column="supplier_name"/>
         <result property="factoryCode" column="factory_code"/>
+        <result property="componyCode" column="compony_code"/>
         <result property="productOrderCode" column="product_order_code"/>
         <result property="stuffStatus" column="stuff_status"/>
         <result property="rawMaterialCode" column="raw_material_code"/>
@@ -44,6 +45,7 @@
                supplier_code,
                supplier_name,
                factory_code,
+               compony_code,
                product_order_code,
                stuff_status,
                raw_material_code,
@@ -73,4 +75,33 @@
         from sms_supplementary_order
     </sql>
 
+    <select id="selectByMonthAndStatus" resultMap="SmsSupplementaryOrderResult">
+        <include refid="selectSmsSupplementaryOrderVo"/>
+        <where>
+            <if test="month != null">
+                DATE_FORMAT(sap_date, '%Y%m') = #{month}
+            </if>
+            AND stuff_status in
+            <foreach collection="stuffStatus" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+            and del_flag='0'
+        </where>
+    </select>
+
+    <select id="selectMaterialByMonthAndStatus" resultType="java.lang.String">
+        select
+        DISTINCT raw_material_code
+        from sms_supplementary_order
+        <where>
+            <if test="month != null">
+                DATE_FORMAT(sap_date, '%Y%m') = #{month}
+            </if>
+            AND stuff_status in
+            <foreach collection="stuffStatus" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+            and del_flag='0'
+        </where>
+    </select>
 </mapper>

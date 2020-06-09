@@ -1,6 +1,7 @@
 package com.cloud.system.feign.factory;
 
 import com.cloud.common.core.domain.R;
+import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.feign.RemoteMaterialService;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,16 @@ public class RemoteMaterialFactory implements FallbackFactory<RemoteMaterialServ
         return new RemoteMaterialService() {
             @Override
             public R saveMaterialInfo() {
+                return null;
+            }
+
+            /**
+             * 根据物料号查询物料信息
+             * @param materialCode
+             * @return
+             */
+            @Override
+            public CdMaterialInfo getByMaterialCode(String materialCode) {
                 return null;
             }
         };

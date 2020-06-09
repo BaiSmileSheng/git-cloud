@@ -51,13 +51,6 @@ public class CdMouthRate extends BaseEntity {
     private BigDecimal rate;
 
     /**
-     * 备注
-     */
-    @ExcelProperty(value = "备注")
-    @ApiModelProperty(value = "备注")
-    private String remarks;
-
-    /**
      * 是否删除 0：有效，1：删除
      */
     private String delFlag;

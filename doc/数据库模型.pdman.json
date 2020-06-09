@@ -7329,6 +7329,13 @@
               "defaultValue": "''"
             },
             {
+              "name": "currency",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "币种",
+              "defaultValue": "''"
+            },
+            {
               "name": "cash_amount",
               "type": "DECIMAL_2",
               "remark": "",
@@ -8247,6 +8254,13 @@
               "autoIncrement": true
             },
             {
+              "name": "settle_no",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "结算单号",
+              "defaultValue": "''"
+            },
+            {
               "name": "data_moth",
               "type": "VARCHAR_32",
               "remark": "",
@@ -8388,6 +8402,13 @@
               "type": "DATETIME",
               "remark": "",
               "chnname": "更新时间",
+              "defaultValue": "''"
+            },
+            {
+              "name": "settle_no",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "结算单号",
               "defaultValue": "''"
             }
           ],
@@ -8654,6 +8675,12 @@
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "应兑现月份"
+            },
+            {
+              "name": "actual_cash_mounth",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "实际兑现月份"
             },
             {
               "name": "del_flag",

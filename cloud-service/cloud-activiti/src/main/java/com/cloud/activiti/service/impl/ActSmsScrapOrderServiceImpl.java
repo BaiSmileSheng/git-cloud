@@ -101,6 +101,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         }
         SmsScrapOrder smsScrapOrderCheck = remoteSmsScrapOrderService.get(id);
         if (!ScrapOrderStatusEnum.BF_ORDER_STATUS_DTJ.getCode().equals(smsScrapOrder.getScrapStatus())) {
+            log.error(StrUtil.format("(报废)只有待提交状态数据可以提交：{}", smsScrapOrder.getScrapStatus()));
             return R.error("只有待提交状态数据可以提交！");
         }
         //更新数据
@@ -133,11 +134,13 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         //流程审核业务表
         BizBusiness bizBusiness = bizBusinessService.selectBizBusinessById(bizAudit.getBusinessKey().toString());
         if (bizBusiness == null) {
+            log.error(StrUtil.format("(报废)流程业务表数据为空：id{}", bizAudit.getBusinessKey()));
             return R.error("流程业务表数据为空！");
         }
         //查询物耗表信息
         SmsScrapOrder smsScrapOrder = remoteSmsScrapOrderService.get(Long.valueOf(bizBusiness.getTableId()));
         if (smsScrapOrder == null) {
+            log.error(StrUtil.format("(报废)未找到此报废数据：id{}", bizBusiness.getTableId()));
             return R.error("未找到此业务数据！");
         }
         //审批结果
@@ -152,14 +155,16 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
                 //TODO:业务科审核通过  传SAP
 
             } else {
-                return R.error("状态错误！");
+                log.error(StrUtil.format("(报废)此状态数据不允许审核：{}", smsScrapOrder.getScrapStatus()));
+                return R.error("此状态数据不允许审核！");
             }
         } else {
             //审批驳回
             if (ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode().equals(smsScrapOrder.getScrapStatus())) {
                 smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKBH.getCode());
             } else {
-                return R.error("状态错误！");
+                log.error(StrUtil.format("(报废)此状态数据不允许审核：{}", smsScrapOrder.getScrapStatus()));
+                return R.error("此状态数据不允许审核！");
             }
         }
         R r = remoteSmsScrapOrderService.update(smsScrapOrder);

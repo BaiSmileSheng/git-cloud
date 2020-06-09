@@ -1,5 +1,6 @@
 package com.cloud.system.controller;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * SAP成本价格
@@ -127,14 +129,16 @@ public class CdMaterialPriceInfoController extends BaseController {
         return cdMaterialPriceInfoService.checkSynchroSAP(materialCode);
     }
 
-
     /**
-     * 校验申请数量是否是最小包装量的整数倍
-     * @param materialCode applyNum
-     * @return R
+     * 根据物料号查询
+     * @param materialCodes
+     * @param beginDate
+     * @param endDate
+     * @return Map<materialCode,CdMaterialPriceInfo>
      */
-    @PostMapping("checkIsMinUnit")
-    public R checkIsMinUnit(String materialCode,int applyNum){
-        return cdMaterialPriceInfoService.checkIsMinUnit(materialCode,applyNum);
+    @PostMapping("selectPriceByInMaterialCodeAndDate")
+    public Map<String, CdMaterialPriceInfo> selectPriceByInMaterialCodeAndDate(String materialCodes, String beginDate, String endDate) {
+        List<String> materialCodeList= CollectionUtil.newArrayList(materialCodes.split(","));
+        return cdMaterialPriceInfoService.selectPriceByInMaterialCodeAndDate(materialCodeList,beginDate,endDate);
     }
 }
