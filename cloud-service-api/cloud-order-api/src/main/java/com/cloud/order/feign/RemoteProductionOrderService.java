@@ -7,6 +7,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 /**
  * 报废管理 Feign服务层
  *
@@ -22,4 +24,16 @@ public interface RemoteProductionOrderService {
      */
     @GetMapping("productionOrder/selectByProdctOrderCode")
     OmsProductionOrder selectByProdctOrderCode(@RequestParam("prodctOrderCode") String prodctOrderCode);
+
+    /**
+     * 查询排产订单 列表
+     * @param productEndDateEnd  基本结束时间 结束值
+     * @param actualEndDateStart 实际结束时间 起始值
+     * @param actualEndDateEnd 实际结束时间 结束值
+     * @return 排产订单 列表
+     */
+    @GetMapping("productionOrder/listForDelays")
+    List<OmsProductionOrder> listForDelays(@RequestParam("productEndDateEnd") String productEndDateEnd,
+                                           @RequestParam("actualEndDateStart") String actualEndDateStart,
+                                           @RequestParam("actualEndDateEnd") String actualEndDateEnd);
 }

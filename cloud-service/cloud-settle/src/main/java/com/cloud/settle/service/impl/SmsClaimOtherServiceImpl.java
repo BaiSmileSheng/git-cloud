@@ -24,6 +24,7 @@ import com.cloud.settle.service.ISmsClaimOtherService;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -134,6 +135,15 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
             logger.error("新增其他索赔时新增文件失败订单号 orderNo:{},res:{}",orderNo, JSONObject.toJSON(uplodeFileResult));
             throw new BusinessException("新增其他索赔时新增质新增文件失败");
         }
+        //4.若直接提交调用提交接口
+        if(smsClaimOther.getFlagCommit()){
+            R resultResult = submit(smsClaimOther.getId().toString());
+            flagResult = "0".equals(resultResult.get("code").toString());
+            if(!flagResult){
+                logger.error("新增其他索赔时提交失败 id:{},res:{}",smsClaimOther.getId(), JSONObject.toJSON(resultResult));
+                throw new BusinessException("新增其他索赔时提交失败");
+            }
+        }
         return R.data(smsClaimOther.getId());
     }
 
@@ -169,6 +179,15 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         if(!flagResult){
             logger.error("修改其他索赔时修改文件失败订单号 orderNo:{},res:{}",orderNo, JSONObject.toJSON(result));
             throw new BusinessException("修改其他索赔单时新增文件信息失败");
+        }
+        //4.若直接提交调用提交接口
+        if(smsClaimOther.getFlagCommit()){
+            R resultResult = submit(smsClaimOther.getId().toString());
+            flagResult = "0".equals(resultResult.get("code").toString());
+            if(!flagResult){
+                logger.error("修改其他索赔时提交失败 id:{},res:{}",smsClaimOther.getId(), JSONObject.toJSON(resultResult));
+                throw new BusinessException("修改其他索赔时提交失败");
+            }
         }
         return result;
     }
@@ -328,5 +347,74 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         return R.ok();
     }
 
+    /**
+     * 48未确认超时发送邮件
+     * @return 成功或失败
+     */
+    @Override
+    public R overTimeSendMail() {
+        //1.查询状态是待供应商确认的 提交时间<=2天前的 >3天前的
+        String twoDate = DateUtils.getDaysTimeString(-2);
+        String threeDate = DateUtils.getDaysTimeString(-3);
+        List<SmsClaimOther> smsClaimOtherList = overTimeSelect(twoDate,threeDate);
+        if(CollectionUtils.isEmpty(smsClaimOtherList)){
+            return R.ok();
+        }
+        //2.发送邮件
+        for(SmsClaimOther smsClaimOther : smsClaimOtherList){
+            String supplierCode = smsClaimOther.getSupplierCode();
+            //根据供应商编号查询供应商信息
+            SysUser sysUser = remoteUserService.findUserBySupplierCode(supplierCode);
+            if(null == sysUser){
+                logger.error("定时发送邮件时查询供应商信息失败供应商编号 supplierCode:{}",supplierCode);
+                throw new BusinessException("定时发送邮件时查询供应商信息失败");
+            }
+            String mailSubject = "其他索赔邮件";
+            StringBuffer mailTextBuffer = new StringBuffer();
+            // 供应商名称 +V码+公司  您有一条其他索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
+            mailTextBuffer.append(smsClaimOther.getSupplierName()).append("+").append(supplierCode).append("+")
+                    .append(sysUser.getCorporation()).append(" ").append("您有一条其他索赔订单，订单号")
+                    .append(smsClaimOther.getClaimCode()).append(",请及时处理，如不处理，1天后系统自动确认，无法申诉");
+            String toSupplier = sysUser.getEmail();
+            mailService.sendTextMail(toSupplier,mailTextBuffer.toString(),mailSubject);
+        }
+        return R.ok();
+    }
 
+    /**
+     * 获取超时未确认的列表
+     * @param submitDateStart 提交时间起始值
+     * @param submitDateEnd 提交时间结束值
+     * @return
+     */
+    private List<SmsClaimOther> overTimeSelect(String submitDateStart,String submitDateEnd){
+        Example example = new Example(SmsClaimOther.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("claimOtherStatus",ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_1);
+        criteria.andGreaterThanOrEqualTo("submitDate",submitDateStart);
+        criteria.andLessThan("submitDate",submitDateEnd);
+        List<SmsClaimOther> smsQualityOrderList = smsClaimOtherMapper.selectByExample(example);
+        return smsQualityOrderList;
+    }
+    /**
+     * 72H超时供应商自动确认
+     * @return 成功或失败
+     */
+    @Override
+    public R overTimeConfim() {
+        //1.查询状态是待供应商确认的 提交时间<=3天前的 >4天前的
+        String threeDate = DateUtils.getDaysTimeString(-3);
+        String fourDate = DateUtils.getDaysTimeString(-4);
+        List<SmsClaimOther> smsClaimOtherList = overTimeSelect(threeDate,fourDate);
+        int count = 0;
+        if(!CollectionUtils.isEmpty(smsClaimOtherList)){
+            for(SmsClaimOther smsClaimOther : smsClaimOtherList){
+                smsClaimOther.setClaimOtherStatus(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_11.getCode());
+                smsClaimOther.setSettleFee(smsClaimOther.getClaimPrice());
+                smsClaimOther.setSupplierConfirmDate(new Date());
+            }
+            count = smsClaimOtherMapper.updateBatchByPrimaryKeySelective(smsClaimOtherList);
+        }
+        return R.data(count);
+    }
 }

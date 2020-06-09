@@ -10,6 +10,7 @@ import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.service.IOmsProductionOrderService;
@@ -115,6 +116,38 @@ public class OmsProductionOrderController extends BaseController {
         return getDataTable(omsProductionOrderList);
     }
 
+    /**
+     * 查询排产订单 列表
+     * @param productEndDateEnd  基本结束时间 结束值
+     * @param actualEndDateStart 实际结束时间 起始值
+     * @param actualEndDateEnd 实际结束时间 结束值
+     * @return 排产订单 列表
+     */
+    @GetMapping("listForDelays")
+    @ApiOperation(value = "查询延期关单的排产订单", response = OmsProductionOrder.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "productEndDateEnd", value = "基本开始日期截止值", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "actualEndDateStart", value = "实际开始日期起始值", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "actualEndDateEnd", value = "实际开始日期结束值", required = true, paramType = "query", dataType = "String")
+    })
+    public List<OmsProductionOrder> listForDelays(@RequestParam("productEndDateEnd") String productEndDateEnd,
+                                                  @RequestParam("actualEndDateStart") String actualEndDateStart,
+                                                  @RequestParam("actualEndDateEnd") String actualEndDateEnd){
+        Example example = new Example(OmsProductionOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        if(StringUtils.isNotBlank(productEndDateEnd)){
+            criteria.andLessThan("productEndDate",productEndDateEnd);
+        }
+        if(StringUtils.isNotBlank(actualEndDateStart)){
+            criteria.andGreaterThanOrEqualTo("actualEndDate", actualEndDateStart);
+        }
+        if(StringUtils.isNotBlank(actualEndDateEnd)){
+            criteria.andLessThan("actualEndDate", actualEndDateEnd);
+        }
+        criteria.andEqualTo("status",ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
+        List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderService.selectByExample(example);
+        return omsProductionOrderList;
+    }
     /**
      * 根据生产订单号查询排产订单信息
      * @param prodctOrderCode

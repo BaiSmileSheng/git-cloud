@@ -70,6 +70,13 @@ public class SmsDelaysDelivery extends BaseEntity {
     private String factoryCode;
 
     /**
+     * 付款公司
+     */
+    @ExcelProperty(value = "付款公司")
+    @ApiModelProperty(value = "付款公司")
+    private String companyCode;
+
+    /**
      * 专用号
      */
     @ExcelProperty(value = "专用号")
@@ -100,7 +107,7 @@ public class SmsDelaysDelivery extends BaseEntity {
     /**
      * 索赔状态 1待供应商确认、4订单待审核、5小微主待审核、、6小微主审核通过、7 待供应商确认(申诉驳回) 、11待结算、12已结算、13已兑现、14部分兑现、15未兑现
      */
-    @ExcelProperty(value = "索赔状态 1待供应商确认、4订单待审核、5小微主待审核、、6小微主审核通过、7 待供应商确认(申诉驳回) 、11待结算、12已结算、13已兑现、14部分兑现、15未兑现")
+    @ExcelProperty(value = "索赔状态")
     @ApiModelProperty(value = "索赔状态 1待供应商确认、4订单待审核、5小微主待审核、、6小微主审核通过、7 待供应商确认(申诉驳回) 、11待结算、12已结算、13已兑现、14部分兑现、15未兑现")
     private String delaysStatus;
 

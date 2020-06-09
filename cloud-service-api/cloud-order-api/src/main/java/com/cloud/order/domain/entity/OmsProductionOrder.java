@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import tk.mybatis.mapper.annotation.KeySql;
 
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -291,5 +292,33 @@ public class OmsProductionOrder extends BaseEntity {
      * 是否删除 0：有效，1：删除
      */
     private String delFlag;
+
+    /**
+     * 查询生产结束日期起始值
+     */
+    @Transient
+    @ApiModelProperty(value = "查询生产结束日期起始值")
+    private String productEndDateStart;
+
+    /**
+     * 查询生产结束日期结束
+     */
+    @Transient
+    @ApiModelProperty(value = "查询生产结束日期结束值")
+    private String productEndDateEnd;
+
+    /**
+     * 实际结束日期起始值
+     */
+    @Transient
+    @ApiModelProperty(value = "查询实际结束日期起始值")
+    private String actualEndDateStart;
+
+    /**
+     * 实际结束日期结束值
+     */
+    @Transient
+    @ApiModelProperty(value = "查询实际结束日期结束值")
+    private String actualEndDateEnd;
 
 }

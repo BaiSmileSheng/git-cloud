@@ -3,9 +3,7 @@ package com.cloud.settle.feign;
 import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.settle.domain.entity.SmsDelaysDelivery;
-import com.cloud.settle.domain.entity.SmsQualityOrder;
 import com.cloud.settle.feign.factory.RemoteDelaysDeliveryFallbackFactory;
-import com.cloud.settle.feign.factory.RemoteQualityOrderFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,7 +30,7 @@ public interface RemoteDelaysDeliveryService {
      * @return 延期交付索赔信息
      */
     @GetMapping("delaysDelivery/get")
-    SmsDelaysDelivery get(Long id);
+    SmsDelaysDelivery get(@RequestParam("id") Long id);
 
     /**
      * 查询延期交付索赔详情
@@ -40,7 +38,7 @@ public interface RemoteDelaysDeliveryService {
      * @return 延期交付索赔详情(包含文件信息)
      */
     @GetMapping("delaysDelivery/selectById")
-    R selectById(Long id);
+    R selectById(@RequestParam("id") Long id);
 
     /**
      * 修改延期索赔信息
@@ -48,5 +46,19 @@ public interface RemoteDelaysDeliveryService {
      * @return 修改数量
      */
     @PostMapping("delaysDelivery/update")
-    R editSave(SmsDelaysDelivery smsDelaysDelivery);
+    R editSave(@RequestBody SmsDelaysDelivery smsDelaysDelivery);
+
+    /**
+     * 48H超时未确认发送邮件
+     * @return 成功或失败
+     */
+    @PostMapping("delaysDelivery/overTimeSendMail")
+    R overTimeSendMail();
+
+    /**
+     * 72H超时供应商自动确认
+     * @return 成功或失败
+     */
+    @PostMapping("delaysDelivery/overTimeConfim")
+    R overTimeConfim();
 }

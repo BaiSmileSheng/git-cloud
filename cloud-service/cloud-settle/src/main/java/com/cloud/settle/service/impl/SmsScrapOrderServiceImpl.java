@@ -100,7 +100,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         if (cdFactoryInfo == null) {
             return R.error("公司信息为空！");
         }
-        smsScrapOrder.setComponyCode(cdFactoryInfo.getCompanyCode());
+        smsScrapOrder.setCompanyCode(cdFactoryInfo.getCompanyCode());
         if (StrUtil.isBlank(smsScrapOrder.getScrapStatus())) {
             smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_DTJ.getCode());
         }
