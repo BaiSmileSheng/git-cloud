@@ -3,9 +3,9 @@ package com.cloud.system.service.impl;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
-import com.cloud.system.domain.entity.CdBom;
-import com.cloud.system.mapper.CdBomMapper;
-import com.cloud.system.service.ICdBomService;
+import com.cloud.system.domain.entity.CdBomInfo;
+import com.cloud.system.mapper.CdBomInfoMapper;
+import com.cloud.system.service.ICdBomInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -17,9 +17,9 @@ import tk.mybatis.mapper.entity.Example;
  * @date 2020-06-01
  */
 @Service
-public class CdBomServiceImpl extends BaseServiceImpl<CdBom> implements ICdBomService {
+public class CdBomInfoInfoServiceImpl extends BaseServiceImpl<CdBomInfo> implements ICdBomInfoService {
     @Autowired
-    private CdBomMapper cdBomMapper;
+    private CdBomInfoMapper cdBomInfoMapper;
 
     /**
      * 校验申请数量是否是单耗的整数倍
@@ -39,18 +39,39 @@ public class CdBomServiceImpl extends BaseServiceImpl<CdBom> implements ICdBomSe
         if (applyNum==0) {
             return R.error("参数：申请量为空！");
         }
-        Example example = new Example(CdBom.class);
+        Example example = new Example(CdBomInfo.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("productMaterialCode",productMaterialCode);
         criteria.andEqualTo("rawMaterialCode",rawMaterialCode);
-        CdBom cdBom = findByExampleOne(example);
-        if (cdBom==null||cdBom.getBomNum() == null) {
+        CdBomInfo cdBomInfo = findByExampleOne(example);
+        if (cdBomInfo ==null|| cdBomInfo.getBomNum() == null) {
             return R.error("未维护BOM！");
         }
-        int bomNum = cdBom.getBomNum().intValue();//单耗
+        int bomNum = cdBomInfo.getBomNum().intValue();//单耗
         if(applyNum%bomNum!=0){
             return R.error("申请量必须是单耗的整数倍！");
         }
         return R.data(bomNum);
+    }
+
+    /**
+     * 1、获取调用SAP系统获取BOM清单接口的入参
+     * 2、组织接口入参数据
+     * 3、调用获取BOM清单数据接口
+     * 4、执行保存BOM清单数据sql
+     *
+     * @Description: 定时任务获取BOM清单-保存
+     * @Param: []
+     * @return: com.cloud.common.core.domain.R
+     * @Author: ltq
+     * @Date: 2020/6/8
+     */
+    @Override
+    public R saveBomInfoBySap() {
+        //1、获取调用SAP系统获取BOM清单接口的入参
+        //2、组织接口入参数据
+        //3、调用获取BOM清单数据接口
+        //4、执行保存BOM清单数据sql
+        return null;
     }
 }

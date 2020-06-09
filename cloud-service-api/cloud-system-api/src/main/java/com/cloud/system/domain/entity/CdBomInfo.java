@@ -26,7 +26,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Builder
 @ApiModel(value = "bom清单数据 ")
-public class CdBom extends BaseEntity {
+public class CdBomInfo extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /**
