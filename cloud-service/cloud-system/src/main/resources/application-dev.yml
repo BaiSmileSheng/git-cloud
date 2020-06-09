@@ -22,7 +22,7 @@ spring:
     druid:
       # 主库数据源
       master:
-        url: jdbc:mysql://10.133.116.86:3306/rycloud?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+        url: jdbc:mysql://10.133.116.86:3306/rycloud?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&allowMultiQueries=true
         username: cloud
         password: Cloud,123456
       # 从库数据源
@@ -71,8 +71,8 @@ spring:
 sap:
   client600:
     ashost: 10.133.28.69
-    sysnr: 30
-    client: 600
+    sysnr: 00
+    client: 200
     user: 19046341
     passwd: 123123
     lang: ZH
