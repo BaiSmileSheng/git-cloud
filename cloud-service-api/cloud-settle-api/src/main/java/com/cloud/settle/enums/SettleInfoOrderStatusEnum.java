@@ -7,11 +7,10 @@ package com.cloud.settle.enums;
  */
 public enum SettleInfoOrderStatusEnum {
 
-    ORDER_STATUS_0("0","已提交"),
     ORDER_STATUS_1("1","未关单"),
     ORDER_STATUS_2("2","已关单"),
-    ORDER_STATUS_3("3","待结算"),
-    ORDER_STATUS_4("4","已付款"),
+    ORDER_STATUS_11("11","待结算"),
+    ORDER_STATUS_12("12","结算完成"),
 
 
     ;

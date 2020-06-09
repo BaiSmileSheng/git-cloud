@@ -1,6 +1,5 @@
 package com.cloud.settle.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
@@ -13,20 +12,14 @@ import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
 import com.cloud.settle.enums.SupplementaryOrderStatusEnum;
 import com.cloud.settle.mapper.SmsSupplementaryOrderMapper;
 import com.cloud.settle.service.ISmsSupplementaryOrderService;
-import com.cloud.system.domain.entity.CdBom;
-import com.cloud.system.domain.entity.CdFactoryLineInfo;
-import com.cloud.system.domain.entity.CdMaterialPriceInfo;
-import com.cloud.system.feign.RemoteBomService;
-import com.cloud.system.feign.RemoteCdMaterialPriceInfoService;
-import com.cloud.system.feign.RemoteFactoryLineInfoService;
-import com.cloud.system.feign.RemoteSequeceService;
+import com.cloud.system.domain.entity.*;
+import com.cloud.system.feign.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 物耗申请单 Service业务层处理
@@ -49,7 +42,10 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
     private RemoteFactoryLineInfoService remotefactoryLineInfoService;
     @Autowired
     private RemoteSequeceService remoteSequeceService;
-
+    @Autowired
+    private RemoteFactoryInfoService remoteFactoryInfoService;
+    @Autowired
+    private RemoteMaterialService remoteMaterialService;
     /**
      * 编辑保存物耗申请单功能  --有逻辑校验
      * @param smsSupplementaryOrder
@@ -114,13 +110,14 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         String rawMaterialCode = smsSupplementaryOrder.getRawMaterialCode();
 
 
-        //根据物料号  有效期查询SAP价格
-        String date = DateUtils.getTime();
-        List<CdMaterialPriceInfo> materialPrices = remoteCdMaterialPriceInfoService.findByMaterialCode(rawMaterialCode,date,date);
-        if (materialPrices == null || materialPrices.size() == 0) {
-            return R.error("物料成本价格未维护！");
-        }
-        CdMaterialPriceInfo cdMaterialPriceInfo = materialPrices.get(0);
+//        //根据物料号  有效期查询SAP价格
+//        String date = DateUtils.getTime();
+//        List<CdMaterialPriceInfo> materialPrices = remoteCdMaterialPriceInfoService.findByMaterialCode(rawMaterialCode,date,date);
+//        if (materialPrices == null || materialPrices.size() == 0) {
+//            log.error(StrUtil.format("(物耗)物料成本价格未维护!参数为{}", rawMaterialCode));
+//            return R.error("物料成本价格未维护！");
+//        }
+//        CdMaterialPriceInfo cdMaterialPriceInfo = materialPrices.get(0);
 
         //开始插入
         String seq = remoteSequeceService.selectSeq("supplementary_seq", 4);
@@ -135,13 +132,20 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             smsSupplementaryOrder.setSupplierName(factoryLineInfo.getSupplierDesc());
         }
         smsSupplementaryOrder.setFactoryCode(omsProductionOrder.getFactoryCode());
+        CdFactoryInfo cdFactoryInfo = remoteFactoryInfoService.selectOneByFactory(omsProductionOrder.getFactoryCode());
+        if (cdFactoryInfo == null) {
+            log.error(StrUtil.format("(物耗)物耗申请新增保存开始：公司信息为空参数为{}", omsProductionOrder.getFactoryCode()));
+            return R.error("公司信息为空！");
+        }
+        smsSupplementaryOrder.setComponyCode(cdFactoryInfo.getCompanyCode());
         smsSupplementaryOrder.setProductOrderCode(omsProductionOrder.getProductOrderCode());//生产订单号
         if (StrUtil.isBlank(smsSupplementaryOrder.getStuffStatus())) {
             smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DTJ.getCode());//状态：待提交
         }
-        smsSupplementaryOrder.setStuffPrice(cdMaterialPriceInfo.getNetWorth());//单价  取得materialPrice表的净价值
-        smsSupplementaryOrder.setStuffUnit(cdMaterialPriceInfo.getUnit());
-        smsSupplementaryOrder.setCurrency(cdMaterialPriceInfo.getCurrency());//币种
+        //改为月度结算时候取值
+//        smsSupplementaryOrder.setStuffPrice(cdMaterialPriceInfo.getNetWorth());//单价  取得materialPrice表的净价值
+//        smsSupplementaryOrder.setStuffUnit(cdMaterialPriceInfo.getUnit());
+//        smsSupplementaryOrder.setCurrency(cdMaterialPriceInfo.getCurrency());//币种
         CdBom cdBom = remoteBomService.listByProductAndMaterial(productMaterialCode, rawMaterialCode);
         smsSupplementaryOrder.setSapStoreage(cdBom.getStoragePoint());
         smsSupplementaryOrder.setPurchaseGroupCode(cdBom.getPurchaseGroup());
@@ -153,6 +157,17 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         } else {
             return R.error("物耗申请插入失败！");
         }
+    }
+
+    /**
+     * 根据月份和状态查询
+     * @param month
+     * @param stuffStatus
+     * @return
+     */
+    @Override
+    public List<SmsSupplementaryOrder> selectByMonthAndStatus(String month, List<String> stuffStatus) {
+        return smsSupplementaryOrderMapper.selectByMonthAndStatus(month,stuffStatus);
     }
 
     /**
@@ -178,26 +193,33 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         }
 
         //1、校验物料号是否同步了sap价格
-        R r = remoteCdMaterialPriceInfoService.checkSynchroSAP(smsSupplementaryOrder.getRawMaterialCode());
-        if (!r.isSuccess()) {
-            return r;
-        }
+//        R r = remoteCdMaterialPriceInfoService.checkSynchroSAP(smsSupplementaryOrder.getRawMaterialCode());
+//        if (!r.isSuccess()) {
+//            return r;
+//        }
         //将返回值Map转为CdMaterialPriceInfo
-        CdMaterialPriceInfo cdMaterialPriceInfo = BeanUtil.mapToBean((Map<?, ?>) r.get("data"), CdMaterialPriceInfo.class, true);
+//        CdMaterialPriceInfo cdMaterialPriceInfo = BeanUtil.mapToBean((Map<?, ?>) r.get("data"), CdMaterialPriceInfo.class, true);
         //2、校验修改申请数量是否是最小包装量的整数倍
+        CdMaterialInfo cdMaterialInfo = remoteMaterialService.getByMaterialCode(smsSupplementaryOrder.getRawMaterialCode());
+        if (cdMaterialInfo == null) {
+            log.error(StrUtil.format("(物耗)未维护物料信息{}", smsSupplementaryOrder.getRawMaterialCode()));
+            return R.error("未维护物料信息！");
+        }
         int applyNum = smsSupplementaryOrder.getStuffAmount();//申请量
         //最小包装量
-        int minUnit = Integer.parseInt(cdMaterialPriceInfo.getPriceUnit() == null ? "0" : cdMaterialPriceInfo.getPriceUnit());
+        int minUnit = Integer.parseInt(cdMaterialInfo.getRoundingQuantit() == null ? "0" : cdMaterialInfo.getRoundingQuantit().toString());
         if (minUnit == 0) {
             return R.error("最小包装量不正确！");
         }
         if (applyNum % minUnit != 0) {
+            log.error(StrUtil.format("(物耗)申请量必须是最小包装量的整数倍参数为{},{}", applyNum,minUnit));
             return R.error("申请量必须是最小包装量的整数倍！");
         }
         //3、校验申请数量是否是单耗的整数倍
         //生产单号获取排产订单信息
         OmsProductionOrder omsProductionOrder = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
         if (omsProductionOrder == null) {
+            log.error(StrUtil.format("(物耗)排产订单信息不存在!排产订单号参数为{}", productOrderCode));
             return R.error("排产订单信息不存在！");
         }
         //根据成品物料号和原材料物料号取bom单耗
@@ -235,4 +257,5 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         }
         return R.data(smsSupplementaryOrderCheck);
     }
+
 }

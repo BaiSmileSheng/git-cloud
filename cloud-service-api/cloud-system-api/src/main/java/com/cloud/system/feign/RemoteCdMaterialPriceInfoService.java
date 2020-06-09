@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用户 Feign服务层
@@ -41,10 +42,15 @@ public interface RemoteCdMaterialPriceInfoService {
     R checkSynchroSAP(@RequestParam(value = "materialCode") String materialCode);
 
     /**
-     * 校验申请数量是否是最小包装量的整数倍
-     * @param materialCode applyNum
-     * @return R
+     * 根据物料号查询
+     * @param materialCodes
+     * @param beginDate
+     * @param endDate
+     * @return Map<materialCode,CdMaterialPriceInfo>
      */
-    @PostMapping("materialPrice/checkIsMinUnit")
-    R checkIsMinUnit(@RequestParam(value = "materialCode") String materialCode,@RequestParam(value = "applyNum") int applyNum);
+    @PostMapping("materialPrice/selectPriceByInMaterialCodeAndDate")
+    Map<String, CdMaterialPriceInfo> selectPriceByInMaterialCodeAndDate(@RequestParam(value = "materialCodes") String materialCodes,
+                                                                        @RequestParam(value = "beginDate") String beginDate,
+                                                                        @RequestParam(value = "endDate") String endDate);
+
 }

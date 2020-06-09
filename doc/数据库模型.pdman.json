@@ -7329,6 +7329,13 @@
               "defaultValue": "''"
             },
             {
+              "name": "currency",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "币种",
+              "defaultValue": "''"
+            },
+            {
               "name": "cash_amount",
               "type": "DECIMAL_2",
               "remark": "",
@@ -8654,6 +8661,12 @@
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "应兑现月份"
+            },
+            {
+              "name": "actual_cash_mounth",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "实际兑现月份"
             },
             {
               "name": "del_flag",

@@ -4,6 +4,9 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.system.domain.entity.CdMaterialPriceInfo;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * SAP成本价格 Service接口
  *
@@ -20,10 +23,13 @@ public interface ICdMaterialPriceInfoService extends BaseService<CdMaterialPrice
     R checkSynchroSAP(String materialCode);
 
     /**
-     * 校验申请数量是否是最小包装量的整数倍
-     * @param materialCode
-     * @param applyNum
-     * @return
+     * 根据物料号查询
+     * @param materialCodes
+     * @param beginDate
+     * @param endDate
+     * @return Map<materialCode,CdMaterialPriceInfo>
      */
-    R checkIsMinUnit(String materialCode, int applyNum);
+    Map<String, CdMaterialPriceInfo> selectPriceByInMaterialCodeAndDate(List<String> materialCodes,
+                                                                        String beginDate,
+                                                                        String endDate);
 }
