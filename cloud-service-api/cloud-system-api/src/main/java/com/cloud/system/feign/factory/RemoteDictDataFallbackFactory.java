@@ -1,8 +1,5 @@
 package com.cloud.system.feign.factory;
 
-import com.cloud.common.core.domain.R;
-import com.cloud.system.domain.entity.CdBom;
-import com.cloud.system.feign.RemoteBomService;
 import com.cloud.system.feign.RemoteDictDataService;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
