@@ -1,6 +1,7 @@
 package com.cloud.system.controller;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.common.utils.StringUtils;
 import io.swagger.annotations.*;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
@@ -58,6 +59,15 @@ public class CdRawMaterialStockController extends BaseController {
     public TableDataInfo list(@ApiIgnore CdRawMaterialStock cdRawMaterialStock) {
         Example example = new Example(CdRawMaterialStock.class);
         Example.Criteria criteria = example.createCriteria();
+        if (StringUtils.isNotBlank(cdRawMaterialStock.getFactoryCode())) {
+            criteria.andEqualTo("factoryCode",cdRawMaterialStock.getFactoryCode());
+        }
+        if (StringUtils.isNotBlank(cdRawMaterialStock.getRawMaterialCode())) {
+            criteria.andEqualTo("rawMaterialCode",cdRawMaterialStock.getRawMaterialCode());
+        }
+        if (StringUtils.isNotBlank(cdRawMaterialStock.getStoragePoint())) {
+            criteria.andEqualTo("storagePoint",cdRawMaterialStock.getStoragePoint());
+        }
         startPage();
         List<CdRawMaterialStock> cdRawMaterialStockList = cdRawMaterialStockService.selectByExample(example);
         return getDataTable(cdRawMaterialStockList);
