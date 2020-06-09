@@ -53,6 +53,16 @@ public class RemoteSmsScrapOrderFallbackFactory implements FallbackFactory<Remot
             public R addSave(SmsScrapOrder smsScrapOrder) {
                 return  R.error();
             }
+
+            /**
+             * 定时任务更新指定月份销售价格到报废表
+             * @param month
+             * @return
+             */
+            @Override
+            public R updatePriceEveryMonth(String month) {
+                return R.error();
+            }
         };
     }
 }

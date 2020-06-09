@@ -63,14 +63,14 @@ public class SmsSettleInfoServiceImpl extends BaseServiceImpl<SmsSettleInfo> imp
      * 根据供应商编码、付款公司、订单状态、月份（基本开始日期）更新数据
      * @param updated
      * @param supplierCode
-     * @param componyCode
+     * @param companyCode
      * @param orderStatus
      * @param month
      * @return
      */
 	@Override
-	public int updateBySupplierCodeAndComponyCodeAndOrderStatusAndMonth(SmsSettleInfo updated,String supplierCode,String componyCode,String orderStatus,String month){
-		 return smsSettleInfoMapper.updateBySupplierCodeAndComponyCodeAndOrderStatusAndMonth(updated,supplierCode,componyCode,orderStatus,month);
+	public int updateBySupplierCodeAndCompanyCodeAndOrderStatusAndMonth(SmsSettleInfo updated,String supplierCode,String companyCode,String orderStatus,String month){
+		 return smsSettleInfoMapper.updateBySupplierCodeAndCompanyCodeAndOrderStatusAndMonth(updated,supplierCode,companyCode,orderStatus,month);
 	}
 
     @Override

@@ -29,6 +29,7 @@ public interface RemoteCdMaterialPriceInfoService {
      */
     @GetMapping("materialPrice/findByMaterialCode")
     List<CdMaterialPriceInfo> findByMaterialCode(@RequestParam(value = "materialCode") String materialCode,
+                                                 @RequestParam(value = "purchasingGroup") String purchasingGroup,
                                                  @RequestParam(value = "beginDate") String beginDate,
                                                  @RequestParam(value = "endDate") String endDate);
 
@@ -42,11 +43,11 @@ public interface RemoteCdMaterialPriceInfoService {
     R checkSynchroSAP(@RequestParam(value = "materialCode") String materialCode);
 
     /**
-     * 根据物料号查询
+     * 根据物料号和采购组织分组查询
      * @param materialCodes
      * @param beginDate
      * @param endDate
-     * @return Map<materialCode,CdMaterialPriceInfo>
+     * @return Map<materialCode+organization,CdMaterialPriceInfo>
      */
     @PostMapping("materialPrice/selectPriceByInMaterialCodeAndDate")
     Map<String, CdMaterialPriceInfo> selectPriceByInMaterialCodeAndDate(@RequestParam(value = "materialCodes") String materialCodes,

@@ -17,12 +17,13 @@
         <result property="unitPricing" column="unit_pricing"/>
         <result property="measureUnit" column="measure_unit"/>
         <result property="sapDelFlag" column="sap_del_flag"/>
-        <result property="remarks" column="remarks"/>
+        <result property="remark" column="remark"/>
         <result property="delFlag" column="del_flag"/>
         <result property="createTime" column="create_time"/>
         <result property="createBy" column="create_by"/>
         <result property="updateTime" column="update_time"/>
         <result property="updateBy" column="update_by"/>
+        <result property="mapKey" column="mapKey"/>
     </resultMap>
 
     <sql id="selectCdSapSalePriceVo">
@@ -38,7 +39,7 @@
                unit_pricing,
                measure_unit,
                sap_del_flag,
-               remarks,
+               remark,
                del_flag,
                create_time,
                create_by,
@@ -47,5 +48,36 @@
         from cd_sap_sale_price
     </sql>
 
-
+    <select id="selectPriceByInMaterialCodeAndDate" resultMap="CdSapSalePriceResult">
+        select id,
+        conditions_type,
+        marketing_organization,
+        material_code,
+        begin_date,
+        end_date,
+        pricing_record_no,
+        sale_price,
+        conditions_monetary,
+        unit_pricing,
+        measure_unit,
+        sap_del_flag,
+        remark,
+        del_flag,
+        create_time,
+        create_by,
+        update_time,
+        update_by,
+        CONCAT(material_code,marketing_organization) as mapKey
+        from cd_sap_sale_price
+        where
+        del_flag='0' and
+        material_code in
+        <foreach collection="materialCodes" item="materialCode" open="(" separator="," close=")">
+            #{materialCode}
+        </foreach>
+        and
+        <![CDATA[
+        begin_date <= #{beginDate} and end_date>=#{endDate}
+        ]]>
+    </select>
 </mapper>

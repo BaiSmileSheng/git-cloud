@@ -10,7 +10,7 @@
         <result property="supplierCode" column="supplier_code"/>
         <result property="supplierName" column="supplier_name"/>
         <result property="factoryCode" column="factory_code"/>
-        <result property="componyCode" column="compony_code"/>
+        <result property="companyCode" column="company_code"/>
         <result property="productOrderCode" column="product_order_code"/>
         <result property="stuffStatus" column="stuff_status"/>
         <result property="rawMaterialCode" column="raw_material_code"/>
@@ -45,7 +45,7 @@
                supplier_code,
                supplier_name,
                factory_code,
-               compony_code,
+               company_code,
                product_order_code,
                stuff_status,
                raw_material_code,
