@@ -19,6 +19,11 @@ public class RemoteMaterialFactory implements FallbackFactory<RemoteMaterialServ
                 return null;
             }
 
+            @Override
+            public R updateUphBySap() {
+                return null;
+            }
+
             /**
              * 根据物料号查询物料信息
              * @param materialCode

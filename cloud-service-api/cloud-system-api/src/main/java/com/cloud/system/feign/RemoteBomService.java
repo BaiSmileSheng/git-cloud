@@ -2,7 +2,7 @@ package com.cloud.system.feign;
 
 import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.common.core.domain.R;
-import com.cloud.system.domain.entity.CdBom;
+import com.cloud.system.domain.entity.CdBomInfo;
 import com.cloud.system.feign.factory.RemoteBomFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,7 +24,7 @@ public interface RemoteBomService {
      * @return
      */
     @GetMapping("bom/listByProductAndMaterial")
-    CdBom listByProductAndMaterial(@RequestParam("productMaterialCode") String productMaterialCode, @RequestParam("rawMaterialCode") String rawMaterialCode);
+    CdBomInfo listByProductAndMaterial(@RequestParam("productMaterialCode") String productMaterialCode, @RequestParam("rawMaterialCode") String rawMaterialCode);
 
     /**
      * 校验申请数量是否是单耗的整数倍

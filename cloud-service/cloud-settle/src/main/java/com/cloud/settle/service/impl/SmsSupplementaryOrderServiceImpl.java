@@ -12,7 +12,10 @@ import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
 import com.cloud.settle.enums.SupplementaryOrderStatusEnum;
 import com.cloud.settle.mapper.SmsSupplementaryOrderMapper;
 import com.cloud.settle.service.ISmsSupplementaryOrderService;
-import com.cloud.system.domain.entity.*;
+import com.cloud.system.domain.entity.CdBomInfo;
+import com.cloud.system.domain.entity.CdFactoryInfo;
+import com.cloud.system.domain.entity.CdFactoryLineInfo;
+import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.feign.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,7 +149,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
 //        smsSupplementaryOrder.setStuffPrice(cdMaterialPriceInfo.getNetWorth());//单价  取得materialPrice表的净价值
 //        smsSupplementaryOrder.setStuffUnit(cdMaterialPriceInfo.getUnit());
 //        smsSupplementaryOrder.setCurrency(cdMaterialPriceInfo.getCurrency());//币种
-        CdBom cdBom = remoteBomService.listByProductAndMaterial(productMaterialCode, rawMaterialCode);
+        CdBomInfo cdBom = remoteBomService.listByProductAndMaterial(productMaterialCode, rawMaterialCode);
         smsSupplementaryOrder.setSapStoreage(cdBom.getStoragePoint());
         smsSupplementaryOrder.setPurchaseGroupCode(cdBom.getPurchaseGroup());
         smsSupplementaryOrder.setDelFlag("0");
