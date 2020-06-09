@@ -105,6 +105,13 @@ public class CdMaterialInfo extends BaseEntity {
     private Date lastUpdate;
 
     /**
+     * UPH节拍
+     */
+    @ExcelProperty(value = "UPH节拍")
+    @ApiModelProperty(value = "UPH节拍")
+    private BigDecimal uph;
+
+    /**
      * 是否删除0：有效，1：删除
      */
     private String delFlag;

@@ -18,8 +18,18 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @FeignClient(name = ServiceNameConstants.SYSTEM_SERVICE, fallbackFactory = RemoteMaterialFactory.class)
 public interface RemoteMaterialService {
+    /**
+     * 定时任务：获取MDM系统物料主数据
+     * 获取MDM系统物料信息数据并保存
+     */
     @PostMapping("material/saveMaterialInit")
     R saveMaterialInfo();
+    /**
+     * 定时任务：获取UPH数据并更新
+     * 频率：定时任务（获取MDM系统物料信息数据并保存）之后
+     */
+    @PostMapping("material/updateUphBySap")
+    R updateUphBySap();
 
     /**
      * 根据物料号查询物料信息

@@ -114,6 +114,13 @@ public class CdFactoryLineInfo extends BaseEntity {
     private String attribute;
 
     /**
+     * 产品定员
+     */
+    @ExcelProperty(value = "产品定员")
+    @ApiModelProperty(value = "产品定员")
+    private int productQuota;
+
+    /**
      * 是否删除0：有效，1：删除
      */
     private String delFlag;

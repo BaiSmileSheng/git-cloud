@@ -1,27 +1,28 @@
 package com.cloud.job.executor.service.jobhandler;
 
 import com.cloud.common.core.domain.R;
-import com.cloud.common.exception.base.BaseException;
 import com.cloud.system.feign.RemoteMaterialService;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import com.xxl.job.core.log.XxlJobLogger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CdMaterialInfoXxlJob {
-    private static Logger logger = LoggerFactory.getLogger(CdMaterialInfoXxlJob.class);
-
     @Autowired
     private RemoteMaterialService remoteMaterialService;
 
+    /**
+     * @Description: 获取MDM物料主数据信息
+     * @Param: [param]
+     * @return: com.xxl.job.core.biz.model.ReturnT<java.lang.String>
+     * @Author: ltq
+     * @Date: 2020/6/8
+     */
     @XxlJob("cdMaterialInfoXxlJobHandler")
-    public ReturnT<String> cdMaterialInfoXxlJobHandler(String param) throws Exception {
+    public ReturnT<String> cdMaterialInfoXxlJobHandler(String param) {
         XxlJobLogger.log("==============执行获取MDM系统物料主数据定时任务开始============");
-
         try {
             XxlJobLogger.log("==============调用保存物料主数据服务开始============");
             R r = remoteMaterialService.saveMaterialInfo();
@@ -35,6 +36,25 @@ public class CdMaterialInfoXxlJob {
             return ReturnT.FAIL;
         }
         XxlJobLogger.log("==============执行获取MDM系统物料主数据定时任务结束============");
+        return ReturnT.SUCCESS;
+    }
+
+    /**
+     * @Description: 获取UPH数据
+     * @Param: [param]
+     * @return: com.xxl.job.core.biz.model.ReturnT<java.lang.String>
+     * @Author: ltq
+     * @Date: 2020/6/8
+     */
+    @XxlJob("cdMaterialUphXxlJobHandler")
+    public ReturnT<String> cdMaterialUphXxlJobHandler(String param) throws Exception {
+        XxlJobLogger.log("=================获取UPH数据定时任务开始==================");
+        R r = remoteMaterialService.updateUphBySap();
+        if (!r.isSuccess()) {
+            XxlJobLogger.log("==============获取UPH数据失败=============");
+            return ReturnT.FAIL;
+        }
+        XxlJobLogger.log("=================获取UPH数据定时任务结束==================");
         return ReturnT.SUCCESS;
     }
 }

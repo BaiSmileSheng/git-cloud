@@ -15,7 +15,7 @@ spring:
   cloud:
     nacos:
       discovery:
-        namespace: a2eeae72-3ab5-4789-ac7f-7370330f9293
+        namespace: 6715aafb-eb61-4cf5-9342-6fadf96b80ef
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
@@ -68,8 +68,23 @@ spring:
         wall:
           config:
             multi-statement-allow: true
+sap:
+  client800:
+    ashost: 10.135.2.229
+    sysnr: 10
+    client: 300
+    user: A0000363
+    passwd: liuyisi,03
+    lang: ZH
+  client600:
+    ashost: 10.133.28.69
+    sysnr: 00
+    client: 200
+    user: 19046341
+    passwd: 123123
+    lang: ZH
 #seata命名空间
 seata:
   registry:
     nacos:
-      namespace: a2eeae72-3ab5-4789-ac7f-7370330f9293
+      namespace: 6715aafb-eb61-4cf5-9342-6fadf96b80ef

@@ -4,6 +4,17 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import io.swagger.annotations.*;
+import tk.mybatis.mapper.entity.Example;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import com.cloud.common.core.domain.R;
+import com.cloud.common.core.controller.BaseController;
 import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.service.ICdMaterialInfoService;
 import io.swagger.annotations.ApiImplicitParam;
@@ -32,7 +43,7 @@ public class CdMaterialInfoController extends BaseController {
      * 查询物料信息
      */
     @GetMapping("get")
-    @ApiOperation(value = "根据id查询物料信息", response = CdMaterialInfo.class)
+    @ApiOperation(value = "根据id查询物料信息 ", response = CdMaterialInfo.class)
     public CdMaterialInfo get(Long id) {
         return cdMaterialInfoService.selectByPrimaryKey(id);
 
@@ -91,10 +102,23 @@ public class CdMaterialInfoController extends BaseController {
     }
 
     /**
+     * @Description: 查询所有有效的物料数据
+     * @Param: []
+     * @return: com.cloud.common.core.domain.R
+     * @Author: ltq
+     * @Date: 2020/6/8
+     */
+    @PostMapping("selectListByDelFlag")
+    @ApiOperation(value = "查询所有有效的物料数据 ", response = R.class)
+    public R selectListByDelFlag(){
+        List<CdMaterialInfo> cdMaterialInfos = cdMaterialInfoService.select(CdMaterialInfo.builder().delFlag("0").build());
+        return R.data(cdMaterialInfos);
+    }
+
+    /**
      * 获取MDM系统物料信息数据并保存
      */
     @PostMapping("saveMaterialInit")
-    @OperLog(title = "保存接口获取的物料信息 ", businessType = BusinessType.INSERT)
     @ApiOperation(value = "保存接口获取的物料信息 ", response = R.class)
     public R saveMaterialInfo(){return cdMaterialInfoService.saveMaterialInfo();}
 
@@ -111,5 +135,14 @@ public class CdMaterialInfoController extends BaseController {
         return cdMaterialInfoService.findByExampleOne(example);
     }
 
+
+    /**
+     * 更新SAP获取的UPH数据
+     */
+    @PostMapping("updateUphBySap")
+    @ApiOperation(value = "更新SAP获取的UPH数据 ", response = R.class)
+    public R updateUphBySap(){
+        return cdMaterialInfoService.updateUphBySap();
+    }
 
 }

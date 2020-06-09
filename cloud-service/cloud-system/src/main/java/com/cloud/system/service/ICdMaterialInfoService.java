@@ -30,4 +30,20 @@ public interface ICdMaterialInfoService extends BaseService<CdMaterialInfo>{
      * @Date: 2020/5/29
      */
     R materialInfoInterface(List<RowRisk> list, int page, String batchId);
+    /**
+     * @Description: 根据工厂、物料批量更新
+     * @Param: [list]
+     * @return: int
+     * @Author: ltq
+     * @Date: 2020/6/5
+     */
+    int updateBatchByFactoryAndMaterial(List<CdMaterialInfo> list);
+    /**
+     * @Description: 更新SAP获取的UPH数据
+     * @Param: []
+     * @return: com.cloud.common.core.domain.R
+     * @Author: ltq
+     * @Date: 2020/6/8
+     */
+    R updateUphBySap();
     }

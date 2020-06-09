@@ -64,3 +64,18 @@ spring:
         wall:
           config:
             multi-statement-allow: true
+sap:
+  client800:
+    ashost: 10.135.2.229
+    sysnr: 10
+    client: 300
+    user: A0000363
+    passwd: liuyisi,03
+    lang: ZH
+  client600:
+    ashost: 10.133.28.69
+    sysnr: 00
+    client: 200
+    user: 19046341
+    passwd: 123123
+    lang: ZH
