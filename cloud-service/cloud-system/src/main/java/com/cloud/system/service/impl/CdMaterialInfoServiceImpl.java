@@ -4,6 +4,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.common.utils.XmlUtil;
 import com.cloud.system.config.MdmConnConfig;
+import com.cloud.system.service.SystemFromSap600InterfaceService;
 import com.cloud.system.webService.material.GeneralMDMDataReleaseBindingStub;
 import com.cloud.system.webService.material.Generalmdmdatarelease_client_epLocator;
 import com.cloud.system.webService.material.ProcessResponse;
@@ -20,10 +21,7 @@ import com.cloud.common.core.service.impl.BaseServiceImpl;
 import javax.xml.rpc.holders.StringHolder;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 物料信息 Service业务层处理
@@ -38,6 +36,8 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
     private CdMaterialInfoMapper cdMaterialInfoMapper;
     @Autowired
     private MdmConnConfig mdmConnConfig;
+    @Autowired
+    private SystemFromSap600InterfaceService systemFromSap600InterfaceService;
 
     /**
      * @Description: 保存MDM接口获取的物料信息数据
@@ -129,6 +129,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
             cl.add(Calendar.DATE, -1);//减一天
             String startDateString = sft.format(cl.getTime());
             String endDateString = sft.format(endDateTime);
+            long startTime = System.currentTimeMillis(); // 获取开始时间
             //获取链接
             GeneralMDMDataReleaseBindingStub generalMDMDataReleaseBindingStub =
                     (GeneralMDMDataReleaseBindingStub) new Generalmdmdatarelease_client_epLocator(mdmConnConfig).getGeneralMDMDataRelease_pt();
@@ -136,6 +137,8 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
             generalMDMDataReleaseBindingStub.process(mdmConnConfig.getSysName(), mdmConnConfig.getMasterType(),
                     mdmConnConfig.getTableName(), startDateString, endDateString, String.valueOf(page), batchId,
                     outPage, outResult, outRetcode, outAllNum, outPageCon, pageAll, outRetmsg, onBatchId);
+            long endTime = System.currentTimeMillis(); // 获取结束时间
+            log.info("调接口一次往返时间： " + (endTime - startTime) + "ms");
             //判断返回的状态
             if (!"S".equals(outRetcode.value)) {
                 log.error("获取物料主数据接口调用失败:" + outRetmsg.value);
@@ -168,6 +171,63 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
         //递归调用
         materialInfoInterface(list, page, onBatchId.value);
         return r;
+    }
+
+    /**
+     * @Description: 根据工厂、物料批量更新
+     * @Param: [list]
+     * @return: int
+     * @Author: ltq
+     * @Date: 2020/6/5
+     */
+    @Override
+    public int updateBatchByFactoryAndMaterial(List<CdMaterialInfo> list) {
+        return cdMaterialInfoMapper.updateBatchByFactoryAndMaterial(list);
+    }
+
+    /**
+     * 1获取调SAP系统获取UPH接口的入参信息
+     * 2处理UPH接口的入参数据
+     * 3调用SAP系统UPH接口
+     * 4执行更新方法
+     *
+     * @Description: 获取UPH数据并更新
+     * @Param: []
+     * @return: com.cloud.common.core.domain.R
+     * @Author: ltq
+     * @Date: 2020/6/8
+     */
+    @Override
+    public R updateUphBySap() {
+        //1获取调SAP系统获取UPH接口的入参信息
+        List<CdMaterialInfo> list = cdMaterialInfoMapper.select(CdMaterialInfo.builder().delFlag("0").build());
+        //2处理UPH接口的入参数据
+        //工厂set
+        Set<String> factorySet = new HashSet<>();
+        //物料set
+        Set<String> materialSet = new HashSet<>();
+        if (list.size() <= 0) {
+            log.error("查询UPH接口入参数据为空！");
+            return R.error("查询UPH接口入参数据为空！");
+        }
+        //遍历获取生产工厂、物料且去重
+        for (CdMaterialInfo cdMaterialInfo : list) {
+            factorySet.add(cdMaterialInfo.getPlantCode());
+            materialSet.add(cdMaterialInfo.getMaterialCode());
+        }
+        //set ——> List
+        List<String> factorys = new ArrayList<>(factorySet);
+        List<String> materials = new ArrayList<>(materialSet);
+        //3调用SAP系统UPH接口
+        R r = systemFromSap600InterfaceService.queryUphFromSap600(factorys, materials);
+        if (!r.isSuccess()) {
+            log.error("调用SAP系统UPH接口返回数据失败，原因：" + r.get("msg"));
+            return R.error("调用SAP系统UPH接口返回数据失败，原因：" + r.get("msg"));
+        }
+        List<CdMaterialInfo> uphList = (List<CdMaterialInfo>) r.get("data");
+        //4执行更新方法
+        cdMaterialInfoMapper.updateBatchByFactoryAndMaterial(uphList);
+        return R.ok();
     }
 
 }
