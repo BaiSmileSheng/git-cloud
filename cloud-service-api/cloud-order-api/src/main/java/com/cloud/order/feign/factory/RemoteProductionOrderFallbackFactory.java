@@ -6,6 +6,8 @@ import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Slf4j
 @Component
 public class RemoteProductionOrderFallbackFactory implements FallbackFactory<RemoteProductionOrderService> {
@@ -19,6 +21,20 @@ public class RemoteProductionOrderFallbackFactory implements FallbackFactory<Rem
             public OmsProductionOrder selectByProdctOrderCode(String prodctOrderCode) {
                 return null;
             }
+
+            /**
+             * 查询排产订单 列表
+             * @param productEndDateEnd  基本结束时间 结束值
+             * @param actualEndDateStart 实际结束时间 起始值
+             * @param actualEndDateEnd 实际结束时间 结束值
+             * @return 排产订单 列表
+             */
+            @Override
+            public List<OmsProductionOrder> listForDelays(String productEndDateEnd, String actualEndDateStart, String actualEndDateEnd) {
+                return null;
+            }
+
+
         };
     }
 }

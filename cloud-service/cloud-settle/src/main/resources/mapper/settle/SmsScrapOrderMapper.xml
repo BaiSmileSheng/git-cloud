@@ -11,7 +11,7 @@
                     <result property="supplierCode" column="supplier_code"/>
                     <result property="supplierName" column="supplier_name"/>
                     <result property="factoryCode" column="factory_code"/>
-                    <result property="componyCode" column="compony_code"/>
+                    <result property="companyCode" column="company_code"/>
                     <result property="scrapStatus" column="scrap_status"/>
                     <result property="postingNo" column="posting_no"/>
                     <result property="sapTransDate" column="sap_trans_date"/>
@@ -35,7 +35,7 @@
                     </resultMap>
 
     <sql id="selectSmsScrapOrderVo">
-        select id, scrap_no, product_order_code, supplier_code, supplier_name, factory_code, compony_code, scrap_status, posting_no, sap_trans_date, product_material_code, product_material_name, scrap_amount, material_price, scrap_price, machining_price, settle_no, settle_fee, cash_amount, uncash_amount, submit_date, del_flag, remark, create_by, create_time, update_by, update_time from sms_scrap_order
+        select id, scrap_no, product_order_code, supplier_code, supplier_name, factory_code, company_code, scrap_status, posting_no, sap_trans_date, product_material_code, product_material_name, scrap_amount, material_price, scrap_price, machining_price, settle_no, settle_fee, cash_amount, uncash_amount, submit_date, del_flag, remark, create_by, create_time, update_by, update_time from sms_scrap_order
     </sql>
 
 

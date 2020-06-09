@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
+import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
@@ -12,6 +13,7 @@ import com.cloud.settle.enums.DeplayStatusEnum;
 import com.cloud.settle.service.ISmsDelaysDeliveryService;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.enums.UserTypeEnum;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -27,7 +29,6 @@ import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.Date;
 import java.util.List;
 /**
  * 延期交付索赔  提供者
@@ -37,6 +38,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("delaysDelivery")
+@Api(tags = "延期交付索赔提供者")
 public class SmsDelaysDeliveryController extends BaseController {
 
     @Autowired
@@ -87,6 +89,45 @@ public class SmsDelaysDeliveryController extends BaseController {
 
     })
     public TableDataInfo list(@ApiIgnore SmsDelaysDelivery smsDelaysDelivery) {
+        Example example = assemblyConditions(smsDelaysDelivery);
+        startPage();
+        List<SmsDelaysDelivery> smsDelaysDeliveryList = smsDelaysDeliveryService.selectByExample(example);
+        return getDataTable(smsDelaysDeliveryList);
+    }
+
+    /**
+     * 导出延期交付索赔 列表
+     * @param smsDelaysDelivery
+     * @return 延期交付索赔列表
+     */
+    @GetMapping("export")
+    @ApiOperation(value = "导出延期交付索赔 列表", response = SmsDelaysDelivery.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "delaysNo", value = "索赔单号", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "supplierCode", value = "供应商编号", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "delaysStatus", value = "索赔状态", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productLineCode", value = "线体号", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productOrderCode", value = "生成订单号", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "beginTime", value = "开始时间", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", required = false,paramType = "query", dataType = "String"),
+    })
+    public R export(SmsDelaysDelivery smsDelaysDelivery) {
+        Example example = assemblyConditions(smsDelaysDelivery);
+        List<SmsDelaysDelivery> smsDelaysDeliveryList = smsDelaysDeliveryService.selectByExample(example);
+        for(SmsDelaysDelivery smsDelaysDeliveryRes : smsDelaysDeliveryList){
+            String delaysStatus = smsDelaysDeliveryRes.getDelaysStatus();
+            smsDelaysDeliveryRes.setDelaysStatus(DeplayStatusEnum.getMsgByCode(delaysStatus));
+        }
+        String fileName = "延期交付索赔 .xlsx";
+        return EasyExcelUtil.writeExcel(smsDelaysDeliveryList,fileName,fileName,new SmsDelaysDelivery());
+    }
+
+    /**
+     * 组装查询条件
+     * @param smsDelaysDelivery 延期索赔信息
+     * @return
+     */
+    private Example assemblyConditions(SmsDelaysDelivery smsDelaysDelivery){
         Example example = new Example(SmsDelaysDelivery.class);
         Example.Criteria criteria = example.createCriteria();
         if(StringUtils.isNotBlank(smsDelaysDelivery.getDelaysNo())){
@@ -117,9 +158,7 @@ public class SmsDelaysDeliveryController extends BaseController {
             String supplierCode = sysUser.getSupplierCode();
             criteria.andEqualTo("supplierCode",supplierCode);
         }
-        startPage();
-        List<SmsDelaysDelivery> smsDelaysDeliveryList = smsDelaysDeliveryService.selectByExample(example);
-        return getDataTable(smsDelaysDeliveryList);
+        return example;
     }
 
     /**
@@ -194,6 +233,26 @@ public class SmsDelaysDeliveryController extends BaseController {
     @ApiOperation(value = "供应商确认延期索赔单", response = SmsDelaysDelivery.class)
     public R supplierConfirm(String ids){
         return smsDelaysDeliveryService.supplierConfirm(ids);
+    }
+
+    /**
+     * 48H超时未确认发送邮件
+     * @return 成功或失败
+     */
+    @PostMapping("overTimeSendMail")
+    @ApiOperation(value = "48H超时未确认发送邮件 ", response = SmsDelaysDelivery.class)
+    public R overTimeSendMail(){
+        return smsDelaysDeliveryService.overTimeSendMail();
+    }
+
+    /**
+     * 72H超时供应商自动确认
+     * @return 成功或失败
+     */
+    @PostMapping("overTimeConfim")
+    @ApiOperation(value = "72H超时供应商自动确认 ", response = SmsDelaysDelivery.class)
+    public R overTimeConfim(){
+        return smsDelaysDeliveryService.overTimeConfim();
     }
 
 }

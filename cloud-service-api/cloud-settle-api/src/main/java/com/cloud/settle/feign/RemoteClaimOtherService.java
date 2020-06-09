@@ -56,4 +56,18 @@ public interface RemoteClaimOtherService {
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     R supplierAppeal(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestParam("files") MultipartFile[] files);
 
+    /**
+     * 48H超时未确认发送邮件
+     * @return 成功或失败
+     */
+    @PostMapping("claimOther/overTimeSendMail")
+    R overTimeSendMail();
+
+    /**
+     * 72H超时供应商自动确认
+     * @return 成功或失败
+     */
+    @PostMapping("claimOther/overTimeConfim")
+    R overTimeConfim();
+
 }

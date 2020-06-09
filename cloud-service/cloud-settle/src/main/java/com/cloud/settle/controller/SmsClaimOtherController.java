@@ -1,9 +1,11 @@
 package com.cloud.settle.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
+import com.cloud.settle.enums.ClaimOtherStatusEnum;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.enums.UserTypeEnum;
 import io.swagger.annotations.Api;
@@ -17,7 +19,6 @@ import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,6 +39,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("claimOther")
+@Api(tags = "其他索赔 提供者")
 public class SmsClaimOtherController extends BaseController {
 
     @Autowired
@@ -67,6 +69,7 @@ public class SmsClaimOtherController extends BaseController {
 
     }
 
+
     /**
      * 查询其他索赔列表
      */
@@ -84,6 +87,43 @@ public class SmsClaimOtherController extends BaseController {
             @ApiImplicitParam(name = "endTime", value = "结束时间", required = false, paramType = "query", dataType = "String")
     })
     public TableDataInfo list(@ApiIgnore SmsClaimOther smsClaimOther) {
+        Example example = assemblyConditions(smsClaimOther);
+        startPage();
+        List<SmsClaimOther> smsClaimOtherList = smsClaimOtherService.selectByExample(example);
+        return getDataTable(smsClaimOtherList);
+    }
+
+    /**
+     * 导出其他索赔列表
+     * @param smsClaimOther 其他索赔查询条件
+     * @return
+     */
+    @GetMapping("export")
+    @ApiOperation(value = "导出其他索赔列表", response = SmsClaimOther.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "claimCode", value = "索赔单号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "supplierCode", value = "供应商编号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "claimOtherStatus", value = "状态", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "beginTime", value = "开始时间", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", required = false, paramType = "query", dataType = "String")
+    })
+    public R export(@ApiIgnore SmsClaimOther smsClaimOther) {
+        Example example = assemblyConditions(smsClaimOther);
+        List<SmsClaimOther> smsClaimOtherList = smsClaimOtherService.selectByExample(example);
+        for(SmsClaimOther smsClaimOtherRes : smsClaimOtherList){
+            String claimOtherStatus = smsClaimOtherRes.getClaimOtherStatus();
+            smsClaimOtherRes.setClaimOtherStatus(ClaimOtherStatusEnum.getMsgByCode(claimOtherStatus));
+        }
+        String fileName = "其他索赔.xlsx";
+        return EasyExcelUtil.writeExcel(smsClaimOtherList,fileName,fileName,new SmsClaimOther());
+    }
+
+    /**
+     * 组装查询条件
+     * @param smsClaimOther 其他索赔
+     * @return
+     */
+    private Example assemblyConditions(SmsClaimOther smsClaimOther){
         Example example = new Example(SmsClaimOther.class);
         Example.Criteria criteria = example.createCriteria();
         if(StringUtils.isNotBlank(smsClaimOther.getClaimCode())){
@@ -109,9 +149,7 @@ public class SmsClaimOtherController extends BaseController {
             String supplierCode = sysUser.getSupplierCode();
             criteria.andEqualTo("supplierCode", supplierCode);
         }
-        startPage();
-        List<SmsClaimOther> smsClaimOtherList = smsClaimOtherService.selectByExample(example);
-        return getDataTable(smsClaimOtherList);
+        return example;
     }
 
     /**
@@ -201,5 +239,25 @@ public class SmsClaimOtherController extends BaseController {
     public R supplierAppeal(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestParam("files") MultipartFile[] files) {
         SmsClaimOther smsClaimOther = JSONObject.parseObject(smsClaimOtherReq,SmsClaimOther.class);
         return smsClaimOtherService.supplierAppeal(smsClaimOther,files);
+    }
+
+    /**
+     * 48H超时未确认发送邮件
+     * @return 成功或失败
+     */
+    @PostMapping("overTimeSendMail")
+    @ApiOperation(value = "48H超时未确认发送邮件 ", response = SmsClaimOther.class)
+    public R overTimeSendMail(){
+        return smsClaimOtherService.overTimeSendMail();
+    }
+
+    /**
+     * 72H超时供应商自动确认
+     * @return 成功或失败
+     */
+    @PostMapping("overTimeConfim")
+    @ApiOperation(value = "72H超时供应商自动确认 ", response = SmsClaimOther.class)
+    public R overTimeConfim(){
+        return smsClaimOtherService.overTimeConfim();
     }
 }

@@ -11,7 +11,7 @@
         <result property="supplierCode" column="supplier_code"/>
         <result property="supplierName" column="supplier_name"/>
         <result property="factoryCode" column="factory_code"/>
-        <result property="componyCode" column="compony_code"/>
+        <result property="companyCode" column="company_code"/>
         <result property="claimReson" column="claim_reson"/>
         <result property="claimPrice" column="claim_price"/>
         <result property="claimOtherStatus" column="claim_other_status"/>
@@ -38,7 +38,7 @@
                supplier_code,
                supplier_name,
                factory_code,
-               compony_code,
+               company_code,
                claim_reson,
                claim_price,
                claim_other_status,

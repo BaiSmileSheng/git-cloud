@@ -34,4 +34,13 @@ public enum ClaimOtherStatusEnum {
     public String getMsg() {
         return msg;
     }
+
+    public static String getMsgByCode(String code) {
+        for (ClaimOtherStatusEnum enums : ClaimOtherStatusEnum.values()) {
+            if (enums.getCode().equals(code)) {
+                return enums.getMsg();
+            }
+        }
+        return "";
+    }
 }
