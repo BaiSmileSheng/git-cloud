@@ -4,6 +4,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.settle.domain.entity.SmsMouthSettle;
+import com.cloud.settle.enums.MonthSettleStatusEnum;
+import com.cloud.settle.service.ISmsMouthSettleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,14 +36,22 @@ public class SmsInvoiceInfoServiceImpl extends BaseServiceImpl<SmsInvoiceInfo> i
     @Autowired
     private SmsInvoiceInfoMapper smsInvoiceInfoMapper;
 
+    @Autowired
+    private ISmsMouthSettleService smsMouthSettleService;
+
     /**
      * 批量新增或修改保存发票信息
      * @param smsInvoiceInfo 发票信息集合
      */
     @Override
     public R batchAddSaveOrUpdate(SmsInvoiceInfo smsInvoiceInfo) {
-        //TODO 月度结算 状态是待结算的才可以
+        SmsInvoiceInfo smsInvoiceInfoFist = smsInvoiceInfo.getSmsInvoiceInfoList().get(0);
+        String mouthSettleId = smsInvoiceInfoFist.getMouthSettleId();
         logger.info("批量新增或修改保存发票信息 结算单号:{}",smsInvoiceInfo.getMouthSettleId());
+        SmsMouthSettle smsMouthSettle = smsMouthSettleService.selectByPrimaryKey(mouthSettleId);
+        if(null == smsMouthSettle || !MonthSettleStatusEnum.YD_SETTLE_STATUS_DJS.getCode().equals(smsMouthSettle.getSettleStatus())){
+            throw new BusinessException("月度结算单已确认,不允许修改发票");
+        }
         List<SmsInvoiceInfo> smsInvoiceInfoList = smsInvoiceInfo.getSmsInvoiceInfoList();
         //新增的
         List<SmsInvoiceInfo> smsInvoiceInfoAddList = new ArrayList<>();
