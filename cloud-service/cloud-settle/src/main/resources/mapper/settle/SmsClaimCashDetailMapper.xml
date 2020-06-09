@@ -37,5 +37,20 @@
         from sms_claim_cash_detail
     </sql>
 
+    <select id="selectSumCashGroupByClaimTypeActual" resultType="java.util.HashMap">
+        select claim_type as claimType, SUM(cash_amount) as cashAmountSum
+        from sms_claim_cash_detail
+        WHERE settle_no = #{settleNo}
+          and should_cash_mounth = actual_cash_mounth
+        GROUP BY claim_type
+    </select>
+
+    <select id="selectSumCashGroupByClaimTypeHistory" resultType="java.util.HashMap">
+        select claim_type as claimType, SUM(cash_amount) as cashAmountSum
+        from sms_claim_cash_detail
+        WHERE settle_no = #{settleNo}
+        and should_cash_mounth != actual_cash_mounth
+        GROUP BY claim_type
+    </select>
 
 </mapper>

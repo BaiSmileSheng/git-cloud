@@ -6,10 +6,11 @@
 
     <resultMap type="SmsMouthSettle" id="SmsMouthSettleResult">
         <result property="id" column="id"/>
+        <result property="settleNo" column="settle_no"/>
         <result property="dataMoth" column="data_moth"/>
         <result property="supplierCode" column="supplier_code"/>
         <result property="supplierName" column="supplier_name"/>
-        <result property="componyCode" column="compony_code"/>
+        <result property="companyCode" column="company_code"/>
         <result property="machiningAmount" column="machining_amount"/>
         <result property="claimAmount" column="claim_amount"/>
         <result property="noCashAmount" column="no_cash_amount"/>
@@ -31,10 +32,11 @@
 
     <sql id="selectSmsMouthSettleVo">
         select id,
+               settle_no,
                data_moth,
                supplier_code,
                supplier_name,
-               compony_code,
+               company_code,
                machining_amount,
                claim_amount,
                no_cash_amount,
