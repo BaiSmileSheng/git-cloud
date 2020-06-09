@@ -1,5 +1,7 @@
 package com.cloud.settle.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
@@ -9,17 +11,22 @@ import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.feign.RemoteProductionOrderService;
 import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
+import com.cloud.settle.enums.CurrencyEnum;
 import com.cloud.settle.enums.SupplementaryOrderStatusEnum;
 import com.cloud.settle.mapper.SmsSupplementaryOrderMapper;
 import com.cloud.settle.service.ISmsSupplementaryOrderService;
 import com.cloud.system.domain.entity.*;
+import com.cloud.system.enums.SettleRatioEnum;
 import com.cloud.system.feign.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 物耗申请单 Service业务层处理
@@ -46,6 +53,12 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
     private RemoteFactoryInfoService remoteFactoryInfoService;
     @Autowired
     private RemoteMaterialService remoteMaterialService;
+    @Autowired
+    private RemoteCdMaterialPriceInfoService remoteCdMaterialPriceInfoService;
+    @Autowired
+    private RemoteCdMouthRateService remoteCdMouthRateService;
+    @Autowired
+    private RemoteSettleRatioService remoteSettleRatioService;
     /**
      * 编辑保存物耗申请单功能  --有逻辑校验
      * @param smsSupplementaryOrder
@@ -96,6 +109,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
      * @return id
      */
     @Override
+    @Transactional
     public R addSave(SmsSupplementaryOrder smsSupplementaryOrder) {
         log.info(StrUtil.format("物耗申请新增保存开始：参数为{}", smsSupplementaryOrder.toString()));
         String productOrderCode = smsSupplementaryOrder.getProductOrderCode();
@@ -108,16 +122,6 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         OmsProductionOrder omsProductionOrder = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
         String productMaterialCode = omsProductionOrder.getProductMaterialCode();
         String rawMaterialCode = smsSupplementaryOrder.getRawMaterialCode();
-
-
-//        //根据物料号  有效期查询SAP价格
-//        String date = DateUtils.getTime();
-//        List<CdMaterialPriceInfo> materialPrices = remoteCdMaterialPriceInfoService.findByMaterialCode(rawMaterialCode,date,date);
-//        if (materialPrices == null || materialPrices.size() == 0) {
-//            log.error(StrUtil.format("(物耗)物料成本价格未维护!参数为{}", rawMaterialCode));
-//            return R.error("物料成本价格未维护！");
-//        }
-//        CdMaterialPriceInfo cdMaterialPriceInfo = materialPrices.get(0);
 
         //开始插入
         String seq = remoteSequeceService.selectSeq("supplementary_seq", 4);
@@ -142,10 +146,6 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         if (StrUtil.isBlank(smsSupplementaryOrder.getStuffStatus())) {
             smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DTJ.getCode());//状态：待提交
         }
-        //改为月度结算时候取值
-//        smsSupplementaryOrder.setStuffPrice(cdMaterialPriceInfo.getNetWorth());//单价  取得materialPrice表的净价值
-//        smsSupplementaryOrder.setStuffUnit(cdMaterialPriceInfo.getUnit());
-//        smsSupplementaryOrder.setCurrency(cdMaterialPriceInfo.getCurrency());//币种
         CdBom cdBom = remoteBomService.listByProductAndMaterial(productMaterialCode, rawMaterialCode);
         smsSupplementaryOrder.setSapStoreage(cdBom.getStoragePoint());
         smsSupplementaryOrder.setPurchaseGroupCode(cdBom.getPurchaseGroup());
@@ -168,6 +168,70 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
     @Override
     public List<SmsSupplementaryOrder> selectByMonthAndStatus(String month, List<String> stuffStatus) {
         return smsSupplementaryOrderMapper.selectByMonthAndStatus(month,stuffStatus);
+    }
+
+    /**
+     * 定时任务更新指定月份原材料价格到物耗表
+     * @return
+     */
+    @Override
+    @Transactional
+    public R updatePriceEveryMonth(String month) {
+        //查询指定月、待结算的物耗申请中的物料号  用途是查询SAP成本价 更新到物耗表
+        List<String> materialCodeList = smsSupplementaryOrderMapper.selectMaterialByMonthAndStatus(month, CollUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode()));
+        Map<String, CdMaterialPriceInfo> mapMaterialPrice = new ConcurrentHashMap<>();
+        if (materialCodeList != null) {
+            log.info(StrUtil.format("(定时任务)物耗申请需要更新成本价格的物料号:{}", materialCodeList.toString()));
+            String now = DateUtil.now();
+            String materialCodeStr = StrUtil.join(",", materialCodeList);
+            //根据前面查出的物料号查询SAP成本价 map key:物料号  value:CdMaterialPriceInfo
+            mapMaterialPrice = remoteCdMaterialPriceInfoService.selectPriceByInMaterialCodeAndDate(materialCodeStr, now, now);
+        }
+        //查询指定月汇率
+        R rRate = remoteCdMouthRateService.findRateByYearMouth(month);
+        if (!rRate.isSuccess()) {
+            throw new BusinessException(StrUtil.format("{}月份未维护费率", month));
+        }
+        BigDecimal rate = new BigDecimal(rRate.get("data").toString());//汇率
+        //物耗索赔系数
+        CdSettleRatio cdSettleRatioWH = remoteSettleRatioService.selectByClaimType(SettleRatioEnum.SPLX_WH.getCode());
+        if (cdSettleRatioWH == null) {
+            log.error("物耗索赔系数未维护！");
+            throw new BusinessException("物耗索赔系数未维护！");
+        }
+        //取得计算月份、待结算的物耗申请数据
+        List<SmsSupplementaryOrder> smsSupplementaryOrderList = selectByMonthAndStatus(month, CollUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode()));
+        //循环物耗，更新成本价格，计算索赔金额
+        if (smsSupplementaryOrderList != null) {
+            for (SmsSupplementaryOrder smsSupplementaryOrder : smsSupplementaryOrderList) {
+                CdMaterialPriceInfo cdMaterialPriceInfo = mapMaterialPrice.get(smsSupplementaryOrder.getRawMaterialCode()+smsSupplementaryOrder.getPurchaseGroupCode());
+                if (cdMaterialPriceInfo == null) {
+                    //如果没有找到SAP价格，则更新备注
+                    log.info(StrUtil.format("(月度结算定时任务)SAP价格未同步的物料号:{}", smsSupplementaryOrder.getRawMaterialCode()));
+                    smsSupplementaryOrder.setRemark("SAP价格未同步！");
+                    updateByPrimaryKeySelective(smsSupplementaryOrder);
+                    continue;
+                }
+                smsSupplementaryOrder.setStuffPrice(cdMaterialPriceInfo.getNetWorth());//单价  取得materialPrice表的净价值
+                smsSupplementaryOrder.setStuffUnit(cdMaterialPriceInfo.getUnit());
+                smsSupplementaryOrder.setCurrency(cdMaterialPriceInfo.getCurrency());//币种
+                //索赔金额=物耗数量* 原材料单价*物耗申请系数
+                BigDecimal spPrice;//索赔金额
+                BigDecimal stuffAmount = new BigDecimal(smsSupplementaryOrder.getStuffAmount());//物耗数量
+                BigDecimal stuffPrice = smsSupplementaryOrder.getStuffPrice();//原材料单价
+                BigDecimal ratio = cdSettleRatioWH.getRatio();//物耗索赔系数
+                spPrice = stuffAmount.multiply(stuffPrice.multiply(ratio));
+                if (CurrencyEnum.CURRENCY_USD.getCode().equals(smsSupplementaryOrder.getCurrency())) {
+                    //如果是美元，还要*汇率
+                    spPrice = spPrice.multiply(rate);
+                    smsSupplementaryOrder.setRate(rate);
+                }
+                smsSupplementaryOrder.setSettleFee(spPrice);
+            }
+            //更新
+            updateBatchByPrimaryKeySelective(smsSupplementaryOrderList);
+        }
+        return R.ok();
     }
 
     /**

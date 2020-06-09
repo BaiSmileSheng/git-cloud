@@ -23,11 +23,11 @@ public interface ICdMaterialPriceInfoService extends BaseService<CdMaterialPrice
     R checkSynchroSAP(String materialCode);
 
     /**
-     * 根据物料号查询
+     * 根据物料号和采购组织分组查询
      * @param materialCodes
      * @param beginDate
      * @param endDate
-     * @return Map<materialCode,CdMaterialPriceInfo>
+     * @return Map<materialCode+organization,CdMaterialPriceInfo>
      */
     Map<String, CdMaterialPriceInfo> selectPriceByInMaterialCodeAndDate(List<String> materialCodes,
                                                                         String beginDate,
