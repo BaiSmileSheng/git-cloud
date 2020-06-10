@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -1113,12 +1114,80 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
             //小微主确认
             smsMouthSettle.setSettleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_XWZQR.getCode());
             updateByPrimaryKeySelective(smsMouthSettle);
-            //TODO：传KMS
+            //传KMS
+            createMultiItemClaim(smsMouthSettle);
 
         }else{
             return R.error("状态错误！");
         }
         return R.ok();
 
+    }
+
+    /**
+     * 创建报账单并修改月度结算状态回填kems单号
+     * @param smsMouthSettle
+     * @return
+     * @throws Exception
+     */
+    private R createMultiItemClaim(SmsMouthSettle smsMouthSettle){
+        //1.创建报账单
+        BaseMultiItemClaimSaveRequest baseMultiItemClaimSaveRequest = getBaseMultiItemClaimSaveRequest(smsMouthSettle);
+        BaseClaimResponse baseClaimResponse = baseMutilItemService.createMultiItemClaim(baseMultiItemClaimSaveRequest);
+        if(null == baseClaimResponse){
+            log.error("调用创建报账单接口异常 req:{},res:{}", JSONObject.toJSONString(baseMultiItemClaimSaveRequest),
+                    JSONObject.toJSON(baseClaimResponse));
+            throw new BusinessException("调用创建报账单接口异常");
+        }
+        if(BaseMultiItemClaimStatusEnum.FAIL.getCode().equals(baseClaimResponse.getSuccessFlag())){
+            log.error("调用创建报账单接口失败req:{},res:{}", JSONObject.toJSONString(baseMultiItemClaimSaveRequest),
+                    JSONObject.toJSON(baseClaimResponse));
+            String failReason = baseClaimResponse.getFailReason();
+            throw new BusinessException("调用创建报账单接口失败" + failReason);
+        }
+        //2.创建报账单成功后修改月度结算状态回填kems单号
+        SmsMouthSettle smsMouthSettleReq = new SmsMouthSettle();
+        smsMouthSettleReq.setId(smsMouthSettle.getId());
+        smsMouthSettleReq.setSettleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_DFK.getCode());
+        smsMouthSettleReq.setKmsNo(baseClaimResponse.getGemsDocNo());
+        smsMouthSettleMapper.updateByPrimaryKeySelective(smsMouthSettle);
+        return R.ok();
+    }
+
+    /**
+     * 组装报账单参数
+     * @param smsMouthSettle
+     * @return
+     * @throws Exception
+     */
+    private BaseMultiItemClaimSaveRequest getBaseMultiItemClaimSaveRequest(SmsMouthSettle smsMouthSettle){
+        String settleNo = smsMouthSettle.getSettleNo();
+        BaseMultiItemClaimSaveRequest baseMultiItemClaimSaveRequest = new BaseMultiItemClaimSaveRequest();
+        baseMultiItemClaimSaveRequest.setCompanyCode(smsMouthSettle.getCompanyCode());
+        baseMultiItemClaimSaveRequest.setVendorCode(smsMouthSettle.getSupplierCode());
+        baseMultiItemClaimSaveRequest.setOriginDocNo(smsMouthSettle.getSettleNo());
+        //根据结算单号查发票信息
+        Example example = new Example(SmsInvoiceInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("mouthSettleId",settleNo);
+        List<SmsInvoiceInfo> smsInvoiceInfoList = smsInvoiceInfoService.selectByExample(example);
+        if(CollectionUtils.isEmpty(smsInvoiceInfoList)){
+            log.error("生成报账单时根据根据结算单号查发票信息不存在 mouthSettleId:{}",settleNo);
+            throw new BusinessException("根据结算单号查发票信息不存在");
+        }
+        //转换对象
+        List<BaseClaimDetail> claimDetailList = new ArrayList<>();
+        for(SmsInvoiceInfo smsInvoiceInfo : smsInvoiceInfoList){
+            BaseClaimDetail baseClaimDetail = new BaseClaimDetail();
+            baseClaimDetail.setApplyAmount(smsInvoiceInfo.getInvoiceAmount());
+            baseClaimDetail.setInvoiceNo(smsInvoiceInfo.getInvoiceNo());
+            XMLGregorianCalendar invoiceDate = DateUtils.convertToXMLGregorianCalendar(smsInvoiceInfo.getInvoiceDate());
+            baseClaimDetail.setInvoiceDate(invoiceDate);
+            baseClaimDetail.setTaxRate(smsInvoiceInfo.getInvoiceRate());
+            baseClaimDetail.setTaxAmount(smsInvoiceInfo.getTaxAmount());
+            claimDetailList.add(baseClaimDetail);
+        }
+        baseMultiItemClaimSaveRequest.setClaimDetailList(claimDetailList);
+        return baseMultiItemClaimSaveRequest;
     }
 }

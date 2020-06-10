@@ -66,12 +66,6 @@ public class BaseMutilItemServiceServiceImpl implements IBaseMutilItemService {
         javax.xml.ws.Service service = javax.xml.ws.Service.create(url, qName);
         IfBaseClaimService ifBaseClaimService = service.getPort(IfBaseClaimService.class);
 
-        BindingProvider bindingProvider = (BindingProvider) ifBaseClaimService;
-        Map<String, Object> requestContext = bindingProvider.getRequestContext();
-        requestContext.put("com.sun.xml.internal.ws.connection.timeout", 10 * 1000);//建立连接的超时时间为10秒
-        requestContext.put("com.sun.xml.internal.ws.request.timeout", 15 * 1000);
-
-
         baseMultiItemClaimSaveRequest.setApplyDate(DateUtils.getDate());//申请日期
         baseMultiItemClaimSaveRequest.setPaybleDate(DateUtils.getDate());//计划付款日期
         //设置申请人
