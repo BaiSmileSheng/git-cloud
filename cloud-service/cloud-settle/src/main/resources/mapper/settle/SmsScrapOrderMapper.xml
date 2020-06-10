@@ -96,4 +96,21 @@
             and del_flag='0'
         </where>
     </select>
+
+    <select id="selectMaterialAndCompanyCodeGroupBy" resultType="java.util.HashMap">
+        select product_material_code as materialCode,company_code as companyCode
+        from sms_scrap_order
+        <where>
+            <if test="month != null">
+                DATE_FORMAT(sap_trans_date, '%Y%m') = #{month}
+            </if>
+            AND scrap_status in
+            <foreach collection="scrapStatus" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+            and del_flag='0'
+        </where>
+        GROUP BY product_material_code,company_code
+    </select>
+
 </mapper>

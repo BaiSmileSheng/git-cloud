@@ -14,6 +14,7 @@ import com.cloud.settle.enums.ScrapOrderStatusEnum;
 import com.cloud.settle.service.ISmsScrapOrderService;
 import com.cloud.settle.util.DataScopeUtil;
 import com.cloud.system.domain.entity.SysUser;
+import com.sap.conn.jco.JCoException;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -141,6 +142,17 @@ public class SmsScrapOrderController extends BaseController {
     @ApiParam(name = "ids", value = "需删除数据的id")
     public R remove(@RequestBody String ids) {
         return smsScrapOrderService.remove(ids);
+    }
+
+    /**
+     * 定时任务更新指定月份SAP销售价格
+     * @param month
+     * @return
+     */
+    @GetMapping("updateSAPPriceEveryMonth")
+    @ApiOperation(value = "定时任务更新指定月份销售价格 ", response = R.class)
+    public R updateSAPPriceEveryMonth(String month) throws JCoException {
+        return smsScrapOrderService.updateSAPPriceEveryMonth(month);
     }
 
     /**

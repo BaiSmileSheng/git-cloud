@@ -5,6 +5,7 @@ import com.cloud.settle.domain.entity.SmsScrapOrder;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 报废申请 Mapper接口
@@ -28,5 +29,14 @@ public interface SmsScrapOrderMapper extends BaseMapper<SmsScrapOrder>{
      * @return
      */
     List<String> selectMaterialByMonthAndStatus(@Param("month") String month,@Param("scrapStatus") List<String> scrapStatus);
+
+
+    /**
+     * 查询指定月份应更新的销售价格的专用号和公司
+     * @param month
+     * @param scrapStatus
+     * @return
+     */
+    List<Map<String,String>> selectMaterialAndCompanyCodeGroupBy(@Param("month") String month, @Param("scrapStatus") List<String> scrapStatus);
 
 }
