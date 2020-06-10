@@ -1,10 +1,12 @@
 package com.cloud.settle.controller;
+
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
+import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
@@ -150,5 +152,46 @@ public class SmsScrapOrderController extends BaseController {
     @ApiOperation(value = "定时任务更新指定月份销售价格到报废表 ", response = R.class)
     public R updatePriceEveryMonth(String month){
         return smsScrapOrderService.updatePriceEveryMonth(month);
+    }
+
+    /**
+     * 查询报废申请 导出
+     */
+    @GetMapping("export")
+    @ApiOperation(value = "报废申请 导出", response = SmsScrapOrder.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "scrapNo", value = "报废单号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productOrderCode", value = "生产订单号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "supplierCode", value = "供应商编码", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "supplierName", value = "供应商名称", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "scrapStatus", value = "报废状态", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productMaterialCode", value = "专用号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "beginTime", value = "创建日期", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "endTime", value = "到", required = false, paramType = "query", dataType = "String")
+    })
+    public R export(@ApiIgnore() SmsScrapOrder smsScrapOrder) {
+        Example example = new Example(SmsScrapOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo(smsScrapOrder);
+        if(StrUtil.isNotEmpty(smsScrapOrder.getEndTime())){
+            criteria.andLessThanOrEqualTo("createTime", smsScrapOrder.getEndTime());
+        }
+        if(StrUtil.isNotEmpty(smsScrapOrder.getBeginTime())){
+            criteria.andGreaterThanOrEqualTo("createTime", smsScrapOrder.getBeginTime());
+        }
+        //供应商：查询本工厂的    业务科：查询
+        SysUser sysUser = getUserInfo(SysUser.class);
+        if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
+            //供应商查询自己工厂下的申请单
+            criteria.andLike("supplierCode", sysUser.getSupplierCode());
+        }else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
+            if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_YWK)){
+                //业务科查询已提交状态自己管理工厂的申请单  采购组权限：sys_data_scope  例：8310,8410
+                criteria.andEqualTo("scrapStatus", ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
+                criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+            }
+        }
+        List<SmsScrapOrder> smsScrapOrderList = smsScrapOrderService.selectByExample(example);
+        return EasyExcelUtil.writeExcel(smsScrapOrderList,"报废申请.xlsx","sheet",new SmsScrapOrder());
     }
 }
