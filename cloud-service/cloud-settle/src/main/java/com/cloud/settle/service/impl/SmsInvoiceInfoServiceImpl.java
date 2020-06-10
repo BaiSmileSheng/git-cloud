@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.settle.domain.entity.PO.SmsInvoiceInfoS;
 import com.cloud.settle.domain.entity.SmsMouthSettle;
 import com.cloud.settle.enums.MonthSettleStatusEnum;
 import com.cloud.settle.service.ISmsMouthSettleService;
@@ -17,7 +18,9 @@ import com.cloud.settle.service.ISmsInvoiceInfoService;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -41,18 +44,21 @@ public class SmsInvoiceInfoServiceImpl extends BaseServiceImpl<SmsInvoiceInfo> i
 
     /**
      * 批量新增或修改保存发票信息
-     * @param smsInvoiceInfo 发票信息集合
+     * @param smsInvoiceInfoS 发票信息集合
      */
     @Override
-    public R batchAddSaveOrUpdate(SmsInvoiceInfo smsInvoiceInfo) {
-        SmsInvoiceInfo smsInvoiceInfoFist = smsInvoiceInfo.getSmsInvoiceInfoList().get(0);
-        String mouthSettleId = smsInvoiceInfoFist.getMouthSettleId();
-        logger.info("批量新增或修改保存发票信息 结算单号:{}",smsInvoiceInfo.getMouthSettleId());
-        SmsMouthSettle smsMouthSettle = smsMouthSettleService.selectByPrimaryKey(mouthSettleId);
+    public R batchAddSaveOrUpdate(SmsInvoiceInfoS smsInvoiceInfoS) {
+        String mouthSettleId = smsInvoiceInfoS.getMouthSettleId();
+        logger.info("批量新增或修改保存发票信息 结算单号:{}",mouthSettleId);
+        //1.校验状态,只有待结算才可以录入发票
+        Example example= new Example(SmsMouthSettle.class);
+        Example.Criteria criteria= example.createCriteria();
+        criteria.andEqualTo("settleNo",mouthSettleId);
+        SmsMouthSettle smsMouthSettle = smsMouthSettleService.selectOneByExample(example);
         if(null == smsMouthSettle || !MonthSettleStatusEnum.YD_SETTLE_STATUS_DJS.getCode().equals(smsMouthSettle.getSettleStatus())){
             throw new BusinessException("月度结算单已确认,不允许修改发票");
         }
-        List<SmsInvoiceInfo> smsInvoiceInfoList = smsInvoiceInfo.getSmsInvoiceInfoList();
+        List<SmsInvoiceInfo> smsInvoiceInfoList = smsInvoiceInfoS.getSmsInvoiceInfoList();
         //新增的
         List<SmsInvoiceInfo> smsInvoiceInfoAddList = new ArrayList<>();
         //修改的
@@ -61,11 +67,13 @@ public class SmsInvoiceInfoServiceImpl extends BaseServiceImpl<SmsInvoiceInfo> i
             if(null != smsInvoiceInfoReq.getId()){
                 smsInvoiceInfoUpdateList.add(smsInvoiceInfoReq);
             }else{
+                smsInvoiceInfoReq.setMouthSettleId(mouthSettleId);
                 smsInvoiceInfoReq.setDelFlag(DeleteFlagConstants.NO_DELETED);
                 smsInvoiceInfoReq.setCreateTime(new Date());
                 smsInvoiceInfoAddList.add(smsInvoiceInfoReq);
             }
         }
+        //2.新增或修改
         if(!CollectionUtils.isEmpty(smsInvoiceInfoAddList)){
            int countAdd = smsInvoiceInfoMapper.insertList(smsInvoiceInfoAddList);
            if(countAdd == 0){
@@ -80,6 +88,18 @@ public class SmsInvoiceInfoServiceImpl extends BaseServiceImpl<SmsInvoiceInfo> i
                 throw new BusinessException("批量新增或修改保存发票信息时异常");
             }
         }
+        //3.修改月度结算单发票金额
+        BigDecimal invoiceFeeAll = BigDecimal.ZERO;
+        for(SmsInvoiceInfo smsInvoiceInfoAdd : smsInvoiceInfoAddList){
+            invoiceFeeAll = invoiceFeeAll.add(smsInvoiceInfoAdd.getInvoiceAmount());
+        }
+        for(SmsInvoiceInfo smsInvoiceInfoUpdate : smsInvoiceInfoUpdateList){
+            invoiceFeeAll = invoiceFeeAll.add(smsInvoiceInfoUpdate.getInvoiceAmount());
+        }
+        SmsMouthSettle smsMouthSettleReq = new SmsMouthSettle();
+        smsMouthSettleReq.setId(smsMouthSettle.getId());
+        smsMouthSettleReq.setInvoiceFee(invoiceFeeAll);
+        smsMouthSettleService.updateByPrimaryKeySelective(smsMouthSettleReq);
         return R.ok();
     }
 }

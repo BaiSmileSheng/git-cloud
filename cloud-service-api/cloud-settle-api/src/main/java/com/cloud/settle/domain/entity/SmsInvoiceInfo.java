@@ -90,11 +90,4 @@ public class SmsInvoiceInfo extends BaseEntity {
      */
     private String delFlag;
 
-    /**
-     * 发票信息集合
-     */
-    @Transient
-    @ApiModelProperty(value = "发票信息集合")
-    private List<SmsInvoiceInfo> smsInvoiceInfoList;
-
 }
