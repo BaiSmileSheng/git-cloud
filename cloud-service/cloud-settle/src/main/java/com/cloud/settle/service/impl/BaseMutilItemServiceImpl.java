@@ -16,9 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.BindingProvider;
 import java.net.URL;
-import java.util.Map;
 
 /**
  * 报账单创建接口
@@ -27,9 +25,9 @@ import java.util.Map;
  * @date 2020-06-09
  */
 @Service
-public class BaseMutilItemServiceServiceImpl implements IBaseMutilItemService {
+public class BaseMutilItemServiceImpl implements IBaseMutilItemService {
 
-    private static Logger logger = LoggerFactory.getLogger(BaseMutilItemServiceServiceImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(BaseMutilItemServiceImpl.class);
 
     @Autowired
     private RemoteDictDataService remoteDictDataService;
