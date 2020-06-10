@@ -8,7 +8,8 @@ import com.alibaba.excel.metadata.property.ExcelContentProperty;
 import com.cloud.settle.enums.ScrapOrderStatusEnum;
 
 /**
- * @author 报废单状态转化器
+ * 报废单状态转化器
+ * @author cs
  */
 public class ScrapOrderStatusConverter implements Converter<String> {
 

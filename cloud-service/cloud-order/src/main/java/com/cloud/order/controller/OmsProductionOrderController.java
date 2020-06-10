@@ -233,25 +233,25 @@ public class OmsProductionOrderController extends BaseController {
             criteria.andLessThanOrEqualTo("productEndDate", omsProductionOrder.getProductEndDate());
         }
         //查询订单状态已下达和已关单的两个状态的订单
-//        List<String> statusList = CollectionUtil.toList(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode(),
-//                ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
-//        criteria.andIn("status",statusList);
-//
-//        SysUser sysUser = getUserInfo(SysUser.class);
-//        if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
-//            R r = remoteFactoryLineInfoService.selectLineCodeBySupplierCode(sysUser.getSupplierCode());
-//            if (r.get("data") == null || StrUtil.isBlank(r.get("data").toString())) {
-//                return null;
-//            }
-//            String lineCodes = r.get("data").toString();
-//            criteria.andIn("productLineCode",CollectionUtil.toList(lineCodes.split(",")));
-//        }else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
-//            //班长、分主管查询工厂下的数据
-//            if(CollectionUtil.contains(sysUser.getRoleKeys(),RoleConstants.ROLE_KEY_BZ)
-//                    ||CollectionUtil.contains(sysUser.getRoleKeys(),RoleConstants.ROLE_KEY_FZG)){
-//                criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
-//            }
-//        }
+        List<String> statusList = CollectionUtil.toList(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode(),
+                ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
+        criteria.andIn("status",statusList);
+
+        SysUser sysUser = getUserInfo(SysUser.class);
+        if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
+            R r = remoteFactoryLineInfoService.selectLineCodeBySupplierCode(sysUser.getSupplierCode());
+            if (r.get("data") == null || StrUtil.isBlank(r.get("data").toString())) {
+                return null;
+            }
+            String lineCodes = r.get("data").toString();
+            criteria.andIn("productLineCode",CollectionUtil.toList(lineCodes.split(",")));
+        }else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
+            //班长、分主管查询工厂下的数据
+            if(CollectionUtil.contains(sysUser.getRoleKeys(),RoleConstants.ROLE_KEY_BZ)
+                    ||CollectionUtil.contains(sysUser.getRoleKeys(),RoleConstants.ROLE_KEY_FZG)){
+                criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+            }
+        }
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderService.selectByExample(example);
         return EasyExcelUtil.writeExcel(omsProductionOrderList, "生产订单.xlsx", "sheet", new OmsProductionOrder());
     }

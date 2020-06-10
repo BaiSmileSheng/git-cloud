@@ -8,7 +8,8 @@ import com.alibaba.excel.metadata.property.ExcelContentProperty;
 import com.cloud.settle.enums.MonthSettleStatusEnum;
 
 /**
- * @author 月度结算状态转化器
+ * 月度结算状态转化器
+ * @author cs
  */
 public class SettleStatusConverter implements Converter<String> {
 

@@ -8,7 +8,8 @@ import com.alibaba.excel.metadata.property.ExcelContentProperty;
 import com.cloud.order.enums.OutSourceTypeEnum;
 
 /**
- * @author 委外方式转化器
+ * 委外方式转化器
+ * @author cs
  */
 public class OutSourceTypeConverter implements Converter<String> {
 
