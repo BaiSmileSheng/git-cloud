@@ -168,88 +168,88 @@ public class BaseMultiItemClaimSaveRequest {
     protected String vendorCode;
 
     /**
-     * ��ȡannexSheets���Ե�ֵ��
-     * 
+     * 获取annexSheets属性的值。
+     *
      */
     public int getAnnexSheets() {
         return annexSheets;
     }
 
     /**
-     * ����annexSheets���Ե�ֵ��
-     * 
+     * 设置annexSheets属性的值。
+     *
      */
     public void setAnnexSheets(int value) {
         this.annexSheets = value;
     }
 
     /**
-     * ��ȡapplyDate���Ե�ֵ��
-     * 
+     * 获取applyDate属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getApplyDate() {
         return applyDate;
     }
 
     /**
-     * ����applyDate���Ե�ֵ��
-     * 
+     * 设置applyDate属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setApplyDate(String value) {
         this.applyDate = value;
     }
 
     /**
-     * ��ȡbusinessDesc���Ե�ֵ��
-     * 
+     * 获取businessDesc属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getBusinessDesc() {
         return businessDesc;
     }
 
     /**
-     * ����businessDesc���Ե�ֵ��
-     * 
+     * 设置businessDesc属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setBusinessDesc(String value) {
         this.businessDesc = value;
     }
 
     /**
-     * ��ȡbusinessType���Ե�ֵ��
-     * 
+     * 获取businessType属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getBusinessType() {
         return businessType;
     }
 
     /**
-     * ����businessType���Ե�ֵ��
-     * 
+     * 设置businessType属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setBusinessType(String value) {
         this.businessType = value;
@@ -257,25 +257,25 @@ public class BaseMultiItemClaimSaveRequest {
 
     /**
      * Gets the value of the claimDetailList property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the claimDetailList property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getClaimDetailList().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link BaseClaimDetail }
-     * 
-     * 
+     *
+     *
      */
     public List<BaseClaimDetail> getClaimDetailList() {
         if (claimDetailList == null) {
@@ -284,653 +284,653 @@ public class BaseMultiItemClaimSaveRequest {
         return this.claimDetailList;
     }
 
+    public void setClaimDetailList(List<BaseClaimDetail> claimDetailList) {
+        this.claimDetailList = claimDetailList;
+    }
+
     /**
-     * ��ȡcompanyCode���Ե�ֵ��
-     * 
+     * 获取companyCode属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCompanyCode() {
         return companyCode;
     }
 
     /**
-     * ����companyCode���Ե�ֵ��
-     * 
+     * 设置companyCode属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCompanyCode(String value) {
         this.companyCode = value;
     }
 
     /**
-     * ��ȡcontractCode���Ե�ֵ��
-     * 
+     * 获取contractCode属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getContractCode() {
         return contractCode;
     }
 
     /**
-     * ����contractCode���Ե�ֵ��
-     * 
+     * 设置contractCode属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setContractCode(String value) {
         this.contractCode = value;
     }
 
     /**
-     * ��ȡcurrency���Ե�ֵ��
-     * 
+     * 获取currency属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCurrency() {
         return currency;
     }
 
     /**
-     * ����currency���Ե�ֵ��
-     * 
+     * 设置currency属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCurrency(String value) {
         this.currency = value;
     }
 
     /**
-     * ��ȡdepartmentCode���Ե�ֵ��
-     * 
+     * 获取departmentCode属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDepartmentCode() {
         return departmentCode;
     }
 
     /**
-     * ����departmentCode���Ե�ֵ��
-     * 
+     * 设置departmentCode属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDepartmentCode(String value) {
         this.departmentCode = value;
     }
 
     /**
-     * ��ȡlegContractNo���Ե�ֵ��
-     * 
+     * 获取legContractNo属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getLegContractNo() {
         return legContractNo;
     }
 
     /**
-     * ����legContractNo���Ե�ֵ��
-     * 
+     * 设置legContractNo属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setLegContractNo(String value) {
         this.legContractNo = value;
     }
 
     /**
-     * ��ȡorderCode���Ե�ֵ��
-     * 
+     * 获取orderCode属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getOrderCode() {
         return orderCode;
     }
 
     /**
-     * ����orderCode���Ե�ֵ��
-     * 
+     * 设置orderCode属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setOrderCode(String value) {
         this.orderCode = value;
     }
 
     /**
-     * ��ȡoriginDocNo���Ե�ֵ��
-     * 
+     * 获取originDocNo属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getOriginDocNo() {
         return originDocNo;
     }
 
     /**
-     * ����originDocNo���Ե�ֵ��
-     * 
+     * 设置originDocNo属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setOriginDocNo(String value) {
         this.originDocNo = value;
     }
 
     /**
-     * ��ȡoriginSystem���Ե�ֵ��
-     * 
+     * 获取originSystem属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getOriginSystem() {
         return originSystem;
     }
 
     /**
-     * ����originSystem���Ե�ֵ��
-     * 
+     * 设置originSystem属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setOriginSystem(String value) {
         this.originSystem = value;
     }
 
     /**
-     * ��ȡpayAccountCode���Ե�ֵ��
-     * 
+     * 获取payAccountCode属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPayAccountCode() {
         return payAccountCode;
     }
 
     /**
-     * ����payAccountCode���Ե�ֵ��
-     * 
+     * 设置payAccountCode属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPayAccountCode(String value) {
         this.payAccountCode = value;
     }
 
     /**
-     * ��ȡpayHbankCode���Ե�ֵ��
-     * 
+     * 获取payHbankCode属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPayHbankCode() {
         return payHbankCode;
     }
 
     /**
-     * ����payHbankCode���Ե�ֵ��
-     * 
+     * 设置payHbankCode属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPayHbankCode(String value) {
         this.payHbankCode = value;
     }
 
     /**
-     * ��ȡpayReason���Ե�ֵ��
-     * 
+     * 获取payReason属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPayReason() {
         return payReason;
     }
 
     /**
-     * ����payReason���Ե�ֵ��
-     * 
+     * 设置payReason属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPayReason(String value) {
         this.payReason = value;
     }
 
     /**
-     * ��ȡpaybleDate���Ե�ֵ��
-     * 
+     * 获取paybleDate属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPaybleDate() {
         return paybleDate;
     }
 
     /**
-     * ����paybleDate���Ե�ֵ��
-     * 
+     * 设置paybleDate属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPaybleDate(String value) {
         this.paybleDate = value;
     }
 
     /**
-     * ��ȡpaymentMethod���Ե�ֵ��
-     * 
+     * 获取paymentMethod属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPaymentMethod() {
         return paymentMethod;
     }
 
     /**
-     * ����paymentMethod���Ե�ֵ��
-     * 
+     * 设置paymentMethod属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPaymentMethod(String value) {
         this.paymentMethod = value;
     }
 
     /**
-     * ��ȡpaymentType���Ե�ֵ��
-     * 
+     * 获取paymentType属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPaymentType() {
         return paymentType;
     }
 
     /**
-     * ����paymentType���Ե�ֵ��
-     * 
+     * 设置paymentType属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPaymentType(String value) {
         this.paymentType = value;
     }
 
     /**
-     * ��ȡprojectCode���Ե�ֵ��
-     * 
+     * 获取projectCode属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getProjectCode() {
         return projectCode;
     }
 
     /**
-     * ����projectCode���Ե�ֵ��
-     * 
+     * 设置projectCode属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setProjectCode(String value) {
         this.projectCode = value;
     }
 
     /**
-     * ��ȡrecAccount���Ե�ֵ��
-     * 
+     * 获取recAccount属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getRecAccount() {
         return recAccount;
     }
 
     /**
-     * ����recAccount���Ե�ֵ��
-     * 
+     * 设置recAccount属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setRecAccount(String value) {
         this.recAccount = value;
     }
 
     /**
-     * ��ȡrecBank���Ե�ֵ��
-     * 
+     * 获取recBank属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getRecBank() {
         return recBank;
     }
 
     /**
-     * ����recBank���Ե�ֵ��
-     * 
+     * 设置recBank属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setRecBank(String value) {
         this.recBank = value;
     }
 
     /**
-     * ��ȡrecCity���Ե�ֵ��
-     * 
+     * 获取recCity属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getRecCity() {
         return recCity;
     }
 
     /**
-     * ����recCity���Ե�ֵ��
-     * 
+     * 设置recCity属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setRecCity(String value) {
         this.recCity = value;
     }
 
     /**
-     * ��ȡrecRegion���Ե�ֵ��
-     * 
+     * 获取recRegion属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getRecRegion() {
         return recRegion;
     }
 
     /**
-     * ����recRegion���Ե�ֵ��
-     * 
+     * 设置recRegion属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setRecRegion(String value) {
         this.recRegion = value;
     }
 
     /**
-     * ��ȡreserved1���Ե�ֵ��
-     * 
+     * 获取reserved1属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getReserved1() {
         return reserved1;
     }
 
     /**
-     * ����reserved1���Ե�ֵ��
-     * 
+     * 设置reserved1属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setReserved1(String value) {
         this.reserved1 = value;
     }
 
     /**
-     * ��ȡreserved2���Ե�ֵ��
-     * 
+     * 获取reserved2属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getReserved2() {
         return reserved2;
     }
 
     /**
-     * ����reserved2���Ե�ֵ��
-     * 
+     * 设置reserved2属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setReserved2(String value) {
         this.reserved2 = value;
     }
 
     /**
-     * ��ȡreserved3���Ե�ֵ��
-     * 
+     * 获取reserved3属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getReserved3() {
         return reserved3;
     }
 
     /**
-     * ����reserved3���Ե�ֵ��
-     * 
+     * 设置reserved3属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setReserved3(String value) {
         this.reserved3 = value;
     }
 
     /**
-     * ��ȡreserved4���Ե�ֵ��
-     * 
+     * 获取reserved4属性的值。
+     *
      * @return
      *     possible object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public BigDecimal getReserved4() {
         return reserved4;
     }
 
     /**
-     * ����reserved4���Ե�ֵ��
-     * 
+     * 设置reserved4属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public void setReserved4(BigDecimal value) {
         this.reserved4 = value;
     }
 
     /**
-     * ��ȡreserved5���Ե�ֵ��
-     * 
+     * 获取reserved5属性的值。
+     *
      * @return
      *     possible object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public BigDecimal getReserved5() {
         return reserved5;
     }
 
     /**
-     * ����reserved5���Ե�ֵ��
-     * 
+     * 设置reserved5属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public void setReserved5(BigDecimal value) {
         this.reserved5 = value;
     }
 
     /**
-     * ��ȡreserved6���Ե�ֵ��
-     * 
+     * 获取reserved6属性的值。
+     *
      * @return
      *     possible object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public BigDecimal getReserved6() {
         return reserved6;
     }
 
     /**
-     * ����reserved6���Ե�ֵ��
-     * 
+     * 设置reserved6属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public void setReserved6(BigDecimal value) {
         this.reserved6 = value;
     }
 
     /**
-     * ��ȡuserNo���Ե�ֵ��
-     * 
+     * 获取userNo属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserNo() {
         return userNo;
     }
 
     /**
-     * ����userNo���Ե�ֵ��
-     * 
+     * 设置userNo属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserNo(String value) {
         this.userNo = value;
     }
 
     /**
-     * ��ȡvendorCode���Ե�ֵ��
-     * 
+     * 获取vendorCode属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getVendorCode() {
         return vendorCode;
     }
 
-    public void setClaimDetailList(List<BaseClaimDetail> claimDetailList) {
-        this.claimDetailList = claimDetailList;
-    }
-
     /**
-     * ����vendorCode���Ե�ֵ��
-     * 
+     * 设置vendorCode属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setVendorCode(String value) {
         this.vendorCode = value;
