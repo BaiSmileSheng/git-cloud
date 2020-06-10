@@ -47,4 +47,27 @@ public class SmsScrapOrderCalculateXxlJob {
         }
     }
 
+    /**
+     * 定时任务更新指定月份SAP销售价格 更新上个月的
+     * 每月一号0点30分开始 0 30 0 1 * ?
+     * @param param
+     * @return
+     * @throws Exception
+     */
+    @XxlJob("updateSAPPriceEveryMonthCalculateHandler")
+    public ReturnT<String> updateSAPPriceEveryMonthCalculateHandler(String param) {
+        String lastMonth = DateUtil.format(DateUtil.lastMonth(), "yyyyMM");//计算月份：上个月
+        logger.info("更新SAP销售价格表价格生成开始");
+        R r=remoteSmsScrapOrderService.updateSAPPriceEveryMonth(lastMonth);
+        XxlJobLogger.log(StrUtil.format("更新SAP销售价格表价格结果：{}",r.toString()));
+        logger.info(StrUtil.format("更新SAP销售价格表价格结果：{}",r.toString()));
+        logger.info("更新SAP销售价格表价格生成结束");
+        if (r.isSuccess()) {
+            return ReturnT.SUCCESS;
+        }else{
+            XxlJobLogger.log(r.get("msg").toString());
+            return ReturnT.FAIL;
+        }
+    }
+
 }

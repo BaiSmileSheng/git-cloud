@@ -290,6 +290,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
                 .appId("SAP").interfaceName("ZSD_INT_DDPS_01")
                 .content(CollUtil.join(materialCodeComCodeList, "#")).build();
         Date date = DateUtil.date();
+        StringBuffer error = new StringBuffer();
         try {
             //创建与SAP的连接
             destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP600);
@@ -343,11 +344,14 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
                     List<CdSapSalePrice> cdSapSalePriceList = remoteCdSapSalePriceInfoService.findByMaterialCodeAndOraganization(outTableOutput.getString("MATNR"),outTableOutput.getString("VKORG"),null,null);
                     R r ;
                     if (cdSapSalePriceList == null||cdSapSalePriceList.size()==0) {
+                        cdSapSalePrice.setCreateBy("定时任务");
+                        cdSapSalePrice.setCreateTime(date);
                         r=remoteCdSapSalePriceInfoService.addSave(cdSapSalePrice);
                     }else{
                         r=remoteCdSapSalePriceInfoService.updateByMarketingOrganizationAndMaterialCode(cdSapSalePrice);
                     }
                     if (!r.isSuccess()) {
+                        error.append(StrUtil.format("销售组织：{},专用号：{}，数据更新错误！", outTableOutput.getString("VKORG"), outTableOutput.getString("MATNR")));
                         log.error(StrUtil.format("销售组织：{},专用号：{}，数据更新错误！",outTableOutput.getString("VKORG"),outTableOutput.getString("MATNR")));
                     }
                 }
@@ -361,6 +365,11 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             sysInterfaceLog.setRemark("定时任务获取SAP销售价格");
             remoteInterfaceLogService.saveInterfaceLog(sysInterfaceLog);
         }
-        return R.ok();
+        if(StrUtil.isEmpty(error)){
+            return R.ok();
+        }else {
+            return R.error(error.toString());
+        }
+
     }
 }
