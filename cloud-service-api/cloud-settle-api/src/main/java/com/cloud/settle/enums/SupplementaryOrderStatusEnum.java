@@ -36,4 +36,22 @@ public enum SupplementaryOrderStatusEnum {
     public String getMsg() {
         return msg;
     }
+
+    public static String getMsgByCode(String code) {
+        for (SupplementaryOrderStatusEnum bt : values()) {
+            if (bt.code .equals(code) ) {
+                return bt.getMsg();
+            }
+        }
+        return code;
+    }
+
+    public static String getCodeByMsg(String msg) {
+        for (SupplementaryOrderStatusEnum bt : values()) {
+            if (bt.msg .equals(msg) ) {
+                return bt.getCode();
+            }
+        }
+        return msg;
+    }
 }
