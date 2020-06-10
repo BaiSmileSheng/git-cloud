@@ -203,7 +203,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
                     .claimAmount(claimPrice).noCashAmount(noCashAmount)
                     .cashAmount(cashAmount).excludingFee(excludingFee)
                     .includeTaxeFee(excludingFee.multiply(BigDecimal.valueOf(1.13)))
-                    .settleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_JSWC.getCode()).build();
+                    .settleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_DJS.getCode()).build();
             smsMouthSettle.setDelFlag("0");
             smsMouthSettle.setCreateBy("定时任务");
             smsMouthSettle.setCreateTime(date);
@@ -1095,7 +1095,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         if (!settleStatus.equals(smsMouthSettle.getSettleStatus())) {
             return R.error("数据状态不允许此操作！");
         }
-        if(MonthSettleStatusEnum.YD_SETTLE_STATUS_JSWC.getCode().equals(settleStatus)){
+        if(MonthSettleStatusEnum.YD_SETTLE_STATUS_DJS.getCode().equals(settleStatus)){
             //内控确认
             smsMouthSettle.setSettleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_NKQR.getCode());
             updateByPrimaryKeySelective(smsMouthSettle);
