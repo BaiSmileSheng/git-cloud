@@ -1150,7 +1150,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         smsMouthSettleReq.setId(smsMouthSettle.getId());
         smsMouthSettleReq.setSettleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_DFK.getCode());
         smsMouthSettleReq.setKmsNo(baseClaimResponse.getGemsDocNo());
-        smsMouthSettleMapper.updateByPrimaryKeySelective(smsMouthSettle);
+        smsMouthSettleMapper.updateByPrimaryKeySelective(smsMouthSettleReq);
         return R.ok();
     }
 
