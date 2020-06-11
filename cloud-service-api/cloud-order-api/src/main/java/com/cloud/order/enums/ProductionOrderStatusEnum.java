@@ -31,4 +31,22 @@ public enum ProductionOrderStatusEnum {
     public String getMsg() {
         return msg;
     }
+
+    public static String getMsgByCode(String code) {
+        for (ProductionOrderStatusEnum bt : values()) {
+            if (bt.code .equals(code) ) {
+                return bt.getMsg();
+            }
+        }
+        return code;
+    }
+
+    public static String getCodeByMsg(String msg) {
+        for (ProductionOrderStatusEnum bt : values()) {
+            if (bt.msg .equals(msg) ) {
+                return bt.getCode();
+            }
+        }
+        return msg;
+    }
 }

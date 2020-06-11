@@ -72,4 +72,12 @@ spring:
 seata:
   registry:
     nacos:
-      namespace: a2eeae72-3ab5-4789-ac7f-7370330f9293
+      namespace: fd0b253f-7130-4c04-a9a1-65206b980991
+sap:
+  client600:
+    ashost: 10.133.28.69
+    sysnr: 00
+    client: 200
+    user: 19046341
+    passwd: 123123
+    lang: ZH

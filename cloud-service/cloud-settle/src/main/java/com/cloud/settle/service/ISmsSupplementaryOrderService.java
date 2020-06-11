@@ -22,6 +22,13 @@ public interface ISmsSupplementaryOrderService extends BaseService<SmsSupplement
     R editSave(SmsSupplementaryOrder smsSupplementaryOrder);
 
     /**
+     * 编辑保存物耗申请单功能  --有逻辑校验（多条）
+     * @param smsSupplementaryOrders
+     * @return
+     */
+    R editSaveList(List<SmsSupplementaryOrder> smsSupplementaryOrders);
+
+    /**
      * 删除物耗申请单
      * @param ids
      * @return
@@ -34,6 +41,13 @@ public interface ISmsSupplementaryOrderService extends BaseService<SmsSupplement
      * @return id
      */
     R addSave(SmsSupplementaryOrder smsSupplementaryOrder);
+
+    /**
+     * 新增保存物耗申请单(多条)
+     * @param smsSupplementaryOrders
+     * @return id
+     */
+    R addSaveList(List<SmsSupplementaryOrder> smsSupplementaryOrders);
 
     /**
      * 根据月份和状态查询

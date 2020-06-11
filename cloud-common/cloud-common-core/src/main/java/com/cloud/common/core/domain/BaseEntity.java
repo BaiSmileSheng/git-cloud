@@ -1,10 +1,6 @@
 package com.cloud.common.core.domain;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -12,6 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Transient;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * Entity基类
@@ -40,6 +39,7 @@ public class BaseEntity implements Serializable {
      * 创建时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @ExcelProperty(value = "创建时间",index = -1)
     private Date createTime;
 
     /**

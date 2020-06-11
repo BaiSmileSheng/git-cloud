@@ -7,6 +7,15 @@ package com.cloud.common.constant;
  * @Date: 2020/6/5
  */
 public class SapConstants {
+
+    /**
+     * SAP返回结果
+     */
+    public static final String SAP_RESULT_TYPE_SUCCESS = "S";
+
+    public static final String SAP_RESULT_TYPE_FAIL = "E";
+
+
     //TODO ================卡奥斯SAP系统连接  start====================
     /**
      * 卡奥斯SAP系统连接

@@ -71,6 +71,12 @@ public class GlobalExceptionHandler {
         return R.error(e.getStatusEnums().getCode(), e.getStatusEnums().getMsg());
     }
 
+    @ExceptionHandler(value = BusinessException.class)
+    public R businessExceptionHandle(BusinessException e, HttpServletResponse response) {
+        logger.error("【错误描述】{}", e.getMessage());
+        return R.error(e.getMessage());
+    }
+
     /**
      * 捕获并处理未授权异常
      *

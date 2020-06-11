@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.settle.mapper.SmsInvoiceInfoMapper">
+
+    <resultMap type="SmsInvoiceInfo" id="SmsInvoiceInfoResult">
+        <result property="id" column="id"/>
+        <result property="mouthSettleId" column="mouth_settle_id"/>
+        <result property="invoiceNo" column="invoice_no"/>
+        <result property="invoiceDate" column="invoice_date"/>
+        <result property="invoiceAmount" column="invoice_amount"/>
+        <result property="invoiceRate" column="invoice_rate"/>
+        <result property="taxAmount" column="tax_amount"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectSmsInvoiceInfoVo">
+        select id,
+               mouth_settle_id,
+               invoice_no,
+               invoice_date,
+               invoice_amount,
+               invoice_rate,
+               tax_amount,
+               del_flag,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark
+        from sms_invoice_info
+    </sql>
+
+
+</mapper>

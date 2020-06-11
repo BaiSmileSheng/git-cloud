@@ -63,6 +63,11 @@ public class RemoteSmsScrapOrderFallbackFactory implements FallbackFactory<Remot
             public R updatePriceEveryMonth(String month) {
                 return R.error();
             }
+
+            @Override
+            public R updateSAPPriceEveryMonth(String month) {
+                return R.error();
+            }
         };
     }
 }

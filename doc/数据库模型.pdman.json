@@ -8774,6 +8774,119 @@
           ],
           "chnname": "索赔兑现明细",
           "remark": "跑月度结算的时候，记录兑现的索赔明细，每个模块的索赔单号是不同的，所以记录的是索赔单号。优先兑现本月产生的索赔金额，本月的索赔信息兑现完成后，再兑现历史未兑现完成的索赔信息。例如：1、本月产生加工费1W，本月的索赔费用一共5000,元，将兑现状态改为“已兑现”，然后再兑现历史未兑现或者部分兑现的索赔单，如果兑现到最后，加工费剩50，索赔单金额为100，则索赔单,兑现50，更新状态为“部分兑现”，更新兑现金额50,本月实际结算金额0。2、跑月结的时候，先汇总加工费金额，再兑现本月的索赔。"
+        },
+        {
+          "title": "sms_quality_type",
+          "fields": [
+            {
+              "name": "id",
+              "type": "BIGINT_19",
+              "remark": "",
+              "chnname": "主键",
+              "pk": true,
+              "notNull": true,
+              "relationNoShow": false,
+              "autoIncrement": true
+            },
+            {
+              "name": "claim_type",
+              "type": "VARCHAR_2000",
+              "remark": "",
+              "chnname": "索赔类型"
+            },
+            {
+              "name": "del_flag",
+              "type": "CHAR_1",
+              "remark": "0：有效，1：删除",
+              "chnname": "删除状态"
+            },
+            {
+              "name": "remark",
+              "type": "VARCHAR_2000",
+              "remark": "",
+              "chnname": "备注"
+            },
+            {
+              "name": "create_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "创建人"
+            },
+            {
+              "name": "create_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "创建时间"
+            },
+            {
+              "name": "update_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "更新人"
+            },
+            {
+              "name": "update_time",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "更新时间"
+            },
+            {
+              "name": "parent_id",
+              "type": "BIGINT_19",
+              "remark": "",
+              "chnname": "父id",
+              "defaultValue": "0"
+            }
+          ],
+          "indexs": [],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
+            }
+          ],
+          "chnname": "sms_quality_type",
+          "remark": "质量索赔扣款类型和扣款标准"
         }
       ],
       "graphCanvas": {
@@ -9218,23 +9331,17 @@
               "notNull": true
             },
             {
-              "name": "storehouse_from",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "发出库位"
-            },
-            {
-              "name": "storehouse_to",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "接受库位"
-            },
-            {
               "name": "stock_k_num",
-              "type": "DefaultString",
+              "type": "Money",
               "remark": "",
               "chnname": "寄售不足",
               "notNull": true
+            },
+            {
+              "name": "rejects_num",
+              "type": "Money",
+              "remark": "",
+              "chnname": "不良品库存"
             },
             {
               "name": "del_flag",
@@ -9337,6 +9444,481 @@
             }
           ],
           "chnname": "成品库存主表"
+        },
+        {
+          "title": "cd_product_passage",
+          "fields": [
+            {
+              "name": "id",
+              "type": "BigInt",
+              "remark": "",
+              "chnname": "主键",
+              "pk": true,
+              "notNull": true,
+              "autoIncrement": true
+            },
+            {
+              "name": "product_material_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "成品物料号",
+              "notNull": true
+            },
+            {
+              "name": "product_material_desc",
+              "type": "ShortString",
+              "remark": "",
+              "chnname": "成品物料描述",
+              "defaultValue": "''"
+            },
+            {
+              "name": "factory_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "工厂编码",
+              "notNull": true
+            },
+            {
+              "name": "factory_desc",
+              "type": "ShortString",
+              "remark": "",
+              "chnname": "工厂描述",
+              "defaultValue": "''"
+            },
+            {
+              "name": "storehouse_from",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "发出库位",
+              "notNull": true
+            },
+            {
+              "name": "storehouse_to",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "接收库位",
+              "notNull": true
+            },
+            {
+              "name": "passage_num",
+              "type": "Money",
+              "remark": "",
+              "chnname": "在途量",
+              "notNull": true
+            },
+            {
+              "name": "del_flag",
+              "type": "Char",
+              "remark": "",
+              "chnname": "是否删除0：有效，1：删除",
+              "defaultValue": "0"
+            },
+            {
+              "name": "remark",
+              "type": "Intro",
+              "remark": "",
+              "chnname": "备注",
+              "defaultValue": "''"
+            },
+            {
+              "name": "create_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "创建时间",
+              "notNull": true
+            },
+            {
+              "name": "create_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "创建人",
+              "notNull": true
+            },
+            {
+              "name": "update_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "更新时间",
+              "defaultValue": ""
+            },
+            {
+              "name": "update_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "更新人",
+              "defaultValue": "''"
+            }
+          ],
+          "indexs": [
+            {
+              "name": "idx _join_index",
+              "isUnique": false,
+              "fields": [
+                "product_material_code",
+                "factory_code",
+                "del_flag"
+              ]
+            }
+          ],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
+            }
+          ],
+          "chnname": "成品库存在途明细表"
+        },
+        {
+          "title": "cd_product_in_production",
+          "fields": [
+            {
+              "name": "id",
+              "type": "BigInt",
+              "remark": "",
+              "chnname": "主键",
+              "pk": true,
+              "notNull": true,
+              "autoIncrement": true
+            },
+            {
+              "name": "product_material_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "成品物料号",
+              "notNull": true
+            },
+            {
+              "name": "product_material_desc",
+              "type": "ShortString",
+              "remark": "",
+              "chnname": "成品物料描述",
+              "defaultValue": "''"
+            },
+            {
+              "name": "factory_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "工厂编码",
+              "notNull": true
+            },
+            {
+              "name": "factory_desc",
+              "type": "ShortString",
+              "remark": "",
+              "chnname": "工厂描述",
+              "defaultValue": "''"
+            },
+            {
+              "name": "in_production_version",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "在产版本"
+            },
+            {
+              "name": "in_production_num",
+              "type": "Money",
+              "remark": "",
+              "chnname": "在产量",
+              "notNull": true
+            },
+            {
+              "name": "del_flag",
+              "type": "Char",
+              "remark": "",
+              "chnname": "是否删除0：有效，1：删除",
+              "defaultValue": "0"
+            },
+            {
+              "name": "remark",
+              "type": "Intro",
+              "remark": "",
+              "chnname": "备注",
+              "defaultValue": "''"
+            },
+            {
+              "name": "create_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "创建时间",
+              "notNull": true
+            },
+            {
+              "name": "create_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "创建人",
+              "notNull": true
+            },
+            {
+              "name": "update_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "更新时间",
+              "defaultValue": ""
+            },
+            {
+              "name": "update_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "更新人",
+              "defaultValue": "''"
+            }
+          ],
+          "indexs": [
+            {
+              "name": "idx _join_index",
+              "isUnique": false,
+              "fields": [
+                "product_material_code",
+                "factory_code",
+                "del_flag"
+              ]
+            }
+          ],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
+            }
+          ],
+          "chnname": "成品库存在产明细表"
+        },
+        {
+          "title": "cd_product_warehouse",
+          "fields": [
+            {
+              "name": "id",
+              "type": "BigInt",
+              "remark": "",
+              "chnname": "主键",
+              "pk": true,
+              "notNull": true,
+              "autoIncrement": true
+            },
+            {
+              "name": "product_material_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "成品物料号",
+              "notNull": true
+            },
+            {
+              "name": "product_material_desc",
+              "type": "ShortString",
+              "remark": "",
+              "chnname": "成品物料描述",
+              "defaultValue": "''"
+            },
+            {
+              "name": "factory_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "工厂编码",
+              "notNull": true
+            },
+            {
+              "name": "factory_desc",
+              "type": "ShortString",
+              "remark": "",
+              "chnname": "工厂描述",
+              "defaultValue": "''"
+            },
+            {
+              "name": "storehouse",
+              "type": "Char",
+              "remark": "",
+              "chnname": "库位",
+              "notNull": true
+            },
+            {
+              "name": "warehouse_num",
+              "type": "Money",
+              "remark": "",
+              "chnname": "在库量",
+              "notNull": true
+            },
+            {
+              "name": "del_flag",
+              "type": "Char",
+              "remark": "",
+              "chnname": "是否删除0：有效，1：删除",
+              "defaultValue": "0"
+            },
+            {
+              "name": "remark",
+              "type": "Intro",
+              "remark": "",
+              "chnname": "备注",
+              "defaultValue": "''"
+            },
+            {
+              "name": "create_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "创建时间",
+              "notNull": true
+            },
+            {
+              "name": "create_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "创建人",
+              "notNull": true
+            },
+            {
+              "name": "update_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "更新时间",
+              "defaultValue": ""
+            },
+            {
+              "name": "update_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "更新人",
+              "defaultValue": "''"
+            }
+          ],
+          "indexs": [
+            {
+              "name": "idx _join_index",
+              "isUnique": false,
+              "fields": [
+                "product_material_code",
+                "factory_code",
+                "storehouse",
+                "del_flag"
+              ]
+            }
+          ],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
+            }
+          ],
+          "chnname": "成品库存在库明细表"
         },
         {
           "title": "cd_raw_material_stock",
@@ -10022,163 +10604,6 @@
             }
           ],
           "chnname": "供应商信息表"
-        },
-        {
-          "title": "cd_product_warehouse",
-          "fields": [
-            {
-              "name": "id",
-              "type": "BigInt",
-              "remark": "",
-              "chnname": "主键",
-              "pk": true,
-              "notNull": true,
-              "autoIncrement": true
-            },
-            {
-              "name": "product_material_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "成品物料号",
-              "notNull": true
-            },
-            {
-              "name": "product_material_desc",
-              "type": "ShortString",
-              "remark": "",
-              "chnname": "成品物料描述",
-              "defaultValue": "''"
-            },
-            {
-              "name": "factory_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "工厂编码",
-              "notNull": true
-            },
-            {
-              "name": "factory_desc",
-              "type": "ShortString",
-              "remark": "",
-              "chnname": "工厂描述",
-              "defaultValue": "''"
-            },
-            {
-              "name": "storehouse",
-              "type": "Char",
-              "remark": "",
-              "chnname": "库位",
-              "notNull": true
-            },
-            {
-              "name": "warehouse_num",
-              "type": "Money",
-              "remark": "",
-              "chnname": "在库量",
-              "notNull": true
-            },
-            {
-              "name": "del_flag",
-              "type": "Char",
-              "remark": "",
-              "chnname": "是否删除0：有效，1：删除",
-              "defaultValue": "0"
-            },
-            {
-              "name": "remark",
-              "type": "Intro",
-              "remark": "",
-              "chnname": "备注",
-              "defaultValue": "''"
-            },
-            {
-              "name": "create_time",
-              "type": "DateTime",
-              "remark": "",
-              "chnname": "创建时间",
-              "notNull": true
-            },
-            {
-              "name": "create_by",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "创建人",
-              "notNull": true
-            },
-            {
-              "name": "update_time",
-              "type": "DateTime",
-              "remark": "",
-              "chnname": "更新时间",
-              "defaultValue": ""
-            },
-            {
-              "name": "update_by",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "更新人",
-              "defaultValue": "''"
-            }
-          ],
-          "indexs": [
-            {
-              "name": "idx _join_index",
-              "isUnique": false,
-              "fields": [
-                "product_material_code",
-                "factory_code",
-                "storehouse",
-                "del_flag"
-              ]
-            }
-          ],
-          "headers": [
-            {
-              "fieldName": "chnname",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "name",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "type",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "dataType",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "remark",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "pk",
-              "relationNoShow": false
-            },
-            {
-              "fieldName": "notNull",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "autoIncrement",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "defaultValue",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "relationNoShow",
-              "relationNoShow": true
-            },
-            {
-              "fieldName": "uiHint",
-              "relationNoShow": true
-            }
-          ],
-          "chnname": "成品库存在库明细表"
         },
         {
           "title": "cd_settle_product_material",
@@ -11356,6 +11781,18 @@
               "type": "DefaultString",
               "remark": "",
               "chnname": "生命周期"
+            },
+            {
+              "name": "is_putting_out",
+              "type": "Char",
+              "remark": "",
+              "chnname": "是否外发"
+            },
+            {
+              "name": "is_overdue_stock",
+              "type": "Char",
+              "remark": "",
+              "chnname": "是否超期库存"
             },
             {
               "name": "del_flag",
