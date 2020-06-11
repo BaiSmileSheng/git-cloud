@@ -2,6 +2,7 @@ package com.cloud.settle.controller;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -86,6 +87,7 @@ public class SmsMouthSettleController extends BaseController {
      */
     @GetMapping("listDetail")
     @ApiOperation(value = "月度结算查询详情")
+    @HasPermissions("settle:mouthSettle:listDetail")
     public R listDetail(Long id) {
         SmsMouthSettle smsMouthSettle = smsMouthSettleService.selectByPrimaryKey(id);
         if (smsMouthSettle == null) {
@@ -125,6 +127,7 @@ public class SmsMouthSettleController extends BaseController {
             @ApiImplicitParam(name = "id", value = "id", required = true,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "settleStatus", value = "状态：12、内控确认 13、小微主确认", required = true,paramType = "query", dataType = "String")
     })
+    @HasPermissions("settle:mouthSettle:confirm")
     public R confirm(Long id,String settleStatus) {
         return smsMouthSettleService.confirm(id,settleStatus);
     }
@@ -183,7 +186,9 @@ public class SmsMouthSettleController extends BaseController {
             @ApiImplicitParam(name = "supplierCode", value = "供应商编码", required = false,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "supplierName", value = "供应商名称", required = false,paramType = "query", dataType = "String")
     })
+    @HasPermissions("settle:mouthSettle:export")
     public R export(@ApiIgnore() SmsMouthSettle smsMouthSettle) {
+
         Example example = new Example(SmsMouthSettle.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo(smsMouthSettle);

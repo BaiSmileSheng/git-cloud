@@ -2,6 +2,7 @@ package com.cloud.activiti.controller;
 
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.service.IActSmsSupplementaryOrderService;
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.log.annotation.OperLog;
@@ -51,6 +52,7 @@ public class ActSmsSupplementaryOrderActController extends BaseController {
     @PostMapping("open")
     @OperLog(title = "物耗审核开启流程(新增、编辑)", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "开启流程(新增、编辑) ", response = R.class)
+    @HasPermissions("settle:supplementary:commit")
     public R addSave(@RequestBody List<SmsSupplementaryOrder> smsSupplementaryOrders, String procDefId, String procName) {
         //开启审核流程
         return actSmsSupplementaryOrderService.startActList(smsSupplementaryOrders,getUserInfo(SysUser.class),procDefId,procName);
@@ -65,6 +67,7 @@ public class ActSmsSupplementaryOrderActController extends BaseController {
     @PostMapping("openOnlyForList")
     @OperLog(title = "物耗审核开启流程(列表提交)", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "开启流程(列表提交) ", response = R.class)
+    @HasPermissions("settle:supplementary:commit")
     public R addSaveOnlyForList(@RequestBody SmsSupplementaryOrder smsSupplementaryOrder) {
         //开启审核流程
         return actSmsSupplementaryOrderService.startActOnlyForList(smsSupplementaryOrder,getCurrentUserId());
@@ -77,6 +80,7 @@ public class ActSmsSupplementaryOrderActController extends BaseController {
      */
     @PostMapping("audit")
     @ApiOperation(value = "物耗流程审批 ", response = R.class)
+    @HasPermissions("settle:supplementary:audit")
     public R audit(@RequestBody BizAudit bizAudit) {
         return actSmsSupplementaryOrderService.audit(bizAudit,getCurrentUserId());
     }
