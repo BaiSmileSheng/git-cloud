@@ -138,7 +138,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                         //设置指针位置
                         outTableOutput.setRow(i);
                         CdFactoryLineInfo cdFactoryLineInfo = new CdFactoryLineInfo();
-                        cdFactoryLineInfo.setFactoryCode(outTableOutput.getString("WERKS"));
+                        cdFactoryLineInfo.setProductFactoryCode(outTableOutput.getString("WERKS"));
                         cdFactoryLineInfo.setProduceLineCode(outTableOutput.getString("CY_SEQNR"));
                         cdFactoryLineInfo.setSupplierCode(outTableOutput.getString("VENDOR"));
                         cdFactoryLineInfo.setBranchOffice(outTableOutput.getString("BOSS"));
@@ -215,7 +215,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                         //设置指针位置
                         outTableOutput.setRow(i);
                         CdRawMaterialStock cdRawMaterialStock = new CdRawMaterialStock();
-                        cdRawMaterialStock.setFactoryCode(outTableOutput.getString("WERKS"));
+                        cdRawMaterialStock.setProductFactoryCode(outTableOutput.getString("WERKS"));
                         cdRawMaterialStock.setRawMaterialCode(outTableOutput.getString("MATNR"));
                         cdRawMaterialStock.setRawMaterialDesc(outTableOutput.getString("MAKTX"));
                         cdRawMaterialStock.setCurrentStock(outTableOutput.getBigDecimal("LABST"));
@@ -299,7 +299,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                         CdBomInfo cdBomInfo = new CdBomInfo();
                         cdBomInfo.setProductMaterialCode(outTableOutput.getString("MATNR"));//成品物料
                         cdBomInfo.setProductMaterialDesc(outTableOutput.getString("MAKTX"));//成品物料描述
-                        cdBomInfo.setFactoryCode(outTableOutput.getString("WERKS"));//工厂编码
+                        cdBomInfo.setProductFactoryCode(outTableOutput.getString("WERKS"));//工厂编码
                         cdBomInfo.setRawMaterialCode(outTableOutput.getString("IDNRK"));//原材料物料
                         cdBomInfo.setRawMaterialDesc(outTableOutput.getString("STLAN"));//原材料物料描述
                         cdBomInfo.setBasicNum(outTableOutput.getLong("BMENG"));//基本数量

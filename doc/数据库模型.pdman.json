@@ -2690,6 +2690,12 @@
               "autoIncrement": true
             },
             {
+              "name": "order_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "订单号"
+            },
+            {
               "name": "order_type",
               "type": "DefaultString",
               "remark": "",
@@ -2730,32 +2736,30 @@
               "notNull": true
             },
             {
-              "name": "pl_factory_code",
+              "name": "customer_code",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL工厂编码",
+              "chnname": "客户编码",
               "notNull": true
             },
             {
-              "name": "pl_factory_desc",
+              "name": "customer_desc",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL工厂描述",
+              "chnname": "客户描述"
+            },
+            {
+              "name": "product_factory_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生产工厂编码",
               "notNull": true
             },
             {
-              "name": "factory_code",
+              "name": "product_factory_desc",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "工厂编码",
-              "defaultValue": "",
-              "notNull": true
-            },
-            {
-              "name": "factory_desc",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "工厂描述",
+              "chnname": "生产工厂描述",
               "defaultValue": "''"
             },
             {
@@ -2815,6 +2819,12 @@
               "chnname": "状态"
             },
             {
+              "name": "data_source",
+              "type": "DefaultString",
+              "remark": "0：接口接入，1：人工导入",
+              "chnname": "数据源"
+            },
+            {
               "name": "del_flag",
               "type": "Char",
               "remark": "0：有效，1：删除",
@@ -2864,7 +2874,6 @@
               "fields": [
                 "order_class",
                 "product_material_code",
-                "factory_code",
                 "delivery_date",
                 "place"
               ]
@@ -3148,32 +3157,31 @@
               "defaultValue": "''"
             },
             {
-              "name": "pl_factory_code",
+              "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL工厂编码",
+              "chnname": "生产工厂编码",
               "notNull": true
             },
             {
-              "name": "pl_factory_desc",
+              "name": "product_factory_desc",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL工厂描述",
-              "notNull": true
-            },
-            {
-              "name": "factory_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "工厂编码",
-              "notNull": true
-            },
-            {
-              "name": "factory_desc",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "工厂描述",
+              "chnname": "生产工厂描述",
               "defaultValue": "''"
+            },
+            {
+              "name": "customer_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "客户编码",
+              "notNull": true
+            },
+            {
+              "name": "customer_desc",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "客户描述"
             },
             {
               "name": "mrp_range",
@@ -3299,7 +3307,6 @@
               "isUnique": true,
               "fields": [
                 "product_material_code",
-                "factory_code",
                 "bom_version",
                 "weeks",
                 "place",
@@ -3406,32 +3413,31 @@
               "defaultValue": "''"
             },
             {
-              "name": "pl_factory_code",
+              "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL工厂编码",
+              "chnname": "生产工厂编码",
               "notNull": true
             },
             {
-              "name": "pl_factory_desc",
+              "name": "product_factory_desc",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL工厂描述",
-              "notNull": true
-            },
-            {
-              "name": "factory_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "工厂编码",
-              "notNull": true
-            },
-            {
-              "name": "factory_desc",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "工厂描述",
+              "chnname": "生产工厂描述",
               "defaultValue": "''"
+            },
+            {
+              "name": "customer_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "客户编码",
+              "notNull": true
+            },
+            {
+              "name": "customer_desc",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "客户描述"
             },
             {
               "name": "mrp_range",
@@ -3556,7 +3562,6 @@
               "isUnique": true,
               "fields": [
                 "product_material_code",
-                "factory_code",
                 "bom_version",
                 "version",
                 "delivery_date",
@@ -3663,32 +3668,31 @@
               "defaultValue": "''"
             },
             {
-              "name": "pl_factory_code",
+              "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL工厂编码",
+              "chnname": "生产工厂编码",
               "notNull": true
             },
             {
-              "name": "pl_factory_desc",
+              "name": "product_factory_desc",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL工厂描述",
-              "notNull": true
-            },
-            {
-              "name": "factory_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "工厂编码",
-              "notNull": true
-            },
-            {
-              "name": "factory_desc",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "工厂描述",
+              "chnname": "生产工厂描述",
               "defaultValue": "''"
+            },
+            {
+              "name": "customer_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "客户编码",
+              "notNull": true
+            },
+            {
+              "name": "customer_desc",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "客户描述"
             },
             {
               "name": "mrp_range",
@@ -3770,6 +3774,14 @@
               "defaultValue": "''"
             },
             {
+              "name": "audit_status",
+              "type": "DefaultString",
+              "remark": "0：无需审核，1：审核中，2：审核完成",
+              "chnname": "审核状态",
+              "notNull": false,
+              "defaultValue": "''"
+            },
+            {
               "name": "sap_messages",
               "type": "Intro",
               "remark": "传SAP返回信息",
@@ -3823,7 +3835,6 @@
               "isUnique": true,
               "fields": [
                 "product_material_code",
-                "factory_code",
                 "bom_version",
                 "weeks",
                 "place",
@@ -3930,32 +3941,31 @@
               "defaultValue": "''"
             },
             {
-              "name": "pl_factory_code",
+              "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL工厂编码",
+              "chnname": "生产工厂编码",
               "notNull": true
             },
             {
-              "name": "pl_factory_desc",
+              "name": "product_factory_desc",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL工厂描述",
-              "notNull": true
-            },
-            {
-              "name": "factory_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "工厂编码",
-              "notNull": true
-            },
-            {
-              "name": "factory_desc",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "工厂描述",
+              "chnname": "生产工厂描述",
               "defaultValue": "''"
+            },
+            {
+              "name": "customer_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "客户编码",
+              "notNull": true
+            },
+            {
+              "name": "customer_desc",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "客户描述"
             },
             {
               "name": "mrp_range",
@@ -4090,7 +4100,6 @@
               "isUnique": true,
               "fields": [
                 "product_material_code",
-                "factory_code",
                 "bom_version",
                 "weeks",
                 "place",
@@ -4346,14 +4355,6 @@
               "notNull": true
             },
             {
-              "name": "order_from",
-              "type": "Char",
-              "remark": "1：内单，2：外单",
-              "chnname": "订单来源",
-              "notNull": true,
-              "defaultValue": "''"
-            },
-            {
               "name": "order_class",
               "type": "DefaultString",
               "remark": "1：正常，2：追加，3：储备，4：新品，5：返修",
@@ -4390,17 +4391,17 @@
               "defaultValue": "''"
             },
             {
-              "name": "factory_code",
+              "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "工厂编码",
+              "chnname": "生产工厂编码",
               "notNull": true
             },
             {
-              "name": "factory_desc",
-              "type": "ShortString",
+              "name": "product_factory_desc",
+              "type": "DefaultString",
               "remark": "",
-              "chnname": "工厂描述",
+              "chnname": "生产工厂描述",
               "defaultValue": "''"
             },
             {
@@ -4473,6 +4474,12 @@
               "notNull": true
             },
             {
+              "name": "new_version",
+              "type": "Integer",
+              "remark": "",
+              "chnname": "新BOM版本"
+            },
+            {
               "name": "sequence",
               "type": "DefaultString",
               "remark": "",
@@ -4539,8 +4546,8 @@
             {
               "name": "outsource_type",
               "type": "Char",
-              "remark": "0：半委外，1：全委外",
-              "chnname": "委外方式",
+              "remark": "0：半成品，1：成品",
+              "chnname": "加工承揽方式",
               "defaultValue": "''"
             },
             {
@@ -4574,7 +4581,7 @@
             {
               "name": "status",
               "type": "DefaultString",
-              "remark": "0：待评审，1：反馈中，2：待调整，3：已调整，4：待传SAP，5：传SAP中，6：已传SAP，7：传SAP异常，8：已关单",
+              "remark": "0：待评审，1：反馈中，2：待调整，3：已评审，4：待传SAP，5：传SAP中，6：已传SAP，7：传SAP异常，8：已关单",
               "chnname": "状态",
               "notNull": true,
               "defaultValue": "0"
@@ -4582,7 +4589,7 @@
             {
               "name": "audit_status",
               "type": "DefaultString",
-              "remark": "0：待审核，1：JIT处长已审核",
+              "remark": "0：无需审核，1：审核中，2：审核完成",
               "chnname": "审核状态",
               "notNull": false,
               "defaultValue": "''"
@@ -4643,7 +4650,6 @@
               "fields": [
                 "order_type",
                 "product_material_code",
-                "factory_code",
                 "bom_version"
               ]
             }
@@ -4774,6 +4780,12 @@
               "notNull": true
             },
             {
+              "name": "status",
+              "type": "Char",
+              "remark": "0：未确认，1：已确认，2：反馈中",
+              "chnname": "状态"
+            },
+            {
               "name": "del_flag",
               "type": "Char",
               "remark": "0：有效，1：删除",
@@ -4872,6 +4884,192 @@
             }
           ],
           "chnname": "排产订单明细表"
+        },
+        {
+          "title": "oms_production_order_analysis",
+          "fields": [
+            {
+              "name": "id",
+              "type": "BigInt",
+              "remark": "",
+              "chnname": "主键",
+              "pk": true,
+              "notNull": true,
+              "relationNoShow": false,
+              "autoIncrement": true
+            },
+            {
+              "name": "order_from",
+              "type": "Char",
+              "remark": "1：内单，2：外单",
+              "chnname": "订单来源",
+              "defaultValue": "",
+              "notNull": true
+            },
+            {
+              "name": "product_material_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "成品物料号",
+              "defaultValue": "",
+              "notNull": true
+            },
+            {
+              "name": "product_material_desc",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "成品物料描述",
+              "defaultValue": "",
+              "notNull": true
+            },
+            {
+              "name": "product_factory_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生产工厂编码",
+              "notNull": true
+            },
+            {
+              "name": "product_factory_desc",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生产工厂描述",
+              "defaultValue": "''"
+            },
+            {
+              "name": "demand_order_num",
+              "type": "Money",
+              "remark": "",
+              "chnname": "需求数量"
+            },
+            {
+              "name": "customer_breach_num",
+              "type": "Money",
+              "remark": "",
+              "chnname": "客户缺口量"
+            },
+            {
+              "name": "gap_customer",
+              "type": "Integer",
+              "remark": "",
+              "chnname": "缺口客户数"
+            },
+            {
+              "name": "total_customer",
+              "type": "Integer",
+              "remark": "",
+              "chnname": "总客户数"
+            },
+            {
+              "name": "surplus_num",
+              "type": "Money",
+              "remark": "",
+              "chnname": "结余量"
+            },
+            {
+              "name": "delivery_date",
+              "type": "Date",
+              "remark": "",
+              "chnname": "交付日期",
+              "notNull": true
+            },
+            {
+              "name": "product_date",
+              "type": "Date",
+              "remark": "",
+              "chnname": "生产日期"
+            },
+            {
+              "name": "del_flag",
+              "type": "Char",
+              "remark": "",
+              "chnname": "是否删除0：有效，1：删除",
+              "defaultValue": "''"
+            },
+            {
+              "name": "remark",
+              "type": "Intro",
+              "remark": "",
+              "chnname": "备注",
+              "defaultValue": "''"
+            },
+            {
+              "name": "create_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "创建时间",
+              "notNull": true
+            },
+            {
+              "name": "create_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "创建人",
+              "notNull": true
+            },
+            {
+              "name": "update_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "更新时间",
+              "defaultValue": ""
+            },
+            {
+              "name": "update_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "更新人",
+              "defaultValue": "''"
+            }
+          ],
+          "indexs": [],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
+            }
+          ],
+          "chnname": "待排产订单分析表"
         },
         {
           "title": "oms_raw_material_feedback",
@@ -5122,17 +5320,17 @@
               "defaultValue": "''"
             },
             {
-              "name": "factory_code",
+              "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "工厂编码",
+              "chnname": "生产工厂编码",
               "notNull": true
             },
             {
-              "name": "factory_desc",
-              "type": "ShortString",
+              "name": "product_factory_desc",
+              "type": "DefaultString",
               "remark": "",
-              "chnname": "工厂描述",
+              "chnname": "生产工厂描述",
               "defaultValue": "''"
             },
             {
@@ -5348,7 +5546,6 @@
               "isUnique": true,
               "fields": [
                 "product_material_code",
-                "factory_code",
                 "order_type",
                 "bom_version"
               ]
@@ -5729,18 +5926,17 @@
               "notNull": true
             },
             {
-              "name": "factory_code",
+              "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "工厂编码",
-              "defaultValue": "",
+              "chnname": "生产工厂编码",
               "notNull": true
             },
             {
-              "name": "factory_desc",
+              "name": "product_factory_desc",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "工厂描述",
+              "chnname": "生产工厂描述",
               "defaultValue": "''"
             },
             {
@@ -5877,14 +6073,6 @@
               "autoIncrement": true
             },
             {
-              "name": "demand_order_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "需求订单号",
-              "pk": false,
-              "notNull": true
-            },
-            {
               "name": "order_type",
               "type": "DefaultString",
               "remark": "",
@@ -5892,10 +6080,10 @@
               "notNull": true
             },
             {
-              "name": "demand_from",
+              "name": "order_from",
               "type": "Char",
-              "remark": "1：客户导入，2：事业部接入",
-              "chnname": "需求来源",
+              "remark": "1：内单，2：外单",
+              "chnname": "订单来源",
               "notNull": true
             },
             {
@@ -5913,32 +6101,31 @@
               "defaultValue": "''"
             },
             {
-              "name": "pl_factory_code",
+              "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL工厂编码",
+              "chnname": "生产工厂编码",
               "notNull": true
             },
             {
-              "name": "pl_factory_desc",
+              "name": "product_factory_desc",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL工厂描述",
-              "notNull": true
-            },
-            {
-              "name": "factory_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "工厂编码",
-              "notNull": true
-            },
-            {
-              "name": "factory_desc",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "工厂描述",
+              "chnname": "生产工厂描述",
               "defaultValue": "''"
+            },
+            {
+              "name": "customer_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "客户编码",
+              "notNull": true
+            },
+            {
+              "name": "customer_desc",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "客户描述"
             },
             {
               "name": "mrp_range",
@@ -6002,19 +6189,6 @@
               "remark": "年度-周数",
               "chnname": "数据版本",
               "notNull": true
-            },
-            {
-              "name": "plan_order_order",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "计划订单号",
-              "defaultValue": "''"
-            },
-            {
-              "name": "sap_messages",
-              "type": "Intro",
-              "remark": "传SAP返回信息",
-              "chnname": "SAP返回信息"
             },
             {
               "name": "del_flag",
@@ -6121,14 +6295,6 @@
               "autoIncrement": true
             },
             {
-              "name": "demand_order_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "需求订单号",
-              "pk": false,
-              "notNull": true
-            },
-            {
               "name": "order_type",
               "type": "DefaultString",
               "remark": "",
@@ -6136,10 +6302,10 @@
               "notNull": true
             },
             {
-              "name": "demand_from",
+              "name": "order_from",
               "type": "Char",
-              "remark": "1：客户导入，2：事业部接入",
-              "chnname": "需求来源",
+              "remark": "1：内单，2：外单",
+              "chnname": "订单来源",
               "notNull": true
             },
             {
@@ -6157,32 +6323,31 @@
               "defaultValue": "''"
             },
             {
-              "name": "pl_factory_code",
+              "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL工厂编码",
+              "chnname": "生产工厂编码",
               "notNull": true
             },
             {
-              "name": "pl_factory_desc",
+              "name": "product_factory_desc",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL工厂描述",
-              "notNull": true
-            },
-            {
-              "name": "factory_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "工厂编码",
-              "notNull": true
-            },
-            {
-              "name": "factory_desc",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "工厂描述",
+              "chnname": "生产工厂描述",
               "defaultValue": "''"
+            },
+            {
+              "name": "customer_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "客户编码",
+              "notNull": true
+            },
+            {
+              "name": "customer_desc",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "客户描述"
             },
             {
               "name": "mrp_range",
@@ -6246,19 +6411,6 @@
               "remark": "年度-周数",
               "chnname": "数据版本",
               "notNull": true
-            },
-            {
-              "name": "plan_order_order",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "计划订单号",
-              "defaultValue": "''"
-            },
-            {
-              "name": "sap_messages",
-              "type": "Intro",
-              "remark": "传SAP返回信息",
-              "chnname": "SAP返回信息"
             },
             {
               "name": "del_flag",
@@ -6352,7 +6504,7 @@
           "chnname": "T+1-T+2周需求历史表"
         },
         {
-          "title": "oms_production_order_analysis",
+          "title": "oms_2weeks_demand_order_edit",
           "fields": [
             {
               "name": "id",
@@ -6365,11 +6517,25 @@
               "autoIncrement": true
             },
             {
+              "name": "demand_order_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "需求订单号",
+              "pk": false,
+              "notNull": true
+            },
+            {
+              "name": "order_type",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "订单类型",
+              "notNull": true
+            },
+            {
               "name": "order_from",
               "type": "Char",
               "remark": "1：内单，2：外单",
               "chnname": "订单来源",
-              "defaultValue": "",
               "notNull": true
             },
             {
@@ -6377,7 +6543,6 @@
               "type": "DefaultString",
               "remark": "",
               "chnname": "成品物料号",
-              "defaultValue": "",
               "notNull": true
             },
             {
@@ -6385,53 +6550,61 @@
               "type": "DefaultString",
               "remark": "",
               "chnname": "成品物料描述",
-              "defaultValue": "",
-              "notNull": true
-            },
-            {
-              "name": "factory_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "工厂编码",
-              "defaultValue": "",
-              "notNull": true
-            },
-            {
-              "name": "factory_desc",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "工厂描述",
               "defaultValue": "''"
             },
             {
-              "name": "demand_order_num",
-              "type": "Money",
+              "name": "product_factory_code",
+              "type": "DefaultString",
               "remark": "",
-              "chnname": "需求数量"
+              "chnname": "生产工厂编码",
+              "notNull": true
             },
             {
-              "name": "customer_breach_num",
-              "type": "Money",
+              "name": "product_factory_desc",
+              "type": "DefaultString",
               "remark": "",
-              "chnname": "客户缺口量"
+              "chnname": "生产工厂描述",
+              "defaultValue": "''"
             },
             {
-              "name": "gap_customer",
-              "type": "Integer",
+              "name": "customer_code",
+              "type": "DefaultString",
               "remark": "",
-              "chnname": "缺口客户数"
+              "chnname": "客户编码",
+              "notNull": true
             },
             {
-              "name": "total_customer",
-              "type": "Integer",
+              "name": "customer_desc",
+              "type": "DefaultString",
               "remark": "",
-              "chnname": "总客户数"
+              "chnname": "客户描述"
             },
             {
-              "name": "surplus_num",
-              "type": "Money",
+              "name": "mrp_range",
+              "type": "DefaultString",
               "remark": "",
-              "chnname": "结余量"
+              "chnname": "MRP范围",
+              "notNull": true
+            },
+            {
+              "name": "bom_version",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "BOM版本",
+              "notNull": true
+            },
+            {
+              "name": "purchase_group_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "采购组"
+            },
+            {
+              "name": "place",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "地点",
+              "notNull": true
             },
             {
               "name": "delivery_date",
@@ -6441,17 +6614,70 @@
               "notNull": true
             },
             {
-              "name": "product_date",
-              "type": "Date",
+              "name": "year",
+              "type": "DefaultString",
+              "remark": "交货日期年度",
+              "chnname": "年度",
+              "notNull": true
+            },
+            {
+              "name": "weeks",
+              "type": "DefaultString",
+              "remark": "交货日期周数",
+              "chnname": "周数",
+              "notNull": true
+            },
+            {
+              "name": "order_num",
+              "type": "BigInt",
               "remark": "",
-              "chnname": "生产日期"
+              "chnname": "订单数量",
+              "defaultValue": "0",
+              "notNull": true
+            },
+            {
+              "name": "version",
+              "type": "DefaultString",
+              "remark": "年度-周数",
+              "chnname": "数据版本",
+              "notNull": true
+            },
+            {
+              "name": "plan_order_order",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "计划订单号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "sap_messages",
+              "type": "Intro",
+              "remark": "传SAP返回信息",
+              "chnname": "SAP返回信息"
+            },
+            {
+              "name": "status",
+              "type": "Char",
+              "remark": "0：初始，1：待传SAP，2：传SAP中，3：已传SAP，4：传SAP异常",
+              "chnname": "状态",
+              "notNull": false,
+              "pk": false,
+              "defaultValue": "''"
+            },
+            {
+              "name": "audit_status",
+              "type": "DefaultString",
+              "remark": "0：无需审核，1：审核中，2：审核完成",
+              "chnname": "审核状态",
+              "notNull": false,
+              "defaultValue": "''"
             },
             {
               "name": "del_flag",
               "type": "Char",
-              "remark": "",
-              "chnname": "是否删除0：有效，1：删除",
-              "defaultValue": "''"
+              "remark": "0：有效，1：删除",
+              "chnname": "是否删除",
+              "defaultValue": "0"
             },
             {
               "name": "remark",
@@ -6478,8 +6704,7 @@
               "name": "update_time",
               "type": "DateTime",
               "remark": "",
-              "chnname": "更新时间",
-              "defaultValue": ""
+              "chnname": "更新时间"
             },
             {
               "name": "update_by",
@@ -6536,7 +6761,267 @@
               "relationNoShow": true
             }
           ],
-          "chnname": "待排产订单分析表"
+          "chnname": "T+1-T+2周需求导入表"
+        },
+        {
+          "title": "oms_2weeks_demand_order_edit_his",
+          "fields": [
+            {
+              "name": "id",
+              "type": "BigInt",
+              "remark": "",
+              "chnname": "主键",
+              "pk": true,
+              "notNull": true,
+              "relationNoShow": false,
+              "autoIncrement": true
+            },
+            {
+              "name": "demand_order_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "需求订单号",
+              "pk": false,
+              "notNull": true
+            },
+            {
+              "name": "order_type",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "订单类型",
+              "notNull": true
+            },
+            {
+              "name": "order_from",
+              "type": "Char",
+              "remark": "1：内单，2：外单",
+              "chnname": "订单来源",
+              "notNull": true
+            },
+            {
+              "name": "product_material_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "成品物料号",
+              "notNull": true
+            },
+            {
+              "name": "product_material_desc",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "成品物料描述",
+              "defaultValue": "''"
+            },
+            {
+              "name": "product_factory_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生产工厂编码",
+              "notNull": true
+            },
+            {
+              "name": "product_factory_desc",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生产工厂描述",
+              "defaultValue": "''"
+            },
+            {
+              "name": "customer_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "客户编码",
+              "notNull": true
+            },
+            {
+              "name": "customer_desc",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "客户描述"
+            },
+            {
+              "name": "mrp_range",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "MRP范围",
+              "notNull": true
+            },
+            {
+              "name": "bom_version",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "BOM版本",
+              "notNull": true
+            },
+            {
+              "name": "purchase_group_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "采购组"
+            },
+            {
+              "name": "place",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "地点",
+              "notNull": true
+            },
+            {
+              "name": "delivery_date",
+              "type": "Date",
+              "remark": "",
+              "chnname": "交付日期",
+              "notNull": true
+            },
+            {
+              "name": "year",
+              "type": "DefaultString",
+              "remark": "交货日期年度",
+              "chnname": "年度",
+              "notNull": true
+            },
+            {
+              "name": "weeks",
+              "type": "DefaultString",
+              "remark": "交货日期周数",
+              "chnname": "周数",
+              "notNull": true
+            },
+            {
+              "name": "order_num",
+              "type": "BigInt",
+              "remark": "",
+              "chnname": "订单数量",
+              "defaultValue": "0",
+              "notNull": true
+            },
+            {
+              "name": "version",
+              "type": "DefaultString",
+              "remark": "年度-周数",
+              "chnname": "数据版本",
+              "notNull": true
+            },
+            {
+              "name": "plan_order_order",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "计划订单号",
+              "defaultValue": "''"
+            },
+            {
+              "name": "sap_messages",
+              "type": "Intro",
+              "remark": "传SAP返回信息",
+              "chnname": "SAP返回信息"
+            },
+            {
+              "name": "status",
+              "type": "Char",
+              "remark": "0：初始，1：待传SAP，2：传SAP中，3：已传SAP，4：传SAP异常",
+              "chnname": "状态",
+              "notNull": false,
+              "pk": false,
+              "defaultValue": "''"
+            },
+            {
+              "name": "audit_status",
+              "type": "DefaultString",
+              "remark": "0：无需审核，1：审核中，2：审核完成",
+              "chnname": "审核状态",
+              "notNull": false,
+              "defaultValue": "''"
+            },
+            {
+              "name": "del_flag",
+              "type": "Char",
+              "remark": "0：有效，1：删除",
+              "chnname": "是否删除",
+              "defaultValue": "0"
+            },
+            {
+              "name": "remark",
+              "type": "Intro",
+              "remark": "",
+              "chnname": "备注",
+              "defaultValue": "''"
+            },
+            {
+              "name": "create_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "创建时间",
+              "notNull": true
+            },
+            {
+              "name": "create_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "创建人",
+              "notNull": true
+            },
+            {
+              "name": "update_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "更新时间"
+            },
+            {
+              "name": "update_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "更新人",
+              "defaultValue": "''"
+            }
+          ],
+          "indexs": [],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
+            }
+          ],
+          "chnname": "T+1-T+2周需求接入历史表"
         }
       ],
       "graphCanvas": {
@@ -8940,12 +9425,11 @@
               "defaultValue": "''"
             },
             {
-              "name": "factory_code",
+              "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "工厂编码",
-              "notNull": true,
-              "defaultValue": "''"
+              "chnname": "生产工厂编码",
+              "notNull": true
             },
             {
               "name": "raw_material_code",
@@ -9310,17 +9794,17 @@
               "defaultValue": "''"
             },
             {
-              "name": "factory_code",
+              "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "工厂编码",
+              "chnname": "生产工厂编码",
               "notNull": true
             },
             {
-              "name": "factory_desc",
-              "type": "ShortString",
+              "name": "product_factory_desc",
+              "type": "DefaultString",
               "remark": "",
-              "chnname": "工厂描述",
+              "chnname": "生产工厂描述",
               "defaultValue": "''"
             },
             {
@@ -9406,7 +9890,6 @@
               "isUnique": true,
               "fields": [
                 "product_material_code",
-                "factory_code",
                 "del_flag"
               ]
             }
@@ -9486,17 +9969,17 @@
               "defaultValue": "''"
             },
             {
-              "name": "factory_code",
+              "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "工厂编码",
+              "chnname": "生产工厂编码",
               "notNull": true
             },
             {
-              "name": "factory_desc",
-              "type": "ShortString",
+              "name": "product_factory_desc",
+              "type": "DefaultString",
               "remark": "",
-              "chnname": "工厂描述",
+              "chnname": "生产工厂描述",
               "defaultValue": "''"
             },
             {
@@ -9569,7 +10052,6 @@
               "isUnique": false,
               "fields": [
                 "product_material_code",
-                "factory_code",
                 "del_flag"
               ]
             }
@@ -9649,17 +10131,17 @@
               "defaultValue": "''"
             },
             {
-              "name": "factory_code",
+              "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "工厂编码",
+              "chnname": "生产工厂编码",
               "notNull": true
             },
             {
-              "name": "factory_desc",
-              "type": "ShortString",
+              "name": "product_factory_desc",
+              "type": "DefaultString",
               "remark": "",
-              "chnname": "工厂描述",
+              "chnname": "生产工厂描述",
               "defaultValue": "''"
             },
             {
@@ -9724,7 +10206,6 @@
               "isUnique": false,
               "fields": [
                 "product_material_code",
-                "factory_code",
                 "del_flag"
               ]
             }
@@ -9804,17 +10285,17 @@
               "defaultValue": "''"
             },
             {
-              "name": "factory_code",
+              "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "工厂编码",
+              "chnname": "生产工厂编码",
               "notNull": true
             },
             {
-              "name": "factory_desc",
-              "type": "ShortString",
+              "name": "product_factory_desc",
+              "type": "DefaultString",
               "remark": "",
-              "chnname": "工厂描述",
+              "chnname": "生产工厂描述",
               "defaultValue": "''"
             },
             {
@@ -9880,7 +10361,6 @@
               "isUnique": false,
               "fields": [
                 "product_material_code",
-                "factory_code",
                 "storehouse",
                 "del_flag"
               ]
@@ -9961,10 +10441,10 @@
               "defaultValue": "''"
             },
             {
-              "name": "factory_code",
+              "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "工厂编码",
+              "chnname": "生产工厂编码",
               "notNull": true
             },
             {
@@ -10037,7 +10517,6 @@
               "isUnique": true,
               "fields": [
                 "raw_material_code",
-                "factory_code",
                 "del_flag",
                 "storage_point"
               ]
@@ -11085,17 +11564,17 @@
               "defaultValue": "''"
             },
             {
-              "name": "factory_code",
+              "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "工厂编码",
+              "chnname": "生产工厂编码",
               "notNull": true
             },
             {
-              "name": "factory_desc",
+              "name": "product_factory_desc",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "工厂描述",
+              "chnname": "生产工厂描述",
               "defaultValue": "''"
             },
             {
@@ -11199,7 +11678,6 @@
               "name": "idx _join_index",
               "isUnique": true,
               "fields": [
-                "factory_code",
                 "produce_line_code",
                 "del_flag"
               ]
@@ -11785,6 +12263,12 @@
               "defaultValue": "''"
             },
             {
+              "name": "customer_name",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "客户名称"
+            },
+            {
               "name": "product_type",
               "type": "DefaultString",
               "remark": "",
@@ -11800,13 +12284,19 @@
               "name": "is_putting_out",
               "type": "Char",
               "remark": "",
-              "chnname": "是否外发"
+              "chnname": "可否加工承揽"
             },
             {
-              "name": "is_overdue_stock",
+              "name": "is_zn_attestation",
               "type": "Char",
               "remark": "",
-              "chnname": "是否超期库存"
+              "chnname": "是否ZN认证"
+            },
+            {
+              "name": "establish_date",
+              "type": "Date",
+              "remark": "",
+              "chnname": "建立日期"
             },
             {
               "name": "del_flag",
@@ -11909,7 +12399,7 @@
           "chnname": "物料扩展信息表"
         },
         {
-          "title": "cd_factory_bom_info",
+          "title": "cd_factory_storehouse_info",
           "fields": [
             {
               "name": "id",
@@ -11936,37 +12426,31 @@
               "defaultValue": "''"
             },
             {
-              "name": "pl_factory_code",
+              "name": "customer_code",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL工厂编码",
+              "chnname": "客户编码",
               "notNull": true
             },
             {
-              "name": "pl_factory_desc",
+              "name": "customer_desc",
               "type": "DefaultString",
               "remark": "",
-              "chnname": "PL工厂描述"
+              "chnname": "客户描述"
             },
             {
-              "name": "from_storehouse",
+              "name": "storehouse_from",
               "type": "DefaultString",
               "remark": "",
               "chnname": "发货库位",
               "notNull": true
             },
             {
-              "name": "to_storehouse",
+              "name": "storehouse_to",
               "type": "DefaultString",
               "remark": "",
               "chnname": "接收库位",
               "notNull": true
-            },
-            {
-              "name": "bom_version",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "BOM版本"
             },
             {
               "name": "lead_time",
@@ -12073,7 +12557,7 @@
               "relationNoShow": true
             }
           ],
-          "chnname": "工厂BOM版本表"
+          "chnname": "工厂库位表"
         }
       ],
       "graphCanvas": {

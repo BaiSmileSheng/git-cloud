@@ -74,7 +74,7 @@ public class OrderFromSap601InterfaceServiceImpl implements OrderFromSap601Inter
                     omsProductionOrder.setOrderCode(outTableOutput.getString("ABLAD"));//排产订单号
                     omsProductionOrder.setProductOrderCode(outTableOutput.getString("AUFNR"));//生产订单号
                     omsProductionOrder.setProductMaterialCode(outTableOutput.getString("MATNR"));//成品物料号
-                    omsProductionOrder.setFactoryCode(outTableOutput.getString("WERKS"));//生产工厂
+                    omsProductionOrder.setProductFactoryCode(outTableOutput.getString("WERKS"));//生产工厂
                     omsProductionOrder.setOrderType(outTableOutput.getString("AUART"));//订单类型
                     omsProductionOrder.setProductStartDate(sft.parse(outTableOutput.getString("GSTRP")));//基本开始日期
                     omsProductionOrder.setProductEndDate(sft.parse(outTableOutput.getString("GLTRP")));//基本结束日期
@@ -128,7 +128,7 @@ public class OrderFromSap601InterfaceServiceImpl implements OrderFromSap601Inter
             for (OmsProductionOrder omsProductionOrder : list) {
                 inputTable.appendRow();
                 inputTable.setValue("MATNR", omsProductionOrder.getProductMaterialCode());
-                inputTable.setValue("WERKS", omsProductionOrder.getFactoryCode());
+                inputTable.setValue("WERKS", omsProductionOrder.getProductFactoryCode());
                 inputTable.setValue("AUART", omsProductionOrder.getOrderType());
                 inputTable.setValue("GSTRP", omsProductionOrder.getProductStartDate());
                 inputTable.setValue("GLTRP", omsProductionOrder.getProductEndDate());

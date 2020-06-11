@@ -51,11 +51,11 @@ public class CdBomInfo extends BaseEntity {
     private String productMaterialDesc;
 
     /**
-     * 工厂编码
+     * 生产工厂编码
      */
-    @ExcelProperty(value = "工厂编码")
-    @ApiModelProperty(value = "工厂编码")
-    private String factoryCode;
+    @ExcelProperty(value = "生产工厂编码")
+    @ApiModelProperty(value = "生产工厂编码")
+    private String productFactoryCode;
 
     /**
      * 原材料物料号
