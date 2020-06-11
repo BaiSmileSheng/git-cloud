@@ -286,7 +286,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             //获取repository
             JCoRepository repository = destination.getRepository();
             //获取函数信息
-            JCoFunction fm = repository.getFunction("ZESP_IM_001");
+            JCoFunction fm = repository.getFunction(SapConstants.ZESP_IM_001);
             if (fm == null) {
                 throw new RuntimeException("Function does not exists in SAP system.");
             }
