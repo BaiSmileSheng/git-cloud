@@ -80,26 +80,29 @@ public class ActTaskController extends BaseController {
         long count = query.count();
         int first = (page.getPageNum() - 1) * page.getPageSize();
         List<Task> taskList = query.listPage(first, page.getPageSize());
-        // 转换vo
-        taskList.forEach(e -> {
-            RuTask rt = new RuTask(e);
-            List<IdentityLink> identityLinks = runtimeService.getIdentityLinksForProcessInstance(rt.getProcInstId());
-            for (IdentityLink ik : identityLinks) {
-                // 关联发起人
-                if ("starter".equals(ik.getType()) && StrUtil.isNotBlank(ik.getUserId())) {
-                    rt.setApplyer(
-                            remoteUserService.selectSysUserByUserId(Long.parseLong(ik.getUserId())).getUserName());
+        if (taskList.size() > 0) {
+            // 转换vo
+            taskList.forEach(e -> {
+                RuTask rt = new RuTask(e);
+                List<IdentityLink> identityLinks = runtimeService
+                        .getIdentityLinksForProcessInstance(rt.getProcInstId());
+                for (IdentityLink ik : identityLinks) {
+                    // 关联发起人
+                    if ("starter".equals(ik.getType()) && StrUtil.isNotBlank(ik.getUserId())) {
+                        rt.setApplyer(
+                                remoteUserService.selectSysUserByUserId(Long.parseLong(ik.getUserId())).getUserName());
+                    }
                 }
-            }
-            // 关联业务key
-            ProcessInstance pi = runtimeService.createProcessInstanceQuery().processInstanceId(rt.getProcInstId())
-                    .singleResult();
-            rt.setBusinessKey(pi.getBusinessKey());
-            rt.setProcessName(pi.getName());
-            rt.setProcessDefKey(pi.getProcessDefinitionKey());
-            rt.setProcessDefName(pi.getProcessDefinitionName());
-            list.add(rt);
-        });
+                // 关联业务key
+                ProcessInstance pi = runtimeService.createProcessInstanceQuery().processInstanceId(rt.getProcInstId())
+                        .singleResult();
+                rt.setBusinessKey(pi.getBusinessKey());
+                rt.setProcessName(pi.getName());
+                rt.setProcessDefKey(pi.getProcessDefinitionKey());
+                rt.setProcessDefName(pi.getProcessDefinitionName());
+                list.add(rt);
+            });
+        }
         Map<String, Object> map = Maps.newHashMap();
         map.put("rows", list);
         map.put("pageNum", page.getPageNum());
@@ -137,15 +140,16 @@ public class ActTaskController extends BaseController {
 
     /**
      * task 流转历史  一个订单有多次审核
+     *
      * @param tableId
      * @param procDefKey
      * @return
      */
     @GetMapping(value = "flowList")
-    @ApiOperation(value = "审核历史-多次",response = HiTaskVo.class)
-    public R flow(String tableId,String procDefKey) {
+    @ApiOperation(value = "审核历史-多次", response = HiTaskVo.class)
+    public R flow(String tableId, String procDefKey) {
         startPage();
-        return result(bizAuditService.getHistoryTaskList(tableId,procDefKey));
+        return result(bizAuditService.getHistoryTaskList(tableId, procDefKey));
     }
 
     /**
@@ -158,17 +162,18 @@ public class ActTaskController extends BaseController {
     @PostMapping("audit")
     public R audit(@RequestBody BizAudit bizAudit) {
         //审批 推进工作流
-        return actTaskService.audit(bizAudit,getCurrentUserId());
+        return actTaskService.audit(bizAudit, getCurrentUserId());
     }
 
     /**
      * 批量审批
+     *
      * @param bizAudit
      * @return
      */
     @PostMapping("audit/batch")
     public R auditBatch(@RequestBody BizAudit bizAudit) {
-        return actTaskService.auditBatch(bizAudit,getCurrentUserId());
+        return actTaskService.auditBatch(bizAudit, getCurrentUserId());
     }
 
     /**
