@@ -1,6 +1,7 @@
 package com.cloud.settle.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -98,6 +99,7 @@ public class SmsQualityOrderController extends BaseController {
      * @param smsQualityOrder  质量索赔信息
      * @return TableDataInfo 质量索赔分页信息
      */
+    @HasPermissions("settle:qualityOrder:export")
     @GetMapping("export")
     @ApiOperation(value = "导出查询质量索赔列表", response = SmsQualityOrder.class)
     @ApiImplicitParams({
@@ -160,10 +162,13 @@ public class SmsQualityOrderController extends BaseController {
      * @param smsQualityOrderReq 质量索赔信息
      * @return 新增id
      */
+    @HasPermissions("settle:qualityOrder:save")
     @PostMapping("save")
-    @ApiOperation(value = "新增保存质量索赔 ", response = SmsQualityOrder.class)
+    @ApiOperation(value = "新增保存质量索赔(包含文件)", response = R.class)
     public R addSave(@RequestParam("smsQualityOrderReq") String smsQualityOrderReq,@RequestParam("files") MultipartFile[] files) {
         SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq,SmsQualityOrder.class);
+        String name = getLoginName();
+        smsQualityOrder.setCreateBy(name);
         smsQualityOrderService.addSmsQualityOrderAndSysOss(smsQualityOrder,files);
         return R.data(smsQualityOrder.getId());
     }
@@ -185,8 +190,9 @@ public class SmsQualityOrderController extends BaseController {
      * @param smsQualityOrderReq 质量索赔信息
      * @return 修改结果成功或失败
      */
+    @HasPermissions("settle:qualityOrder:update")
     @PostMapping("update")
-    @ApiOperation(value = "修改保存质量索赔(包含文件信息)", response = SmsQualityOrder.class)
+    @ApiOperation(value = "修改保存质量索赔(包含文件信息)",response = R.class)
     public R updateQuality(@RequestParam("smsQualityOrder") String smsQualityOrderReq,@RequestParam("files") MultipartFile[] files) {
         SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq,SmsQualityOrder.class);
         return smsQualityOrderService.updateSmsQualityOrderAndSysOss(smsQualityOrder,files);
@@ -198,7 +204,8 @@ public class SmsQualityOrderController extends BaseController {
      * @return 删除结果成功或失败
      */
     @PostMapping("remove")
-    @ApiOperation(value = "删除质量索赔 ", response = SmsQualityOrder.class)
+    @HasPermissions("settle:qualityOrder:remove")
+    @ApiOperation(value = "删除质量索赔 ", response = R.class)
     public R remove(String ids) {
         return smsQualityOrderService.deleteSmsQualityOrderAndSysOss(ids);
     }
@@ -208,9 +215,10 @@ public class SmsQualityOrderController extends BaseController {
      * @param ids 主键id
      * @return 提交结果成功或失败
      */
+    @HasPermissions("settle:qualityOrder:submit")
     @PostMapping("submit")
     @OperLog(title = "提交索赔单 ", businessType = BusinessType.DELETE)
-    @ApiOperation(value = "提交索赔单 ", response = SmsQualityOrder.class)
+    @ApiOperation(value = "提交索赔单 ", response = R.class)
     public R submit(String ids){
         return smsQualityOrderService.submit(ids);
     }
@@ -220,9 +228,10 @@ public class SmsQualityOrderController extends BaseController {
      * @param ids 主键id
      * @return 供应商确认成功或失败
      */
+    @HasPermissions("settle:qualityOrder:supplierConfirm")
     @PostMapping("supplierConfirm")
     @OperLog(title = "供应商确认索赔单 ", businessType = BusinessType.DELETE)
-    @ApiOperation(value = "供应商确认索赔单 ", response = SmsQualityOrder.class)
+    @ApiOperation(value = "供应商确认索赔单 ", response = R.class)
     public R supplierConfirm(String ids){
         return smsQualityOrderService.supplierConfirm(ids);
     }
@@ -232,8 +241,9 @@ public class SmsQualityOrderController extends BaseController {
      * @param smsQualityOrderReq 质量索赔信息
      * @return 索赔单供应商申诉结果成功或失败
      */
+    @HasPermissions("settle:qualityOrder:supplierAppeal")
     @PostMapping("supplierAppeal")
-    @ApiOperation(value = "索赔单供应商申诉 ", response = SmsQualityOrder.class)
+    @ApiOperation(value = "索赔单供应商申诉 ", response = R.class)
     public R supplierAppeal(@RequestParam("smsQualityOrder") String smsQualityOrderReq,@RequestParam("files") MultipartFile[] files) {
             SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq,SmsQualityOrder.class);
             return smsQualityOrderService.supplierAppeal(smsQualityOrder,files);

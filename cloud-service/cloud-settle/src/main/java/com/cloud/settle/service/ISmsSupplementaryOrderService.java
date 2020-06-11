@@ -63,4 +63,11 @@ public interface ISmsSupplementaryOrderService extends BaseService<SmsSupplement
      * @return
      */
     R updatePriceEveryMonth(String month);
+
+    /**
+     * 根据状态查物料号
+     * @param status
+     * @return 物料号集合
+     */
+    List<String> materialCodeListByStatus(String status);
 }

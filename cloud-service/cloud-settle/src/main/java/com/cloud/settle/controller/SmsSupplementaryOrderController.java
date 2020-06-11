@@ -285,4 +285,15 @@ public class SmsSupplementaryOrderController extends BaseController {
         });
         return EasyExcelUtil.writeExcel(smsSupplementaryOrderZBList, "物耗申请总部.xlsx", "sheet", new SmsSupplementaryOrder());
     }
+
+    /**
+     * 根据状态查物料号
+     * @param status
+     * @return 物料号集合
+     */
+    @GetMapping("materialCodeListByStatus")
+    @ApiOperation(value = "根据状态查物料号", response = String.class)
+    public List<String> materialCodeListByStatus(String status){
+        return smsSupplementaryOrderService.materialCodeListByStatus(status);
+    }
 }
