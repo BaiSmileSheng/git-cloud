@@ -1,10 +1,12 @@
 package com.cloud.settle.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
+import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.settle.enums.ClaimOtherStatusEnum;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.enums.UserTypeEnum;
@@ -98,6 +100,7 @@ public class SmsClaimOtherController extends BaseController {
      * @param smsClaimOther 其他索赔查询条件
      * @return
      */
+    @HasPermissions("settle:claimOther:export")
     @GetMapping("export")
     @ApiOperation(value = "导出其他索赔列表", response = SmsClaimOther.class)
     @ApiImplicitParams({
@@ -157,10 +160,14 @@ public class SmsClaimOtherController extends BaseController {
      * @param files
      * @return
      */
+    @HasPermissions("settle:claimOther:save")
     @PostMapping("save")
     @ApiOperation(value = "新增其他索赔信息(包含文件信息)", response = R.class)
     public R addSave(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestParam("files") MultipartFile[] files) {
         SmsClaimOther smsClaimOther = JSONObject.parseObject(smsClaimOtherReq,SmsClaimOther.class);
+        //校验入参
+        ValidatorUtils.validateEntity(smsClaimOther,SmsClaimOther.class);
+        smsClaimOther.setCreateBy(getLoginName());
         R result = smsClaimOtherService.insertClaimOtherAndOss(smsClaimOther,files);
         return result;
     }
@@ -171,10 +178,14 @@ public class SmsClaimOtherController extends BaseController {
      * @param files  文件
      * @return 修改成功或失败
      */
+    @HasPermissions("settle:claimOther:updateClaimOther")
     @PostMapping("updateClaimOther")
     @ApiOperation(value = "修改保存其他索赔(包含图片信息)", response = R.class)
     public R updateClaimOtherAndOss(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestParam("files") MultipartFile[] files) {
         SmsClaimOther smsClaimOther = JSONObject.parseObject(smsClaimOtherReq,SmsClaimOther.class);
+        //校验入参
+        ValidatorUtils.validateEntity(smsClaimOther,SmsClaimOther.class);
+        smsClaimOther.setUpdateBy(getLoginName());
         R result = smsClaimOtherService.updateClaimOtherAndOss(smsClaimOther,files);
         return result;
     }
@@ -196,6 +207,7 @@ public class SmsClaimOtherController extends BaseController {
      * @param ids 主键
      * @return 成功或失败
      */
+    @HasPermissions("settle:claimOther:remove")
     @PostMapping("remove")
     @OperLog(title = "删除其他索赔", businessType = BusinessType.DELETE)
     @ApiOperation(value = "删除其他索赔", response = R.class)
@@ -210,6 +222,7 @@ public class SmsClaimOtherController extends BaseController {
      * @param ids 主键id
      * @return 提交结果成功或失败
      */
+    @HasPermissions("settle:claimOther:submit")
     @PostMapping("submit")
     @OperLog(title = "提交其他索赔单", businessType = BusinessType.DELETE)
     @ApiOperation(value = "提交其他索赔单", response = R.class)
@@ -222,6 +235,7 @@ public class SmsClaimOtherController extends BaseController {
      * @param ids 主键id
      * @return 供应商确认成功或失败
      */
+    @HasPermissions("settle:claimOther:supplierConfirm")
     @PostMapping("supplierConfirm")
     @OperLog(title = "供应商确认索赔单 ", businessType = BusinessType.DELETE)
     @ApiOperation(value = "供应商确认索赔单 ", response = R.class)
@@ -231,13 +245,19 @@ public class SmsClaimOtherController extends BaseController {
 
     /**
      * 索赔单供应商申诉(包含文件信息)
-     * @param smsClaimOtherReq 其他索赔信息
+     * @param id 主键id
+     * @param complaintDescription 申诉描述
+     * @param files
      * @return 索赔单供应商申诉结果成功或失败
      */
+    @HasPermissions("settle:claimOther:supplierAppeal")
     @PostMapping("supplierAppeal")
     @ApiOperation(value = "索赔单供应商申诉 ", response = R.class)
-    public R supplierAppeal(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestParam("files") MultipartFile[] files) {
-        SmsClaimOther smsClaimOther = JSONObject.parseObject(smsClaimOtherReq,SmsClaimOther.class);
+    public R supplierAppeal(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription, @RequestParam("files") MultipartFile[] files) {
+        SmsClaimOther smsClaimOther = new SmsClaimOther();
+        smsClaimOther.setId(id);
+        smsClaimOther.setComplaintDescription(complaintDescription);
+        smsClaimOther.setUpdateBy(getLoginName());
         return smsClaimOtherService.supplierAppeal(smsClaimOther,files);
     }
 

@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Id;
 import javax.persistence.Transient;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import tk.mybatis.mapper.annotation.KeySql;
 
@@ -58,6 +60,8 @@ public class SmsClaimOther extends BaseEntity {
     /**
      * 供应商编码
      */
+    @Valid
+    @NotNull(message = "供应商编码不能为空")
     @ExcelProperty(value = "供应商编码")
     @ApiModelProperty(value = "供应商编码")
     private String supplierCode;
@@ -72,6 +76,8 @@ public class SmsClaimOther extends BaseEntity {
     /**
      * 工厂
      */
+    @Valid
+    @NotNull(message = "工厂不能为空")
     @ExcelProperty(value = "工厂")
     @ApiModelProperty(value = "工厂")
     private String factoryCode;
