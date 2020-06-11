@@ -80,7 +80,7 @@ public class CdFactoryLineInfoServiceImpl extends BaseServiceImpl<CdFactoryLineI
             if (cdFactoryLineInfos.size() > 0) {
                 for (CdFactoryLineInfo cdFactoryLineInfo : cdFactoryLineInfos) {
                     CdFactoryLineInfo factoryLineInfo = new CdFactoryLineInfo();
-                    factoryLineInfo.setFactoryCode(cdFactoryLineInfo.getFactoryCode());
+                    factoryLineInfo.setProductFactoryCode(cdFactoryLineInfo.getProductFactoryCode());
                     factoryLineInfo.setProduceLineCode(cdFactoryLineInfo.getProduceLineCode());
                     factoryLineInfo.setDelFlag("0");
                     //根据工厂、线体查询数据

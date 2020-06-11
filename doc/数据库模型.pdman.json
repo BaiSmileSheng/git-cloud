@@ -9418,13 +9418,6 @@
               "notNull": true
             },
             {
-              "name": "product_factory_desc",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "生产工厂描述",
-              "defaultValue": "''"
-            },
-            {
               "name": "raw_material_code",
               "type": "DefaultString",
               "remark": "",
@@ -10439,13 +10432,6 @@
               "remark": "",
               "chnname": "生产工厂编码",
               "notNull": true
-            },
-            {
-              "name": "product_factory_desc",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "生产工厂描述",
-              "defaultValue": "''"
             },
             {
               "name": "unit",

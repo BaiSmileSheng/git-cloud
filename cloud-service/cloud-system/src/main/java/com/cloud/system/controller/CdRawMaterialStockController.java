@@ -55,14 +55,14 @@ public class CdRawMaterialStockController extends BaseController {
             @ApiImplicitParam(name = "sortField", value = "排序列", required = false,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "rawMaterialCode", value = "原材料物料号", required = false,paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "factoryCode", value = "生产工厂", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = false,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "storagePoint", value = "仓储点", required = false,paramType = "query", dataType = "String")
     })
     public TableDataInfo list(@ApiIgnore CdRawMaterialStock cdRawMaterialStock) {
         Example example = new Example(CdRawMaterialStock.class);
         Example.Criteria criteria = example.createCriteria();
-        if (StringUtils.isNotBlank(cdRawMaterialStock.getFactoryCode())) {
-            criteria.andEqualTo("factoryCode",cdRawMaterialStock.getFactoryCode());
+        if (StringUtils.isNotBlank(cdRawMaterialStock.getProductFactoryCode())) {
+            criteria.andEqualTo("factoryCode",cdRawMaterialStock.getProductFactoryCode());
         }
         if (StringUtils.isNotBlank(cdRawMaterialStock.getRawMaterialCode())) {
             criteria.andEqualTo("rawMaterialCode",cdRawMaterialStock.getRawMaterialCode());

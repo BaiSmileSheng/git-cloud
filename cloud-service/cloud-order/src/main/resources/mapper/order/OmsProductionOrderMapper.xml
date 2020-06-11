@@ -14,8 +14,8 @@
         <result property="monitor" column="monitor"/>
         <result property="productMaterialCode" column="product_material_code"/>
         <result property="productMaterialDesc" column="product_material_desc"/>
-        <result property="factoryCode" column="factory_code"/>
-        <result property="factoryDesc" column="factory_desc"/>
+        <result property="productFactoryCode" column="product_factory_code"/>
+        <result property="productFactoryDesc" column="product_factory_desc"/>
         <result property="orderType" column="order_type"/>
         <result property="productNum" column="product_num"/>
         <result property="deliveryNum" column="delivery_num"/>
@@ -26,6 +26,7 @@
         <result property="productEndTime" column="product_end_time"/>
         <result property="actualEndDate" column="actual_end_date"/>
         <result property="bomVersion" column="bom_version"/>
+        <result property="newVersion" column="new_version"/>
         <result property="sequence" column="sequence"/>
         <result property="destination" column="destination"/>
         <result property="deliveryDate" column="delivery_date"/>
@@ -60,8 +61,8 @@
                monitor,
                product_material_code,
                product_material_desc,
-               factory_code,
-               factory_desc,
+               product_factory_code,
+               product_factory_desc,
                order_type,
                product_num,
                delivery_num,
@@ -72,6 +73,7 @@
                product_end_time,
                actual_end_date,
                bom_version,
+               new_version,
                sequence,
                destination,
                delivery_date,
