@@ -147,10 +147,10 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             smsSupplementaryOrder.setSupplierCode(factoryLineInfo.getSupplierCode());
             smsSupplementaryOrder.setSupplierName(factoryLineInfo.getSupplierDesc());
         }
-        smsSupplementaryOrder.setFactoryCode(omsProductionOrder.getFactoryCode());
-        CdFactoryInfo cdFactoryInfo = remoteFactoryInfoService.selectOneByFactory(omsProductionOrder.getFactoryCode());
+        smsSupplementaryOrder.setFactoryCode(omsProductionOrder.getProductFactoryCode());
+        CdFactoryInfo cdFactoryInfo = remoteFactoryInfoService.selectOneByFactory(omsProductionOrder.getProductFactoryCode());
         if (cdFactoryInfo == null) {
-            log.error(StrUtil.format("(物耗)物耗申请新增保存开始：公司信息为空参数为{}", omsProductionOrder.getFactoryCode()));
+            log.error(StrUtil.format("(物耗)物耗申请新增保存开始：公司信息为空参数为{}", omsProductionOrder.getProductFactoryCode()));
             return R.error("公司信息为空！");
         }
         smsSupplementaryOrder.setCompanyCode(cdFactoryInfo.getCompanyCode());

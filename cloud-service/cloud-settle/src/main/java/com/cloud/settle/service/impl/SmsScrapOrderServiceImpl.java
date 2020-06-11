@@ -112,10 +112,10 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             smsScrapOrder.setSupplierCode(factoryLineInfo.getSupplierCode());
             smsScrapOrder.setSupplierName(factoryLineInfo.getSupplierDesc());
         }
-        smsScrapOrder.setFactoryCode(omsProductionOrder.getFactoryCode());
-        CdFactoryInfo cdFactoryInfo = remoteFactoryInfoService.selectOneByFactory(omsProductionOrder.getFactoryCode());
+        smsScrapOrder.setFactoryCode(omsProductionOrder.getProductFactoryCode());
+        CdFactoryInfo cdFactoryInfo = remoteFactoryInfoService.selectOneByFactory(omsProductionOrder.getProductFactoryCode());
         if (cdFactoryInfo == null) {
-            log.error(StrUtil.format("(报废)报废申请新增保存开始：公司信息为空参数为{}", omsProductionOrder.getFactoryCode()));
+            log.error(StrUtil.format("(报废)报废申请新增保存开始：公司信息为空参数为{}", omsProductionOrder.getProductFactoryCode()));
             return R.error("公司信息为空！");
         }
         smsScrapOrder.setCompanyCode(cdFactoryInfo.getCompanyCode());
