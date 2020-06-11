@@ -64,7 +64,6 @@ public class SmsClaimOther extends BaseEntity {
     @ExcelProperty(value = "供应商编码",index = 0)
     @Valid
     @NotNull(message = "供应商编码不能为空")
-    @ExcelProperty(value = "供应商编码")
     @ApiModelProperty(value = "供应商编码")
     private String supplierCode;
 
@@ -81,7 +80,6 @@ public class SmsClaimOther extends BaseEntity {
     @ExcelProperty(value = "工厂",index = 2)
     @Valid
     @NotNull(message = "工厂不能为空")
-    @ExcelProperty(value = "工厂")
     @ApiModelProperty(value = "工厂")
     private String factoryCode;
 
