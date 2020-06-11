@@ -64,6 +64,14 @@ spring:
         wall:
           config:
             multi-statement-allow: true
+sap:
+  client600:
+    ashost: 10.133.28.69
+    sysnr: 00
+    client: 200
+    user: 19046341
+    passwd: 123123
+    lang: ZH
 webService:
   # 创建报账单 webservice
   baseMultiItemClaim:

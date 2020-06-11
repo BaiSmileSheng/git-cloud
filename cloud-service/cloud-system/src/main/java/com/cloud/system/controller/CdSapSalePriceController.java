@@ -136,4 +136,14 @@ public class CdSapSalePriceController extends BaseController {
         List<String> materialCodeList= CollectionUtil.newArrayList(materialCodes.split(","));
         return cdSapSalePriceService.selectPriceByInMaterialCodeAndDate(materialCodeList,beginDate,endDate);
     }
+
+    /**
+     * 根据销售组织、专用号更新数据
+     * @param cdSapSalePrice
+     * @return
+     */
+    @PostMapping("updateByMarketingOrganizationAndMaterialCode")
+    public R updateByMarketingOrganizationAndMaterialCode(@RequestBody CdSapSalePrice cdSapSalePrice) {
+        return toAjax(cdSapSalePriceService.updateByMarketingOrganizationAndMaterialCode(cdSapSalePrice,cdSapSalePrice.getMarketingOrganization(),cdSapSalePrice.getMaterialCode()));
+    }
 }

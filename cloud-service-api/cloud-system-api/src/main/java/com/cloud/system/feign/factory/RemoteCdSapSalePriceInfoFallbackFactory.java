@@ -1,5 +1,6 @@
 package com.cloud.system.feign.factory;
 
+import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.CdSapSalePrice;
 import com.cloud.system.feign.RemoteCdSapSalePriceInfoService;
 import feign.hystrix.FallbackFactory;
@@ -40,6 +41,24 @@ public class RemoteCdSapSalePriceInfoFallbackFactory implements FallbackFactory<
             @Override
             public Map<String, CdSapSalePrice> selectPriceByInMaterialCodeAndDate(String materialCodes, String beginDate, String endDate) {
                 return null;
+            }
+
+            /**
+             * 根据销售组织、专用号更新数据
+             * @param cdSapSalePrice
+             * @return
+             */
+            @Override
+            public R updateByMarketingOrganizationAndMaterialCode(CdSapSalePrice cdSapSalePrice) {
+                return R.error();
+            }
+
+            /**
+             * 新增保存成品销售价格
+             */
+            @Override
+            public R addSave(CdSapSalePrice cdSapSalePrice) {
+                return R.error();
             }
         };
     }

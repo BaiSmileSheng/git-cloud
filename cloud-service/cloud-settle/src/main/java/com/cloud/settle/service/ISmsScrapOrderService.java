@@ -3,6 +3,7 @@ package com.cloud.settle.service;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
+import com.sap.conn.jco.JCoException;
 
 import java.util.List;
 
@@ -49,4 +50,11 @@ public interface ISmsScrapOrderService extends BaseService<SmsScrapOrder> {
      * @return
      */
     R updatePriceEveryMonth(String month);
+
+    /**
+     * 定时任务更新指定月份SAP销售价格
+     * @param month
+     * @return
+     */
+    R updateSAPPriceEveryMonth(String month) throws JCoException;
 }

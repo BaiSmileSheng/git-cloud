@@ -155,9 +155,16 @@ public class SmsSupplementaryOrderController extends BaseController {
     /**
      * 新增保存物耗申请单
      */
+    @PostMapping("saveList")
+    @ApiOperation(value = "新增保存物耗申请单参数为List", response = R.class)
+    public R addSave(@RequestBody List<SmsSupplementaryOrder> smsSupplementaryOrders) {
+        return smsSupplementaryOrderService.addSaveList(smsSupplementaryOrders);
+    }
+
+    /**
+     * 新增保存物耗申请单
+     */
     @PostMapping("save")
-    @OperLog(title = "新增保存物耗申请单 ", businessType = BusinessType.INSERT)
-    @ApiOperation(value = "新增保存物耗申请单 ", response = R.class)
     public R addSave(@RequestBody SmsSupplementaryOrder smsSupplementaryOrder) {
         return smsSupplementaryOrderService.addSave(smsSupplementaryOrder);
     }
@@ -173,9 +180,18 @@ public class SmsSupplementaryOrderController extends BaseController {
     /**
      * 编辑保存物耗申请单功能  --有逻辑校验
      */
+    @PostMapping("editSaveList")
+    @OperLog(title = "修改保存物耗申请单 ", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "修改保存物耗申请单List ", response = R.class)
+    public R editSave(@RequestBody List<SmsSupplementaryOrder> smsSupplementaryOrders) {
+        return smsSupplementaryOrderService.editSaveList(smsSupplementaryOrders);
+    }
+
+    /**
+     * 编辑保存物耗申请单功能  --有逻辑校验
+     */
     @PostMapping("editSave")
     @OperLog(title = "修改保存物耗申请单 ", businessType = BusinessType.UPDATE)
-    @ApiOperation(value = "修改保存物耗申请单 ", response = R.class)
     public R editSave(@RequestBody SmsSupplementaryOrder smsSupplementaryOrder) {
         return smsSupplementaryOrderService.editSave(smsSupplementaryOrder);
     }

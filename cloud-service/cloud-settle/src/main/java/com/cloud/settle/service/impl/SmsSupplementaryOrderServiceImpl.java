@@ -64,6 +64,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
      * @return
      */
     @Override
+    @Transactional
     public R editSave(SmsSupplementaryOrder smsSupplementaryOrder) {
         Long id = smsSupplementaryOrder.getId();
         log.info(StrUtil.format("物耗申请修改保存开始：参数为{}", smsSupplementaryOrder.toString()));
@@ -81,6 +82,18 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         } else {
             return R.error("物耗申请更新失败！");
         }
+    }
+
+    @Override
+    @Transactional
+    public R editSaveList(List<SmsSupplementaryOrder> smsSupplementaryOrders) {
+        smsSupplementaryOrders.forEach(smsSupplementaryOrder ->{
+            R r = editSave(smsSupplementaryOrder);
+            if(!r.isSuccess()){
+                throw new BusinessException(r.getStr("msg"));
+            }
+        });
+        return R.ok();
     }
 
     /**
@@ -160,6 +173,23 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         } else {
             return R.error("物耗申请插入失败！");
         }
+    }
+
+    /**
+     * 多条增加
+     * @param smsSupplementaryOrders
+     * @return
+     */
+    @Override
+    @Transactional
+    public R addSaveList(List<SmsSupplementaryOrder> smsSupplementaryOrders) {
+        smsSupplementaryOrders.forEach(smsSupplementaryOrder ->{
+            R r = addSave(smsSupplementaryOrder);
+            if(!r.isSuccess()){
+                throw new BusinessException(r.getStr("msg"));
+            }
+        });
+        return R.ok();
     }
 
     /**
@@ -274,20 +304,20 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         }
         int applyNum = smsSupplementaryOrder.getStuffAmount();//申请量
         //最小包装量
-        int minUnit = Integer.parseInt(cdMaterialInfo.getRoundingQuantit() == null ? "0" : cdMaterialInfo.getRoundingQuantit().toString());
+        Double minUnit = Double.valueOf(cdMaterialInfo.getRoundingQuantit() == null ? "0" : cdMaterialInfo.getRoundingQuantit().toString());
         if (minUnit == 0) {
-            return R.error("最小包装量不正确！");
+            return R.error(StrUtil.format("{}最小包装量不正确！",smsSupplementaryOrder.getRawMaterialCode()));
         }
         if (applyNum % minUnit != 0) {
             log.error(StrUtil.format("(物耗)申请量必须是最小包装量的整数倍参数为{},{}", applyNum,minUnit));
-            return R.error("申请量必须是最小包装量的整数倍！");
+            return R.error(StrUtil.format("{}申请量必须是最小包装量的整数倍！",smsSupplementaryOrder.getRawMaterialCode()));
         }
         //3、校验申请数量是否是单耗的整数倍
         //生产单号获取排产订单信息
         OmsProductionOrder omsProductionOrder = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
         if (omsProductionOrder == null) {
             log.error(StrUtil.format("(物耗)排产订单信息不存在!排产订单号参数为{}", productOrderCode));
-            return R.error("排产订单信息不存在！");
+            return R.error(StrUtil.format("{}排产订单信息不存在！",productOrderCode));
         }
         //根据成品物料号和原材料物料号取bom单耗
         String productMaterialCode = omsProductionOrder.getProductMaterialCode();
@@ -300,7 +330,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         //5、校验申请量是否大于订单量*单耗
         BigDecimal productNum = omsProductionOrder.getProductNum();
         if (new BigDecimal(applyNum).compareTo(productNum.multiply(new BigDecimal(rBomNum.get("data").toString()))) >= 0) {
-            return R.error("申请量不得大于订单量");
+            return R.error(StrUtil.format("{}申请量不得大于订单量",productOrderCode));
         }
         return R.ok();
     }

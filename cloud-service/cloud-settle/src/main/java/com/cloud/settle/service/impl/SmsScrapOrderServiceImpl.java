@@ -3,6 +3,7 @@ package com.cloud.settle.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
@@ -15,18 +16,17 @@ import com.cloud.settle.enums.CurrencyEnum;
 import com.cloud.settle.enums.ScrapOrderStatusEnum;
 import com.cloud.settle.mapper.SmsScrapOrderMapper;
 import com.cloud.settle.service.ISmsScrapOrderService;
-import com.cloud.system.domain.entity.CdFactoryInfo;
-import com.cloud.system.domain.entity.CdFactoryLineInfo;
-import com.cloud.system.domain.entity.CdSapSalePrice;
-import com.cloud.system.domain.entity.CdSettleRatio;
+import com.cloud.system.domain.entity.*;
 import com.cloud.system.enums.SettleRatioEnum;
 import com.cloud.system.feign.*;
+import com.sap.conn.jco.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,6 +56,9 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
     private RemoteCdSapSalePriceInfoService remoteCdSapSalePriceInfoService;
     @Autowired
     private RemoteCdMouthRateService remoteCdMouthRateService;
+    @Autowired
+    private RemoteInterfaceLogService remoteInterfaceLogService;
+
 
     /**
      * 编辑报废申请单功能  --有状态校验
@@ -270,5 +273,103 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             updateBatchByPrimaryKeySelective(smsScrapOrderList);
         }
         return R.ok();
+    }
+
+    /**
+     * 定时任务更新指定月份SAP销售价格
+     * @param month
+     * @return
+     */
+    @Override
+//    @GlobalTransactional
+    public R updateSAPPriceEveryMonth(String month) {
+        //查询上个月、待结算的物耗申请中的物料号，公司编号
+        List<Map<String,String>> materialCodeComCodeList = smsScrapOrderMapper.selectMaterialAndCompanyCodeGroupBy(month, CollUtil.newArrayList(ScrapOrderStatusEnum.BF_ORDER_STATUS_DJS.getCode()));
+        JCoDestination destination;
+        SysInterfaceLog sysInterfaceLog = new SysInterfaceLog().builder()
+                .appId("SAP").interfaceName("ZSD_INT_DDPS_01")
+                .content(CollUtil.join(materialCodeComCodeList, "#")).build();
+        Date date = DateUtil.date();
+        StringBuffer error = new StringBuffer();
+        try {
+            //创建与SAP的连接
+            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP600);
+            //获取repository
+            JCoRepository repository = destination.getRepository();
+            //获取函数信息
+            JCoFunction fm = repository.getFunction("ZSD_INT_DDPS_01");
+            if (fm == null) {
+                throw new RuntimeException("Function does not exists in SAP system.");
+            }
+            //获取输入参数
+            JCoTable inputTable = fm.getTableParameterList().getTable("T_INPUT");
+            materialCodeComCodeList.forEach(stringStringMap -> {
+                inputTable.appendRow();
+                inputTable.setValue("VKORG", stringStringMap.get("companyCode"));
+                inputTable.setValue("MATNR", stringStringMap.get("materialCode"));
+            });
+            log.info(StrUtil.format("【SAP销售价格接口】传输参数：{}"),CollUtil.join(materialCodeComCodeList,"#"));
+            //执行函数
+            JCoContext.begin(destination);
+            fm.execute(destination);
+            JCoContext.end(destination);
+            //获取返回的Table
+            JCoParameterList exportParameter=fm.getExportParameterList();
+            String eType=exportParameter.getString("E_TYPE");
+            String eMessage=exportParameter.getString("E_MESSAGE");
+            if (SapConstants.SAP_RESULT_TYPE_FAIL.equals(eType)) {
+                log.error(StrUtil.format("SAP返回错误信息：{}",eMessage));
+                sysInterfaceLog.setResults(StrUtil.format("SAP返回错误信息：{}",eMessage));
+                return R.error(eMessage);
+            }
+            JCoTable outTableOutput = fm.getTableParameterList().getTable("T_OUTPUT");
+            //从输出table中获取每一行数据
+            if (outTableOutput != null && outTableOutput.getNumRows() > 0) {
+                //循环取table行数据
+                for (int i = 0; i < outTableOutput.getNumRows(); i++) {
+                    //设置指针位置
+                    outTableOutput.setRow(i);
+                    CdSapSalePrice cdSapSalePrice = new CdSapSalePrice().builder()
+                            .conditionsType(outTableOutput.getString("KSCHL"))
+                            .marketingOrganization(outTableOutput.getString("VKORG"))
+                            .materialCode(outTableOutput.getString("MATNR"))
+                            .beginDate(outTableOutput.getDate("DATBI"))
+                            .endDate(outTableOutput.getDate("DATAB"))
+                            .pricingRecordNo(outTableOutput.getString("KNUMH"))
+                            .salePrice(outTableOutput.getString("KBETR"))
+                            .conditionsMonetary(outTableOutput.getString("KONWA"))
+                            .unitPricing(outTableOutput.getString("KPEIN"))
+                            .measureUnit(outTableOutput.getString("KMEIN"))
+                            .sapDelFlag(outTableOutput.getString("LOEVM_KO")).build();
+                    List<CdSapSalePrice> cdSapSalePriceList = remoteCdSapSalePriceInfoService.findByMaterialCodeAndOraganization(outTableOutput.getString("MATNR"),outTableOutput.getString("VKORG"),null,null);
+                    R r ;
+                    if (cdSapSalePriceList == null||cdSapSalePriceList.size()==0) {
+                        cdSapSalePrice.setCreateBy("定时任务");
+                        cdSapSalePrice.setCreateTime(date);
+                        r=remoteCdSapSalePriceInfoService.addSave(cdSapSalePrice);
+                    }else{
+                        r=remoteCdSapSalePriceInfoService.updateByMarketingOrganizationAndMaterialCode(cdSapSalePrice);
+                    }
+                    if (!r.isSuccess()) {
+                        error.append(StrUtil.format("销售组织：{},专用号：{}，数据更新错误！", outTableOutput.getString("VKORG"), outTableOutput.getString("MATNR")));
+                        log.error(StrUtil.format("销售组织：{},专用号：{}，数据更新错误！",outTableOutput.getString("VKORG"),outTableOutput.getString("MATNR")));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error(StrUtil.format("SAP返回错误信息：{}",e.getMessage()));
+            throw new BusinessException(StrUtil.format("SAP返回错误信息：{}",e.getMessage()));
+        }finally {
+            sysInterfaceLog.setCreateBy("定时任务");
+            sysInterfaceLog.setCreateTime(date);
+            sysInterfaceLog.setRemark("定时任务获取SAP销售价格");
+            remoteInterfaceLogService.saveInterfaceLog(sysInterfaceLog);
+        }
+        if(StrUtil.isEmpty(error)){
+            return R.ok();
+        }else {
+            return R.error(error.toString());
+        }
+
     }
 }
