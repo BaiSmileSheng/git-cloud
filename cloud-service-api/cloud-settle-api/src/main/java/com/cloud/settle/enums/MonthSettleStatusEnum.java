@@ -30,4 +30,22 @@ public enum MonthSettleStatusEnum {
     public String getMsg() {
         return msg;
     }
+
+    public static String getMsgByCode(String code) {
+        for (MonthSettleStatusEnum bt : values()) {
+            if (bt.code .equals(code) ) {
+                return bt.getMsg();
+            }
+        }
+        return code;
+    }
+
+    public static String getCodeByMsg(String msg) {
+        for (MonthSettleStatusEnum bt : values()) {
+            if (bt.msg .equals(msg) ) {
+                return bt.getCode();
+            }
+        }
+        return msg;
+    }
 }

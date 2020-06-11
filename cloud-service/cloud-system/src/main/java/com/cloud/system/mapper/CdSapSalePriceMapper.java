@@ -22,8 +22,19 @@ public interface CdSapSalePriceMapper extends BaseMapper<CdSapSalePrice>{
      * @param endDate
      * @return
      */
-    @MapKey("mapKey")
+    @MapKey("getVKey")
     Map<String, CdSapSalePrice> selectPriceByInMaterialCodeAndDate(@Param(value = "materialCodes") List<String> materialCodes,
                                                                         @Param(value = "beginDate") String beginDate,
                                                                         @Param(value = "endDate") String endDate);
+
+    /**
+     * 根据销售组织、专用号更新数据
+     * @param updated
+     * @param marketingOrganization
+     * @param materialCode
+     * @return
+     */
+    int updateByMarketingOrganizationAndMaterialCode(@Param("updated")CdSapSalePrice updated,@Param("marketingOrganization")String marketingOrganization,@Param("materialCode")String materialCode);
+
+
 }

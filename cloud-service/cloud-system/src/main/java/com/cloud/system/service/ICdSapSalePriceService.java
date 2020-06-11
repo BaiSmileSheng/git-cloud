@@ -24,4 +24,15 @@ public interface ICdSapSalePriceService extends BaseService<CdSapSalePrice> {
     Map<String, CdSapSalePrice> selectPriceByInMaterialCodeAndDate(List<String> materialCodes,
                                                                         String beginDate,
                                                                         String endDate);
+
+
+    /**
+     * 根据销售组织、专用号更新数据
+     * @param updated
+     * @param marketingOrganization
+     * @param materialCode
+     * @return
+     */
+	int updateByMarketingOrganizationAndMaterialCode(CdSapSalePrice updated,String marketingOrganization,String materialCode);
+
 }

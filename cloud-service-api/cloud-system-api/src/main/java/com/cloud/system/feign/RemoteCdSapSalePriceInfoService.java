@@ -1,12 +1,11 @@
 package com.cloud.system.feign;
 
 import com.cloud.common.constant.ServiceNameConstants;
+import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.CdSapSalePrice;
 import com.cloud.system.feign.factory.RemoteCdSapSalePriceInfoFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -43,5 +42,18 @@ public interface RemoteCdSapSalePriceInfoService {
                                                                         @RequestParam(value = "beginDate") String beginDate,
                                                                         @RequestParam(value = "endDate") String endDate);
 
+    /**
+     * 根据销售组织、专用号更新数据
+     * @param cdSapSalePrice
+     * @return
+     */
+    @PostMapping("salePrice/updateByMarketingOrganizationAndMaterialCode")
+    R updateByMarketingOrganizationAndMaterialCode(@RequestBody CdSapSalePrice cdSapSalePrice);
+
+    /**
+     * 新增保存成品销售价格
+     */
+    @PostMapping("salePrice/save")
+    R addSave(@RequestBody CdSapSalePrice cdSapSalePrice);
 
 }

@@ -7,6 +7,7 @@ import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
+import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
@@ -197,4 +198,61 @@ public class OmsProductionOrderController extends BaseController {
         return toAjax(omsProductionOrderService.deleteByIds(ids));
     }
 
+    /**
+     * 查询排产订单导出 列表
+     */
+    @GetMapping("export")
+    @ApiOperation(value = "排产订单 导出", response = OmsProductionOrder.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "productMaterialCode", value = "专用号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "factoryDesc", value = "工厂", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productLineCode", value = "线体", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "status", value = "状态", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productStartDate", value = "基本开始日期", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productEndDate", value = "到", required = false, paramType = "query", dataType = "String")
+    })
+    public R export(@ApiIgnore() OmsProductionOrder omsProductionOrder) {
+        Example example = new Example(OmsProductionOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        if (StrUtil.isNotBlank(omsProductionOrder.getFactoryCode())) {
+            criteria.andEqualTo("factoryDesc", omsProductionOrder.getFactoryCode());
+        }
+        if (StrUtil.isNotBlank(omsProductionOrder.getProductLineCode())) {
+            criteria.andEqualTo("productLineCode",omsProductionOrder.getProductLineCode());
+        }
+        if (StrUtil.isNotBlank(omsProductionOrder.getStatus())) {
+            criteria.andEqualTo("status",omsProductionOrder.getStatus());
+        }
+        if (StrUtil.isNotBlank(omsProductionOrder.getProductMaterialCode())) {
+            criteria.andLike("productMaterialCode", omsProductionOrder.getProductMaterialCode());
+        }
+        if (omsProductionOrder.getProductStartDate()!=null) {
+            criteria.andGreaterThanOrEqualTo("productStartDate", omsProductionOrder.getProductStartDate());
+        }
+        if (omsProductionOrder.getProductEndDate()!=null) {
+            criteria.andLessThanOrEqualTo("productEndDate", omsProductionOrder.getProductEndDate());
+        }
+        //查询订单状态已下达和已关单的两个状态的订单
+        List<String> statusList = CollectionUtil.toList(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode(),
+                ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
+        criteria.andIn("status",statusList);
+
+        SysUser sysUser = getUserInfo(SysUser.class);
+        if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
+            R r = remoteFactoryLineInfoService.selectLineCodeBySupplierCode(sysUser.getSupplierCode());
+            if (r.get("data") == null || StrUtil.isBlank(r.get("data").toString())) {
+                return null;
+            }
+            String lineCodes = r.get("data").toString();
+            criteria.andIn("productLineCode",CollectionUtil.toList(lineCodes.split(",")));
+        }else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
+            //班长、分主管查询工厂下的数据
+            if(CollectionUtil.contains(sysUser.getRoleKeys(),RoleConstants.ROLE_KEY_BZ)
+                    ||CollectionUtil.contains(sysUser.getRoleKeys(),RoleConstants.ROLE_KEY_FZG)){
+                criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+            }
+        }
+        List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderService.selectByExample(example);
+        return EasyExcelUtil.writeExcel(omsProductionOrderList, "生产订单.xlsx", "sheet", new OmsProductionOrder());
+    }
 }

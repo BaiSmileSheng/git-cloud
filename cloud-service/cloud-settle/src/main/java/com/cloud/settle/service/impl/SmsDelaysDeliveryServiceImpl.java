@@ -1,5 +1,6 @@
 package com.cloud.settle.service.impl;
 
+import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
@@ -195,6 +196,7 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
             smsDelaysDelivery.setDeliveryDate(omsProductionOrderRes.getProductEndDate());
             smsDelaysDelivery.setActDeliveryDate(omsProductionOrderRes.getActualEndDate());
             smsDelaysDelivery.setCreateTime(new Date());
+            smsDelaysDelivery.setDelFlag(DeleteFlagConstants.NO_DELETED);
 
             //根据线体获取供应商信息
             CdFactoryLineInfo cdFactoryLineInfo =remoteFactoryLineInfoService

@@ -10,6 +10,7 @@ import com.cloud.settle.enums.TimeTypeEnum;
 import com.cloud.settle.service.ISmsSettleInfoService;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.enums.UserTypeEnum;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -27,11 +28,12 @@ import java.util.List;
 /**
  * 加工费结算  提供者
  *
- * @author cs
+ * @author Lihongcxia
  * @date 2020-05-26
  */
 @RestController
 @RequestMapping("smsSettleInfo")
+@Api(tags = "加工费结算  提供者")
 public class SmsSettleInfoController extends BaseController {
 
     @Autowired

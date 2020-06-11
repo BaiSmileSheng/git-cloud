@@ -5,6 +5,7 @@ import cn.hutool.core.lang.Dict;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
+import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.settle.domain.entity.SmsMouthSettle;
@@ -18,6 +19,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
@@ -68,7 +70,7 @@ public class SmsMouthSettleController extends BaseController {
             @ApiImplicitParam(name = "supplierCode", value = "供应商编码", required = false,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "supplierName", value = "供应商名称", required = false,paramType = "query", dataType = "String")
     })
-    public TableDataInfo list(SmsMouthSettle smsMouthSettle) {
+    public TableDataInfo list(@ApiIgnore() SmsMouthSettle smsMouthSettle) {
         Example example = new Example(SmsMouthSettle.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo(smsMouthSettle);
@@ -167,4 +169,23 @@ public class SmsMouthSettleController extends BaseController {
         return smsMouthSettleService.countMonthSettle();
     }
 
+    /**
+     * 查询月度结算信息导出 列表
+     */
+    @GetMapping("export")
+    @ApiOperation(value = "月度结算信息 导出", response = SmsMouthSettle.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "settleNo", value = "结算单号", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "dataMoth", value = "结算月份", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "supplierCode", value = "供应商编码", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "supplierName", value = "供应商名称", required = false,paramType = "query", dataType = "String")
+    })
+    public R export(@ApiIgnore() SmsMouthSettle smsMouthSettle) {
+        Example example = new Example(SmsMouthSettle.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo(smsMouthSettle);
+        startPage();
+        List<SmsMouthSettle> smsMouthSettleList = smsMouthSettleService.selectByExample(example);
+        return EasyExcelUtil.writeExcel(smsMouthSettleList, "月度结算.xlsx", "sheet", new SmsMouthSettle());
+    }
 }
