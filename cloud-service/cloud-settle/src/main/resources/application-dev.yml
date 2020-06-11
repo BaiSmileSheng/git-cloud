@@ -87,3 +87,7 @@ webService:
     namespaceURL: http://gems.haier.com/IfBaseClaim_Srv
     localPart: IfBaseClaim_Srv
     dictType: company_cost_relation
+  qryPaysSoap:
+    urlClaim: http://10.133.28.51:8080/fm/services/QryPays?wsdl
+    namespaceURL: http://10.133.28.51:8080/fm/services/QryPays
+    localPart: ErpPayoutReceiveServiceService
