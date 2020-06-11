@@ -197,6 +197,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
      */
     private BizBusiness initBusiness(SmsScrapOrder smsScrapOrder, long userId) {
         BizBusiness business = new BizBusiness();
+        business.setOrderNo(smsScrapOrder.getScrapNo());
         business.setTableId(smsScrapOrder.getId().toString());
         business.setProcDefId(smsScrapOrder.getProcDefId());
         business.setTitle(ActivitiProTitleConstants.ACTIVITI_PRO_TITLE_SCRAP_TEST);
