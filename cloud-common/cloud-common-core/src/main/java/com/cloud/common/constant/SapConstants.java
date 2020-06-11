@@ -20,7 +20,7 @@ public class SapConstants {
     /**
      * 卡奥斯SAP系统连接
      * */
-    public static final String ABAP_AS_SAP600 = "ABAP_AS_SAP600";
+    public static final String ABAP_AS_SAP601 = "ABAP_AS_SAP601";
     /**
      * 获取uph数据接口函数
      * */

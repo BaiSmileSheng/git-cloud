@@ -77,6 +77,15 @@ public class RemoteSmsSupplementaryOrderFallbackFactory implements FallbackFacto
             public List<String> materialCodeListByStatus(String status) {
                 return null;
             }
+            /**
+             * 小微主审批通过传SAPY61
+             * @param smsSupplementaryOrder
+             * @return
+             */
+            @Override
+            public R autidSuccessToSAPY61(SmsSupplementaryOrder smsSupplementaryOrder) {
+                return R.error();
+            }
         };
     }
 }

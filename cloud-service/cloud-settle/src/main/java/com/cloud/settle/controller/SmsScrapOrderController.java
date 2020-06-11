@@ -1,6 +1,7 @@
 package com.cloud.settle.controller;
 
 import cn.hutool.core.util.StrUtil;
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.controller.BaseController;
@@ -104,6 +105,7 @@ public class SmsScrapOrderController extends BaseController {
     @PostMapping("save")
     @OperLog(title = "新增保存报废申请 ", businessType = BusinessType.INSERT)
     @ApiOperation(value = "新增保存报废申请 ", response = R.class)
+    @HasPermissions("settle:scrapOrder:save")
     public R addSave(@RequestBody SmsScrapOrder smsScrapOrder) {
         if (StrUtil.isNotEmpty(getLoginName())) {
             smsScrapOrder.setCreateBy(getLoginName());
@@ -125,6 +127,7 @@ public class SmsScrapOrderController extends BaseController {
     @PostMapping("editSave")
     @OperLog(title = "修改保存报废申请 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存报废申请 ", response = R.class)
+    @HasPermissions("settle:scrapOrder:save")
     public R editSave(@RequestBody SmsScrapOrder smsScrapOrder) {
         if (StrUtil.isNotEmpty(getLoginName())) {
             smsScrapOrder.setUpdateBy(getLoginName());
@@ -181,6 +184,7 @@ public class SmsScrapOrderController extends BaseController {
             @ApiImplicitParam(name = "beginTime", value = "创建日期", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "endTime", value = "到", required = false, paramType = "query", dataType = "String")
     })
+    @HasPermissions("settle:scrapOrder:export")
     public R export(@ApiIgnore() SmsScrapOrder smsScrapOrder) {
         Example example = new Example(SmsScrapOrder.class);
         Example.Criteria criteria = example.createCriteria();
@@ -205,5 +209,15 @@ public class SmsScrapOrderController extends BaseController {
         }
         List<SmsScrapOrder> smsScrapOrderList = smsScrapOrderService.selectByExample(example);
         return EasyExcelUtil.writeExcel(smsScrapOrderList,"报废申请.xlsx","sheet",new SmsScrapOrder());
+    }
+
+    /**
+     * 业务科审批通过传SAP261
+     * @param smsScrapOrder
+     * @return
+     */
+    @PostMapping("autidSuccessToSAP261")
+    public R autidSuccessToSAP261(@RequestBody SmsScrapOrder smsScrapOrder){
+        return smsScrapOrderService.autidSuccessToSAP261(smsScrapOrder);
     }
 }

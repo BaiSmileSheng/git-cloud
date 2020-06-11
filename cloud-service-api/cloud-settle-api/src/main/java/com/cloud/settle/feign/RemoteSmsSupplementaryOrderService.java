@@ -69,4 +69,12 @@ public interface RemoteSmsSupplementaryOrderService {
      */
     @GetMapping(value = "supplementary/materialCodeListByStatus")
     List<String> materialCodeListByStatus(@RequestParam("status")String status);
+
+    /**
+     * 小微主审批通过传SAPY61
+     * @param smsSupplementaryOrder
+     * @return
+     */
+    @PostMapping("supplementary/autidSuccessToSAPY61")
+    R autidSuccessToSAPY61(SmsSupplementaryOrder smsSupplementaryOrder);
 }

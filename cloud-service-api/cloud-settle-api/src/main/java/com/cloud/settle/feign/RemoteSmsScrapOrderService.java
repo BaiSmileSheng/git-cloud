@@ -65,4 +65,12 @@ public interface RemoteSmsScrapOrderService {
      */
     @GetMapping("scrapOrder/updateSAPPriceEveryMonth")
     R updateSAPPriceEveryMonth(@RequestParam("month") String month);
+
+    /**
+     * 业务科审批通过传SAP261
+     * @param smsScrapOrder
+     * @return
+     */
+    @PostMapping("scrapOrder/autidSuccessToSAP261")
+    R autidSuccessToSAP261(SmsScrapOrder smsScrapOrder);
 }

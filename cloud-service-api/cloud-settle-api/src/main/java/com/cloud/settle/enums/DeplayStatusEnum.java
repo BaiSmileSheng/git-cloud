@@ -40,5 +40,13 @@ public enum DeplayStatusEnum {
         }
         return "";
     }
+    public static String getCodeByMsg(String msg) {
+        for (DeplayStatusEnum bt : values()) {
+            if (bt.msg .equals(msg) ) {
+                return bt.getCode();
+            }
+        }
+        return msg;
+    }
 
 }

@@ -74,10 +74,20 @@ seata:
     nacos:
       namespace: fd0b253f-7130-4c04-a9a1-65206b980991
 sap:
-  client600:
+  client601:
     ashost: 10.133.28.69
     sysnr: 00
     client: 200
     user: 19046341
     passwd: 123123
     lang: ZH
+webService:
+  baseMultiItemClaim:
+    urlClaim: http://10.133.28.51:8001/gems/services/baseClaim/ifBaseClaim_Srv?wsdl
+    namespaceURL: http://gems.haier.com/IfBaseClaim_Srv
+    localPart: IfBaseClaim_Srv
+    dictType: company_cost_relation
+  qryPaysSoap:
+    urlClaim: http://10.133.28.51:8080/fm/services/QryPays?wsdl
+    namespaceURL: http://10.133.28.51:8080/fm/services/QryPays
+    localPart: ErpPayoutReceiveServiceService

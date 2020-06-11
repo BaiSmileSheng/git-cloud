@@ -2,34 +2,25 @@ package com.cloud.settle.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.auth.annotation.HasPermissions;
+import com.cloud.common.core.controller.BaseController;
+import com.cloud.common.core.domain.R;
+import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.settle.enums.ClaimOtherStatusEnum;
+import com.cloud.settle.domain.entity.SmsClaimOther;
+import com.cloud.settle.service.ISmsClaimOtherService;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.enums.UserTypeEnum;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import org.springframework.web.bind.annotation.RequestParam;
+import io.swagger.annotations.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.cloud.common.core.domain.R;
-import com.cloud.common.core.controller.BaseController;
-import com.cloud.settle.domain.entity.SmsClaimOther;
-import com.cloud.settle.service.ISmsClaimOtherService;
-import com.cloud.common.core.page.TableDataInfo;
 
 import java.util.List;
 
@@ -113,10 +104,6 @@ public class SmsClaimOtherController extends BaseController {
     public R export(@ApiIgnore SmsClaimOther smsClaimOther) {
         Example example = assemblyConditions(smsClaimOther);
         List<SmsClaimOther> smsClaimOtherList = smsClaimOtherService.selectByExample(example);
-        for(SmsClaimOther smsClaimOtherRes : smsClaimOtherList){
-            String claimOtherStatus = smsClaimOtherRes.getClaimOtherStatus();
-            smsClaimOtherRes.setClaimOtherStatus(ClaimOtherStatusEnum.getMsgByCode(claimOtherStatus));
-        }
         String fileName = "其他索赔.xlsx";
         return EasyExcelUtil.writeExcel(smsClaimOtherList,fileName,fileName,new SmsClaimOther());
     }

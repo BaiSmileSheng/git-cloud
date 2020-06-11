@@ -2,21 +2,21 @@ package com.cloud.settle.controller;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.settle.domain.entity.SmsInvoiceInfo;
 import com.cloud.settle.domain.entity.SmsMouthSettle;
 import com.cloud.settle.domain.entity.SmsSettleInfo;
 import com.cloud.settle.service.ISmsClaimCashDetailService;
+import com.cloud.settle.service.ISmsInvoiceInfoService;
 import com.cloud.settle.service.ISmsMouthSettleService;
 import com.cloud.settle.service.ISmsSettleInfoService;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -34,6 +34,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("mouthSettle")
+@Api(tags = "月度结算")
 public class SmsMouthSettleController extends BaseController {
 
     @Autowired
@@ -42,6 +43,8 @@ public class SmsMouthSettleController extends BaseController {
     private ISmsSettleInfoService smsSettleInfoService;
     @Autowired
     private ISmsClaimCashDetailService smsClaimCashDetailService;
+    @Autowired
+    private ISmsInvoiceInfoService smsInvoiceInfoService;
 
 
 
@@ -84,6 +87,7 @@ public class SmsMouthSettleController extends BaseController {
      */
     @GetMapping("listDetail")
     @ApiOperation(value = "月度结算查询详情")
+    @HasPermissions("settle:mouthSettle:listDetail")
     public R listDetail(Long id) {
         SmsMouthSettle smsMouthSettle = smsMouthSettleService.selectByPrimaryKey(id);
         if (smsMouthSettle == null) {
@@ -108,7 +112,8 @@ public class SmsMouthSettleController extends BaseController {
         dict.put("mapActual",mapActual);
         dict.put("mapHistory",mapHistory);
 
-        //TODO:发票信息查询
+        List<SmsInvoiceInfo> smsInvoiceInfoList=smsInvoiceInfoService.selectByMouthSettleId(smsMouthSettle.getSettleNo());
+        dict.put("invoices",smsInvoiceInfoList);
         return R.data(dict);
 
     }
@@ -122,6 +127,7 @@ public class SmsMouthSettleController extends BaseController {
             @ApiImplicitParam(name = "id", value = "id", required = true,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "settleStatus", value = "状态：12、内控确认 13、小微主确认", required = true,paramType = "query", dataType = "String")
     })
+    @HasPermissions("settle:mouthSettle:confirm")
     public R confirm(Long id,String settleStatus) {
         return smsMouthSettleService.confirm(id,settleStatus);
     }
@@ -180,7 +186,9 @@ public class SmsMouthSettleController extends BaseController {
             @ApiImplicitParam(name = "supplierCode", value = "供应商编码", required = false,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "supplierName", value = "供应商名称", required = false,paramType = "query", dataType = "String")
     })
+    @HasPermissions("settle:mouthSettle:export")
     public R export(@ApiIgnore() SmsMouthSettle smsMouthSettle) {
+
         Example example = new Example(SmsMouthSettle.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo(smsMouthSettle);

@@ -15,8 +15,10 @@
         <result property="scrapStatus" column="scrap_status"/>
         <result property="postingNo" column="posting_no"/>
         <result property="sapTransDate" column="sap_trans_date"/>
+        <result property="sapRemark" column="sap_remark"/>
         <result property="productMaterialCode" column="product_material_code"/>
         <result property="productMaterialName" column="product_material_name"/>
+        <result property="measureUnit" column="measure_unit"/>
         <result property="scrapAmount" column="scrap_amount"/>
         <result property="materialPrice" column="material_price"/>
         <result property="currency" column="currency"/>
@@ -46,8 +48,10 @@
                scrap_status,
                posting_no,
                sap_trans_date,
+               sap_remark,
                product_material_code,
                product_material_name,
+               measure_unit,
                scrap_amount,
                material_price,
                scrap_price,

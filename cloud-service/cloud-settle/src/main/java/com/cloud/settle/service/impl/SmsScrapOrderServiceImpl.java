@@ -255,6 +255,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
                 }
                 smsScrapOrder.setCurrency(cdSapSalePrice.getConditionsMonetary());
                 smsScrapOrder.setMaterialPrice(new BigDecimal(cdSapSalePrice.getSalePrice()));
+                smsScrapOrder.setMeasureUnit(cdSapSalePrice.getMeasureUnit());
                 smsScrapOrder.setScrapPrice(smsScrapOrder.getMaterialPrice().multiply(new BigDecimal(smsScrapOrder.getScrapAmount())));
                 //索赔金额=（Sap成品物料销售价格*报废数量*报废索赔系数）+（报废数量*生产订单加工费单价）
                 BigDecimal scrapPrice ;//索赔金额
@@ -293,7 +294,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         StringBuffer error = new StringBuffer();
         try {
             //创建与SAP的连接
-            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP600);
+            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP601);
             //获取repository
             JCoRepository repository = destination.getRepository();
             //获取函数信息
@@ -371,5 +372,72 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             return R.error(error.toString());
         }
 
+    }
+
+    /**
+     * 传SAP261
+     * @param smsScrapOrder
+     * @return
+     */
+    @Override
+    public R autidSuccessToSAP261(SmsScrapOrder smsScrapOrder) {
+        Date date = DateUtil.date();
+        //发送SAP
+        JCoDestination destination =null;
+        try {
+            //创建与SAP的连接
+            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP601);
+            //获取repository
+            JCoRepository repository = destination.getRepository();
+            //获取函数信息
+            JCoFunction fm = repository.getFunction("ZESP_IM_001");
+            if (fm == null) {
+                throw new RuntimeException("Function does not exists in SAP system.");
+            }
+            JCoParameterList input = fm.getImportParameterList();
+            input.setValue("FLAG_GZ","1");
+            //获取输入参数
+            JCoTable inputTable = fm.getTableParameterList().getTable("T_INPUT");
+            //附加表的最后一个新行,行指针,它指向新添加的行。
+            inputTable.appendRow();
+            inputTable.setValue("BWARTWA","261");//移动类型（库存管理）  261/Y61
+            inputTable.setValue("BKTXT", StrUtil.concat(true,smsScrapOrder.getSupplierCode(),smsScrapOrder.getScrapNo()));//凭证抬头文本  V码+报废单号
+            inputTable.setValue("WERKS", smsScrapOrder.getFactoryCode());//工厂
+            inputTable.setValue("LGORT", "0088");//库存地点 成品报废库位默认0088，如果0088没有库存就选择0188
+            inputTable.setValue("MATNR", smsScrapOrder.getProductMaterialCode());//物料号
+            inputTable.setValue("ERFME", smsScrapOrder.getMeasureUnit());//基本计量单位
+            inputTable.setValue("ERFMG", smsScrapOrder.getScrapAmount());//数量
+            inputTable.setValue("AUFNR", smsScrapOrder.getProductOrderCode());//生产订单号
+
+            //执行函数
+            JCoContext.begin(destination);
+            fm.execute(destination);
+            JCoContext.end(destination);
+            //获取返回的Table
+            JCoTable outTableOutput = fm.getTableParameterList().getTable("T_MESSAGE");
+            //从输出table中获取每一行数据
+            if (outTableOutput != null && outTableOutput.getNumRows() > 0) {
+                //循环取table行数据
+                for (int i = 0; i < outTableOutput.getNumRows(); i++) {
+                    //设置指针位置
+                    outTableOutput.setRow(i);
+                    if(SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(outTableOutput.getString("FLAG"))){
+                        //获取成功
+                        smsScrapOrder.setPostingNo(outTableOutput.getString("MBLNR"));
+                        smsScrapOrder.setSapTransDate(date);
+                        smsScrapOrder.setSapRemark(outTableOutput.getString("MESSAGE"));
+                        smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_DJS.getCode());
+                        updateByPrimaryKeySelective(smsScrapOrder);
+                    }else {
+                        //获取失败
+                        throw new BusinessException(StrUtil.format("发送SAP失败！原因：{}",outTableOutput.getString("MESSAGE")));
+                    }
+                }
+            }
+        } catch (JCoException e) {
+            log.error("Connect SAP fault, error msg: " + e.toString());
+            throw new BusinessException(e.getMessage());
+        }
+        return R.ok();
     }
 }

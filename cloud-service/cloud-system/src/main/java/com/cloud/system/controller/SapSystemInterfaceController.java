@@ -1,8 +1,7 @@
 package com.cloud.system.controller;
 
 import com.cloud.common.core.domain.R;
-import com.cloud.system.domain.entity.CdRawMaterialStock;
-import com.cloud.system.service.SystemFromSap600InterfaceService;
+import com.cloud.system.service.SystemFromSap601InterfaceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -24,7 +23,7 @@ import java.util.List;
 @Api(tags = "system模块对SAP系统接口")
 public class SapSystemInterfaceController {
     @Autowired
-    private SystemFromSap600InterfaceService systemFromSap600InterfaceService;
+    private SystemFromSap601InterfaceService systemFromSap601InterfaceService;
     /**
      * @Description: 获取uph数据
      * @Param:  factorys,materials
@@ -38,7 +37,7 @@ public class SapSystemInterfaceController {
             @ApiImplicitParam(name = "factorys",value = "生产工厂编码",required = true),
             @ApiImplicitParam(name = "materials",value = "成品物料编码", required = true)})
     public R queryUph(@RequestBody List<String> factorys, List<String> materials) {
-        return systemFromSap600InterfaceService.queryUphFromSap600(factorys,materials);
+        return systemFromSap601InterfaceService.queryUphFromSap601(factorys,materials);
     }
     /**
      * @Description: 获取BOM清单数据
@@ -53,7 +52,7 @@ public class SapSystemInterfaceController {
             @ApiImplicitParam(name = "factorys",value = "生产工厂编码",required = true),
             @ApiImplicitParam(name = "materials",value = "成品物料编码", required = true)})
     public R queryBomInfo(@RequestBody List<String> factorys, List<String> materials) {
-        return systemFromSap600InterfaceService.queryBomInfoFromSap600(factorys,materials);
+        return systemFromSap601InterfaceService.queryBomInfoFromSap601(factorys,materials);
     }
 
     /**
@@ -66,7 +65,7 @@ public class SapSystemInterfaceController {
     @GetMapping("queryFactoryLine")
     @ApiOperation(value = "获取SAP系统工厂线体关系数据 ", response = R.class)
     public R queryFactoryLine() {
-        return systemFromSap600InterfaceService.queryFactoryLineFromSap600();
+        return systemFromSap601InterfaceService.queryFactoryLineFromSap601();
     }
     /**
      * @Description: 获取原材料库存
@@ -81,7 +80,7 @@ public class SapSystemInterfaceController {
             @ApiImplicitParam(name = "factorys",value = "生产工厂编码",required = true),
             @ApiImplicitParam(name = "materials",value = "成品物料编码", required = true)})
     public R queryRawMaterialStock(@RequestBody List<String> factorys, List<String> materials) {
-        return systemFromSap600InterfaceService.queryRawMaterialStockFromSap600(factorys,materials);
+        return systemFromSap601InterfaceService.queryRawMaterialStockFromSap601(factorys,materials);
     }
 
 }
