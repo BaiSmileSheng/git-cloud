@@ -218,6 +218,7 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
      */
     private BizBusiness initBusiness(SmsSupplementaryOrder smsSupplementaryOrder, long userId) {
         BizBusiness business = new BizBusiness();
+        business.setOrderNo(smsSupplementaryOrder.getStuffNo());
         business.setTableId(smsSupplementaryOrder.getId().toString());
         business.setProcDefId(smsSupplementaryOrder.getProcDefId());
         business.setTitle(ActivitiProTitleConstants.ACTIVITI_PRO_TITLE_SUPPLEMENTARY_TEST);

@@ -143,6 +143,7 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
      */
     private BizBusiness initBusiness(SmsQualityOrder smsQualityOrder,SysUser sysUser) {
         BizBusiness business = new BizBusiness();
+        business.setOrderNo(smsQualityOrder.getQualityNo());
         business.setTableId(smsQualityOrder.getId().toString());
         business.setProcDefId(smsQualityOrder.getProcDefId());
         business.setTitle(ActivitiProTitleConstants.ACTIVITI_PRO_TITLE_SQUALITY_TEST);

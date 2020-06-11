@@ -4,7 +4,9 @@ import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.feign.factory.RemoteOssFallbackFactory;
+import feign.form.spring.SpringFormEncoder;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
-
+import feign.codec.Encoder;
 import java.util.List;
 
 
@@ -23,7 +25,7 @@ import java.util.List;
  * @author cs
  * @date 2020-05-03
  */
-@FeignClient(name = ServiceNameConstants.SYSTEM_SERVICE, fallbackFactory = RemoteOssFallbackFactory.class)
+@FeignClient(name = ServiceNameConstants.SYSTEM_SERVICE,configuration = RemoteOssService.MultipartSupportConfig.class,fallbackFactory = RemoteOssFallbackFactory.class)
 public interface RemoteOssService {
     /**
      * 上传文件到华为云
@@ -77,5 +79,12 @@ public interface RemoteOssService {
      */
     @PostMapping("oss/deleteListByOrderNo")
     public R deleteListByOrderNo(@RequestParam("orderNo") String orderNo);
+
+    class MultipartSupportConfig {
+        @Bean
+        public Encoder feignFormEncoder() {
+            return new SpringFormEncoder();
+        }
+    }
 
 }
