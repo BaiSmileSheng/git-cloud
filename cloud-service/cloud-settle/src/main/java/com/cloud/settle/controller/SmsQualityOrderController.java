@@ -9,7 +9,6 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.domain.entity.SmsQualityOrder;
-import com.cloud.settle.enums.QualityStatusEnum;
 import com.cloud.settle.service.ISmsQualityOrderService;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.enums.UserTypeEnum;
@@ -18,12 +17,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
@@ -111,10 +105,6 @@ public class SmsQualityOrderController extends BaseController {
     public R export(SmsQualityOrder smsQualityOrder) {
         Example example = assemblyConditions(smsQualityOrder);
         List<SmsQualityOrder> smsQualityOrderList = smsQualityOrderService.selectByExample(example);
-        for(SmsQualityOrder smsQualityOrderRes : smsQualityOrderList){
-            String qualityStatus = smsQualityOrderRes.getQualityStatus();
-            smsQualityOrderRes.setQualityStatus(QualityStatusEnum.getMsgByCode(qualityStatus));
-        }
         String fileName = "质量索赔 .xlsx";
         return EasyExcelUtil.writeExcel(smsQualityOrderList,fileName,fileName,new SmsQualityOrder());
     }

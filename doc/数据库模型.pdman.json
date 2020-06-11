@@ -7758,6 +7758,13 @@
               "defaultValue": "''"
             },
             {
+              "name": "sap_remark",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "SAP创单备注",
+              "defaultValue": "''"
+            },
+            {
               "name": "product_material_code",
               "type": "VARCHAR_32",
               "remark": "",
@@ -7769,6 +7776,13 @@
               "type": "VARCHAR_200",
               "remark": "",
               "chnname": "物料名称",
+              "defaultValue": "''"
+            },
+            {
+              "name": "measure_unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "计量单位",
               "defaultValue": "''"
             },
             {

@@ -2,6 +2,7 @@ package com.cloud.activiti.controller;
 
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.service.IActSmsScrapOrderService;
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.log.annotation.OperLog;
@@ -48,6 +49,7 @@ public class ActSmsScrapOrderActController extends BaseController {
     @PostMapping("open")
     @OperLog(title = "报废审核开启流程(编辑、新增提交)", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "报废审核开启流程(编辑、新增提交)", response = R.class)
+    @HasPermissions("settle:scrapOrder:commit")
     public R addSave(@RequestBody SmsScrapOrder smsScrapOrder) {
         return actSmsScrapOrderService.startAct(smsScrapOrder,getUserInfo(SysUser.class));
     }
@@ -61,6 +63,7 @@ public class ActSmsScrapOrderActController extends BaseController {
     @PostMapping("openOnlyForList")
     @OperLog(title = "报废审核开启流程(列表提交)", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "报废审核开启流程(列表提交)", response = R.class)
+    @HasPermissions("settle:scrapOrder:commit")
     public R addSaveOnlyForList(@RequestBody SmsScrapOrder smsScrapOrder) {
         return actSmsScrapOrderService.startActOnlyForList(smsScrapOrder,getCurrentUserId());
     }
@@ -72,6 +75,7 @@ public class ActSmsScrapOrderActController extends BaseController {
      */
     @PostMapping("audit")
     @ApiOperation(value = "报废流程审批 ", response = R.class)
+    @HasPermissions("settle:scrapOrder:audit")
     public R audit(@RequestBody BizAudit bizAudit) {
         //审核
         return actSmsScrapOrderService.audit(bizAudit,getCurrentUserId());

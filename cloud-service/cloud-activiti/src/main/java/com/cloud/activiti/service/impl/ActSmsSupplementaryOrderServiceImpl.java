@@ -165,8 +165,12 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
             if (SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode().equals(smsSupplementaryOrder.getStuffStatus())) {
                 smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode());
             } else if (SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode().equals(smsSupplementaryOrder.getStuffStatus())) {
-                //TODO:小微主审核通过   传SAP
-
+                //小微主审核通过传SAP
+                R r = remoteSmsSupplementaryOrderService.autidSuccessToSAPY61(smsSupplementaryOrder);
+                if (!r.isSuccess()) {
+                    return r;
+                }
+                smsSupplementaryOrder = (SmsSupplementaryOrder) r.get("data");
             } else {
                 log.error(StrUtil.format("(物耗)物耗审批通过状态错误：{}", smsSupplementaryOrder.getStuffStatus()));
                 throw new BusinessException("此状态数据不允许审核！");

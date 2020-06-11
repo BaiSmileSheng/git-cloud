@@ -57,4 +57,12 @@ public interface RemoteSmsSupplementaryOrderService {
      */
     @GetMapping("supplementary/updatePriceEveryMonth")
     R updatePriceEveryMonth(@RequestParam("month") String month);
+
+    /**
+     * 小微主审批通过传SAPY61
+     * @param smsSupplementaryOrder
+     * @return
+     */
+    @PostMapping("supplementary/autidSuccessToSAPY61")
+    R autidSuccessToSAPY61(SmsSupplementaryOrder smsSupplementaryOrder);
 }

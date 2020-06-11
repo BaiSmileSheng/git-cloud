@@ -20,7 +20,7 @@ import java.util.Properties;
 @Slf4j
 @Component
 public class SAPInitConfig implements CommandLineRunner {
-    private static final String ABAP_AS_SAP600 = "ABAP_AS_SAP600";
+    private static final String ABAP_AS_SAP601 = "ABAP_AS_SAP601";
 
 
     @Autowired
@@ -37,7 +37,7 @@ public class SAPInitConfig implements CommandLineRunner {
 //		connectProperties.setProperty(DestinationDataProvider.JCO_POOL_CAPACITY, "3");  //最大连接数
 //		connectProperties.setProperty(DestinationDataProvider.JCO_PEAK_LIMIT, "10");     //最大连接线程
 
-        createDataFile(ABAP_AS_SAP600, "jcoDestination", connectProperties);
+        createDataFile(ABAP_AS_SAP601, "jcoDestination", connectProperties);
     }
 
     /**

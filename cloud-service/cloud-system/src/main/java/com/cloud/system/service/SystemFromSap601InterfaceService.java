@@ -1,18 +1,17 @@
 package com.cloud.system.service;
 
 import com.cloud.common.core.domain.R;
-import com.cloud.system.domain.entity.CdMaterialInfo;
 
 import java.util.List;
 
 /**
- * @Description: System服务 - sap600系统接口
+ * @Description: System服务 - sap601系统接口
  * @Param:
  * @return:
  * @Author: ltq
  * @Date: 2020/6/2
  */
-public interface SystemFromSap600InterfaceService {
+public interface SystemFromSap601InterfaceService {
     /**
     * @Description: 获取uph数据
     * @Param:  factorys,materials
@@ -20,7 +19,7 @@ public interface SystemFromSap600InterfaceService {
     * @Author: ltq
     * @Date: 2020/6/2
     */
-    R queryUphFromSap600(List<String> factorys,List<String> materials);
+    R queryUphFromSap601(List<String> factorys, List<String> materials);
     /**
      * @Description: 获取SAP系统工厂线体关系数据
      * @Param: []
@@ -28,7 +27,7 @@ public interface SystemFromSap600InterfaceService {
      * @Author: ltq
      * @Date: 2020/6/2
      */
-    R queryFactoryLineFromSap600();
+    R queryFactoryLineFromSap601();
     /**
      * @Description: 获取原材料库存接口
      * @Param: [list]
@@ -36,7 +35,7 @@ public interface SystemFromSap600InterfaceService {
      * @Author: ltq
      * @Date: 2020/6/5
      */
-    R queryRawMaterialStockFromSap600(List<String> factorys,List<String> materials);
+    R queryRawMaterialStockFromSap601(List<String> factorys, List<String> materials);
     /**
      * @Description: 获取BOM清单数据
      * @Param: [factorys, materials]
@@ -44,6 +43,6 @@ public interface SystemFromSap600InterfaceService {
      * @Author: ltq
      * @Date: 2020/6/5
      */
-    R queryBomInfoFromSap600(List<String> factorys,List<String> materials);
+    R queryBomInfoFromSap601(List<String> factorys, List<String> materials);
 
 }
