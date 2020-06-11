@@ -285,4 +285,14 @@ public class SmsSupplementaryOrderController extends BaseController {
         });
         return EasyExcelUtil.writeExcel(smsSupplementaryOrderZBList, "物耗申请总部.xlsx", "sheet", new SmsSupplementaryOrder());
     }
+
+    /**
+     * 业务科审批通过传SAPY61
+     * @param smsSupplementaryOrder
+     * @return
+     */
+    @PostMapping("autidSuccessToSAPY61")
+    public R autidSuccessToSAPY61(@RequestBody SmsSupplementaryOrder smsSupplementaryOrder){
+        return smsSupplementaryOrderService.autidSuccessToSAPY61(smsSupplementaryOrder);
+    }
 }

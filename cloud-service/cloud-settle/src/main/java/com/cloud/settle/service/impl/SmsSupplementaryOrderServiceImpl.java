@@ -3,6 +3,7 @@ package com.cloud.settle.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
@@ -18,12 +19,14 @@ import com.cloud.settle.service.ISmsSupplementaryOrderService;
 import com.cloud.system.domain.entity.*;
 import com.cloud.system.enums.SettleRatioEnum;
 import com.cloud.system.feign.*;
+import com.sap.conn.jco.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -263,6 +266,75 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             }
             //更新
             updateBatchByPrimaryKeySelective(smsSupplementaryOrderList);
+        }
+        return R.ok();
+    }
+
+    /**
+     * 小微主审批通过传SAPY61
+     * @param smsSupplementaryOrder
+     * @return
+     */
+    @Override
+    public R autidSuccessToSAPY61(SmsSupplementaryOrder smsSupplementaryOrder) {
+        Date date = DateUtil.date();
+        //发送SAP
+        JCoDestination destination =null;
+        try {
+            //创建与SAP的连接
+            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP600);
+            //获取repository
+            JCoRepository repository = destination.getRepository();
+            //获取函数信息
+            JCoFunction fm = repository.getFunction("ZESP_IM_001");
+            if (fm == null) {
+                throw new RuntimeException("Function does not exists in SAP system.");
+            }
+            JCoParameterList input = fm.getImportParameterList();
+            input.setValue("FLAG_GZ","1");
+            //获取输入参数
+            JCoTable inputTable = fm.getTableParameterList().getTable("T_INPUT");
+            //附加表的最后一个新行,行指针,它指向新添加的行。
+            inputTable.appendRow();
+            inputTable.setValue("BWARTWA","Y61");//移动类型（库存管理）  261/Y61
+            inputTable.setValue("BKTXT", StrUtil.concat(true,smsSupplementaryOrder.getSupplierCode(),smsSupplementaryOrder.getStuffNo()));//凭证抬头文本  V码+物耗单号
+            inputTable.setValue("WERKS", smsSupplementaryOrder.getFactoryCode());//工厂
+            inputTable.setValue("LGORT", "0088");//库存地点 成品报废库位默认0088，如果0088没有库存就选择0188
+            inputTable.setValue("MATNR", smsSupplementaryOrder.getRawMaterialCode());//物料号
+            inputTable.setValue("ERFME", smsSupplementaryOrder.getStuffUnit());//基本计量单位
+            inputTable.setValue("ERFMG", smsSupplementaryOrder.getStuffAmount());//数量
+            inputTable.setValue("AUFNR", smsSupplementaryOrder.getProductOrderCode());//生产订单号
+
+            //执行函数
+            JCoContext.begin(destination);
+            fm.execute(destination);
+            JCoContext.end(destination);
+            //获取返回的Table
+            JCoTable outTableOutput = fm.getTableParameterList().getTable("T_MESSAGE");
+            //从输出table中获取每一行数据
+            if (outTableOutput != null && outTableOutput.getNumRows() > 0) {
+                //循环取table行数据
+                for (int i = 0; i < outTableOutput.getNumRows(); i++) {
+                    //设置指针位置
+                    outTableOutput.setRow(i);
+                    if(SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(outTableOutput.getString("FLAG"))){
+                        //获取成功
+                        smsSupplementaryOrder.setPostingNo(outTableOutput.getString("MBLNR"));
+//                        smsSupplementaryOrder.setSapStoreage();
+                        smsSupplementaryOrder.setSapResult(outTableOutput.getString("FLAG"));
+                        smsSupplementaryOrder.setSapDate(date);
+                        smsSupplementaryOrder.setSapRemark(outTableOutput.getString("MESSAGE"));
+                        smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode());
+                        return R.data(smsSupplementaryOrder);
+                    }else {
+                        //获取失败
+                        throw new BusinessException(StrUtil.format("发送SAP失败！原因：{}",outTableOutput.getString("MESSAGE")));
+                    }
+                }
+            }
+        } catch (JCoException e) {
+            log.error("Connect SAP fault, error msg: " + e.toString());
+            throw new BusinessException(e.getMessage());
         }
         return R.ok();
     }

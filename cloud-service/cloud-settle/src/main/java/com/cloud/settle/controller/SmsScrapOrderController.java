@@ -206,4 +206,14 @@ public class SmsScrapOrderController extends BaseController {
         List<SmsScrapOrder> smsScrapOrderList = smsScrapOrderService.selectByExample(example);
         return EasyExcelUtil.writeExcel(smsScrapOrderList,"报废申请.xlsx","sheet",new SmsScrapOrder());
     }
+
+    /**
+     * 业务科审批通过传SAP261
+     * @param smsScrapOrder
+     * @return
+     */
+    @PostMapping("autidSuccessToSAP261")
+    public R autidSuccessToSAP261(@RequestBody SmsScrapOrder smsScrapOrder){
+        return smsScrapOrderService.autidSuccessToSAP261(smsScrapOrder);
+    }
 }
