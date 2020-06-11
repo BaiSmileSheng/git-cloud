@@ -8,15 +8,14 @@ import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.settle.domain.entity.SmsInvoiceInfo;
 import com.cloud.settle.domain.entity.SmsMouthSettle;
 import com.cloud.settle.domain.entity.SmsSettleInfo;
 import com.cloud.settle.service.ISmsClaimCashDetailService;
+import com.cloud.settle.service.ISmsInvoiceInfoService;
 import com.cloud.settle.service.ISmsMouthSettleService;
 import com.cloud.settle.service.ISmsSettleInfoService;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -34,6 +33,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("mouthSettle")
+@Api(tags = "月度结算")
 public class SmsMouthSettleController extends BaseController {
 
     @Autowired
@@ -42,6 +42,8 @@ public class SmsMouthSettleController extends BaseController {
     private ISmsSettleInfoService smsSettleInfoService;
     @Autowired
     private ISmsClaimCashDetailService smsClaimCashDetailService;
+    @Autowired
+    private ISmsInvoiceInfoService smsInvoiceInfoService;
 
 
 
@@ -108,7 +110,8 @@ public class SmsMouthSettleController extends BaseController {
         dict.put("mapActual",mapActual);
         dict.put("mapHistory",mapHistory);
 
-        //TODO:发票信息查询
+        List<SmsInvoiceInfo> smsInvoiceInfoList=smsInvoiceInfoService.selectByMouthSettleId(smsMouthSettle.getSettleNo());
+        dict.put("invoices",smsInvoiceInfoList);
         return R.data(dict);
 
     }
