@@ -63,144 +63,144 @@ public class BaseClaimDetail {
     protected BigDecimal taxRate;
 
     /**
-     * ��ȡapplyAmount���Ե�ֵ��
-     * 
+     * 获取applyAmount属性的值。
+     *
      * @return
      *     possible object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public BigDecimal getApplyAmount() {
         return applyAmount;
     }
 
     /**
-     * ����applyAmount���Ե�ֵ��
-     * 
+     * 设置applyAmount属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public void setApplyAmount(BigDecimal value) {
         this.applyAmount = value;
     }
 
     /**
-     * ��ȡexpenseItem���Ե�ֵ��
-     * 
+     * 获取expenseItem属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getExpenseItem() {
         return expenseItem;
     }
 
     /**
-     * ����expenseItem���Ե�ֵ��
-     * 
+     * 设置expenseItem属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setExpenseItem(String value) {
         this.expenseItem = value;
     }
 
     /**
-     * ��ȡinvoiceDate���Ե�ֵ��
-     * 
+     * 获取invoiceDate属性的值。
+     *
      * @return
      *     possible object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public XMLGregorianCalendar getInvoiceDate() {
         return invoiceDate;
     }
 
     /**
-     * ����invoiceDate���Ե�ֵ��
-     * 
+     * 设置invoiceDate属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public void setInvoiceDate(XMLGregorianCalendar value) {
         this.invoiceDate = value;
     }
 
     /**
-     * ��ȡinvoiceNo���Ե�ֵ��
-     * 
+     * 获取invoiceNo属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getInvoiceNo() {
         return invoiceNo;
     }
 
     /**
-     * ����invoiceNo���Ե�ֵ��
-     * 
+     * 设置invoiceNo属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setInvoiceNo(String value) {
         this.invoiceNo = value;
     }
 
     /**
-     * ��ȡtaxAmount���Ե�ֵ��
-     * 
+     * 获取taxAmount属性的值。
+     *
      * @return
      *     possible object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public BigDecimal getTaxAmount() {
         return taxAmount;
     }
 
     /**
-     * ����taxAmount���Ե�ֵ��
-     * 
+     * 设置taxAmount属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public void setTaxAmount(BigDecimal value) {
         this.taxAmount = value;
     }
 
     /**
-     * ��ȡtaxRate���Ե�ֵ��
-     * 
+     * 获取taxRate属性的值。
+     *
      * @return
      *     possible object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public BigDecimal getTaxRate() {
         return taxRate;
     }
 
     /**
-     * ����taxRate���Ե�ֵ��
-     * 
+     * 设置taxRate属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public void setTaxRate(BigDecimal value) {
         this.taxRate = value;

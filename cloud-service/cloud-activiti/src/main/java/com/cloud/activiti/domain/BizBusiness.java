@@ -27,6 +27,8 @@ public class BizBusiness implements Serializable {
 
     private String title;
 
+    private String orderNo;
+
     private Long userId;
 
     private String tableId;

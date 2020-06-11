@@ -72,11 +72,17 @@ sap:
     user: 19046341
     passwd: 123123
     lang: ZH
-# 创建报账单 webservice
 webService:
+  # 创建报账单 webservice
   baseMultiItemClaim:
     urlClaim: http://10.133.28.51:8001/gems/services/baseClaim/ifBaseClaim_Srv?wsdl
     namespaceURL: http://gems.haier.com/IfBaseClaim_Srv
     localPart: IfBaseClaim_Srv
+    #获取申请人时字典表中dictType
     dictType: company_cost_relation
+    # 付款查询接口 webservice
+  qryPaysSoap:
+    urlClaim: http://10.133.28.51:8080/fm/services/QryPays?wsdl
+    namespaceURL: http://10.133.28.51:8080/fm/services/QryPays
+    localPart: ErpPayoutReceiveServiceService
 

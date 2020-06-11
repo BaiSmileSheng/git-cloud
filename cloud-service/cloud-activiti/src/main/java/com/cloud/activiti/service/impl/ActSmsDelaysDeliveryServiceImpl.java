@@ -135,6 +135,7 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
      */
     private BizBusiness initBusiness(SmsDelaysDelivery smsDelaysDelivery,SysUser sysUser) {
         BizBusiness business = new BizBusiness();
+        business.setOrderNo(smsDelaysDelivery.getDelaysNo());
         business.setTableId(smsDelaysDelivery.getId().toString());
         business.setProcDefId(smsDelaysDelivery.getProcDefId());
         business.setTitle(ActivitiProTitleConstants.ACTIVITI_PRO_TITLE_SDEPALYS_TEST);

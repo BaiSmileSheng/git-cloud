@@ -51,99 +51,100 @@ public class BaseClaimResponse {
     protected String successFlag;
 
     /**
-     * ��ȡfailReason���Ե�ֵ��
-     * 
+     * 获取failReason属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFailReason() {
         return failReason;
     }
 
     /**
-     * ����failReason���Ե�ֵ��
-     * 
+     * 设置failReason属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFailReason(String value) {
         this.failReason = value;
     }
 
     /**
-     * ��ȡgemsDocNo���Ե�ֵ��
-     * 
+     * 获取gemsDocNo属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getGemsDocNo() {
         return gemsDocNo;
     }
 
     /**
-     * ����gemsDocNo���Ե�ֵ��
-     * 
+     * 设置gemsDocNo属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setGemsDocNo(String value) {
         this.gemsDocNo = value;
     }
 
     /**
-     * ��ȡoriginDocNo���Ե�ֵ��
-     * 
+     * 获取originDocNo属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getOriginDocNo() {
         return originDocNo;
     }
 
     /**
-     * ����originDocNo���Ե�ֵ��
-     * 
+     * 设置originDocNo属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setOriginDocNo(String value) {
         this.originDocNo = value;
     }
 
     /**
-     * ��ȡsuccessFlag���Ե�ֵ��
-     * 
+     * 获取successFlag属性的值。
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getSuccessFlag() {
         return successFlag;
     }
 
     /**
-     * ����successFlag���Ե�ֵ��
-     * 
+     * 设置successFlag属性的值。
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setSuccessFlag(String value) {
         this.successFlag = value;
     }
 
 }
+
