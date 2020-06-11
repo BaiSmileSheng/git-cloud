@@ -57,4 +57,12 @@ public interface RemoteSmsScrapOrderService {
      */
     @GetMapping("scrapOrder/updatePriceEveryMonth")
     R updatePriceEveryMonth(@RequestParam("month") String month);
+
+    /**
+     * 定时任务更新指定月份SAP销售价格
+     * @param month
+     * @return
+     */
+    @GetMapping("scrapOrder/updateSAPPriceEveryMonth")
+    R updateSAPPriceEveryMonth(@RequestParam("month") String month);
 }

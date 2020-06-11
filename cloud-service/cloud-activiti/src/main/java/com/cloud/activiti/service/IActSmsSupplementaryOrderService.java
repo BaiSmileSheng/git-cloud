@@ -5,6 +5,8 @@ import com.cloud.common.core.domain.R;
 import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
 import com.cloud.system.domain.entity.SysUser;
 
+import java.util.List;
+
 /**
  * 物耗申请单 审核
  *
@@ -18,7 +20,16 @@ public interface IActSmsSupplementaryOrderService {
      * @param smsSupplementaryOrder
      * @return R
      */
-    R startAct(SmsSupplementaryOrder smsSupplementaryOrder, SysUser SysUser);
+    R startAct(SmsSupplementaryOrder smsSupplementaryOrder, SysUser sysUser, String procDefId, String procName);
+
+    /**
+     * 开启流程 物耗申请单逻辑  新增、编辑提交时开启(多条)
+     *
+     * @param smsSupplementaryOrders
+     * @return R
+     */
+    R startActList(List<SmsSupplementaryOrder> smsSupplementaryOrders, SysUser sysUser, String procDefId, String procName);
+
 
     /**
      * 开启流程 物耗申请单逻辑  列表提交时开启

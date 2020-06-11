@@ -1,8 +1,5 @@
 package com.cloud.settle.config;
 
-import feign.codec.Encoder;
-import feign.form.spring.SpringFormEncoder;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -12,13 +9,13 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class MultipartSupportConfig {
-    @Bean
-    public Encoder feignFormEncoder() {
-        return new SpringFormEncoder();
-    }
-
-    @Bean
-    public feign.Logger.Level multipartLoggerLevel() {
-        return feign.Logger.Level.FULL;
-    }
+//    @Bean
+//    public Encoder feignFormEncoder() {
+//        return new SpringFormEncoder();
+//    }
+//
+//    @Bean
+//    public feign.Logger.Level multipartLoggerLevel() {
+//        return feign.Logger.Level.FULL;
+//    }
 }

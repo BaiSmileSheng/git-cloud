@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 
@@ -47,7 +48,7 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
      */
     @Override
 //    @GlobalTransactional
-    public R startAct(SmsSupplementaryOrder smsSupplementaryOrder, SysUser sysUser) {
+    public R startAct(SmsSupplementaryOrder smsSupplementaryOrder, SysUser sysUser,String procDefId,String procName) {
         log.info(StrUtil.format("物耗申请开启流程（新增、编辑）：参数为{}", smsSupplementaryOrder.toString()));
         if (smsSupplementaryOrder.getId() == null) {
             //新增提交  校验  获取数据  插入数据  开启流程
@@ -71,11 +72,25 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
             }
         }
         //插入流程物业表  并开启流程
+        smsSupplementaryOrder.setProcDefId(procDefId);
+        smsSupplementaryOrder.setProcName(procName);
         BizBusiness business = initBusiness(smsSupplementaryOrder, sysUser.getUserId());
         bizBusinessService.insertBizBusiness(business);
         Map<String, Object> variables = Maps.newHashMap();
         bizBusinessService.startProcess(business, variables);
         return R.ok("提交成功！");
+    }
+
+    @Override
+//    @GlobalTransactional
+    public R startActList(List<SmsSupplementaryOrder> smsSupplementaryOrders, SysUser sysUser, String procDefId, String procName) {
+        smsSupplementaryOrders.forEach(smsSupplementaryOrder->{
+            R r = startAct(smsSupplementaryOrder, sysUser, procDefId, procName);
+            if (!r.isSuccess()) {
+                throw new BusinessException(r.getStr("msg"));
+            }
+        });
+        return R.ok();
     }
 
     /**

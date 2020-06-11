@@ -13,6 +13,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 物耗申请单 审核流程
  *
@@ -41,16 +43,17 @@ public class ActSmsSupplementaryOrderActController extends BaseController {
 
     /**
      * 物耗审核开启流程  新增、编辑提交时开启
-     *
-     * @param smsSupplementaryOrder
-     * @return R 成功/失败
+     * @param smsSupplementaryOrders
+     * @param procDefId
+     * @param procName
+     * @return
      */
     @PostMapping("open")
     @OperLog(title = "物耗审核开启流程(新增、编辑)", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "开启流程(新增、编辑) ", response = R.class)
-    public R addSave(@RequestBody SmsSupplementaryOrder smsSupplementaryOrder) {
+    public R addSave(@RequestBody List<SmsSupplementaryOrder> smsSupplementaryOrders, String procDefId, String procName) {
         //开启审核流程
-        return actSmsSupplementaryOrderService.startAct(smsSupplementaryOrder,getUserInfo(SysUser.class));
+        return actSmsSupplementaryOrderService.startActList(smsSupplementaryOrders,getUserInfo(SysUser.class),procDefId,procName);
     }
 
     /**
