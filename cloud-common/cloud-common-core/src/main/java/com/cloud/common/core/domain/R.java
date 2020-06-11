@@ -1,11 +1,11 @@
 package com.cloud.common.core.domain;
 
+import cn.hutool.core.lang.Dict;
 import com.cloud.common.constant.Constants;
 
-import java.util.HashMap;
 import java.util.Map;
 
-public class R extends HashMap<String, Object> {
+public class R extends Dict {
     //
     private static final long serialVersionUID = -8157613083634272196L;
 
