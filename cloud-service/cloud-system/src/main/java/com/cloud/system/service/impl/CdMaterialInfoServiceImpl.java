@@ -4,7 +4,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.common.utils.XmlUtil;
 import com.cloud.system.config.MdmConnConfig;
-import com.cloud.system.service.SystemFromSap600InterfaceService;
+import com.cloud.system.service.SystemFromSap601InterfaceService;
 import com.cloud.system.webService.material.GeneralMDMDataReleaseBindingStub;
 import com.cloud.system.webService.material.Generalmdmdatarelease_client_epLocator;
 import com.cloud.system.webService.material.ProcessResponse;
@@ -37,7 +37,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
     @Autowired
     private MdmConnConfig mdmConnConfig;
     @Autowired
-    private SystemFromSap600InterfaceService systemFromSap600InterfaceService;
+    private SystemFromSap601InterfaceService systemFromSap601InterfaceService;
 
     /**
      * @Description: 保存MDM接口获取的物料信息数据
@@ -219,7 +219,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
         List<String> factorys = new ArrayList<>(factorySet);
         List<String> materials = new ArrayList<>(materialSet);
         //3调用SAP系统UPH接口
-        R r = systemFromSap600InterfaceService.queryUphFromSap600(factorys, materials);
+        R r = systemFromSap601InterfaceService.queryUphFromSap601(factorys, materials);
         if (!r.isSuccess()) {
             log.error("调用SAP系统UPH接口返回数据失败，原因：" + r.get("msg"));
             return R.error("调用SAP系统UPH接口返回数据失败，原因：" + r.get("msg"));

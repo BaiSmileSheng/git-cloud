@@ -7,7 +7,7 @@ import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.mapper.CdFactoryLineInfoMapper;
 import com.cloud.system.service.ICdFactoryInfoService;
 import com.cloud.system.service.ICdFactoryLineInfoService;
-import com.cloud.system.service.SystemFromSap600InterfaceService;
+import com.cloud.system.service.SystemFromSap601InterfaceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ public class CdFactoryLineInfoServiceImpl extends BaseServiceImpl<CdFactoryLineI
     @Autowired
     private CdFactoryLineInfoMapper cdFactoryLineInfoMapper;
     @Autowired
-    private SystemFromSap600InterfaceService systemFromSap600InterfaceService;
+    private SystemFromSap601InterfaceService systemFromSap601InterfaceService;
     @Autowired
     private ICdFactoryInfoService cdFactoryInfoService;
 
@@ -65,7 +65,7 @@ public class CdFactoryLineInfoServiceImpl extends BaseServiceImpl<CdFactoryLineI
     @Override
     public R saveFactoryLineInfo() {
         //1、调用SAP系统获取工厂线体关系数据接口
-        R factoryLineSap = systemFromSap600InterfaceService.queryFactoryLineFromSap600();
+        R factoryLineSap = systemFromSap601InterfaceService.queryFactoryLineFromSap601();
         if (!factoryLineSap.isSuccess()) {
             log.error("调用SAP系统获取工厂线体关系数据接口失败，原因："+factoryLineSap.get("msg"));
             return R.error("调用SAP系统获取工厂线体关系数据接口失败，原因："+factoryLineSap.get("msg"));

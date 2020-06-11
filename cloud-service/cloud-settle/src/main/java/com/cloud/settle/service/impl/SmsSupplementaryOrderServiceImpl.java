@@ -282,7 +282,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         JCoDestination destination =null;
         try {
             //创建与SAP的连接
-            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP600);
+            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP601);
             //获取repository
             JCoRepository repository = destination.getRepository();
             //获取函数信息
@@ -320,7 +320,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
                     if(SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(outTableOutput.getString("FLAG"))){
                         //获取成功
                         smsSupplementaryOrder.setPostingNo(outTableOutput.getString("MBLNR"));
-//                        smsSupplementaryOrder.setSapStoreage();
+                        smsSupplementaryOrder.setSapStoreage("0088");
                         smsSupplementaryOrder.setSapResult(outTableOutput.getString("FLAG"));
                         smsSupplementaryOrder.setSapDate(date);
                         smsSupplementaryOrder.setSapRemark(outTableOutput.getString("MESSAGE"));
