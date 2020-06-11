@@ -72,3 +72,11 @@ sap:
     user: 19046341
     passwd: 123123
     lang: ZH
+# 创建报账单 webservice
+webService:
+  baseMultiItemClaim:
+    urlClaim: http://10.133.28.51:8001/gems/services/baseClaim/ifBaseClaim_Srv?wsdl
+    namespaceURL: http://gems.haier.com/IfBaseClaim_Srv
+    localPart: IfBaseClaim_Srv
+    dictType: company_cost_relation
+

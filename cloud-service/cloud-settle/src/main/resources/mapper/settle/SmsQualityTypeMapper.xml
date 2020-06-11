@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.settle.mapper.SmsQualityTypeMapper">
+
+    <resultMap type="SmsQualityType" id="SmsQualityTypeResult">
+        <result property="id" column="id"/>
+        <result property="claimType" column="claim_type"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="parentId" column="parent_id"/>
+    </resultMap>
+
+    <sql id="selectSmsQualityTypeVo">
+        select id,
+               claim_type,
+               del_flag,
+               remark,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               parent_id
+        from sms_quality_type
+    </sql>
+
+
+</mapper>

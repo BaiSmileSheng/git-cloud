@@ -7,11 +7,16 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
+import com.cloud.common.exception.BusinessException;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * 时间工具类
@@ -182,4 +187,25 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         String dateString = new SimpleDateFormat(YYYY_MM_DD).format(timestampDate);
         return dateString;
     }
+
+    /**
+     * 时间转换, Date转换成 XMLGregorianCalendar
+     * @param date
+     * @return
+     * @throws Exception
+     */
+    public static XMLGregorianCalendar convertToXMLGregorianCalendar(Date date){
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.setTime(date);
+        XMLGregorianCalendar gc = null;
+        try{
+            gc = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new BusinessException("日期转换异常");
+        }
+
+        return gc;
+    }
+
 }
