@@ -8,7 +8,7 @@
                     <result property="id" column="id"/>
                     <result property="rawMaterialCode" column="raw_material_code"/>
                     <result property="rawMaterialDesc" column="raw_material_desc"/>
-                    <result property="factoryCode" column="factory_code"/>
+                    <result property="productFactoryCode" column="product_factory_code"/>
                     <result property="unit" column="unit"/>
                     <result property="storagePoint" column="storage_point"/>
                     <result property="currentStock" column="current_stock"/>
@@ -21,7 +21,7 @@
                     </resultMap>
 
     <sql id="selectCdRawMaterialStockVo">
-        select id, raw_material_code, raw_material_desc, factory_code, unit, storage_point, current_stock, del_flag, remark, create_time, create_by, update_time, update_by from cd_raw_material_stock
+        select id, raw_material_code, raw_material_desc, product_factory_code, unit, storage_point, current_stock, del_flag, remark, create_time, create_by, update_time, update_by from cd_raw_material_stock
     </sql>
 
 

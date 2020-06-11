@@ -93,17 +93,17 @@ public class OmsProductionOrder extends BaseEntity {
     private String productMaterialDesc;
 
     /**
-     * 工厂编码
+     * 生产工厂编码
      */
-    @ExcelProperty(value = "工厂",index = 4)
-    @ApiModelProperty(value = "工厂编码")
-    private String factoryCode;
+    @ExcelProperty(value = "生产工厂编码",index = 4)
+    @ApiModelProperty(value = "生产工厂编码")
+    private String productFactoryCode;
 
     /**
-     * 工厂描述
+     * 生产工厂描述
      */
-    @ApiModelProperty(value = "工厂描述")
-    private String factoryDesc;
+    @ApiModelProperty(value = "生产工厂描述")
+    private String productFactoryDesc;
 
     /**
      * 订单类型
@@ -174,6 +174,13 @@ public class OmsProductionOrder extends BaseEntity {
     @ExcelProperty(value = "BOM版本",index = 8)
     @ApiModelProperty(value = "BOM版本")
     private String bomVersion;
+
+    /**
+     * 新BOM版本
+     */
+    @ExcelProperty(value = "新BOM版本")
+    @ApiModelProperty(value = "新BOM版本")
+    private String newVersion;
 
     /**
      * 顺序

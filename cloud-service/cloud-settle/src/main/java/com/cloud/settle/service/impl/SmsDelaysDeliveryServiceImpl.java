@@ -189,7 +189,7 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
             //将排产订单信息转换成延期索赔数据
             smsDelaysDelivery.setProductLineCode(omsProductionOrderRes.getProductLineCode());
             smsDelaysDelivery.setProductOrderCode(omsProductionOrderRes.getProductOrderCode());
-            smsDelaysDelivery.setFactoryCode(omsProductionOrderRes.getFactoryCode());
+            smsDelaysDelivery.setFactoryCode(omsProductionOrderRes.getProductFactoryCode());
             smsDelaysDelivery.setProductMaterialCode(omsProductionOrderRes.getProductMaterialCode());
             smsDelaysDelivery.setProductMaterialName(omsProductionOrderRes.getProductMaterialDesc());
             smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_1.getCode());
