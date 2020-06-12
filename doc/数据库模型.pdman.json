@@ -9842,6 +9842,12 @@
               "chnname": "不良品库存"
             },
             {
+              "name": "unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "单位"
+            },
+            {
               "name": "del_flag",
               "type": "Char",
               "remark": "",
@@ -10004,6 +10010,12 @@
               "notNull": true
             },
             {
+              "name": "unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "单位"
+            },
+            {
               "name": "del_flag",
               "type": "Char",
               "remark": "",
@@ -10158,6 +10170,12 @@
               "notNull": true
             },
             {
+              "name": "unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "单位"
+            },
+            {
               "name": "del_flag",
               "type": "Char",
               "remark": "",
@@ -10271,6 +10289,12 @@
               "autoIncrement": true
             },
             {
+              "name": "stock_type",
+              "type": "DefaultString",
+              "remark": "0：良品，1：不良品",
+              "chnname": "库存类型"
+            },
+            {
               "name": "product_material_code",
               "type": "DefaultString",
               "remark": "",
@@ -10311,6 +10335,12 @@
               "remark": "",
               "chnname": "在库量",
               "notNull": true
+            },
+            {
+              "name": "unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "单位"
             },
             {
               "name": "del_flag",
