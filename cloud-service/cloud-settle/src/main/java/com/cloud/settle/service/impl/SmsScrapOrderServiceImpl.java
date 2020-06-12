@@ -288,7 +288,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         List<Map<String,String>> materialCodeComCodeList = smsScrapOrderMapper.selectMaterialAndCompanyCodeGroupBy(month, CollUtil.newArrayList(ScrapOrderStatusEnum.BF_ORDER_STATUS_DJS.getCode()));
         JCoDestination destination;
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog().builder()
-                .appId("SAP").interfaceName("ZSD_INT_DDPS_01")
+                .appId("SAP").interfaceName(SapConstants.ABAP_AS_SAP601)
                 .content(CollUtil.join(materialCodeComCodeList, "#")).build();
         Date date = DateUtil.date();
         StringBuffer error = new StringBuffer();
@@ -382,6 +382,9 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
     @Override
     public R autidSuccessToSAP261(SmsScrapOrder smsScrapOrder) {
         Date date = DateUtil.date();
+        SysInterfaceLog sysInterfaceLog = new SysInterfaceLog().builder()
+                .appId("SAP").interfaceName(SapConstants.ZESP_IM_001)
+                .content(smsScrapOrder.toString()).build();
         //发送SAP
         JCoDestination destination =null;
         try {
@@ -430,6 +433,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
                         updateByPrimaryKeySelective(smsScrapOrder);
                     }else {
                         //获取失败
+                        sysInterfaceLog.setResults(StrUtil.format("SAP返回错误信息：{}",outTableOutput.getString("MESSAGE")));
                         throw new BusinessException(StrUtil.format("发送SAP失败！原因：{}",outTableOutput.getString("MESSAGE")));
                     }
                 }
@@ -437,6 +441,11 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         } catch (JCoException e) {
             log.error("Connect SAP fault, error msg: " + e.toString());
             throw new BusinessException(e.getMessage());
+        }finally {
+            sysInterfaceLog.setCreateBy("定时任务");
+            sysInterfaceLog.setCreateTime(date);
+            sysInterfaceLog.setRemark("定时任务报废审核通过传SAP261");
+            remoteInterfaceLogService.saveInterfaceLog(sysInterfaceLog);
         }
         return R.ok();
     }
