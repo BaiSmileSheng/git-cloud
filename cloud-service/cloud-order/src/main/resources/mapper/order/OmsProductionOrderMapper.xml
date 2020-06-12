@@ -8,7 +8,6 @@
         <result property="id" column="id"/>
         <result property="orderCode" column="order_code"/>
         <result property="productOrderCode" column="product_order_code"/>
-        <result property="orderFrom" column="order_from"/>
         <result property="orderClass" column="order_class"/>
         <result property="branchOffice" column="branch_office"/>
         <result property="monitor" column="monitor"/>
@@ -55,7 +54,6 @@
         select id,
                order_code,
                product_order_code,
-               order_from,
                order_class,
                branch_office,
                monitor,

@@ -27,6 +27,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("demand")
+@Api(tags = "内单PR/PO原表信息")
 public class OmsInternalOrderResController extends BaseController {
 
     @Autowired
