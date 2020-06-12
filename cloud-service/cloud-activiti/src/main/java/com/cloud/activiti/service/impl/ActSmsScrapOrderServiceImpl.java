@@ -90,7 +90,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         log.info(StrUtil.format("报废申请开启流程（列表）：参数为{}", smsScrapOrder.toString()));
         //判断状态是否是未提交，如果不是则抛出错误
         Long id = smsScrapOrder.getId();
-        if (id != null) {
+        if (id == null) {
             return R.error("id不能为空！");
         }
         SmsScrapOrder smsScrapOrderCheck = remoteSmsScrapOrderService.get(id);

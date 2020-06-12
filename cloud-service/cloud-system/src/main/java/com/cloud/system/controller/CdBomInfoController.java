@@ -1,5 +1,6 @@
 package com.cloud.system.controller;
 
+import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * bom清单数据  提供者
@@ -147,5 +149,14 @@ public class CdBomInfoController extends BaseController {
     @PostMapping("checkBomNum")
     public R checkBomNum(String productMaterialCode,String rawMaterialCode,int applyNum){
         return cdBomInfoService.checkBomNum(productMaterialCode,rawMaterialCode,applyNum);
+    }
+
+    /**
+     * 根据物料号工厂分组取bom版本
+     * @return
+     */
+    @PostMapping("selectVersionMap")
+    public Map<String,Map<String, String>> selectVersionMap(@RequestBody List<Dict> dicts){
+        return cdBomInfoService.selectVersionMap(dicts);
     }
 }

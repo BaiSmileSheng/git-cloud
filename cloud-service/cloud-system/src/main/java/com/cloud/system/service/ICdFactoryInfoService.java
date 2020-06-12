@@ -1,7 +1,8 @@
 package com.cloud.system.service;
-
-import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.common.core.service.BaseService;
+import com.cloud.system.domain.entity.CdFactoryInfo;
+
+import java.util.Map;
 
 /**
  * 工厂信息 Service接口
@@ -11,4 +12,13 @@ import com.cloud.common.core.service.BaseService;
  */
 public interface ICdFactoryInfoService extends BaseService<CdFactoryInfo>{
 
-    }
+
+    /**
+     * 根据公司V码查询
+     * @param companyCodeV
+     * @return
+     */
+    Map<String, CdFactoryInfo> selectAllByCompanyCodeV(String companyCodeV);
+
+
+}
