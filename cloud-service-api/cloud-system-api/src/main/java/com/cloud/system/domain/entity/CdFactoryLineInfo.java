@@ -51,18 +51,18 @@ public class CdFactoryLineInfo extends BaseEntity {
     private String supplierDesc;
 
     /**
-     * 工厂编码
+     * 生产工厂编码
      */
-    @ExcelProperty(value = "工厂编码")
-    @ApiModelProperty(value = "工厂编码")
-    private String factoryCode;
+    @ExcelProperty(value = "生产工厂编码")
+    @ApiModelProperty(value = "生产工厂编码")
+    private String productFactoryCode;
 
     /**
-     * 工厂描述
+     * 生产工厂描述
      */
-    @ExcelProperty(value = "工厂描述")
-    @ApiModelProperty(value = "工厂描述")
-    private String factoryDesc;
+    @ExcelProperty(value = "生产工厂描述")
+    @ApiModelProperty(value = "生产工厂描述")
+    private String productFactoryDesc;
 
     /**
      * 线体编码

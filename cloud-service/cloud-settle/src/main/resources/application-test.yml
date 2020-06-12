@@ -65,7 +65,7 @@ spring:
           config:
             multi-statement-allow: true
 sap:
-  client600:
+  client601:
     ashost: 10.133.28.69
     sysnr: 00
     client: 200

@@ -74,8 +74,8 @@ public class OmsProductionOrderController extends BaseController {
     public TableDataInfo list(@ApiIgnore() OmsProductionOrder omsProductionOrder) {
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();
-        if (StrUtil.isNotBlank(omsProductionOrder.getFactoryCode())) {
-            criteria.andEqualTo("factoryDesc", omsProductionOrder.getFactoryCode());
+        if (StrUtil.isNotBlank(omsProductionOrder.getProductFactoryCode())) {
+            criteria.andEqualTo("factoryDesc", omsProductionOrder.getProductFactoryCode());
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getProductLineCode())) {
             criteria.andEqualTo("productLineCode",omsProductionOrder.getProductLineCode());
@@ -214,8 +214,8 @@ public class OmsProductionOrderController extends BaseController {
     public R export(@ApiIgnore() OmsProductionOrder omsProductionOrder) {
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();
-        if (StrUtil.isNotBlank(omsProductionOrder.getFactoryCode())) {
-            criteria.andEqualTo("factoryDesc", omsProductionOrder.getFactoryCode());
+        if (StrUtil.isNotBlank(omsProductionOrder.getProductFactoryCode())) {
+            criteria.andEqualTo("factoryDesc", omsProductionOrder.getProductFactoryCode());
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getProductLineCode())) {
             criteria.andEqualTo("productLineCode",omsProductionOrder.getProductLineCode());

@@ -4,7 +4,7 @@ import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.order.domain.entity.OmsProductionOrder;
-import com.cloud.order.service.OrderFromSap600InterfaceService;
+import com.cloud.order.service.OrderFromSap601InterfaceService;
 import com.sap.conn.jco.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @Description: Order服务 - sap600系统接口
+ * @Description: Order服务 - sap601系统接口
  * @Param:
  * @return:
  * @Author: ltq
@@ -23,7 +23,7 @@ import java.util.List;
  */
 @Service
 @Slf4j
-public class OrderFromSap600InterfaceServiceImpl implements OrderFromSap600InterfaceService {
+public class OrderFromSap601InterfaceServiceImpl implements OrderFromSap601InterfaceService {
     /**
      * @Description: 获取SAP系统生产订单
      * @Param: [list]
@@ -32,7 +32,7 @@ public class OrderFromSap600InterfaceServiceImpl implements OrderFromSap600Inter
      * @Date: 2020/6/4
      */
     @Override
-    public R queryProductOrderFromSap600(List<OmsProductionOrder> list) {
+    public R queryProductOrderFromSap601(List<OmsProductionOrder> list) {
         log.info("================获取SAP系统生产订单方法  start================");
         JCoDestination destination = null;
         if (list.size() <= 0) {
@@ -43,7 +43,7 @@ public class OrderFromSap600InterfaceServiceImpl implements OrderFromSap600Inter
         List<OmsProductionOrder> dataList = new ArrayList<>();
         try {
             //创建与SAP的连接
-            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP600);
+            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP601);
             //获取repository
             JCoRepository repository = destination.getRepository();
             //获取函数信息
@@ -74,7 +74,7 @@ public class OrderFromSap600InterfaceServiceImpl implements OrderFromSap600Inter
                     omsProductionOrder.setOrderCode(outTableOutput.getString("ABLAD"));//排产订单号
                     omsProductionOrder.setProductOrderCode(outTableOutput.getString("AUFNR"));//生产订单号
                     omsProductionOrder.setProductMaterialCode(outTableOutput.getString("MATNR"));//成品物料号
-                    omsProductionOrder.setFactoryCode(outTableOutput.getString("WERKS"));//生产工厂
+                    omsProductionOrder.setProductFactoryCode(outTableOutput.getString("WERKS"));//生产工厂
                     omsProductionOrder.setOrderType(outTableOutput.getString("AUART"));//订单类型
                     omsProductionOrder.setProductStartDate(sft.parse(outTableOutput.getString("GSTRP")));//基本开始日期
                     omsProductionOrder.setProductEndDate(sft.parse(outTableOutput.getString("GLTRP")));//基本结束日期
@@ -104,7 +104,7 @@ public class OrderFromSap600InterfaceServiceImpl implements OrderFromSap600Inter
      * @Date: 2020/6/4
      */
     @Override
-    public R createProductOrderFromSap600(List<OmsProductionOrder> list) {
+    public R createProductOrderFromSap601(List<OmsProductionOrder> list) {
         log.info("================联动SAP创建生产订单方法  start================");
         JCoDestination destination = null;
         if (list.size() <= 0) {
@@ -115,7 +115,7 @@ public class OrderFromSap600InterfaceServiceImpl implements OrderFromSap600Inter
         List<OmsProductionOrder> dataList = new ArrayList<>();
         try {
             //创建与SAP的连接
-            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP600);
+            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP601);
             //获取repository
             JCoRepository repository = destination.getRepository();
             //获取函数信息
@@ -128,7 +128,7 @@ public class OrderFromSap600InterfaceServiceImpl implements OrderFromSap600Inter
             for (OmsProductionOrder omsProductionOrder : list) {
                 inputTable.appendRow();
                 inputTable.setValue("MATNR", omsProductionOrder.getProductMaterialCode());
-                inputTable.setValue("WERKS", omsProductionOrder.getFactoryCode());
+                inputTable.setValue("WERKS", omsProductionOrder.getProductFactoryCode());
                 inputTable.setValue("AUART", omsProductionOrder.getOrderType());
                 inputTable.setValue("GSTRP", omsProductionOrder.getProductStartDate());
                 inputTable.setValue("GLTRP", omsProductionOrder.getProductEndDate());

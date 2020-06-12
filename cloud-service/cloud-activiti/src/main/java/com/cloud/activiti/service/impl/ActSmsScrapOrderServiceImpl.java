@@ -146,8 +146,11 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         if (result) {
             //审批通过
             if (ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode().equals(smsScrapOrder.getScrapStatus())) {
-                //TODO:业务科审核通过  传SAP
-
+                //业务科审核通过传SAP
+                R r = remoteSmsScrapOrderService.autidSuccessToSAP261(smsScrapOrder);
+                if (!r.isSuccess()) {
+                    return r;
+                }
             } else {
                 log.error(StrUtil.format("(报废)此状态数据不允许审核：{}", smsScrapOrder.getScrapStatus()));
                 return R.error("此状态数据不允许审核！");
@@ -156,17 +159,17 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
             //审批驳回
             if (ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode().equals(smsScrapOrder.getScrapStatus())) {
                 smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKBH.getCode());
+                R r = remoteSmsScrapOrderService.update(smsScrapOrder);
+                if (!r.isSuccess()) {
+                    return r;
+                }
             } else {
                 log.error(StrUtil.format("(报废)此状态数据不允许审核：{}", smsScrapOrder.getScrapStatus()));
                 return R.error("此状态数据不允许审核！");
             }
         }
-        R r = remoteSmsScrapOrderService.update(smsScrapOrder);
-        if (r.isSuccess()) {
-            //审批 推进工作流
-            return actTaskService.audit(bizAudit, userId);
-        }
-        return R.error();
+        //审批 推进工作流
+        return actTaskService.audit(bizAudit, userId);
     }
 
     /**
