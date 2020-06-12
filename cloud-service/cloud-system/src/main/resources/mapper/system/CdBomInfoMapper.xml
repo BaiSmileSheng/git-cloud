@@ -31,17 +31,21 @@
     </sql>
 
 
-    <resultMap type="java.util.HashMap" id="CdBomMapResult">
-        <result property="key" column="keyValue"/>
-        <result property="value" column="version"/>
-    </resultMap>
-    <select id="selectVersionMap" resultType="java.util.HashMap">
+    <select id="selectVersionMap" parameterType="list" resultType="java.util.HashMap">
         SELECT
             CONCAT( product_material_code, product_factory_code ) as keyValue,
             GROUP_CONCAT( version ) as version
         FROM
             cd_bom_info
         where del_flag='0'
+        and product_material_code in
+        <foreach collection="list" index="index" item="dict" open="(" close=")" separator=",">
+            #{dict.productMaterialCode}
+        </foreach>
+            and product_factory_code in
+        <foreach collection="list" index="index" item="dict" open="(" close=")" separator=",">
+            #{dict.productFactoryCode}
+        </foreach>
         GROUP BY
             product_material_code,
             product_factory_code

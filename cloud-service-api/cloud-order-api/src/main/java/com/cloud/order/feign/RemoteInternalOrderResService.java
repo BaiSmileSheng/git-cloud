@@ -5,9 +5,6 @@ import com.cloud.common.core.domain.R;
 import com.cloud.order.feign.factory.RemoteInternalOrderResServiceFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.Date;
 
 /**
  * 需求数据接入（800PR） Feign服务层
@@ -18,11 +15,17 @@ import java.util.Date;
 @FeignClient(name = ServiceNameConstants.ORDER_SERVICE, fallbackFactory = RemoteInternalOrderResServiceFallbackFactory.class)
 public interface RemoteInternalOrderResService {
     /**
-     * 根据时间从800获取PR
-     * @param startDate
-     * @param endDate
+     * SAP800获取PR定时任务(周五)
      * @return
      */
-    @GetMapping("demand/queryAndInsertDemandPRFromSap800")
-    R queryAndInsertDemandPRFromSap800(@RequestParam("startDate") Date startDate, @RequestParam("endDate")Date endDate);
+    @GetMapping("demand/queryAndInsertDemandPRFromSap800Friday")
+    R queryAndInsertDemandPRFromSap800Friday();
+
+    /**
+     * SAP800获取PR定时任务(周一)
+     *
+     * @return
+     */
+    @GetMapping("demand/queryAndInsertDemandPRFromSap800Monday")
+    R queryAndInsertDemandPRFromSap800Monday();
 }

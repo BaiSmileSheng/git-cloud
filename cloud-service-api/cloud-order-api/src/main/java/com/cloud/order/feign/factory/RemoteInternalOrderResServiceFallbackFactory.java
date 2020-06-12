@@ -6,8 +6,6 @@ import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-
 @Slf4j
 @Component
 public class RemoteInternalOrderResServiceFallbackFactory implements FallbackFactory<RemoteInternalOrderResService> {
@@ -16,14 +14,13 @@ public class RemoteInternalOrderResServiceFallbackFactory implements FallbackFac
     @Override
     public RemoteInternalOrderResService create(Throwable throwable) {
         return new RemoteInternalOrderResService(){
-            /**
-             * 根据时间从800获取PR
-             * @param startDate
-             * @param endDate
-             * @return
-             */
             @Override
-            public R queryAndInsertDemandPRFromSap800(Date startDate, Date endDate) {
+            public R queryAndInsertDemandPRFromSap800Friday() {
+                return null;
+            }
+
+            @Override
+            public R queryAndInsertDemandPRFromSap800Monday() {
                 return null;
             }
         };

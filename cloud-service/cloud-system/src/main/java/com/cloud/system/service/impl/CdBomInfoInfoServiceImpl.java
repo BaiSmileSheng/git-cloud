@@ -1,5 +1,6 @@
 package com.cloud.system.service.impl;
 
+import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -82,7 +84,7 @@ public class CdBomInfoInfoServiceImpl extends BaseServiceImpl<CdBomInfo> impleme
      * @return
      */
     @Override
-    public Map<String,Map<String, String>> selectVersionMap() {
-        return cdBomInfoMapper.selectVersionMap();
+    public Map<String,Map<String, String>> selectVersionMap(List<Dict> dicts) {
+        return cdBomInfoMapper.selectVersionMap(dicts);
     }
 }

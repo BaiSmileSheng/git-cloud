@@ -1,9 +1,11 @@
 package com.cloud.system.service;
 
+import cn.hutool.core.lang.Dict;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.system.domain.entity.CdBomInfo;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,9 +32,11 @@ public interface ICdBomInfoService extends BaseService<CdBomInfo> {
      * @Date: 2020/6/8
      */
     R saveBomInfoBySap();
+
     /**
      * 根据物料号工厂分组取bom版本
+     * @param dicts
      * @return
      */
-    Map<String,Map<String, String>> selectVersionMap();
+    Map<String,Map<String, String>> selectVersionMap(List<Dict> dicts);
 }

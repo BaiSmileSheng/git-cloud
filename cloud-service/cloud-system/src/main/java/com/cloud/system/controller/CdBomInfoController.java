@@ -1,5 +1,6 @@
 package com.cloud.system.controller;
 
+import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
@@ -156,8 +157,8 @@ public class CdBomInfoController extends BaseController {
      * 根据物料号工厂分组取bom版本
      * @return
      */
-    @GetMapping("selectVersionMap")
-    public Map<String,Map<String, String>> selectVersionMap(){
-        return cdBomInfoService.selectVersionMap();
+    @PostMapping("selectVersionMap")
+    public Map<String,Map<String, String>> selectVersionMap(@RequestBody List<Dict> dicts){
+        return cdBomInfoService.selectVersionMap(dicts);
     }
 }

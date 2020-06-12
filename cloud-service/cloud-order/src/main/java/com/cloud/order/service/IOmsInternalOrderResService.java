@@ -4,6 +4,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.order.domain.entity.OmsInternalOrderRes;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -24,5 +25,13 @@ public interface IOmsInternalOrderResService extends BaseService<OmsInternalOrde
 
 
     int deleteByMarker(String marker);
+
+    /**
+     * SAP800获取PR定时任务
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    R SAP800PRFindInternalOrderRes(Date startDate, Date endDate);
 
 }

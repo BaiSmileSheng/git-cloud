@@ -1,5 +1,6 @@
 package com.cloud.system.feign.factory;
 
+import cn.hutool.core.lang.Dict;
 import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.CdBomInfo;
 import com.cloud.system.feign.RemoteBomService;
@@ -7,6 +8,7 @@ import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -42,12 +44,15 @@ public class RemoteBomFallbackFactory implements FallbackFactory<RemoteBomServic
             }
             /**
              * 根据物料号工厂分组取bom版本
-             * @return null
+             * @param dicts
+             * @return
              */
             @Override
-            public Map<String, Map<String, String>> selectVersionMap() {
+            public Map<String, Map<String, String>> selectVersionMap(List<Dict> dicts) {
                 return null;
             }
+
+
         };
     }
 }

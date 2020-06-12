@@ -1,6 +1,7 @@
 package com.cloud.order.controller;
 
-import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -8,7 +9,6 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.order.domain.entity.OmsInternalOrderRes;
 import com.cloud.order.service.IOmsInternalOrderResService;
-import com.cloud.order.service.IOrderFromSap800InterfaceService;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -32,8 +32,7 @@ public class OmsInternalOrderResController extends BaseController {
     @Autowired
     private IOmsInternalOrderResService omsInternalOrderResService;
 
-    @Autowired
-    private IOrderFromSap800InterfaceService orderFromSap800InterfaceService;
+
 
     /**
      * 查询内单PR/PO原
@@ -97,28 +96,30 @@ public class OmsInternalOrderResController extends BaseController {
         return toAjax(omsInternalOrderResService.deleteByIds(ids));
     }
 
-    @GetMapping("queryAndInsertDemandPRFromSap800")
-    @ApiOperation(value = "根据时间从800获取PR", response = R.class)
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "startDate", value = "开始时间", required = true,paramType = "query", dataType = "date"),
-            @ApiImplicitParam(name = "endDate", value = "结束时间", required = true,paramType = "query", dataType = "date")
-    })
-    public R queryAndInsertDemandPRFromSap800(Date startDate, Date endDate){
-        //删除原有的PR数据
-        omsInternalOrderResService.deleteByMarker("PR");
+    /**
+     * SAP800获取PR定时任务(周五)
+     * @return
+     */
+    @GetMapping("queryAndInsertDemandPRFromSap800Friday")
+    public R queryAndInsertDemandPRFromSap800Friday(){
+        //开始：这个周天
+        Date startDate = DateUtil.endOfWeek(DateUtil.date());
+        //结束：往后推90天
+        Date endDate = DateUtil.offset(startDate, DateField.DAY_OF_YEAR, 90);
+        return omsInternalOrderResService.SAP800PRFindInternalOrderRes(startDate,endDate);
+    }
 
-        //从SAP800获取PR数据
-        R prR = orderFromSap800InterfaceService.queryDemandPRFromSap800(startDate,endDate);
-        if (!prR.isSuccess()) {
-            return prR;
-        }
-        List<OmsInternalOrderRes> list = (List<OmsInternalOrderRes>) prR.getObj("data");
-        if (CollUtil.isEmpty(list)) {
-            return R.error("未取到PR数据！");
-        }
-        //插入
-        R rInsert = omsInternalOrderResService.insert800PR(list);
-        return rInsert;
+    /**
+     * SAP800获取PR定时任务(周一)
+     * @return
+     */
+    @GetMapping("queryAndInsertDemandPRFromSap800Monday")
+    public R queryAndInsertDemandPRFromSap800Monday(){
+        //开始：上个周天
+        Date startDate = DateUtil.endOfWeek(DateUtil.lastWeek());
+        //结束：往后推90天
+        Date endDate = DateUtil.offset(startDate, DateField.DAY_OF_YEAR, 90);
+        return omsInternalOrderResService.SAP800PRFindInternalOrderRes(startDate,endDate);
     }
 
 }
