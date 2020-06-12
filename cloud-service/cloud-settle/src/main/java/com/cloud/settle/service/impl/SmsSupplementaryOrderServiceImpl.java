@@ -427,4 +427,13 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         return R.data(smsSupplementaryOrderCheck);
     }
 
+    /**
+     * 根据状态查物料号
+     * @param status
+     * @return 物料号集合
+     */
+    @Override
+    public List<String> materialCodeListByStatus(String status) {
+        return smsSupplementaryOrderMapper.materialCodeListByStatus(status);
+    }
 }

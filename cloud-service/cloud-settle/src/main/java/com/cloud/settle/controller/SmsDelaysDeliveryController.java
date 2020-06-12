@@ -1,6 +1,6 @@
 package com.cloud.settle.controller;
 
-import com.alibaba.fastjson.JSONObject;
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -8,7 +8,9 @@ import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
+import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.settle.domain.entity.SmsDelaysDelivery;
+import com.cloud.settle.enums.DeplayStatusEnum;
 import com.cloud.settle.service.ISmsDelaysDeliveryService;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.enums.UserTypeEnum;
@@ -19,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
 import java.util.List;
 /**
  * 延期交付索赔  提供者
@@ -90,6 +93,7 @@ public class SmsDelaysDeliveryController extends BaseController {
      * @param smsDelaysDelivery
      * @return 延期交付索赔列表
      */
+    @HasPermissions("settle:delaysDelivery:export")
     @GetMapping("export")
     @ApiOperation(value = "导出延期交付索赔 列表", response = SmsDelaysDelivery.class)
     @ApiImplicitParams({
@@ -123,7 +127,14 @@ public class SmsDelaysDeliveryController extends BaseController {
             criteria.andEqualTo("supplierCode",smsDelaysDelivery.getSupplierCode());
         }
         if(StringUtils.isNotBlank(smsDelaysDelivery.getDelaysStatus())){
-            criteria.andEqualTo("delaysStatus",smsDelaysDelivery.getDelaysStatus());
+            if(DeplayStatusEnum.DELAYS_STATUS_1.getCode().equals(smsDelaysDelivery.getDelaysStatus())){
+                List<String> list = new ArrayList<>();
+                list.add(DeplayStatusEnum.DELAYS_STATUS_1.getCode());
+                list.add(DeplayStatusEnum.DELAYS_STATUS_7.getCode());
+                criteria.andIn("delaysStatus",list);
+            }else{
+                criteria.andEqualTo("delaysStatus",smsDelaysDelivery.getDelaysStatus());
+            }
         }
         if(StringUtils.isNotBlank(smsDelaysDelivery.getProductLineCode())){
             criteria.andEqualTo("productLineCode",smsDelaysDelivery.getProductLineCode());
@@ -156,6 +167,9 @@ public class SmsDelaysDeliveryController extends BaseController {
     @OperLog(title = "新增保存延期交付索赔 ", businessType = BusinessType.INSERT)
     @ApiOperation(value = "新增保存延期交付索赔 ", response = R.class)
     public R addSave(@RequestBody SmsDelaysDelivery smsDelaysDelivery) {
+        //校验入参
+        ValidatorUtils.validateEntity(smsDelaysDelivery,SmsDelaysDelivery.class);
+        smsDelaysDelivery.setCreateBy(getLoginName());
         smsDelaysDeliveryService.insertSelective(smsDelaysDelivery);
         return R.data(smsDelaysDelivery.getId());
     }
@@ -190,6 +204,7 @@ public class SmsDelaysDeliveryController extends BaseController {
      * @param ids
      * @return 成功或失败
      */
+    @HasPermissions("settle:delaysDelivery:remove")
     @PostMapping("remove")
     @OperLog(title = "删除延期交付索赔 ", businessType = BusinessType.DELETE)
     @ApiOperation(value = "删除延期交付索赔 ", response = R.class)
@@ -200,13 +215,19 @@ public class SmsDelaysDeliveryController extends BaseController {
 
     /**
      * 延期索赔单供应商申诉(包含文件信息)
-     * @param smsDelaysDeliveryReq 延期索赔信息
+     * @param id 主键id
+     * @param complaintDescription 申诉描述
+     * @param files
      * @return 延期索赔单供应商申诉结果成功或失败
      */
+    @HasPermissions("settle:delaysDelivery:supplierAppeal")
     @PostMapping("supplierAppeal")
     @ApiOperation(value = "延期索赔单供应商申诉(包含文件信息) ", response = SmsDelaysDelivery.class)
-    public R supplierAppeal(@RequestParam("smsQualityOrder") String smsDelaysDeliveryReq, @RequestParam("files") MultipartFile[] files) {
-        SmsDelaysDelivery smsDelaysDelivery = JSONObject.parseObject(smsDelaysDeliveryReq,SmsDelaysDelivery.class);
+    public R supplierAppeal(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription, @RequestParam("files") MultipartFile[] files) {
+        SmsDelaysDelivery smsDelaysDelivery = new SmsDelaysDelivery();
+        smsDelaysDelivery.setId(id);
+        smsDelaysDelivery.setComplaintDescription(complaintDescription);
+        smsDelaysDelivery.setUpdateBy(getLoginName());
         return smsDelaysDeliveryService.supplierAppeal(smsDelaysDelivery,files);
     }
 
@@ -215,7 +236,9 @@ public class SmsDelaysDeliveryController extends BaseController {
      * @param ids 主键id
      * @return 供应商确认成功或失败
      */
+    @HasPermissions("settle:delaysDelivery:supplierConfirm")
     @PostMapping("supplierConfirm")
+    @OperLog(title = "供应商确认延期索赔单 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "供应商确认延期索赔单", response = SmsDelaysDelivery.class)
     public R supplierConfirm(String ids){
         return smsDelaysDeliveryService.supplierConfirm(ids);

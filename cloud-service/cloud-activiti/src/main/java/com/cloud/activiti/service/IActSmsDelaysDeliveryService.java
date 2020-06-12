@@ -22,11 +22,13 @@ public interface IActSmsDelaysDeliveryService {
 
     /**
      * 供应商申诉延期索赔开启流程
-     * @param smsDelaysDeliveryReq 延期索赔嘻嘻
+     * @param id 主键id
+     * @param complaintDescription 申诉描述
+     * @param files
      * @param sysUser 用户信息
      * @return
      */
-    R addSave(String smsDelaysDeliveryReq, MultipartFile[] files, SysUser sysUser);
+    R addSave(Long id,String complaintDescription, MultipartFile[] files, SysUser sysUser);
 
     /**
      * 延期索赔流程审批

@@ -31,4 +31,11 @@ public interface SmsSupplementaryOrderMapper extends BaseMapper<SmsSupplementary
      */
     List<String> selectMaterialByMonthAndStatus(@Param("month") String month,@Param("stuffStatus") List<String> stuffStatus);
 
+    /**
+     * 根据状态查物料号
+     * @param status
+     * @return 物料号集合
+     */
+    List<String> materialCodeListByStatus(@Param("status")String status);
+
 }

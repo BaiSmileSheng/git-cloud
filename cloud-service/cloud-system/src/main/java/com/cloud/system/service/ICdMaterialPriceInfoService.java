@@ -32,4 +32,9 @@ public interface ICdMaterialPriceInfoService extends BaseService<CdMaterialPrice
     Map<String, CdMaterialPriceInfo> selectPriceByInMaterialCodeAndDate(List<String> materialCodes,
                                                                         String beginDate,
                                                                         String endDate);
+    /**
+     * 定时加工费/原材料价格同步
+     * @return 成功或失败
+     */
+    R synPrice();
 }

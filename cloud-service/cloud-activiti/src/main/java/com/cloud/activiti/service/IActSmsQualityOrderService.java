@@ -21,12 +21,13 @@ public interface IActSmsQualityOrderService {
     R getBizInfoByTableId(String businessKey);
 
     /**
-     * 质量索赔信息开启流程
-     * @param smsQualityOrderReq 质量索赔信息
-     * @param sysUser 当前用户信息
+     * 供应商申诉时质量索赔开启流程
+     * @param id 主键id
+     * @param complaintDescription 申诉描述
+     * @param files
      * @return 成功或失败
      */
-    R addSave(String smsQualityOrderReq,MultipartFile[] files, SysUser sysUser);
+    R addSave(Long id,String complaintDescription,MultipartFile[] files, SysUser sysUser);
 
     /**
      * 质量索赔审批流程
