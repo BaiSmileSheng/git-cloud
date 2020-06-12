@@ -22,6 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -124,7 +126,14 @@ public class SmsClaimOtherController extends BaseController {
         }
 
         if(StringUtils.isNotBlank(smsClaimOther.getClaimOtherStatus())){
-            criteria.andEqualTo("claimOtherStatus",smsClaimOther.getClaimOtherStatus());
+            if(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_1.getCode().equals(smsClaimOther.getClaimOtherStatus())){
+                List<String> list = new ArrayList<>();
+                list.add(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_1.getCode());
+                list.add(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_7.getCode());
+                criteria.andIn("claimOtherStatus",list);
+            }else{
+                criteria.andEqualTo("claimOtherStatus",smsClaimOther.getClaimOtherStatus());
+            }
         }
         if(StringUtils.isNotBlank(smsClaimOther.getBeginTime())){
             criteria.andGreaterThanOrEqualTo("createTime",smsClaimOther.getBeginTime());
@@ -211,7 +220,7 @@ public class SmsClaimOtherController extends BaseController {
      */
     @HasPermissions("settle:claimOther:submit")
     @PostMapping("submit")
-    @OperLog(title = "提交其他索赔单", businessType = BusinessType.DELETE)
+    @OperLog(title = "提交其他索赔单", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "提交其他索赔单", response = R.class)
     public R submit(String ids){
         return smsClaimOtherService.submit(ids);
@@ -224,7 +233,7 @@ public class SmsClaimOtherController extends BaseController {
      */
     @HasPermissions("settle:claimOther:supplierConfirm")
     @PostMapping("supplierConfirm")
-    @OperLog(title = "供应商确认索赔单 ", businessType = BusinessType.DELETE)
+    @OperLog(title = "供应商确认索赔单 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "供应商确认索赔单 ", response = R.class)
     public R supplierConfirm(String ids){
         return smsClaimOtherService.supplierConfirm(ids);

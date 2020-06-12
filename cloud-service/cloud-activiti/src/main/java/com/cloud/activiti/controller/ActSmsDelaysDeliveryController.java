@@ -44,15 +44,17 @@ public class ActSmsDelaysDeliveryController extends BaseController {
 
     /**
      * 供应商申诉延期索赔开启流程
-     * @param smsDelaysDeliveryReq 延期索赔信息
+     * @param id 主键id
+     * @param complaintDescription 申诉描述
+     * @param files
      * @return 成功或失败
      */
     @PostMapping("save")
-    @ApiOperation(value = "开启延期索赔流程",response = SmsDelaysDelivery.class)
-    public R addSave(@RequestParam("smsDelaysDelivery") String smsDelaysDeliveryReq,@RequestParam("files") MultipartFile[] files) {
+    @ApiOperation(value = "供应商申诉延期索赔开启流程",response = SmsDelaysDelivery.class)
+    public R addSave(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription,@RequestParam("files") MultipartFile[] files) {
         //获取当前用户登录信息
         SysUser sysUser = getUserInfo(SysUser.class);
-        return actSmsDelaysDeliveryService.addSave(smsDelaysDeliveryReq,files,sysUser);
+        return actSmsDelaysDeliveryService.addSave(id,complaintDescription,files,sysUser);
     }
 
     /**

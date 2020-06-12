@@ -130,7 +130,7 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
         sysInterfaceLog.setContent("查加工费/原材料价格");
         try {
             //创建与SAP的连接
-            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP600);
+            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP601);
             //获取repository
             JCoRepository repository = destination.getRepository();
             //获取函数信息

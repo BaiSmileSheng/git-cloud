@@ -15,6 +15,8 @@ import tk.mybatis.mapper.annotation.KeySql;
 
 import javax.persistence.Id;
 import javax.persistence.Transient;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -57,6 +59,8 @@ public class SmsQualityOrder extends BaseEntity {
     /**
      * 供应商编码
      */
+    @Valid
+    @NotNull(message = "供应商编码不能为空")
     @ExcelProperty(value = "供应商编码",index = 2)
     @ApiModelProperty(value = "供应商编码")
     private String supplierCode;
@@ -71,6 +75,8 @@ public class SmsQualityOrder extends BaseEntity {
     /**
      * 工厂
      */
+    @Valid
+    @NotNull(message = "工厂不能为空")
     @ExcelProperty(value = "工厂",index = 4)
     @ApiModelProperty(value = "工厂")
     private String factoryCode;
@@ -112,6 +118,8 @@ public class SmsQualityOrder extends BaseEntity {
     /**
      * 问题分类
      */
+    @Valid
+    @NotNull(message = "问题分类不能为空")
     @ExcelProperty(value = "问题分类",index = 9)
     @ApiModelProperty(value = "问题分类")
     private String projectName;
@@ -119,6 +127,8 @@ public class SmsQualityOrder extends BaseEntity {
     /**
      * 索赔条款
      */
+    @Valid
+    @NotNull(message = "索赔条款不能为空")
     @ApiModelProperty(value = "索赔条款")
     private String claimClause;
 
@@ -132,6 +142,8 @@ public class SmsQualityOrder extends BaseEntity {
     /**
      * 索赔金额
      */
+    @Valid
+    @NotNull(message = "索赔金额不能为空")
     @ExcelProperty(value = "索赔金额",index = 8)
     @ApiModelProperty(value = "索赔金额")
     private BigDecimal claimAmount;

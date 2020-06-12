@@ -5,18 +5,15 @@ package com.cloud.settle.enums;
  * @Author Lihongxia
  * @Date 2020-05-26
  */
-public enum SettleInfoOrderStatusEnum {
+public enum OutsourceWayEnum {
 
-    ORDER_STATUS_1("1","未关单"),
-    ORDER_STATUS_2("2","已关单"),
-    ORDER_STATUS_11("11","待结算"),
-    ORDER_STATUS_12("12","结算完成"),
-
+    OUTSOURCE_WAY_0("0","半委外"),
+    OUTSOURCE_WAY_1("1","全委外"),
 
     ;
     private String code;
     private String msg;
-    SettleInfoOrderStatusEnum(String code, String msg) {
+    OutsourceWayEnum(String code, String msg) {
         this.code = code;
         this.msg = msg;
     }
@@ -30,7 +27,7 @@ public enum SettleInfoOrderStatusEnum {
     }
 
     public static String getMsgByCode(String code) {
-        for (SettleInfoOrderStatusEnum enums : SettleInfoOrderStatusEnum.values()) {
+        for (OutsourceWayEnum enums : OutsourceWayEnum.values()) {
             if (enums.getCode().equals(code)) {
                 return enums.getMsg();
             }
@@ -39,7 +36,7 @@ public enum SettleInfoOrderStatusEnum {
     }
 
     public static String getCodeByMsg(String msg) {
-        for (SettleInfoOrderStatusEnum bt : values()) {
+        for (OutsourceWayEnum bt : values()) {
             if (bt.msg .equals(msg) ) {
                 return bt.getCode();
             }
