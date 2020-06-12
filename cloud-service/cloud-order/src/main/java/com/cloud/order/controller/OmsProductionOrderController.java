@@ -65,7 +65,7 @@ public class OmsProductionOrderController extends BaseController {
             @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productMaterialCode", value = "专用号", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "factoryDesc", value = "工厂", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productFactoryCode", value = "工厂", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productLineCode", value = "线体", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "status", value = "状态", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productStartDate", value = "基本开始日期", required = false, paramType = "query", dataType = "String"),
@@ -75,7 +75,7 @@ public class OmsProductionOrderController extends BaseController {
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();
         if (StrUtil.isNotBlank(omsProductionOrder.getProductFactoryCode())) {
-            criteria.andEqualTo("factoryDesc", omsProductionOrder.getProductFactoryCode());
+            criteria.andEqualTo("productFactoryCode", omsProductionOrder.getProductFactoryCode());
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getProductLineCode())) {
             criteria.andEqualTo("productLineCode",omsProductionOrder.getProductLineCode());
@@ -109,7 +109,7 @@ public class OmsProductionOrderController extends BaseController {
             //班长、分主管查询工厂下的数据
             if(CollectionUtil.contains(sysUser.getRoleKeys(),RoleConstants.ROLE_KEY_BZ)
             ||CollectionUtil.contains(sysUser.getRoleKeys(),RoleConstants.ROLE_KEY_FZG)){
-                criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+                criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
             }
         }
         startPage();
@@ -205,7 +205,7 @@ public class OmsProductionOrderController extends BaseController {
     @ApiOperation(value = "排产订单 导出", response = OmsProductionOrder.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "productMaterialCode", value = "专用号", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "factoryDesc", value = "工厂", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productFactoryCode", value = "工厂", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productLineCode", value = "线体", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "status", value = "状态", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productStartDate", value = "基本开始日期", required = false, paramType = "query", dataType = "String"),
@@ -215,7 +215,7 @@ public class OmsProductionOrderController extends BaseController {
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();
         if (StrUtil.isNotBlank(omsProductionOrder.getProductFactoryCode())) {
-            criteria.andEqualTo("factoryDesc", omsProductionOrder.getProductFactoryCode());
+            criteria.andEqualTo("productFactoryCode", omsProductionOrder.getProductFactoryCode());
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getProductLineCode())) {
             criteria.andEqualTo("productLineCode",omsProductionOrder.getProductLineCode());
@@ -249,7 +249,7 @@ public class OmsProductionOrderController extends BaseController {
             //班长、分主管查询工厂下的数据
             if(CollectionUtil.contains(sysUser.getRoleKeys(),RoleConstants.ROLE_KEY_BZ)
                     ||CollectionUtil.contains(sysUser.getRoleKeys(),RoleConstants.ROLE_KEY_FZG)){
-                criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+                criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
             }
         }
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderService.selectByExample(example);

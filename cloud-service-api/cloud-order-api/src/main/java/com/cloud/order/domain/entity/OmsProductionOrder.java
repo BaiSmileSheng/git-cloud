@@ -55,12 +55,6 @@ public class OmsProductionOrder extends BaseEntity {
     private String productOrderCode;
 
     /**
-     * 订单来源 1：内单，2：外单
-     */
-    @ApiModelProperty(value = "订单来源 1：内单，2：外单")
-    private String orderFrom;
-
-    /**
      * 订单种类 1：正常，2：追加，3：储备，4：新品，5：返修
      */
     @ApiModelProperty(value = "订单种类 1：正常，2：追加，3：储备，4：新品，5：返修")
@@ -263,16 +257,16 @@ public class OmsProductionOrder extends BaseEntity {
     private String lifeCycle;
 
     /**
-     * 状态 0：待评审，1：反馈中，2：待调整，3：已调整，4：待传SAP，5：已传SAP，6：已关单
+     * 状态 0：待评审，1：反馈中，2：待调整，3：已评审，4：待传SAP，5：传SAP中，6：已传SAP，7：传SAP异常，8：已关单
      */
     @ExcelProperty(value = "状态 ",index=12,converter = ProductionOrderStatusConverter.class)
-    @ApiModelProperty(value = "状态 0：待评审，1：反馈中，2：待调整，3：已调整，4：待传SAP，5：已传SAP，6：已关单")
+    @ApiModelProperty(value = "状态 0：待评审，1：反馈中，2：待调整，3：已评审，4：待传SAP，5：传SAP中，6：已传SAP，7：传SAP异常，8：已关单")
     private String status;
 
     /**
      * 审核状态 0：待审核，1：JIT处长已审核
      */
-    @ApiModelProperty(value = "审核状态 0：待审核，1：JIT处长已审核")
+    @ApiModelProperty(value = "审核状态 0：无需审核，1：审核中，2：审核完成")
     private String auditStatus;
 
     /**
