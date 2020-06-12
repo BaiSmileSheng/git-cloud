@@ -11,10 +11,7 @@ import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.system.domain.entity.CdBomInfo;
 import com.cloud.system.service.ICdBomInfoService;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
@@ -30,6 +27,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("bom")
+@Api(tags = "BOM清单")
 public class CdBomInfoController extends BaseController {
 
     @Autowired

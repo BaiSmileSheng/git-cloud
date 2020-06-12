@@ -34,6 +34,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("material")
+@Api(tags = "物料主数据信息")
 public class CdMaterialInfoController extends BaseController {
 
     @Autowired
