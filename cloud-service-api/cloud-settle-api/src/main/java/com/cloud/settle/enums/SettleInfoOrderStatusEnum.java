@@ -28,4 +28,22 @@ public enum SettleInfoOrderStatusEnum {
     public String getMsg() {
         return msg;
     }
+
+    public static String getMsgByCode(String code) {
+        for (SettleInfoOrderStatusEnum enums : SettleInfoOrderStatusEnum.values()) {
+            if (enums.getCode().equals(code)) {
+                return enums.getMsg();
+            }
+        }
+        return "";
+    }
+
+    public static String getCodeByMsg(String msg) {
+        for (SettleInfoOrderStatusEnum bt : values()) {
+            if (bt.msg .equals(msg) ) {
+                return bt.getCode();
+            }
+        }
+        return msg;
+    }
 }

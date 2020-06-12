@@ -48,13 +48,15 @@ public interface RemoteClaimOtherService {
 
     /**
      * 索赔单供应商申诉(包含文件信息)
-     * @param smsClaimOtherReq 其他索赔信息
+     * @param id 主键id
+     * @param complaintDescription 申诉描述
+     * @param files
      * @return 索赔单供应商申诉结果成功或失败
      */
     @RequestMapping(value = "claimOther/supplierAppeal", method = RequestMethod.POST,
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    R supplierAppeal(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestParam("files") MultipartFile[] files);
+    R supplierAppeal(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription,@RequestParam("files") MultipartFile[] files);
 
     /**
      * 48H超时未确认发送邮件

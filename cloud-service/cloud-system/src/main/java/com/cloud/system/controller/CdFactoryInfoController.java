@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 工厂信息  提供者
@@ -51,6 +52,15 @@ public class CdFactoryInfoController extends BaseController {
         criteria.andEqualTo("factoryCode", factoryCode)
                 .andEqualTo("delFlag","0");
         return cdFactoryInfoService.findByExampleOne(example);
+    }
+
+    /**
+     * 根据公司V码查询
+     */
+    @GetMapping("selectAllByCompanyCodeV")
+    @ApiOperation(value = "根据公司V码查询 ", response = CdFactoryInfo.class)
+    public Map<String, CdFactoryInfo> selectAllByCompanyCodeV(String companyCodeV) {
+         return cdFactoryInfoService.selectAllByCompanyCodeV(companyCodeV);
     }
 
     /**

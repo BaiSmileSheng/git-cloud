@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 
 /**
- * 报废管理 Feign服务层
+ * 生产管理 Feign服务层
  *
  * @author cs
  * @date 2020-05-20

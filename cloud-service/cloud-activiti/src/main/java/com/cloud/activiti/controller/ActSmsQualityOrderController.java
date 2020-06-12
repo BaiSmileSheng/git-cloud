@@ -44,15 +44,17 @@ public class ActSmsQualityOrderController extends BaseController {
 
     /**
      * 供应商申诉时质量索赔开启流程
-     * @param smsQualityOrderReq 质量索赔信息
+     * @param id 主键id
+     * @param complaintDescription 申诉描述
+     * @param files
      * @return 成功或失败
      */
     @PostMapping("save")
-    @ApiOperation(value = "开启质量索赔流程",response = SmsQualityOrder.class)
-    public R addSave(@RequestParam("smsQualityOrder") String smsQualityOrderReq,@RequestParam("files") MultipartFile[] files) {
+    @ApiOperation(value = "供应商申诉时质量索赔开启流程",response = SmsQualityOrder.class)
+    public R addSave(@RequestParam("id") Long id, @RequestParam("complaintDescription") String complaintDescription,@RequestParam("files") MultipartFile[] files) {
         //获取当前用户登录信息
         SysUser sysUser = getUserInfo(SysUser.class);
-        return actSmsQualityOrderService.addSave(smsQualityOrderReq,files,sysUser);
+        return actSmsQualityOrderService.addSave(id,complaintDescription,files,sysUser);
     }
 
     /**

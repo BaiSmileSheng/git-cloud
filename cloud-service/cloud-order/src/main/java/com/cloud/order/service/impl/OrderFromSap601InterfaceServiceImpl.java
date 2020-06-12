@@ -4,7 +4,7 @@ import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.order.domain.entity.OmsProductionOrder;
-import com.cloud.order.service.OrderFromSap601InterfaceService;
+import com.cloud.order.service.IOrderFromSap601InterfaceService;
 import com.sap.conn.jco.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ import java.util.List;
  */
 @Service
 @Slf4j
-public class OrderFromSap601InterfaceServiceImpl implements OrderFromSap601InterfaceService {
+public class OrderFromSap601InterfaceServiceImpl implements IOrderFromSap601InterfaceService {
     /**
      * @Description: 获取SAP系统生产订单
      * @Param: [list]

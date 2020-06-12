@@ -16,7 +16,7 @@ public class SapConstants {
     public static final String SAP_RESULT_TYPE_FAIL = "E";
 
 
-    //TODO ================卡奥斯SAP系统连接  start====================
+    /**================卡奥斯SAP系统连接  start====================**/
     /**
      * 卡奥斯SAP系统连接
      * */
@@ -49,10 +49,21 @@ public class SapConstants {
      * 获取BOM清单数据
      * */
     public static final String ZPP_INT_DDPS_06 = "ZPP_INT_DDPS_06";
+    /**
+     * 获取加工费/原材料价格
+     * */
+    public static final String ZMM_INT_DDPS_01 = "ZMM_INT_DDPS_01";
+
     //TODO ================卡奥斯SAP系统连接  end=====================
 
+    /**
+     * 报废、物耗发送SAP  261/Y61
+     */
+    public static final String ZESP_IM_001 = "ZESP_IM_001";
+    /** ================卡奥斯SAP系统连接  end=====================**/
 
-    //TODO ================SAP 800系统连接  start====================
+
+    /** ================SAP 800系统连接  start====================**/
     /**
      * SAP800 系统连接
      * */
@@ -65,5 +76,5 @@ public class SapConstants {
      * 获取SAP800系统PO真单
      * */
     public static final String ZMM_PO_KAS = "ZMM_PO_KAS";
-    //TODO ================SAP 800系统连接  end====================
+    /** ================SAP 800系统连接  end====================**/
 }

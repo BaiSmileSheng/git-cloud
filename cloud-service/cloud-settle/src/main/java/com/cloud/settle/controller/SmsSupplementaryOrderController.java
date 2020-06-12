@@ -300,4 +300,15 @@ public class SmsSupplementaryOrderController extends BaseController {
     public R autidSuccessToSAPY61(@RequestBody SmsSupplementaryOrder smsSupplementaryOrder){
         return smsSupplementaryOrderService.autidSuccessToSAPY61(smsSupplementaryOrder);
     }
+
+    /**
+     * 根据状态查物料号
+     * @param status
+     * @return 物料号集合
+     */
+    @GetMapping("materialCodeListByStatus")
+    @ApiOperation(value = "根据状态查物料号", response = String.class)
+    public List<String> materialCodeListByStatus(String status){
+        return smsSupplementaryOrderService.materialCodeListByStatus(status);
+    }
 }

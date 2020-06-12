@@ -144,4 +144,16 @@ public class CdMaterialPriceInfoController extends BaseController {
         List<String> materialCodeList= CollectionUtil.newArrayList(materialCodes.split(","));
         return cdMaterialPriceInfoService.selectPriceByInMaterialCodeAndDate(materialCodeList,beginDate,endDate);
     }
+
+    /**
+     * 定时加工费/原材料价格同步
+     * @return 成功或失败
+     */
+    @PostMapping("synPrice")
+    @OperLog(title = "定时加工费/原材料价格同步 ", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "定时加工费/原材料价格同步 ", response = R.class)
+    public R synPrice(){
+        R result = cdMaterialPriceInfoService.synPrice();
+        return result;
+    }
 }

@@ -4,7 +4,7 @@ import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.order.domain.entity.OmsInternalOrderRes;
-import com.cloud.order.service.OrderFromSap800InterfaceService;
+import com.cloud.order.service.IOrderFromSap800InterfaceService;
 import com.sap.conn.jco.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ import java.util.List;
  */
 @Slf4j
 @Service
-public class OrderFromSap800InterfaceServiceImpl implements OrderFromSap800InterfaceService {
+public class OrderFromSap800InterfaceServiceImpl implements IOrderFromSap800InterfaceService {
     /**
      * @Description: 获取SAP800系统13周PR需求
      * @Param: [startDate, endDate]
@@ -95,7 +95,7 @@ public class OrderFromSap800InterfaceServiceImpl implements OrderFromSap800Inter
                 }
             } else {
                 log.error("获取SAP800系统13周PR需求数据失败：" + outParam.getString("MESSAGE"));
-                return R.error(jCoFields.getString("MESSAGE"));
+                return R.error(outParam.getString("MESSAGE"));
             }
         } catch (Exception e) {
             log.error("获取SAP800系统13周PR需求方法异常:" + e);

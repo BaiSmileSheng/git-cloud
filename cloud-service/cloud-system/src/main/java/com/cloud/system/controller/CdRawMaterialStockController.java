@@ -62,7 +62,7 @@ public class CdRawMaterialStockController extends BaseController {
         Example example = new Example(CdRawMaterialStock.class);
         Example.Criteria criteria = example.createCriteria();
         if (StringUtils.isNotBlank(cdRawMaterialStock.getProductFactoryCode())) {
-            criteria.andEqualTo("factoryCode",cdRawMaterialStock.getProductFactoryCode());
+            criteria.andEqualTo("productFactoryCode",cdRawMaterialStock.getProductFactoryCode());
         }
         if (StringUtils.isNotBlank(cdRawMaterialStock.getRawMaterialCode())) {
             criteria.andEqualTo("rawMaterialCode",cdRawMaterialStock.getRawMaterialCode());
@@ -121,7 +121,7 @@ public class CdRawMaterialStockController extends BaseController {
     @ApiOperation(value = "导出原材料库存报表", response = CdRawMaterialStock.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "rawMaterialCode", value = "原材料物料号", required = false,paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "factoryCode", value = "生产工厂", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = false,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "storagePoint", value = "仓储点", required = false,paramType = "query", dataType = "String")
     })
     public R exportRawMaterialExcel(@ApiIgnore CdRawMaterialStock cdRawMaterialStock){

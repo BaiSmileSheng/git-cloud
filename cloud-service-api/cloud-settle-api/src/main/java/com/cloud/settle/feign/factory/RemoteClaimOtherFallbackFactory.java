@@ -53,12 +53,14 @@ public class RemoteClaimOtherFallbackFactory implements FallbackFactory<RemoteCl
 
             /**
              * 索赔单供应商申诉(包含文件信息)
-             * @param smsClaimOtherReq 其他索赔信息
+             * @param id 主键id
+             * @param complaintDescription 申诉描述
+             * @param files
              * @return 索赔单供应商申诉结果成功或失败
              */
             @Override
-            public R supplierAppeal(String smsClaimOtherReq, MultipartFile[] files) {
-                return R.error("根据id申诉其他索赔信息失败");
+            public R supplierAppeal(Long id, String complaintDescription, MultipartFile[] files) {
+                return null;
             }
 
             /**

@@ -1,8 +1,10 @@
 package com.cloud.settle.controller;
 
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
+import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.settle.domain.entity.SmsSettleInfo;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
@@ -62,7 +65,14 @@ public class SmsSettleInfoController extends BaseController {
             @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "lineNo", value = "线体号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "supplierCode", value = "供应商编号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productOrderCode", value = "生产订单号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "orderStatus", value = "状态", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "timeType", value = "1:基本开始时间,2:基本结束时间,3:实际结束时间", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "beginTime", value = "开始时间", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", required = false, paramType = "query", dataType = "String")
     })
     public TableDataInfo list(SmsSettleInfo smsSettleInfo) {
         startPage();
@@ -72,15 +82,53 @@ public class SmsSettleInfoController extends BaseController {
         return getDataTable(smsSettleInfoList);
     }
 
+    @HasPermissions("settle:smsSettleInfo:export")
+    @GetMapping("export")
+    @ApiOperation(value = "加工费结算导出", response = SmsSettleInfo.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "lineNo", value = "线体号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "supplierCode", value = "供应商编号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productOrderCode", value = "生产订单号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "orderStatus", value = "状态", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "timeType", value = "1:基本开始时间,2:基本结束时间,3:实际结束时间", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "beginTime", value = "开始时间", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", required = false, paramType = "query", dataType = "String")
+    })
+    public R export(@ApiIgnore SmsSettleInfo smsSettleInfo){
+        Example example = exampleListCondition(smsSettleInfo);
+        List<SmsSettleInfo> smsSettleInfoList = smsSettleInfoService.selectByExample(example);
+        for(SmsSettleInfo smsSettleInfoRes : smsSettleInfoList){
+            int orderAmount = (smsSettleInfoRes.getOrderAmount() == null ? 0 : smsSettleInfoRes.getOrderAmount());
+            int confirmAmont = (smsSettleInfoRes.getConfirmAmont() == null ? 0 : smsSettleInfoRes.getConfirmAmont());
+            Integer differenceAmont = orderAmount - confirmAmont;
+            smsSettleInfoRes.setDifferenceAmont(differenceAmont);
+        }
+        String fileName = "加工费结算 .xlsx";
+        return EasyExcelUtil.writeExcel(smsSettleInfoList, fileName, fileName, new SmsSettleInfo());
+    }
     /**
      * 查询加工费结算 列表
      * @param smsSettleInfo 加工费结算信息
      * @return List<SmsSettleInfo> 加工费结算列表
      */
     @GetMapping("listByCondition")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "lineNo", value = "线体号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "supplierCode", value = "供应商编号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productOrderCode", value = "生产订单号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "orderStatus", value = "状态", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "timeType", value = "1:基本开始时间,2:基本结束时间,3:实际结束时间", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "beginTime", value = "开始时间", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", required = false, paramType = "query", dataType = "String")
+    })
     @ApiOperation(value = "加工费结算条件查询", response = SmsSettleInfo.class)
-    public List<SmsSettleInfo> listByCondition(SmsSettleInfo smsSettleInfo) {
-        startPage();
+    public List<SmsSettleInfo> listByCondition(@ApiIgnore SmsSettleInfo smsSettleInfo) {
         Example example = exampleListCondition(smsSettleInfo);
         List<SmsSettleInfo> smsSettleInfoList = smsSettleInfoService.selectByExample(example);
         return smsSettleInfoList;

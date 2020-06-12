@@ -11,7 +11,7 @@ import java.util.List;
  * @Author: ltq
  * @Date: 2020/6/4
  */
-public interface OrderFromSap601InterfaceService {
+public interface IOrderFromSap601InterfaceService {
     /**
      * @Description: 获取SAP系统生产订单
      * @Param: [list]

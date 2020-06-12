@@ -52,6 +52,15 @@ public class RemoteCdMaterialPriceInfoFallbackFactory implements FallbackFactory
                 return null;
             }
 
+            /**
+             * 定时加工费/原材料价格同步
+             * @return 成功或失败
+             */
+            @Override
+            public R synPrice() {
+                return null;
+            }
+
         };
     }
 }

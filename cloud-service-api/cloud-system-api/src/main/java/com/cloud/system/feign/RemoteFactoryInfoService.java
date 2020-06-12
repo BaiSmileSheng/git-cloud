@@ -7,6 +7,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Map;
+
 /**
  * 工厂信息 Feign服务层
  * @author cs
@@ -21,4 +23,13 @@ public interface RemoteFactoryInfoService {
      */
     @GetMapping("factoryInfo/getOne")
     CdFactoryInfo selectOneByFactory(@RequestParam(value = "factoryCode") String factoryCode);
+
+
+    /**
+     * 根据公司V码查询
+     * @param companyCodeV
+     * @return 工厂信息
+     */
+    @GetMapping("factoryInfo/selectAllByCompanyCodeV")
+    Map<String, CdFactoryInfo> selectAllByCompanyCodeV(@RequestParam(value = "companyCodeV") String companyCodeV);
 }
