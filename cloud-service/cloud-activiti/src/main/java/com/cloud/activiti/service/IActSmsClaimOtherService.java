@@ -21,12 +21,13 @@ public interface IActSmsClaimOtherService {
 
     /**
      * 供应商发起申诉时 其他索赔信息开启流程
-     * @param smsClaimOtherReq 其他索赔信息
+     * @param id 主键id
+     * @param complaintDescription 申诉描述
      * @param sysUser 当前用户信息
      * @param files  文件
      * @return 成功或失败
      */
-    R addSave(String smsClaimOtherReq, MultipartFile[] files, SysUser sysUser);
+    R addSave(Long id,String complaintDescription, MultipartFile[] files, SysUser sysUser);
 
     /**
      * 其他索赔审批流程

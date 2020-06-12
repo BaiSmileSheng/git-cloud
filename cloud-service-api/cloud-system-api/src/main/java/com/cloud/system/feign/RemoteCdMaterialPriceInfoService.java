@@ -4,6 +4,7 @@ import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.CdMaterialPriceInfo;
 import com.cloud.system.feign.factory.RemoteCdMaterialPriceInfoFallbackFactory;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,5 +54,11 @@ public interface RemoteCdMaterialPriceInfoService {
     Map<String, CdMaterialPriceInfo> selectPriceByInMaterialCodeAndDate(@RequestParam(value = "materialCodes") String materialCodes,
                                                                         @RequestParam(value = "beginDate") String beginDate,
                                                                         @RequestParam(value = "endDate") String endDate);
+    /**
+     * 定时加工费/原材料价格同步
+     * @return 成功或失败
+     */
+    @PostMapping("materialPrice/synPrice")
+    R synPrice();
 
 }

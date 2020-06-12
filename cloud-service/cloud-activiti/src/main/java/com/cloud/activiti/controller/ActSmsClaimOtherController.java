@@ -44,16 +44,15 @@ public class ActSmsClaimOtherController extends BaseController {
 
     /**
      * 其他索赔开启流程
-     * @param smsClaimOtherReq 其他索赔信息
-     * @param files 文件信息
+
      * @return 成功或失败
      */
     @PostMapping("save")
     @ApiOperation(value = "供应商申诉时开启其他索赔流程",response = SmsQualityOrder.class)
-    public R addSave(@RequestParam("smsClaimOther") String smsClaimOtherReq, @RequestParam("files") MultipartFile[] files) {
+    public R addSave(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription, @RequestParam("files") MultipartFile[] files) {
         //获取当前用户登录信息
         SysUser sysUser = getUserInfo(SysUser.class);
-        return actSmsClaimOtherService.addSave(smsClaimOtherReq,files,sysUser);
+        return actSmsClaimOtherService.addSave(id,complaintDescription,files,sysUser);
     }
 
     /**

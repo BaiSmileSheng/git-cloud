@@ -74,15 +74,19 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
 
     /**
      * 供应商发起申诉时 其他索赔信息开启流程
-     * @param smsClaimOtherReq 其他索赔信息
+     * @param id 主键id
+     * @param complaintDescription 申诉描述
      * @param sysUser 当前用户信息
      * @param files  文件
      * @return 成功或失败
      */
     //@GlobalTransactional
     @Override
-    public R addSave(String smsClaimOtherReq, MultipartFile[] files, SysUser sysUser) {
-        SmsClaimOther smsClaimOther = JSONObject.parseObject(smsClaimOtherReq,SmsClaimOther.class);
+    public R addSave(Long id,String complaintDescription, MultipartFile[] files, SysUser sysUser) {
+        SmsClaimOther smsClaimOther = new SmsClaimOther();
+        smsClaimOther.setId(id);
+        smsClaimOther.setComplaintDescription(complaintDescription);
+        smsClaimOther.setUpdateBy(sysUser.getLoginName());
         logger.info("其他索赔开启流程 其他索赔id:{},其他索赔索赔单号:{}",smsClaimOther.getId(),
                 smsClaimOther.getClaimCode());
         //1.供应商申诉

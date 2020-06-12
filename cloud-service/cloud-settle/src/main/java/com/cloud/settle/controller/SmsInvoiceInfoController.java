@@ -1,7 +1,9 @@
 package com.cloud.settle.controller;
 
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.settle.domain.entity.PO.SmsInvoiceInfoS;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -14,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import tk.mybatis.mapper.entity.Example;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -92,6 +93,8 @@ public class SmsInvoiceInfoController extends BaseController {
     @OperLog(title = "新增保存发票信息 ", businessType = BusinessType.INSERT)
     @ApiOperation(value = "新增保存发票信息 ", response = R.class)
     public R addSave(@RequestBody SmsInvoiceInfo smsInvoiceInfo) {
+        //校验入参
+        ValidatorUtils.validateEntity(smsInvoiceInfo,SmsInvoiceInfo.class);
         smsInvoiceInfoService.insertSelective(smsInvoiceInfo);
         return R.data(smsInvoiceInfo.getId());
     }
@@ -100,6 +103,7 @@ public class SmsInvoiceInfoController extends BaseController {
      * 批量新增或修改保存发票信息
      * @param smsInvoiceInfoS 发票信息集合
      */
+    @HasPermissions("settle:invoiceInfo:batchAddSaveOrUpdate")
     @PostMapping("batchAddSaveOrUpdate")
     @OperLog(title = "批量新增或修改保存发票信息 ", businessType = BusinessType.INSERT)
     @ApiOperation(value = "批量新增或修改保存发票信息 ", response = R.class)
@@ -114,6 +118,7 @@ public class SmsInvoiceInfoController extends BaseController {
     /**
      * 修改保存发票信息
      */
+    @HasPermissions("settle:invoiceInfo:update")
     @PostMapping("update")
     @OperLog(title = "修改保存发票信息 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存发票信息 ", response = R.class)
@@ -124,6 +129,7 @@ public class SmsInvoiceInfoController extends BaseController {
     /**
      * 删除发票信息
      */
+    @HasPermissions("settle:invoiceInfo:remove")
     @PostMapping("remove")
     @OperLog(title = "删除发票信息 ", businessType = BusinessType.DELETE)
     @ApiOperation(value = "删除发票信息 ", response = R.class)

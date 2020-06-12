@@ -104,4 +104,10 @@
             and del_flag='0'
         </where>
     </select>
+
+    <select id="materialCodeListByStatus" parameterType="java.lang.String" resultType="java.lang.String">
+        select DISTINCT product_order_code
+        from sms_supplementary_order
+        where stuff_status = #{status}
+    </select>
 </mapper>
