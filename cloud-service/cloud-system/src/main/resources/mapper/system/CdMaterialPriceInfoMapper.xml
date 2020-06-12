@@ -94,6 +94,8 @@
         begin_date <= #{beginDate} and end_date>=#{endDate}
         ]]>
     </select>
-
+    <delete id="deleteAll">
+        DELETE FROM cd_material_price_info;
+    </delete>
 
 </mapper>

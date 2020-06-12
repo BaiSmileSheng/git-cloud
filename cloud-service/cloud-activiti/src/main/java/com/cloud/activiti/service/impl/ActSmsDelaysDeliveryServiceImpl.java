@@ -70,15 +70,20 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
 
     /**
      * 供应商申诉延期索赔开启流程
-     * @param smsDelaysDeliveryReq 延期索赔嘻嘻
+     * @param id 主键id
+     * @param complaintDescription 申诉描述
+     * @param files
      * @param sysUser 用户信息
      * @return
      */
     @GlobalTransactional
     @Override
-    public R addSave(String smsDelaysDeliveryReq, MultipartFile[] files,SysUser sysUser) {
+    public R addSave(Long id,String complaintDescription, MultipartFile[] files,SysUser sysUser) {
 
-        SmsDelaysDelivery smsDelaysDelivery = JSONObject.parseObject(smsDelaysDeliveryReq,SmsDelaysDelivery.class);
+        SmsDelaysDelivery smsDelaysDelivery = new SmsDelaysDelivery();
+        smsDelaysDelivery.setId(id);
+        smsDelaysDelivery.setComplaintDescription(complaintDescription);
+        smsDelaysDelivery.setUpdateBy(sysUser.getLoginName());
         logger.info("供应商申诉延期索赔开启流程 延期索赔id:{},延期索赔索赔单号:{}",smsDelaysDelivery.getId(),
                 smsDelaysDelivery.getDelaysNo());
         //1.供应商申诉

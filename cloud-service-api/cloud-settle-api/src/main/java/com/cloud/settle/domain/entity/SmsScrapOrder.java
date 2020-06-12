@@ -102,6 +102,18 @@ public class SmsScrapOrder extends BaseEntity {
     private Date sapTransDate;
 
     /**
+     * SAP创单备注
+     */
+    @ApiModelProperty(value = "SAP创单备注")
+    private String sapRemark;
+
+    /**
+     * 计量单位
+     */
+    @ApiModelProperty(value = "计量单位")
+    private String measureUnit;
+
+    /**
      * 专用号
      */
     @ExcelProperty(value = "专用号",index = 4)

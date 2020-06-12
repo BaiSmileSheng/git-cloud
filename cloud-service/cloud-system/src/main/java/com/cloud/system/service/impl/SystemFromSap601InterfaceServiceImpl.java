@@ -7,7 +7,7 @@ import com.cloud.system.domain.entity.CdBomInfo;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.domain.entity.CdRawMaterialStock;
-import com.cloud.system.service.SystemFromSap600InterfaceService;
+import com.cloud.system.service.SystemFromSap601InterfaceService;
 import com.sap.conn.jco.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @Description: sap600系统接口
+ * @Description: sap601系统接口
  * @Param:
  * @return:
  * @Author: ltq
@@ -25,7 +25,7 @@ import java.util.List;
  */
 @Service
 @Slf4j
-public class SystemFromSap600InterfaceServiceImpl implements SystemFromSap600InterfaceService {
+public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601InterfaceService {
     /**
      * @Description: 获取uph数据
      * @Param: factorys, materials
@@ -34,7 +34,7 @@ public class SystemFromSap600InterfaceServiceImpl implements SystemFromSap600Int
      * @Date: 2020/6/2
      */
     @Override
-    public R queryUphFromSap600(List<String> factorys, List<String> materials) {
+    public R queryUphFromSap601(List<String> factorys, List<String> materials) {
         JCoDestination destination = null;
         if (factorys.size() <= 0) {
             log.info("============获取UPH数据接口传入工厂参数为空！===========");
@@ -45,7 +45,7 @@ public class SystemFromSap600InterfaceServiceImpl implements SystemFromSap600Int
         try {
 
             //创建与SAP的连接
-            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP600);
+            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP601);
             //获取repository
             JCoRepository repository = destination.getRepository();
             //获取函数信息
@@ -107,13 +107,13 @@ public class SystemFromSap600InterfaceServiceImpl implements SystemFromSap600Int
      * @Date: 2020/6/2
      */
     @Override
-    public R queryFactoryLineFromSap600() {
+    public R queryFactoryLineFromSap601() {
         JCoDestination destination = null;
         //定义返回的data体
         List<CdFactoryLineInfo> dataList = new ArrayList<>();
         try {
             //创建与SAP的连接
-            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP600);
+            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP601);
             //获取repository
             JCoRepository repository = destination.getRepository();
             //获取函数信息
@@ -166,7 +166,7 @@ public class SystemFromSap600InterfaceServiceImpl implements SystemFromSap600Int
      * @Date: 2020/6/5
      */
     @Override
-    public R queryRawMaterialStockFromSap600(List<String> factorys, List<String> materials) {
+    public R queryRawMaterialStockFromSap601(List<String> factorys, List<String> materials) {
         JCoDestination destination = null;
         if (factorys.size() <= 0) {
             log.info("============获取原材料库存接口传入工厂参数为空！===========");
@@ -177,7 +177,7 @@ public class SystemFromSap600InterfaceServiceImpl implements SystemFromSap600Int
         try {
 
             //创建与SAP的连接
-            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP600);
+            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP601);
             //获取repository
             JCoRepository repository = destination.getRepository();
             //获取函数信息
@@ -242,7 +242,7 @@ public class SystemFromSap600InterfaceServiceImpl implements SystemFromSap600Int
      * @Date: 2020/6/5
      */
     @Override
-    public R queryBomInfoFromSap600(List<String> factorys, List<String> materials) {
+    public R queryBomInfoFromSap601(List<String> factorys, List<String> materials) {
         JCoDestination destination = null;
         if (factorys.size() <= 0) {
             log.info("============获取BOM清单数据接口传入工厂参数为空！===========");
@@ -255,7 +255,7 @@ public class SystemFromSap600InterfaceServiceImpl implements SystemFromSap600Int
         List<CdBomInfo> dataList = new ArrayList<>();
         try {
             //创建与SAP的连接
-            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP600);
+            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP601);
             //获取repository
             JCoRepository repository = destination.getRepository();
             //获取函数信息

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  * @description SAP配置
  */
 @Component
-@ConfigurationProperties(prefix = "sap.client600")
+@ConfigurationProperties(prefix = "sap.client601")
 @Data
 public class SAPConnConfig {
 

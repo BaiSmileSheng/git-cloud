@@ -3,19 +3,18 @@ package com.cloud.settle.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.core.domain.R;
+import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.settle.domain.entity.PO.SmsInvoiceInfoS;
+import com.cloud.settle.domain.entity.SmsInvoiceInfo;
 import com.cloud.settle.domain.entity.SmsMouthSettle;
 import com.cloud.settle.enums.MonthSettleStatusEnum;
+import com.cloud.settle.mapper.SmsInvoiceInfoMapper;
+import com.cloud.settle.service.ISmsInvoiceInfoService;
 import com.cloud.settle.service.ISmsMouthSettleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import com.cloud.settle.mapper.SmsInvoiceInfoMapper;
-import com.cloud.settle.domain.entity.SmsInvoiceInfo;
-import com.cloud.settle.service.ISmsInvoiceInfoService;
-import com.cloud.common.core.service.impl.BaseServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
@@ -102,4 +101,17 @@ public class SmsInvoiceInfoServiceImpl extends BaseServiceImpl<SmsInvoiceInfo> i
         smsMouthSettleService.updateByPrimaryKeySelective(smsMouthSettleReq);
         return R.ok();
     }
+
+    /**
+     * 根据月度结算单号查询
+     * @param mouthSettleId
+     * @return
+     */
+	@Override
+	public List<SmsInvoiceInfo> selectByMouthSettleId(String mouthSettleId){
+		 return smsInvoiceInfoMapper.selectByMouthSettleId(mouthSettleId);
+	}
+
+
+
 }

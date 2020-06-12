@@ -1,6 +1,7 @@
 package com.cloud.settle.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.controller.BaseController;
@@ -157,6 +158,7 @@ public class SmsSupplementaryOrderController extends BaseController {
      */
     @PostMapping("saveList")
     @ApiOperation(value = "新增保存物耗申请单参数为List", response = R.class)
+    @HasPermissions("settle:supplementary:save")
     public R addSave(@RequestBody List<SmsSupplementaryOrder> smsSupplementaryOrders) {
         return smsSupplementaryOrderService.addSaveList(smsSupplementaryOrders);
     }
@@ -183,6 +185,7 @@ public class SmsSupplementaryOrderController extends BaseController {
     @PostMapping("editSaveList")
     @OperLog(title = "修改保存物耗申请单 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存物耗申请单List ", response = R.class)
+    @HasPermissions("settle:supplementary:save")
     public R editSave(@RequestBody List<SmsSupplementaryOrder> smsSupplementaryOrders) {
         return smsSupplementaryOrderService.editSaveList(smsSupplementaryOrders);
     }
@@ -203,6 +206,7 @@ public class SmsSupplementaryOrderController extends BaseController {
     @OperLog(title = "删除物耗申请单 ", businessType = BusinessType.DELETE)
     @ApiOperation(value = "删除物耗申请单 ", response = R.class)
     @ApiParam(name = "ids", value = "需删除数据的id")
+    @HasPermissions("settle:supplementary:remove")
     public R remove(@RequestBody String ids) {
         return smsSupplementaryOrderService.remove(ids);
     }
@@ -233,6 +237,7 @@ public class SmsSupplementaryOrderController extends BaseController {
             @ApiImplicitParam(name = "beginTime", value = "申请日期开始", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "endTime", value = "申请日期结束", required = false, paramType = "query", dataType = "String")
     })
+    @HasPermissions("settle:supplementary:export")
     public R export(@ApiIgnore() SmsSupplementaryOrder smsSupplementaryOrder) {
         Example example = new Example(SmsSupplementaryOrder.class);
         Example.Criteria criteria = example.createCriteria();
@@ -284,5 +289,26 @@ public class SmsSupplementaryOrderController extends BaseController {
             return vo;
         });
         return EasyExcelUtil.writeExcel(smsSupplementaryOrderZBList, "物耗申请总部.xlsx", "sheet", new SmsSupplementaryOrder());
+    }
+
+    /**
+     * 业务科审批通过传SAPY61
+     * @param smsSupplementaryOrder
+     * @return
+     */
+    @PostMapping("autidSuccessToSAPY61")
+    public R autidSuccessToSAPY61(@RequestBody SmsSupplementaryOrder smsSupplementaryOrder){
+        return smsSupplementaryOrderService.autidSuccessToSAPY61(smsSupplementaryOrder);
+    }
+
+    /**
+     * 根据状态查物料号
+     * @param status
+     * @return 物料号集合
+     */
+    @GetMapping("materialCodeListByStatus")
+    @ApiOperation(value = "根据状态查物料号", response = String.class)
+    public List<String> materialCodeListByStatus(String status){
+        return smsSupplementaryOrderService.materialCodeListByStatus(status);
     }
 }

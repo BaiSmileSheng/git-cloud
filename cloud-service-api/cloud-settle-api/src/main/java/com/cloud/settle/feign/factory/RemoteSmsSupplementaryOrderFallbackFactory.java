@@ -7,6 +7,8 @@ import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Slf4j
 @Component
 public class RemoteSmsSupplementaryOrderFallbackFactory implements FallbackFactory<RemoteSmsSupplementaryOrderService> {
@@ -63,6 +65,25 @@ public class RemoteSmsSupplementaryOrderFallbackFactory implements FallbackFacto
              */
             @Override
             public R updatePriceEveryMonth(String month) {
+                return R.error();
+            }
+
+            /**
+             * 根据状态查物料号
+             * @param status 状态
+             * @return 物料号集合
+             */
+            @Override
+            public List<String> materialCodeListByStatus(String status) {
+                return null;
+            }
+            /**
+             * 小微主审批通过传SAPY61
+             * @param smsSupplementaryOrder
+             * @return
+             */
+            @Override
+            public R autidSuccessToSAPY61(SmsSupplementaryOrder smsSupplementaryOrder) {
                 return R.error();
             }
         };

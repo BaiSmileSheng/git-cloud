@@ -74,14 +74,19 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
 
     /**
      * 质量索赔信息开启流程
-     * @param smsQualityOrderReq 质量索赔信息
+     * @param id 主键id
+     * @param complaintDescription 申诉描述
+     * @param files
      * @return 成功或失败
      */
     //@GlobalTransactional
     @Override
-    public R addSave(String smsQualityOrderReq,MultipartFile[] files, SysUser sysUser) {
+    public R addSave(Long id,String complaintDescription,MultipartFile[] files, SysUser sysUser) {
 
-        SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq,SmsQualityOrder.class);
+        SmsQualityOrder smsQualityOrder = new SmsQualityOrder();
+        smsQualityOrder.setId(id);
+        smsQualityOrder.setComplaintDescription(complaintDescription);
+        smsQualityOrder.setUpdateBy(sysUser.getLoginName());
         logger.info("质量索赔信息开启流程 质量索赔id:{},质量索赔索赔单号:{}",smsQualityOrder.getId(),
                 smsQualityOrder.getQualityNo());
         //1.供应商发起申诉

@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
  * @description SAP配置
  */
 @Component
-@ConfigurationProperties(prefix = "sap.client600")
+@ConfigurationProperties(prefix = "sap.client601")
 @Data
-public class SAP600ConnConfig {
+public class SAP601ConnConfig {
 
 
     private String ashost;//sap IP 地址

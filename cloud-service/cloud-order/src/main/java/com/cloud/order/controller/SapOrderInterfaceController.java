@@ -2,7 +2,7 @@ package com.cloud.order.controller;
 
 import com.cloud.common.core.domain.R;
 import com.cloud.order.domain.entity.OmsProductionOrder;
-import com.cloud.order.service.OrderFromSap600InterfaceService;
+import com.cloud.order.service.OrderFromSap601InterfaceService;
 import com.cloud.order.service.OrderFromSap800InterfaceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -27,39 +27,39 @@ import java.util.List;
 @Api(tags = "Order模块对SAP系统接口")
 public class SapOrderInterfaceController {
     @Autowired
-    private OrderFromSap600InterfaceService orderFromSap600InterfaceService;
+    private OrderFromSap601InterfaceService orderFromSap601InterfaceService;
     @Autowired
     private OrderFromSap800InterfaceService orderFromSap800InterfaceService;
     /**
-     * @Description: 获取SAP600系统生产订单
+     * @Description: 获取SAP601系统生产订单
      * @Param: [list]
      * @return: com.cloud.common.core.domain.R
      * @Author: ltq
      * @Date: 2020/6/4
      */
     @GetMapping("queryProductOrder")
-    @ApiOperation(value = "获取SAP600系统生产订单 ", response = R.class)
+    @ApiOperation(value = "获取SAP601系统生产订单 ", response = R.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "list",value = "排产订单号",required = true)})
     public R queryProductOrder(List<OmsProductionOrder> list) {
-        return orderFromSap600InterfaceService.queryProductOrderFromSap600(list);
+        return orderFromSap601InterfaceService.queryProductOrderFromSap601(list);
     }
 
 
 
     /**
-     * @Description: SAP600创建生产订单
+     * @Description: SAP601创建生产订单
      * @Param: [list]
      * @return: com.cloud.common.core.domain.R
      * @Author: ltq
      * @Date: 2020/6/4
      */
     @GetMapping("createProductOrder")
-    @ApiOperation(value = "SAP600创建生产订单 ", response = R.class)
+    @ApiOperation(value = "SAP601创建生产订单 ", response = R.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "list",value = "排产订单信息",required = true)})
     public R createProductOrder(List<OmsProductionOrder> list) {
-        return orderFromSap600InterfaceService.createProductOrderFromSap600(list);
+        return orderFromSap601InterfaceService.createProductOrderFromSap601(list);
     }
 
 

@@ -57,4 +57,11 @@ public interface ISmsScrapOrderService extends BaseService<SmsScrapOrder> {
      * @return
      */
     R updateSAPPriceEveryMonth(String month) throws JCoException;
+
+    /**
+     * 业务科审批通过传SAP261
+     * @param smsScrapOrder
+     * @return
+     */
+    R autidSuccessToSAP261(SmsScrapOrder smsScrapOrder);
 }

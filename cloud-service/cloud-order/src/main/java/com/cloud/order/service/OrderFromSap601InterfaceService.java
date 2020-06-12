@@ -5,13 +5,13 @@ import com.cloud.order.domain.entity.OmsProductionOrder;
 
 import java.util.List;
 /**
- * @Description: Order服务 - sap600系统接口
+ * @Description: Order服务 - sap601系统接口
  * @Param:
  * @return:
  * @Author: ltq
  * @Date: 2020/6/4
  */
-public interface OrderFromSap600InterfaceService {
+public interface OrderFromSap601InterfaceService {
     /**
      * @Description: 获取SAP系统生产订单
      * @Param: [list]
@@ -19,7 +19,7 @@ public interface OrderFromSap600InterfaceService {
      * @Author: ltq
      * @Date: 2020/6/4
      */
-    R queryProductOrderFromSap600(List<OmsProductionOrder> list);
+    R queryProductOrderFromSap601(List<OmsProductionOrder> list);
     /**
      * @Description: 创建生产订单
      * @Param: [list]
@@ -27,5 +27,5 @@ public interface OrderFromSap600InterfaceService {
      * @Author: ltq
      * @Date: 2020/6/4
      */
-    R createProductOrderFromSap600(List<OmsProductionOrder> list);
+    R createProductOrderFromSap601(List<OmsProductionOrder> list);
 }

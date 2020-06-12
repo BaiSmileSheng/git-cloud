@@ -1,34 +1,29 @@
 package com.cloud.settle.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.cloud.common.auth.annotation.HasPermissions;
+import com.cloud.common.core.controller.BaseController;
+import com.cloud.common.core.domain.R;
+import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
+import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.settle.enums.ClaimOtherStatusEnum;
+import com.cloud.settle.domain.entity.SmsClaimOther;
+import com.cloud.settle.service.ISmsClaimOtherService;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.enums.UserTypeEnum;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import org.springframework.web.bind.annotation.RequestParam;
+import io.swagger.annotations.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.cloud.common.core.domain.R;
-import com.cloud.common.core.controller.BaseController;
-import com.cloud.settle.domain.entity.SmsClaimOther;
-import com.cloud.settle.service.ISmsClaimOtherService;
-import com.cloud.common.core.page.TableDataInfo;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -98,6 +93,7 @@ public class SmsClaimOtherController extends BaseController {
      * @param smsClaimOther 其他索赔查询条件
      * @return
      */
+    @HasPermissions("settle:claimOther:export")
     @GetMapping("export")
     @ApiOperation(value = "导出其他索赔列表", response = SmsClaimOther.class)
     @ApiImplicitParams({
@@ -110,10 +106,6 @@ public class SmsClaimOtherController extends BaseController {
     public R export(@ApiIgnore SmsClaimOther smsClaimOther) {
         Example example = assemblyConditions(smsClaimOther);
         List<SmsClaimOther> smsClaimOtherList = smsClaimOtherService.selectByExample(example);
-        for(SmsClaimOther smsClaimOtherRes : smsClaimOtherList){
-            String claimOtherStatus = smsClaimOtherRes.getClaimOtherStatus();
-            smsClaimOtherRes.setClaimOtherStatus(ClaimOtherStatusEnum.getMsgByCode(claimOtherStatus));
-        }
         String fileName = "其他索赔.xlsx";
         return EasyExcelUtil.writeExcel(smsClaimOtherList,fileName,fileName,new SmsClaimOther());
     }
@@ -134,7 +126,14 @@ public class SmsClaimOtherController extends BaseController {
         }
 
         if(StringUtils.isNotBlank(smsClaimOther.getClaimOtherStatus())){
-            criteria.andEqualTo("claimOtherStatus",smsClaimOther.getClaimOtherStatus());
+            if(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_1.getCode().equals(smsClaimOther.getClaimOtherStatus())){
+                List<String> list = new ArrayList<>();
+                list.add(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_1.getCode());
+                list.add(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_7.getCode());
+                criteria.andIn("claimOtherStatus",list);
+            }else{
+                criteria.andEqualTo("claimOtherStatus",smsClaimOther.getClaimOtherStatus());
+            }
         }
         if(StringUtils.isNotBlank(smsClaimOther.getBeginTime())){
             criteria.andGreaterThanOrEqualTo("createTime",smsClaimOther.getBeginTime());
@@ -157,10 +156,14 @@ public class SmsClaimOtherController extends BaseController {
      * @param files
      * @return
      */
+    @HasPermissions("settle:claimOther:save")
     @PostMapping("save")
     @ApiOperation(value = "新增其他索赔信息(包含文件信息)", response = R.class)
     public R addSave(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestParam("files") MultipartFile[] files) {
         SmsClaimOther smsClaimOther = JSONObject.parseObject(smsClaimOtherReq,SmsClaimOther.class);
+        //校验入参
+        ValidatorUtils.validateEntity(smsClaimOther,SmsClaimOther.class);
+        smsClaimOther.setCreateBy(getLoginName());
         R result = smsClaimOtherService.insertClaimOtherAndOss(smsClaimOther,files);
         return result;
     }
@@ -171,10 +174,14 @@ public class SmsClaimOtherController extends BaseController {
      * @param files  文件
      * @return 修改成功或失败
      */
+    @HasPermissions("settle:claimOther:updateClaimOther")
     @PostMapping("updateClaimOther")
     @ApiOperation(value = "修改保存其他索赔(包含图片信息)", response = R.class)
     public R updateClaimOtherAndOss(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestParam("files") MultipartFile[] files) {
         SmsClaimOther smsClaimOther = JSONObject.parseObject(smsClaimOtherReq,SmsClaimOther.class);
+        //校验入参
+        ValidatorUtils.validateEntity(smsClaimOther,SmsClaimOther.class);
+        smsClaimOther.setUpdateBy(getLoginName());
         R result = smsClaimOtherService.updateClaimOtherAndOss(smsClaimOther,files);
         return result;
     }
@@ -196,6 +203,7 @@ public class SmsClaimOtherController extends BaseController {
      * @param ids 主键
      * @return 成功或失败
      */
+    @HasPermissions("settle:claimOther:remove")
     @PostMapping("remove")
     @OperLog(title = "删除其他索赔", businessType = BusinessType.DELETE)
     @ApiOperation(value = "删除其他索赔", response = R.class)
@@ -210,8 +218,9 @@ public class SmsClaimOtherController extends BaseController {
      * @param ids 主键id
      * @return 提交结果成功或失败
      */
+    @HasPermissions("settle:claimOther:submit")
     @PostMapping("submit")
-    @OperLog(title = "提交其他索赔单", businessType = BusinessType.DELETE)
+    @OperLog(title = "提交其他索赔单", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "提交其他索赔单", response = R.class)
     public R submit(String ids){
         return smsClaimOtherService.submit(ids);
@@ -222,8 +231,9 @@ public class SmsClaimOtherController extends BaseController {
      * @param ids 主键id
      * @return 供应商确认成功或失败
      */
+    @HasPermissions("settle:claimOther:supplierConfirm")
     @PostMapping("supplierConfirm")
-    @OperLog(title = "供应商确认索赔单 ", businessType = BusinessType.DELETE)
+    @OperLog(title = "供应商确认索赔单 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "供应商确认索赔单 ", response = R.class)
     public R supplierConfirm(String ids){
         return smsClaimOtherService.supplierConfirm(ids);
@@ -231,13 +241,19 @@ public class SmsClaimOtherController extends BaseController {
 
     /**
      * 索赔单供应商申诉(包含文件信息)
-     * @param smsClaimOtherReq 其他索赔信息
+     * @param id 主键id
+     * @param complaintDescription 申诉描述
+     * @param files
      * @return 索赔单供应商申诉结果成功或失败
      */
+    @HasPermissions("settle:claimOther:supplierAppeal")
     @PostMapping("supplierAppeal")
     @ApiOperation(value = "索赔单供应商申诉 ", response = R.class)
-    public R supplierAppeal(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestParam("files") MultipartFile[] files) {
-        SmsClaimOther smsClaimOther = JSONObject.parseObject(smsClaimOtherReq,SmsClaimOther.class);
+    public R supplierAppeal(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription, @RequestParam("files") MultipartFile[] files) {
+        SmsClaimOther smsClaimOther = new SmsClaimOther();
+        smsClaimOther.setId(id);
+        smsClaimOther.setComplaintDescription(complaintDescription);
+        smsClaimOther.setUpdateBy(getLoginName());
         return smsClaimOtherService.supplierAppeal(smsClaimOther,files);
     }
 

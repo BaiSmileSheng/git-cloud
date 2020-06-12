@@ -26,4 +26,6 @@ public interface CdMaterialPriceInfoMapper extends BaseMapper<CdMaterialPriceInf
     Map<String, CdMaterialPriceInfo> selectPriceByInMaterialCodeAndDate(@Param(value = "materialCodes") List<String> materialCodes,
                                                                @Param(value = "beginDate") String beginDate,
                                                                @Param(value = "endDate") String endDate);
+
+    int deleteAll();
 }

@@ -1,7 +1,7 @@
 package com.cloud.order.jco;
 
 
-import com.cloud.order.config.SAP600ConnConfig;
+import com.cloud.order.config.SAP601ConnConfig;
 import com.cloud.order.config.SAP800ConnConfig;
 import com.sap.conn.jco.ext.DestinationDataProvider;
 import lombok.extern.slf4j.Slf4j;
@@ -23,13 +23,13 @@ import java.util.Properties;
 @Component
 public class SAPInitConfig implements CommandLineRunner {
     private static final String ABAP_AS_SAP800 = "ABAP_AS_SAP800";
-    private static final String ABAP_AS_SAP600 = "ABAP_AS_SAP600";
+    private static final String ABAP_AS_SAP601 = "ABAP_AS_SAP601";
 
 
     @Autowired
     private SAP800ConnConfig sap800ConnConfig;
     @Autowired
-    private SAP600ConnConfig sap600ConnConfig;
+    private SAP601ConnConfig sap601ConnConfig;
 
     public void initConfig() {
         Properties connectProperties800 = new Properties();
@@ -40,18 +40,18 @@ public class SAPInitConfig implements CommandLineRunner {
         connectProperties800.setProperty(DestinationDataProvider.JCO_PASSWD, sap800ConnConfig.getPasswd());
         connectProperties800.setProperty(DestinationDataProvider.JCO_LANG, sap800ConnConfig.getLang());
 
-        Properties connectProperties600 = new Properties();
-        connectProperties600.setProperty(DestinationDataProvider.JCO_ASHOST, sap600ConnConfig.getAshost());//服务器
-        connectProperties600.setProperty(DestinationDataProvider.JCO_SYSNR,  sap600ConnConfig.getSysnr());        //系统编号
-        connectProperties600.setProperty(DestinationDataProvider.JCO_CLIENT, sap600ConnConfig.getClient());
-        connectProperties600.setProperty(DestinationDataProvider.JCO_USER, sap600ConnConfig.getUser());
-        connectProperties600.setProperty(DestinationDataProvider.JCO_PASSWD, sap600ConnConfig.getPasswd());
-        connectProperties600.setProperty(DestinationDataProvider.JCO_LANG, sap600ConnConfig.getLang());
+        Properties connectProperties601 = new Properties();
+        connectProperties601.setProperty(DestinationDataProvider.JCO_ASHOST, sap601ConnConfig.getAshost());//服务器
+        connectProperties601.setProperty(DestinationDataProvider.JCO_SYSNR,  sap601ConnConfig.getSysnr());        //系统编号
+        connectProperties601.setProperty(DestinationDataProvider.JCO_CLIENT, sap601ConnConfig.getClient());
+        connectProperties601.setProperty(DestinationDataProvider.JCO_USER, sap601ConnConfig.getUser());
+        connectProperties601.setProperty(DestinationDataProvider.JCO_PASSWD, sap601ConnConfig.getPasswd());
+        connectProperties601.setProperty(DestinationDataProvider.JCO_LANG, sap601ConnConfig.getLang());
 //		connectProperties.setProperty(DestinationDataProvider.JCO_POOL_CAPACITY, "3");  //最大连接数
 //		connectProperties.setProperty(DestinationDataProvider.JCO_PEAK_LIMIT, "10");     //最大连接线程
 
         createDataFile(ABAP_AS_SAP800, "jcoDestination", connectProperties800);
-        createDataFile(ABAP_AS_SAP600,"jcoDestination",connectProperties600);
+        createDataFile(ABAP_AS_SAP601,"jcoDestination",connectProperties601);
     }
 
     /**
