@@ -7,6 +7,8 @@ import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 
 @Slf4j
 @Component
@@ -36,6 +38,14 @@ public class RemoteBomFallbackFactory implements FallbackFactory<RemoteBomServic
              */
             @Override
             public R checkBomNum(String rawMaterialCode, String productMaterialCode, int applyNum) {
+                return null;
+            }
+            /**
+             * 根据物料号工厂分组取bom版本
+             * @return null
+             */
+            @Override
+            public Map<String, Map<String, String>> selectVersionMap() {
                 return null;
             }
         };

@@ -31,4 +31,19 @@
     </sql>
 
 
+    <resultMap type="java.util.HashMap" id="CdBomMapResult">
+        <result property="key" column="keyValue"/>
+        <result property="value" column="version"/>
+    </resultMap>
+    <select id="selectVersionMap" resultType="java.util.HashMap">
+        SELECT
+            CONCAT( product_material_code, product_factory_code ) as keyValue,
+            GROUP_CONCAT( version ) as version
+        FROM
+            cd_bom_info
+        where del_flag='0'
+        GROUP BY
+            product_material_code,
+            product_factory_code
+    </select>
 </mapper>

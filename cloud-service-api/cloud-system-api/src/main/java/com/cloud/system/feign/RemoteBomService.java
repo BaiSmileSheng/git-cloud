@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Map;
+
 /**
  * 数据BOM Feign服务层
  *
@@ -35,4 +37,10 @@ public interface RemoteBomService {
      */
     @PostMapping("bom/checkBomNum")
     R checkBomNum(@RequestParam(value = "productMaterialCode") String rawMaterialCode,@RequestParam(value = "rawMaterialCode") String productMaterialCode, @RequestParam(value = "applyNum") int applyNum);
+    /**
+     * 根据物料号工厂分组取bom版本
+     * @return
+     */
+    @GetMapping("bom/selectVersionMap")
+    public Map<String, Map<String, String>> selectVersionMap();
 }

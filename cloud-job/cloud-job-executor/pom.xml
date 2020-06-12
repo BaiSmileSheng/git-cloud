@@ -55,6 +55,11 @@
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.cloud</groupId>
+            <artifactId>cloud-order-api</artifactId>
+            <version>${cloud.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
