@@ -61,6 +61,8 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
     private RemoteCdMouthRateService remoteCdMouthRateService;
     @Autowired
     private RemoteSettleRatioService remoteSettleRatioService;
+    @Autowired
+    private RemoteInterfaceLogService remoteInterfaceLogService;
     /**
      * 编辑保存物耗申请单功能  --有逻辑校验
      * @param smsSupplementaryOrder
@@ -278,6 +280,9 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
     @Override
     public R autidSuccessToSAPY61(SmsSupplementaryOrder smsSupplementaryOrder) {
         Date date = DateUtil.date();
+        SysInterfaceLog sysInterfaceLog = new SysInterfaceLog().builder()
+                .appId("SAP").interfaceName(SapConstants.ZESP_IM_001)
+                .content(smsSupplementaryOrder.toString()).build();
         //发送SAP
         JCoDestination destination =null;
         try {
@@ -286,7 +291,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             //获取repository
             JCoRepository repository = destination.getRepository();
             //获取函数信息
-            JCoFunction fm = repository.getFunction("ZESP_IM_001");
+            JCoFunction fm = repository.getFunction(SapConstants.ZESP_IM_001);
             if (fm == null) {
                 throw new RuntimeException("Function does not exists in SAP system.");
             }
@@ -328,6 +333,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
                         return R.data(smsSupplementaryOrder);
                     }else {
                         //获取失败
+                        sysInterfaceLog.setResults(StrUtil.format("SAP返回错误信息：{}",outTableOutput.getString("MESSAGE")));
                         throw new BusinessException(StrUtil.format("发送SAP失败！原因：{}",outTableOutput.getString("MESSAGE")));
                     }
                 }
@@ -335,6 +341,11 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         } catch (JCoException e) {
             log.error("Connect SAP fault, error msg: " + e.toString());
             throw new BusinessException(e.getMessage());
+        }finally {
+            sysInterfaceLog.setCreateBy("定时任务");
+            sysInterfaceLog.setCreateTime(date);
+            sysInterfaceLog.setRemark("定时任务物耗审核通过传SAP261");
+            remoteInterfaceLogService.saveInterfaceLog(sysInterfaceLog);
         }
         return R.ok();
     }

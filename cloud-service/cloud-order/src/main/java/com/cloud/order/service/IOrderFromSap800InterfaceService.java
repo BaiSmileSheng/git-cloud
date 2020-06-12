@@ -11,7 +11,7 @@ import java.util.Date;
  * @Author: ltq
  * @Date: 2020/6/5
  */
-public interface OrderFromSap800InterfaceService {
+public interface IOrderFromSap800InterfaceService {
      /**
       * @Description: 获取SAP800系统13周PR需求
       * @Param: [startDate, endDate]

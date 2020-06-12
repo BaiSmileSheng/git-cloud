@@ -1,20 +1,23 @@
 package com.cloud.order.controller;
+
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
+import com.cloud.common.core.controller.BaseController;
+import com.cloud.common.core.domain.R;
+import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.order.domain.entity.OmsInternalOrderRes;
 import com.cloud.order.service.IOmsInternalOrderResService;
-import io.swagger.annotations.*;
-import tk.mybatis.mapper.entity.Example;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.cloud.common.core.domain.R;
-import com.cloud.common.core.controller.BaseController;
-import com.cloud.common.core.page.TableDataInfo;
+import org.springframework.web.bind.annotation.*;
+import tk.mybatis.mapper.entity.Example;
+
+import java.util.Date;
 import java.util.List;
 /**
  * 内单PR/PO原  提供者
@@ -29,8 +32,10 @@ public class OmsInternalOrderResController extends BaseController {
     @Autowired
     private IOmsInternalOrderResService omsInternalOrderResService;
 
+
+
     /**
-     * 查询内单PR/PO原 
+     * 查询内单PR/PO原
      */
     @GetMapping("get")
     @ApiOperation(value = "根据id查询内单PR/PO原 ", response = OmsInternalOrderRes.class)
@@ -60,7 +65,7 @@ public class OmsInternalOrderResController extends BaseController {
 
 
     /**
-     * 新增保存内单PR/PO原 
+     * 新增保存内单PR/PO原
      */
     @PostMapping("save")
     @OperLog(title = "新增保存内单PR/PO原 ", businessType = BusinessType.INSERT)
@@ -71,7 +76,7 @@ public class OmsInternalOrderResController extends BaseController {
     }
 
     /**
-     * 修改保存内单PR/PO原 
+     * 修改保存内单PR/PO原
      */
     @PostMapping("update")
     @OperLog(title = "修改保存内单PR/PO原 ", businessType = BusinessType.UPDATE)
@@ -81,7 +86,7 @@ public class OmsInternalOrderResController extends BaseController {
     }
 
     /**
-     * 删除内单PR/PO原 
+     * 删除内单PR/PO原
      */
     @PostMapping("remove")
     @OperLog(title = "删除内单PR/PO原 ", businessType = BusinessType.DELETE)
@@ -89,6 +94,32 @@ public class OmsInternalOrderResController extends BaseController {
     @ApiParam(name = "ids", value = "需删除数据的id")
     public R remove(@RequestBody String ids) {
         return toAjax(omsInternalOrderResService.deleteByIds(ids));
+    }
+
+    /**
+     * SAP800获取PR定时任务(周五)
+     * @return
+     */
+    @GetMapping("queryAndInsertDemandPRFromSap800Friday")
+    public R queryAndInsertDemandPRFromSap800Friday(){
+        //开始：这个周天
+        Date startDate = DateUtil.endOfWeek(DateUtil.date());
+        //结束：往后推90天
+        Date endDate = DateUtil.offset(startDate, DateField.DAY_OF_YEAR, 90);
+        return omsInternalOrderResService.SAP800PRFindInternalOrderRes(startDate,endDate);
+    }
+
+    /**
+     * SAP800获取PR定时任务(周一)
+     * @return
+     */
+    @GetMapping("queryAndInsertDemandPRFromSap800Monday")
+    public R queryAndInsertDemandPRFromSap800Monday(){
+        //开始：上个周天
+        Date startDate = DateUtil.endOfWeek(DateUtil.lastWeek());
+        //结束：往后推90天
+        Date endDate = DateUtil.offset(startDate, DateField.DAY_OF_YEAR, 90);
+        return omsInternalOrderResService.SAP800PRFindInternalOrderRes(startDate,endDate);
     }
 
 }

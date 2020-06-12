@@ -2,8 +2,8 @@ package com.cloud.order.controller;
 
 import com.cloud.common.core.domain.R;
 import com.cloud.order.domain.entity.OmsProductionOrder;
-import com.cloud.order.service.OrderFromSap601InterfaceService;
-import com.cloud.order.service.OrderFromSap800InterfaceService;
+import com.cloud.order.service.IOrderFromSap601InterfaceService;
+import com.cloud.order.service.IOrderFromSap800InterfaceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -27,9 +27,9 @@ import java.util.List;
 @Api(tags = "Order模块对SAP系统接口")
 public class SapOrderInterfaceController {
     @Autowired
-    private OrderFromSap601InterfaceService orderFromSap601InterfaceService;
+    private IOrderFromSap601InterfaceService IOrderFromSap601InterfaceService;
     @Autowired
-    private OrderFromSap800InterfaceService orderFromSap800InterfaceService;
+    private IOrderFromSap800InterfaceService IOrderFromSap800InterfaceService;
     /**
      * @Description: 获取SAP601系统生产订单
      * @Param: [list]
@@ -42,7 +42,7 @@ public class SapOrderInterfaceController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "list",value = "排产订单号",required = true)})
     public R queryProductOrder(List<OmsProductionOrder> list) {
-        return orderFromSap601InterfaceService.queryProductOrderFromSap601(list);
+        return IOrderFromSap601InterfaceService.queryProductOrderFromSap601(list);
     }
 
 
@@ -59,7 +59,7 @@ public class SapOrderInterfaceController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "list",value = "排产订单信息",required = true)})
     public R createProductOrder(List<OmsProductionOrder> list) {
-        return orderFromSap601InterfaceService.createProductOrderFromSap601(list);
+        return IOrderFromSap601InterfaceService.createProductOrderFromSap601(list);
     }
 
 
@@ -77,7 +77,7 @@ public class SapOrderInterfaceController {
             @ApiImplicitParam(name = "startDate",value = "开始日期",required = true),
             @ApiImplicitParam(name = "endDate",value = "结束日期",required = true)})
     public R queryDemandPR(Date startDate, Date endDate) {
-        return orderFromSap800InterfaceService.queryDemandPRFromSap800(startDate,endDate);
+        return IOrderFromSap800InterfaceService.queryDemandPRFromSap800(startDate,endDate);
     }
 
 
@@ -95,7 +95,7 @@ public class SapOrderInterfaceController {
             @ApiImplicitParam(name = "startDate",value = "开始日期",required = true),
             @ApiImplicitParam(name = "endDate",value = "结束日期",required = true)})
     public R queryDemandPO(Date startDate, Date endDate) {
-        return orderFromSap800InterfaceService.queryDemandPOFromSap800(startDate,endDate);
+        return IOrderFromSap800InterfaceService.queryDemandPOFromSap800(startDate,endDate);
     }
 
 
