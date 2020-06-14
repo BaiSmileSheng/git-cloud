@@ -8,6 +8,8 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.SysOperLog;
 import com.cloud.system.service.ISysOperLogService;
+import io.seata.core.context.RootContext;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +23,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("operLog")
+@Slf4j
 public class SysOperLogController extends BaseController {
     @Autowired
     private ISysOperLogService sysOperLogService;
@@ -55,8 +58,10 @@ public class SysOperLogController extends BaseController {
      * 新增保存操作日志记录
      */
     @PostMapping("save")
-    public void addSave(@RequestBody SysOperLog sysOperLog) {
+    public R addSave(@RequestBody SysOperLog sysOperLog) {
+        log.info("----------------------" + RootContext.getXID());
         sysOperLogService.insertOperlog(sysOperLog);
+        return R.ok();
     }
 
     /**
