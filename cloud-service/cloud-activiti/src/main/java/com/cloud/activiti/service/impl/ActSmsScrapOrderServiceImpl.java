@@ -94,8 +94,8 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
             return R.error("id不能为空！");
         }
         SmsScrapOrder smsScrapOrderCheck = remoteSmsScrapOrderService.get(id);
-        if (!ScrapOrderStatusEnum.BF_ORDER_STATUS_DTJ.getCode().equals(smsScrapOrder.getScrapStatus())) {
-            log.error(StrUtil.format("(报废)只有待提交状态数据可以提交：{}", smsScrapOrder.getScrapStatus()));
+        if (!ScrapOrderStatusEnum.BF_ORDER_STATUS_DTJ.getCode().equals(smsScrapOrderCheck.getScrapStatus())) {
+            log.error(StrUtil.format("(报废)只有待提交状态数据可以提交：{}", smsScrapOrderCheck.getScrapStatus()));
             return R.error("只有待提交状态数据可以提交！");
         }
         //更新数据
