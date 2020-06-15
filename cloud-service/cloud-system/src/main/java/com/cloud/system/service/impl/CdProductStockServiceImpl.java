@@ -7,7 +7,6 @@ import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.domain.entity.CdMaterialInfo;
-import com.cloud.system.domain.entity.CdMaterialPriceInfo;
 import com.cloud.system.domain.entity.CdProductInProduction;
 import com.cloud.system.domain.entity.CdProductPassage;
 import com.cloud.system.domain.entity.CdProductStock;
@@ -16,7 +15,6 @@ import com.cloud.system.domain.entity.SysInterfaceLog;
 import com.cloud.system.domain.po.CdProductStockDetail;
 import com.cloud.system.mapper.CdProductStockMapper;
 import com.cloud.system.service.ICdFactoryInfoService;
-import com.cloud.system.service.ICdMaterialInfoService;
 import com.cloud.system.service.ICdProductInProductionService;
 import com.cloud.system.service.ICdProductPassageService;
 import com.cloud.system.service.ICdProductStockService;
@@ -27,7 +25,6 @@ import com.sap.conn.jco.JCoContext;
 import com.sap.conn.jco.JCoDestination;
 import com.sap.conn.jco.JCoDestinationManager;
 import com.sap.conn.jco.JCoFunction;
-import com.sap.conn.jco.JCoParameterList;
 import com.sap.conn.jco.JCoRepository;
 import com.sap.conn.jco.JCoTable;
 import org.apache.commons.lang3.StringUtils;
@@ -39,8 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,9 +73,6 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
 
     @Autowired
     private ICdFactoryInfoService cdFactoryInfoService;
-
-    @Autowired
-    private ICdMaterialInfoService cdMaterialInfoService;
 
     @Autowired
     private ISysInterfaceLogService sysInterfaceLogService;
