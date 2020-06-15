@@ -2869,7 +2869,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "order_class",
@@ -3050,7 +3050,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "pid",
@@ -3290,15 +3290,15 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
-              "isUnique": true,
+              "name": "idx_join_index",
+              "isUnique": false,
               "fields": [
                 "product_material_code",
                 "bom_version",
-                "weeks",
-                "place",
                 "delivery_date",
-                "version"
+                "version",
+                "customer_code",
+                "product_factory_code"
               ]
             }
           ],
@@ -3532,15 +3532,14 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
-              "isUnique": true,
+              "name": "idx_join_index",
+              "isUnique": false,
               "fields": [
                 "product_material_code",
+                "product_factory_code",
+                "customer_code",
                 "bom_version",
-                "version",
-                "delivery_date",
-                "weeks",
-                "place"
+                "delivery_date"
               ]
             }
           ],
@@ -3805,15 +3804,14 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
-              "isUnique": true,
+              "name": "idx_join_index",
+              "isUnique": false,
               "fields": [
                 "product_material_code",
+                "product_factory_code",
+                "customer_code",
                 "bom_version",
-                "weeks",
-                "place",
-                "delivery_date",
-                "version"
+                "delivery_date"
               ]
             }
           ],
@@ -4070,15 +4068,14 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
-              "isUnique": true,
+              "name": "idx_join_index",
+              "isUnique": false,
               "fields": [
                 "product_material_code",
+                "product_factory_code",
+                "customer_code",
                 "bom_version",
-                "weeks",
-                "place",
-                "delivery_date",
-                "version"
+                "delivery_date"
               ]
             }
           ],
@@ -4252,8 +4249,8 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
-              "isUnique": true,
+              "name": "idx_join_index",
+              "isUnique": false,
               "fields": [
                 "pid",
                 "raw_material_code",
@@ -4619,12 +4616,14 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
-              "isUnique": true,
+              "name": "idx_join_index",
+              "isUnique": false,
               "fields": [
                 "order_type",
                 "product_material_code",
-                "bom_version"
+                "bom_version",
+                "product_factory_code",
+                "product_start_date"
               ]
             }
           ],
@@ -4803,8 +4802,8 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
-              "isUnique": true,
+              "name": "idx_join_index",
+              "isUnique": false,
               "fields": [
                 "material_code",
                 "bom_version"
@@ -5179,12 +5178,11 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
-              "isUnique": true,
+              "name": "idx_join_index",
+              "isUnique": false,
               "fields": [
                 "product_material_code",
                 "raw_material_code",
-                "status",
                 "delivery_date"
               ]
             }
@@ -5516,7 +5514,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "product_material_code",
@@ -5694,10 +5692,9 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
-              "isUnique": true,
+              "name": "idx_join_index",
+              "isUnique": false,
               "fields": [
-                "pid",
                 "material_code",
                 "bom_version"
               ]
@@ -9866,11 +9863,11 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
-              "isUnique": true,
+              "name": "idx_join_index",
+              "isUnique": false,
               "fields": [
                 "product_material_code",
-                "del_flag"
+                "product_factory_code"
               ]
             }
           ],
@@ -10034,11 +10031,11 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "product_material_code",
-                "del_flag"
+                "product_factory_code"
               ]
             }
           ],
@@ -10194,11 +10191,11 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "product_material_code",
-                "del_flag"
+                "product_factory_code"
               ]
             }
           ],
@@ -10361,12 +10358,11 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "product_material_code",
-                "storehouse",
-                "del_flag"
+                "product_factory_code"
               ]
             }
           ],
@@ -10459,13 +10455,6 @@
               "notNull": true
             },
             {
-              "name": "storage_point",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "仓储点",
-              "notNull": true
-            },
-            {
               "name": "current_stock",
               "type": "Money",
               "remark": "",
@@ -10517,12 +10506,11 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
-              "isUnique": true,
+              "name": "idx_join_index",
+              "isUnique": false,
               "fields": [
                 "raw_material_code",
-                "del_flag",
-                "storage_point"
+                "product_factory_code"
               ]
             }
           ],
@@ -10662,11 +10650,10 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
-              "isUnique": true,
+              "name": "idx_join_index",
+              "isUnique": false,
               "fields": [
-                "factory_code",
-                "del_flag"
+                "factory_code"
               ]
             }
           ],
@@ -11679,11 +11666,11 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
-              "isUnique": true,
+              "name": "idx_join_index",
+              "isUnique": false,
               "fields": [
                 "produce_line_code",
-                "del_flag"
+                "product_factory_code"
               ]
             }
           ],
@@ -12238,7 +12225,7 @@
               "relationNoShow": true
             }
           ],
-          "chnname": "总承BOM清单表"
+          "chnname": "总成BOM清单表"
         },
         {
           "title": "cd_material_extend_info",
@@ -12347,10 +12334,10 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
-              "isUnique": true,
+              "name": "idx_join_index",
+              "isUnique": false,
               "fields": [
-                "del_flag"
+                "material_code"
               ]
             }
           ],
@@ -12508,10 +12495,11 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
-              "isUnique": true,
+              "name": "idx_join_index",
+              "isUnique": false,
               "fields": [
-                "del_flag"
+                "product_factory_code",
+                "customer_code"
               ]
             }
           ],
