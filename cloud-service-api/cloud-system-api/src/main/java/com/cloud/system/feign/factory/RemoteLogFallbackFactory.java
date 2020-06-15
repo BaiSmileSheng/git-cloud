@@ -1,5 +1,6 @@
 package com.cloud.system.feign.factory;
 
+import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.SysOperLog;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +18,8 @@ public class RemoteLogFallbackFactory implements FallbackFactory<RemoteLogServic
         log.error(throwable.getMessage());
         return new RemoteLogService() {
             @Override
-            public void insertOperlog(SysOperLog operLog) {
+            public R insertOperlog(SysOperLog operLog) {
+                return R.error("前方拥挤，请稍等~");
             }
 
             @Override

@@ -15,7 +15,7 @@ spring:
   cloud:
     nacos:
       discovery:
-        namespace: 6715aafb-eb61-4cf5-9342-6fadf96b80ef
+        namespace: hugh
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
@@ -68,6 +68,11 @@ spring:
         wall:
           config:
             multi-statement-allow: true
+#seata命名空间
+seata:
+  registry:
+    nacos:
+      namespace: ${spring.cloud.nacos.discovery.namespace}
 sap:
   client800:
     ashost: 10.135.2.229
@@ -83,8 +88,4 @@ sap:
     user: 19046341
     passwd: 123123
     lang: ZH
-#seata命名空间
-seata:
-  registry:
-    nacos:
-      namespace: 6715aafb-eb61-4cf5-9342-6fadf96b80ef
+

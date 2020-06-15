@@ -19,4 +19,4 @@ spring:
 seata:
   registry:
     nacos:
-      namespace: a2eeae72-3ab5-4789-ac7f-7370330f9293
+      namespace: ${spring.cloud.nacos.discovery.namespace}
