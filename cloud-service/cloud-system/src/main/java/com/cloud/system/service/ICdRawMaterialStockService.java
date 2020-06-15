@@ -19,4 +19,10 @@ public interface ICdRawMaterialStockService extends BaseService<CdRawMaterialSto
      * @Date: 2020/6/9
      */
     R exportRawMaterialExcel(CdRawMaterialStock cdRawMaterialStock);
+
+    /**
+     * 删除全部数据
+     * @return
+     */
+    R deleteAll();
 }

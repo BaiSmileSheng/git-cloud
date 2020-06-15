@@ -17,18 +17,18 @@ import tk.mybatis.mapper.annotation.KeySql;
 import java.math.BigDecimal;
 
 /**
- * 原材料库存 对象 cd_raw_material_stock
+ * 成品库存在途明细 对象 cd_product_passage
  *
- * @author ltq
- * @date 2020-06-05
+ * @author lihongxia
+ * @date 2020-06-12
  */
 @ExcelIgnoreUnannotated
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ApiModel(value = "原材料库存 ")
-public class CdRawMaterialStock extends BaseEntity {
+@ApiModel(value = "成品库存在途明细 ")
+public class CdProductPassage extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -39,18 +39,18 @@ public class CdRawMaterialStock extends BaseEntity {
     private Long id;
 
     /**
-     * 原材料物料号
+     * 成品物料号
      */
-    @ExcelProperty(value = "原材料物料号")
-    @ApiModelProperty(value = "原材料物料号")
-    private String rawMaterialCode;
+    @ExcelProperty(value = "成品物料号")
+    @ApiModelProperty(value = "成品物料号")
+    private String productMaterialCode;
 
     /**
-     * 原材料物料描述
+     * 成品物料描述
      */
-    @ExcelProperty(value = "原材料物料描述")
-    @ApiModelProperty(value = "原材料物料描述")
-    private String rawMaterialDesc;
+    @ExcelProperty(value = "成品物料描述")
+    @ApiModelProperty(value = "成品物料描述")
+    private String productMaterialDesc;
 
     /**
      * 生产工厂编码
@@ -60,18 +60,39 @@ public class CdRawMaterialStock extends BaseEntity {
     private String productFactoryCode;
 
     /**
+     * 生产工厂描述
+     */
+    @ExcelProperty(value = "生产工厂描述")
+    @ApiModelProperty(value = "生产工厂描述")
+    private String productFactoryDesc;
+
+    /**
+     * 发出库位
+     */
+    @ExcelProperty(value = "发出库位")
+    @ApiModelProperty(value = "发出库位")
+    private String storehouseFrom;
+
+    /**
+     * 接收库位
+     */
+    @ExcelProperty(value = "接收库位")
+    @ApiModelProperty(value = "接收库位")
+    private String storehouseTo;
+
+    /**
+     * 在途量
+     */
+    @ExcelProperty(value = "在途量")
+    @ApiModelProperty(value = "在途量")
+    private BigDecimal passageNum;
+
+    /**
      * 单位
      */
     @ExcelProperty(value = "单位")
     @ApiModelProperty(value = "单位")
     private String unit;
-
-    /**
-     * 可用库存
-     */
-    @ExcelProperty(value = "可用库存")
-    @ApiModelProperty(value = "可用库存")
-    private BigDecimal currentStock;
 
     /**
      * 是否删除0：有效，1：删除
