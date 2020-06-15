@@ -2869,7 +2869,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "order_class",
@@ -3050,7 +3050,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "pid",
@@ -3290,7 +3290,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "product_material_code",
@@ -3532,7 +3532,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "product_material_code",
@@ -3805,7 +3805,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "product_material_code",
@@ -4070,7 +4070,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "product_material_code",
@@ -4252,7 +4252,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "pid",
@@ -4619,7 +4619,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "order_type",
@@ -4803,7 +4803,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "material_code",
@@ -5179,7 +5179,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "product_material_code",
@@ -5516,7 +5516,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "product_material_code",
@@ -5694,7 +5694,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "pid",
@@ -7289,7 +7289,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "line_no",
@@ -7595,7 +7595,7 @@
               ]
             },
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "stuff_no",
@@ -7874,7 +7874,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "supplier_code",
@@ -8151,7 +8151,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "quality_no",
@@ -8421,7 +8421,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "delays_no",
@@ -9042,7 +9042,7 @@
               ]
             },
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "mouth_settle_id",
@@ -9685,7 +9685,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "material_code",
@@ -9866,7 +9866,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "product_material_code",
@@ -10034,7 +10034,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "product_material_code",
@@ -10194,7 +10194,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "product_material_code",
@@ -10361,7 +10361,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "product_material_code",
@@ -10517,7 +10517,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "raw_material_code",
@@ -10662,7 +10662,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "factory_code",
@@ -11476,7 +11476,7 @@
               ]
             },
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "material_code",
@@ -11679,7 +11679,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "produce_line_code",
@@ -11816,7 +11816,7 @@
               ]
             },
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "year_mouth",
@@ -12023,7 +12023,7 @@
               ]
             },
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "conditions_type",
@@ -12347,7 +12347,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "del_flag"
@@ -12508,10 +12508,11 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
-                "del_flag"
+                "product_factory_code",
+                "customer_code"
               ]
             }
           ],
