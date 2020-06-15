@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -65,6 +66,25 @@ public class CdProductWarehouseController extends BaseController {
         return getDataTable(cdProductWarehouseList);
     }
 
+    /**
+     * 查询成品库存在库明细 列表
+     */
+    @GetMapping("showListDetails")
+    @ApiOperation(value = "成品库存在库明细", response = CdProductWarehouse.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "productMaterialCode", value = "物料号", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "stockType", value = "0:良品;1:不良品", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = true, paramType = "query", dataType = "String")
+    })
+    public List<CdProductWarehouse> showListDetails(@ApiIgnore CdProductWarehouse cdProductWarehouse){
+        Example example = new Example(CdProductWarehouse.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("productMaterialCode",cdProductWarehouse.getProductMaterialCode());
+        criteria.andEqualTo("stockType",cdProductWarehouse.getStockType());
+        criteria.andEqualTo("productFactoryCode",cdProductWarehouse.getProductFactoryCode());
+        List<CdProductWarehouse> cdProductWarehouseList = cdProductWarehouseService.selectByExample(example);
+        return cdProductWarehouseList;
+    }
 
     /**
      * 新增保存成品库存在库明细

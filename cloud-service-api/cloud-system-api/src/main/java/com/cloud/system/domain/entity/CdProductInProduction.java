@@ -41,42 +41,40 @@ public class CdProductInProduction extends BaseEntity {
     /**
      * 成品物料号
      */
-    @ExcelProperty(value = "成品物料号")
+    @ExcelProperty(value = "成品物料号",index = 0)
     @ApiModelProperty(value = "成品物料号")
     private String productMaterialCode;
 
     /**
      * 成品物料描述
      */
-    @ExcelProperty(value = "成品物料描述")
     @ApiModelProperty(value = "成品物料描述")
     private String productMaterialDesc;
 
     /**
      * 生产工厂编码
      */
-    @ExcelProperty(value = "生产工厂编码")
+    @ExcelProperty(value = "生产工厂编码",index = 1)
     @ApiModelProperty(value = "生产工厂编码")
     private String productFactoryCode;
 
     /**
      * 生产工厂描述
      */
-    @ExcelProperty(value = "生产工厂描述")
     @ApiModelProperty(value = "生产工厂描述")
     private String productFactoryDesc;
 
     /**
      * 在产版本
      */
-    @ExcelProperty(value = "在产版本")
+    @ExcelProperty(value = "在产版本",index = 2)
     @ApiModelProperty(value = "在产版本")
     private String inProductionVersion;
 
     /**
      * 在产量
      */
-    @ExcelProperty(value = "在产量")
+    @ExcelProperty(value = "在产量",index = 3)
     @ApiModelProperty(value = "在产量")
     private BigDecimal inProductionNum;
 

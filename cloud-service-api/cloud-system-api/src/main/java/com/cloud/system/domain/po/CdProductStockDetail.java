@@ -53,4 +53,15 @@ public class CdProductStockDetail extends BaseEntity {
      * 成品库存在库明细
      */
     private List<CdProductWarehouse> cdProductWarehouseList;
+
+
+    /**
+     * 成品库存在库明细(不包括不良品)
+     */
+    private List<CdProductWarehouse> cdProductWarehouseListL;
+
+    /**
+     * 成品库存不良品
+     */
+    private List<CdProductWarehouse> cdProductWarehouseListB;
 }

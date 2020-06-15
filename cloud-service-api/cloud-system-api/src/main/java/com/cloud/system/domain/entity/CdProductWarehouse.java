@@ -41,56 +41,52 @@ public class CdProductWarehouse extends BaseEntity {
     /**
      * 0:良品;1:不良品
      */
-    @ExcelProperty(value = "0:良品;1:不良品")
     @ApiModelProperty(value = "0:良品;1:不良品")
     private String stockType;
 
     /**
      * 成品物料号
      */
-    @ExcelProperty(value = "成品物料号")
+    @ExcelProperty(value = "成品物料号",index = 0)
     @ApiModelProperty(value = "成品物料号")
     private String productMaterialCode;
 
     /**
      * 成品物料描述
      */
-    @ExcelProperty(value = "成品物料描述")
     @ApiModelProperty(value = "成品物料描述")
     private String productMaterialDesc;
 
     /**
      * 生产工厂编码
      */
-    @ExcelProperty(value = "生产工厂编码")
+    @ExcelProperty(value = "生产工厂编码",index = 1)
     @ApiModelProperty(value = "生产工厂编码")
     private String productFactoryCode;
 
     /**
      * 生产工厂描述
      */
-    @ExcelProperty(value = "生产工厂描述")
     @ApiModelProperty(value = "生产工厂描述")
     private String productFactoryDesc;
 
     /**
      * 库位
      */
-    @ExcelProperty(value = "库位")
+    @ExcelProperty(value = "库位",index = 2)
     @ApiModelProperty(value = "库位")
     private String storehouse;
 
     /**
      * 在库量
      */
-    @ExcelProperty(value = "在库量")
+    @ExcelProperty(value = "在库量",index = 3)
     @ApiModelProperty(value = "在库量")
     private BigDecimal warehouseNum;
 
     /**
      * 单位
      */
-    @ExcelProperty(value = "单位")
     @ApiModelProperty(value = "单位")
     private String unit;
 

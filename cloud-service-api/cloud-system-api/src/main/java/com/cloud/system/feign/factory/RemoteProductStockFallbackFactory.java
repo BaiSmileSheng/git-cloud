@@ -22,7 +22,7 @@ public class RemoteProductStockFallbackFactory implements FallbackFactory<Remote
              */
             @Override
             public R timeSycProductStock() {
-                return null;
+                return R.error("定时任务同步成品库存熔断");
             }
         };
     }

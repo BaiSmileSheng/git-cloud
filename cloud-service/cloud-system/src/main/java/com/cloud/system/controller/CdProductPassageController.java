@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -65,7 +66,24 @@ public class CdProductPassageController extends BaseController {
         return getDataTable(cdProductPassageList);
     }
 
-
+    /**
+     * 查询成品库存在途明细 列表
+     */
+    @GetMapping("showListDetails")
+    @ApiOperation(value = "查询成品库存在途明细 列表", response = CdProductPassage.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "productMaterialCode", value = "物料号", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "stockType", value = "0:良品;1:不良品", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = true, paramType = "query", dataType = "String")
+    })
+    public List<CdProductPassage> showListDetails(@ApiIgnore CdProductPassage cdProductPassage){
+        Example example = new Example(CdProductPassage.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("productMaterialCode",cdProductPassage.getProductMaterialCode());
+        criteria.andEqualTo("productFactoryCode",cdProductPassage.getProductFactoryCode());
+        List<CdProductPassage> cdProductPassageList = cdProductPassageService.selectByExample(example);
+        return cdProductPassageList;
+    }
     /**
      * 新增保存成品库存在途明细
      */

@@ -31,4 +31,11 @@ public interface ICdProductStockService extends BaseService<CdProductStock> {
      */
 
     R timeSycProductStock();
+
+    /**
+     * 导出成品库存主表列表
+     * @param cdProductStock  成品库存主表信息
+     * @return
+     */
+    R export(CdProductStock cdProductStock);
 }

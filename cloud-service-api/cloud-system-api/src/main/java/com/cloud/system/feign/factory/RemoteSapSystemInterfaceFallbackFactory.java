@@ -19,7 +19,7 @@ public class RemoteSapSystemInterfaceFallbackFactory implements FallbackFactory<
 
             @Override
             public R sycRawMaterialStock() {
-                return null;
+                return R.error("定时同步原材料库存熔断");
             }
         };
     }

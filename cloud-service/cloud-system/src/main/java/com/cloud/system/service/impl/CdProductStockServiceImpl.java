@@ -89,6 +89,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
 
     private static final String NO_STOCK_TYPE = "1";//不良成品库位标记
 
+    private static final String STOCK_TYPE = "0";//良成品库位标记
+
     /**
      * 删除全表
      * @return
@@ -97,6 +99,127 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
     public R deleteAll() {
         cdProductStockMapper.deleteAll();
         return R.ok();
+    }
+
+    /**
+     * 导出成品库存主表列表
+     * @param cdProductStock  成品库存主表信息
+     * @return
+     */
+    @Override
+    public R export(CdProductStock cdProductStock) {
+
+        CdProductStockDetail cdProductStockDetail = new CdProductStockDetail();
+        //1.查询主表数据
+        List<CdProductStock> cdProductStockList = listByCondition(cdProductStock);
+        for (CdProductStock cdProductStockRes : cdProductStockList) {
+            //在库库存
+            BigDecimal stockWNum = cdProductStockRes.getStockWNum();
+            //在途库存
+            BigDecimal stockINum = cdProductStockRes.getStockINum();
+            //寄售不足
+            BigDecimal stockKNum = cdProductStockRes.getStockKNum();
+            BigDecimal sumNum = stockWNum.add(stockINum).multiply(stockKNum);
+            cdProductStockRes.setSumNum(sumNum);
+        }
+        cdProductStockDetail.setCdProductStockList(cdProductStockList);
+        //2.在产信息
+        List<CdProductInProduction> cdProductInProductionList = listProductInProduction(cdProductStock);
+        cdProductStockDetail.setCdProductInProductionList(cdProductInProductionList);
+
+        //3.在途信息
+        List<CdProductPassage> cdProductPassageList = listProductPassage(cdProductStock);
+        cdProductStockDetail.setCdProductPassageList(cdProductPassageList);
+
+        //4.在库信息(良品)
+        List<CdProductWarehouse> cdProductWarehouseListL = listProductWarehouse(cdProductStock,STOCK_TYPE);
+        cdProductStockDetail.setCdProductWarehouseListL(cdProductWarehouseListL);
+        //4.不良信息
+        List<CdProductWarehouse> cdProductWarehouseListB = listProductWarehouse(cdProductStock,NO_STOCK_TYPE);
+        cdProductStockDetail.setCdProductWarehouseListB(cdProductWarehouseListB);
+
+        R r = new R();
+        r.set("com.cloud.system.domain.po.CdProductStockDetail",cdProductStockDetail);
+        return r;
+    }
+
+    /**
+     * 查主表数据
+     *
+     * @param cdProductStock
+     * @return
+     */
+    private List<CdProductStock> listByCondition(CdProductStock cdProductStock) {
+        Example example = new Example(CdProductStock.class);
+        Example.Criteria criteria = example.createCriteria();
+        if(StringUtils.isNotBlank(cdProductStock.getProductFactoryCode())){
+            criteria.andEqualTo("productFactoryCode", cdProductStock.getProductFactoryCode());
+
+        }
+        if(StringUtils.isNotBlank(cdProductStock.getProductMaterialCode())){
+            criteria.andEqualTo("productMaterialCode", cdProductStock.getProductMaterialCode());
+        }
+        List<CdProductStock> cdProductStockList = selectByExample(example);
+        return cdProductStockList;
+    }
+
+    /**
+     * 查在产数据
+     * @param cdProductStock
+     * @return
+     */
+    private List<CdProductInProduction> listProductInProduction(CdProductStock cdProductStock){
+        Example example = new Example(CdProductInProduction.class);
+        Example.Criteria criteria = example.createCriteria();
+        if(StringUtils.isNotBlank(cdProductStock.getProductFactoryCode())){
+            criteria.andEqualTo("productFactoryCode", cdProductStock.getProductFactoryCode());
+
+        }
+        if(StringUtils.isNotBlank(cdProductStock.getProductMaterialCode())){
+            criteria.andEqualTo("productMaterialCode", cdProductStock.getProductMaterialCode());
+        }
+        List<CdProductInProduction> cdProductInProductionList = cdProductInProductionService.selectByExample(example);
+        return cdProductInProductionList;
+    }
+
+    /**
+     * 查在途信息
+     * @param cdProductStock
+     * @return
+     */
+    private List<CdProductPassage> listProductPassage(CdProductStock cdProductStock){
+        Example example = new Example(CdProductPassage.class);
+        Example.Criteria criteria = example.createCriteria();
+        if(StringUtils.isNotBlank(cdProductStock.getProductFactoryCode())){
+            criteria.andEqualTo("productFactoryCode", cdProductStock.getProductFactoryCode());
+
+        }
+        if(StringUtils.isNotBlank(cdProductStock.getProductMaterialCode())){
+            criteria.andEqualTo("productMaterialCode", cdProductStock.getProductMaterialCode());
+        }
+        List<CdProductPassage> productPassageList = cdProductPassageService.selectByExample(example);
+        return productPassageList;
+    }
+
+    /**
+     * 查在库信息
+     * @param cdProductStock
+     * @param stockType
+     * @return
+     */
+    private List<CdProductWarehouse> listProductWarehouse(CdProductStock cdProductStock,String stockType){
+        Example example = new Example(CdProductWarehouse.class);
+        Example.Criteria criteria = example.createCriteria();
+        if(StringUtils.isNotBlank(cdProductStock.getProductFactoryCode())){
+            criteria.andEqualTo("productFactoryCode", cdProductStock.getProductFactoryCode());
+
+        }
+        if(StringUtils.isNotBlank(cdProductStock.getProductMaterialCode())){
+            criteria.andEqualTo("productMaterialCode", cdProductStock.getProductMaterialCode());
+        }
+        criteria.andEqualTo("stockType",stockType);
+        List<CdProductWarehouse> cdProductWarehouseList = cdProductWarehouseService.selectByExample(example);
+        return cdProductWarehouseList;
     }
 
     /**
@@ -113,10 +236,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
         Example.Criteria criteria = exampleMaterialInfo.createCriteria();
         criteria.andEqualTo("plantCode",factoryCode);
         criteria.andEqualTo("materialCode",materialCode);
-        List<CdMaterialInfo> cdMaterialInfoList = cdMaterialInfoService.selectByExample(exampleMaterialInfo);
-        Map<String,String>  materialMap = cdMaterialInfoList.stream().collect(Collectors.toMap(
-                CdMaterialInfo::getMaterialCode, CdMaterialInfo::getMaterialDesc));
-        disposeProductStock(Arrays.asList(factoryCode),Arrays.asList(materialCode), materialMap);
+        disposeProductStock(Arrays.asList(factoryCode),Arrays.asList(materialCode));
         return R.ok();
     }
 
@@ -127,20 +247,15 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
     @Transactional
     @Override
     public R timeSycProductStock() {
-        //1.获取工厂全部信息cd_factory_info 和 物料号
+        //1.获取工厂全部信息cd_factory_info
         Example exampleFactoryInfo = new Example(CdFactoryInfo.class);
         List<CdFactoryInfo> cdFactoryInfoList = cdFactoryInfoService.selectByExample(exampleFactoryInfo);
         List<String> factoryCodelist = cdFactoryInfoList.stream().map(cdFactoryInfo->{
             return cdFactoryInfo.getFactoryCode();
         }).collect(Collectors.toList());
-        Example exampleMaterialInfo = new Example(CdMaterialInfo.class);
-        Example.Criteria criteria = exampleMaterialInfo.createCriteria();
-        List<CdMaterialInfo> cdMaterialInfoList = cdMaterialInfoService.selectByExample(exampleMaterialInfo);
-        Map<String,String>  materialMap = cdMaterialInfoList.stream().collect(Collectors.toMap(
-                CdMaterialInfo::getMaterialCode, CdMaterialInfo::getMaterialDesc));
         //2.调用SAP  ZSD_INT_DDPS_02 获取SAP成品库存信息   插入明细表
         //3.汇总数据 插入主表数据库
-        disposeProductStock(factoryCodelist,null,materialMap);
+        disposeProductStock(factoryCodelist,null);
         return R.ok();
     }
 
@@ -148,12 +263,11 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
      *  处理SAP库存 存入数据库
      * @param factoryCodeList 工厂编号
      * @param materialCodeList 物料编号
-     * @param materialMap 物料编号 和 物料描述
      * @return
      */
-    private void disposeProductStock(List<String> factoryCodeList,List<String> materialCodeList,Map<String,String>  materialMap){
+    private void disposeProductStock(List<String> factoryCodeList,List<String> materialCodeList){
         //2.调用SAP  ZSD_INT_DDPS_02 获取SAP成品库存信息   插入明细表
-        CdProductStockDetail cdProductStockDetail = sycSAPProductStock(factoryCodeList,materialCodeList,materialMap);
+        CdProductStockDetail cdProductStockDetail = sycSAPProductStock(factoryCodeList,materialCodeList);
         //成品库存主表 寄售不足列表
         List<CdProductStock> cdProductStockList = cdProductStockDetail.getCdProductStockList();
         //成品库存在产明细
@@ -217,6 +331,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
                     cdProductStock.setUnit(cdProductWarehouse.getUnit());
                     cdProductStock.setCreateBy("定时任务");
                     cdProductStock.setCreateTime(new Date());
+                    cdProductStock.setDelFlag(DeleteFlagConstants.NO_DELETED);
                     cdProductStockMapB.put(code,cdProductStock);
                 }
             }else{
@@ -236,6 +351,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
                     cdProductStock.setUnit(cdProductWarehouse.getUnit());
                     cdProductStock.setCreateBy("定时任务");
                     cdProductStock.setCreateTime(new Date());
+                    cdProductStock.setDelFlag(DeleteFlagConstants.NO_DELETED);
                     cdProductStockMapL.put(code,cdProductStock);
                 }
             }
@@ -269,6 +385,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
                 cdProductStock.setUnit(cdProductInProduction.getUnit());
                 cdProductStock.setCreateBy("定时任务");
                 cdProductStock.setCreateTime(new Date());
+                cdProductStock.setDelFlag(DeleteFlagConstants.NO_DELETED);
                 cdProductStockMap.put(code,cdProductStock);
             }
         });
@@ -290,6 +407,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
                 cdProductStock.setUnit(cdProductPassage.getUnit());
                 cdProductStock.setCreateBy("定时任务");
                 cdProductStock.setCreateTime(new Date());
+                cdProductStock.setDelFlag(DeleteFlagConstants.NO_DELETED);
                 cdProductStockMap.put(code,cdProductStock);
             }
         });
@@ -332,10 +450,9 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
      *
      * @param factoryCodeList 工厂编号
      * @param materialCodeList 物料号
-     * @param materialMap key:物料号  value物料描述
      * @return
      */
-    private CdProductStockDetail sycSAPProductStock(List<String> factoryCodeList,List<String> materialCodeList, Map<String,String> materialMap) {
+    private CdProductStockDetail sycSAPProductStock(List<String> factoryCodeList,List<String> materialCodeList) {
         JCoDestination destination;
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog();
         sysInterfaceLog.setAppId("SAP");
@@ -377,16 +494,16 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
             //在产库存
             JCoTable outputZC = fm.getTableParameterList().getTable("OUTPUT_ZC");
             //转换对象插入数据库
-            List<CdProductInProduction> productInProductionList = insertInProduction(outputZC,materialMap);
+            List<CdProductInProduction> productInProductionList = insertInProduction(outputZC);
             //在途库存
             JCoTable outputZT = fm.getTableParameterList().getTable("OUTPUT_ZT");
-            List<CdProductPassage> productPassageList = insertPassage(outputZT,materialMap);
+            List<CdProductPassage> productPassageList = insertPassage(outputZT);
             //在库库存
             JCoTable outputZK = fm.getTableParameterList().getTable("OUTPUT_ZK");
-            List<CdProductWarehouse> productWarehouseList = insertWarehouse(outputZK,materialMap);
+            List<CdProductWarehouse> productWarehouseList = insertWarehouse(outputZK);
             //寄售不足库存
             JCoTable outputJS = fm.getTableParameterList().getTable("OUTPUT_JS");
-            List<CdProductStock> productStockList = getJSStock(outputJS,materialMap);
+            List<CdProductStock> productStockList = getJSStock(outputJS);
 
             CdProductStockDetail cdProductStockDetail = new CdProductStockDetail();
             cdProductStockDetail.setCdProductInProductionList(productInProductionList);
@@ -406,10 +523,9 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
     /**
      * 将SAP在产成品库存转换成 CdProductInProduction 插入数据库
      * @param outputZC 在产成品库存表
-     * @param materialMap key 物料号 value:物料描述
      * @return List<CdProductInProduction> 在产成品库存集合
      */
-    private List<CdProductInProduction> insertInProduction(JCoTable outputZC,Map<String,String> materialMap){
+    private List<CdProductInProduction> insertInProduction(JCoTable outputZC){
         logger.info("将SAP在产成品库存转换成 CdProductInProduction 插入数据库开始");
         List<CdProductInProduction> productInProductionList = new ArrayList<>();
         //从输出table中获取每一行数据
@@ -418,7 +534,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
             for (int i = 0; i < outputZC.getNumRows(); i++) {
                 //设置指针位置
                 outputZC.setRow(i);
-                CdProductInProduction cdMaterialPriceInfo = changeInProduction(outputZC,materialMap);
+                CdProductInProduction cdMaterialPriceInfo = changeInProduction(outputZC);
                 productInProductionList.add(cdMaterialPriceInfo);
             }
         }
@@ -434,14 +550,13 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
     /**
      * 将SAP在产成品库存转换成 CdProductInProduction
      * @param outputZC 在产成品库存表
-     * @param materialMap key 物料号 value:物料描述
      * @return 在产成品库存
      */
-    private CdProductInProduction changeInProduction(JCoTable outputZC,Map<String,String> materialMap){
+    private CdProductInProduction changeInProduction(JCoTable outputZC){
         CdProductInProduction cdProductInProduction = new CdProductInProduction();
         cdProductInProduction.setProductFactoryCode(outputZC.getString("WERKS"));
         cdProductInProduction.setProductMaterialCode(outputZC.getString("MATNR"));
-        cdProductInProduction.setProductMaterialDesc(materialMap.get(outputZC.getString("MATNR")));
+        cdProductInProduction.setProductMaterialDesc(outputZC.getString("MAKTX"));
         cdProductInProduction.setInProductionVersion(outputZC.getString("VERID"));
         cdProductInProduction.setInProductionNum(outputZC.getBigDecimal("MENGE_Z"));
         cdProductInProduction.setUnit(outputZC.getString("ERFME"));
@@ -454,10 +569,9 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
     /**
      * 将SAP在途成品库存转换成 CdProductInProduction 插入数据库
      * @param outputZT 在途成品表
-     * @param materialMap key 物料号 value:物料描述
      * @return List<CdProductPassage> 在途成品库存集合
      */
-    private List<CdProductPassage> insertPassage(JCoTable outputZT,Map<String,String> materialMap){
+    private List<CdProductPassage> insertPassage(JCoTable outputZT){
         logger.info("将SAP在途成品库存转换成 CdProductInProduction 插入数据库开始");
         List<CdProductPassage> productPassagesList = new ArrayList<>();
         //从输出table中获取每一行数据
@@ -466,7 +580,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
             for (int i = 0; i < outputZT.getNumRows(); i++) {
                 //设置指针位置
                 outputZT.setRow(i);
-                CdProductPassage cdProductPassage = changePassage(outputZT,materialMap);
+                CdProductPassage cdProductPassage = changePassage(outputZT);
                 productPassagesList.add(cdProductPassage);
             }
         }
@@ -482,30 +596,29 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
     /**
      * 将SAP在途成品库存转换成 CdProductPassage
      * @param outputZT 在途成品表
-     * @param materialMap key 物料号 value:物料描述
      * @return 在途成品库存
      */
-    private CdProductPassage changePassage(JCoTable outputZT,Map<String,String> materialMap){
+    private CdProductPassage changePassage(JCoTable outputZT){
         CdProductPassage cdProductPassage = new CdProductPassage();
         cdProductPassage.setProductFactoryCode(outputZT.getString("WERKS"));
         cdProductPassage.setProductMaterialCode(outputZT.getString("MATNR"));
-        cdProductPassage.setProductMaterialDesc(materialMap.get(outputZT.getString("MATNR")));
+        cdProductPassage.setProductMaterialDesc(outputZT.getString(" MAKTX"));
         cdProductPassage.setUnit(outputZT.getString("ERFME"));
         cdProductPassage.setStorehouseFrom(outputZT.getString("LGORT_F"));
         cdProductPassage.setStorehouseTo(outputZT.getString("LGORT_J"));
         cdProductPassage.setPassageNum(outputZT.getBigDecimal("MENGE"));
         cdProductPassage.setCreateBy("定时任务");
         cdProductPassage.setCreateTime(new Date());
+        cdProductPassage.setDelFlag(DeleteFlagConstants.NO_DELETED);
         return cdProductPassage;
     }
 
     /**
      * 将SAP在库成品库存转换成 CdProductInProduction 插入数据库
      * @param outputZK 在库成品库存表
-     * @param materialMap key:物料号 value:物料描述
      * @return List<CdProductWarehouse> 在库成品库存集合
      */
-    private List<CdProductWarehouse> insertWarehouse(JCoTable outputZK,Map<String,String> materialMap){
+    private List<CdProductWarehouse> insertWarehouse(JCoTable outputZK){
         logger.info("将SAP在库成品库存转换成 CdProductWarehouse 插入数据库开始");
         List<CdProductWarehouse> productWarehousesList = new ArrayList<>();
 
@@ -515,7 +628,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
             for (int i = 0; i < outputZK.getNumRows(); i++) {
                 //设置指针位置
                 outputZK.setRow(i);
-                CdProductWarehouse cdProductWarehouse = changeWarehouse(outputZK,materialMap);
+                CdProductWarehouse cdProductWarehouse = changeWarehouse(outputZK);
                 productWarehousesList.add(cdProductWarehouse);
             }
         }
@@ -531,25 +644,27 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
     /**
      * 将SAP在库成品库存转换成 CdProductWarehouse
      * @param outputZK 在库成品库存表
-     * @param materialMap key:物料号 value:物料描述
      * @return CdProductWarehouse 在库成品库存转
      */
-    private CdProductWarehouse changeWarehouse(JCoTable outputZK,Map<String,String> materialMap){
+    private CdProductWarehouse changeWarehouse(JCoTable outputZK){
         CdProductWarehouse cdProductWarehouse = new CdProductWarehouse();
         cdProductWarehouse.setProductFactoryCode(outputZK.getString("WERKS"));
         cdProductWarehouse.setProductMaterialCode(outputZK.getString("MATNR"));
-        cdProductWarehouse.setProductMaterialDesc(materialMap.get(outputZK.getString("MATNR")));
+        cdProductWarehouse.setProductMaterialDesc(outputZK.getString("MAKTX"));
         cdProductWarehouse.setStorehouse(outputZK.getString("LGORT"));
         cdProductWarehouse.setWarehouseNum(outputZK.getBigDecimal("LABST"));
         cdProductWarehouse.setUnit(outputZK.getString("ERFME"));
         cdProductWarehouse.setCreateBy("定时任务");
         cdProductWarehouse.setCreateTime(new Date());
+        cdProductWarehouse.setDelFlag(DeleteFlagConstants.NO_DELETED);
         //根据工厂在字典表里获取不良成品 库位
         List<String> storehouseList = sysDictDataService.selectListDictLabel(FACTORY_REJECTSTORE_RELATION,outputZK.getString("WERKS"));
         //根据工厂查所对应的不良货位,如果库存地点是不良货位则设置类型为1
         Boolean flagStockType = storehouseList.contains(outputZK.getString("LGORT"));
         if(flagStockType){
             cdProductWarehouse.setStockType(NO_STOCK_TYPE);
+        }else{
+            cdProductWarehouse.setStockType(STOCK_TYPE);
         }
         return cdProductWarehouse;
     }
@@ -557,10 +672,9 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
     /**
      * 将SAP寄售不足成品库存转换成 CdProductStock 库存主表
      * @param outputJS  表
-     * @param materialMap  key:物料号 value:物料描述
      * @return
      */
-    private List<CdProductStock> getJSStock(JCoTable outputJS,Map<String,String> materialMap){
+    private List<CdProductStock> getJSStock(JCoTable outputJS){
         logger.info("将SAP寄售不足成品库存转换成 CdProductStock 库存主表");
         List<CdProductStock> productStockList = new ArrayList<>();
         //从输出table中获取每一行数据
@@ -569,7 +683,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
             for (int i = 0; i < outputJS.getNumRows(); i++) {
                 //设置指针位置
                 outputJS.setRow(i);
-                CdProductStock cdProductStock = changeJSStock(outputJS,materialMap);
+                CdProductStock cdProductStock = changeJSStock(outputJS);
                 productStockList.add(cdProductStock);
             }
         }
@@ -579,18 +693,18 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
     /**
      * 将SAP寄售不足成品库存转换成 CdProductStock 库存主表
      * @param outputJS  表
-     * @param materialMap  key:物料号 value:物料描述
      * @return CdProductStock 库存主表
      */
-    private CdProductStock changeJSStock(JCoTable outputJS,Map<String,String> materialMap){
+    private CdProductStock changeJSStock(JCoTable outputJS){
         CdProductStock cdProductStock = new CdProductStock();
         cdProductStock.setProductFactoryCode(outputJS.getString("WERKS"));
         cdProductStock.setProductMaterialCode(outputJS.getString("MATNR"));
-        cdProductStock.setProductMaterialDesc(materialMap.get(outputJS.getString("MATNR")));
+        cdProductStock.setProductMaterialDesc(outputJS.getString("MAKTX"));
         cdProductStock.setStockKNum(outputJS.getBigDecimal("CY"));
         cdProductStock.setUnit(outputJS.getString("ERFME"));
         cdProductStock.setCreateBy("定时任务");
         cdProductStock.setCreateTime(new Date());
+        cdProductStock.setDelFlag(DeleteFlagConstants.NO_DELETED);
         return cdProductStock;
     }
 

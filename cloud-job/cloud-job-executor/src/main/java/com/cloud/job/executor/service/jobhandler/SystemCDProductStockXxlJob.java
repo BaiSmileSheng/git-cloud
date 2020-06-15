@@ -23,7 +23,7 @@ public class SystemCDProductStockXxlJob {
 
     /**
      * 每天定时同步成品库存信息
-     * 每日凌晨执行一次  0 0 0 * * ?
+     * 每日凌晨执行一次  0 0 1 * * ?
      * @param param
      * @return 成功
      * @throws Exception

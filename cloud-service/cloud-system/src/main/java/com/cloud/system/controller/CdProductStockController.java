@@ -1,13 +1,20 @@
 package com.cloud.system.controller;
 
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.easyexcel.EasyExcelUtil;
+import com.cloud.common.easyexcel.SheetExcelData;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.system.domain.entity.CdProductInProduction;
+import com.cloud.system.domain.entity.CdProductPassage;
+import com.cloud.system.domain.entity.CdProductWarehouse;
+import com.cloud.system.domain.po.CdProductStockDetail;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
@@ -25,6 +32,7 @@ import com.cloud.system.service.ICdProductStockService;
 import com.cloud.common.core.page.TableDataInfo;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -73,28 +81,54 @@ public class CdProductStockController extends BaseController {
      * 导出成品库存主表列表
      */
     @GetMapping("export")
-    @ApiOperation(value = "成品库存主表 查询分页", response = CdProductStock.class)
+    @HasPermissions("system:productStock:export")
+    @ApiOperation(value = "导出成品库存主表列表", response = CdProductStock.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "productFactoryCode", value = "专用号", required = false, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "productMaterialCode", value = "专用号", required = false, paramType = "query", dataType = "String")
     })
     public R export(@ApiIgnore CdProductStock cdProductStock) {
-        List<CdProductStock> cdProductStockList = listByCondition(cdProductStock);
-        for (CdProductStock cdProductStockRes : cdProductStockList) {
-            //在库库存
-            BigDecimal stockWNum = cdProductStockRes.getStockWNum();
-            //在途库存
-            BigDecimal stockINum = cdProductStockRes.getStockINum();
-            //寄售不足
-            BigDecimal stockKNum = cdProductStockRes.getStockKNum();
-            BigDecimal sumNum = stockWNum.add(stockINum).multiply(stockKNum);
-            cdProductStockRes.setSumNum(sumNum);
+
+        R result = cdProductStockService.export(cdProductStock);
+        if(!result.isSuccess()){
+            return result;
         }
-        return EasyExcelUtil.writeExcel(cdProductStockList, "成品库存.xlsx", "sheet", new CdProductStock());
+        CdProductStockDetail cdProductStockDetail = (CdProductStockDetail)result.get("com.cloud.system.domain.po.CdProductStockDetail");
+        List<SheetExcelData>  sheetExcelDataList= new ArrayList<>();
+        SheetExcelData sheetExcelDataZ = new SheetExcelData();
+        sheetExcelDataZ.setDataList(cdProductStockDetail.getCdProductStockList());
+        sheetExcelDataZ.setSheetName("汇总数据");
+        sheetExcelDataZ.setTClass(CdProductStock.class);
+        sheetExcelDataList.add(sheetExcelDataZ);
+        SheetExcelData sheetExcelDataL = new SheetExcelData();
+        sheetExcelDataL.setDataList(cdProductStockDetail.getCdProductWarehouseListL());
+        sheetExcelDataL.setSheetName("在库库存");
+        sheetExcelDataL.setTClass(CdProductWarehouse.class);
+        sheetExcelDataList.add(sheetExcelDataL);
+
+        SheetExcelData sheetExcelDataT = new SheetExcelData();
+        sheetExcelDataT.setDataList(cdProductStockDetail.getCdProductPassageList());
+        sheetExcelDataT.setSheetName("在途库存");
+        sheetExcelDataT.setTClass(CdProductPassage.class);
+        sheetExcelDataList.add(sheetExcelDataT);
+
+        SheetExcelData sheetExcelDataC = new SheetExcelData();
+        sheetExcelDataC.setDataList(cdProductStockDetail.getCdProductInProductionList());
+        sheetExcelDataC.setSheetName("在产库存");
+        sheetExcelDataC.setTClass(CdProductInProduction.class);
+        sheetExcelDataList.add(sheetExcelDataC);
+
+        SheetExcelData sheetExcelDataB = new SheetExcelData();
+        sheetExcelDataB.setDataList(cdProductStockDetail.getCdProductWarehouseListL());
+        sheetExcelDataB.setSheetName("不良库存");
+        sheetExcelDataB.setTClass(CdProductWarehouse.class);
+        sheetExcelDataList.add(sheetExcelDataB);
+
+        return EasyExcelUtil.writeMultiExcel("成品库存.xlsx", sheetExcelDataList);
     }
 
     /**
@@ -106,9 +140,13 @@ public class CdProductStockController extends BaseController {
     private List<CdProductStock> listByCondition(CdProductStock cdProductStock) {
         Example example = new Example(CdProductStock.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("productFactoryCode", cdProductStock.getProductFactoryCode());
-        criteria.andEqualTo("productMaterialCode", cdProductStock.getProductMaterialCode());
-        startPage();
+        if(StringUtils.isNotBlank(cdProductStock.getProductFactoryCode())){
+            criteria.andEqualTo("productFactoryCode", cdProductStock.getProductFactoryCode());
+
+        }
+        if(StringUtils.isNotBlank(cdProductStock.getProductMaterialCode())){
+            criteria.andEqualTo("productMaterialCode", cdProductStock.getProductMaterialCode());
+        }
         List<CdProductStock> cdProductStockList = cdProductStockService.selectByExample(example);
         return cdProductStockList;
     }
