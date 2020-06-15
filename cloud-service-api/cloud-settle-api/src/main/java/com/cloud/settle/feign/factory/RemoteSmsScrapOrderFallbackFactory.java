@@ -41,7 +41,7 @@ public class RemoteSmsScrapOrderFallbackFactory implements FallbackFactory<Remot
              */
             @Override
             public R editSave(SmsScrapOrder smsScrapOrder) {
-                return R.error();
+                return R.error("服务被降级熔断。。");
             }
 
             /**
