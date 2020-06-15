@@ -1,5 +1,6 @@
 package com.cloud.system.feign;
 
+import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.SysLogininfor;
 import com.cloud.system.domain.entity.SysOperLog;
 import com.cloud.system.feign.factory.RemoteLogFallbackFactory;
@@ -18,7 +19,7 @@ import com.cloud.common.constant.ServiceNameConstants;
 @FeignClient(name = ServiceNameConstants.SYSTEM_SERVICE, fallbackFactory = RemoteLogFallbackFactory.class)
 public interface RemoteLogService {
     @PostMapping("operLog/save")
-    public void insertOperlog(@RequestBody SysOperLog operLog);
+    public R insertOperlog(@RequestBody SysOperLog operLog);
 
     @PostMapping("logininfor/save")
     public void insertLoginlog(@RequestBody SysLogininfor logininfor);

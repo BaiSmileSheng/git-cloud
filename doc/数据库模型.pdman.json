@@ -2869,7 +2869,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "order_class",
@@ -3050,7 +3050,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "pid",
@@ -3247,19 +3247,6 @@
               "notNull": true
             },
             {
-              "name": "plan_order_order",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "计划订单号",
-              "defaultValue": "''"
-            },
-            {
-              "name": "sap_messages",
-              "type": "Intro",
-              "remark": "传SAP返回信息",
-              "chnname": "SAP返回信息"
-            },
-            {
               "name": "del_flag",
               "type": "Char",
               "remark": "0：有效，1：删除",
@@ -3303,7 +3290,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "product_material_code",
@@ -3501,19 +3488,6 @@
               "notNull": true
             },
             {
-              "name": "plan_order_order",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "计划订单号",
-              "defaultValue": "''"
-            },
-            {
-              "name": "sap_messages",
-              "type": "Intro",
-              "remark": "传SAP返回信息",
-              "chnname": "SAP返回信息"
-            },
-            {
               "name": "del_flag",
               "type": "Char",
               "remark": "0：有效，1：删除",
@@ -3558,7 +3532,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "product_material_code",
@@ -3831,7 +3805,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "product_material_code",
@@ -4096,7 +4070,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "product_material_code",
@@ -4278,7 +4252,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "pid",
@@ -4645,7 +4619,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "order_type",
@@ -4829,7 +4803,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "material_code",
@@ -5205,7 +5179,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "product_material_code",
@@ -5542,7 +5516,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "product_material_code",
@@ -5720,7 +5694,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "pid",
@@ -7315,7 +7289,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "line_no",
@@ -7621,7 +7595,7 @@
               ]
             },
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "stuff_no",
@@ -7900,7 +7874,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "supplier_code",
@@ -8177,7 +8151,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "quality_no",
@@ -8447,7 +8421,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "delays_no",
@@ -9068,7 +9042,7 @@
               ]
             },
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "mouth_settle_id",
@@ -9711,7 +9685,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "material_code",
@@ -9842,6 +9816,12 @@
               "chnname": "不良品库存"
             },
             {
+              "name": "unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "单位"
+            },
+            {
               "name": "del_flag",
               "type": "Char",
               "remark": "",
@@ -9886,7 +9866,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "product_material_code",
@@ -10004,6 +9984,12 @@
               "notNull": true
             },
             {
+              "name": "unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "单位"
+            },
+            {
               "name": "del_flag",
               "type": "Char",
               "remark": "",
@@ -10048,7 +10034,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "product_material_code",
@@ -10158,6 +10144,12 @@
               "notNull": true
             },
             {
+              "name": "unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "单位"
+            },
+            {
               "name": "del_flag",
               "type": "Char",
               "remark": "",
@@ -10202,7 +10194,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "product_material_code",
@@ -10271,6 +10263,12 @@
               "autoIncrement": true
             },
             {
+              "name": "stock_type",
+              "type": "DefaultString",
+              "remark": "0：良品，1：不良品",
+              "chnname": "库存类型"
+            },
+            {
               "name": "product_material_code",
               "type": "DefaultString",
               "remark": "",
@@ -10311,6 +10309,12 @@
               "remark": "",
               "chnname": "在库量",
               "notNull": true
+            },
+            {
+              "name": "unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "单位"
             },
             {
               "name": "del_flag",
@@ -10357,7 +10361,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "product_material_code",
@@ -10513,7 +10517,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "raw_material_code",
@@ -10658,7 +10662,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "factory_code",
@@ -11472,7 +11476,7 @@
               ]
             },
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "material_code",
@@ -11675,7 +11679,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "produce_line_code",
@@ -11812,7 +11816,7 @@
               ]
             },
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "year_mouth",
@@ -12019,7 +12023,7 @@
               ]
             },
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": false,
               "fields": [
                 "conditions_type",
@@ -12343,7 +12347,7 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
                 "del_flag"
@@ -12504,10 +12508,11 @@
           ],
           "indexs": [
             {
-              "name": "idx _join_index",
+              "name": "idx_join_index",
               "isUnique": true,
               "fields": [
-                "del_flag"
+                "product_factory_code",
+                "customer_code"
               ]
             }
           ],

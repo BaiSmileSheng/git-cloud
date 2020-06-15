@@ -1,5 +1,6 @@
 package com.cloud.system.feign;
 
+import cn.hutool.core.lang.Dict;
 import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.CdBomInfo;
@@ -7,7 +8,11 @@ import com.cloud.system.feign.factory.RemoteBomFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 数据BOM Feign服务层
@@ -35,4 +40,10 @@ public interface RemoteBomService {
      */
     @PostMapping("bom/checkBomNum")
     R checkBomNum(@RequestParam(value = "productMaterialCode") String rawMaterialCode,@RequestParam(value = "rawMaterialCode") String productMaterialCode, @RequestParam(value = "applyNum") int applyNum);
+    /**
+     * 根据物料号工厂分组取bom版本
+     * @return
+     */
+    @PostMapping("bom/selectVersionMap")
+    Map<String, Map<String, String>> selectVersionMap(@RequestBody List<Dict> dicts);
 }

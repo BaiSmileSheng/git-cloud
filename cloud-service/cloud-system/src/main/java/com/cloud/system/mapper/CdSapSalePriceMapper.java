@@ -22,7 +22,7 @@ public interface CdSapSalePriceMapper extends BaseMapper<CdSapSalePrice>{
      * @param endDate
      * @return
      */
-    @MapKey("getVKey")
+    @MapKey("mapKey")
     Map<String, CdSapSalePrice> selectPriceByInMaterialCodeAndDate(@Param(value = "materialCodes") List<String> materialCodes,
                                                                         @Param(value = "beginDate") String beginDate,
                                                                         @Param(value = "endDate") String endDate);

@@ -87,11 +87,14 @@ pagehelper:
 seata:
   enabled: true
   application-id: ${spring.application.name}
-  #事务组
-  tx-service-group: seataGroup-${seata.application-id}
+  tx-service-group: ${spring.application.name}-group
+  enable-auto-data-source-proxy: true
+  use-jdk-proxy: true
   service:
-    vgroup-mapping: 'default'
-  #nacos中server-Addr 所在的命名空间
+    vgroup-mapping:
+      cloud-activiti-group: cloud-tx # seata  server段的cluster
+    enable-degrade: false # 是否启用降级
+    disable-global-transaction: false # 是否禁用全局事务
   registry:
     type: nacos
     nacos:

@@ -1,5 +1,6 @@
 package com.cloud.system.controller;
 
+import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
@@ -10,15 +11,13 @@ import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.system.domain.entity.CdBomInfo;
 import com.cloud.system.service.ICdBomInfoService;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * bom清单数据  提供者
@@ -28,6 +27,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("bom")
+@Api(tags = "BOM清单")
 public class CdBomInfoController extends BaseController {
 
     @Autowired
@@ -149,5 +149,14 @@ public class CdBomInfoController extends BaseController {
     @PostMapping("checkBomNum")
     public R checkBomNum(String productMaterialCode,String rawMaterialCode,int applyNum){
         return cdBomInfoService.checkBomNum(productMaterialCode,rawMaterialCode,applyNum);
+    }
+
+    /**
+     * 根据物料号工厂分组取bom版本
+     * @return
+     */
+    @PostMapping("selectVersionMap")
+    public Map<String,Map<String, String>> selectVersionMap(@RequestBody List<Dict> dicts){
+        return cdBomInfoService.selectVersionMap(dicts);
     }
 }

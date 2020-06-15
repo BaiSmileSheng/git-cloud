@@ -72,7 +72,7 @@ spring:
 seata:
   registry:
     nacos:
-      namespace: fd0b253f-7130-4c04-a9a1-65206b980991
+      namespace: ${spring.cloud.nacos.discovery.namespace}
 sap:
   client601:
     ashost: 10.133.28.69

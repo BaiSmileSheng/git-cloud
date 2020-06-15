@@ -1,5 +1,6 @@
 package com.cloud.system.service.impl;
 
+import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
@@ -9,6 +10,9 @@ import com.cloud.system.service.ICdBomInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * bom清单数据 Service业务层处理
@@ -68,10 +72,19 @@ public class CdBomInfoInfoServiceImpl extends BaseServiceImpl<CdBomInfo> impleme
      */
     @Override
     public R saveBomInfoBySap() {
+        //TODO:
         //1、获取调用SAP系统获取BOM清单接口的入参
         //2、组织接口入参数据
         //3、调用获取BOM清单数据接口
         //4、执行保存BOM清单数据sql
         return null;
+    }
+    /**
+     * 根据物料号工厂分组取bom版本
+     * @return
+     */
+    @Override
+    public Map<String,Map<String, String>> selectVersionMap(List<Dict> dicts) {
+        return cdBomInfoMapper.selectVersionMap(dicts);
     }
 }
