@@ -3247,19 +3247,6 @@
               "notNull": true
             },
             {
-              "name": "plan_order_order",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "计划订单号",
-              "defaultValue": "''"
-            },
-            {
-              "name": "sap_messages",
-              "type": "Intro",
-              "remark": "传SAP返回信息",
-              "chnname": "SAP返回信息"
-            },
-            {
               "name": "del_flag",
               "type": "Char",
               "remark": "0：有效，1：删除",
@@ -3499,19 +3486,6 @@
               "remark": "年度-周数",
               "chnname": "数据版本",
               "notNull": true
-            },
-            {
-              "name": "plan_order_order",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "计划订单号",
-              "defaultValue": "''"
-            },
-            {
-              "name": "sap_messages",
-              "type": "Intro",
-              "remark": "传SAP返回信息",
-              "chnname": "SAP返回信息"
             },
             {
               "name": "del_flag",
