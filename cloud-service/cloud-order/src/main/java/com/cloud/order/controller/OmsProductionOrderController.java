@@ -101,7 +101,7 @@ public class OmsProductionOrderController extends BaseController {
         if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
             R r = remoteFactoryLineInfoService.selectLineCodeBySupplierCode(sysUser.getSupplierCode());
             if (r.get("data") == null || StrUtil.isBlank(r.get("data").toString())) {
-                return null;
+                return getDataTable(CollectionUtil.newArrayList());
             }
             String lineCodes = r.get("data").toString();
             criteria.andIn("productLineCode",CollectionUtil.toList(lineCodes.split(",")));
@@ -241,7 +241,7 @@ public class OmsProductionOrderController extends BaseController {
         if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
             R r = remoteFactoryLineInfoService.selectLineCodeBySupplierCode(sysUser.getSupplierCode());
             if (r.get("data") == null || StrUtil.isBlank(r.get("data").toString())) {
-                return null;
+                return R.error("数据为空！");
             }
             String lineCodes = r.get("data").toString();
             criteria.andIn("productLineCode",CollectionUtil.toList(lineCodes.split(",")));
