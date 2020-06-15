@@ -55,6 +55,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
             smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
             R rAdd = remoteSmsScrapOrderService.addSave(smsScrapOrder);
             if (!rAdd.isSuccess()) {
+                log.info("报废申请保存结果：{}", rAdd.toString());
                 return rAdd;
             }
             Long id = Long.valueOf(rAdd.get("data").toString());
@@ -66,6 +67,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
             smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
             R rUpdate = remoteSmsScrapOrderService.editSave(smsScrapOrder);
             if (!rUpdate.isSuccess()) {
+                log.info("报废申请更新结果：{}", rUpdate.toString());
                 return rUpdate;
             }
         }
