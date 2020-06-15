@@ -165,20 +165,6 @@ public class OmsDemandOrderGather extends BaseEntity {
     private String version;
 
     /**
-     * 计划订单号
-     */
-    @ExcelProperty(value = "计划订单号")
-    @ApiModelProperty(value = "计划订单号")
-    private String planOrderOrder;
-
-    /**
-     * SAP返回信息 传SAP返回信息
-     */
-    @ExcelProperty(value = "SAP返回信息 传SAP返回信息")
-    @ApiModelProperty(value = "SAP返回信息 传SAP返回信息")
-    private String sapMessages;
-
-    /**
      * 是否删除 0：有效，1：删除
      */
     private String delFlag;

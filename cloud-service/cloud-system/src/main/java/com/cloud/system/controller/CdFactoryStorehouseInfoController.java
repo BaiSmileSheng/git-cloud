@@ -1,5 +1,6 @@
 package com.cloud.system.controller;
 
+import cn.hutool.core.lang.Dict;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
+import java.util.Map;
+
 /**
  * 工厂库位  提供者
  *
@@ -58,6 +61,27 @@ public class CdFactoryStorehouseInfoController extends BaseController {
         return getDataTable(cdFactoryStorehouseInfoList);
     }
 
+    /**
+     * 查询一个工厂库位
+     */
+    @GetMapping("findOneByExample")
+    public R findOneByExample(CdFactoryStorehouseInfo cdFactoryStorehouseInfo) {
+        Example example = new Example(CdFactoryStorehouseInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo(cdFactoryStorehouseInfo);
+        CdFactoryStorehouseInfo cdFactoryStorehouse = cdFactoryStorehouseInfoService.findByExampleOne(example);
+        return R.data(cdFactoryStorehouse);
+    }
+
+    /**
+     * 根据工厂，客户编码分组取接收库位
+     * @param dicts
+     * @return
+     */
+    @PostMapping("selectStorehouseToMap")
+    public Map<String, Map<String, String>> selectStorehouseToMap(@RequestBody List<Dict> dicts){
+        return cdFactoryStorehouseInfoService.selectStorehouseToMap(dicts);
+    }
 
     /**
      * 新增保存工厂库位

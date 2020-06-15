@@ -9,5 +9,5 @@ import com.cloud.common.core.dao.BaseMapper;
  * @date 2020-06-12
  */
 public interface Oms2weeksDemandOrderMapper extends BaseMapper<Oms2weeksDemandOrder>{
-
+    int deleteAll();
 }

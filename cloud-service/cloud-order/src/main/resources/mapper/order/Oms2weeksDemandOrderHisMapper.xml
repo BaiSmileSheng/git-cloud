@@ -56,7 +56,7 @@
                create_by,
                update_time,
                update_by
-        from oms_2weeks_demand_order_his
+        from oms2weeks_demand_order_his
     </sql>
 
 

@@ -38,6 +38,24 @@
                update_by
         from cd_factory_storehouse_info
     </sql>
-
+    <select id="selectStorehouseToMap" parameterType="list" resultType="java.util.HashMap">
+        SELECT
+        CONCAT( product_factory_code, customer_code ) as keyValue,
+        GROUP_CONCAT( storehouse_to ) as storehouseTo
+        FROM
+        cd_factory_storehouse_info
+        where del_flag='0'
+        and product_factory_code in
+        <foreach collection="list" index="index" item="dict" open="(" close=")" separator=",">
+            #{dict.productFactoryCode}
+        </foreach>
+        and customer_code in
+        <foreach collection="list" index="index" item="dict" open="(" close=")" separator=",">
+            #{dict.customerCode}
+        </foreach>
+        GROUP BY
+        product_factory_code,
+        customer_code
+    </select>
 
 </mapper>

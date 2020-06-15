@@ -15,6 +15,7 @@ public class RemoteProductionOrderFallbackFactory implements FallbackFactory<Rem
 
     @Override
     public RemoteProductionOrderService create(Throwable throwable) {
+        log.error("生产订单熔断错误信息：{}",throwable.getMessage());
         return new RemoteProductionOrderService(){
 
             @Override

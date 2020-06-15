@@ -13,15 +13,25 @@ public class RemoteInternalOrderResServiceFallbackFactory implements FallbackFac
 
     @Override
     public RemoteInternalOrderResService create(Throwable throwable) {
+        log.error("PR/PO熔断错误信息：{}",throwable.getMessage());
         return new RemoteInternalOrderResService(){
+            /**
+             * SAP800获取PR定时任务(周五)
+             * @return
+             */
             @Override
             public R queryAndInsertDemandPRFromSap800Friday() {
-                return null;
+                return R.error();
             }
 
+            /**
+             * SAP800获取PR定时任务(周一)
+             *
+             * @return
+             */
             @Override
             public R queryAndInsertDemandPRFromSap800Monday() {
-                return null;
+                return R.error();
             }
         };
     }

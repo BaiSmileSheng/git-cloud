@@ -2,7 +2,6 @@ package com.cloud.order.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.lang.Console;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
@@ -18,7 +17,6 @@ import com.cloud.system.feign.RemoteFactoryInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -129,15 +127,4 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
         R rInsert = insert800PR(list);
         return rInsert;
     }
-
-    public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("1");
-        list.add("2");
-        list.add("2");
-        list.add("3");
-        List<Dict> maps = list.stream().map(s -> new Dict().set("aa",s).set("bb","12")).distinct().collect(Collectors.toList());
-        Console.log(maps.toString());
-
-	}
 }
