@@ -1,24 +1,22 @@
 package com.cloud.activiti.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.activiti.engine.RepositoryService;
-import org.activiti.engine.RuntimeService;
-import org.activiti.engine.repository.ProcessDefinition;
-import org.activiti.engine.repository.ProcessDefinitionQuery;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.cloud.activiti.domain.ActReProcdef;
 import com.cloud.activiti.service.IActReProcdefService;
 import com.cloud.activiti.vo.ReProcdef;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
+import com.cloud.settle.domain.entity.SmsScrapOrder;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
+import org.activiti.engine.repository.ProcessDefinition;
+import org.activiti.engine.repository.ProcessDefinitionQuery;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 流程控制接口
@@ -28,6 +26,7 @@ import com.cloud.common.core.domain.R;
  */
 @RestController
 @RequestMapping("prof")
+@Api(value = "获取流程实例")
 public class ActivitiController extends BaseController {
     @Autowired
     private RepositoryService repositoryService;
@@ -64,6 +63,7 @@ public class ActivitiController extends BaseController {
     }
 
     @GetMapping("list")
+    @ApiOperation(value = "根据key获取流程实例", response = SmsScrapOrder.class)
     public R list(ActReProcdef actReProcdef) {
         startPage();
         return result(procdefService.selectList(actReProcdef));
