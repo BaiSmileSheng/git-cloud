@@ -199,13 +199,13 @@ public class CdProductStockController extends BaseController {
     }
 
     /**
-     * 定时任务同步原材料库存接口
+     * 定时任务同步成品库存接口
      *
      * @return
      */
     @PostMapping("timeSycProductStock")
-    @OperLog(title = "定时任务同步原材料库存接口 ", businessType = BusinessType.UPDATE)
-    @ApiOperation(value = "定时任务同步原材料库存接口 ", response = R.class)
+    @OperLog(title = "定时任务同步成品库存接口 ", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "定时任务同步成品库存接口 ", response = R.class)
     public R timeSycProductStock() {
 
         return cdProductStockService.timeSycProductStock();
