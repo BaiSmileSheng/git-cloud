@@ -26,7 +26,7 @@ public class OmsDemandOrderGatherXxlJob {
 
     /**
      * 周五需求数据汇总
-     * 每周五凌晨四点  0 30 6 ? * FRI
+     * 每周五凌晨六点半  0 30 6 ? * FRI
      *
      * @return
      */
@@ -46,7 +46,7 @@ public class OmsDemandOrderGatherXxlJob {
 
     /**
      * 周一需求数据汇总
-     * 每周一凌晨四点  0 30 6 ? * MON
+     * 每周一凌晨六点半  0 30 6 ? * MON
      *
      * @return
      */
