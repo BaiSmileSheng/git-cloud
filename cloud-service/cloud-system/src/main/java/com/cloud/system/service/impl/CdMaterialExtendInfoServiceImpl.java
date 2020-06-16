@@ -101,8 +101,23 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
             fm.execute(destination);
             JCoContext.end(destination);
 
+            StringBuffer remarkBuffer = new StringBuffer("传输成品物料异常信息");
             //返回信息
             JCoTable outputTable = fm.getTableParameterList().getTable("OUTPUT");
+            if (outputTable != null && outputTable.getNumRows() > 0) {
+                //循环取table行数据
+                for (int i = 0; i < outputTable.getNumRows(); i++) {
+                    //设置指针位置
+                    outputTable.setRow(i);
+                    String flag = outputTable.getString("FLAG");
+                    if(!"S".equals(flag)){
+                        String code = outputTable.getString("MATNR");
+                        String msg = outputTable.getString("MESSAGE");
+                        remarkBuffer.append(code + msg);
+                        sysInterfaceLog.setRemark(remarkBuffer.toString());
+                    }
+                }
+            }
             return R.ok();
         } catch (Exception e) {
             e.printStackTrace();

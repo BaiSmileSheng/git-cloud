@@ -9,6 +9,7 @@ import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
+import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.settle.domain.entity.SmsQualityOrder;
 import com.cloud.settle.enums.QualityStatusEnum;
 import com.cloud.settle.service.ISmsQualityOrderService;
@@ -172,6 +173,8 @@ public class SmsQualityOrderController extends BaseController {
     @ApiOperation(value = "新增保存质量索赔(包含文件)", response = R.class)
     public R addSave(@RequestParam("smsQualityOrderReq") String smsQualityOrderReq, @RequestParam("files") MultipartFile[] files) {
         SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq, SmsQualityOrder.class);
+        //校验入参
+        ValidatorUtils.validateEntity(smsQualityOrder);
         String name = getLoginName();
         smsQualityOrder.setCreateBy(name);
         smsQualityOrderService.addSmsQualityOrderAndSysOss(smsQualityOrder, files);
@@ -202,6 +205,9 @@ public class SmsQualityOrderController extends BaseController {
     @ApiOperation(value = "修改保存质量索赔(包含文件信息)", response = R.class)
     public R updateQuality(@RequestParam("smsQualityOrder") String smsQualityOrderReq, @RequestParam("files") MultipartFile[] files) {
         SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq, SmsQualityOrder.class);
+        //校验入参
+        ValidatorUtils.validateEntity(smsQualityOrder,SmsQualityOrder.class);
+        smsQualityOrder.setUpdateBy(getLoginName());
         return smsQualityOrderService.updateSmsQualityOrderAndSysOss(smsQualityOrder, files);
     }
 
