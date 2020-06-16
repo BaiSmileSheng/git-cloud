@@ -4,17 +4,24 @@ import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.system.domain.entity.CdBomInfo;
+import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.domain.entity.CdRawMaterialStock;
+import com.cloud.system.service.ICdFactoryInfoService;
+import com.cloud.system.service.ICdRawMaterialStockService;
 import com.cloud.system.service.SystemFromSap601InterfaceService;
 import com.sap.conn.jco.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Description: sap601系统接口
@@ -26,6 +33,13 @@ import java.util.List;
 @Service
 @Slf4j
 public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601InterfaceService {
+
+
+    @Autowired
+    private ICdFactoryInfoService cdFactoryInfoService;
+
+    @Autowired
+    private ICdRawMaterialStockService cdRawMaterialStockService;
     /**
      * @Description: 获取uph数据
      * @Param: factorys, materials
@@ -195,9 +209,11 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                 inputTableWerks.setValue("WERKS", factoryCode);
             }
             //物料
-            for (String materialCode : materials) {
-                inputTableMatnr.appendRow();
-                inputTableMatnr.setValue("MATNR", materialCode);
+            if(!CollectionUtils.isEmpty(materials)){
+                for (String materialCode : materials) {
+                    inputTableMatnr.appendRow();
+                    inputTableMatnr.setValue("MATNR", materialCode);
+                }
             }
             //执行函数
             JCoContext.begin(destination);
@@ -205,7 +221,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             JCoContext.end(destination);
             //获取返回的参数
             JCoParameterList jCoFields = fm.getExportParameterList();
-            if ("S".equals(jCoFields.getString("TYPE"))) {
+            if ("S".equals(jCoFields.getString("ZTYPE"))) {
                 //获取返回的Table
                 JCoTable outTableOutput = fm.getTableParameterList().getTable("OUTPUT");
                 //从输出table中获取每一行数据
@@ -220,6 +236,8 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                         cdRawMaterialStock.setRawMaterialDesc(outTableOutput.getString("MAKTX"));
                         cdRawMaterialStock.setCurrentStock(outTableOutput.getBigDecimal("LABST"));
                         cdRawMaterialStock.setUnit(outTableOutput.getString("KMEIN"));
+                        cdRawMaterialStock.setCreateBy("定时调用");
+                        cdRawMaterialStock.setCreateTime(new Date());
                         dataList.add(cdRawMaterialStock);
                     }
                 }
@@ -231,6 +249,8 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             log.error("Connect SAP fault, error msg: " + e);
             throw new BusinessException(e.getMessage());
         }
+        R r = new R();
+        r.set("com.cloud.system.domain.entity.CdRawMaterialStock",dataList);
         return R.data(dataList);
     }
 
@@ -320,6 +340,24 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             throw new BusinessException(e.getMessage());
         }
         return R.data(dataList);
+    }
+
+    @Override
+    public R sycRawMaterialStock() {
+        //1.获取工厂全部信息cd_factory_info
+        Example exampleFactoryInfo = new Example(CdFactoryInfo.class);
+        List<CdFactoryInfo> cdFactoryInfoList = cdFactoryInfoService.selectByExample(exampleFactoryInfo);
+        List<String> factoryCodelist = cdFactoryInfoList.stream().map(cdFactoryInfo->{
+            return cdFactoryInfo.getFactoryCode();
+        }).collect(Collectors.toList());
+        R result = queryRawMaterialStockFromSap601(factoryCodelist,  null);
+        if(!result.isSuccess()){
+            return result;
+        }
+        List<CdRawMaterialStock> list = (List<CdRawMaterialStock>)result.get("data");
+        cdRawMaterialStockService.deleteAll();
+        cdRawMaterialStockService.insertList(list);
+        return R.ok();
     }
 
 }
