@@ -45,4 +45,10 @@ public interface SystemFromSap601InterfaceService {
      */
     R queryBomInfoFromSap601(List<String> factorys, List<String> materials);
 
+    /**
+     * 定时同步原材料库存
+     * @return
+     */
+    R sycRawMaterialStock();
+
 }

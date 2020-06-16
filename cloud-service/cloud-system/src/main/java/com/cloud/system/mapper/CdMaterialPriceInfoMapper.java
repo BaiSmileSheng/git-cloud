@@ -27,5 +27,9 @@ public interface CdMaterialPriceInfoMapper extends BaseMapper<CdMaterialPriceInf
                                                                @Param(value = "beginDate") String beginDate,
                                                                @Param(value = "endDate") String endDate);
 
+    /**
+     * 删除全表
+     * @return
+     */
     int deleteAll();
 }
