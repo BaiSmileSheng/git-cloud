@@ -129,6 +129,7 @@ public class CdMaterialInfoController extends BaseController {
      * @return
      */
     @GetMapping("getByMaterialCode")
+    @ApiOperation(value = "根据物料号查询物料信息 ", response = CdMaterialInfo.class)
     public CdMaterialInfo getByMaterialCode(String materialCode) {
         Example example = new Example(CdMaterialInfo.class);
         Example.Criteria criteria = example.createCriteria();
