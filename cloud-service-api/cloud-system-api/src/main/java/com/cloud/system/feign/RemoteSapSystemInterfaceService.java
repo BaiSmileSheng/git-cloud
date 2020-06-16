@@ -23,4 +23,11 @@ public interface RemoteSapSystemInterfaceService {
     @PostMapping("sapSystem/sycRawMaterialStock")
     R sycRawMaterialStock();
 
+    /**
+     * 定时获取BOM清单数据
+     * @return
+     */
+    @PostMapping("sapSystem/sycBomInfo")
+    R sycBomInfo();
+
 }
