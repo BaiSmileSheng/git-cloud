@@ -139,10 +139,9 @@ public class RedisConfig {
     private RedisSentinelConfiguration redisSentinelConfiguration() {
         RedisSentinelConfiguration sentinelConfig = new RedisSentinelConfiguration();
         RedisProperties.Sentinel sentinel = redisProperties.getSentinel();
-        String master = sentinel.getMaster();
         // 根据配置文件里面的master判断是否配置了哨兵
-        if (master != null && !"".equals(master)) {
-            sentinelConfig.setMaster(master);
+        if (sentinel != null && !"".equals(sentinel)) {
+            sentinelConfig.setMaster(sentinel.getMaster());
             Set<RedisNode> sentinels = new HashSet<>();
             List<String> nodes = sentinel.getNodes();
             for (String redisHost : nodes) {
