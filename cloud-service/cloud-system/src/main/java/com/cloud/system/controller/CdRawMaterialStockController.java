@@ -67,9 +67,6 @@ public class CdRawMaterialStockController extends BaseController {
         if (StringUtils.isNotBlank(cdRawMaterialStock.getRawMaterialCode())) {
             criteria.andEqualTo("rawMaterialCode",cdRawMaterialStock.getRawMaterialCode());
         }
-        if (StringUtils.isNotBlank(cdRawMaterialStock.getStoragePoint())) {
-            criteria.andEqualTo("storagePoint",cdRawMaterialStock.getStoragePoint());
-        }
         startPage();
         List<CdRawMaterialStock> cdRawMaterialStockList = cdRawMaterialStockService.selectByExample(example);
         return getDataTable(cdRawMaterialStockList);

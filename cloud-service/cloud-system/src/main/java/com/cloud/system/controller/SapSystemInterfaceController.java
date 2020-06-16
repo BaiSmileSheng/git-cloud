@@ -83,4 +83,14 @@ public class SapSystemInterfaceController {
         return systemFromSap601InterfaceService.queryRawMaterialStockFromSap601(factorys,materials);
     }
 
+    /**
+     * 定时同步原材料库存
+     * @return
+     */
+    @PostMapping("sycRawMaterialStock")
+    @ApiOperation(value = "定时同步原材料库存 ", response = R.class)
+    public R sycRawMaterialStock(){
+        return systemFromSap601InterfaceService.sycRawMaterialStock();
+    }
+
 }

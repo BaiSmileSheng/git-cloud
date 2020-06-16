@@ -36,4 +36,14 @@ public class CdRawMaterialStockServiceImpl extends BaseServiceImpl<CdRawMaterial
         List<CdRawMaterialStock> cdRawMaterialStocks = cdRawMaterialStockMapper.select(cdRawMaterialStock);
         return EasyExcelUtil.writeExcel(cdRawMaterialStocks, "原材料库存报表.xlsx", "sheet", new CdRawMaterialStock());
     }
+
+    /**
+     * 删除全部数据
+     * @return
+     */
+    @Override
+    public R deleteAll() {
+        cdRawMaterialStockMapper.deleteAll();
+        return R.ok();
+    }
 }
