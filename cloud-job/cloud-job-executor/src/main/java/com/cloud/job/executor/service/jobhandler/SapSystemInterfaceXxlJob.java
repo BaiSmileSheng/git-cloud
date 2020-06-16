@@ -24,7 +24,8 @@ public class SapSystemInterfaceXxlJob {
 
     /**
      * 每天定时同步原材料库存
-     * 每日凌晨执行一次  0 0 0 * * ?
+     * 要在传输物料号任务之后
+     * 每日凌晨执行一次  0 0 1 * * ?
      *
      * @param param
      * @return 成功
@@ -41,4 +42,21 @@ public class SapSystemInterfaceXxlJob {
         return ReturnT.SUCCESS;
     }
 
+    /**
+     * 定时获取BOM清单数据
+     * 每日凌晨执行一次  0 0 0 * * ?
+     * @param param
+     * @return
+     * @throws Exception
+     */
+    @XxlJob("sycBomInfo")
+    public ReturnT<String> sycBomInfo(String param) throws Exception {
+        XxlJobLogger.log("定时定时获取BOM清单数据开始");
+        R r = remoteSapSystemInterfaceService.sycBomInfo();
+        if (!r.isSuccess()) {
+            XxlJobLogger.log("定时获取BOM清单异常 :{}", JSONObject.toJSONString(r));
+        }
+        XxlJobLogger.log("定时获取BOM清单结束");
+        return ReturnT.SUCCESS;
+    }
 }
