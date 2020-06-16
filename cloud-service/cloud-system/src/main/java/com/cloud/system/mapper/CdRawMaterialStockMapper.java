@@ -10,4 +10,10 @@ import com.cloud.common.core.dao.BaseMapper;
  */
 public interface CdRawMaterialStockMapper extends BaseMapper<CdRawMaterialStock>{
 
+    /**
+     * 删除全部数据
+     * @return
+     */
+    int deleteAll();
+
 }
