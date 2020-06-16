@@ -155,6 +155,7 @@ public class OmsProductionOrderController extends BaseController {
      * @return OmsProductionOrder
      */
     @GetMapping("selectByProdctOrderCode")
+    @ApiOperation(value = "根据生产订单号查询排产订单信息 ", response = OmsProductionOrder.class)
     public OmsProductionOrder selectByProdctOrderCode(String prodctOrderCode) {
         if (StrUtil.isBlank(prodctOrderCode)) {
             throw new BusinessException("参数：生产订单号为空！");

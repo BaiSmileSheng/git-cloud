@@ -24,4 +24,6 @@ public interface CdBomInfoMapper extends BaseMapper<CdBomInfo>{
      */
     @MapKey("keyValue")
     Map<String,Map<String, String>> selectVersionMap(@RequestParam(value = "dicts") List<Dict> dicts);
+
+    int deleteAll();
 }
