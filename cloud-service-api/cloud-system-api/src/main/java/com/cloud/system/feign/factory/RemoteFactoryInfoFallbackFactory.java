@@ -15,7 +15,7 @@ public class RemoteFactoryInfoFallbackFactory implements FallbackFactory<RemoteF
 
     @Override
     public RemoteFactoryInfoService create(Throwable throwable) {
-        log.error(throwable.getMessage());
+        log.error("RemoteFactoryInfoService错误信息：{}",throwable.getMessage());
         return new RemoteFactoryInfoService() {
             /**
              * 查询工厂信息

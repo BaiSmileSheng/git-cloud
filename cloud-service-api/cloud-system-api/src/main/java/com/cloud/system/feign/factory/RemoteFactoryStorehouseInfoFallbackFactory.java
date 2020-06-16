@@ -18,7 +18,7 @@ public class RemoteFactoryStorehouseInfoFallbackFactory implements FallbackFacto
 
     @Override
     public RemoteFactoryStorehouseInfoService create(Throwable throwable) {
-        log.error(throwable.getMessage());
+        log.error("RemoteFactoryStorehouseInfoService错误信息：{}",throwable.getMessage());
         return new RemoteFactoryStorehouseInfoService() {
 
             /**
@@ -28,7 +28,7 @@ public class RemoteFactoryStorehouseInfoFallbackFactory implements FallbackFacto
              */
             @Override
             public R findOneByExample(CdFactoryStorehouseInfo cdFactoryStorehouseInfo) {
-                return null;
+                return R.error("服务器拥挤，请稍后再试！");
             }
             /**
              * 根据工厂，客户编码分组取接收库位

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class RemoteSettleRatioFallbackFactory implements FallbackFactory<RemoteSettleRatioService> {
     @Override
     public RemoteSettleRatioService create(Throwable throwable) {
-        log.error(throwable.getMessage());
+        log.error("RemoteSettleRatioService错误信息：{}",throwable.getMessage());
         return new RemoteSettleRatioService() {
 
             /**

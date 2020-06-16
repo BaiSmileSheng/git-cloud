@@ -17,7 +17,7 @@ public class RemoteOssFallbackFactory implements FallbackFactory<RemoteOssServic
 
     @Override
     public RemoteOssService create(Throwable throwable) {
-        log.error(throwable.getMessage());
+        log.error("RemoteOssService错误信息：{}",throwable.getMessage());
         return new RemoteOssService() {
 
 
@@ -28,7 +28,7 @@ public class RemoteOssFallbackFactory implements FallbackFactory<RemoteOssServic
              */
             @Override
             public R uploadFile(MultipartFile file, String orderNo) {
-                return R.error();
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             /**
@@ -48,7 +48,7 @@ public class RemoteOssFallbackFactory implements FallbackFactory<RemoteOssServic
              */
             @Override
             public R remove(String ids) {
-                return R.error();
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             /**

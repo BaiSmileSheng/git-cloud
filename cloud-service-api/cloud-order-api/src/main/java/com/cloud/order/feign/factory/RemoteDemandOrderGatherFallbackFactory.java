@@ -13,7 +13,7 @@ public class RemoteDemandOrderGatherFallbackFactory implements FallbackFactory<R
 
     @Override
     public RemoteDemandOrderGatherService create(Throwable throwable) {
-        log.error("需求汇总熔断错误信息：{}",throwable.getMessage());
+        log.error("RemoteDemandOrderGatherService需求汇总熔断错误信息：{}",throwable.getMessage());
         return new RemoteDemandOrderGatherService(){
             /**
              * 周五需求数据汇总
@@ -21,7 +21,7 @@ public class RemoteDemandOrderGatherFallbackFactory implements FallbackFactory<R
              */
             @Override
             public R gatherDemandOrderFriday() {
-                return R.error();
+                return R.error("服务器拥挤，请稍后再试！");
             }
             /**
              * 周一需求数据汇总
@@ -30,7 +30,7 @@ public class RemoteDemandOrderGatherFallbackFactory implements FallbackFactory<R
              */
             @Override
             public R gatherDemandOrderMonday() {
-                return R.error();
+                return R.error("服务器拥挤，请稍后再试！");
             }
         };
     }

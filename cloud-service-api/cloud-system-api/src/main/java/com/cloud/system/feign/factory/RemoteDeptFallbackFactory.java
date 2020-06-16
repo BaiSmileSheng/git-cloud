@@ -16,7 +16,7 @@ public class RemoteDeptFallbackFactory implements FallbackFactory<RemoteDeptServ
 
     @Override
     public RemoteDeptService create(Throwable throwable) {
-        log.error(throwable.getMessage());
+        log.error("RemoteDeptService错误信息：{}",throwable.getMessage());
         return new RemoteDeptService() {
 
             @Override

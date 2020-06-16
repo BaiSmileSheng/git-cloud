@@ -20,7 +20,6 @@ import java.util.List;
 public class RemoteSettleInfoFallbackFactory implements FallbackFactory<RemoteSettleInfoService> {
     @Override
     public RemoteSettleInfoService create(Throwable throwable) {
-        log.error(throwable.getMessage());
         return new RemoteSettleInfoService(){
 
             /**
@@ -30,6 +29,7 @@ public class RemoteSettleInfoFallbackFactory implements FallbackFactory<RemoteSe
              */
             @Override
             public TableDataInfo list(SmsSettleInfo smsSettleInfo) {
+                log.error("RemoteSettleInfoService.list错误：{}",throwable.getMessage());
                 return null;
             }
 
@@ -40,6 +40,7 @@ public class RemoteSettleInfoFallbackFactory implements FallbackFactory<RemoteSe
              */
             @Override
             public List<SmsSettleInfo> listByCondition(SmsSettleInfo smsSettleInfo) {
+                log.error("RemoteSettleInfoService.listByCondition错误：{}",throwable.getMessage());
                 return null;
             }
 
@@ -50,8 +51,8 @@ public class RemoteSettleInfoFallbackFactory implements FallbackFactory<RemoteSe
              */
             @Override
             public R editSave(SmsSettleInfo smsSettleInfo) {
-
-                return R.error("调用settle系统修改加工费失败");
+                log.error("RemoteSettleInfoService.editSave错误：{}",throwable.getMessage());
+                return R.error("服务器拥挤：请稍后再试！");
             }
 
             /**
@@ -61,7 +62,8 @@ public class RemoteSettleInfoFallbackFactory implements FallbackFactory<RemoteSe
              */
             @Override
             public R addSave(SmsSettleInfo smsSettleInfo) {
-                return R.error("调用settle系统新增加工费失败");
+                log.error("RemoteSettleInfoService.addSave错误：{}",throwable.getMessage());
+                return R.error("服务器拥挤：请稍后再试！");
             }
 
             /**
@@ -70,7 +72,8 @@ public class RemoteSettleInfoFallbackFactory implements FallbackFactory<RemoteSe
              */
             @Override
             public R smsSettleInfoCalculate() {
-                return R.error("定时任务计算加工费失败");
+                log.error("RemoteSettleInfoService.smsSettleInfoCalculate错误：{}",throwable.getMessage());
+                return R.error("服务器拥挤：请稍后再试！");
             }
         };
     }
