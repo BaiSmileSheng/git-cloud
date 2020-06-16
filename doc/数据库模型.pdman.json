@@ -2793,15 +2793,21 @@
               "notNull": true
             },
             {
+              "name": "unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "单位"
+            },
+            {
               "name": "delivery_date",
-              "type": "Date",
+              "type": "DefaultString",
               "remark": "",
               "chnname": "交付日期",
               "notNull": true
             },
             {
               "name": "product_date",
-              "type": "Date",
+              "type": "DefaultString",
               "remark": "",
               "chnname": "生产日期"
             },
@@ -4940,15 +4946,27 @@
               "chnname": "结余量"
             },
             {
+              "name": "stock_num",
+              "type": "Money",
+              "remark": "",
+              "chnname": "可用总库存"
+            },
+            {
+              "name": "unit",
+              "type": "IdOrKey",
+              "remark": "",
+              "chnname": "单位"
+            },
+            {
               "name": "delivery_date",
-              "type": "Date",
+              "type": "DefaultString",
               "remark": "",
               "chnname": "交付日期",
               "notNull": true
             },
             {
               "name": "product_date",
-              "type": "Date",
+              "type": "DefaultString",
               "remark": "",
               "chnname": "生产日期"
             },
