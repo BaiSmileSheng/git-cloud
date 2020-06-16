@@ -257,7 +257,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
         }
         R r = new R();
         r.set("data",dataList);
-        return R.data(dataList);
+        return r;
     }
 
     /**
