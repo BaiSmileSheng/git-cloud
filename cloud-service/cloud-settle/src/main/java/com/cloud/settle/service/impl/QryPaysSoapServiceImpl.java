@@ -24,7 +24,9 @@ import tk.mybatis.mapper.entity.Example;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import java.io.PrintWriter;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -134,7 +136,10 @@ public class QryPaysSoapServiceImpl implements IQryPaysSoapService {
             //冗余kms单号
             qryPaysSoapResponse.setKmsNo(qryPaysSoapRequest.getDOC_NO());
         }catch (Exception e){
-            e.printStackTrace();
+            StringWriter w = new StringWriter();
+            e.printStackTrace(new PrintWriter(w));
+            logger.error(
+                    "调用付款接口异常: {}", w.toString());
             throw new BusinessException("调用付款接口异常");
         }
         return qryPaysSoapResponse;
