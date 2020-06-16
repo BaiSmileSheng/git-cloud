@@ -26,7 +26,7 @@ public class OmsInternalOrderResXxlJob {
 
     /**
      * SAP800获取PR数据定时任务
-     * 每周五凌晨三点  0 0 3 ? * FRI
+     * 每周五凌晨三点  0 30 5 ? * FRI
      *
      * @return
      */
@@ -46,7 +46,7 @@ public class OmsInternalOrderResXxlJob {
 
     /**
      * SAP800更新PR数据定时任务
-     * 每周一凌晨三点  0 0 3 ? * MON
+     * 每周一凌晨三点  0 30 5 ? * MON
      *
      * @return
      */
