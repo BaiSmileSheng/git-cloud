@@ -36,6 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -504,7 +506,10 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
             cdProductStockDetail.setCdProductWarehouseList(productWarehouseList);
             return cdProductStockDetail;
         } catch (Exception e) {
-            e.printStackTrace();
+            StringWriter w = new StringWriter();
+            e.printStackTrace(new PrintWriter(w));
+            logger.error(
+                    "获取sap成品库存信息异常: {}", w.toString());
             sysInterfaceLog.setRemark(e.getMessage());
             throw new BusinessException("获取sap成品库存信息异常");
         }finally {

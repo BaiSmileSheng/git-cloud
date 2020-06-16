@@ -38,6 +38,11 @@
                update_by
         from cd_factory_storehouse_info
     </sql>
-
-
+    <select id="batchSelectListByCondition" parameterType="java.util.List" resultMap="CdFactoryStorehouseInfoResult">
+        <include refid="selectCdFactoryStorehouseInfoVo"/>
+        WHERE
+        <foreach collection="list" item="item"  separator="or">
+            (product_factory_code = #{item.productFactoryCode} and customer_code = #{item.customerCode} and del_flag = 0)
+        </foreach>
+    </select>
 </mapper>

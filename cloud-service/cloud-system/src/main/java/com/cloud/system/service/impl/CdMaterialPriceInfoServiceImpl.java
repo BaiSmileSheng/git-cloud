@@ -31,6 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -178,7 +180,10 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            StringWriter w = new StringWriter();
+            e.printStackTrace(new PrintWriter(w));
+            logger.error(
+                    "调SAP接口查加工费/原材料价格 : {}", w.toString());
             throw new BusinessException(e.getMessage());
         }
 
