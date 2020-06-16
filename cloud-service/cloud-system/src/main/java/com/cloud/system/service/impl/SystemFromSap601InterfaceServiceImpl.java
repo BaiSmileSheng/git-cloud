@@ -1,5 +1,6 @@
 package com.cloud.system.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
@@ -8,6 +9,7 @@ import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.domain.entity.CdRawMaterialStock;
+import com.cloud.system.service.ICdBomInfoService;
 import com.cloud.system.service.ICdFactoryInfoService;
 import com.cloud.system.service.ICdRawMaterialStockService;
 import com.cloud.system.service.SystemFromSap601InterfaceService;
@@ -19,6 +21,7 @@ import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,6 +43,9 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
 
     @Autowired
     private ICdRawMaterialStockService cdRawMaterialStockService;
+
+    @Autowired
+    private ICdBomInfoService cdBomInfoService;
     /**
      * @Description: 获取uph数据
      * @Param: factorys, materials
@@ -250,8 +256,8 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             throw new BusinessException(e.getMessage());
         }
         R r = new R();
-        r.set("com.cloud.system.domain.entity.CdRawMaterialStock",dataList);
-        return R.data(dataList);
+        r.set("data",dataList);
+        return r;
     }
 
     /**
@@ -267,9 +273,6 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
         if (factorys.size() <= 0) {
             log.info("============获取BOM清单数据接口传入工厂参数为空！===========");
             return R.error("获取BOM清单数据接口传入工厂参数为空!");
-        } else if (materials.size() <= 0) {
-            log.info("============获取BOM清单数据接口传入物料参数为空！===========");
-            return R.error("获取BOM清单数据接口传入物料参数为空!");
         }
         //定义返回的data体
         List<CdBomInfo> dataList = new ArrayList<>();
@@ -296,10 +299,12 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                 inputTableWerks.appendRow();
                 inputTableWerks.setValue("WERKS", factoryCode);
             }
-            //物料
-            for (String materialCode : materials) {
-                inputTableMatnr.appendRow();
-                inputTableMatnr.setValue("MATNR", materialCode);
+            if(!CollectionUtils.isEmpty(materials)){
+                //物料
+                for (String materialCode : materials) {
+                    inputTableMatnr.appendRow();
+                    inputTableMatnr.setValue("MATNR", materialCode);
+                }
             }
             //执行函数
             JCoContext.begin(destination);
@@ -339,7 +344,33 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             log.error("Connect SAP fault, error msg: " + e);
             throw new BusinessException(e.getMessage());
         }
-        return R.data(dataList);
+        R result = new R();
+        result.set("data",dataList);
+        return result;
+    }
+
+    @Override
+    public R sycBomInfo() {
+        //1.获取工厂全部信息cd_factory_info
+        Example exampleFactoryInfo = new Example(CdFactoryInfo.class);
+        List<CdFactoryInfo> cdFactoryInfoList = cdFactoryInfoService.selectByExample(exampleFactoryInfo);
+
+        //2.删除全部数据
+        cdBomInfoService.deleteAll();
+        //3.连接SAP获取数据
+        for(CdFactoryInfo cdFactoryInfo : cdFactoryInfoList){
+            String factoryCode = cdFactoryInfo.getFactoryCode();
+            R result = queryBomInfoFromSap601(Arrays.asList(factoryCode),null);
+            if(!result.isSuccess()){
+                log.error("连接SAP获取BOM数据异常 req:{},res:{}",factoryCode, JSONObject.toJSON(result));
+                continue;
+            }
+            List<CdBomInfo> cdBomInfoList = (List<CdBomInfo>)result.get("data");
+            if(!CollectionUtils.isEmpty(cdBomInfoList)){
+                cdBomInfoService.insertList(cdBomInfoList);
+            }
+        }
+        return R.ok();
     }
 
     @Override

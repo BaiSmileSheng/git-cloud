@@ -39,4 +39,10 @@ public interface ICdBomInfoService extends BaseService<CdBomInfo> {
      * @return
      */
     Map<String,Map<String, String>> selectVersionMap(List<Dict> dicts);
+
+    /**
+     * 删除全表数据
+     * @return
+     */
+    R deleteAll();
 }

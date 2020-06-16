@@ -56,6 +56,16 @@ public class SapSystemInterfaceController {
     }
 
     /**
+     * 定时获取BOM清单数据
+     * @return
+     */
+    @PostMapping("sycBomInfo")
+    @ApiOperation(value = "定时获取BOM清单数据 ", response = R.class)
+    public R sycBomInfo(){
+        return systemFromSap601InterfaceService.sycBomInfo();
+    }
+
+    /**
      * @Description: 获取SAP系统工厂线体关系数据
      * @Param: []
      * @return: com.cloud.common.core.domain.R

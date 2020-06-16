@@ -165,6 +165,7 @@ public class SmsQualityOrder extends BaseEntity {
      * 申诉时间
      */
     @ExcelProperty(value = "申诉时间",index = 14)
+    @ApiModelProperty(value = "申诉时间")
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     private Date complaintDate;
 
@@ -172,6 +173,7 @@ public class SmsQualityOrder extends BaseEntity {
      * 供应商确认时间
      */
     @ExcelProperty(value = "供应商确认时间",index = 12)
+    @ApiModelProperty(value = "供应商确认时间")
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     private Date supplierConfirmDate;
 

@@ -94,7 +94,7 @@ public class SmsInvoiceInfoController extends BaseController {
     @ApiOperation(value = "新增保存发票信息 ", response = R.class)
     public R addSave(@RequestBody SmsInvoiceInfo smsInvoiceInfo) {
         //校验入参
-        ValidatorUtils.validateEntity(smsInvoiceInfo,SmsInvoiceInfo.class);
+        ValidatorUtils.validateEntity(smsInvoiceInfo);
         smsInvoiceInfoService.insertSelective(smsInvoiceInfo);
         return R.data(smsInvoiceInfo.getId());
     }
