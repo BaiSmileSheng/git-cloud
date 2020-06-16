@@ -206,7 +206,7 @@ public class SmsQualityOrderController extends BaseController {
     public R updateQuality(@RequestParam("smsQualityOrder") String smsQualityOrderReq, @RequestParam("files") MultipartFile[] files) {
         SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq, SmsQualityOrder.class);
         //校验入参
-        ValidatorUtils.validateEntity(smsQualityOrder,SmsQualityOrder.class);
+        ValidatorUtils.validateEntity(smsQualityOrder);
         smsQualityOrder.setUpdateBy(getLoginName());
         return smsQualityOrderService.updateSmsQualityOrderAndSysOss(smsQualityOrder, files);
     }
