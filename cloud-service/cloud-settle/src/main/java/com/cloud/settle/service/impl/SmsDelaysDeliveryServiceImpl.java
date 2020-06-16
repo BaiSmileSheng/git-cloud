@@ -21,24 +21,16 @@ import com.cloud.system.feign.RemoteFactoryLineInfoService;
 import com.cloud.system.feign.RemoteOssService;
 import com.cloud.system.feign.RemoteUserService;
 import io.seata.spring.annotation.GlobalTransactional;
-import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 延期交付索赔 Service业务层处理
@@ -119,7 +111,7 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
      * 定时任务调用批量新增保存延期交付索赔(并发送邮件)
      * @return 成功或失败
      */
-    //@GlobalTransactional
+    @GlobalTransactional
     @Override
     public R batchAddDelaysDelivery() {
         logger.info("定时任务调用批量新增保存延期交付索赔");
@@ -216,7 +208,7 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
      * @param smsDelaysDeliveryReq 延期索赔信息
      * @return 延期索赔单供应商申诉结果成功或失败
      */
-    //@GlobalTransactional
+    @GlobalTransactional
     @Override
     public R supplierAppeal(SmsDelaysDelivery smsDelaysDeliveryReq, MultipartFile[] files) {
         logger.info("延期索赔单供应商申诉(包含文件信息) 单号:{}",smsDelaysDeliveryReq.getDelaysNo());

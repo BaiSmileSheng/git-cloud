@@ -10,12 +10,14 @@ import com.cloud.activiti.service.IActSmsScrapOrderService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
 import com.cloud.common.core.domain.R;
+import com.cloud.common.exception.BusinessException;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
 import com.cloud.settle.enums.ScrapOrderStatusEnum;
 import com.cloud.settle.feign.RemoteSmsScrapOrderService;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteUserService;
 import com.google.common.collect.Maps;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,7 +47,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
      * @return R
      */
     @Override
-//    @GlobalTransactional
+    @GlobalTransactional
     public R startAct(SmsScrapOrder smsScrapOrder, SysUser sysUser) {
         log.info(StrUtil.format("报废申请开启流程（编辑、新增）：参数为{}", smsScrapOrder.toString()));
         //判断状态是否是未提交，如果不是则抛出错误
@@ -56,7 +58,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
             R rAdd = remoteSmsScrapOrderService.addSave(smsScrapOrder);
             if (!rAdd.isSuccess()) {
                 log.info("报废申请保存结果：{}", rAdd.toString());
-                return rAdd;
+                throw new BusinessException(rAdd.getStr("msg"));
             }
             Long id = Long.valueOf(rAdd.get("data").toString());
             smsScrapOrder.setId(id);
@@ -68,7 +70,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
             R rUpdate = remoteSmsScrapOrderService.editSave(smsScrapOrder);
             if (!rUpdate.isSuccess()) {
                 log.info("报废申请更新结果：{}", rUpdate.toString());
-                return rUpdate;
+                throw new BusinessException(rUpdate.getStr("msg"));
             }
         }
         //插入流程物业表  并开启流程
@@ -87,7 +89,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
      * @return R
      */
     @Override
-//    @GlobalTransactional
+    @GlobalTransactional
     public R startActOnlyForList(SmsScrapOrder smsScrapOrder, long userId) {
         log.info(StrUtil.format("报废申请开启流程（列表）：参数为{}", smsScrapOrder.toString()));
         //判断状态是否是未提交，如果不是则抛出错误
@@ -105,7 +107,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
         R rUpdate = remoteSmsScrapOrderService.update(smsScrapOrder);
         if (!rUpdate.isSuccess()) {
-            return rUpdate;
+            throw new BusinessException(rUpdate.getStr("msg"));
         }
         //插入流程物业表  并开启流程
         BizBusiness business = initBusiness(smsScrapOrder, userId);
@@ -124,7 +126,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
      * @return R
      */
     @Override
-//    @GlobalTransactional
+    @GlobalTransactional
     public R audit(BizAudit bizAudit, long userId) {
         log.info(StrUtil.format("报废申请审核：参数为{}", bizAudit.toString()));
         //流程审核业务表
@@ -151,7 +153,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
                 //业务科审核通过传SAP
                 R r = remoteSmsScrapOrderService.autidSuccessToSAP261(smsScrapOrder);
                 if (!r.isSuccess()) {
-                    return r;
+                    throw new BusinessException(r.getStr("msg"));
                 }
             } else {
                 log.error(StrUtil.format("(报废)此状态数据不允许审核：{}", smsScrapOrder.getScrapStatus()));
@@ -163,7 +165,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
                 smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKBH.getCode());
                 R r = remoteSmsScrapOrderService.update(smsScrapOrder);
                 if (!r.isSuccess()) {
-                    return r;
+                    throw new BusinessException(r.getStr("msg"));
                 }
             } else {
                 log.error(StrUtil.format("(报废)此状态数据不允许审核：{}", smsScrapOrder.getScrapStatus()));
