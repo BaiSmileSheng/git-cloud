@@ -15,7 +15,7 @@ public class RemoteCdSettleProductMaterialFallbackFactory implements FallbackFac
 
     @Override
     public RemoteCdSettleProductMaterialService create(Throwable throwable) {
-        log.error(throwable.getMessage());
+        log.error("RemoteCdSettleProductMaterialService错误信息：{}",throwable.getMessage());
         return new RemoteCdSettleProductMaterialService() {
 
             /**

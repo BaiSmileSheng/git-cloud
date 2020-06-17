@@ -16,17 +16,17 @@ import org.springframework.stereotype.Component;
 public class RemoteInterfaceLogFallbackFactory implements FallbackFactory<RemoteInterfaceLogService> {
     @Override
     public RemoteInterfaceLogService create(Throwable throwable) {
-        log.error(throwable.getMessage());
+        log.error("RemoteInterfaceLogService错误信息：{}",throwable.getMessage());
         return new RemoteInterfaceLogService(){
 
             @Override
             public R saveInterfaceLog(SysInterfaceLog sysInterfaceLog) {
-                return null;
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             @Override
             public R updateInterfaceLog(SysInterfaceLog sysInterfaceLog) {
-                return null;
+                return R.error("服务器拥挤，请稍后再试！");
             }
         };
     }

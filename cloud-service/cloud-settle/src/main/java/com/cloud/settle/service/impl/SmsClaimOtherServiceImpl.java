@@ -108,7 +108,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
      * @param files 文件信息
      * @return 新增结果
      */
-    //@GlobalTransactional
+    @GlobalTransactional
     @Override
     public R insertClaimOtherAndOss(SmsClaimOther smsClaimOther, MultipartFile[] files) {
         //1.生成单号 索赔单号生成规则 QT+年月日+4位顺序号，循序号每日清零
@@ -153,7 +153,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
      * @param files 文件信息
      * @return 修改成功或失败
      */
-    //@GlobalTransactional
+    @GlobalTransactional
     @Override
     public R updateClaimOtherAndOss(SmsClaimOther smsClaimOther, MultipartFile[] files) {
         logger.info("修改其他索赔单信息 id:{},claimCode:{}",smsClaimOther.getId(),smsClaimOther.getClaimCode());
@@ -197,7 +197,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
      * @param ids 主键
      * @return 成功或失败
      */
-    //@GlobalTransactional
+    @GlobalTransactional
     @Override
     public R deleteClaimOtherAndOss(String ids) {
         logger.info("批量删除其他索赔单 ids:{}",ids);
@@ -317,7 +317,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
      * @param smsClaimOther 其他索赔信息
      * @return 索赔单供应商申诉结果成功或失败
      */
-    //    @GlobalTransactional
+    @GlobalTransactional
     @Override
     public R supplierAppeal(SmsClaimOther smsClaimOther, MultipartFile[] files) {
         //1.查询索赔单数据,判断状态是否是待提交,待提交可修改

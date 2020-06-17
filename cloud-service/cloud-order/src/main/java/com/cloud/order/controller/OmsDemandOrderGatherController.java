@@ -7,10 +7,7 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.order.domain.entity.OmsDemandOrderGather;
 import com.cloud.order.service.IOmsDemandOrderGatherService;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
@@ -25,6 +22,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("demandOrderGather")
+@Api(tags = "滚动计划需求")
 public class OmsDemandOrderGatherController extends BaseController {
 
     @Autowired
@@ -92,4 +90,23 @@ public class OmsDemandOrderGatherController extends BaseController {
         return toAjax(omsDemandOrderGatherService.deleteByIds(ids));
     }
 
+    /**
+     * 周五需求数据汇总
+     * @return
+     */
+    @GetMapping("gatherDemandOrderFriday")
+    @ApiOperation(value = "周五需求数据汇总 ", response = R.class)
+    public R gatherDemandOrderFriday(){
+        return omsDemandOrderGatherService.gatherDemandOrderFriday();
+    }
+
+    /**
+     * 周一需求数据汇总
+     * @return
+     */
+    @GetMapping("gatherDemandOrderMonday")
+    @ApiOperation(value = "周一需求数据汇总 ", response = R.class)
+    public R gatherDemandOrderMonday(){
+        return omsDemandOrderGatherService.gatherDemandOrderMonday();
+    }
 }

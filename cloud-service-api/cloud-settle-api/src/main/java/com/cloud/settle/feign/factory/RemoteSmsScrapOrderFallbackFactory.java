@@ -14,6 +14,7 @@ public class RemoteSmsScrapOrderFallbackFactory implements FallbackFactory<Remot
 
     @Override
     public RemoteSmsScrapOrderService create(Throwable throwable) {
+        log.error("RemoteSmsScrapOrderService错误：{}",throwable.getMessage());
         return new RemoteSmsScrapOrderService(){
 
             /**
@@ -32,7 +33,7 @@ public class RemoteSmsScrapOrderFallbackFactory implements FallbackFactory<Remot
              */
             @Override
             public R update(SmsScrapOrder smsScrapOrder) {
-                return R.error();
+                return R.error("服务器拥挤：请稍后再试！");
             }
             /**
              * 修改保存报废管理申请  --有状态校验
@@ -42,7 +43,7 @@ public class RemoteSmsScrapOrderFallbackFactory implements FallbackFactory<Remot
             @Override
             public R editSave(SmsScrapOrder smsScrapOrder) {
                 log.error("报废申请编辑服务熔断降级，原因是：{}", throwable.getMessage());
-                return R.error("服务被降级熔断。。");
+                return R.error("服务器拥挤：请稍后再试！");
             }
 
             /**
@@ -52,7 +53,7 @@ public class RemoteSmsScrapOrderFallbackFactory implements FallbackFactory<Remot
              */
             @Override
             public R addSave(SmsScrapOrder smsScrapOrder) {
-                return  R.error();
+                return R.error("服务器拥挤：请稍后再试！");
             }
 
             /**
@@ -62,7 +63,7 @@ public class RemoteSmsScrapOrderFallbackFactory implements FallbackFactory<Remot
              */
             @Override
             public R updatePriceEveryMonth(String month) {
-                return R.error();
+                return R.error("服务器拥挤：请稍后再试！");
             }
             /**
              * 定时任务更新指定月份SAP销售价格
@@ -71,7 +72,7 @@ public class RemoteSmsScrapOrderFallbackFactory implements FallbackFactory<Remot
              */
             @Override
             public R updateSAPPriceEveryMonth(String month) {
-                return R.error();
+                return R.error("服务器拥挤：请稍后再试！");
             }
 
             /**
@@ -81,7 +82,7 @@ public class RemoteSmsScrapOrderFallbackFactory implements FallbackFactory<Remot
              */
             @Override
             public R autidSuccessToSAP261(SmsScrapOrder smsScrapOrder) {
-                return R.error();
+                return R.error("服务器拥挤：请稍后再试！");
             }
         };
     }

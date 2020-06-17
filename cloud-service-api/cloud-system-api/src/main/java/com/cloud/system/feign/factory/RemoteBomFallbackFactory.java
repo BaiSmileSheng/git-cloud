@@ -18,7 +18,7 @@ public class RemoteBomFallbackFactory implements FallbackFactory<RemoteBomServic
 
     @Override
     public RemoteBomService create(Throwable throwable) {
-        log.error(throwable.getMessage());
+        log.error("RemoteBomService错误信息：{}",throwable.getMessage());
         return new RemoteBomService() {
             /**
              * 根据成品物料号、原材料物料号确定一条数据
@@ -40,7 +40,7 @@ public class RemoteBomFallbackFactory implements FallbackFactory<RemoteBomServic
              */
             @Override
             public R checkBomNum(String rawMaterialCode, String productMaterialCode, int applyNum) {
-                return null;
+                return R.error("服务器拥挤，请稍后再试！");
             }
             /**
              * 根据物料号工厂分组取bom版本

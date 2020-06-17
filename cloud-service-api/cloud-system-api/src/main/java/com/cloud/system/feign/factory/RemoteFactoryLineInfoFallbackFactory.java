@@ -14,7 +14,7 @@ public class RemoteFactoryLineInfoFallbackFactory implements FallbackFactory<Rem
 
     @Override
     public RemoteFactoryLineInfoService create(Throwable throwable) {
-        log.error(throwable.getMessage());
+        log.error("RemoteFactoryLineInfoService错误信息：{}",throwable.getMessage());
         return new RemoteFactoryLineInfoService() {
             /**
              * 查询工厂线体关系
@@ -23,7 +23,7 @@ public class RemoteFactoryLineInfoFallbackFactory implements FallbackFactory<Rem
              */
             @Override
             public R listByExample(CdFactoryLineInfo cdFactoryLineInfo) {
-                return null;
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             /**
@@ -33,7 +33,7 @@ public class RemoteFactoryLineInfoFallbackFactory implements FallbackFactory<Rem
              */
             @Override
             public R selectLineCodeBySupplierCode(String supplierCode) {
-                return null;
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             /**
@@ -51,7 +51,7 @@ public class RemoteFactoryLineInfoFallbackFactory implements FallbackFactory<Rem
              */
             @Override
             public R saveFactoryLineInfo() {
-                return null;
+                return R.error("服务器拥挤，请稍后再试！");
             }
         };
     }

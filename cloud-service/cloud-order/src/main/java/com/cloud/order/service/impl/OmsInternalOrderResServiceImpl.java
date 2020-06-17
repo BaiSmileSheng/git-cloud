@@ -2,12 +2,12 @@ package com.cloud.order.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.lang.Console;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
+import com.cloud.common.exception.BusinessException;
 import com.cloud.order.domain.entity.OmsInternalOrderRes;
 import com.cloud.order.mapper.OmsInternalOrderResMapper;
 import com.cloud.order.service.IOmsInternalOrderResService;
@@ -15,10 +15,10 @@ import com.cloud.order.service.IOrderFromSap800InterfaceService;
 import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.feign.RemoteBomService;
 import com.cloud.system.feign.RemoteFactoryInfoService;
+import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -112,14 +112,14 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
 	}
 
     @Override
-//    @GlobalTransactional
+    @GlobalTransactional
     public R SAP800PRFindInternalOrderRes(Date startDate, Date endDate) {
         //删除原有的PR数据
         deleteByMarker("PR");
         //从SAP800获取PR数据
         R prR = orderFromSap800InterfaceService.queryDemandPRFromSap800(startDate,endDate);
         if (!prR.isSuccess()) {
-            return prR;
+            throw new BusinessException(prR.getStr("msg"));
         }
         List<OmsInternalOrderRes> list = (List<OmsInternalOrderRes>) prR.getObj("data");
         if (CollUtil.isEmpty(list)) {
@@ -129,15 +129,4 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
         R rInsert = insert800PR(list);
         return rInsert;
     }
-
-    public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("1");
-        list.add("2");
-        list.add("2");
-        list.add("3");
-        List<Dict> maps = list.stream().map(s -> new Dict().set("aa",s).set("bb","12")).distinct().collect(Collectors.toList());
-        Console.log(maps.toString());
-
-	}
 }

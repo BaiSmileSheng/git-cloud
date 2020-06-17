@@ -17,6 +17,7 @@ public class RemoteCdMaterialPriceInfoFallbackFactory implements FallbackFactory
 
     @Override
     public RemoteCdMaterialPriceInfoService create(Throwable throwable) {
+        log.error("RemoteCdMaterialPriceInfoService错误信息：{}",throwable.getMessage());
         return new RemoteCdMaterialPriceInfoService(){
             /**
              * 根据Example条件查询列表
@@ -58,7 +59,7 @@ public class RemoteCdMaterialPriceInfoFallbackFactory implements FallbackFactory
              */
             @Override
             public R synPrice() {
-                return null;
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
         };

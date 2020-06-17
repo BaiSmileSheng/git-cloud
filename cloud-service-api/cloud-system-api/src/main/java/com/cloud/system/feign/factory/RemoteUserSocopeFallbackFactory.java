@@ -12,7 +12,7 @@ public class RemoteUserSocopeFallbackFactory implements FallbackFactory<RemoteUs
 
     @Override
     public RemoteUserScopeService create(Throwable throwable) {
-        log.error(throwable.getMessage());
+        log.error("RemoteUserScopeService错误信息：{}",throwable.getMessage());
         return new RemoteUserScopeService() {
 
 
