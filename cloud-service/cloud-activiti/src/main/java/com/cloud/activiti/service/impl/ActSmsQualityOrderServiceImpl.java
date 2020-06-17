@@ -2,12 +2,12 @@ package com.cloud.activiti.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.consts.ActivitiConstant;
+import com.cloud.activiti.consts.ActivitiProTitleConstants;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.service.IActSmsQualityOrderService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
-import com.cloud.activiti.consts.ActivitiProTitleConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
@@ -17,6 +17,7 @@ import com.cloud.settle.feign.RemoteQualityOrderService;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteOssService;
 import com.google.common.collect.Maps;
+import io.seata.spring.annotation.GlobalTransactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +80,7 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
      * @param files
      * @return 成功或失败
      */
-    //@GlobalTransactional
+    @GlobalTransactional
     @Override
     public R addSave(Long id,String complaintDescription,MultipartFile[] files, SysUser sysUser) {
 
@@ -167,7 +168,7 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
      * @param bizAudit
      * @return 成功/失败
      */
-    //@GlobalTransactional
+    @GlobalTransactional
     @Override
     public R audit(BizAudit bizAudit,SysUser sysUser) {
         //查询可处理业务逻辑

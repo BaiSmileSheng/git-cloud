@@ -12,6 +12,7 @@ public class RemoteCdMouthRateFallbackFactory implements FallbackFactory<RemoteC
 
     @Override
     public RemoteCdMouthRateService create(Throwable throwable) {
+        log.error("RemoteCdMouthRateService错误信息：{}",throwable.getMessage());
         return new RemoteCdMouthRateService() {
             /**
              * 根据月份查询汇率
@@ -20,7 +21,7 @@ public class RemoteCdMouthRateFallbackFactory implements FallbackFactory<RemoteC
              */
             @Override
             public R findRateByYearMouth(String yearMouth) {
-                return null;
+                return R.error("服务器拥挤，请稍后再试！");
             }
         };
     }

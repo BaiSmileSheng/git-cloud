@@ -1,10 +1,13 @@
 package com.cloud.system.service;
 
+import cn.hutool.core.lang.Dict;
 import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.CdFactoryStorehouseInfo;
 import com.cloud.common.core.service.BaseService;
 
 import java.util.List;
+import java.util.Map;
+
 
 /**
  * 工厂库位 Service接口
@@ -21,4 +24,10 @@ public interface ICdFactoryStorehouseInfoService extends BaseService<CdFactorySt
      */
     R batchInsertOrUpdate(List<CdFactoryStorehouseInfo> list);
 
+    /**
+     * 根据工厂，客户编码分组取接收库位
+     * @param dicts
+     * @return
+     */
+    Map<String, Map<String, String>> selectStorehouseToMap(List<Dict> dicts);
 }

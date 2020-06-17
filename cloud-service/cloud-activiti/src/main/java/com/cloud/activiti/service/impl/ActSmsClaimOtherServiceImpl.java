@@ -80,7 +80,7 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
      * @param files  文件
      * @return 成功或失败
      */
-    //@GlobalTransactional
+    @GlobalTransactional
     @Override
     public R addSave(Long id,String complaintDescription, MultipartFile[] files, SysUser sysUser) {
         SmsClaimOther smsClaimOther = new SmsClaimOther();

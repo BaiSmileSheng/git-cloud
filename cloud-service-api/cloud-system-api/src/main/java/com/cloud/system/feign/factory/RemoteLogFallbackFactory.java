@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RemoteLogFallbackFactory implements FallbackFactory<RemoteLogService> {
     @Override
     public RemoteLogService create(Throwable throwable) {
-        log.error(throwable.getMessage());
+        log.error("RemoteLogService错误信息：{}",throwable.getMessage());
         return new RemoteLogService() {
             @Override
             public R insertOperlog(SysOperLog operLog) {

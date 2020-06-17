@@ -108,7 +108,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
      * @param files 质量索赔对应的文件信息
      * @return
      */
-//    @GlobalTransactional
+    @GlobalTransactional
     @Override
     public R addSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder, MultipartFile[] files) {
         //1.索赔单号生成规则 ZL+年月日+4位顺序号，循序号每日清零
@@ -141,7 +141,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
      * @param files 质量索赔对应的文件信息
      * @return
      */
-//    @GlobalTransactional
+    @GlobalTransactional
     @Override
     public R updateSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder, MultipartFile[] files) {
         logger.info("修改质量索赔单信息 id:{},qualityNo:{}",smsQualityOrder.getId(),smsQualityOrder.getQualityNo());
@@ -175,7 +175,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
      * @param ids 主键id
      * @return 删除结果成功或失败
      */
-//    @GlobalTransactional
+    @GlobalTransactional
     @Override
     public R deleteSmsQualityOrderAndSysOss(String ids) {
         logger.info("批量删除质量索赔单 ids:{}",ids);
@@ -223,7 +223,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
      * @param ids 主键id
      * @return 提交结果成功或失败
      */
-    //@GlobalTransactional
+    @GlobalTransactional
     @Override
     public R submit(String ids) {
         logger.info("提交质量索赔单 ids:{}",ids);
@@ -303,7 +303,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
      * @param smsQualityOrder 质量索赔信息
      * @return 索赔单供应商申诉结果成功或失败
      */
-    //    @GlobalTransactional
+    @GlobalTransactional
     @Override
     public R supplierAppeal(SmsQualityOrder smsQualityOrder, MultipartFile[] files) {
         //1.查询索赔单数据,判断状态是否是待提交,待提交可修改

@@ -17,6 +17,7 @@ public class RemoteCdSapSalePriceInfoFallbackFactory implements FallbackFactory<
 
     @Override
     public RemoteCdSapSalePriceInfoService create(Throwable throwable) {
+        log.error("RemoteCdSapSalePriceInfoService错误信息：{}",throwable.getMessage());
         return new RemoteCdSapSalePriceInfoService(){
 
             /**
@@ -50,7 +51,7 @@ public class RemoteCdSapSalePriceInfoFallbackFactory implements FallbackFactory<
              */
             @Override
             public R updateByMarketingOrganizationAndMaterialCode(CdSapSalePrice cdSapSalePrice) {
-                return R.error();
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             /**
@@ -58,7 +59,7 @@ public class RemoteCdSapSalePriceInfoFallbackFactory implements FallbackFactory<
              */
             @Override
             public R addSave(CdSapSalePrice cdSapSalePrice) {
-                return R.error();
+                return R.error("服务器拥挤，请稍后再试！");
             }
         };
     }
