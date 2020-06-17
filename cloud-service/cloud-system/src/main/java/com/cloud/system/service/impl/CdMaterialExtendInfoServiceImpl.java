@@ -113,10 +113,11 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
                     outputTable.setRow(i);
                     String flag = outputTable.getString("FLAG");
                     if(!"S".equals(flag)){
-                        String code = outputTable.getString("MATNR");
+                        String materialCode = outputTable.getString("MATNR");
                         String msg = outputTable.getString("MESSAGE");
-                        remarkBuffer.append(code + msg);
+                        remarkBuffer.append(materialCode + msg);
                         sysInterfaceLog.setRemark(remarkBuffer.toString());
+                        logger.error("传输成品物料异常信息异常 materialCode:{},res:{}",materialCode,msg);
                     }
                 }
             }

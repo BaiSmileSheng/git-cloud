@@ -37,5 +37,5 @@ public interface RemoteMaterialService {
      * @return
      */
     @GetMapping("material/getByMaterialCode")
-    CdMaterialInfo getByMaterialCode(@RequestParam(value = "materialCode") String materialCode);
+    R getByMaterialCode(@RequestParam(value = "materialCode") String materialCode);
 }

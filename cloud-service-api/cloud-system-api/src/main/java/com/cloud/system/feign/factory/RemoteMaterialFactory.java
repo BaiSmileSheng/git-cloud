@@ -30,8 +30,8 @@ public class RemoteMaterialFactory implements FallbackFactory<RemoteMaterialServ
              * @return
              */
             @Override
-            public CdMaterialInfo getByMaterialCode(String materialCode) {
-                return null;
+            public R getByMaterialCode(String materialCode) {
+                return R.error("服务拥挤请稍后再试");
             }
         };
     }

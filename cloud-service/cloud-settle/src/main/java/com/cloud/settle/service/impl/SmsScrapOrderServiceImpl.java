@@ -3,6 +3,7 @@ package com.cloud.settle.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
@@ -105,7 +106,12 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         scrapNo.append("BF").append(DateUtils.dateTime()).append(seq);
         smsScrapOrder.setScrapNo(scrapNo.toString());
         //生产单号获取排产订单信息
-        OmsProductionOrder omsProductionOrder = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
+        R omsProductionOrderResult = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
+        if(!omsProductionOrderResult.isSuccess()){
+            log.error("根据生产单号获取排产订单信息失败 productOrderCode:{},res:{}",productOrderCode, JSONObject.toJSON(omsProductionOrderResult));
+            throw new BusinessException(omsProductionOrderResult.get("msg").toString());
+        }
+        OmsProductionOrder omsProductionOrder = omsProductionOrderResult.getData(OmsProductionOrder.class);
         smsScrapOrder.setMachiningPrice(omsProductionOrder.getProcessCost());
         //根据线体号查询供应商编码
         CdFactoryLineInfo factoryLineInfo = remotefactoryLineInfoService.selectInfoByCodeLineCode(omsProductionOrder.getProductLineCode());
@@ -149,10 +155,11 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         }
         int applyNum = smsScrapOrder.getScrapAmount();//申请量
         //生产单号获取排产订单信息
-        OmsProductionOrder omsProductionOrder = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
-        if (omsProductionOrder == null) {
+        R omsProductionOrderResult = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
+        if (!omsProductionOrderResult.isSuccess()) {
             return R.error("订单信息不存在！");
         }
+        OmsProductionOrder omsProductionOrder = omsProductionOrderResult.getData(OmsProductionOrder.class);
         //5、校验申请量是否大于订单量
         BigDecimal productNum = omsProductionOrder.getProductNum();
         if (new BigDecimal(applyNum).compareTo(productNum) > 0) {
