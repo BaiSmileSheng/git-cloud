@@ -3,12 +3,12 @@ package com.cloud.activiti.service.impl;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.consts.ActivitiConstant;
+import com.cloud.activiti.consts.ActivitiProTitleConstants;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.service.IActSmsSupplementaryOrderService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
-import com.cloud.activiti.consts.ActivitiProTitleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
@@ -17,6 +17,7 @@ import com.cloud.settle.feign.RemoteSmsSupplementaryOrderService;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteUserService;
 import com.google.common.collect.Maps;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,7 +48,7 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
      * @return R
      */
     @Override
-//    @GlobalTransactional
+    @GlobalTransactional
     public R startAct(SmsSupplementaryOrder smsSupplementaryOrder, SysUser sysUser,String procDefId,String procName) {
         log.info(StrUtil.format("物耗申请开启流程（新增、编辑）：参数为{}", smsSupplementaryOrder.toString()));
         if (smsSupplementaryOrder.getId() == null) {
@@ -57,7 +58,7 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
             smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode());
             R rAdd = remoteSmsSupplementaryOrderService.addSave(smsSupplementaryOrder);
             if (!rAdd.isSuccess()) {
-                return rAdd;
+                throw new BusinessException(rAdd.getStr("msg"));
             }
             Long id = Long.valueOf(rAdd.get("data").toString());
             smsSupplementaryOrder.setId(id);
@@ -68,7 +69,7 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
             smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode());
             R rUpdate = remoteSmsSupplementaryOrderService.editSave(smsSupplementaryOrder);
             if (!rUpdate.isSuccess()) {
-                return rUpdate;
+                throw new BusinessException(rUpdate.getStr("msg"));
             }
         }
         //插入流程物业表  并开启流程
@@ -82,7 +83,7 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
     }
 
     @Override
-//    @GlobalTransactional
+    @GlobalTransactional
     public R startActList(List<SmsSupplementaryOrder> smsSupplementaryOrders, SysUser sysUser, String procDefId, String procName) {
         smsSupplementaryOrders.forEach(smsSupplementaryOrder->{
             R r = startAct(smsSupplementaryOrder, sysUser, procDefId, procName);
@@ -101,7 +102,7 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
      * @return
      */
     @Override
-//    @GlobalTransactional
+    @GlobalTransactional
     public R startActOnlyForList(SmsSupplementaryOrder smsSupplementaryOrder, long userId) {
         log.info(StrUtil.format("物耗申请开启流程（列表）：参数为{}", smsSupplementaryOrder.toString()));
         //列表提交  更新数据  开启流程
@@ -119,7 +120,7 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
         smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode());
         R rUpdate = remoteSmsSupplementaryOrderService.update(smsSupplementaryOrder);
         if (!rUpdate.isSuccess()) {
-            return rUpdate;
+            throw new BusinessException(rUpdate.getStr("msg"));
         }
         //插入流程物业表  并开启流程
         BizBusiness business = initBusiness(smsSupplementaryOrder, userId);
@@ -138,7 +139,7 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
      * @return R
      */
     @Override
-//    @GlobalTransactional
+    @GlobalTransactional
     public R audit(BizAudit bizAudit, long userId) {
         log.info(StrUtil.format("物耗申请审核：参数为{}", bizAudit.toString()));
         //流程审核业务表
@@ -168,7 +169,7 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
                 //小微主审核通过传SAP
                 R r = remoteSmsSupplementaryOrderService.autidSuccessToSAPY61(smsSupplementaryOrder);
                 if (!r.isSuccess()) {
-                    return r;
+                    throw new BusinessException(r.getStr("msg"));
                 }
                 smsSupplementaryOrder = (SmsSupplementaryOrder) r.get("data");
             } else {
@@ -190,8 +191,9 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
         if (r.isSuccess()) {
             //审批 推进工作流
             return actTaskService.audit(bizAudit, userId);
+        }else{
+            throw new BusinessException(r.getStr("msg"));
         }
-        return R.error();
     }
 
     /**

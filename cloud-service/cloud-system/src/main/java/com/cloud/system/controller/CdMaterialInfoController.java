@@ -5,23 +5,9 @@ import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.enums.StatusEnums;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
-import io.swagger.annotations.*;
-import tk.mybatis.mapper.entity.Example;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.cloud.common.core.domain.R;
-import com.cloud.common.core.controller.BaseController;
 import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.service.ICdMaterialInfoService;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
@@ -114,6 +100,13 @@ public class CdMaterialInfoController extends BaseController {
     @ApiOperation(value = "查询所有有效的物料数据 ", response = R.class)
     public R selectListByDelFlag(){
         List<CdMaterialInfo> cdMaterialInfos = cdMaterialInfoService.select(CdMaterialInfo.builder().delFlag("0").build());
+        return R.data(cdMaterialInfos);
+    }
+
+    @PostMapping("selectListByMaterialInfo")
+    @ApiOperation(value = "根据条件查询List ", response = R.class)
+    public R selectListByDelFlag(@RequestBody CdMaterialInfo cdMaterialInfo){
+        List<CdMaterialInfo> cdMaterialInfos = cdMaterialInfoService.select(cdMaterialInfo);
         return R.data(cdMaterialInfos);
     }
 

@@ -2793,15 +2793,21 @@
               "notNull": true
             },
             {
+              "name": "unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "单位"
+            },
+            {
               "name": "delivery_date",
-              "type": "Date",
+              "type": "DefaultString",
               "remark": "",
               "chnname": "交付日期",
               "notNull": true
             },
             {
               "name": "product_date",
-              "type": "Date",
+              "type": "DefaultString",
               "remark": "",
               "chnname": "生产日期"
             },
@@ -3295,10 +3301,10 @@
               "fields": [
                 "product_material_code",
                 "bom_version",
-                "weeks",
-                "place",
                 "delivery_date",
-                "version"
+                "version",
+                "customer_code",
+                "product_factory_code"
               ]
             }
           ],
@@ -3536,11 +3542,10 @@
               "isUnique": true,
               "fields": [
                 "product_material_code",
+                "product_factory_code",
+                "customer_code",
                 "bom_version",
-                "version",
-                "delivery_date",
-                "weeks",
-                "place"
+                "delivery_date"
               ]
             }
           ],
@@ -3642,18 +3647,23 @@
               "defaultValue": "''"
             },
             {
+              "name": "product_type",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "产品类别"
+            },
+            {
+              "name": "life_cycle",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生命周期"
+            },
+            {
               "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
               "chnname": "生产工厂编码",
               "notNull": true
-            },
-            {
-              "name": "product_factory_desc",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "生产工厂描述",
-              "defaultValue": "''"
             },
             {
               "name": "customer_code",
@@ -3732,13 +3742,6 @@
               "notNull": true
             },
             {
-              "name": "plan_order_order",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "计划订单号",
-              "defaultValue": "''"
-            },
-            {
               "name": "status",
               "type": "Char",
               "remark": "0：初始，1：待传SAP，2：传SAP中，3：已传SAP，4：传SAP异常",
@@ -3756,9 +3759,15 @@
               "defaultValue": "''"
             },
             {
+              "name": "plan_order_order",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "计划订单号"
+            },
+            {
               "name": "sap_messages",
               "type": "Intro",
-              "remark": "传SAP返回信息",
+              "remark": "",
               "chnname": "SAP返回信息"
             },
             {
@@ -3809,11 +3818,10 @@
               "isUnique": true,
               "fields": [
                 "product_material_code",
+                "product_factory_code",
+                "customer_code",
                 "bom_version",
-                "weeks",
-                "place",
-                "delivery_date",
-                "version"
+                "delivery_date"
               ]
             }
           ],
@@ -3915,18 +3923,23 @@
               "defaultValue": "''"
             },
             {
+              "name": "product_type",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "产品类别"
+            },
+            {
+              "name": "life_cycle",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生命周期"
+            },
+            {
               "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
               "chnname": "生产工厂编码",
               "notNull": true
-            },
-            {
-              "name": "product_factory_desc",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "生产工厂描述",
-              "defaultValue": "''"
             },
             {
               "name": "customer_code",
@@ -4005,13 +4018,6 @@
               "notNull": true
             },
             {
-              "name": "plan_order_order",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "计划订单号",
-              "defaultValue": "''"
-            },
-            {
               "name": "status",
               "type": "Char",
               "remark": "0：初始，1：待传SAP，2：传SAP中，3：已传SAP，4：传SAP异常",
@@ -4021,9 +4027,23 @@
               "defaultValue": "''"
             },
             {
+              "name": "audit_status",
+              "type": "DefaultString",
+              "remark": "0：无需审核，1：审核中，2：审核完成",
+              "chnname": "审核状态",
+              "notNull": false,
+              "defaultValue": "''"
+            },
+            {
+              "name": "plan_order_order",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "计划订单号"
+            },
+            {
               "name": "sap_messages",
               "type": "Intro",
-              "remark": "传SAP返回信息",
+              "remark": "",
               "chnname": "SAP返回信息"
             },
             {
@@ -4074,11 +4094,10 @@
               "isUnique": true,
               "fields": [
                 "product_material_code",
+                "product_factory_code",
+                "customer_code",
                 "bom_version",
-                "weeks",
-                "place",
-                "delivery_date",
-                "version"
+                "delivery_date"
               ]
             }
           ],
@@ -4624,7 +4643,9 @@
               "fields": [
                 "order_type",
                 "product_material_code",
-                "bom_version"
+                "bom_version",
+                "product_factory_code",
+                "product_start_date"
               ]
             }
           ],
@@ -4941,15 +4962,27 @@
               "chnname": "结余量"
             },
             {
+              "name": "stock_num",
+              "type": "Money",
+              "remark": "",
+              "chnname": "可用总库存"
+            },
+            {
+              "name": "unit",
+              "type": "IdOrKey",
+              "remark": "",
+              "chnname": "单位"
+            },
+            {
               "name": "delivery_date",
-              "type": "Date",
+              "type": "DefaultString",
               "remark": "",
               "chnname": "交付日期",
               "notNull": true
             },
             {
               "name": "product_date",
-              "type": "Date",
+              "type": "DefaultString",
               "remark": "",
               "chnname": "生产日期"
             },
@@ -5184,7 +5217,6 @@
               "fields": [
                 "product_material_code",
                 "raw_material_code",
-                "status",
                 "delivery_date"
               ]
             }
@@ -5697,7 +5729,6 @@
               "name": "idx_join_index",
               "isUnique": true,
               "fields": [
-                "pid",
                 "material_code",
                 "bom_version"
               ]
@@ -6527,6 +6558,18 @@
               "defaultValue": "''"
             },
             {
+              "name": "product_type",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "产品类别"
+            },
+            {
+              "name": "life_cycle",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生命周期"
+            },
+            {
               "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
@@ -6785,6 +6828,18 @@
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "''"
+            },
+            {
+              "name": "product_type",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "产品类别"
+            },
+            {
+              "name": "life_cycle",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生命周期"
             },
             {
               "name": "product_factory_code",
@@ -9870,7 +9925,7 @@
               "isUnique": true,
               "fields": [
                 "product_material_code",
-                "del_flag"
+                "product_factory_code"
               ]
             }
           ],
@@ -10038,7 +10093,7 @@
               "isUnique": false,
               "fields": [
                 "product_material_code",
-                "del_flag"
+                "product_factory_code"
               ]
             }
           ],
@@ -10198,7 +10253,7 @@
               "isUnique": false,
               "fields": [
                 "product_material_code",
-                "del_flag"
+                "product_factory_code"
               ]
             }
           ],
@@ -10365,8 +10420,7 @@
               "isUnique": false,
               "fields": [
                 "product_material_code",
-                "storehouse",
-                "del_flag"
+                "product_factory_code"
               ]
             }
           ],
@@ -10459,13 +10513,6 @@
               "notNull": true
             },
             {
-              "name": "storage_point",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "仓储点",
-              "notNull": true
-            },
-            {
               "name": "current_stock",
               "type": "Money",
               "remark": "",
@@ -10521,8 +10568,7 @@
               "isUnique": true,
               "fields": [
                 "raw_material_code",
-                "del_flag",
-                "storage_point"
+                "product_factory_code"
               ]
             }
           ],
@@ -10665,8 +10711,7 @@
               "name": "idx_join_index",
               "isUnique": true,
               "fields": [
-                "factory_code",
-                "del_flag"
+                "factory_code"
               ]
             }
           ],
@@ -11683,7 +11728,7 @@
               "isUnique": true,
               "fields": [
                 "produce_line_code",
-                "del_flag"
+                "product_factory_code"
               ]
             }
           ],
@@ -12238,7 +12283,7 @@
               "relationNoShow": true
             }
           ],
-          "chnname": "总承BOM清单表"
+          "chnname": "总成BOM清单表"
         },
         {
           "title": "cd_material_extend_info",
@@ -12350,7 +12395,7 @@
               "name": "idx_join_index",
               "isUnique": true,
               "fields": [
-                "del_flag"
+                "material_code"
               ]
             }
           ],

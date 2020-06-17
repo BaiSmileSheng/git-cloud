@@ -12,7 +12,7 @@ public class RemoteDictDataFallbackFactory implements FallbackFactory<RemoteDict
 
     @Override
     public RemoteDictDataService create(Throwable throwable) {
-        log.error(throwable.getMessage());
+        log.error("RemoteDictDataService错误信息：{}",throwable.getMessage());
         return new RemoteDictDataService() {
 
             /**

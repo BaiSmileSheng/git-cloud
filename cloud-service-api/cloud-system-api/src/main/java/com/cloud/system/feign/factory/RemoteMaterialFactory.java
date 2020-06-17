@@ -12,16 +12,16 @@ import org.springframework.stereotype.Component;
 public class RemoteMaterialFactory implements FallbackFactory<RemoteMaterialService> {
     @Override
     public RemoteMaterialService create(Throwable throwable) {
-        log.error(throwable.getMessage());
+        log.error("RemoteMaterialService错误信息：{}",throwable.getMessage());
         return new RemoteMaterialService() {
             @Override
             public R saveMaterialInfo() {
-                return null;
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             @Override
             public R updateUphBySap() {
-                return null;
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             /**

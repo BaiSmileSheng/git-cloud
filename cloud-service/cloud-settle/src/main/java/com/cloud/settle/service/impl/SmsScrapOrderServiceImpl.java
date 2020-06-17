@@ -21,6 +21,7 @@ import com.cloud.system.domain.entity.*;
 import com.cloud.system.enums.SettleRatioEnum;
 import com.cloud.system.feign.*;
 import com.sap.conn.jco.*;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -76,7 +77,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         //校验
         R rCheck = checkScrapOrderCondition(smsScrapOrder,smsScrapOrderCheck.getProductOrderCode());
         if (!rCheck.isSuccess()) {
-            return rCheck;
+            throw new BusinessException(rCheck.getStr("msg"));
         }
         int rows = updateByPrimaryKeySelective(smsScrapOrder);
         return rows > 0 ? R.ok() : R.error("更新错误！");
@@ -96,7 +97,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         //校验
         R rCheck = checkScrapOrderCondition(smsScrapOrder,productOrderCode);
         if (!rCheck.isSuccess()) {
-            return rCheck;
+            throw new BusinessException(rCheck.getStr("msg"));
         }
 
         String seq = remoteSequeceService.selectSeq("scrap_seq", 4);
@@ -289,7 +290,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
      * @return
      */
     @Override
-//    @GlobalTransactional
+    @GlobalTransactional
     public R updateSAPPriceEveryMonth(String month) {
         //查询上个月、待结算的物耗申请中的物料号，公司编号
         List<Map<String,String>> materialCodeComCodeList = smsScrapOrderMapper.selectMaterialAndCompanyCodeGroupBy(month, CollUtil.newArrayList(ScrapOrderStatusEnum.BF_ORDER_STATUS_DJS.getCode()));
