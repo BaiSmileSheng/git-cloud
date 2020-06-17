@@ -23,7 +23,7 @@ import java.util.List;
  * @date 2020-06-16
  */
 @RestController
-@RequestMapping("demandOrderGatherEdit")
+@RequestMapping("demandOrderGatherEditHis")
 public class OmsDemandOrderGatherEditHisController extends BaseController {
 
     @Autowired
