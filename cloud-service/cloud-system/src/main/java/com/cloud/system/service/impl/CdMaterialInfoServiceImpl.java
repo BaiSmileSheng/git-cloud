@@ -230,4 +230,14 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
         return R.ok();
     }
 
+    /**
+     * 根据物料号集合查询物料信息
+     * @param materialCodes
+     * @param materialType
+     * @return
+     */
+    @Override
+    public R selectInfoByInMaterialCodeAndMaterialType(List<String> materialCodes,String materialType) {
+        return R.data(cdMaterialInfoMapper.selectInfoByInMaterialCodeAndMaterialType(materialCodes, materialType));
+    }
 }
