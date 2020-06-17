@@ -3647,18 +3647,23 @@
               "defaultValue": "''"
             },
             {
+              "name": "product_type",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "产品类别"
+            },
+            {
+              "name": "life_cycle",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生命周期"
+            },
+            {
               "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
               "chnname": "生产工厂编码",
               "notNull": true
-            },
-            {
-              "name": "product_factory_desc",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "生产工厂描述",
-              "defaultValue": "''"
             },
             {
               "name": "customer_code",
@@ -3737,13 +3742,6 @@
               "notNull": true
             },
             {
-              "name": "plan_order_order",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "计划订单号",
-              "defaultValue": "''"
-            },
-            {
               "name": "status",
               "type": "Char",
               "remark": "0：初始，1：待传SAP，2：传SAP中，3：已传SAP，4：传SAP异常",
@@ -3761,9 +3759,15 @@
               "defaultValue": "''"
             },
             {
+              "name": "plan_order_order",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "计划订单号"
+            },
+            {
               "name": "sap_messages",
               "type": "Intro",
-              "remark": "传SAP返回信息",
+              "remark": "",
               "chnname": "SAP返回信息"
             },
             {
@@ -3919,18 +3923,23 @@
               "defaultValue": "''"
             },
             {
+              "name": "product_type",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "产品类别"
+            },
+            {
+              "name": "life_cycle",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生命周期"
+            },
+            {
               "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
               "chnname": "生产工厂编码",
               "notNull": true
-            },
-            {
-              "name": "product_factory_desc",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "生产工厂描述",
-              "defaultValue": "''"
             },
             {
               "name": "customer_code",
@@ -4009,13 +4018,6 @@
               "notNull": true
             },
             {
-              "name": "plan_order_order",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "计划订单号",
-              "defaultValue": "''"
-            },
-            {
               "name": "status",
               "type": "Char",
               "remark": "0：初始，1：待传SAP，2：传SAP中，3：已传SAP，4：传SAP异常",
@@ -4025,9 +4027,23 @@
               "defaultValue": "''"
             },
             {
+              "name": "audit_status",
+              "type": "DefaultString",
+              "remark": "0：无需审核，1：审核中，2：审核完成",
+              "chnname": "审核状态",
+              "notNull": false,
+              "defaultValue": "''"
+            },
+            {
+              "name": "plan_order_order",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "计划订单号"
+            },
+            {
               "name": "sap_messages",
               "type": "Intro",
-              "remark": "传SAP返回信息",
+              "remark": "",
               "chnname": "SAP返回信息"
             },
             {
@@ -6542,6 +6558,18 @@
               "defaultValue": "''"
             },
             {
+              "name": "product_type",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "产品类别"
+            },
+            {
+              "name": "life_cycle",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生命周期"
+            },
+            {
               "name": "product_factory_code",
               "type": "DefaultString",
               "remark": "",
@@ -6800,6 +6828,18 @@
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "''"
+            },
+            {
+              "name": "product_type",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "产品类别"
+            },
+            {
+              "name": "life_cycle",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生命周期"
             },
             {
               "name": "product_factory_code",
