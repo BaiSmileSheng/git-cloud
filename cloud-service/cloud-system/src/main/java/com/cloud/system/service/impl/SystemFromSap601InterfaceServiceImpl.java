@@ -365,7 +365,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             R result = queryBomInfoFromSap601(Arrays.asList(factoryCode),null);
             if(!result.isSuccess()){
                 log.error("连接SAP获取BOM数据异常 req:{},res:{}",factoryCode, JSONObject.toJSON(result));
-                continue;
+                throw new BusinessException(result.get("msg").toString());
             }
             List<CdBomInfo> cdBomInfoList = (List<CdBomInfo>)result.get("data");
             if(!CollectionUtils.isEmpty(cdBomInfoList)){
