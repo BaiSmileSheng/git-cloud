@@ -48,8 +48,8 @@ public class EasyExcelUtil {
             excelReader = EasyExcel.read(excel.getInputStream(), object.getClass(), excelListener).build();
             ReadSheet readSheet = EasyExcel.readSheet(sheetIndex).build();
             excelReader.read(readSheet);
-        } catch (Exception e) {
-            throw new BusinessException("导入Excel失败，请联系网站管理员！");
+        } catch (IOException e) {
+            throw new BusinessException(e.getMessage());
         } finally {
             // 这里千万别忘记关闭，读的时候会创建临时文件，到时磁盘会崩的
             excelReader.finish();

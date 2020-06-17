@@ -12,7 +12,7 @@ public class RemoteSupplierInfoFallbackFactory implements FallbackFactory<Remote
 
     @Override
     public RemoteSupplierInfoService create(Throwable throwable) {
-        log.error("RemoteSupplierInfoService错误信息：{}",throwable.getMessage());
+
         return new RemoteSupplierInfoService() {
 
             /**
@@ -22,6 +22,7 @@ public class RemoteSupplierInfoFallbackFactory implements FallbackFactory<Remote
              */
             @Override
             public CdSupplierInfo getByNick(String loginName) {
+                log.error("RemoteSupplierInfoService.getByNick错误信息：{}",throwable.getMessage());
                 return null;
             }
         };

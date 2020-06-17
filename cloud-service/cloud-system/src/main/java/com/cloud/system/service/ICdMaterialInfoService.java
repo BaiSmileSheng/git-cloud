@@ -1,8 +1,8 @@
 package com.cloud.system.service;
 
 import com.cloud.common.core.domain.R;
-import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.common.core.service.BaseService;
+import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.webService.material.RowRisk;
 
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.List;
  * @author ltq
  * @date 2020-06-01
  */
-public interface ICdMaterialInfoService extends BaseService<CdMaterialInfo>{
+public interface ICdMaterialInfoService extends BaseService<CdMaterialInfo> {
     /**
      * @Description: 保存MDM接口获取的物料信息数据
      * @Param: []
@@ -22,6 +22,7 @@ public interface ICdMaterialInfoService extends BaseService<CdMaterialInfo>{
      * @Date: 2020/5/29
      */
     R saveMaterialInfo();
+
     /**
      * @Description: 接口获取MDM物料信息
      * @Param: [list, pageAll, page, batchId]
@@ -30,6 +31,7 @@ public interface ICdMaterialInfoService extends BaseService<CdMaterialInfo>{
      * @Date: 2020/5/29
      */
     R materialInfoInterface(List<RowRisk> list, int page, String batchId);
+
     /**
      * @Description: 根据工厂、物料批量更新
      * @Param: [list]
@@ -38,6 +40,7 @@ public interface ICdMaterialInfoService extends BaseService<CdMaterialInfo>{
      * @Date: 2020/6/5
      */
     int updateBatchByFactoryAndMaterial(List<CdMaterialInfo> list);
+
     /**
      * @Description: 更新SAP获取的UPH数据
      * @Param: []
@@ -46,4 +49,11 @@ public interface ICdMaterialInfoService extends BaseService<CdMaterialInfo>{
      * @Date: 2020/6/8
      */
     R updateUphBySap();
-    }
+
+    /**
+     * 根据物料号集合查询物料信息
+     * @param materialCodes
+     * @return
+     */
+    R selectInfoByInMaterialCodeAndMaterialType(List<String> materialCodes,String materialType);
+}
