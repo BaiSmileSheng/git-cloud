@@ -1,6 +1,5 @@
 package com.cloud.common.core.domain;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.ObjectUtil;
 import com.cloud.common.constant.Constants;
@@ -41,7 +40,7 @@ public class R extends Dict {
 
     public static R data(Object obj) {
         if (ObjectUtil.isEmpty(obj)) {
-            R.error("数据为空！");
+            return R.error("数据为空！");
         }
         R r = new R();
         r.put("data", obj);
