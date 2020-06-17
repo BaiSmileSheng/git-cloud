@@ -1,8 +1,8 @@
 package com.cloud.system.controller;
 
+import cn.hutool.core.lang.Dict;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.DeleteFlagConstants;
-import cn.hutool.core.lang.Dict;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -12,11 +12,7 @@ import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.system.domain.entity.CdFactoryStorehouseInfo;
 import com.cloud.system.service.ICdFactoryStorehouseInfoService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -28,7 +24,6 @@ import tk.mybatis.mapper.entity.Example;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 工厂库位  提供者
@@ -174,7 +169,7 @@ public class CdFactoryStorehouseInfoController extends BaseController {
      * @return
      */
     @PostMapping("selectStorehouseToMap")
-    public Map<String, Map<String, String>> selectStorehouseToMap(@RequestBody List<Dict> dicts){
+    public R selectStorehouseToMap(@RequestBody List<Dict> dicts){
         return cdFactoryStorehouseInfoService.selectStorehouseToMap(dicts);
     }
 

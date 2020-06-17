@@ -168,7 +168,11 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
         List<Dict> maps = listRes.stream().map(s -> new Dict().set("productFactoryCode",s.getProductFactoryCode())
                 .set("customerCode",s.getCustomerCode())).distinct().collect(Collectors.toList());
         //获取库位
-        Map<String, Map<String, String>> storehouseMap = remoteFactoryStorehouseInfoService.selectStorehouseToMap(maps);
+        R rStoreHouse = remoteFactoryStorehouseInfoService.selectStorehouseToMap(maps);
+        if(!rStoreHouse.isSuccess()){
+            return R.error("获取接收库位失败！");
+        }
+        Map<String, Map<String, String>> storehouseMap = rStoreHouse.getCollectData(new TypeReference<Map<String, Map<String, String>>>() {});
         if (MapUtil.isEmpty(storehouseMap)) {
             return R.error("获取接收库位失败！");
         }
@@ -232,7 +236,11 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
         List<Dict> maps = listRes.stream().map(s -> new Dict().set("productFactoryCode",s.getProductFactoryCode())
                 .set("customerCode",s.getCustomerCode())).distinct().collect(Collectors.toList());
         //获取库位
-        Map<String, Map<String, String>> storehouseMap = remoteFactoryStorehouseInfoService.selectStorehouseToMap(maps);
+        R rStoreHouse = remoteFactoryStorehouseInfoService.selectStorehouseToMap(maps);
+        if(!rStoreHouse.isSuccess()){
+            return R.error("获取接收库位失败！");
+        }
+        Map<String, Map<String, String>> storehouseMap = rStoreHouse.getCollectData(new TypeReference<Map<String, Map<String, String>>>() {});
         if (MapUtil.isEmpty(storehouseMap)) {
             return R.error("获取接收库位失败！");
         }

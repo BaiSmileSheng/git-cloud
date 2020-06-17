@@ -2,11 +2,10 @@ package com.cloud.system.service;
 
 import cn.hutool.core.lang.Dict;
 import com.cloud.common.core.domain.R;
-import com.cloud.system.domain.entity.CdFactoryStorehouseInfo;
 import com.cloud.common.core.service.BaseService;
+import com.cloud.system.domain.entity.CdFactoryStorehouseInfo;
 
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -29,5 +28,5 @@ public interface ICdFactoryStorehouseInfoService extends BaseService<CdFactorySt
      * @param dicts
      * @return
      */
-    Map<String, Map<String, String>> selectStorehouseToMap(List<Dict> dicts);
+    R selectStorehouseToMap(List<Dict> dicts);
 }

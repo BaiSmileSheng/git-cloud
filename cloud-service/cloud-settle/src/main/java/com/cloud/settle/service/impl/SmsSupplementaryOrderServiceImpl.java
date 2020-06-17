@@ -176,6 +176,9 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
 //        smsSupplementaryOrder.setStuffUnit(cdMaterialPriceInfo.getUnit());
 //        smsSupplementaryOrder.setCurrency(cdMaterialPriceInfo.getCurrency());//币种
         CdBomInfo cdBom = remoteBomService.listByProductAndMaterial(productMaterialCode, rawMaterialCode);
+        if (cdBom == null) {
+            return R.error("BOM信息为空！");
+        }
         smsSupplementaryOrder.setSapStoreage(cdBom.getStoragePoint());
         smsSupplementaryOrder.setPurchaseGroupCode(cdBom.getPurchaseGroup());
         smsSupplementaryOrder.setDelFlag("0");
