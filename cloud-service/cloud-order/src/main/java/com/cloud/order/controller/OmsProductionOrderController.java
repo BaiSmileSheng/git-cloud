@@ -8,6 +8,7 @@ import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.easyexcel.EasyExcelUtil;
+import com.cloud.common.enums.StatusEnums;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
@@ -156,7 +157,7 @@ public class OmsProductionOrderController extends BaseController {
      */
     @GetMapping("selectByProdctOrderCode")
     @ApiOperation(value = "根据生产订单号查询排产订单信息 ", response = OmsProductionOrder.class)
-    public OmsProductionOrder selectByProdctOrderCode(String prodctOrderCode) {
+    public R selectByProdctOrderCode(String prodctOrderCode) {
         if (StrUtil.isBlank(prodctOrderCode)) {
             throw new BusinessException("参数：生产订单号为空！");
         }
@@ -164,7 +165,10 @@ public class OmsProductionOrderController extends BaseController {
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("productOrderCode",prodctOrderCode);
         OmsProductionOrder productionOrder = omsProductionOrderService.findByExampleOne(example);
-        return productionOrder;
+        if(null == productionOrder){
+            return R.error("排产订单信息不存在,请检查数据");
+        }
+        return R.data(productionOrder);
     }
 
     /**
