@@ -15,6 +15,7 @@ import com.cloud.order.service.IOrderFromSap800InterfaceService;
 import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.feign.RemoteBomService;
 import com.cloud.system.feign.RemoteFactoryInfoService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -125,7 +126,7 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
         if (!prR.isSuccess()) {
             throw new BusinessException(prR.getStr("msg"));
         }
-        List<OmsInternalOrderRes> list = (List<OmsInternalOrderRes>) prR.getObj("data");
+        List<OmsInternalOrderRes> list = prR.getCollectData(new TypeReference<List<OmsInternalOrderRes>>() {});
         if (CollUtil.isEmpty(list)) {
             return R.error("未取到PR数据！");
         }
