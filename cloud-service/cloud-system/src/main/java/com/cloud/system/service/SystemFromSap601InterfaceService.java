@@ -46,6 +46,12 @@ public interface SystemFromSap601InterfaceService {
     R queryBomInfoFromSap601(List<String> factorys, List<String> materials);
 
     /**
+     * 定时获取BOM清单数据
+     * @return
+     */
+    R sycBomInfo();
+
+    /**
      * 定时同步原材料库存
      * @return
      */

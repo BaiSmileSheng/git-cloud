@@ -50,4 +50,7 @@
             product_material_code,
             product_factory_code
     </select>
+    <delete id="deleteAll">
+        delete from cd_bom_info;
+    </delete>
 </mapper>

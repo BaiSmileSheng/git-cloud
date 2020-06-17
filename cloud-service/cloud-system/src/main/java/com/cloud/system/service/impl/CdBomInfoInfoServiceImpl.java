@@ -87,4 +87,10 @@ public class CdBomInfoInfoServiceImpl extends BaseServiceImpl<CdBomInfo> impleme
     public Map<String,Map<String, String>> selectVersionMap(List<Dict> dicts) {
         return cdBomInfoMapper.selectVersionMap(dicts);
     }
+
+    @Override
+    public R deleteAll() {
+        cdBomInfoMapper.deleteAll();
+        return R.ok();
+    }
 }

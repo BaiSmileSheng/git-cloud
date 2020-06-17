@@ -162,7 +162,7 @@ public class SmsClaimOtherController extends BaseController {
     public R addSave(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestParam("files") MultipartFile[] files) {
         SmsClaimOther smsClaimOther = JSONObject.parseObject(smsClaimOtherReq,SmsClaimOther.class);
         //校验入参
-        ValidatorUtils.validateEntity(smsClaimOther,SmsClaimOther.class);
+        ValidatorUtils.validateEntity(smsClaimOther);
         smsClaimOther.setCreateBy(getLoginName());
         R result = smsClaimOtherService.insertClaimOtherAndOss(smsClaimOther,files);
         return result;
@@ -180,7 +180,7 @@ public class SmsClaimOtherController extends BaseController {
     public R updateClaimOtherAndOss(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestParam("files") MultipartFile[] files) {
         SmsClaimOther smsClaimOther = JSONObject.parseObject(smsClaimOtherReq,SmsClaimOther.class);
         //校验入参
-        ValidatorUtils.validateEntity(smsClaimOther,SmsClaimOther.class);
+        ValidatorUtils.validateEntity(smsClaimOther);
         smsClaimOther.setUpdateBy(getLoginName());
         R result = smsClaimOtherService.updateClaimOtherAndOss(smsClaimOther,files);
         return result;

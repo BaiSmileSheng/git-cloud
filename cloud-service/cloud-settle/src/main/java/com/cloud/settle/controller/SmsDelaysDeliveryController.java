@@ -168,7 +168,7 @@ public class SmsDelaysDeliveryController extends BaseController {
     @ApiOperation(value = "新增保存延期交付索赔 ", response = R.class)
     public R addSave(@RequestBody SmsDelaysDelivery smsDelaysDelivery) {
         //校验入参
-        ValidatorUtils.validateEntity(smsDelaysDelivery,SmsDelaysDelivery.class);
+        ValidatorUtils.validateEntity(smsDelaysDelivery);
         smsDelaysDelivery.setCreateBy(getLoginName());
         smsDelaysDeliveryService.insertSelective(smsDelaysDelivery);
         return R.data(smsDelaysDelivery.getId());
