@@ -52,7 +52,11 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
 
         // 1根据供应商V码去工厂信息表（cd_factory_info）中获取生产工厂编码及名称
         //2 首先通过生产工厂、成品物料号去BOM清单表（cd_bom_info）中获取BOM的版本号，优先8、9版本，有8选8，没8取9，其他取最小版本；
-        Map<String, CdFactoryInfo> factoryInfoMap = remoteFactoryInfoService.selectAllByCompanyCodeV(null);
+        R rFactory = remoteFactoryInfoService.selectAllByCompanyCodeV(null);
+        if (!rFactory.isSuccess()) {
+            return R.error("工厂信息为空！！！");
+        }
+        Map<String, CdFactoryInfo> factoryInfoMap=rFactory.getCollectData(new TypeReference<Map<String, CdFactoryInfo>>() {});
         if (MapUtil.isEmpty(factoryInfoMap)) {
             return R.error("获取工厂编码失败！");
         }
