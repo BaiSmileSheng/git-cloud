@@ -17,6 +17,7 @@ import com.sap.conn.jco.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
@@ -337,7 +338,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                     }
                 }
             } else {
-                log.error("获取BOM清单数据失败：" + jCoFields.getString("MESSAGE"));
+                log.error("获取BOM清单数据失败 factorys:{},res:{}", factorys,jCoFields.getString("MESSAGE"));
                 return R.error(jCoFields.getString("MESSAGE"));
             }
         } catch (Exception e) {
@@ -349,6 +350,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
         return result;
     }
 
+    @Transactional
     @Override
     public R sycBomInfo() {
         //1.获取工厂全部信息cd_factory_info
@@ -363,7 +365,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             R result = queryBomInfoFromSap601(Arrays.asList(factoryCode),null);
             if(!result.isSuccess()){
                 log.error("连接SAP获取BOM数据异常 req:{},res:{}",factoryCode, JSONObject.toJSON(result));
-                continue;
+                throw new BusinessException(result.get("msg").toString());
             }
             List<CdBomInfo> cdBomInfoList = (List<CdBomInfo>)result.get("data");
             if(!CollectionUtils.isEmpty(cdBomInfoList)){
@@ -373,6 +375,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
         return R.ok();
     }
 
+    @Transactional
     @Override
     public R sycRawMaterialStock() {
         //1.获取工厂全部信息cd_factory_info

@@ -2,6 +2,7 @@ package com.cloud.system.controller;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
+import com.cloud.common.enums.StatusEnums;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.CdMaterialInfo;
@@ -123,11 +124,15 @@ public class CdMaterialInfoController extends BaseController {
      */
     @GetMapping("getByMaterialCode")
     @ApiOperation(value = "根据物料号查询物料信息 ", response = CdMaterialInfo.class)
-    public CdMaterialInfo getByMaterialCode(String materialCode) {
+    public R getByMaterialCode(String materialCode) {
         Example example = new Example(CdMaterialInfo.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("materialCode", materialCode);
-        return cdMaterialInfoService.findByExampleOne(example);
+        CdMaterialInfo cdMaterialInfo = cdMaterialInfoService.findByExampleOne(example);
+        if(null == cdMaterialInfo){
+            return R.error("物料信息不存在,请检查数据");
+        }
+        return R.data(cdMaterialInfo);
     }
 
 

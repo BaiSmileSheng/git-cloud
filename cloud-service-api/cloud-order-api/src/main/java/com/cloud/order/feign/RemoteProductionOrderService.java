@@ -1,6 +1,7 @@
 package com.cloud.order.feign;
 
 import com.cloud.common.constant.ServiceNameConstants;
+import com.cloud.common.core.domain.R;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.feign.factory.RemoteProductionOrderFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -23,7 +24,7 @@ public interface RemoteProductionOrderService {
      * @return OmsProductionOrder
      */
     @GetMapping("productionOrder/selectByProdctOrderCode")
-    OmsProductionOrder selectByProdctOrderCode(@RequestParam("prodctOrderCode") String prodctOrderCode);
+    R selectByProdctOrderCode(@RequestParam("prodctOrderCode") String prodctOrderCode);
 
     /**
      * 查询排产订单 列表
