@@ -12,7 +12,7 @@ public class RemoteUserSocopeFallbackFactory implements FallbackFactory<RemoteUs
 
     @Override
     public RemoteUserScopeService create(Throwable throwable) {
-        log.error("RemoteUserScopeService错误信息：{}",throwable.getMessage());
+
         return new RemoteUserScopeService() {
 
 
@@ -24,6 +24,7 @@ public class RemoteUserSocopeFallbackFactory implements FallbackFactory<RemoteUs
              */
             @Override
             public String selectDataScopeIdByUserIdAndType(Long userId, String type) {
+                log.error("RemoteUserScopeService.selectDataScopeIdByUserIdAndType错误信息：{}",throwable.getMessage());
                 return null;
             }
         };

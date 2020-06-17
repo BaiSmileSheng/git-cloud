@@ -1,13 +1,11 @@
 package com.cloud.system.feign;
 
 import com.cloud.common.constant.ServiceNameConstants;
-import com.cloud.system.domain.entity.CdFactoryInfo;
+import com.cloud.common.core.domain.R;
 import com.cloud.system.feign.factory.RemoteFactoryInfoFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.Map;
 
 /**
  * 工厂信息 Feign服务层
@@ -22,7 +20,7 @@ public interface RemoteFactoryInfoService {
      * @return 工厂信息
      */
     @GetMapping("factoryInfo/getOne")
-    CdFactoryInfo selectOneByFactory(@RequestParam(value = "factoryCode") String factoryCode);
+    R selectOneByFactory(@RequestParam(value = "factoryCode") String factoryCode);
 
 
     /**
@@ -31,5 +29,12 @@ public interface RemoteFactoryInfoService {
      * @return 工厂信息
      */
     @GetMapping("factoryInfo/selectAllByCompanyCodeV")
-    Map<String, CdFactoryInfo> selectAllByCompanyCodeV(@RequestParam(value = "companyCodeV") String companyCodeV);
+    R selectAllByCompanyCodeV(@RequestParam(value = "companyCodeV") String companyCodeV);
+
+    /**
+     * 获取所有公司编码
+     * @return
+     */
+    @GetMapping("factoryInfo/getAllCompanyCode")
+    R getAllCompanyCode();
 }

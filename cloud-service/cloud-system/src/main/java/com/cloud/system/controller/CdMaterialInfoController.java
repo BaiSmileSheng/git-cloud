@@ -1,8 +1,8 @@
 package com.cloud.system.controller;
+
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.enums.StatusEnums;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.CdMaterialInfo;
@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
+
 /**
  * 物料信息  提供者
  *
@@ -145,4 +146,14 @@ public class CdMaterialInfoController extends BaseController {
         return cdMaterialInfoService.updateUphBySap();
     }
 
+    /**
+     * 根据物料号集合查询物料信息
+     * @param materialCodes
+     * @param materialType
+     * @return
+     */
+    @PostMapping("selectInfoByInMaterialCodeAndMaterialType")
+    public R selectInfoByInMaterialCodeAndMaterialType(@RequestBody List<String> materialCodes,@RequestParam(value = "materialType")String materialType) {
+        return cdMaterialInfoService.selectInfoByInMaterialCodeAndMaterialType(materialCodes,materialType);
+    }
 }

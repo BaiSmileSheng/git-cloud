@@ -37,5 +37,5 @@ public interface RemoteFactoryStorehouseInfoService {
      * @return
      */
     @PostMapping("factoryStorehouse/selectStorehouseToMap")
-    Map<String, Map<String, String>> selectStorehouseToMap(@RequestBody List<Dict> dicts);
+    R selectStorehouseToMap(@RequestBody List<Dict> dicts);
 }

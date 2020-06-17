@@ -1,12 +1,12 @@
 package com.cloud.system.service.impl;
+
+import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.mapper.CdFactoryInfoMapper;
 import com.cloud.system.service.ICdFactoryInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 /**
  * 工厂信息 Service业务层处理
@@ -26,9 +26,21 @@ public class CdFactoryInfoServiceImpl extends BaseServiceImpl<CdFactoryInfo> imp
      * @return
      */
 	@Override
-	public Map<String, CdFactoryInfo> selectAllByCompanyCodeV(String companyCodeV){
-		 return cdFactoryInfoMapper.selectAllByCompanyCodeV(companyCodeV);
+	public R selectAllByCompanyCodeV(String companyCodeV){
+		 return R.data(cdFactoryInfoMapper.selectAllByCompanyCodeV(companyCodeV));
 	}
+
+	/**
+	 * 查询所有公司编码
+	 * @return
+	 */
+	@Override
+	public R selectAllCompanyCode(){
+		 return R.data(cdFactoryInfoMapper.selectAllCompanyCode());
+	}
+
+
+
 
 
 

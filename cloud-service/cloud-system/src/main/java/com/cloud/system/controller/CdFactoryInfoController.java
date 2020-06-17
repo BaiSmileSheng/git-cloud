@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 工厂信息  提供者
@@ -46,12 +45,12 @@ public class CdFactoryInfoController extends BaseController {
      */
     @GetMapping("getOne")
     @ApiOperation(value = "根据工厂编码查询工厂信息 ", response = CdFactoryInfo.class)
-    public CdFactoryInfo selectOneByFactory(String factoryCode) {
+    public R selectOneByFactory(String factoryCode) {
         Example example = new Example(CdFactoryInfo.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("factoryCode", factoryCode)
                 .andEqualTo("delFlag","0");
-        return cdFactoryInfoService.findByExampleOne(example);
+        return R.data(cdFactoryInfoService.findByExampleOne(example));
     }
 
     /**
@@ -59,7 +58,7 @@ public class CdFactoryInfoController extends BaseController {
      */
     @GetMapping("selectAllByCompanyCodeV")
     @ApiOperation(value = "根据公司V码查询 ", response = CdFactoryInfo.class)
-    public Map<String, CdFactoryInfo> selectAllByCompanyCodeV(String companyCodeV) {
+    public R selectAllByCompanyCodeV(String companyCodeV) {
          return cdFactoryInfoService.selectAllByCompanyCodeV(companyCodeV);
     }
 
@@ -115,4 +114,13 @@ public class CdFactoryInfoController extends BaseController {
         return toAjax(cdFactoryInfoService.deleteByIds(ids));
     }
 
+    /**
+     * 查询所有公司编码
+     * @return
+     */
+    @GetMapping("getAllCompanyCode")
+    @ApiOperation(value = "获取所有公司编码 ", response = R.class)
+    public R getAllCompanyCode(){
+        return cdFactoryInfoService.selectAllCompanyCode();
+    }
 }

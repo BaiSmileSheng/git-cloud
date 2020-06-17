@@ -4,17 +4,16 @@ import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.Id;
-
 import tk.mybatis.mapper.annotation.KeySql;
 
+import javax.persistence.Id;
 import java.util.Date;
 
 /**
@@ -93,6 +92,7 @@ public class CdMaterialExtendInfo extends BaseEntity {
      */
     @ExcelProperty(value = "建立日期")
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "建立日期")
     private Date establishDate;
 

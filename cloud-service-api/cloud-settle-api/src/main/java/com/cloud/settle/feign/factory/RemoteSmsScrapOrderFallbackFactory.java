@@ -14,7 +14,7 @@ public class RemoteSmsScrapOrderFallbackFactory implements FallbackFactory<Remot
 
     @Override
     public RemoteSmsScrapOrderService create(Throwable throwable) {
-        log.error("RemoteSmsScrapOrderService错误：{}",throwable.getMessage());
+
         return new RemoteSmsScrapOrderService(){
 
             /**
@@ -24,6 +24,7 @@ public class RemoteSmsScrapOrderFallbackFactory implements FallbackFactory<Remot
              */
             @Override
             public SmsScrapOrder get(Long id) {
+                log.error("RemoteSmsScrapOrderService.get错误：{}",throwable.getMessage());
                 return null;
             }
             /**
@@ -33,6 +34,7 @@ public class RemoteSmsScrapOrderFallbackFactory implements FallbackFactory<Remot
              */
             @Override
             public R update(SmsScrapOrder smsScrapOrder) {
+                log.error("RemoteSmsScrapOrderService.update错误：{}",throwable.getMessage());
                 return R.error("服务器拥挤：请稍后再试！");
             }
             /**
@@ -42,7 +44,7 @@ public class RemoteSmsScrapOrderFallbackFactory implements FallbackFactory<Remot
              */
             @Override
             public R editSave(SmsScrapOrder smsScrapOrder) {
-                log.error("报废申请编辑服务熔断降级，原因是：{}", throwable.getMessage());
+                log.error("RemoteSmsScrapOrderService.editSave报废申请编辑服务熔断降级，原因是：{}", throwable.getMessage());
                 return R.error("服务器拥挤：请稍后再试！");
             }
 
@@ -53,6 +55,7 @@ public class RemoteSmsScrapOrderFallbackFactory implements FallbackFactory<Remot
              */
             @Override
             public R addSave(SmsScrapOrder smsScrapOrder) {
+                log.error("RemoteSmsScrapOrderService.addSave错误：{}",throwable.getMessage());
                 return R.error("服务器拥挤：请稍后再试！");
             }
 
@@ -63,6 +66,7 @@ public class RemoteSmsScrapOrderFallbackFactory implements FallbackFactory<Remot
              */
             @Override
             public R updatePriceEveryMonth(String month) {
+                log.error("RemoteSmsScrapOrderService.updatePriceEveryMonth错误：{}",throwable.getMessage());
                 return R.error("服务器拥挤：请稍后再试！");
             }
             /**
@@ -72,6 +76,7 @@ public class RemoteSmsScrapOrderFallbackFactory implements FallbackFactory<Remot
              */
             @Override
             public R updateSAPPriceEveryMonth(String month) {
+                log.error("RemoteSmsScrapOrderService.updateSAPPriceEveryMonth错误：{}",throwable.getMessage());
                 return R.error("服务器拥挤：请稍后再试！");
             }
 
@@ -82,6 +87,7 @@ public class RemoteSmsScrapOrderFallbackFactory implements FallbackFactory<Remot
              */
             @Override
             public R autidSuccessToSAP261(SmsScrapOrder smsScrapOrder) {
+                log.error("RemoteSmsScrapOrderService.autidSuccessToSAP261错误：{}",throwable.getMessage());
                 return R.error("服务器拥挤：请稍后再试！");
             }
         };

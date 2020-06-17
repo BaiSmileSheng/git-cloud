@@ -1,10 +1,10 @@
 package com.cloud.system.mapper;
-
 import com.cloud.common.core.dao.BaseMapper;
 import com.cloud.system.domain.entity.CdFactoryInfo;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,5 +22,14 @@ public interface CdFactoryInfoMapper extends BaseMapper<CdFactoryInfo>{
      */
     @MapKey("companyCodeV")
     Map<String, CdFactoryInfo> selectAllByCompanyCodeV(@Param("companyCodeV")String companyCodeV);
+
+
+    /**
+     *  获取所有公司编码
+     * @return
+     */
+    List<String> selectAllCompanyCode();
+
+
 
 }
