@@ -2,6 +2,8 @@ package com.cloud.common.core.domain;
 
 import cn.hutool.core.lang.Dict;
 import com.cloud.common.constant.Constants;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Map;
 
@@ -39,6 +41,19 @@ public class R extends Dict {
         R r = new R();
         r.put("data", obj);
         return r;
+    }
+
+
+    public <T> T getData(Class<T> clazz) {
+        ObjectMapper mapper = new ObjectMapper();
+        T data = mapper.convertValue(super.get("data"), clazz);
+        return data;
+    }
+
+    public <T> T getCollectData(TypeReference<T> typeReference) {
+        ObjectMapper mapper = new ObjectMapper();
+        T data = mapper.convertValue(super.get("data"), typeReference);
+        return data;
     }
 
     public static R ok(Map<String, Object> map) {
