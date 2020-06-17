@@ -1,21 +1,32 @@
 package com.cloud.system.controller;
 
+import com.cloud.common.auth.annotation.HasPermissions;
+import com.cloud.common.constant.DeleteFlagConstants;
 import cn.hutool.core.lang.Dict;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
+import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.system.domain.entity.CdFactoryStorehouseInfo;
 import com.cloud.system.service.ICdFactoryStorehouseInfoService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +38,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("factoryStorehouse")
+@Api(tags = "工厂库位  提供者")
 public class CdFactoryStorehouseInfoController extends BaseController {
 
     @Autowired
@@ -51,14 +63,97 @@ public class CdFactoryStorehouseInfoController extends BaseController {
             @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required =true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "sortField", value = "排序列", required = false,paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false,paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂编码", required =false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "customerCode", value = "客户编码", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "storehouseFrom", value = "发货库位", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "storehouseTo", value = "接收库位", required = false,paramType = "query", dataType = "String")
     })
-    public TableDataInfo list(CdFactoryStorehouseInfo cdFactoryStorehouseInfo) {
-        Example example = new Example(CdFactoryStorehouseInfo.class);
-        Example.Criteria criteria = example.createCriteria();
+    public TableDataInfo list(@ApiIgnore CdFactoryStorehouseInfo cdFactoryStorehouseInfo) {
+        Example example = assemblyConditions(cdFactoryStorehouseInfo);
         startPage();
         List<CdFactoryStorehouseInfo> cdFactoryStorehouseInfoList = cdFactoryStorehouseInfoService.selectByExample(example);
         return getDataTable(cdFactoryStorehouseInfoList);
+    }
+
+    /**
+     * 组装查询条件
+     * @param cdFactoryStorehouseInfo
+     * @return
+     */
+    private Example assemblyConditions(CdFactoryStorehouseInfo cdFactoryStorehouseInfo){
+        Example example = new Example(CdFactoryStorehouseInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        if(StringUtils.isNotBlank(cdFactoryStorehouseInfo.getProductFactoryCode())){
+            criteria.andEqualTo("productFactoryCode",cdFactoryStorehouseInfo.getProductFactoryCode());
+        }
+        if(StringUtils.isNotBlank(cdFactoryStorehouseInfo.getCustomerCode())){
+            criteria.andEqualTo("customerCode",cdFactoryStorehouseInfo.getCustomerCode());
+        }
+        if(StringUtils.isNotBlank(cdFactoryStorehouseInfo.getStorehouseFrom())){
+            criteria.andEqualTo("storehouseFrom",cdFactoryStorehouseInfo.getStorehouseFrom());
+        }
+        if(StringUtils.isNotBlank(cdFactoryStorehouseInfo.getStorehouseTo())){
+            criteria.andEqualTo("storehouseTo",cdFactoryStorehouseInfo.getStorehouseTo());
+        }
+        return example;
+    }
+    /**
+     * 导出模板
+     * @return
+     */
+    @GetMapping("exportTemplate")
+    @HasPermissions("system:factoryStorehouse:exportTemplate")
+    @ApiOperation(value = "导出模板", response = CdFactoryStorehouseInfo.class)
+    public R exportTemplate(){
+        String fileName = "交货提前量模板.xlsx";
+        return EasyExcelUtil.writeExcel(Arrays.asList(),fileName,fileName,new CdFactoryStorehouseInfo());
+    }
+
+    /**
+     * 导出
+     * @return
+     */
+    @GetMapping("export")
+    @HasPermissions("system:factoryStorehouse:export")
+    @ApiOperation(value = "导出", response = CdFactoryStorehouseInfo.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required =true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "sortField", value = "排序列", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂编码", required =false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "customerCode", value = "客户编码", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "storehouseFrom", value = "发货库位", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "storehouseTo", value = "接收库位", required = false,paramType = "query", dataType = "String")
+    })
+    public R export(@ApiIgnore CdFactoryStorehouseInfo cdFactoryStorehouseInfo){
+        String fileName = "交货提前量.xlsx";
+        Example example = assemblyConditions(cdFactoryStorehouseInfo);
+        List<CdFactoryStorehouseInfo> cdFactoryStorehouseInfoList = cdFactoryStorehouseInfoService.selectByExample(example);
+        return EasyExcelUtil.writeExcel(cdFactoryStorehouseInfoList,fileName,fileName,new CdFactoryStorehouseInfo());
+    }
+
+    /**
+     * 导入
+     * @return
+     */
+    @PostMapping("importFactoryStorehouse")
+    @HasPermissions("system:factoryStorehouse:importFactoryStorehouse")
+    @ApiOperation(value = "导入", response = CdFactoryStorehouseInfo.class)
+    public R importFactoryStorehouse(@RequestParam("file") MultipartFile file){
+        List<CdFactoryStorehouseInfo> list =  (List<CdFactoryStorehouseInfo>)EasyExcelUtil.readMulExcel(file,new CdFactoryStorehouseInfo());
+        if(CollectionUtils.isEmpty(list)){
+            return R.error("导入数据不存在");
+        }
+        for(CdFactoryStorehouseInfo cdFactoryStorehouseInfo : list){
+            //校验入参
+            ValidatorUtils.validateEntity(cdFactoryStorehouseInfo);
+            cdFactoryStorehouseInfo.setDelFlag(DeleteFlagConstants.NO_DELETED);
+            cdFactoryStorehouseInfo.setCreateBy(getLoginName());
+            cdFactoryStorehouseInfo.setCreateTime(new Date());
+        }
+        return cdFactoryStorehouseInfoService.batchInsertOrUpdate(list);
     }
 
     /**

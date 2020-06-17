@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 import java.util.Map;
 
+
+
 /**
  * 工厂库位 Mapper接口
  *
@@ -24,4 +26,10 @@ public interface CdFactoryStorehouseInfoMapper extends BaseMapper<CdFactoryStore
      */
     @MapKey("keyValue")
     Map<String, Map<String, String>> selectStorehouseToMap(@RequestParam(value = "dicts") List<Dict> dicts);
+    /**
+     * 根据工厂编号和客户编号批量查询
+     * @param listReq
+     * @return
+     */
+    List<CdFactoryStorehouseInfo> batchSelectListByCondition(List<CdFactoryStorehouseInfo> listReq);
 }

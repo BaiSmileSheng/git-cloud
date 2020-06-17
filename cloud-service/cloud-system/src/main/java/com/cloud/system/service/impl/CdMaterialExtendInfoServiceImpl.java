@@ -23,6 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -101,11 +103,29 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
             fm.execute(destination);
             JCoContext.end(destination);
 
+            StringBuffer remarkBuffer = new StringBuffer("传输成品物料异常信息");
             //返回信息
             JCoTable outputTable = fm.getTableParameterList().getTable("OUTPUT");
+            if (outputTable != null && outputTable.getNumRows() > 0) {
+                //循环取table行数据
+                for (int i = 0; i < outputTable.getNumRows(); i++) {
+                    //设置指针位置
+                    outputTable.setRow(i);
+                    String flag = outputTable.getString("FLAG");
+                    if(!"S".equals(flag)){
+                        String code = outputTable.getString("MATNR");
+                        String msg = outputTable.getString("MESSAGE");
+                        remarkBuffer.append(code + msg);
+                        sysInterfaceLog.setRemark(remarkBuffer.toString());
+                    }
+                }
+            }
             return R.ok();
         } catch (Exception e) {
-            e.printStackTrace();
+            StringWriter w = new StringWriter();
+            e.printStackTrace(new PrintWriter(w));
+            logger.error(
+                    "传输成品物料接口异常: {}", w.toString());
             sysInterfaceLog.setRemark(e.getMessage());
             throw new BusinessException("传输成品物料接口异常");
         } finally {
