@@ -1,25 +1,16 @@
 package com.cloud.system.controller;
 
+import com.cloud.common.core.controller.BaseController;
+import com.cloud.common.core.domain.R;
+import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import tk.mybatis.mapper.entity.Example;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.cloud.common.core.domain.R;
-import com.cloud.common.core.controller.BaseController;
 import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.system.service.ICdMaterialExtendInfoService;
-import com.cloud.common.core.page.TableDataInfo;
+import io.swagger.annotations.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
 
@@ -111,4 +102,23 @@ public class CdMaterialExtendInfoController extends BaseController {
         return cdMaterialExtendInfoService.timeSycMaterialCode();
     }
 
+    /**
+     * 根据生命周期查询物料号集合
+     * @param lifeCycle
+     * @return
+     */
+    @GetMapping("selectMaterialCodeByLifeCycle")
+    public R selectMaterialCodeByLifeCycle(@RequestParam("lifeCycle") String lifeCycle){
+        return cdMaterialExtendInfoService.selectMaterialCodeByLifeCycle(lifeCycle);
+    }
+
+    /**
+     * 根据物料号集合查询
+     * @param materialCodes
+     * @return
+     */
+    @PostMapping("selectInfoInMaterialCodes")
+    public R selectInfoInMaterialCodes(@RequestBody List<String> materialCodes) {
+        return cdMaterialExtendInfoService.selectInfoInMaterialCodes(materialCodes);
+    }
 }
