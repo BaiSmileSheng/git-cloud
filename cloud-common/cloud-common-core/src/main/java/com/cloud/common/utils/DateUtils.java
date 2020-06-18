@@ -249,4 +249,47 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         Timestamp buydate = Timestamp.valueOf(nowTime);
         return buydate;
     }
+
+    /**
+     * 返回指定天数位移后的日期
+     */
+    public static String dayOffset(String dateString, int offset,String paramFormat){
+        Date date = string2Date(dateString,paramFormat);
+        Date dateResult = dayOffset(date,offset);
+        SimpleDateFormat sdf1 = new SimpleDateFormat(paramFormat);
+        String dateResultString = sdf1.format(dateResult);
+        return dateResultString;
+    }
+
+
+    /**
+     * 返回指定天数位移后的日期
+     */
+    public static Date dayOffset(Date date, int offset) {
+
+        return offsetDate(date, Calendar.DATE, offset);
+    }
+
+    /**
+     * 返回指定日期相应位移后的日期
+     *
+     * @param date
+     *            参考日期
+     * @param field
+     *            位移单位，见 {@link Calendar}
+     * @param offset
+     *            位移数量，正数表示之后的时间，负数表示之前的时间
+     * @return 位移后的日期
+     */
+    public static Date offsetDate(Date date, int field, int offset) {
+        Calendar calendar = convert(date);
+        calendar.add(field, offset);
+        return calendar.getTime();
+    }
+
+    private static Calendar convert(Date date) {
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        return calendar;
+    }
 }

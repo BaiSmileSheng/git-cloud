@@ -24,6 +24,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("realOrder")
+@Api(tags = "真单 提供者")
 public class OmsRealOrderController extends BaseController {
 
     @Autowired
@@ -89,6 +90,32 @@ public class OmsRealOrderController extends BaseController {
     @ApiParam(name = "ids", value = "需删除数据的id")
     public R remove(@RequestBody String ids) {
         return toAjax(omsRealOrderService.deleteByIds(ids));
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * 定时任务每天在获取到PO信息后 进行需求汇总
+     */
+    @PostMapping("timeCollectToOmsRealOrder")
+    @OperLog(title = "定时任务每天在获取到PO信息后 进行需求汇总", businessType = BusinessType.INSERT)
+    @ApiOperation(value = "定时任务每天在获取到PO信息后 进行需求汇总", response = R.class)
+    public R timeCollectToOmsRealOrder(){
+        return omsRealOrderService.timeCollectToOmsRealOrder();
     }
 
 }

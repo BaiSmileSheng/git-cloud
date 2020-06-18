@@ -16,8 +16,10 @@ import com.cloud.order.mapper.OmsInternalOrderResMapper;
 import com.cloud.order.service.IOmsInternalOrderResService;
 import com.cloud.order.service.IOrderFromSap800InterfaceService;
 import com.cloud.system.domain.entity.CdFactoryInfo;
+import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.feign.RemoteBomService;
 import com.cloud.system.feign.RemoteFactoryInfoService;
+import com.cloud.system.feign.RemoteMaterialService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.seata.spring.annotation.GlobalTransactional;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -28,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import java.lang.reflect.Type;
@@ -56,6 +59,8 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
     private RemoteBomService remoteBomService;
     @Autowired
     private IOrderFromSap800InterfaceService orderFromSap800InterfaceService;
+    @Autowired
+    private RemoteMaterialService remoteMaterialService;
 
     static final String BOM_VERSION_EIGHT = "8";
 
@@ -165,6 +170,10 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
             return R.error(resultSAP.get("msg").toString());
         }
         List<OmsInternalOrderRes> omsInternalOrderResList = resultSAP.getCollectData(new TypeReference<List<OmsInternalOrderRes>>() {});
+        if(CollectionUtils.isEmpty(omsInternalOrderResList)){
+            logger.error("获取PO接口定时任务 没有在SAP到数据");
+            throw new BusinessException("获取PO接口定时任务 没有在SAP到数据");
+        }
         //2.根据供应商v码获取 工厂编号 cd_factory_info company_code_v -- company_code
         R resultFactory = remoteFactoryInfoService.listAll();
         if(!resultFactory.isSuccess()){
@@ -182,6 +191,13 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
                 throw new BusinessException("根据供应商v码获取 工厂编号 异常");
             }
             omsInternalOrderRes.setProductFactoryCode(factoryCode);
+            R cdMaterialInfoResult = remoteMaterialService.getByMaterialCode(omsInternalOrderRes.getProductMaterialCode());
+            if (!cdMaterialInfoResult.isSuccess()) {
+                logger.error(StrUtil.format("查物料信息异常 req{},res:{}", omsInternalOrderRes.getProductMaterialCode(),JSONObject.toJSON(cdMaterialInfoResult)));
+                throw new BusinessException("未维护物料信息");
+            }
+            CdMaterialInfo cdMaterialInfo = cdMaterialInfoResult.getData(CdMaterialInfo.class);
+            omsInternalOrderRes.setProductMaterialDesc(cdMaterialInfo.getMaterialDesc());
         }
         //3.插入数据
         omsInternalOrderResMapper.batchInsertOrUpdate(omsInternalOrderResList);

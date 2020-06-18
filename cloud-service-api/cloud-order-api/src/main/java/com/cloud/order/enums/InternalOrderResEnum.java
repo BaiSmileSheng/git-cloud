@@ -14,7 +14,7 @@ public enum InternalOrderResEnum {
     MARKER_PO("PO","PO标记"),
     MARKER_PR("PR","PR标记"),
 
-    DELIVERY_FLAG_NO("0","未交货"),
+    DELIVERY_FLAG_X("X","已交货"),
 
 
     ;
