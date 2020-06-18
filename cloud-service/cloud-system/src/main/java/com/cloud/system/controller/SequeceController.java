@@ -1,5 +1,6 @@
 package com.cloud.system.controller;
 
+import com.cloud.common.core.domain.R;
 import com.cloud.system.service.ISequeceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -32,7 +33,7 @@ public class SequeceController {
      */
     @GetMapping("/selectSeq")
     @ApiOperation(value = "获取序列号",response = String.class)
-    public String selectSeq(@RequestParam("name") String name,@RequestParam("length") int length){
-        return sequeceService.selectSeq(name,length);
+    public R selectSeq(@RequestParam("name") String name,@RequestParam("length") int length){
+        return R.data(sequeceService.selectSeq(name,length));
     }
 }

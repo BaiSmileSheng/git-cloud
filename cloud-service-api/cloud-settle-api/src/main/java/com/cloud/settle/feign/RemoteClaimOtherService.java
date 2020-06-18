@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -56,7 +57,7 @@ public interface RemoteClaimOtherService {
     @RequestMapping(value = "claimOther/supplierAppeal", method = RequestMethod.POST,
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    R supplierAppeal(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription,@RequestParam("files") MultipartFile[] files);
+    R supplierAppeal(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription,@RequestPart("files") MultipartFile[] files);
 
     /**
      * 48H超时未确认发送邮件

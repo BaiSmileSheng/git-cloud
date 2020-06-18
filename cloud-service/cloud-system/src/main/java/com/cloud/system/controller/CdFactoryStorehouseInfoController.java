@@ -136,7 +136,7 @@ public class CdFactoryStorehouseInfoController extends BaseController {
     @PostMapping("importFactoryStorehouse")
     @HasPermissions("system:factoryStorehouse:importFactoryStorehouse")
     @ApiOperation(value = "导入", response = CdFactoryStorehouseInfo.class)
-    public R importFactoryStorehouse(@RequestParam("file") MultipartFile file){
+    public R importFactoryStorehouse(@RequestPart("file") MultipartFile file){
         List<CdFactoryStorehouseInfo> list =  (List<CdFactoryStorehouseInfo>)EasyExcelUtil.readMulExcel(file,new CdFactoryStorehouseInfo());
         if(CollectionUtils.isEmpty(list)){
             return R.error("导入数据不存在");

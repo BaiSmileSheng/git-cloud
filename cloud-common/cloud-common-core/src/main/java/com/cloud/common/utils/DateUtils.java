@@ -41,6 +41,8 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
             "yyyy/MM/dd", "yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd HH:mm", "yyyy/MM",
             "yyyy.MM.dd", "yyyy.MM.dd HH:mm:ss", "yyyy.MM.dd HH:mm", "yyyy.MM"};
 
+    public static final long DAY = 24 * 60 * 60 * 1000L;
+
     /**
      * 获取当前Date型日期
      *
@@ -208,4 +210,28 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         return gc;
     }
 
+    /**
+     * 时间差值 天数
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static int dayDiff(Date date1, Date date2) {
+        long diff = date1.getTime() - date2.getTime();
+        return (int) (diff / DAY);
+    }
+
+    /**
+     * 时间差值 天数
+     * @param dateStr1
+     * @param dateStr2
+     * @param pattern  时间类型
+     * @return
+     */
+    public static int dayDiffSt(String dateStr1, String dateStr2,String pattern) {
+        Date date1 = string2Date(dateStr1,pattern);
+        Date date2 = string2Date(dateStr2,pattern);
+        long diff = date1.getTime() - date2.getTime();
+        return (int) (diff / DAY);
+    }
 }

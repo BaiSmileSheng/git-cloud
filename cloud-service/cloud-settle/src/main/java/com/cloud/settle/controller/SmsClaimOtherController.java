@@ -159,7 +159,7 @@ public class SmsClaimOtherController extends BaseController {
     @HasPermissions("settle:claimOther:save")
     @PostMapping("save")
     @ApiOperation(value = "新增其他索赔信息(包含文件信息)", response = R.class)
-    public R addSave(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestParam("files") MultipartFile[] files) {
+    public R addSave(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestPart("files") MultipartFile[] files) {
         SmsClaimOther smsClaimOther = JSONObject.parseObject(smsClaimOtherReq,SmsClaimOther.class);
         //校验入参
         ValidatorUtils.validateEntity(smsClaimOther);
@@ -177,7 +177,7 @@ public class SmsClaimOtherController extends BaseController {
     @HasPermissions("settle:claimOther:updateClaimOther")
     @PostMapping("updateClaimOther")
     @ApiOperation(value = "修改保存其他索赔(包含图片信息)", response = R.class)
-    public R updateClaimOtherAndOss(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestParam("files") MultipartFile[] files) {
+    public R updateClaimOtherAndOss(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestPart("files") MultipartFile[] files) {
         SmsClaimOther smsClaimOther = JSONObject.parseObject(smsClaimOtherReq,SmsClaimOther.class);
         //校验入参
         ValidatorUtils.validateEntity(smsClaimOther);
@@ -249,7 +249,7 @@ public class SmsClaimOtherController extends BaseController {
     @HasPermissions("settle:claimOther:supplierAppeal")
     @PostMapping("supplierAppeal")
     @ApiOperation(value = "索赔单供应商申诉 ", response = R.class)
-    public R supplierAppeal(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription, @RequestParam("files") MultipartFile[] files) {
+    public R supplierAppeal(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription, @RequestPart("files") MultipartFile[] files) {
         SmsClaimOther smsClaimOther = new SmsClaimOther();
         smsClaimOther.setId(id);
         smsClaimOther.setComplaintDescription(complaintDescription);
