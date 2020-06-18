@@ -114,10 +114,11 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         //1.生成单号 索赔单号生成规则 QT+年月日+4位顺序号，循序号每日清零
         StringBuffer qualityNoBuffer = new StringBuffer(OTHER_ORDER_PRE);
         qualityNoBuffer.append(DateUtils.getDate().replace("-",""));
-        String seq = remoteSequeceService.selectSeq(OTHER_SEQ_NAME,OTHER_SEQ_LENGTH);
-        if(StringUtils.isBlank(seq)){
+        R seqResult = remoteSequeceService.selectSeq(OTHER_SEQ_NAME,OTHER_SEQ_LENGTH);
+        if(!seqResult.isSuccess()){
             return R.error("新增其他索赔信息时获取序列号异常");
         }
+        String seq = seqResult.getStr("data");
         logger.info("新增其他索赔信息时获取序列号seq:{}",seq);
         qualityNoBuffer.append(seq);
         smsClaimOther.setClaimCode(qualityNoBuffer.toString());

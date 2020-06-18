@@ -171,7 +171,7 @@ public class SmsQualityOrderController extends BaseController {
     @HasPermissions("settle:qualityOrder:save")
     @PostMapping("save")
     @ApiOperation(value = "新增保存质量索赔(包含文件)", response = R.class)
-    public R addSave(@RequestParam("smsQualityOrderReq") String smsQualityOrderReq, @RequestParam("files") MultipartFile[] files) {
+    public R addSave(@RequestParam("smsQualityOrderReq") String smsQualityOrderReq, @RequestPart("files") MultipartFile[] files) {
         SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq, SmsQualityOrder.class);
         //校验入参
         ValidatorUtils.validateEntity(smsQualityOrder);
@@ -203,7 +203,7 @@ public class SmsQualityOrderController extends BaseController {
     @HasPermissions("settle:qualityOrder:update")
     @PostMapping("update")
     @ApiOperation(value = "修改保存质量索赔(包含文件信息)", response = R.class)
-    public R updateQuality(@RequestParam("smsQualityOrder") String smsQualityOrderReq, @RequestParam("files") MultipartFile[] files) {
+    public R updateQuality(@RequestParam("smsQualityOrder") String smsQualityOrderReq, @RequestPart("files") MultipartFile[] files) {
         SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq, SmsQualityOrder.class);
         //校验入参
         ValidatorUtils.validateEntity(smsQualityOrder);
@@ -262,7 +262,7 @@ public class SmsQualityOrderController extends BaseController {
     @HasPermissions("settle:qualityOrder:supplierAppeal")
     @PostMapping("supplierAppeal")
     @ApiOperation(value = "索赔单供应商申诉 ", response = R.class)
-    public R supplierAppeal(@RequestParam("id") Long id, @RequestParam("complaintDescription") String complaintDescription, @RequestParam("files") MultipartFile[] files) {
+    public R supplierAppeal(@RequestParam("id") Long id, @RequestParam("complaintDescription") String complaintDescription, @RequestPart("files") MultipartFile[] files) {
         SmsQualityOrder smsQualityOrder = new SmsQualityOrder();
         smsQualityOrder.setId(id);
         smsQualityOrder.setComplaintDescription(complaintDescription);

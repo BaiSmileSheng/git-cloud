@@ -147,7 +147,11 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         String rawMaterialCode = smsSupplementaryOrder.getRawMaterialCode();
 
         //开始插入
-        String seq = remoteSequeceService.selectSeq("supplementary_seq", 4);
+        R seqResult = remoteSequeceService.selectSeq("supplementary_seq", 4);
+        if(!seqResult.isSuccess()){
+            throw new BusinessException("获取序列号失败");
+        }
+        String seq = seqResult.getStr("data");
         StringBuffer stuffNo = new StringBuffer();
         //WH+年月日+4位顺序号
         stuffNo.append("WH").append(DateUtils.dateTime()).append(seq);
