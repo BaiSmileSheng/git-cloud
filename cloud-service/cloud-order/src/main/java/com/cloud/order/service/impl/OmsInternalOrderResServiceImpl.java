@@ -181,6 +181,7 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
                 logger.error("根据供应商v码获取 工厂编号 异常 req:{},resAll:{}",supplierCode,JSONObject.toJSON(cdFactoryInfoMap));
                 throw new BusinessException("根据供应商v码获取 工厂编号 异常");
             }
+            omsInternalOrderRes.setProductFactoryCode(factoryCode);
         }
         //3.插入数据
         omsInternalOrderResMapper.batchInsertOrUpdate(omsInternalOrderResList);

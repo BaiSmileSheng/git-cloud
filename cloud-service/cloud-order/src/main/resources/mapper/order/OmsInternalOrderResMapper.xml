@@ -179,7 +179,22 @@
             ifnull(#{item.createBy}, '')
             )
         </foreach>
-        DUPLICATE KEY UPDATE
-        update_time = now()
+        ON DUPLICATE KEY UPDATE
+        delivery_flag = VALUES(delivery_flag),
+        product_material_code = VALUES(product_material_code),
+        customer_code = VALUES(customer_code),
+        customer_desc = VALUES(customer_desc),
+        purchase_group_code = VALUES(purchase_group_code),
+        purchase_group_desc = VALUES(purchase_group_desc),
+        supplier_code = VALUES(supplier_code),
+        supplier_desc = VALUES(supplier_desc),
+        delivery_date = VALUES(delivery_date),
+        order_num = VALUES(order_num),
+        delivery_num = VALUES(delivery_num),
+        unit = VALUES(unit),
+        create_date_pr = VALUES(create_date_pr),
+        project_type = VALUES(project_type),
+        mrp_range = VALUES(mrp_range),
+        marker = VALUES(marker)
     </insert>
 </mapper>
