@@ -20,4 +20,4 @@ spring:
   cloud:
     nacos:
       discovery:
-        namespace: 071c0d1f-c1a4-48cc-ac1e-aa26e230309d
+        namespace: a2eeae72-3ab5-4789-ac7f-7370330f9293
