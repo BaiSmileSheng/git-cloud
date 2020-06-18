@@ -7,10 +7,7 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.service.ICdFactoryInfoService;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
@@ -25,6 +22,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("factoryInfo")
+@Api(tags = "工厂信息")
 public class CdFactoryInfoController extends BaseController {
 
     @Autowired
