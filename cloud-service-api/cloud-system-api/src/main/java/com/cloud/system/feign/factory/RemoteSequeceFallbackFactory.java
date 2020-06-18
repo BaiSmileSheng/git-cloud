@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 public class RemoteSequeceFallbackFactory implements FallbackFactory<RemoteSequeceService> {
     @Override
     public RemoteSequeceService create(Throwable throwable) {
-        log.error("RemoteSequeceService错误信息：{}",throwable.getMessage());
         return new RemoteSequeceService() {
             @Override
             public R selectSeq(String name, int length) {

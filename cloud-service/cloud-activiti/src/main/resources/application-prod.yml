@@ -2,10 +2,14 @@
 spring:
   redis:
     database: 1
-    host: 10.133.116.85
-    port: 6379
-    password: swyl2020     # 密码（默认为空）
+    password: Cos8_Order    # 密码（默认为空）
     timeout: 6000ms  # 连接超时时长（毫秒）
+    sentinel:
+      master: cosorder
+      nodes:
+        - 10.202.89.21:16379
+        - 10.202.89.22:16379
+        - 10.202.89.23:16379
     lettuce:
       pool:
         max-active: 1000  # 连接池最大连接数（使用负值表示没有限制）
@@ -15,13 +19,13 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://10.133.116.86:3306/rycloud?useUnicode=true&characterEncoding=utf8&nullCatalogMeansCurrent=true&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
-    username: cloud
-    password: Cloud,123456
+    url: jdbc:mysql://10.202.89.21:5730/orw?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    username: appadmin
+    password: OI%TPkmL
   cloud:
     nacos:
       discovery:
-        namespace: orw-test
+        namespace: orw-prod
 #seata命名空间
 seata:
   registry:

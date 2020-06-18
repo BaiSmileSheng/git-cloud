@@ -1,7 +1,6 @@
 package com.cloud.system.service.impl;
 
 import cn.hutool.core.lang.Dict;
-import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.system.domain.entity.CdFactoryStorehouseInfo;
@@ -9,10 +8,6 @@ import com.cloud.system.mapper.CdFactoryStorehouseInfoMapper;
 import com.cloud.system.service.ICdFactoryStorehouseInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -31,6 +26,16 @@ import java.util.stream.Collectors;
 public class CdFactoryStorehouseInfoServiceImpl extends BaseServiceImpl<CdFactoryStorehouseInfo> implements ICdFactoryStorehouseInfoService {
     @Autowired
     private CdFactoryStorehouseInfoMapper cdFactoryStorehouseInfoMapper;
+
+    /**
+     * 根据工厂，客户编码分组取接收库位
+     *
+     * @param dicts
+     * @return
+     */
+    public R selectStorehouseToMap(List<Dict> dicts) {
+        return R.data(cdFactoryStorehouseInfoMapper.selectStorehouseToMap(dicts));
+    }
 
     /**
      * 批量新增或修改
@@ -63,15 +68,5 @@ public class CdFactoryStorehouseInfoServiceImpl extends BaseServiceImpl<CdFactor
         cdFactoryStorehouseInfoMapper.insertList(insertList);
         return R.ok();
     }
-
-    /**
-     * 根据工厂，客户编码分组取接收库位
-     *
-     * @param dicts
-     * @return
-     */
-    @Override
-    public Map<String, Map<String, String>> selectStorehouseToMap(List<Dict> dicts) {
-        return cdFactoryStorehouseInfoMapper.selectStorehouseToMap(dicts);
-    }
 }
+

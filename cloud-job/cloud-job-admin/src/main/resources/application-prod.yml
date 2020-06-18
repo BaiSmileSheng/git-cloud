@@ -1,9 +1,9 @@
 # 数据源配置
 spring:
   datasource:
-    url: jdbc:mysql://10.133.116.86:3306/rycloud?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
-    username: cloud
-    password: Cloud,123456
+    url: jdbc:mysql://10.202.89.21:3306/orw?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    username: appadmin
+    password: OI%TPkmL
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.zaxxer.hikari.HikariDataSource
     hikari:

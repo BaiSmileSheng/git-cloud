@@ -16,7 +16,7 @@ public class RemoteSmsSupplementaryOrderFallbackFactory implements FallbackFacto
 
     @Override
     public RemoteSmsSupplementaryOrderService create(Throwable throwable) {
-        log.error("RemoteSmsSupplementaryOrderService错误：{}",throwable.getMessage());
+
         return new RemoteSmsSupplementaryOrderService(){
 
             /**
@@ -26,6 +26,7 @@ public class RemoteSmsSupplementaryOrderFallbackFactory implements FallbackFacto
              */
             @Override
             public SmsSupplementaryOrder get(Long id) {
+                log.error("RemoteSmsSupplementaryOrderService.get错误：{}",throwable.getMessage());
                 return null;
             }
 
@@ -36,6 +37,7 @@ public class RemoteSmsSupplementaryOrderFallbackFactory implements FallbackFacto
              */
             @Override
             public R update(SmsSupplementaryOrder smsSupplementaryOrder) {
+                log.error("RemoteSmsSupplementaryOrderService.update错误：{}",throwable.getMessage());
                 return R.error("服务器拥挤：请稍后再试！");
             }
 
@@ -46,6 +48,7 @@ public class RemoteSmsSupplementaryOrderFallbackFactory implements FallbackFacto
              */
             @Override
             public R editSave(SmsSupplementaryOrder smsSupplementaryOrder) {
+                log.error("RemoteSmsSupplementaryOrderService.editSave错误：{}",throwable.getMessage());
                 return R.error("服务器拥挤：请稍后再试！");
             }
 
@@ -56,6 +59,7 @@ public class RemoteSmsSupplementaryOrderFallbackFactory implements FallbackFacto
              */
             @Override
             public R addSave(SmsSupplementaryOrder smsSupplementaryOrder) {
+                log.error("RemoteSmsSupplementaryOrderService.addSave错误：{}",throwable.getMessage());
                 return R.error("服务器拥挤：请稍后再试！");
             }
 
@@ -66,6 +70,7 @@ public class RemoteSmsSupplementaryOrderFallbackFactory implements FallbackFacto
              */
             @Override
             public R updatePriceEveryMonth(String month) {
+                log.error("RemoteSmsSupplementaryOrderService.updatePriceEveryMonth错误：{}",throwable.getMessage());
                 return R.error("服务器拥挤：请稍后再试！");
             }
 
@@ -76,6 +81,7 @@ public class RemoteSmsSupplementaryOrderFallbackFactory implements FallbackFacto
              */
             @Override
             public List<String> materialCodeListByStatus(String status) {
+                log.error("RemoteSmsSupplementaryOrderService.materialCodeListByStatus错误：{}",throwable.getMessage());
                 return null;
             }
             /**
@@ -85,6 +91,7 @@ public class RemoteSmsSupplementaryOrderFallbackFactory implements FallbackFacto
              */
             @Override
             public R autidSuccessToSAPY61(SmsSupplementaryOrder smsSupplementaryOrder) {
+                log.error("RemoteSmsSupplementaryOrderService.autidSuccessToSAPY61错误：{}",throwable.getMessage());
                 return R.error("服务器拥挤：请稍后再试！");
             }
         };
