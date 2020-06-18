@@ -150,6 +150,12 @@ public class OmsDemandOrderGatherEdit extends BaseEntity {
     private Long orderNum;
 
     /**
+     * 单位
+     */
+    @ApiModelProperty(value = "单位")
+    private String unit;
+
+    /**
      * 产品类别
      */
     @ExcelProperty(value = "产品类别",index = 12)

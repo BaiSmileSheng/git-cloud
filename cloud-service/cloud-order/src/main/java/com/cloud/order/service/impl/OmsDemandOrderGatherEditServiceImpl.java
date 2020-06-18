@@ -219,6 +219,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             CdMaterialInfo cdMaterialInfo = cdMaterialInfoOpt.get();
             demandOrderGatherEdit.setProductMaterialDesc(cdMaterialInfo.getMaterialDesc());
             demandOrderGatherEdit.setPurchaseGroupCode(cdMaterialInfo.getPurchaseGroupCode());
+            demandOrderGatherEdit.setUnit(cdMaterialInfo.getPrimaryUom());
             //需求订单号
             R seqresult = remoteSequeceService.selectSeq("demand_order_gather_seq", 4);
             if(!seqresult.isSuccess()){

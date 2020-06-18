@@ -94,6 +94,12 @@ public class OmsDemandOrderGatherEditController extends BaseController {
         List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList = omsDemandOrderGatherEditService.selectByExample(example);
         return getDataTable(omsDemandOrderGatherEditList);
     }
+
+    /**
+     * Example查询时的条件
+     * @param omsDemandOrderGatherEdit
+     * @return
+     */
     Example listCondition(OmsDemandOrderGatherEdit omsDemandOrderGatherEdit){
         Example example = new Example(OmsDemandOrderGatherEdit.class);
         Example.Criteria criteria = example.createCriteria();
