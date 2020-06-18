@@ -259,7 +259,11 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
             Date deliveryDate = DateUtil.parse(res.getDeliveryDate());
             String deliveryYear = StrUtil.toString(DateUtil.year(deliveryDate));//交付日期年
             String deliveryWeek = StrUtil.split(keyCode, StrUtil.COMMA)[1];//交付日期周数
-            String seq = remoteSequeceService.selectSeq("demand_order_gather_seq", 4);
+            R seqresult = remoteSequeceService.selectSeq("demand_order_gather_seq", 4);
+            if(!seqresult.isSuccess()){
+                throw new BusinessException("查序列号失败");
+            }
+            String seq = seqresult.getStr("data");
             //需求汇总单号
             String demandOrderCode = StrUtil.concat(true, "DM", DateUtils.dateTime(), seq);
             Date date = DateUtil.date();
