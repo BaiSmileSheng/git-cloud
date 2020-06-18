@@ -1,9 +1,14 @@
 package com.cloud.system.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import com.cloud.common.core.domain.R;
+import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.common.utils.XmlUtil;
 import com.cloud.system.config.MdmConnConfig;
+import com.cloud.system.domain.entity.CdMaterialInfo;
+import com.cloud.system.mapper.CdMaterialInfoMapper;
+import com.cloud.system.service.ICdMaterialInfoService;
 import com.cloud.system.service.SystemFromSap601InterfaceService;
 import com.cloud.system.webService.material.GeneralMDMDataReleaseBindingStub;
 import com.cloud.system.webService.material.Generalmdmdatarelease_client_epLocator;
@@ -13,15 +18,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.cloud.system.mapper.CdMaterialInfoMapper;
-import com.cloud.system.domain.entity.CdMaterialInfo;
-import com.cloud.system.service.ICdMaterialInfoService;
-import com.cloud.common.core.service.impl.BaseServiceImpl;
 
 import javax.xml.rpc.holders.StringHolder;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 物料信息 Service业务层处理
@@ -238,6 +240,11 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
      */
     @Override
     public R selectInfoByInMaterialCodeAndMaterialType(List<String> materialCodes,String materialType) {
-        return R.data(cdMaterialInfoMapper.selectInfoByInMaterialCodeAndMaterialType(materialCodes, materialType));
+        List<CdMaterialInfo> list = cdMaterialInfoMapper.selectInfoByInMaterialCodeAndMaterialType(materialCodes, materialType);
+        if(CollUtil.isEmpty(list)){
+            return R.data(null);
+        }
+        Map<String,List<CdMaterialInfo>> map=list.stream().collect(Collectors.groupingBy(CdMaterialInfo::getMaterialCode));
+        return R.data(map);
     }
 }
