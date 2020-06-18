@@ -80,13 +80,6 @@ public class OmsDemandOrderGatherEditHis extends BaseEntity {
     private String productFactoryCode;
 
     /**
-     * 生产工厂描述
-     */
-    @ExcelProperty(value = "生产工厂描述")
-    @ApiModelProperty(value = "生产工厂描述")
-    private String productFactoryDesc;
-
-    /**
      * 客户编码
      */
     @ExcelProperty(value = "客户编码")
@@ -113,6 +106,20 @@ public class OmsDemandOrderGatherEditHis extends BaseEntity {
     @ExcelProperty(value = "BOM版本")
     @ApiModelProperty(value = "BOM版本")
     private String bomVersion;
+
+    /**
+     * 产品类别
+     */
+    @ExcelProperty(value = "产品类别")
+    @ApiModelProperty(value = "产品类别")
+    private String productType;
+
+    /**
+     * 生命周期
+     */
+    @ExcelProperty(value = "生命周期")
+    @ApiModelProperty(value = "生命周期")
+    private String lifeCycle;
 
     /**
      * 采购组
@@ -158,6 +165,12 @@ public class OmsDemandOrderGatherEditHis extends BaseEntity {
     private Long orderNum;
 
     /**
+     * 单位
+     */
+    @ApiModelProperty(value = "单位")
+    private String unit;
+
+    /**
      * 数据版本 年度-周数
      */
     @ExcelProperty(value = "数据版本 年度-周数")
@@ -184,6 +197,13 @@ public class OmsDemandOrderGatherEditHis extends BaseEntity {
     @ExcelProperty(value = "SAP返回信息 传SAP返回信息")
     @ApiModelProperty(value = "SAP返回信息 传SAP返回信息")
     private String sapMessages;
+
+    /**
+     * 审核状态 0：无需审核，1：审核中，2：审核完成
+     */
+    @ExcelProperty(value = "审核状态 0：无需审核，1：审核中，2：审核完成")
+    @ApiModelProperty(value = "审核状态 0：无需审核，1：审核中，2：审核完成")
+    private String auditStatus;
 
     /**
      * 是否删除 0：有效，1：删除
