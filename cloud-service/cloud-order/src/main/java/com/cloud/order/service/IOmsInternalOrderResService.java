@@ -34,4 +34,10 @@ public interface IOmsInternalOrderResService extends BaseService<OmsInternalOrde
      */
     R SAP800PRFindInternalOrderRes(Date startDate, Date endDate);
 
+    /**
+     * 获取PO接口定时任务
+     * @return
+     */
+    R timeInsertFromSAP();
+
 }

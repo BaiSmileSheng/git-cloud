@@ -5,10 +5,13 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.common.utils.DateUtils;
 import com.cloud.order.domain.entity.OmsInternalOrderRes;
+import com.cloud.order.enums.InternalOrderResEnum;
 import com.cloud.order.mapper.OmsInternalOrderResMapper;
 import com.cloud.order.service.IOmsInternalOrderResService;
 import com.cloud.order.service.IOrderFromSap800InterfaceService;
@@ -17,9 +20,18 @@ import com.cloud.system.feign.RemoteBomService;
 import com.cloud.system.feign.RemoteFactoryInfoService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.seata.spring.annotation.GlobalTransactional;
+import com.fasterxml.jackson.core.type.TypeReference;
+import io.seata.spring.annotation.GlobalTransactional;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import tk.mybatis.mapper.entity.Example;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +45,9 @@ import java.util.stream.Collectors;
  */
 @Service
 public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalOrderRes> implements IOmsInternalOrderResService {
+
+    private static Logger logger = LoggerFactory.getLogger(OmsInternalOrderResServiceImpl.class);
+
     @Autowired
     private OmsInternalOrderResMapper omsInternalOrderResMapper;
     @Autowired
@@ -134,4 +149,42 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
         R rInsert = insert800PR(list);
         return rInsert;
     }
+
+    /**
+     * 获取PO接口定时任务
+     * @return
+     */
+    @Transactional
+    @Override
+    public R timeInsertFromSAP() {
+        //获取两个月前的时间
+        Date startTime = DateUtils.getMonthTime(-2);
+        //1.从SAP800 获取数据 po数据
+        R resultSAP = orderFromSap800InterfaceService.queryDemandPOFromSap800(startTime,new Date());
+        if(!resultSAP.isSuccess()){
+            return R.error(resultSAP.get("msg").toString());
+        }
+        List<OmsInternalOrderRes> omsInternalOrderResList = resultSAP.getCollectData(new TypeReference<List<OmsInternalOrderRes>>() {});
+        //2.根据供应商v码获取 工厂编号 cd_factory_info company_code_v -- company_code
+        R resultFactory = remoteFactoryInfoService.listAll();
+        if(!resultFactory.isSuccess()){
+            logger.error("remoteFactoryInfoService.listAll() 异常res:{}", JSONObject.toJSONString(resultFactory));
+            throw new BusinessException("根据供应商v码获取 工厂编号 异常");
+        }
+        List<CdFactoryInfo> cdFactoryInfoList = resultFactory.getCollectData(new TypeReference<List<CdFactoryInfo>>() {});
+        Map<String,String> cdFactoryInfoMap = cdFactoryInfoList.stream().collect(Collectors.toMap(CdFactoryInfo ::getCompanyCodeV,
+                CdFactoryInfo ::getCompanyCode,(key1,key2) -> key2));
+        for(OmsInternalOrderRes omsInternalOrderRes : omsInternalOrderResList){
+            String supplierCode = omsInternalOrderRes.getSupplierCode();
+            String factoryCode = cdFactoryInfoMap.get(supplierCode);
+            if(StringUtils.isBlank(factoryCode)){
+                logger.error("根据供应商v码获取 工厂编号 异常 req:{},resAll:{}",supplierCode,JSONObject.toJSON(cdFactoryInfoMap));
+                throw new BusinessException("根据供应商v码获取 工厂编号 异常");
+            }
+        }
+        //3.插入数据
+        omsInternalOrderResMapper.batchInsertOrUpdate(omsInternalOrderResList);
+        return R.ok();
+    }
+
 }

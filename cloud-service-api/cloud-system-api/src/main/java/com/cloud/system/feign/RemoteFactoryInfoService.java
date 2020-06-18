@@ -2,6 +2,7 @@ package com.cloud.system.feign;
 
 import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.common.core.domain.R;
+import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.feign.factory.RemoteFactoryInfoFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,4 +38,10 @@ public interface RemoteFactoryInfoService {
      */
     @GetMapping("factoryInfo/getAllCompanyCode")
     R getAllCompanyCode();
+
+    /**
+     * 查询工厂信息 列表
+     */
+    @GetMapping("factoryInfo/listAll")
+    R listAll();
 }

@@ -234,4 +234,19 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         long diff = date1.getTime() - date2.getTime();
         return (int) (diff / DAY);
     }
+
+    /**
+     * 获取n个月后时间
+     */
+    public static Timestamp getMonthTime(int month) {
+        Date dt = new Date();
+        Calendar now = Calendar.getInstance();
+        now.setTime(dt);
+        now.add(Calendar.MONTH, month);
+        Date threeMonthAgoDate = now.getTime();
+        DateFormat df = new SimpleDateFormat(YYYY_MM_DD_HH_MM_SS);
+        String nowTime = df.format(threeMonthAgoDate);
+        Timestamp buydate = Timestamp.valueOf(nowTime);
+        return buydate;
+    }
 }

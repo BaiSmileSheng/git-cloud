@@ -63,4 +63,24 @@ public class OmsInternalOrderResXxlJob {
             return ReturnT.FAIL;
         }
     }
+
+    /**
+     * 定时任务获取PO数据
+     * 每周一点  0 0  1 * * *
+     *
+     * @return
+     */
+    @XxlJob("timeInsertFromSAP")
+    public ReturnT<String> timeInsertFromSAP(String param) {
+        log.info("--------------定时任务获取PO数据定时任务开始----------");
+        R r=remoteInternalOrderResService.timeInsertFromSAP();
+        XxlJobLogger.log(StrUtil.format("定时任务获取PO数据 数据结果：{}",r.toString()));
+        log.info(StrUtil.format("定时任务获取PO数据结果：{}",r.toString()));
+        log.info("--------------定时任务获取PO数据结束------------");
+        if (r.isSuccess()) {
+            return ReturnT.SUCCESS;
+        }else{
+            return ReturnT.FAIL;
+        }
+    }
 }
