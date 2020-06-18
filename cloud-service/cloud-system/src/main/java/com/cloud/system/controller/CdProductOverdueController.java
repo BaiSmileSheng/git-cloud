@@ -13,13 +13,12 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -135,7 +134,7 @@ public class CdProductOverdueController extends BaseController {
     @PostMapping("importFactoryStorehouse")
     @HasPermissions("system:productOverdue:importFactoryStorehouse")
     @ApiOperation(value = "导入", response = CdProductOverdue.class)
-    public R importFactoryStorehouse(@RequestParam("file") MultipartFile file){
+    public R importFactoryStorehouse(@RequestPart("file") MultipartFile file){
         List<CdProductOverdue> list =  (List<CdProductOverdue>)EasyExcelUtil.readMulExcel(file,new CdProductOverdue());
         if(CollectionUtils.isEmpty(list)){
             return R.error("导入数据不存在");

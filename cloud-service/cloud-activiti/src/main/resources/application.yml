@@ -11,7 +11,7 @@ spring:
   application:
     name: cloud-activiti
   profiles:
-    active: test
+    active: dev
   devtools:
     restart:
       enabled: true
@@ -30,6 +30,7 @@ spring:
     nacos:
       discovery:
         server-addr: 10.133.1.8:8848
+        namespace: 071c0d1f-c1a4-48cc-ac1e-aa26e230309d
   activiti:
     check-process-definitions: false
 

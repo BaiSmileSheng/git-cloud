@@ -108,7 +108,7 @@ public class SysOssController extends BaseController {
      * @throws IOException
      */
     @PostMapping("upload")
-    public R editSave(@RequestParam("file") MultipartFile file,@RequestParam(value = "orderNo",required = false) String orderNo) throws IOException {
+    public R editSave(@RequestPart("file") MultipartFile file,@RequestParam(value = "orderNo",required = false) String orderNo) throws IOException {
         if (file.isEmpty()) {
             throw new OssException("上传文件不能为空");
         }
@@ -188,7 +188,7 @@ public class SysOssController extends BaseController {
      */
     @PostMapping("updateListByOrderNo")
     @ApiOperation(value = "根据订单编号修改文件上传列表",response = SysOss.class)
-    public R updateListByOrderNo(@RequestParam("orderNo") String orderNo,@RequestParam("files") MultipartFile[] files) throws IOException {
+    public R updateListByOrderNo(@RequestParam("orderNo") String orderNo,@RequestPart("files") MultipartFile[] files) throws IOException {
         R result = sysOssService.updateListByOrderNo(orderNo,files);
         return result;
     }

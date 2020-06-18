@@ -100,7 +100,11 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             throw new BusinessException(rCheck.getStr("msg"));
         }
 
-        String seq = remoteSequeceService.selectSeq("scrap_seq", 4);
+        R seqResult = remoteSequeceService.selectSeq("scrap_seq", 4);
+        if(!seqResult.isSuccess()){
+            throw new BusinessException("获取序列号失败");
+        }
+        String seq = seqResult.getStr("data");
         StringBuffer scrapNo = new StringBuffer();
         //WH+年月日+4位顺序号
         scrapNo.append("BF").append(DateUtils.dateTime()).append(seq);

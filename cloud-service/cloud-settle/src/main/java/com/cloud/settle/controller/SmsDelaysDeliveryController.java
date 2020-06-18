@@ -223,7 +223,7 @@ public class SmsDelaysDeliveryController extends BaseController {
     @HasPermissions("settle:delaysDelivery:supplierAppeal")
     @PostMapping("supplierAppeal")
     @ApiOperation(value = "延期索赔单供应商申诉(包含文件信息) ", response = SmsDelaysDelivery.class)
-    public R supplierAppeal(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription, @RequestParam("files") MultipartFile[] files) {
+    public R supplierAppeal(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription, @RequestPart("files") MultipartFile[] files) {
         SmsDelaysDelivery smsDelaysDelivery = new SmsDelaysDelivery();
         smsDelaysDelivery.setId(id);
         smsDelaysDelivery.setComplaintDescription(complaintDescription);
