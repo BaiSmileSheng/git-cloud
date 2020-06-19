@@ -5,6 +5,7 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
 import com.cloud.settle.converter.SupplementaryOrderStatusConverter;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -137,6 +138,7 @@ public class SmsSupplementaryOrder extends BaseEntity {
      * 提交时间
      */
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date submitDate;
 
     /**
@@ -170,6 +172,7 @@ public class SmsSupplementaryOrder extends BaseEntity {
      */
     @ExcelProperty(value = "SAP创单时间",index = 10)
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date sapDate;
 
     /**
