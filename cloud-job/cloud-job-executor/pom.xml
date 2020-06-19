@@ -32,18 +32,18 @@
             <groupId>com.xuxueli</groupId>
             <artifactId>xxl-job-core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.cloud</groupId>
-            <artifactId>cloud-system-api</artifactId>
-            <version>${cloud.version}</version>
-        </dependency>
         <!-- 结算模块-->
         <dependency>
             <groupId>com.cloud</groupId>
             <artifactId>cloud-settle-api</artifactId>
             <version>${cloud.version}</version>
         </dependency>
-
+        <!--  订单模块 -->
+        <dependency>
+            <groupId>com.cloud</groupId>
+            <artifactId>cloud-order-api</artifactId>
+            <version>${cloud.version}</version>
+        </dependency>
         <!-- system模块-->
         <dependency>
             <groupId>com.cloud</groupId>
@@ -55,11 +55,7 @@
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.cloud</groupId>
-            <artifactId>cloud-order-api</artifactId>
-            <version>${cloud.version}</version>
-        </dependency>
+
     </dependencies>
 
     <build>
