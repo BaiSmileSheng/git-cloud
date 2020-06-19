@@ -24,6 +24,7 @@
         <result property="deliveryDate" column="delivery_date"/>
         <result property="productDate" column="product_date"/>
         <result property="place" column="place"/>
+        <result property="auditStatus" column="audit_status"/>
         <result property="status" column="status"/>
         <result property="dataSource" column="data_source"/>
         <result property="delFlag" column="del_flag"/>
@@ -54,6 +55,7 @@
                delivery_date,
                product_date,
                place,
+               audit_status,
                status,
                data_source,
                del_flag,
@@ -120,6 +122,7 @@
         product_date,
         place,
         status,
+        audit_status,
         data_source,
         del_flag,
         remark,
@@ -147,6 +150,7 @@
             ifnull(#{item.productDate}, ''),
             #{item.place},
             ifnull(#{item.status}, 0),
+            ifnull(#{item.auditStatus}, 0),
             #{item.dataSource},
             0,
             ifnull(#{item.remark}, ''),
@@ -157,7 +161,7 @@
         ON DUPLICATE KEY UPDATE
         order_from = VALUES(order_from),
         order_class = VALUES(order_class),
-        product_material_desc =  VALUES(product_material_desc),
+        product_material_desc = VALUES(product_material_desc),
         mrp_range = VALUES(mrp_range),
         bom_version = VALUES(bom_version),
         order_num = VALUES(order_num),
