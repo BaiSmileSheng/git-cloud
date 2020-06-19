@@ -18,6 +18,6 @@ public interface RemoteOmsRealOrderService {
     /**
      * 定时任务每天在获取到PO信息后 进行需求汇总
      */
-    @PostMapping("timeCollectToOmsRealOrder")
+    @PostMapping("realOrder/timeCollectToOmsRealOrder")
     R timeCollectToOmsRealOrder();
 }

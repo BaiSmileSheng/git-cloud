@@ -157,6 +157,7 @@
         ON DUPLICATE KEY UPDATE
         order_from = VALUES(order_from),
         order_class = VALUES(order_class),
+        product_material_desc =  VALUES(product_material_desc),
         mrp_range = VALUES(mrp_range),
         bom_version = VALUES(bom_version),
         order_num = VALUES(order_num),

@@ -182,6 +182,7 @@
         ON DUPLICATE KEY UPDATE
         delivery_flag = VALUES(delivery_flag),
         product_material_code = VALUES(product_material_code),
+        product_material_desc =  VALUES(product_material_desc),
         customer_code = VALUES(customer_code),
         customer_desc = VALUES(customer_desc),
         purchase_group_code = VALUES(purchase_group_code),

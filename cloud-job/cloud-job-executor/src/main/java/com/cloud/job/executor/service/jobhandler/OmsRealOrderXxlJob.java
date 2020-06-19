@@ -26,7 +26,7 @@ public class OmsRealOrderXxlJob {
 
     /**
      * 定时任务每天在获取到PO信息后 进行需求汇总
-     * 0 0 2 * * *
+     * 0 0 2 * * ?
      *
      * @return
      */
