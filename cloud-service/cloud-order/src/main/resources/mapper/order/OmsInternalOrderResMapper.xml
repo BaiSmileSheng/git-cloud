@@ -197,5 +197,6 @@
         project_type = VALUES(project_type),
         mrp_range = VALUES(mrp_range),
         marker = VALUES(marker)
+        version = VALUES(version)
     </insert>
 </mapper>
