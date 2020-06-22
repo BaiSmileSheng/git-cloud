@@ -7,8 +7,6 @@ import com.cloud.settle.service.ISmsClaimCashDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,7 +27,7 @@ public class SmsClaimCashDetailServiceImpl extends BaseServiceImpl<SmsClaimCashD
      * @return
      */
     @Override
-    public List<Map<String, BigDecimal>> selectSumCashGroupByClaimTypeActual(String settleNo) {
+    public Map<String, SmsClaimCashDetail> selectSumCashGroupByClaimTypeActual(String settleNo) {
         return smsClaimCashDetailMapper.selectSumCashGroupByClaimTypeActual(settleNo);
     }
 
@@ -39,7 +37,7 @@ public class SmsClaimCashDetailServiceImpl extends BaseServiceImpl<SmsClaimCashD
      * @return
      */
     @Override
-    public List<Map<String, BigDecimal>> selectSumCashGroupByClaimTypeHistory(String settleNo) {
+    public Map<String, SmsClaimCashDetail> selectSumCashGroupByClaimTypeHistory(String settleNo) {
         return smsClaimCashDetailMapper.selectSumCashGroupByClaimTypeHistory(settleNo);
     }
 }
