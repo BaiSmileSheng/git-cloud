@@ -14,7 +14,20 @@ import java.util.List;
  */
 public interface OmsDemandOrderGatherEditMapper extends BaseMapper<OmsDemandOrderGatherEdit>{
 
+    /**
+     * 根据创建人和客户编码删除
+     * @param createBy
+     * @param customerCodes
+     * @return
+     */
     int deleteByCreateByAndCustomerCode(@Param("createBy")String createBy,@Param("customerCodes") List<String> customerCodes);
 
+    /**
+     * 查询不重复的物料号和工厂
+     * @param omsDemandOrderGatherEdit
+     * @return
+     */
+    List<OmsDemandOrderGatherEdit> selectDistinctMaterialCodeAndFactoryCode(@Param("dto")OmsDemandOrderGatherEdit omsDemandOrderGatherEdit);
 
+    List<OmsDemandOrderGatherEdit> selectInfoInMaterialCodeAndFactoryCode(List<OmsDemandOrderGatherEdit> list);
 }

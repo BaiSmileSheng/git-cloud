@@ -2,19 +2,28 @@ package com.cloud.order.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Dict;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.excel.EasyExcel;
+import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.easyexcel.DTO.ExcelImportErrObjectDto;
 import com.cloud.common.easyexcel.DTO.ExcelImportOtherObjectDto;
 import com.cloud.common.easyexcel.DTO.ExcelImportResult;
 import com.cloud.common.easyexcel.DTO.ExcelImportSucObjectDto;
+import com.cloud.common.easyexcel.EasyExcelUtil;
+import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.order.domain.entity.OmsDemandOrderGatherEdit;
 import com.cloud.order.domain.entity.OmsDemandOrderGatherEditHis;
 import com.cloud.order.domain.entity.OmsDemandOrderGatherEditImport;
+import com.cloud.order.domain.entity.WeekAndNumGatherDTO;
+import com.cloud.order.domain.entity.vo.OmsDemandOrderGatherEditExport;
 import com.cloud.order.enums.DemandOrderGatherEditAuditStatusEnum;
 import com.cloud.order.enums.DemandOrderGatherEditStatusEnum;
 import com.cloud.order.enums.OrderFromEnum;
@@ -22,22 +31,25 @@ import com.cloud.order.mapper.OmsDemandOrderGatherEditMapper;
 import com.cloud.order.service.IOmsDemandOrderGatherEditHisService;
 import com.cloud.order.service.IOmsDemandOrderGatherEditImportService;
 import com.cloud.order.service.IOmsDemandOrderGatherEditService;
-import com.cloud.system.domain.entity.CdBomInfo;
+import com.cloud.order.util.DataScopeUtil;
 import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.system.domain.entity.CdMaterialInfo;
+import com.cloud.system.domain.entity.CdProductStock;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.enums.LifeCycleEnum;
 import com.cloud.system.enums.MaterialTypeEnum;
-import com.cloud.system.feign.RemoteFactoryInfoService;
-import com.cloud.system.feign.RemoteMaterialExtendInfoService;
-import com.cloud.system.feign.RemoteMaterialService;
-import com.cloud.system.feign.RemoteSequeceService;
+import com.cloud.system.feign.*;
 import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -61,6 +73,10 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
     private RemoteSequeceService remoteSequeceService;
     @Autowired
     private IOmsDemandOrderGatherEditHisService omsDemandOrderGatherEditHisService;
+    @Autowired
+    private IOmsDemandOrderGatherEditImportService omsDemandOrderGatherEditImportService;
+    @Autowired
+    private RemoteProductStockService remoteProductStockService;
 
     @Override
     public R updateWithLimit(OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
@@ -336,35 +352,302 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         return R.ok();
     }
 
+    /**
+     * 根据创建人和客户编码删除
+     * @param createBy
+     * @param customerCodes
+     * @return
+     */
 	@Override
 	public int deleteByCreateByAndCustomerCode(String createBy,List<String> customerCodes){
 		 return omsDemandOrderGatherEditMapper.deleteByCreateByAndCustomerCode(createBy,customerCodes);
 	}
 
-    public static void main(String[] args) {
-        CdBomInfo cdBomInfo1 = new CdBomInfo().builder().productMaterialCode("11")
-                .productMaterialDesc("哈哈哈").productFactoryCode("33").basicNum(1L).build();
-        CdBomInfo cdBomInfo2 = new CdBomInfo().builder().productMaterialCode("11")
-                .productMaterialDesc("呵呵呵").productFactoryCode("33").basicNum(2L).build();
-        CdBomInfo cdBomInfo3 = new CdBomInfo().builder().productMaterialCode("22")
-                .productMaterialDesc("嘿嘿").productFactoryCode("33").basicNum(3L).build();
-        CdBomInfo cdBomInfo4 = new CdBomInfo().builder().productMaterialCode("22")
-                .productMaterialDesc("呼呼").productFactoryCode("33").basicNum(4L).build();
 
-        List<CdBomInfo> list = CollUtil.newArrayList(cdBomInfo1,cdBomInfo2,cdBomInfo3,cdBomInfo4);
-        Map<String,List<CdBomInfo>> map=list.stream().collect(Collectors.groupingBy(e -> fetchGroupKey(e)));
-
-
-        Map<String,Double> map1=list.stream().collect(Collectors.groupingBy(e ->
-                fetchGroupKey(e),Collectors.summingDouble(CdBomInfo::getBasicNum)));
-
-        List<Object> list1 = new ArrayList<>();
-        list1.addAll(list);
-        System.out.println("牛逼！");
+    @Override
+    @SneakyThrows
+    @Transactional
+    public R importDemandGatherEdit(MultipartFile file,SysUser sysUser) {
+        EasyWithErrorExcelListener easyExcelListener = new EasyWithErrorExcelListener(omsDemandOrderGatherEditImportService,OmsDemandOrderGatherEditImport.class);
+        EasyExcel.read(file.getInputStream(),OmsDemandOrderGatherEditImport.class,easyExcelListener).sheet().doRead();
+        //需要审核的结果
+        List<ExcelImportOtherObjectDto> auditList=easyExcelListener.getOtherList();
+        List<OmsDemandOrderGatherEdit> auditResult = new ArrayList<>();
+        if (auditList.size() > 0){
+            auditResult =auditList.stream().map(excelImportAuditObjectDto -> {
+                OmsDemandOrderGatherEdit demandOrderGatherEdit = BeanUtil.copyProperties(excelImportAuditObjectDto.getObject(), OmsDemandOrderGatherEdit.class);
+                return demandOrderGatherEdit;
+            }).collect(Collectors.toList());
+        }
+        //可以导入的结果集 插入
+        List<ExcelImportSucObjectDto> successList=easyExcelListener.getSuccessList();
+        if (successList.size() > 0){
+            List<OmsDemandOrderGatherEdit> successResult =successList.stream().map(excelImportSucObjectDto -> {
+                OmsDemandOrderGatherEdit demandOrderGatherEdit = BeanUtil.copyProperties(excelImportSucObjectDto.getObject(), OmsDemandOrderGatherEdit.class);
+                return demandOrderGatherEdit;
+            }).collect(Collectors.toList());
+            importDemandGatherEdit(successResult,auditResult,sysUser);
+        }
+        //错误结果集 导出
+        List<ExcelImportErrObjectDto> errList = easyExcelListener.getErrList();
+        if (errList.size() > 0){
+            List<OmsDemandOrderGatherEditImport> errorResults = errList.stream().map(excelImportErrObjectDto -> {
+                OmsDemandOrderGatherEditImport omsDemandOrderGatherEditImport = BeanUtil.copyProperties(excelImportErrObjectDto.getObject(), OmsDemandOrderGatherEditImport.class);
+                omsDemandOrderGatherEditImport.setErrorMsg(excelImportErrObjectDto.getErrMsg());
+                return omsDemandOrderGatherEditImport;
+            }).collect(Collectors.toList());
+            //导出excel
+            return EasyExcelUtil.writeExcel(errorResults, "需求导入错误信息.xlsx", "sheet", new OmsDemandOrderGatherEditImport());
+        }
+        return R.ok();
     }
 
-    private static String fetchGroupKey(CdBomInfo cd){
-        return cd.getProductMaterialCode() +"#"+ cd.getProductFactoryCode();
+    /**
+     * 13周滚动需求汇总分页查询
+     * @param listDistant 不重复的物料和工厂
+     * @return
+     */
+    @Override
+    public R week13DemandGatherList(List<OmsDemandOrderGatherEdit> listDistant) {
+        //包括周的数据
+        List<OmsDemandOrderGatherEdit> listAll = omsDemandOrderGatherEditMapper.selectInfoInMaterialCodeAndFactoryCode(listDistant);
+        //根据物料号，工厂分组
+        Map<String,List<OmsDemandOrderGatherEdit>> mapGroup=listAll.stream()
+                .collect(Collectors.groupingBy(e -> fetchGroupKey(e)));
+
+        List<OmsDemandOrderGatherEdit> listReturn = new ArrayList<>();
+        Date date = DateUtil.date();
+        int weekNum  = DateUtil.weekOfYear(date);
+        //判断今天是不是周天，如果是周天，则周数+1
+        if (DateUtil.dayOfWeek(date)==1) {
+            weekNum += 1;
+        }
+        //从T+3周开始
+        int gatherWeek = weekNum + 3;
+        int[] weekRange= NumberUtil.range(gatherWeek, gatherWeek+10);
+        mapGroup.forEach((keyCode,list)->{
+            List<WeekAndNumGatherDTO> weekNumList = new ArrayList<>();
+            //取第一条数据作为返回的一行数据
+            OmsDemandOrderGatherEdit dto = CollUtil.getFirst(list);
+            //key为周 value为订单量
+            Map<String,Long> mapNum=list.stream().collect(Collectors.groupingBy(
+                    OmsDemandOrderGatherEdit::getWeeks,Collectors.summingLong(OmsDemandOrderGatherEdit::getOrderNum)));
+            //11周数据
+            for (int week : weekRange) {
+                String weekStr = StrUtil.toString(week);
+                WeekAndNumGatherDTO weekInfo = new WeekAndNumGatherDTO().builder()
+                        .weeks(weekStr).orderNum(mapNum.get(weekStr)==null?0L:mapNum.get(weekStr)).build();
+                //开始日期  结束日期
+                int year = DateUtil.thisYear();
+                int thisWeek = DateUtil.thisWeekOfYear();
+                //如果thisWeek比week大，则week属于下一年
+                if (NumberUtil.compare(week, thisWeek) < 0) {
+                    year += 1;
+                }
+                Map<String,String> mapDateRange=DateUtils.weekToDayFormate(year, week);
+                weekInfo.setStartDate(mapDateRange.get("startDate"));
+                weekInfo.setEndDate(mapDateRange.get("endDate"));
+                weekNumList.add(weekInfo);
+            }
+            dto.setWeekDataList(weekNumList);
+            listReturn.add(dto);
+        });
+        return R.data(listReturn);
     }
+
+    /**
+     * 13周需求组合key
+     * @param cd
+     * @return
+     */
+    private static String fetchGroupKey(OmsDemandOrderGatherEdit cd){
+        return StrUtil.concat(true, cd.getProductMaterialCode(), StrUtil.COMMA
+                ,cd.getProductFactoryCode());
+    }
+
+    /**
+     * 成品库存组合key
+     * @param cd
+     * @return
+     */
+    private static String fetchGroupKey(CdProductStock cd){
+        return StrUtil.concat(true, cd.getProductMaterialCode(), StrUtil.COMMA
+                ,cd.getProductFactoryCode());
+    }
+
+    /**
+     * 查询不重复的物料号和工厂
+     * @param omsDemandOrderGatherEdit
+     * @return
+     */
+    public R selectDistinctMaterialCodeAndFactoryCode(OmsDemandOrderGatherEdit omsDemandOrderGatherEdit,SysUser sysUser) {
+        //如果是排产员，需要加上工厂权限
+        if(CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
+            List<String> factoryList=Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(","));
+            if (CollUtil.isNotEmpty(factoryList)) {
+                omsDemandOrderGatherEdit.setProductFactoryList(factoryList);
+            }
+        }
+        List<OmsDemandOrderGatherEdit> list = omsDemandOrderGatherEditMapper.selectDistinctMaterialCodeAndFactoryCode(omsDemandOrderGatherEdit);
+        return R.data(list);
+    }
+
+    /**
+     * 13周滚动需求汇总 导出
+     * @param omsDemandOrderGatherEdit
+     * @param sysUser
+     * @return
+     */
+    @Override
+    public R week13DemandGatherExport(OmsDemandOrderGatherEdit omsDemandOrderGatherEdit,SysUser sysUser) {
+        Example example = new Example(OmsDemandOrderGatherEdit.class);
+        Example.Criteria criteria = example.createCriteria();
+        if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getProductMaterialCode())) {
+            criteria.andEqualTo("productMaterialCode",omsDemandOrderGatherEdit.getProductMaterialCode() );
+        }
+        if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getProductFactoryCode())) {
+            criteria.andEqualTo("productFactoryCode",omsDemandOrderGatherEdit.getProductFactoryCode() );
+        }
+        if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getOrderFrom())) {
+            criteria.andEqualTo("orderFrom",omsDemandOrderGatherEdit.getOrderFrom() );
+        }
+        //如果是排产员，需要加上工厂权限
+        if(CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
+            example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(",")));
+        }
+        List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList = selectByExample(example);
+        if(CollUtil.isEmpty(omsDemandOrderGatherEditList)){
+            return R.error("导出数据为空!");
+        }
+        Date date = DateUtil.date();
+        int weekNum  = DateUtil.weekOfYear(date);
+        //判断今天是不是周天，如果是周天，则周数+1
+        if (DateUtil.dayOfWeek(date)==1) {
+            weekNum += 1;
+        }
+        //从T+3周开始
+        int gatherWeek = weekNum + 3;
+        //所有周数
+        int[] weekRange= NumberUtil.range(gatherWeek, gatherWeek+10);
+        //查出全部数据了
+        Map<String,List<OmsDemandOrderGatherEdit>> mapGroup=omsDemandOrderGatherEditList.stream()
+                .collect(Collectors.groupingBy(e -> fetchGroupKey(e)));
+        //查询库存
+        List<Dict> maps = omsDemandOrderGatherEditList.stream().map(s -> new Dict().set("productFactoryCode",s.getProductFactoryCode())
+                .set("productMaterialCode",s.getProductMaterialCode())).distinct().collect(Collectors.toList());
+        R rProStock = remoteProductStockService.selectProductStockToMap(maps);
+        if (!rProStock.isSuccess()) {
+            return rProStock;
+        }
+        //导出数据有关的工厂、专用号 成品库存信息
+        List<CdProductStock> listProStock=rProStock.getCollectData(new TypeReference<List<CdProductStock>>() {});
+        Map<String,List<CdProductStock>> mapProStock=listProStock.stream()
+                .collect(Collectors.groupingBy(e -> fetchGroupKey(e)));
+
+
+
+        List<OmsDemandOrderGatherEditExport> listExport = new ArrayList<>();
+        //根据工厂和物料号分组了
+        mapGroup.forEach((key,list)->{
+            List<CdProductStock> stockList=mapProStock.get(key);
+            BigDecimal stockNum = BigDecimal.ZERO;
+            if (CollUtil.isNotEmpty(stockList)) {
+                CdProductStock stock = CollUtil.getFirst(stockList);
+                BigDecimal stockWNum = stock.getStockWNum();//在库
+                BigDecimal stockINum = stock.getStockINum();//在途
+                BigDecimal stockPNum = stock.getStockPNum();//在产
+                BigDecimal stockKNum = stock.getStockKNum();//寄售不足
+                stockNum = stockWNum.add(stockINum.add(stockPNum).subtract(stockKNum));
+            }
+            //map key:周  value:数量
+            Map<String,Long> mapNum=list.stream().collect(Collectors.groupingBy(
+                    OmsDemandOrderGatherEdit::getWeeks,Collectors.summingLong(OmsDemandOrderGatherEdit::getOrderNum)));
+            OmsDemandOrderGatherEdit dto = CollUtil.getFirst(list);
+            OmsDemandOrderGatherEditExport export = BeanUtil.copyProperties(dto,OmsDemandOrderGatherEditExport.class);
+            int index = 0;
+            Long totalDemandNum = 0L;
+            for (int week : weekRange) {
+                String weekStr = StrUtil.toString(week);
+                String setIndexStr = StrUtil.toString(index + 3);
+                Long orderNum = 0L;
+                if (mapNum.get(weekStr) != null) {
+                    orderNum = mapNum.get(weekStr);
+                }
+                totalDemandNum = totalDemandNum+orderNum;
+                try {
+                    Method method = OmsDemandOrderGatherEditExport.class.getMethod(StrUtil.format("setT{}Num",setIndexStr),Long.class);
+                    method.invoke(export ,orderNum);
+                } catch (IllegalAccessException e) {
+                    throw new BusinessException("系统拥挤，请稍后再试！（Invoke）");
+                } catch (InvocationTargetException e) {
+                    throw new BusinessException("系统拥挤，请稍后再试！（Invoke）");
+                }catch (NoSuchMethodException e) {
+                    throw new BusinessException("系统拥挤，请稍后再试！（Invoke）");
+                }
+                index++;
+            }
+            export.setTotalDemandNum(totalDemandNum);
+            export.setStockNum(stockNum);
+            listExport.add(export);
+        });
+        List<List<String>> headList = headList(weekRange);
+         return EasyExcelUtil.writeExcelWithHead(listExport, "13周滚动需求汇总.xlsx", "sheet", new OmsDemandOrderGatherEditExport(),headList);
+    }
+
+    /**
+     * 导出表头数据
+     * @param weekRange
+     * @return
+     */
+    List<List<String>> headList(int[] weekRange) {
+        List<List<String>> headList = new ArrayList<List<String>>();
+        List<String> headTitle0 = new ArrayList<String>();
+        List<String> headTitle1 = new ArrayList<String>();
+        List<String> headTitle2 = new ArrayList<String>();
+        List<String> headTitle3 = new ArrayList<String>();
+        List<String> headTitle4 = new ArrayList<String>();
+        List<String> headTitle5 = new ArrayList<String>();
+        headTitle0.add("专用号");
+        headTitle1.add("专用号描述");
+        headTitle2.add("客户编码");
+        headTitle3.add("客户名称");
+        headTitle4.add("生产工厂");
+        headTitle5.add("单位");
+        headList.add(headTitle0);
+        headList.add(headTitle1);
+        headList.add(headTitle2);
+        headList.add(headTitle3);
+        headList.add(headTitle4);
+        headList.add(headTitle5);
+
+        for (int week : weekRange) {
+            List<String> headTitle6 = new ArrayList<String>();
+            String weekStr = StrUtil.toString(week);
+            //开始日期  结束日期
+            int year = DateUtil.thisYear();
+            int thisWeek = DateUtil.thisWeekOfYear();
+            //如果thisWeek比week大，则week属于下一年
+            if (NumberUtil.compare(week, thisWeek) < 0) {
+                year += 1;
+            }
+            Map<String,String> mapDateRange=DateUtils.weekToDayFormate(year, week);
+            String startDate = mapDateRange.get("startDate");
+            String endDate = mapDateRange.get("endDate");
+            Date sDate = DateUtils.string2Date(startDate, DateUtils.YYYY_MM_DD);
+            Date eDate = DateUtils.string2Date(endDate, DateUtils.YYYY_MM_DD);
+            startDate = DateUtils.parseDateToStr(DateUtils.MM_dd, sDate);
+            endDate = DateUtils.parseDateToStr(DateUtils.MM_dd, eDate);
+            headTitle6.add(StrUtil.format("{}-{}",startDate,endDate));
+            headList.add(headTitle6);
+        }
+        List<String> headTitle17 = new ArrayList<String>();
+        List<String> headTitle18 = new ArrayList<String>();
+        headTitle17.add("需求总量");
+        headTitle18.add("库存量");
+        headList.add(headTitle17);
+        headList.add(headTitle18);
+        return headList;
+    }
+
 
 }

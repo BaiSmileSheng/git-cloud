@@ -42,7 +42,6 @@
         <result property="productMaterialCode" column="product_material_code"/>
         <result property="productMaterialDesc" column="product_material_desc"/>
         <result property="productFactoryCode" column="product_factory_code"/>
-        <result property="productFactoryDesc" column="product_factory_desc"/>
         <result property="customerCode" column="customer_code"/>
         <result property="customerDesc" column="customer_desc"/>
         <result property="mrpRange" column="mrp_range"/>
@@ -74,7 +73,6 @@
                product_material_code,
                product_material_desc,
                product_factory_code,
-               product_factory_desc,
                customer_code,
                customer_desc,
                mrp_range,
@@ -115,5 +113,36 @@
         </where>
     </delete>
 
+    <select id="selectDistinctMaterialCodeAndFactoryCode" parameterType="OmsDemandOrderGatherEdit" resultMap="OmsDemandOrderGatherEditResult">
+        select DISTINCT product_material_code,product_factory_code from oms_demand_order_gather_edit
+        <where>
+            <if test="dto.productMaterialCode != null and dto.productMaterialCode != ''">
+                and product_material_code=#{dto.productMaterialCode}
+            </if>
+            <if test="dto.productFactoryCode != null and dto.productFactoryCode != ''">
+                and product_factory_code=#{dto.productFactoryCode}
+            </if>
+            <if test="dto.orderFrom != null and dto.orderFrom != ''">
+                and order_from=#{dto.orderFrom}
+            </if>
+            <if test="dto.productFactoryList != null ">
+                and product_factory_code in
+                <foreach collection="dto.productFactoryList" item="item" open="(" close=")" separator="," >
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY product_material_code,product_factory_code DESC
+    </select>
 
+    <select id="selectInfoInMaterialCodeAndFactoryCode" parameterType="java.util.List"  resultMap="OmsDemandOrderGatherEditResult">
+        <include refid="selectOmsDemandOrderGatherEditVo"></include>
+        <where>
+            <foreach collection="list" item="item"  separator="or">
+                (product_material_code = #{item.productMaterialCode} and product_factory_code = #{item.productFactoryCode} )
+            </foreach>
+            and del_flag = 0
+        </where>
+        ORDER BY weeks asc
+    </select>
 </mapper>

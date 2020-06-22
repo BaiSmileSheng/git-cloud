@@ -1,27 +1,20 @@
 package com.cloud.order.controller;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.excel.EasyExcel;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.easyexcel.DTO.ExcelImportErrObjectDto;
-import com.cloud.common.easyexcel.DTO.ExcelImportOtherObjectDto;
-import com.cloud.common.easyexcel.DTO.ExcelImportSucObjectDto;
 import com.cloud.common.easyexcel.EasyExcelUtil;
-import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.order.domain.entity.OmsDemandOrderGather;
 import com.cloud.order.domain.entity.OmsDemandOrderGatherEdit;
-import com.cloud.order.domain.entity.OmsDemandOrderGatherEditImport;
-import com.cloud.order.service.IOmsDemandOrderGatherEditImportService;
 import com.cloud.order.service.IOmsDemandOrderGatherEditService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.system.domain.entity.SysUser;
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -29,11 +22,9 @@ import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 滚动计划需求操作  提供者
@@ -49,8 +40,7 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     @Autowired
     private IOmsDemandOrderGatherEditService omsDemandOrderGatherEditService;
 
-    @Autowired
-    private IOmsDemandOrderGatherEditImportService omsDemandOrderGatherEditImportService;
+
 
     /**
      * 查询滚动计划需求操作
@@ -187,39 +177,8 @@ public class OmsDemandOrderGatherEditController extends BaseController {
      */
     @PostMapping("importExcel")
     @ApiOperation(value = "滚动计划需求操作导入 ", response = R.class)
-    public R importExcel(MultipartFile file) throws IOException {
-        EasyWithErrorExcelListener easyExcelListener = new EasyWithErrorExcelListener(omsDemandOrderGatherEditImportService,OmsDemandOrderGatherEditImport.class);
-        EasyExcel.read(file.getInputStream(),OmsDemandOrderGatherEditImport.class,easyExcelListener).sheet().doRead();
-        //需要审核的结果
-        List<ExcelImportOtherObjectDto> auditList=easyExcelListener.getOtherList();
-        List<OmsDemandOrderGatherEdit> auditResult = new ArrayList<>();
-        if (auditList.size() > 0){
-                auditResult =auditList.stream().map(excelImportAuditObjectDto -> {
-                OmsDemandOrderGatherEdit demandOrderGatherEdit = BeanUtil.copyProperties(excelImportAuditObjectDto.getObject(), OmsDemandOrderGatherEdit.class);
-                return demandOrderGatherEdit;
-            }).collect(Collectors.toList());
-        }
-        //可以导入的结果集 插入
-        List<ExcelImportSucObjectDto> successList=easyExcelListener.getSuccessList();
-        if (successList.size() > 0){
-            List<OmsDemandOrderGatherEdit> successResult =successList.stream().map(excelImportSucObjectDto -> {
-                OmsDemandOrderGatherEdit demandOrderGatherEdit = BeanUtil.copyProperties(excelImportSucObjectDto.getObject(), OmsDemandOrderGatherEdit.class);
-                return demandOrderGatherEdit;
-            }).collect(Collectors.toList());
-            omsDemandOrderGatherEditService.importDemandGatherEdit(successResult,auditResult,getUserInfo(SysUser.class));
-        }
-        //错误结果集 导出
-        List<ExcelImportErrObjectDto> errList = easyExcelListener.getErrList();
-        if (errList.size() > 0){
-            List<OmsDemandOrderGatherEditImport> errorResults = errList.stream().map(excelImportErrObjectDto -> {
-                OmsDemandOrderGatherEditImport omsDemandOrderGatherEditImport = BeanUtil.copyProperties(excelImportErrObjectDto.getObject(), OmsDemandOrderGatherEditImport.class);
-                omsDemandOrderGatherEditImport.setErrorMsg(excelImportErrObjectDto.getErrMsg());
-                return omsDemandOrderGatherEditImport;
-            }).collect(Collectors.toList());
-            //导出excel
-            return EasyExcelUtil.writeExcel(errorResults, "需求导入错误信息.xlsx", "sheet", new OmsDemandOrderGatherEditImport());
-        }
-        return R.ok();
+    public R importExcel(MultipartFile file) {
+        return omsDemandOrderGatherEditService.importDemandGatherEdit(file,getUserInfo(SysUser.class));
     }
 
     /**
@@ -248,5 +207,49 @@ public class OmsDemandOrderGatherEditController extends BaseController {
         startPage();
         List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList = omsDemandOrderGatherEditService.selectByExample(example);
         return EasyExcelUtil.writeExcel(omsDemandOrderGatherEditList, "需求导入.xlsx", "sheet", new OmsDemandOrderGatherEdit());
+    }
+
+    /**
+     * 查询滚动计划需求操作 列表
+     */
+    @GetMapping("week13DemandGatherList")
+    @ApiOperation(value = "13周滚动需求汇总分页查询", response = OmsDemandOrderGatherEdit.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productMaterialCode", value = "成品专用号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "orderFrom", value = "订单来源", required = false, paramType = "query", dataType = "String"),
+
+    })
+    public TableDataInfo week13DemandGatherList(@ApiIgnore OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
+        SysUser sysUser = getUserInfo(SysUser.class);
+        startPage();
+        R r = omsDemandOrderGatherEditService.selectDistinctMaterialCodeAndFactoryCode(omsDemandOrderGatherEdit,sysUser);
+        if (r.isSuccess()) {
+            List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList=r.getCollectData(new TypeReference<List<OmsDemandOrderGatherEdit>>() {});
+            R rReturn = omsDemandOrderGatherEditService.week13DemandGatherList(omsDemandOrderGatherEditList);
+            if (rReturn.isSuccess()) {
+                List<OmsDemandOrderGatherEdit> listReturn=rReturn.getCollectData(new TypeReference<List<OmsDemandOrderGatherEdit>>() {});
+                return getDataTable(listReturn);
+            }
+        }
+        return getDataTable(new ArrayList<>());
+    }
+
+    /**
+     * 13周滚动需求汇总 导出
+     */
+    @GetMapping("week13DemandGatherExport")
+    @ApiOperation(value = "13周滚动需求汇总 导出", response = OmsDemandOrderGatherEdit.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "productMaterialCode", value = "成品专用号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "orderFrom", value = "订单来源", required = false, paramType = "query", dataType = "String"),
+    })
+    public R week13DemandGatherExport(@ApiIgnore() OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
+        return omsDemandOrderGatherEditService.week13DemandGatherExport(omsDemandOrderGatherEdit,getUserInfo(SysUser.class));
     }
 }

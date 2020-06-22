@@ -2,10 +2,9 @@ package com.cloud.settle.mapper;
 
 import com.cloud.common.core.dao.BaseMapper;
 import com.cloud.settle.domain.entity.SmsClaimCashDetail;
+import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Param;
 
-import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,11 +19,13 @@ public interface SmsClaimCashDetailMapper extends BaseMapper<SmsClaimCashDetail>
      * @param settleNo
      * @return
      */
-    List<Map<String, BigDecimal>> selectSumCashGroupByClaimTypeActual(@Param("settleNo") String settleNo);
+    @MapKey("claimType")
+    Map<String, SmsClaimCashDetail> selectSumCashGroupByClaimTypeActual(@Param("settleNo") String settleNo);
     /**
      * 历史兑现扣款
      * @param settleNo
      * @return
      */
-    List<Map<String, BigDecimal>> selectSumCashGroupByClaimTypeHistory(@Param("settleNo") String settleNo);
+    @MapKey("claimType")
+    Map<String, SmsClaimCashDetail> selectSumCashGroupByClaimTypeHistory(@Param("settleNo") String settleNo);
 }

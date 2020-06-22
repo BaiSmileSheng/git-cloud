@@ -6,6 +6,7 @@ import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
 import com.cloud.order.converter.OutSourceTypeConverter;
 import com.cloud.order.converter.ProductionOrderStatusConverter;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -136,6 +137,7 @@ public class OmsProductionOrder extends BaseEntity {
      * 生产开始日期
      */
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "生产开始日期")
     private Date productStartDate;
 
@@ -144,6 +146,7 @@ public class OmsProductionOrder extends BaseEntity {
      */
     @ExcelProperty(value = "生产结束日期",index=9)
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "生产结束日期")
     private Date productEndDate;
 
@@ -159,6 +162,7 @@ public class OmsProductionOrder extends BaseEntity {
      */
     @ExcelProperty(value = "实际结束日期",index=11)
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "实际结束日期")
     private Date actualEndDate;
 
@@ -192,6 +196,7 @@ public class OmsProductionOrder extends BaseEntity {
      * 交货日期
      */
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "交货日期")
     private Date deliveryDate;
 

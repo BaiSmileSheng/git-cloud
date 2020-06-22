@@ -4,6 +4,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.order.domain.entity.OmsDemandOrderGatherEdit;
 import com.cloud.system.domain.entity.SysUser;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -38,7 +39,7 @@ public interface IOmsDemandOrderGatherEditService extends BaseService<OmsDemandO
 
 
     /**
-     * 需求数据导入
+     * 需求数据汇总
      * @param successList 成功结果集
      * @param auditList 需要审核的结果集
      * @return
@@ -54,5 +55,35 @@ public interface IOmsDemandOrderGatherEditService extends BaseService<OmsDemandO
      */
 	int deleteByCreateByAndCustomerCode(String createBy,List<String> customerCodes);
 
+    /**
+     * 需求数据导入
+     * @param file
+     * @param sysUser
+     * @return
+     */
+    R importDemandGatherEdit(MultipartFile file,SysUser sysUser);
+
+
+    /**
+     * 13周滚动需求汇总分页查询
+     * @param listDistant 不重复的物料和工厂
+     * @return
+     */
+    R week13DemandGatherList(List<OmsDemandOrderGatherEdit> listDistant);
+
+    /**
+     * 查询不重复的物料号和工厂
+     * @param omsDemandOrderGatherEdit
+     * @return
+     */
+    R selectDistinctMaterialCodeAndFactoryCode(OmsDemandOrderGatherEdit omsDemandOrderGatherEdit,SysUser sysUser);
+
+    /**
+     * 13周滚动需求汇总 导出
+     * @param omsDemandOrderGatherEdit
+     * @param sysUser
+     * @return
+     */
+    R week13DemandGatherExport(OmsDemandOrderGatherEdit omsDemandOrderGatherEdit,SysUser sysUser);
 
 }
