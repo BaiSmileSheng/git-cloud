@@ -35,6 +35,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -185,8 +186,7 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
         Map<String,String> cdFactoryInfoMap = cdFactoryInfoList.stream().collect(Collectors.toMap(CdFactoryInfo ::getCompanyCodeV,
                 CdFactoryInfo ::getCompanyCode,(key1,key2) -> key2));
 
-        //3.获取bom版本
-        Map<String, Map<String, String>> bomMap = bomMap(omsInternalOrderResList);
+
 
         for(OmsInternalOrderRes omsInternalOrderRes : omsInternalOrderResList){
             String supplierCode = omsInternalOrderRes.getSupplierCode();
@@ -199,11 +199,13 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
             R cdMaterialInfoResult = remoteMaterialService.getByMaterialCode(omsInternalOrderRes.getProductMaterialCode());
             if (!cdMaterialInfoResult.isSuccess()) {
                 logger.error(StrUtil.format("查物料信息异常 productMaterialCode:{},res:{}", omsInternalOrderRes.getProductMaterialCode(),JSONObject.toJSON(cdMaterialInfoResult)));
-                throw new BusinessException("未维护物料信息");
+                throw new BusinessException("物料信息表未维护物料信息");
             }
             CdMaterialInfo cdMaterialInfo = cdMaterialInfoResult.getData(CdMaterialInfo.class);
             omsInternalOrderRes.setProductMaterialDesc(cdMaterialInfo.getMaterialDesc());
 
+            //获取bom版本
+            Map<String, Map<String, String>> bomMap = bomMap(Arrays.asList(omsInternalOrderRes));
             //通过生产工厂、客户编码去BOM清单表（cd_bom_info）中获取BOM的版本号，优先8、9版本，有8选8，没8取9，其他取最小版本
             String keyBom = StrUtil.concat(true, omsInternalOrderRes.getProductMaterialCode(), omsInternalOrderRes.getProductFactoryCode());
             //key:成品物料号+生产工厂
@@ -240,7 +242,7 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
         //获取bom版本
         Map<String, Map<String, String>> bomMap = remoteBomService.selectVersionMap(maps);
         if (MapUtil.isEmpty(bomMap)) {
-            logger.error("获取bom版本失败 req:{}",internalOrderResList);
+            logger.error("获取bom版本失败 req:{},res:{}",maps,JSONObject.toJSON(bomMap));
             throw new BusinessException("获取bom版本失败！");
         }
         return bomMap;

@@ -170,6 +170,7 @@
         place = VALUES(place),
         data_source = VALUES(data_source),
         remark = VALUES(remark),
-        create_by = VALUES(create_by)
+        create_by = VALUES(create_by),
+        update_time = now()
     </insert>
 </mapper>

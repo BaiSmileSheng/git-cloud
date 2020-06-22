@@ -196,7 +196,8 @@
         create_date_pr = VALUES(create_date_pr),
         project_type = VALUES(project_type),
         mrp_range = VALUES(mrp_range),
-        marker = VALUES(marker)
-        version = VALUES(version)
+        marker = VALUES(marker),
+        version = VALUES(version),
+        update_time = now()
     </insert>
 </mapper>
