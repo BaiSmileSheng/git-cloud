@@ -1,18 +1,16 @@
-package com.cloud.order.domain.entity;
+package com.cloud.order.domain.entity.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
-import com.alibaba.excel.annotation.format.DateTimeFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotBlank;
-import java.util.Date;
+import java.math.BigDecimal;
 
 /**
- * 滚动计划需求操作 导入对象
+ * 滚动计划需求操作 导出对象
  *
  * @author cs
  * @date 2020-06-16
@@ -22,105 +20,84 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class OmsDemandOrderGatherEditImport{
+public class OmsDemandOrderGatherEditExport {
     private static final long serialVersionUID = 1L;
 
-
-
-
-    /**
-     * 订单类型
-     */
-    @ExcelProperty(value = "订单类型")
-    @NotBlank
-    private String orderType;
-
-    /**
-     * 订单来源 1：内单，2：外单
-     */
-    @ExcelProperty(value = "订单来源")
-    @NotBlank
-    private String orderFrom;
 
     /**
      * 成品物料号
      */
-    @ExcelProperty(value = "成品物料")
-    @NotBlank
+    @ExcelProperty(value = "专用号",index = 0)
     private String productMaterialCode;
 
+    /**
+     * 成品物料描述
+     */
+    @ExcelProperty(value = "专用号描述",index = 1)
+    private String productMaterialDesc;
 
     /**
      * 生产工厂编码
      */
-    @ExcelProperty(value = "工厂")
-    @NotBlank
+    @ExcelProperty(value = "生产工厂",index = 4)
     private String productFactoryCode;
 
 
     /**
      * 客户编码
      */
-    @ExcelProperty(value = "客户编码")
-    @NotBlank
+    @ExcelProperty(value = "客户编码",index = 2)
     private String customerCode;
 
     /**
      * 客户描述
      */
-    @ExcelProperty(value = "客户名称")
-    @NotBlank
+    @ExcelProperty(value = "客户名称",index = 3)
     private String customerDesc;
 
     /**
-     * MRP范围
+     * 单位
      */
-    @ExcelProperty(value = "MRP范围")
-    @NotBlank
-    private String mrpRange;
+    @ExcelProperty(value = "单位",index = 5)
+    private String unit;
 
-    /**
-     * BOM版本
-     */
-    @ExcelProperty(value = "版本")
-    @NotBlank
-    private String bomVersion;
+    @ExcelProperty(value = "T+3周")
+    private Long t3Num;
 
-    /**
-     * 采购组
-     */
-    @ExcelProperty(value = "采购组")
-    @NotBlank
-    private String purchaseGroupCode;
+    @ExcelProperty(value = "T+4周")
+    private Long t4Num;
 
-    /**
-     * 地点
-     */
-    @ExcelProperty(value = "地点")
-    @NotBlank
-    private String place;
+    @ExcelProperty(value = "T+5周")
+    private Long t5Num;
 
-    /**
-     * 交付日期
-     */
-    @ExcelProperty(value = "交付日期")
-    @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
-    @NotBlank
-    private Date deliveryDate;
+    @ExcelProperty(value = "T+6周")
+    private Long t6Num;
 
-    /**
-     * 订单数量
-     */
-    @ExcelProperty(value = "数量")
-    @NotBlank
-    private Long orderNum;
+    @ExcelProperty(value = "T+7周")
+    private Long t7Num;
 
-    /**
-     * 备注
-     */
-    @ExcelProperty(value = "备注")
-    private String remark;
+    @ExcelProperty(value = "T+8周")
+    private Long t8Num;
 
-    @ExcelProperty(value = "错误信息")
-    private String errorMsg;
+    @ExcelProperty(value = "T+9周")
+    private Long t9Num;
+
+    @ExcelProperty(value = "T+10周")
+    private Long t10Num;
+
+    @ExcelProperty(value = "T+11周")
+    private Long t11Num;
+
+    @ExcelProperty(value = "T+12周")
+    private Long t12Num;
+
+    @ExcelProperty(value = "T+13周")
+    private Long t13Num;
+
+    @ExcelProperty(value = "需求总量")
+    private Long totalDemandNum;
+
+    @ExcelProperty(value = "库存量")
+    private BigDecimal stockNum;
+
 }

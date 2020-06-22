@@ -14,7 +14,9 @@ import lombok.NoArgsConstructor;
 import tk.mybatis.mapper.annotation.KeySql;
 
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 滚动计划需求操作 对象 oms_demand_order_gather_edit
@@ -204,4 +206,15 @@ public class OmsDemandOrderGatherEdit extends BaseEntity {
      */
     private String delFlag;
 
+    /**
+     * 汇总展示数据
+     */
+    @Transient  //tk 不操作字段
+    List<WeekAndNumGatherDTO> weekDataList;
+
+    /**
+     * 工厂列表
+     */
+    @Transient
+    List<String> productFactoryList;
 }
