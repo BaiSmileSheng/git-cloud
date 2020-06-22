@@ -44,8 +44,9 @@ public class SmsDelaysDeliveryController extends BaseController {
      */
     @GetMapping("get")
     @ApiOperation(value = "根据id查询延期交付索赔 ", response = SmsDelaysDelivery.class)
-    public SmsDelaysDelivery get(Long id) {
-        return smsDelaysDeliveryService.selectByPrimaryKey(id);
+    public R get(Long id) {
+        SmsDelaysDelivery smsDelaysDelivery = smsDelaysDeliveryService.selectByPrimaryKey(id);
+        return R.data(smsDelaysDelivery);
 
     }
 

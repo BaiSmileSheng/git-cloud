@@ -25,8 +25,9 @@ public class RemoteQualityOrderFallbackFactory implements FallbackFactory<Remote
              * @return SmsQualityOrder 质量索赔信息
              */
             @Override
-            public SmsQualityOrder get(Long id) {
-                return null;
+            public R get(Long id) {
+                log.error("RemoteQualityOrderService.get error:{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             /**
@@ -36,7 +37,8 @@ public class RemoteQualityOrderFallbackFactory implements FallbackFactory<Remote
              */
             @Override
             public R selectById(Long id) {
-                return null;
+                log.error("RemoteQualityOrderService.selectById error:{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             /**
@@ -46,7 +48,8 @@ public class RemoteQualityOrderFallbackFactory implements FallbackFactory<Remote
              */
             @Override
             public R editSave(SmsQualityOrder smsQualityOrder) {
-                return R.error("修改保存质量索赔失败");
+                log.error("RemoteQualityOrderService.editSave error:{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
             /**
              * 48H超时未确认发送邮件
@@ -54,7 +57,8 @@ public class RemoteQualityOrderFallbackFactory implements FallbackFactory<Remote
              */
             @Override
             public R overTimeSendMail() {
-                return R.error("48H超时未确认发送邮件失败");
+                log.error("RemoteQualityOrderService.overTimeSendMail error:{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             /**
@@ -63,7 +67,8 @@ public class RemoteQualityOrderFallbackFactory implements FallbackFactory<Remote
              */
             @Override
             public R overTimeConfim() {
-                return R.error("72H超时供应商自动确认失败");
+                log.error("RemoteQualityOrderService.overTimeConfim error:{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
         };
     }

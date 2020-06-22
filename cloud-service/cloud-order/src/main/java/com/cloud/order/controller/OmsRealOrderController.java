@@ -207,7 +207,8 @@ public class OmsRealOrderController extends BaseController {
     @PostMapping("importByPCY")
     @ApiOperation(value = "内单导入", response = OmsRealOrder.class)
     public R importByPCY(@RequestPart("file") MultipartFile file)throws IOException {
-        return importRealOrder(file,RealOrderFromEnum.ORDER_FROM_1.getCode());
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return omsRealOrderService.importRealOrderFile(file,RealOrderFromEnum.ORDER_FROM_1.getCode(),sysUser);
     }
 
     /**
@@ -216,57 +217,11 @@ public class OmsRealOrderController extends BaseController {
      * @return
      */
     @HasPermissions("order:realOrder:importByYW")
-    @PostMapping("importByPCY")
+    @PostMapping("importByYW")
     @ApiOperation(value = "外单导入", response = OmsRealOrder.class)
     public R importByYW(@RequestPart("file") MultipartFile file)throws IOException {
-        return importRealOrder(file,RealOrderFromEnum.ORDER_FROM_2.getCode());
-    }
-
-    /**
-     * 真单导入
-     * @param file
-     * @return
-     * @throws IOException
-     */
-    private R importRealOrder(MultipartFile file,String orderFrom) throws IOException {
-        EasyWithErrorExcelListener easyExcelListener = new EasyWithErrorExcelListener(omsRealOrderExcelImportService, OmsRealOrderExcelImportVo.class);
-        EasyExcel.read(file.getInputStream(),OmsRealOrderExcelImportVo.class,easyExcelListener).sheet().doRead();
-        //需要审核的结果
-        List<ExcelImportOtherObjectDto> auditList=easyExcelListener.getOtherList();
-        List<OmsRealOrder> auditResult = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(auditList)){
-            auditResult =auditList.stream().map(excelImportAuditObjectDto -> {
-                OmsRealOrder omsRealOrder = BeanUtil.copyProperties(excelImportAuditObjectDto, OmsRealOrder.class);
-                return omsRealOrder;
-            }).collect(Collectors.toList());
-        }
-        //可以导入的结果集 插入
-        List<ExcelImportSucObjectDto> successList=easyExcelListener.getSuccessList();
-        if (!CollectionUtils.isEmpty(successList)){
-            List<OmsRealOrder> successResult =successList.stream().map(excelImportSucObjectDto -> {
-                OmsRealOrder omsRealOrder = BeanUtil.copyProperties(excelImportSucObjectDto.getObject(), OmsRealOrder.class);
-                return omsRealOrder;
-            }).collect(Collectors.toList());
-            R result = omsRealOrderService.importOmsRealOrder(successResult,auditResult,getUserInfo(SysUser.class),
-                    orderFrom);
-            if(!result.isSuccess()){
-                logger.error("导入时插入数据异常 res:{}", JSONObject.toJSONString(result));
-                return result;
-            }
-        }
-        //错误结果集 导出
-        List<ExcelImportErrObjectDto> errList = easyExcelListener.getErrList();
-        if (!CollectionUtils.isEmpty(errList)){
-            List<OmsRealOrderExcelImportErrorVo> errorResults = errList.stream().map(excelImportErrObjectDto -> {
-                OmsRealOrderExcelImportErrorVo omsRealOrderExcelImportErrorVo = BeanUtil.copyProperties(excelImportErrObjectDto.getObject(),
-                        OmsRealOrderExcelImportErrorVo.class);
-                omsRealOrderExcelImportErrorVo.setErrorMessage(excelImportErrObjectDto.getErrMsg());
-                return omsRealOrderExcelImportErrorVo;
-            }).collect(Collectors.toList());
-            //导出excel
-            return EasyExcelUtil.writeExcel(errorResults, "真单导入错误信息.xlsx", "sheet", new ExcelImportErrObjectDto());
-        }
-        return R.ok();
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return omsRealOrderService.importRealOrderFile(file,RealOrderFromEnum.ORDER_FROM_2.getCode(),sysUser);
     }
 
     /**

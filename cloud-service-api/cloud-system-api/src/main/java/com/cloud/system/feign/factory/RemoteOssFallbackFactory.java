@@ -57,8 +57,9 @@ public class RemoteOssFallbackFactory implements FallbackFactory<RemoteOssServic
              * @return R 包含List<SysOss> 文件上传集合
              */
             @Override
-            public List<SysOss> listByOrderNo(String orderNo) {
-                return null;
+            public R listByOrderNo(String orderNo) {
+                log.error("RemoteOssService.listByOrderNo错误信息：{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             /**

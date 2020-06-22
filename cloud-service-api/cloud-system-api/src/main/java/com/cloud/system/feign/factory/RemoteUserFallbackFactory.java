@@ -52,8 +52,9 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
              * @return 用户信息
              */
             @Override
-            public SysUser findUserBySupplierCode(String supplierCode) {
-                return null;
+            public R findUserBySupplierCode(String supplierCode) {
+                log.error("RemoteUserService.findUserBySupplierCode error:{}",throwable.getMessage());
+                return R.error("服务拥挤，请稍后再试！");
             }
         };
     }

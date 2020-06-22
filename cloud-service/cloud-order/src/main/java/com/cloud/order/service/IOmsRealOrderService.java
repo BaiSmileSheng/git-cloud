@@ -4,7 +4,9 @@ import com.cloud.common.core.domain.R;
 import com.cloud.order.domain.entity.OmsRealOrder;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.system.domain.entity.SysUser;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -22,6 +24,14 @@ public interface IOmsRealOrderService extends BaseService<OmsRealOrder> {
      */
     R editSaveOmsRealOrder(OmsRealOrder omsRealOrder, SysUser sysUser,long userId);
 
+    /**
+     * 导入真单
+     * @param file 文件
+     * @param orderFrom 来源
+     * @return
+     * @throws IOException
+     */
+    R importRealOrderFile(MultipartFile file, String orderFrom,SysUser sysUser) throws IOException;
     /**
      * 导入真单
      * @param successResult  需要导入的数据

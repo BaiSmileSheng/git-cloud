@@ -180,9 +180,14 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
             logger.error("remoteFactoryInfoService.listAll() 异常res:{}", JSONObject.toJSONString(resultFactory));
             throw new BusinessException("根据供应商v码获取 工厂编号 异常");
         }
+
         List<CdFactoryInfo> cdFactoryInfoList = resultFactory.getCollectData(new TypeReference<List<CdFactoryInfo>>() {});
         Map<String,String> cdFactoryInfoMap = cdFactoryInfoList.stream().collect(Collectors.toMap(CdFactoryInfo ::getCompanyCodeV,
                 CdFactoryInfo ::getCompanyCode,(key1,key2) -> key2));
+
+        //3.获取bom版本
+        Map<String, Map<String, String>> bomMap = bomMap(omsInternalOrderResList);
+
         for(OmsInternalOrderRes omsInternalOrderRes : omsInternalOrderResList){
             String supplierCode = omsInternalOrderRes.getSupplierCode();
             String factoryCode = cdFactoryInfoMap.get(supplierCode);
@@ -198,10 +203,46 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
             }
             CdMaterialInfo cdMaterialInfo = cdMaterialInfoResult.getData(CdMaterialInfo.class);
             omsInternalOrderRes.setProductMaterialDesc(cdMaterialInfo.getMaterialDesc());
+
+            //通过生产工厂、客户编码去BOM清单表（cd_bom_info）中获取BOM的版本号，优先8、9版本，有8选8，没8取9，其他取最小版本
+            String keyBom = StrUtil.concat(true, omsInternalOrderRes.getProductMaterialCode(), omsInternalOrderRes.getProductFactoryCode());
+            //key:成品物料号+生产工厂
+            if (bomMap.get(keyBom) != null) {
+                //获取BOM版本
+                String boms = bomMap.get(keyBom).get("version");//逗号分隔多版本拼接
+                List<String> bomList = StrUtil.splitTrim(boms,StrUtil.COMMA);
+                if (CollUtil.contains(bomList, BOM_VERSION_EIGHT)) {
+                    //有8取8
+                    omsInternalOrderRes.setVersion(BOM_VERSION_EIGHT);
+                } else if (CollUtil.contains(bomList, BOM_VERSION_NINE)){
+                    //有9取9
+                    omsInternalOrderRes.setVersion(BOM_VERSION_NINE);
+                }else{
+                    //取最小的
+                    omsInternalOrderRes.setVersion(bomList.stream().min((c,d)->StrUtil.compare(c,d,true)).get());
+                }
+            }
+
         }
         //3.插入数据
         omsInternalOrderResMapper.batchInsertOrUpdate(omsInternalOrderResList);
         return R.ok();
     }
 
+    /**
+     * 获取bom信息
+     * @param internalOrderResList
+     * @return
+     */
+    private Map<String, Map<String, String>> bomMap(List<OmsInternalOrderRes> internalOrderResList){
+        List<Dict> maps = internalOrderResList.stream().map(s -> new Dict().set("productFactoryCode",s.getProductFactoryCode())
+                .set("productMaterialCode",s.getProductMaterialCode())).distinct().collect(Collectors.toList());
+        //获取bom版本
+        Map<String, Map<String, String>> bomMap = remoteBomService.selectVersionMap(maps);
+        if (MapUtil.isEmpty(bomMap)) {
+            logger.error("获取bom版本失败 req:{}",internalOrderResList);
+            throw new BusinessException("获取bom版本失败！");
+        }
+        return bomMap;
+    }
 }

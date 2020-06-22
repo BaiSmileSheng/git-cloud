@@ -13,6 +13,7 @@ import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteOssService;
 import com.cloud.system.feign.RemoteSequeceService;
 import com.cloud.system.feign.RemoteUserService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -89,10 +91,22 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         if(null != smsClaimOtherRes || StringUtils.isNotBlank(smsClaimOtherRes.getClaimCode())){
             //索赔文件编号
             String claimOrderNo =smsClaimOtherRes.getClaimCode() + ORDER_NO_OTHER_CLAIM_END;
-            List<SysOss> claimListReault = remoteOssService.listByOrderNo(claimOrderNo);
+            R claimListR = remoteOssService.listByOrderNo(claimOrderNo);
+            if(!claimListR.isSuccess()){
+                logger.error("根据id查询其他索赔单详情时获取索赔图片信息失败claimOrderNo:{},res:{}",
+                        claimOrderNo,JSONObject.toJSON(claimListR));
+                throw new BusinessException("根据id查询其他索赔单详情时获取索赔图片信息失败");
+            }
+            List<SysOss> claimListReault = claimListR.getCollectData(new TypeReference<List<SysOss>>() {});
             //申诉文件编号
             String appealOrderNo = smsClaimOtherRes.getClaimCode() + ORDER_NO_OTHER_APPEAL_END;
-            List<SysOss> appealListReault = remoteOssService.listByOrderNo(appealOrderNo);
+            R appealListR = remoteOssService.listByOrderNo(appealOrderNo);
+            if(!appealListR.isSuccess()){
+                logger.error("根据id查询其他索赔单详情时获取申诉图片信息失败appealOrderNo:{},res:{}",
+                        claimOrderNo,JSONObject.toJSON(appealListR));
+                throw new BusinessException("根据id查询其他索赔单详情时获取审诉图片信息失败");
+            }
+            List<SysOss> appealListReault = appealListR.getCollectData(new TypeReference<List<SysOss>>() {});
             Map<String,Object> map = new HashMap<>();
             map.put("smsClaimOther",smsClaimOtherRes);
             map.put("claimSysOssList",claimListReault);
@@ -139,8 +153,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         //4.若直接提交调用提交接口
         if(smsClaimOther.getFlagCommit()){
             R resultResult = submit(smsClaimOther.getId().toString());
-            flagResult = "0".equals(resultResult.get("code").toString());
-            if(!flagResult){
+            if(!resultResult.isSuccess()){
                 logger.error("新增其他索赔时提交失败 id:{},res:{}",smsClaimOther.getId(), JSONObject.toJSON(resultResult));
                 throw new BusinessException("新增其他索赔时提交失败");
             }
@@ -163,12 +176,12 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         SmsClaimOther smsClaimOtherRes = smsClaimOtherMapper.selectByPrimaryKey(smsClaimOther.getId());
         if(null == smsClaimOtherRes){
             logger.error("根据id查询其他索赔单不存在 id:{}",smsClaimOther.getId());
-            return R.error("其他索赔单不存在");
+            throw new BusinessException("其他索赔单不存在");
         }
         Boolean flagResult = ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_0.getCode().equals(smsClaimOtherRes.getClaimOtherStatus());
         if(!flagResult){
             logger.error("此索赔单已提交不可再编辑 id:{},claimOtherStatus:{}",smsClaimOtherRes.getId(),smsClaimOtherRes.getClaimOtherStatus());
-            return R.error("此索赔单已提交不可再编辑");
+            throw new BusinessException("此索赔单已提交不可再编辑");
         }
         //2.修改索赔单信息
         smsClaimOtherMapper.updateByPrimaryKeySelective(smsClaimOtherRes);
@@ -176,16 +189,14 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         //3.根据索赔单号对所对应的文件修改(先删后增)
         String orderNo = smsClaimOtherRes.getClaimCode() + ORDER_NO_OTHER_CLAIM_END;
         R result = remoteOssService.updateListByOrderNo(orderNo,files);
-        flagResult = "0".equals(result.get("code").toString());
-        if(!flagResult){
+        if(!result.isSuccess()){
             logger.error("修改其他索赔时修改文件失败订单号 orderNo:{},res:{}",orderNo, JSONObject.toJSON(result));
             throw new BusinessException("修改其他索赔单时新增文件信息失败");
         }
         //4.若直接提交调用提交接口
         if(smsClaimOther.getFlagCommit()){
             R resultResult = submit(smsClaimOther.getId().toString());
-            flagResult = "0".equals(resultResult.get("code").toString());
-            if(!flagResult){
+            if(!resultResult.isSuccess()){
                 logger.error("修改其他索赔时提交失败 id:{},res:{}",smsClaimOther.getId(), JSONObject.toJSON(resultResult));
                 throw new BusinessException("修改其他索赔时提交失败");
             }
@@ -206,7 +217,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         List<SmsClaimOther> selectListResult =  smsClaimOtherMapper.selectByIds(ids);
         if(CollectionUtils.isEmpty(selectListResult)){
             logger.error("删除其他索赔单时失败,其他索赔单不存在 ids:{}",ids);
-            return R.error("其他索赔单不存在");
+            throw new BusinessException("其他索赔单不存在");
         }
 
         Boolean flagResult;
@@ -214,7 +225,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
             flagResult = ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_0.getCode().equals(smsClaimOther.getClaimOtherStatus());
             if(!flagResult){
                 logger.error("删除其他索赔单失败 id:{},claimOtherStatus:{}",smsClaimOther.getId(),smsClaimOther.getClaimOtherStatus());
-                return R.error("请确认其他索赔单状态是否为待提交");
+                throw new BusinessException("请确认其他索赔单状态是否为待提交");
             }
         }
         //2.根据订单号删除文件
@@ -222,8 +233,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         for(SmsClaimOther smsClaimOther : selectListResult){
             String orderNo = smsClaimOther.getClaimCode() + ORDER_NO_OTHER_CLAIM_END;
             R resultOss = remoteOssService.deleteListByOrderNo(orderNo);
-            flagResult = "0".equals(resultOss.get("code").toString());
-            if(!flagResult){
+            if(!resultOss.isSuccess()){
                 logger.error("修改其他索赔单时修改文件信息失败 orderNo:{},res:{}",orderNo,JSONObject.toJSON(resultOss));
                 throw new BusinessException("修改其他索赔单时修改文件信息失败");
             }
@@ -248,7 +258,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         List<SmsClaimOther> selectListResult =  smsClaimOtherMapper.selectByIds(ids);
         if(CollectionUtils.isEmpty(selectListResult)){
             logger.error("提交其他索赔单失败,其他索赔单不存在 ids:{}",ids);
-            return R.error("其他索赔单不存在");
+            throw new BusinessException("其他索赔单不存在");
         }
         //1.校验状态,发送邮件
         for(SmsClaimOther smsClaimOther : selectListResult){
@@ -256,15 +266,16 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
             if(!flagResult){
                 logger.error("提交其他索赔单失败,状态异常 id:{},claimOtherStatus:{}",
                         smsClaimOther.getId(),smsClaimOther.getClaimOtherStatus());
-                return R.error("请确认其他索赔单状态是否为待提交");
+                throw new BusinessException("请确认其他索赔单状态是否为待提交");
             }
             String supplierCode = smsClaimOther.getSupplierCode();
             //根据供应商编号查询供应商信息
-            SysUser sysUser = remoteUserService.findUserBySupplierCode(supplierCode);
-            if(null == sysUser){
+            R sysUserR = remoteUserService.findUserBySupplierCode(supplierCode);
+            if(!sysUserR.isSuccess()){
                 logger.error("提交其他索赔时查询供应商信息失败供应商编号 supplierCode:{}",supplierCode);
                 throw new BusinessException("提交其他索赔时查询供应商信息失败");
             }
+            SysUser sysUser = sysUserR.getData(SysUser.class);
             String mailSubject = "其他索赔邮件";
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条其他索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
@@ -294,7 +305,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         List<SmsClaimOther> selectListResult =  smsClaimOtherMapper.selectByIds(ids);
         if(CollectionUtils.isEmpty(selectListResult)){
             logger.error("供应商确认其他索赔单失败,其他索赔单不存在 ids:{}",ids);
-            return R.error("其他索赔单不存在");
+            throw new BusinessException("其他索赔单不存在");
         }
         //校验状态
         for(SmsClaimOther smsClaimOther : selectListResult){
@@ -303,7 +314,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
             if(!flagResult){
                 logger.error("供应商确认其他索赔单失败,状态异常 id:{},claimOtherStatus:{}",
                         smsClaimOther.getId(),smsClaimOther.getClaimOtherStatus());
-                return R.error("请确认其他索赔单状态是否为待供应商确认");
+                throw new BusinessException("请确认其他索赔单状态是否为待供应商确认");
             }
             smsClaimOther.setClaimOtherStatus(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_11.getCode());
             smsClaimOther.setSettleFee(smsClaimOther.getClaimPrice());
@@ -325,14 +336,14 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         SmsClaimOther smsClaimOtherRes = smsClaimOtherMapper.selectByPrimaryKey(smsClaimOther.getId());
         if(null == smsClaimOtherRes){
             logger.error("供应商申诉的其他索赔单不存在 id:{}",smsClaimOther.getId());
-            return R.error("索赔单不存在");
+            throw new BusinessException("索赔单不存在");
         }
         Boolean flagResult = ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_1.getCode().equals(smsClaimOtherRes.getClaimOtherStatus())
                 ||ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_7.equals(smsClaimOtherRes.getClaimOtherStatus());
         if(!flagResult){
             logger.error("供应商申诉的其他索赔单 状态异常 id:{},claimOtherStatus:{}",
                     smsClaimOther.getId(),smsClaimOtherRes.getClaimOtherStatus());
-            return R.error("此索赔单不可申诉");
+            throw new BusinessException("此索赔单不可申诉");
         }
         //2.修改索赔单信息
         smsClaimOtherRes.setClaimOtherStatus(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_3.getCode());
@@ -341,8 +352,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         String orderNo = smsClaimOtherRes.getClaimCode() + ORDER_NO_OTHER_APPEAL_END;
         //3.根据订单号新增文件
         R uplodeFileResult = remoteOssService.updateListByOrderNo(orderNo,files);
-        flagResult = "0".equals(uplodeFileResult.get("code").toString());
-        if(!flagResult){
+        if(!uplodeFileResult.isSuccess()){
             throw new BusinessException("其他索赔单供应商申诉时新增文件失败");
         }
         return R.ok();
@@ -365,11 +375,12 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         for(SmsClaimOther smsClaimOther : smsClaimOtherList){
             String supplierCode = smsClaimOther.getSupplierCode();
             //根据供应商编号查询供应商信息
-            SysUser sysUser = remoteUserService.findUserBySupplierCode(supplierCode);
-            if(null == sysUser){
+            R sysUserR = remoteUserService.findUserBySupplierCode(supplierCode);
+            if(!sysUserR.isSuccess()){
                 logger.error("定时发送邮件时查询供应商信息失败供应商编号 supplierCode:{}",supplierCode);
                 throw new BusinessException("定时发送邮件时查询供应商信息失败");
             }
+            SysUser sysUser = sysUserR.getData(SysUser.class);
             String mailSubject = "其他索赔邮件";
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条其他索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉

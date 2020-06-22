@@ -287,6 +287,11 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         return calendar.getTime();
     }
 
+    /**
+     * 获取 Calendar 类型时间
+     * @param date
+     * @return
+     */
     private static Calendar convert(Date date) {
         Calendar calendar = new GregorianCalendar();
         calendar.setTime(date);

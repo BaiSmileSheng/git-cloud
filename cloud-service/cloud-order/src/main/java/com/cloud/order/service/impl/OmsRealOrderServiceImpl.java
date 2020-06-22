@@ -7,6 +7,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.constant.RoleConstants;
@@ -16,10 +17,13 @@ import com.cloud.common.easyexcel.DTO.ExcelImportErrObjectDto;
 import com.cloud.common.easyexcel.DTO.ExcelImportOtherObjectDto;
 import com.cloud.common.easyexcel.DTO.ExcelImportResult;
 import com.cloud.common.easyexcel.DTO.ExcelImportSucObjectDto;
+import com.cloud.common.easyexcel.EasyExcelUtil;
+import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.order.domain.entity.OmsInternalOrderRes;
 import com.cloud.order.domain.entity.OmsRealOrder;
+import com.cloud.order.domain.entity.vo.OmsRealOrderExcelImportErrorVo;
 import com.cloud.order.domain.entity.vo.OmsRealOrderExcelImportVo;
 import com.cloud.order.enums.DemandOrderGatherEditAuditStatusEnum;
 import com.cloud.order.enums.InternalOrderResEnum;
@@ -49,8 +53,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -90,6 +96,9 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
 
     @Autowired
     private RemoteMaterialExtendInfoService remoteMaterialExtendInfoService;
+
+    @Autowired
+    private IOmsRealOrderExcelImportService omsRealOrderExcelImportService;
 
     private final static String YYYY_MM_DD = "yyyy-MM-dd";//时间格式
 
@@ -138,6 +147,47 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         }
 
         omsRealOrderMapper.updateByPrimaryKey(omsRealOrder);
+        return R.ok();
+    }
+
+    @Override
+    public R importRealOrderFile(MultipartFile file, String orderFrom,SysUser sysUser) throws IOException {
+        EasyWithErrorExcelListener easyExcelListener = new EasyWithErrorExcelListener(omsRealOrderExcelImportService, OmsRealOrderExcelImportVo.class);
+        EasyExcel.read(file.getInputStream(),OmsRealOrderExcelImportVo.class,easyExcelListener).sheet().doRead();
+        //需要审核的结果
+        List<ExcelImportOtherObjectDto> auditList=easyExcelListener.getOtherList();
+        List<OmsRealOrder> auditResult = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(auditList)){
+            auditResult =auditList.stream().map(excelImportAuditObjectDto -> {
+                OmsRealOrder omsRealOrder = BeanUtil.copyProperties(excelImportAuditObjectDto, OmsRealOrder.class);
+                return omsRealOrder;
+            }).collect(Collectors.toList());
+        }
+        //可以导入的结果集 插入
+        List<ExcelImportSucObjectDto> successList=easyExcelListener.getSuccessList();
+        if (!CollectionUtils.isEmpty(successList)){
+            List<OmsRealOrder> successResult =successList.stream().map(excelImportSucObjectDto -> {
+                OmsRealOrder omsRealOrder = BeanUtil.copyProperties(excelImportSucObjectDto.getObject(), OmsRealOrder.class);
+                return omsRealOrder;
+            }).collect(Collectors.toList());
+            R result = importOmsRealOrder(successResult,auditResult,sysUser,orderFrom);
+            if(!result.isSuccess()){
+                logger.error("导入时插入数据异常 res:{}", JSONObject.toJSONString(result));
+                return result;
+            }
+        }
+        //错误结果集 导出
+        List<ExcelImportErrObjectDto> errList = easyExcelListener.getErrList();
+        if (!CollectionUtils.isEmpty(errList)){
+            List<OmsRealOrderExcelImportErrorVo> errorResults = errList.stream().map(excelImportErrObjectDto -> {
+                OmsRealOrderExcelImportErrorVo omsRealOrderExcelImportErrorVo = BeanUtil.copyProperties(excelImportErrObjectDto.getObject(),
+                        OmsRealOrderExcelImportErrorVo.class);
+                omsRealOrderExcelImportErrorVo.setErrorMessage(excelImportErrObjectDto.getErrMsg());
+                return omsRealOrderExcelImportErrorVo;
+            }).collect(Collectors.toList());
+            //导出excel
+            return EasyExcelUtil.writeExcel(errorResults, "真单导入错误信息.xlsx", "sheet", new ExcelImportErrObjectDto());
+        }
         return R.ok();
     }
 
@@ -197,16 +247,13 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         //2.获取cd_factory_storehouse_info 工厂库位基础表
         //一个工厂,一个客户对应一个库位
         Map<String, CdFactoryStorehouseInfo> factoryStorehouseInfoMap = factoryStorehouseInfoMap(new CdFactoryStorehouseInfo());
-        //3.获取不重复的物料号和工厂Map
-        //获取bom版本
-        Map<String, Map<String, String>> bomMap = bomMap(internalOrderResList);
 
         logger.info("定时任务每天在获取到PO信息后 进行需求汇总  汇总开始  ");
-        //4.将原始数据按照成品专用号、生产工厂、客户编码、交付日期将未完成交货的数据订单数量进行汇总
-        Map<String, OmsRealOrder> omsRealOrderMap = getStringOmsRealOrderMap(internalOrderResList, factoryStorehouseInfoMap, bomMap,"定时任务");
+        //3.将原始数据按照成品专用号、生产工厂、客户编码、交付日期将未完成交货的数据订单数量进行汇总
+        Map<String, OmsRealOrder> omsRealOrderMap = getStringOmsRealOrderMap(internalOrderResList, factoryStorehouseInfoMap,"定时任务");
 
         logger.info("定时任务每天在获取到PO信息后 进行需求汇总  批量插入开始  ");
-        //5.批量插入(生产工厂、客户编码、成品专用号、交付日期、订单种类唯一索引),存在就修改
+        //4.批量插入(生产工厂、客户编码、成品专用号、交付日期、订单种类唯一索引),存在就修改
         List<OmsRealOrder> omsRealOrdersList = omsRealOrderMap.values().stream().collect(Collectors.toList());
         omsRealOrderMapper.batchInsetOrUpdate(omsRealOrdersList);
         logger.info("定时任务每天在获取到PO信息后 进行需求汇总  结束");
@@ -217,12 +264,11 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
      * 将原始数据按照成品专用号、生产工厂、客户编码、交付日期将未完成交货的数据订单数量进行汇总
      * @param internalOrderResList
      * @param factoryStorehouseInfoMap
-     * @param bomMap
      * @return
      */
     private Map<String, OmsRealOrder> getStringOmsRealOrderMap(List<OmsInternalOrderRes> internalOrderResList,
                                                                Map<String, CdFactoryStorehouseInfo> factoryStorehouseInfoMap,
-                                                               Map<String, Map<String, String>> bomMap,String createBy) {
+                                                              String createBy) {
         Map<String, OmsRealOrder> omsRealOrderMap = new HashMap<>();
         internalOrderResList.forEach(internalOrderRes -> {
             String productMaterialCode = internalOrderRes.getProductMaterialCode();
@@ -259,24 +305,6 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 omsRealOrder.setProductFactoryCode(internalOrderRes.getProductFactoryCode());
                 omsRealOrder.setProductFactoryDesc(internalOrderRes.getProductFactoryDesc());
                 omsRealOrder.setMrpRange(internalOrderRes.getMrpRange());
-                //通过生产工厂、客户编码去BOM清单表（cd_bom_info）中获取BOM的版本号，优先8、9版本，有8选8，没8取9，其他取最小版本
-                String keyBom = StrUtil.concat(true, internalOrderRes.getProductMaterialCode(), productFactoryCode);
-                //key:成品物料号+生产工厂
-                if (bomMap.get(keyBom) != null) {
-                    //获取BOM版本
-                    String boms = bomMap.get(keyBom).get("version");//逗号分隔多版本拼接
-                    List<String> bomList = StrUtil.splitTrim(boms,StrUtil.COMMA);
-                    if (CollUtil.contains(bomList, BOM_VERSION_EIGHT)) {
-                        //有8取8
-                        internalOrderRes.setVersion(BOM_VERSION_EIGHT);
-                    } else if (CollUtil.contains(bomList, BOM_VERSION_NINE)){
-                        //有9取9
-                        internalOrderRes.setVersion(BOM_VERSION_NINE);
-                    }else{
-                        //取最小的
-                        internalOrderRes.setVersion(bomList.stream().min((c,d)->StrUtil.compare(c,d,true)).get());
-                    }
-                }
                 omsRealOrder.setBomVersion(internalOrderRes.getVersion());
                 omsRealOrder.setPurchaseGroupCode(internalOrderRes.getPurchaseGroupCode());
                 omsRealOrder.setOrderNum(internalOrderRes.getOrderNum());
@@ -344,23 +372,6 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 storehouseInfo -> storehouseInfo, (key1, key2) -> key2));
 
         return factoryStorehouseInfoMap;
-    }
-
-    /**
-     * 获取bom信息
-     * @param internalOrderResList
-     * @return
-     */
-    private Map<String, Map<String, String>> bomMap(List<OmsInternalOrderRes> internalOrderResList){
-        List<Dict> maps = internalOrderResList.stream().map(s -> new Dict().set("productFactoryCode",s.getProductFactoryCode())
-                .set("productMaterialCode",s.getProductMaterialCode())).distinct().collect(Collectors.toList());
-        //获取bom版本
-        Map<String, Map<String, String>> bomMap = remoteBomService.selectVersionMap(maps);
-        if (MapUtil.isEmpty(bomMap)) {
-            logger.error("获取bom版本失败 req:{}",internalOrderResList);
-            throw new BusinessException("获取bom版本失败！");
-        }
-        return bomMap;
     }
 
     @Override

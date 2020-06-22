@@ -128,10 +128,10 @@ public class SmsSettleInfoController extends BaseController {
             @ApiImplicitParam(name = "endTime", value = "结束时间", required = false, paramType = "query", dataType = "String")
     })
     @ApiOperation(value = "加工费结算条件查询", response = SmsSettleInfo.class)
-    public List<SmsSettleInfo> listByCondition(@ApiIgnore SmsSettleInfo smsSettleInfo) {
+    public R listByCondition(@ApiIgnore SmsSettleInfo smsSettleInfo) {
         Example example = exampleListCondition(smsSettleInfo);
         List<SmsSettleInfo> smsSettleInfoList = smsSettleInfoService.selectByExample(example);
-        return smsSettleInfoList;
+        return R.data(smsSettleInfoList);
     }
 
     /**
