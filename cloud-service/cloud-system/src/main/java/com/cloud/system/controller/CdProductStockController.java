@@ -87,7 +87,7 @@ public class CdProductStockController extends BaseController {
         if(!result.isSuccess()){
             return result;
         }
-        CdProductStockDetail cdProductStockDetail = (CdProductStockDetail)result.get("com.cloud.system.domain.po.CdProductStockDetail");
+        CdProductStockDetail cdProductStockDetail = (CdProductStockDetail)result.get("data");
         List<SheetExcelData>  sheetExcelDataList= new ArrayList<>();
         SheetExcelData sheetExcelDataZ = new SheetExcelData();
         sheetExcelDataZ.setDataList(cdProductStockDetail.getCdProductStockList());
@@ -197,7 +197,6 @@ public class CdProductStockController extends BaseController {
     @OperLog(title = "定时任务同步成品库存接口 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "定时任务同步成品库存接口 ", response = R.class)
     public R timeSycProductStock() {
-
         return cdProductStockService.timeSycProductStock();
     }
 
