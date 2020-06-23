@@ -115,11 +115,12 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
      */
     private R supplierAppeal(SmsClaimOther smsClaimOther, MultipartFile[] files) {
         //1.查询索赔单数据,判断状态是否是待提交,待提交可修改
-        SmsClaimOther smsClaimOtherRes = remoteClaimOtherService.get(smsClaimOther.getId());
-        if(null == smsClaimOtherRes){
+        R smsClaimOtherResR = remoteClaimOtherService.get(smsClaimOther.getId());
+        if(!smsClaimOtherResR.isSuccess()){
             logger.error("供应商申诉的其他索赔单不存在 id:{}",smsClaimOther.getId());
             throw new BusinessException("索赔单不存在");
         }
+        SmsClaimOther smsClaimOtherRes = smsClaimOtherResR.getData(SmsClaimOther.class);
         Boolean flagResult = ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_1.getCode().equals(smsClaimOtherRes.getClaimOtherStatus())
                 ||ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_7.equals(smsClaimOtherRes.getClaimOtherStatus());
         if(!flagResult){
@@ -131,14 +132,13 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         smsClaimOtherRes.setClaimOtherStatus(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_3.getCode());
         smsClaimOtherRes.setComplaintDate(new Date());
         R updateResult = remoteClaimOtherService.editSave(smsClaimOtherRes);
-        if(!"0".equals(updateResult.get("code").toString())){
+        if(!updateResult.isSuccess()){
             throw new BusinessException("修改索赔单信息失败");
         }
         String orderNo = smsClaimOtherRes.getClaimCode() + ORDER_NO_OTHER_APPEAL_END;
         //3.根据订单号新增文件
         R uplodeFileResult = remoteOssService.updateListByOrderNo(orderNo,files);
-        flagResult = "0".equals(uplodeFileResult.get("code").toString());
-        if(!flagResult){
+        if(!uplodeFileResult.isSuccess()){
             throw new BusinessException("其他索赔单供应商申诉时新增文件失败");
         }
         return R.ok();
@@ -180,11 +180,12 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         }
         //2.根据id获取其他索赔信息 判断是否待审批
         logger.info ("其他索赔审批流程 获取其他索赔信息主键id:{}",bizBusiness.getTableId());
-        SmsClaimOther smsClaimOther = remoteClaimOtherService.get(Long.valueOf(bizBusiness.getTableId()));
-        if(null == smsClaimOther){
+        R smsClaimOtherR = remoteClaimOtherService.get(Long.valueOf(bizBusiness.getTableId()));
+        if(!smsClaimOtherR.isSuccess()){
             logger.error ("其他索赔审批流程 查询其他索赔信息失败Req主键id:{}",bizBusiness.getTableId());
             return R.error("其他索赔审批流程 查询其他索赔信息失败");
         }
+        SmsClaimOther smsClaimOther = smsClaimOtherR.getData(SmsClaimOther.class);
         //状态是否是待小微主审核
         Boolean flagStatus3 = ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_3.getCode().equals(smsClaimOther.getClaimOtherStatus());
         if (!flagStatus3) {
@@ -204,9 +205,15 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         //更新其他索赔状态
         logger.info ("其他索赔审批流程 更新其他索赔主键id:{} 状态:{}",smsClaimOther.getId(),smsClaimOther.getClaimOtherStatus());
         R updateResult = remoteClaimOtherService.editSave(smsClaimOther);
-        if("0".equals(updateResult.get("code").toString())){
-            //4.审批 推进工作流
-            return actTaskService.audit(bizAudit, sysUser.getUserId());
+        if(!updateResult.isSuccess()){
+            logger.error("其他索赔审批流程 更新其他索赔失败 主键id:{}res:{}",smsClaimOther.getId(),JSONObject.toJSON(updateResult));
+            throw new BusinessException("其他索赔审批流程 更新其他索赔失败 ");
+        }
+        //4.审批 推进工作流
+        R resultAck = actTaskService.audit(bizAudit, sysUser.getUserId());
+        if(!resultAck.isSuccess()){
+            logger.error("其他索赔审批流程 审批 推进工作流 req:{}res:{}",JSONObject.toJSON(bizAudit),JSONObject.toJSON(updateResult));
+            throw new BusinessException("其他索赔审批流程 审批 推进工作流失败 ");
         }
         return R.error();
     }

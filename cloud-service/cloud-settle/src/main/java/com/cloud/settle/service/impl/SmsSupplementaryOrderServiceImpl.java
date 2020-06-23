@@ -3,6 +3,7 @@ package com.cloud.settle.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
@@ -136,12 +137,21 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             return rCheck;
         }
         //生产单号获取排产订单信息
-        OmsProductionOrder omsProductionOrder = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
+        R omsProductionOrderResult = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
+        if(!omsProductionOrderResult.isSuccess()){
+            log.error("根据生产单号获取排产订单信息异常 productOrderCode:{},res:{}",productOrderCode, JSONObject.toJSON(omsProductionOrderResult));
+            throw new BusinessException(omsProductionOrderResult.get("msg").toString());
+        }
+        OmsProductionOrder omsProductionOrder = omsProductionOrderResult.getData(OmsProductionOrder.class);
         String productMaterialCode = omsProductionOrder.getProductMaterialCode();
         String rawMaterialCode = smsSupplementaryOrder.getRawMaterialCode();
 
         //开始插入
-        String seq = remoteSequeceService.selectSeq("supplementary_seq", 4);
+        R seqResult = remoteSequeceService.selectSeq("supplementary_seq", 4);
+        if(!seqResult.isSuccess()){
+            throw new BusinessException("获取序列号失败");
+        }
+        String seq = seqResult.getStr("data");
         StringBuffer stuffNo = new StringBuffer();
         //WH+年月日+4位顺序号
         stuffNo.append("WH").append(DateUtils.dateTime()).append(seq);
@@ -153,11 +163,13 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             smsSupplementaryOrder.setSupplierName(factoryLineInfo.getSupplierDesc());
         }
         smsSupplementaryOrder.setFactoryCode(omsProductionOrder.getProductFactoryCode());
-        CdFactoryInfo cdFactoryInfo = remoteFactoryInfoService.selectOneByFactory(omsProductionOrder.getProductFactoryCode());
-        if (cdFactoryInfo == null) {
+        R rFactoryInfo= remoteFactoryInfoService.selectOneByFactory(omsProductionOrder.getProductFactoryCode());
+        if(!rFactoryInfo.isSuccess()){
             log.error(StrUtil.format("(物耗)物耗申请新增保存开始：公司信息为空参数为{}", omsProductionOrder.getProductFactoryCode()));
             return R.error("公司信息为空！");
         }
+        CdFactoryInfo cdFactoryInfo = rFactoryInfo.getData(CdFactoryInfo.class);
+
         smsSupplementaryOrder.setCompanyCode(cdFactoryInfo.getCompanyCode());
         smsSupplementaryOrder.setProductOrderCode(omsProductionOrder.getProductOrderCode());//生产订单号
         if (StrUtil.isBlank(smsSupplementaryOrder.getStuffStatus())) {
@@ -168,6 +180,9 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
 //        smsSupplementaryOrder.setStuffUnit(cdMaterialPriceInfo.getUnit());
 //        smsSupplementaryOrder.setCurrency(cdMaterialPriceInfo.getCurrency());//币种
         CdBomInfo cdBom = remoteBomService.listByProductAndMaterial(productMaterialCode, rawMaterialCode);
+        if (cdBom == null) {
+            return R.error("BOM信息为空！");
+        }
         smsSupplementaryOrder.setSapStoreage(cdBom.getStoragePoint());
         smsSupplementaryOrder.setPurchaseGroupCode(cdBom.getPurchaseGroup());
         smsSupplementaryOrder.setDelFlag("0");
@@ -379,12 +394,13 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
 //        }
         //将返回值Map转为CdMaterialPriceInfo
 //        CdMaterialPriceInfo cdMaterialPriceInfo = BeanUtil.mapToBean((Map<?, ?>) r.get("data"), CdMaterialPriceInfo.class, true);
-        //2、校验修改申请数量是否是最小包装量的整数倍
-        CdMaterialInfo cdMaterialInfo = remoteMaterialService.getByMaterialCode(smsSupplementaryOrder.getRawMaterialCode());
-        if (cdMaterialInfo == null) {
+        //2、校验修改申请数量是否是最小包装量的整数倍 CdMaterialInfo cdMaterialInfo
+        R cdMaterialInfoResult = remoteMaterialService.getByMaterialCode(smsSupplementaryOrder.getRawMaterialCode());
+        if (!cdMaterialInfoResult.isSuccess()) {
             log.error(StrUtil.format("(物耗)未维护物料信息{}", smsSupplementaryOrder.getRawMaterialCode()));
             return R.error("未维护物料信息！");
         }
+        CdMaterialInfo cdMaterialInfo = cdMaterialInfoResult.getData(CdMaterialInfo.class);
         int applyNum = smsSupplementaryOrder.getStuffAmount();//申请量
         //最小包装量
         Double minUnit = Double.valueOf(cdMaterialInfo.getRoundingQuantit() == null ? "0" : cdMaterialInfo.getRoundingQuantit().toString());
@@ -397,11 +413,12 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         }
         //3、校验申请数量是否是单耗的整数倍
         //生产单号获取排产订单信息
-        OmsProductionOrder omsProductionOrder = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
-        if (omsProductionOrder == null) {
+        R omsProductionOrderResult = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
+        if (!omsProductionOrderResult.isSuccess()) {
             log.error(StrUtil.format("(物耗)排产订单信息不存在!排产订单号参数为{}", productOrderCode));
             return R.error(StrUtil.format("{}排产订单信息不存在！",productOrderCode));
         }
+        OmsProductionOrder omsProductionOrder = omsProductionOrderResult.getData(OmsProductionOrder.class);
         //根据成品物料号和原材料物料号取bom单耗
         String productMaterialCode = omsProductionOrder.getProductMaterialCode();
         String rawMaterialCode = smsSupplementaryOrder.getRawMaterialCode();

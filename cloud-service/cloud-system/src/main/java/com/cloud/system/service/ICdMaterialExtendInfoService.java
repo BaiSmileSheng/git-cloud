@@ -1,8 +1,10 @@
 package com.cloud.system.service;
 
 import com.cloud.common.core.domain.R;
-import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.common.core.service.BaseService;
+import com.cloud.system.domain.entity.CdMaterialExtendInfo;
+
+import java.util.List;
 
 /**
  * 物料扩展信息 Service接口
@@ -18,4 +20,19 @@ public interface ICdMaterialExtendInfoService extends BaseService<CdMaterialExte
      * @return
      */
     R timeSycMaterialCode();
+
+
+    /**
+     * 根据生命周期查询物料号集合
+     * @param lifeCycle
+     * @return
+     */
+	R selectMaterialCodeByLifeCycle(String lifeCycle);
+
+    /**
+     * 根据物料号集合查询
+     * @param materialCodes
+     * @return
+     */
+    R selectInfoInMaterialCodes(List<String> materialCodes);
 }

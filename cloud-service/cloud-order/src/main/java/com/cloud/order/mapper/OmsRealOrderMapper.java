@@ -13,4 +13,13 @@ import java.util.List;
  */
 public interface OmsRealOrderMapper extends BaseMapper<OmsRealOrder>{
 
+    List<OmsRealOrder> selectListByGroup(OmsRealOrder omsRealOrder);
+
+    /**
+     * 批量插入或修改
+     * @param omsRealOrderList
+     * @return
+     */
+    int batchInsetOrUpdate(List<OmsRealOrder> omsRealOrderList);
+
 }

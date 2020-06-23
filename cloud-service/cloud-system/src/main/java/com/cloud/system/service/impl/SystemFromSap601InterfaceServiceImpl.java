@@ -1,25 +1,43 @@
 package com.cloud.system.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.system.domain.entity.CdBomInfo;
 import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
+import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.domain.entity.CdRawMaterialStock;
 import com.cloud.system.service.ICdBomInfoService;
 import com.cloud.system.service.ICdFactoryInfoService;
+import com.cloud.system.service.ICdMaterialExtendInfoService;
 import com.cloud.system.service.ICdRawMaterialStockService;
 import com.cloud.system.service.SystemFromSap601InterfaceService;
-import com.sap.conn.jco.*;
+import com.sap.conn.jco.JCoContext;
+import com.sap.conn.jco.JCoDestination;
+import com.sap.conn.jco.JCoDestinationManager;
+import com.sap.conn.jco.JCoFunction;
+import com.sap.conn.jco.JCoParameterList;
+import com.sap.conn.jco.JCoRepository;
+import com.sap.conn.jco.JCoTable;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -46,6 +64,30 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
 
     @Autowired
     private ICdBomInfoService cdBomInfoService;
+
+    @Autowired
+    private ICdMaterialExtendInfoService cdMaterialExtendInfoService;
+
+    @Autowired
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
+
+    @Autowired
+    private DataSourceTransactionManager dstManager;
+
+    @Value("${spring.datasource.driverClassName}")
+    private String driverClassName;
+
+    @Value("${spring.datasource.druid.master.url}")
+    private String url;
+
+    @Value("${spring.datasource.druid.master.username}")
+    private String userName;
+
+    @Value("${spring.datasource.druid.master.password}")
+    private String password;
+
+    private static final double SMALL_SIZE = 100;//获取bom数据每次传输物料号最大数量
+
     /**
      * @Description: 获取uph数据
      * @Param: factorys, materials
@@ -214,7 +256,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                 inputTableWerks.setValue("WERKS", factoryCode);
             }
             //物料
-            if(!CollectionUtils.isEmpty(materials)){
+            if (!CollectionUtils.isEmpty(materials)) {
                 for (String materialCode : materials) {
                     inputTableMatnr.appendRow();
                     inputTableMatnr.setValue("MATNR", materialCode);
@@ -255,7 +297,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             throw new BusinessException(e.getMessage());
         }
         R r = new R();
-        r.set("data",dataList);
+        r.set("data", dataList);
         return r;
     }
 
@@ -288,8 +330,8 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             }
             //获取输入参数
             JCoParameterList inputParams = fm.getImportParameterList();
-            inputParams.setValue("S_DATUM",new Date());//当前日期，可填可不填
-            inputParams.setValue("E_DATUM",new Date());//当前日期，可填可不填
+//            inputParams.setValue("S_DATUM", new Date());//当前日期，可填可不填
+//            inputParams.setValue("E_DATUM", new Date());//当前日期，可填可不填
             //获取输入表参数
             JCoTable inputTableWerks = fm.getTableParameterList().getTable("WERKS");
             JCoTable inputTableMatnr = fm.getTableParameterList().getTable("MATNR");
@@ -298,7 +340,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                 inputTableWerks.appendRow();
                 inputTableWerks.setValue("WERKS", factoryCode);
             }
-            if(!CollectionUtils.isEmpty(materials)){
+            if (!CollectionUtils.isEmpty(materials)) {
                 //物料
                 for (String materialCode : materials) {
                     inputTableMatnr.appendRow();
@@ -325,18 +367,21 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                         cdBomInfo.setProductMaterialDesc(outTableOutput.getString("MAKTX"));//成品物料描述
                         cdBomInfo.setProductFactoryCode(outTableOutput.getString("WERKS"));//工厂编码
                         cdBomInfo.setRawMaterialCode(outTableOutput.getString("IDNRK"));//原材料物料
-                        cdBomInfo.setRawMaterialDesc(outTableOutput.getString("STLAN"));//原材料物料描述
+                        cdBomInfo.setRawMaterialDesc(outTableOutput.getString("BCPMS"));//原材料物料描述
                         cdBomInfo.setBasicNum(outTableOutput.getBigDecimal("BMENG"));//基本数量
                         cdBomInfo.setBomNum(outTableOutput.getBigDecimal("DANHAO"));//单耗
                         cdBomInfo.setProductUnit(outTableOutput.getString("MMEIN"));//成品单位
                         cdBomInfo.setComponentUnit(outTableOutput.getString("MEINS"));//组件单位
                         cdBomInfo.setVersion(outTableOutput.getString("STLAL"));//BOM版本
                         cdBomInfo.setPurchaseGroup(outTableOutput.getString("EKGRP"));//采购组
+                        cdBomInfo.setCreateBy("定时任务");
+                        cdBomInfo.setCreateTime(new Date());
+                        cdBomInfo.setDelFlag(DeleteFlagConstants.NO_DELETED);
                         dataList.add(cdBomInfo);
                     }
                 }
             } else {
-                log.error("获取BOM清单数据失败：" + jCoFields.getString("MESSAGE"));
+                log.error("获取BOM清单数据失败 factorys:{},res:{}", factorys, jCoFields.getString("MESSAGE"));
                 return R.error(jCoFields.getString("MESSAGE"));
             }
         } catch (Exception e) {
@@ -344,47 +389,136 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             throw new BusinessException(e.getMessage());
         }
         R result = new R();
-        result.set("data",dataList);
+        result.set("data", dataList);
         return result;
     }
 
+    /**
+     * 定时获取BOM清单数据
+     *
+     * @return
+     */
     @Override
     public R sycBomInfo() {
         //1.获取工厂全部信息cd_factory_info
         Example exampleFactoryInfo = new Example(CdFactoryInfo.class);
         List<CdFactoryInfo> cdFactoryInfoList = cdFactoryInfoService.selectByExample(exampleFactoryInfo);
-
-        //2.删除全部数据
-        cdBomInfoService.deleteAll();
+        if (CollectionUtils.isEmpty(cdFactoryInfoList)) {
+            throw new BusinessException("获取工厂信息失败");
+        }
+        //2.获取物料信息
+        List<CdMaterialExtendInfo> materialExtendInfoList = getMaterial();
+        if (CollectionUtils.isEmpty(materialExtendInfoList)) {
+            throw new BusinessException("获取物料信息失败");
+        }
+        double size = materialExtendInfoList.size();
+        double smallSize = SMALL_SIZE;
+        int materialExtendInfoCount = (int) Math.ceil(size / smallSize);
         //3.连接SAP获取数据
-        for(CdFactoryInfo cdFactoryInfo : cdFactoryInfoList){
-            String factoryCode = cdFactoryInfo.getFactoryCode();
-            R result = queryBomInfoFromSap601(Arrays.asList(factoryCode),null);
-            if(!result.isSuccess()){
-                log.error("连接SAP获取BOM数据异常 req:{},res:{}",factoryCode, JSONObject.toJSON(result));
-                continue;
-            }
-            List<CdBomInfo> cdBomInfoList = (List<CdBomInfo>)result.get("data");
-            if(!CollectionUtils.isEmpty(cdBomInfoList)){
-                cdBomInfoService.insertList(cdBomInfoList);
+        int deleteFlag = 0; //删除bom表标记
+        for (int z = 0; z < cdFactoryInfoList.size(); z++) {
+            String factoryCode = cdFactoryInfoList.get(z).getFactoryCode();
+            for (int i = 0; i < materialExtendInfoCount; i++) {
+                int startCont = (int) (i * SMALL_SIZE);
+                int nextI = i + 1;
+                int endCount = (int) (nextI * SMALL_SIZE);
+                if (endCount > materialExtendInfoList.size()) {
+                    endCount = materialExtendInfoList.size();
+                }
+                List<String> materials = new ArrayList<>();
+                for (int j = startCont; j < endCount; j++) {
+                    materials.add(materialExtendInfoList.get(j).getMaterialCode());
+                }
+                R result = queryBomInfoFromSap601(Arrays.asList(factoryCode), materials);
+                if (!result.isSuccess()) {
+                    log.error("连接SAP获取BOM数据异常 factoryCode:{},materials:{},res:{}", factoryCode, materials, JSONObject.toJSON(result));
+                    continue;
+                }
+                List<CdBomInfo> cdBomInfoList = (List<CdBomInfo>) result.get("data");
+                deleteFlag++;
+                if (deleteFlag == 1) {
+                    insertBomDb(cdBomInfoList, Boolean.TRUE);
+                } else {
+                    taskInsertBomDb(cdBomInfoList, Boolean.FALSE);
+                }
             }
         }
+        log.info("定时获取BOM清单数据结束");
         return R.ok();
     }
 
+
+    /**
+     * 插入bom数据库
+     *
+     * @param cdBomInfoList
+     * @param flag
+     */
+    private void taskInsertBomDb(final List<CdBomInfo> cdBomInfoList, final Boolean flag) {
+        threadPoolTaskExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    insertBomDb(cdBomInfoList, flag);
+                } catch (Exception e) {
+                    StringWriter w = new StringWriter();
+                    e.printStackTrace(new PrintWriter(w));
+                    log.error("插入bom青单异常 e:{}", w.toString());
+                }
+            }
+        });
+    }
+
+    /**
+     * 插入数据库
+     *
+     * @param cdBomInfoList
+     * @param flag          是否是第一次插入数据库,若是,则删除全表
+     */
+    private void insertBomDb(final List<CdBomInfo> cdBomInfoList, final Boolean flag) {
+        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW); // 事物隔离级别，开启新事务，这样会比较安全些。
+        TransactionStatus transaction = dstManager.getTransaction(def); // 获得事务状态
+        try {
+            if (flag) {
+                cdBomInfoService.deleteAll();
+            }
+            if (!CollectionUtils.isEmpty(cdBomInfoList)) {
+                cdBomInfoService.insertList(cdBomInfoList);
+            }
+            dstManager.commit(transaction);
+        } catch (Exception e) {
+            dstManager.rollback(transaction);
+        }
+
+    }
+
+    /**
+     * 获取成品物料信息
+     *
+     * @return
+     */
+    private List<CdMaterialExtendInfo> getMaterial() {
+        Example example = new Example(CdMaterialExtendInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        List<CdMaterialExtendInfo> cdMaterialExtendInfoList = cdMaterialExtendInfoService.selectByExample(example);
+        return cdMaterialExtendInfoList;
+    }
+
+    @Transactional
     @Override
     public R sycRawMaterialStock() {
         //1.获取工厂全部信息cd_factory_info
         Example exampleFactoryInfo = new Example(CdFactoryInfo.class);
         List<CdFactoryInfo> cdFactoryInfoList = cdFactoryInfoService.selectByExample(exampleFactoryInfo);
-        List<String> factoryCodelist = cdFactoryInfoList.stream().map(cdFactoryInfo->{
+        List<String> factoryCodelist = cdFactoryInfoList.stream().map(cdFactoryInfo -> {
             return cdFactoryInfo.getFactoryCode();
         }).collect(Collectors.toList());
-        R result = queryRawMaterialStockFromSap601(factoryCodelist,  null);
-        if(!result.isSuccess()){
+        R result = queryRawMaterialStockFromSap601(factoryCodelist, null);
+        if (!result.isSuccess()) {
             return result;
         }
-        List<CdRawMaterialStock> list = (List<CdRawMaterialStock>)result.get("data");
+        List<CdRawMaterialStock> list = (List<CdRawMaterialStock>) result.get("data");
         cdRawMaterialStockService.deleteAll();
         cdRawMaterialStockService.insertList(list);
         return R.ok();

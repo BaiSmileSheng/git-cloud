@@ -20,7 +20,7 @@ public class RemoteMouthSettleFallbackFactory implements FallbackFactory<RemoteM
              */
             @Override
             public R countMonthSettle() {
-                log.error("月度结算定时任务错误：{}",throwable.getMessage());
+                log.error("RemoteMouthSettleService.countMonthSettle月度结算定时任务错误：{}",throwable.getMessage());
                 return R.error("服务器拥挤，请稍后再试！");
             }
         };

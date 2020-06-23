@@ -19,7 +19,7 @@ spring:
   cloud:
     nacos:
       discovery:
-        namespace: hugh
+        namespace: orw-prod
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
@@ -33,7 +33,7 @@ spring:
       slave:
         #从数据源开关/默认关闭
         enabled: false
-        url: jdbc:mysql://localhost:3306/wind?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+        url: jdbc:mysql://localhost:3306/cloud_read?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
         username: root
         password: root
       # 初始连接数
@@ -79,9 +79,15 @@ seata:
       namespace: ${spring.cloud.nacos.discovery.namespace}
 sap:
   client601:
-    ashost: 10.202.84.25
-    sysnr: 30
-    client: 600
-    user: VPMS_COS
-    passwd: qwer1234
+    ashost: 10.133.28.69
+    sysnr: 00
+    client: 200
+    user: 19046341
+    passwd: 123123
     lang: ZH
+mdm:
+  material:
+    serviceUrl: http://bpel.mdm.haier.com:7778/soa-infra/services/interface/GeneralMDMDataRelease/generalmdmdatarelease_client_ep
+    sysName: S01992
+    masterType: HAIERMDM
+    tableName: HRDDPS_MTL_INFO

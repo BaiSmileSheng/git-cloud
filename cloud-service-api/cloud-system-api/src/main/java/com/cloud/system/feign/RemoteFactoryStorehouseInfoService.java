@@ -37,5 +37,13 @@ public interface RemoteFactoryStorehouseInfoService {
      * @return
      */
     @PostMapping("factoryStorehouse/selectStorehouseToMap")
-    Map<String, Map<String, String>> selectStorehouseToMap(@RequestBody List<Dict> dicts);
+    R selectStorehouseToMap(@RequestBody List<Dict> dicts);
+
+    /**
+     * 查询工厂库位 列表
+     * @param cdFactoryStorehouseInfoReq
+     * @return
+     */
+    @GetMapping("factoryStorehouse/listFactoryStorehouseInfo")
+    R listFactoryStorehouseInfo(@RequestParam("cdFactoryStorehouseInfoReq") String cdFactoryStorehouseInfoReq);
 }

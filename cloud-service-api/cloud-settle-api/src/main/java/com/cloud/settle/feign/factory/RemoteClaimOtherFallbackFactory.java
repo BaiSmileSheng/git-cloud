@@ -27,8 +27,9 @@ public class RemoteClaimOtherFallbackFactory implements FallbackFactory<RemoteCl
              * @return 成功或失败
              */
             @Override
-            public SmsClaimOther get(Long id) {
-                return null;
+            public R get(Long id) {
+                log.error("RemoteClaimOtherService.get error:{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             /**
@@ -38,7 +39,8 @@ public class RemoteClaimOtherFallbackFactory implements FallbackFactory<RemoteCl
              */
             @Override
             public R selectById(Long id) {
-                return R.error("根据id查其他索赔信息失败");
+                log.error("RemoteClaimOtherService.selectById error:{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             /**
@@ -48,7 +50,8 @@ public class RemoteClaimOtherFallbackFactory implements FallbackFactory<RemoteCl
              */
             @Override
             public R editSave(SmsClaimOther smsClaimOther) {
-                return R.error("根据id修改其他索赔信息失败");
+                log.error("RemoteClaimOtherService.editSave error:{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             /**
@@ -60,7 +63,9 @@ public class RemoteClaimOtherFallbackFactory implements FallbackFactory<RemoteCl
              */
             @Override
             public R supplierAppeal(Long id, String complaintDescription, MultipartFile[] files) {
-                return null;
+
+                log.error("RemoteClaimOtherService.supplierAppeal error:{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             /**
@@ -69,7 +74,8 @@ public class RemoteClaimOtherFallbackFactory implements FallbackFactory<RemoteCl
              */
             @Override
             public R overTimeSendMail() {
-                return R.error("48H超时未确认发送邮件失败");
+                log.error("RemoteClaimOtherService.overTimeSendMail error:{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             /**
@@ -78,7 +84,8 @@ public class RemoteClaimOtherFallbackFactory implements FallbackFactory<RemoteCl
              */
             @Override
             public R overTimeConfim() {
-                return R.error("72H超时供应商自动确认失败");
+                log.error("RemoteClaimOtherService.overTimeConfim error:{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
         };
     }

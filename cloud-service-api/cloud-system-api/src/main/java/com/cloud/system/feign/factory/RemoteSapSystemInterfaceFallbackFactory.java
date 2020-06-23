@@ -23,7 +23,7 @@ public class RemoteSapSystemInterfaceFallbackFactory implements FallbackFactory<
              */
             @Override
             public R sycRawMaterialStock() {
-                log.error("定时同步原材料库存熔断 error:{}",throwable.getMessage());
+                log.error("RemoteSapSystemInterfaceService.sycRawMaterialStock定时同步原材料库存熔断 error:{}",throwable.getMessage());
                 return R.error("服务拥挤请稍后再试");
             }
 
@@ -33,7 +33,7 @@ public class RemoteSapSystemInterfaceFallbackFactory implements FallbackFactory<
              */
             @Override
             public R sycBomInfo() {
-                log.error("定时获取BOM清单数据熔断 error:{}",throwable.getMessage());
+                log.error("RemoteSapSystemInterfaceService.sycRawMaterialStock定时获取BOM清单数据熔断 error:{}",throwable.getMessage());
                 return R.error("服务拥挤请稍后再试");
             }
         };

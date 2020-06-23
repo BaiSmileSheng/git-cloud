@@ -3,8 +3,6 @@ package com.cloud.settle.service;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.settle.domain.entity.SmsClaimCashDetail;
 
-import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,12 +18,12 @@ public interface ISmsClaimCashDetailService extends BaseService<SmsClaimCashDeta
      * @param settleNo
      * @return
      */
-    List<Map<String, BigDecimal>> selectSumCashGroupByClaimTypeActual(String settleNo);
+    Map<String, SmsClaimCashDetail> selectSumCashGroupByClaimTypeActual(String settleNo);
 
     /**
      * 历史兑现扣款
      * @param settleNo
      * @return
      */
-    List<Map<String, BigDecimal>> selectSumCashGroupByClaimTypeHistory(String settleNo);
+    Map<String, SmsClaimCashDetail> selectSumCashGroupByClaimTypeHistory(String settleNo);
 }

@@ -1,4 +1,5 @@
 package com.cloud.system.controller;
+
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -8,10 +9,12 @@ import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.service.ICdMaterialInfoService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
+
 /**
  * 物料信息  提供者
  *
@@ -117,17 +120,22 @@ public class CdMaterialInfoController extends BaseController {
     public R saveMaterialInfo(){return cdMaterialInfoService.saveMaterialInfo();}
 
     /**
-     * 根据物料号查询物料信息
+     * 根据物料号查询一条物料信息(多条取一条)
      * @param materialCode
      * @return
      */
     @GetMapping("getByMaterialCode")
     @ApiOperation(value = "根据物料号查询物料信息 ", response = CdMaterialInfo.class)
-    public CdMaterialInfo getByMaterialCode(String materialCode) {
+    public R getByMaterialCode(String materialCode) {
         Example example = new Example(CdMaterialInfo.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("materialCode", materialCode);
-        return cdMaterialInfoService.findByExampleOne(example);
+        List<CdMaterialInfo> cdMaterialInfoList = cdMaterialInfoService.selectByExample(example);
+        if(CollectionUtils.isEmpty(cdMaterialInfoList)){
+            return R.error("物料信息不存在,请检查数据");
+        }
+        CdMaterialInfo cdMaterialInfo = cdMaterialInfoList.get(0);
+        return R.data(cdMaterialInfo);
     }
 
 
@@ -140,4 +148,14 @@ public class CdMaterialInfoController extends BaseController {
         return cdMaterialInfoService.updateUphBySap();
     }
 
+    /**
+     * 根据物料号集合查询物料信息
+     * @param materialCodes
+     * @param materialType
+     * @return
+     */
+    @PostMapping("selectInfoByInMaterialCodeAndMaterialType")
+    public R selectInfoByInMaterialCodeAndMaterialType(@RequestBody List<String> materialCodes,@RequestParam(value = "materialType")String materialType) {
+        return cdMaterialInfoService.selectInfoByInMaterialCodeAndMaterialType(materialCodes,materialType);
+    }
 }

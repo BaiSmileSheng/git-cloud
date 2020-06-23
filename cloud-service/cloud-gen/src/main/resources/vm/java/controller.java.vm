@@ -37,8 +37,8 @@ public class ${ClassName}Controller extends BaseController {
      */
     @GetMapping("get")
     @ApiOperation(value = "根据id查询${functionName}", response = ${ClassName}.class)
-    public ${ClassName} get(${pkColumn.javaType} ${pkColumn.javaField}) {
-        return ${className}Service.selectByPrimaryKey(${pkColumn.javaField});
+    public R get(${pkColumn.javaType} ${pkColumn.javaField}) {
+        return R.data(${className}Service.selectByPrimaryKey(${pkColumn.javaField}));
 
     }
 

@@ -63,4 +63,17 @@
         </foreach>
     </update>
 
+
+    <select id="selectInfoByInMaterialCodeAndMaterialType" resultMap="CdMaterialInfoResult">
+        <include refid="selectCdMaterialInfoVo"/>
+        where
+        del_flag='0' and
+        material_code in
+        <foreach collection="materialCodes" item="materialCode" open="(" separator="," close=")">
+            #{materialCode}
+        </foreach>
+        <if test="materialType != null and materialType != ''">
+            and material_type = #{materialType}
+        </if>
+    </select>
 </mapper>

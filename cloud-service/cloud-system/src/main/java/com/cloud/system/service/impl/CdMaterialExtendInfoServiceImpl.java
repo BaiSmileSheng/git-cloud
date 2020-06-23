@@ -2,30 +2,22 @@ package com.cloud.system.service.impl;
 
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
+import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.system.domain.entity.SysInterfaceLog;
+import com.cloud.system.mapper.CdMaterialExtendInfoMapper;
+import com.cloud.system.service.ICdMaterialExtendInfoService;
 import com.cloud.system.service.ISysInterfaceLogService;
-import com.sap.conn.jco.JCoContext;
-import com.sap.conn.jco.JCoDestination;
-import com.sap.conn.jco.JCoDestinationManager;
-import com.sap.conn.jco.JCoFunction;
-import com.sap.conn.jco.JCoRepository;
-import com.sap.conn.jco.JCoTable;
+import com.sap.conn.jco.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.cloud.system.mapper.CdMaterialExtendInfoMapper;
-import com.cloud.system.domain.entity.CdMaterialExtendInfo;
-import com.cloud.system.service.ICdMaterialExtendInfoService;
-import com.cloud.common.core.service.impl.BaseServiceImpl;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -113,10 +105,11 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
                     outputTable.setRow(i);
                     String flag = outputTable.getString("FLAG");
                     if(!"S".equals(flag)){
-                        String code = outputTable.getString("MATNR");
+                        String materialCode = outputTable.getString("MATNR");
                         String msg = outputTable.getString("MESSAGE");
-                        remarkBuffer.append(code + msg);
+                        remarkBuffer.append(materialCode + msg);
                         sysInterfaceLog.setRemark(remarkBuffer.toString());
+                        logger.error("传输成品物料异常信息异常 materialCode:{},res:{}",materialCode,msg);
                     }
                 }
             }
@@ -133,4 +126,22 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
         }
     }
 
+    /**
+     * 根据生命周期查询物料号集合
+     * @param lifeCycle
+     * @return
+     */
+	@Override
+	public R selectMaterialCodeByLifeCycle(String lifeCycle){
+		 return R.data(cdMaterialExtendInfoMapper.selectMaterialCodeByLifeCycle(lifeCycle));
+	}
+    /**
+     * 根据物料号集合查询
+     * @param materialCodes
+     * @return
+     */
+    @Override
+    public R selectInfoInMaterialCodes(List<String> materialCodes) {
+        return R.data(cdMaterialExtendInfoMapper.selectInfoInMaterialCodes(materialCodes));
+    }
 }

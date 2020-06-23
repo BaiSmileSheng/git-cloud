@@ -1,5 +1,6 @@
 package com.cloud.system.service;
 
+import cn.hutool.core.lang.Dict;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.system.domain.entity.CdProductStock;
@@ -40,6 +41,13 @@ public interface ICdProductStockService extends BaseService<CdProductStock> {
      * @return
      */
     R export(CdProductStock cdProductStock);
+
+    /**
+     * 根据工厂，专用号分组取成品库存
+     * @param dicts
+     * @return
+     */
+    R selectProductStockToMap(List<Dict> dicts);
 
     R selectList(List<CdProductStock> list);
 }

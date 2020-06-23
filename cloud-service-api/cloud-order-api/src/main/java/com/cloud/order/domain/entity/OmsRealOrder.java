@@ -10,13 +10,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.Id;
-
 import tk.mybatis.mapper.annotation.KeySql;
 
+import javax.persistence.Id;
 import java.math.BigDecimal;
-import java.util.Date;
 
 /**
  * 真单对象 oms_real_order
@@ -165,6 +162,13 @@ public class OmsRealOrder extends BaseEntity {
     @ExcelProperty(value = "地点")
     @ApiModelProperty(value = "地点")
     private String place;
+
+    /**
+     * 0：无需审核，1：审核中，2：审核完成
+     */
+    @ExcelProperty(value = "0：无需审核，1：审核中，2：审核完成")
+    @ApiModelProperty(value = "0：无需审核，1：审核中，2：审核完成")
+    private String auditStatus;
 
     /**
      * 状态 0：初始，1：已调整

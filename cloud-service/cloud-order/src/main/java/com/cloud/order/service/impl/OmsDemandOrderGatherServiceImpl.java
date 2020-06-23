@@ -4,9 +4,10 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.lang.Console;
+import cn.hutool.core.date.Week;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
@@ -18,6 +19,7 @@ import com.cloud.order.mapper.OmsDemandOrderGatherMapper;
 import com.cloud.order.service.*;
 import com.cloud.system.feign.RemoteFactoryStorehouseInfoService;
 import com.cloud.system.feign.RemoteSequeceService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,11 +81,11 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
             }
         }
         //汇总
-        R rGather=gatherDemandOrder();
+        R rGather=gatherDemandOrder(Week.FRIDAY.getValue());
         if (!rGather.isSuccess()) {
             throw new BusinessException(rGather.getStr("msg")) ;
         }
-        List<OmsDemandOrderGather> listGather = (List<OmsDemandOrderGather>) rGather.getObj("data");
+        List<OmsDemandOrderGather> listGather = rGather.getCollectData(new TypeReference<List<OmsDemandOrderGather>>() {});
         //插入新汇总
         if (listGather != null) {
             insertList(listGather);
@@ -91,17 +93,21 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
         return R.ok();
     }
 
+    /**
+     * 周一需求数据汇总
+     * @return
+     */
     @Override
     @Transactional
     public R gatherDemandOrderMonday() {
         //删除周五的汇总
         omsDemandOrderGatherMapper.deleteAll();
         //重新汇总
-        R rGather=gatherDemandOrder();
+        R rGather=gatherDemandOrder(Week.MONDAY.getValue());
         if (!rGather.isSuccess()) {
             throw new BusinessException(rGather.getStr("msg")) ;
         }
-        List<OmsDemandOrderGather> listGather = (List<OmsDemandOrderGather>) rGather.getObj("data");
+        List<OmsDemandOrderGather> listGather = rGather.getCollectData(new TypeReference<List<OmsDemandOrderGather>>() {});
         //插入新汇总
         if (listGather != null) {
             insertList(listGather);
@@ -124,7 +130,7 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
         if (!r.isSuccess()) {
             throw new BusinessException(rGather.getStr("msg")) ;
         }
-        List<Oms2weeksDemandOrder> list = (List<Oms2weeksDemandOrder>) rGather.getObj("data");
+        List<Oms2weeksDemandOrder> list = rGather.getCollectData(new TypeReference<List<Oms2weeksDemandOrder>>() {});
         //插入新汇总
         if (list != null) {
             oms2weeksDemandOrderService.insertList(list);
@@ -132,6 +138,10 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
         return R.ok();
     }
 
+    /**
+     * 按天汇总oms_2weeks_demand_order
+     * @return
+     */
     R gather2WeeksDemandOrder(){
         ///查询T+2，T+3数据
         Date date = DateUtil.date();
@@ -158,7 +168,11 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
         List<Dict> maps = listRes.stream().map(s -> new Dict().set("productFactoryCode",s.getProductFactoryCode())
                 .set("customerCode",s.getCustomerCode())).distinct().collect(Collectors.toList());
         //获取库位
-        Map<String, Map<String, String>> storehouseMap = remoteFactoryStorehouseInfoService.selectStorehouseToMap(maps);
+        R rStoreHouse = remoteFactoryStorehouseInfoService.selectStorehouseToMap(maps);
+        if(!rStoreHouse.isSuccess()){
+            return R.error("获取接收库位失败！");
+        }
+        Map<String, Map<String, String>> storehouseMap = rStoreHouse.getCollectData(new TypeReference<Map<String, Map<String, String>>>() {});
         if (MapUtil.isEmpty(storehouseMap)) {
             return R.error("获取接收库位失败！");
         }
@@ -182,9 +196,10 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
                     .customerCode(res.getCustomerCode()).customerDesc(res.getCustomerDesc())
                     .mrpRange(res.getMrpRange()).bomVersion(res.getVersion()).purchaseGroupCode(res.getPurchaseGroupCode())
                     .place(storeHouse).deliveryDate(deliveryDate).year(deliveryYear)
-                    .weeks(Integer.toString(weekNum)).orderNum(orderNumTotal.longValue()).version(StrUtil.concat(true,deliveryYear,Integer.toString(weekNum))).build();
+                    .weeks(Integer.toString(weekNum)).orderNum(orderNumTotal.longValue()).version(StrUtil.concat(true,DateUtil.now(),Integer.toString(weekNum))).build();
             oms2weeksDemandOrder.setCreateBy("定时任务");
             oms2weeksDemandOrder.setCreateTime(date);
+            oms2weeksDemandOrder.setDelFlag("0");
             oms2weeksDemandOrders.add(oms2weeksDemandOrder);
         });
         return R.data(oms2weeksDemandOrders);
@@ -194,7 +209,7 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
      * 汇总PR数据 返回汇总数据
      * @return
      */
-    R gatherDemandOrder(){
+    R gatherDemandOrder(int flag){
         //按照生产工厂、客户编码、成品物料号、交付日期字段，将到天的数据汇总到周，并转换交付日期至周数和年度，
         // 将汇总的周数据存到需求汇总表中（oms_demand_order_gather）
         Example example = new Example(OmsInternalOrderRes.class);
@@ -221,7 +236,11 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
         List<Dict> maps = listRes.stream().map(s -> new Dict().set("productFactoryCode",s.getProductFactoryCode())
                 .set("customerCode",s.getCustomerCode())).distinct().collect(Collectors.toList());
         //获取库位
-        Map<String, Map<String, String>> storehouseMap = remoteFactoryStorehouseInfoService.selectStorehouseToMap(maps);
+        R rStoreHouse = remoteFactoryStorehouseInfoService.selectStorehouseToMap(maps);
+        if(!rStoreHouse.isSuccess()){
+            return R.error("获取接收库位失败！");
+        }
+        Map<String, Map<String, String>> storehouseMap = rStoreHouse.getCollectData(new TypeReference<Map<String, Map<String, String>>>() {});
         if (MapUtil.isEmpty(storehouseMap)) {
             return R.error("获取接收库位失败！");
         }
@@ -240,9 +259,15 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
             Date deliveryDate = DateUtil.parse(res.getDeliveryDate());
             String deliveryYear = StrUtil.toString(DateUtil.year(deliveryDate));//交付日期年
             String deliveryWeek = StrUtil.split(keyCode, StrUtil.COMMA)[1];//交付日期周数
-            String seq = remoteSequeceService.selectSeq("demand_order_gather_seq", 4);
+            R seqresult = remoteSequeceService.selectSeq("demand_order_gather_seq", 4);
+            if(!seqresult.isSuccess()){
+                throw new BusinessException("查序列号失败");
+            }
+            String seq = seqresult.getStr("data");
             //需求汇总单号
             String demandOrderCode = StrUtil.concat(true, "DM", DateUtils.dateTime(), seq);
+            Date date = DateUtil.date();
+            int thisWeek = NumberUtil.compare(flag , Week.FRIDAY.getValue())>0 ? DateUtil.weekOfYear(date) : DateUtil.weekOfYear(date) - 1;
             OmsDemandOrderGather omsDemandOrderGather = new OmsDemandOrderGather().builder()
                     .demandOrderCode(demandOrderCode).orderType("GN00").orderFrom("1")
                     .productMaterialCode(res.getProductMaterialCode()).productMaterialDesc(res.getProductMaterialDesc())
@@ -250,15 +275,13 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
                     .customerCode(res.getCustomerCode()).customerDesc(res.getCustomerDesc())
                     .mrpRange(res.getMrpRange()).bomVersion(res.getVersion()).purchaseGroupCode(res.getPurchaseGroupCode())
                     .place(storeHouse).deliveryDate(deliveryDate).year(deliveryYear)
-                    .weeks(deliveryWeek).orderNum(orderNumTotal.longValue()).version(StrUtil.concat(true,deliveryYear,deliveryWeek)).build();
+                    .weeks(deliveryWeek).orderNum(orderNumTotal.longValue())
+                    .version(StrUtil.concat(true,StrUtil.toString(DateUtil.year(date)),StrUtil.toString(thisWeek))).build();
             omsDemandOrderGather.setCreateBy("定时任务");
             omsDemandOrderGather.setCreateTime(DateUtil.date());
+            omsDemandOrderGather.setDelFlag("0");
             demandOrderGathers.add(omsDemandOrderGather);
         });
         return R.data(demandOrderGathers);
-    }
-
-    public static void main(String[] args) {
-        Console.log(DateUtil.weekOfYear(DateUtil.parseDate("2020-06-15")));
     }
 }

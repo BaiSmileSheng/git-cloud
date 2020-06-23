@@ -7,16 +7,12 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.service.ICdFactoryInfoService;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 工厂信息  提供者
@@ -26,6 +22,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("factoryInfo")
+@Api(tags = "工厂信息")
 public class CdFactoryInfoController extends BaseController {
 
     @Autowired
@@ -46,12 +43,12 @@ public class CdFactoryInfoController extends BaseController {
      */
     @GetMapping("getOne")
     @ApiOperation(value = "根据工厂编码查询工厂信息 ", response = CdFactoryInfo.class)
-    public CdFactoryInfo selectOneByFactory(String factoryCode) {
+    public R selectOneByFactory(String factoryCode) {
         Example example = new Example(CdFactoryInfo.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("factoryCode", factoryCode)
                 .andEqualTo("delFlag","0");
-        return cdFactoryInfoService.findByExampleOne(example);
+        return R.data(cdFactoryInfoService.findByExampleOne(example));
     }
 
     /**
@@ -59,7 +56,7 @@ public class CdFactoryInfoController extends BaseController {
      */
     @GetMapping("selectAllByCompanyCodeV")
     @ApiOperation(value = "根据公司V码查询 ", response = CdFactoryInfo.class)
-    public Map<String, CdFactoryInfo> selectAllByCompanyCodeV(String companyCodeV) {
+    public R selectAllByCompanyCodeV(String companyCodeV) {
          return cdFactoryInfoService.selectAllByCompanyCodeV(companyCodeV);
     }
 
@@ -82,6 +79,18 @@ public class CdFactoryInfoController extends BaseController {
         return getDataTable(cdFactoryInfoList);
     }
 
+    /**
+     * 查询工厂信息 列表
+     */
+    @GetMapping("listAll")
+    @ApiOperation(value = "查询工厂信息 列表 ", response = CdFactoryInfo.class)
+    public R listAll(){
+        Example example = new Example(CdFactoryInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        startPage();
+        List<CdFactoryInfo> cdFactoryInfoList = cdFactoryInfoService.selectByExample(example);
+        return R.data(cdFactoryInfoList);
+    }
 
     /**
      * 新增保存工厂信息
@@ -115,4 +124,13 @@ public class CdFactoryInfoController extends BaseController {
         return toAjax(cdFactoryInfoService.deleteByIds(ids));
     }
 
+    /**
+     * 查询所有公司编码
+     * @return
+     */
+    @GetMapping("getAllCompanyCode")
+    @ApiOperation(value = "获取所有公司编码 ", response = R.class)
+    public R getAllCompanyCode(){
+        return cdFactoryInfoService.selectAllCompanyCode();
+    }
 }

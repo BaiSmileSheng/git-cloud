@@ -1,5 +1,6 @@
 package com.cloud.order.feign.factory;
 
+import com.cloud.common.core.domain.R;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.feign.RemoteProductionOrderService;
 import feign.hystrix.FallbackFactory;
@@ -15,12 +16,18 @@ public class RemoteProductionOrderFallbackFactory implements FallbackFactory<Rem
 
     @Override
     public RemoteProductionOrderService create(Throwable throwable) {
-        log.error("RemoteProductionOrderService(生产订单)错误信息：{}",throwable.getMessage());
+
         return new RemoteProductionOrderService(){
 
+            /**
+             * 根据生产订单号查询排产订单信息
+             * @param prodctOrderCode
+             * @return OmsProductionOrder
+             */
             @Override
-            public OmsProductionOrder selectByProdctOrderCode(String prodctOrderCode) {
-                return null;
+            public R selectByProdctOrderCode(String prodctOrderCode) {
+                log.error("RemoteProductionOrderService.selectByProdctOrderCode(生产订单)错误信息：{}",throwable.getMessage());
+                return R.error("服务拥挤请稍后再试");
             }
 
             /**
@@ -32,6 +39,7 @@ public class RemoteProductionOrderFallbackFactory implements FallbackFactory<Rem
              */
             @Override
             public List<OmsProductionOrder> listForDelays(String productEndDateEnd, String actualEndDateStart, String actualEndDateEnd) {
+                log.error("RemoteProductionOrderService.listForDelays(生产订单)错误信息：{}",throwable.getMessage());
                 return null;
             }
 

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -49,7 +50,7 @@ public class ActSmsClaimOtherController extends BaseController {
      */
     @PostMapping("save")
     @ApiOperation(value = "供应商申诉时开启其他索赔流程",response = SmsQualityOrder.class)
-    public R addSave(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription, @RequestParam("files") MultipartFile[] files) {
+    public R addSave(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription, @RequestPart("files") MultipartFile[] files) {
         //获取当前用户登录信息
         SysUser sysUser = getUserInfo(SysUser.class);
         return actSmsClaimOtherService.addSave(id,complaintDescription,files,sysUser);

@@ -27,7 +27,8 @@ public class RemoteQryPaysSoapFallbackFactory implements FallbackFactory<RemoteQ
              */
             @Override
             public R updateKmsStatus() {
-                return null;
+                log.error("RemoteQryPaysSoapService.updateKmsStatus error:{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
         };
     }

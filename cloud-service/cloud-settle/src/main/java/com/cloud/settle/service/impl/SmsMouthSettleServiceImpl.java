@@ -129,7 +129,11 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
             //索赔兑换明细list 每次有兑现操作都需要插入一条  循环内批量插入用
             List<SmsClaimCashDetail> claimCashDetailList = new ArrayList<>();
             //结算单号
-            String seq = remoteSequeceService.selectSeq("month_settle_seq", 4);
+            R seqResult = remoteSequeceService.selectSeq("month_settle_seq", 4);
+            if(!seqResult.isSuccess()){
+                throw new BusinessException("查序列号不存在");
+            }
+            String seq = seqResult.getStr("data");
             StringBuffer monthSettleNo = new StringBuffer();
             //YDJS+年月日+4位顺序号
             monthSettleNo.append("YDJS").append(DateUtils.dateTime()).append(seq);

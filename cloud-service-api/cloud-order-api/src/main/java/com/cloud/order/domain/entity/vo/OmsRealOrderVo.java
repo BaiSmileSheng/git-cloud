@@ -2,16 +2,13 @@ package com.cloud.order.domain.entity.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
-import com.cloud.common.core.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tk.mybatis.mapper.annotation.KeySql;
 
-import javax.persistence.Id;
 import java.math.BigDecimal;
 
 /**
@@ -26,7 +23,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Builder
 @ApiModel(value = "真单VO")
-public class OmsRealOrderVo extends BaseEntity {
+public class OmsRealOrderVo {
     private static final long serialVersionUID = 1L;
 
     /**

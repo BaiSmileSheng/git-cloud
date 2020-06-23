@@ -1,6 +1,7 @@
 package com.cloud.system.feign;
 
 import com.cloud.common.constant.ServiceNameConstants;
+import com.cloud.common.core.domain.R;
 import com.cloud.system.feign.factory.RemoteSequeceFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,5 +23,5 @@ public interface RemoteSequeceService {
      * @return 序列号
      */
     @GetMapping("sequece/selectSeq")
-    String selectSeq(@RequestParam("name") String name, @RequestParam("length") int length);
+    R selectSeq(@RequestParam("name") String name, @RequestParam("length") int length);
 }

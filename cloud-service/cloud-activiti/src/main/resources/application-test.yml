@@ -18,3 +18,12 @@ spring:
     url: jdbc:mysql://10.133.116.86:3306/rycloud?useUnicode=true&characterEncoding=utf8&nullCatalogMeansCurrent=true&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
     username: cloud
     password: Cloud,123456
+  cloud:
+    nacos:
+      discovery:
+        namespace: orw-test
+#seata命名空间
+seata:
+  registry:
+    nacos:
+      namespace: ${spring.cloud.nacos.discovery.namespace}

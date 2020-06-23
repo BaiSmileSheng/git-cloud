@@ -44,7 +44,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("task")
-@Api(value = "审核流转")
+@Api(tags = "审核流转")
 public class ActTaskController extends BaseController {
     @Autowired
     private TaskService taskService;

@@ -1,7 +1,9 @@
 package com.cloud.settle.controller;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
+import cn.hutool.core.map.MapUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
@@ -9,6 +11,8 @@ import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.settle.domain.entity.PO.SmsClaimCashDetailDTO;
+import com.cloud.settle.domain.entity.SmsClaimCashDetail;
 import com.cloud.settle.domain.entity.SmsInvoiceInfo;
 import com.cloud.settle.domain.entity.SmsMouthSettle;
 import com.cloud.settle.domain.entity.SmsSettleInfo;
@@ -16,6 +20,7 @@ import com.cloud.settle.service.ISmsClaimCashDetailService;
 import com.cloud.settle.service.ISmsInvoiceInfoService;
 import com.cloud.settle.service.ISmsMouthSettleService;
 import com.cloud.settle.service.ISmsSettleInfoService;
+import com.cloud.system.enums.SettleRatioEnum;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +28,7 @@ import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -106,12 +112,29 @@ public class SmsMouthSettleController extends BaseController {
         dict.put("settleInfos", settleInfos);
 
         //索赔明细
-        List<Map<String, BigDecimal>> mapActual = smsClaimCashDetailService.selectSumCashGroupByClaimTypeActual(smsMouthSettle.getSettleNo());
-        List<Map<String, BigDecimal>> mapHistory = smsClaimCashDetailService.selectSumCashGroupByClaimTypeHistory(smsMouthSettle.getSettleNo());
+        Map<String, SmsClaimCashDetail> mapActual = smsClaimCashDetailService.selectSumCashGroupByClaimTypeActual(smsMouthSettle.getSettleNo());
+        Map<String, SmsClaimCashDetail> mapHistory = smsClaimCashDetailService.selectSumCashGroupByClaimTypeHistory(smsMouthSettle.getSettleNo());
 
-        dict.put("mapActual",mapActual);
-        dict.put("mapHistory",mapHistory);
-
+        List<SmsClaimCashDetailDTO> list = new ArrayList<>();
+        List<String> typeList = CollUtil.newArrayList(SettleRatioEnum.SPLX_BF.getCode()
+        ,SettleRatioEnum.SPLX_WH.getCode(),SettleRatioEnum.SPLX_YQ.getCode()
+        ,SettleRatioEnum.SPLX_ZL.getCode(),SettleRatioEnum.SPLX_QY.getCode());
+        typeList.forEach(type->{
+            SmsClaimCashDetailDTO dto = new SmsClaimCashDetailDTO();
+            dto.setClaimType(type);
+            if (MapUtil.isNotEmpty(mapActual)&&mapActual.get(type) != null) {
+                dto.setActualCashAmount(mapActual.get(type).getCashAmount());
+            }else {
+                dto.setActualCashAmount(BigDecimal.ZERO);
+            }
+            if (MapUtil.isNotEmpty(mapHistory)&&mapHistory.get(type) != null) {
+                dto.setHistoryCashAmount(mapHistory.get(type).getCashAmount());
+            }else {
+                dto.setHistoryCashAmount(BigDecimal.ZERO);
+            }
+            list.add(dto);
+        });
+        dict.put("mapAmount",list);
         List<SmsInvoiceInfo> smsInvoiceInfoList=smsInvoiceInfoService.selectByMouthSettleId(smsMouthSettle.getSettleNo());
         dict.put("invoices",smsInvoiceInfoList);
         return R.data(dict);

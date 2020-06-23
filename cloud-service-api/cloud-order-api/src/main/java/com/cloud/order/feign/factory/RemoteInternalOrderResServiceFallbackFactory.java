@@ -13,7 +13,7 @@ public class RemoteInternalOrderResServiceFallbackFactory implements FallbackFac
 
     @Override
     public RemoteInternalOrderResService create(Throwable throwable) {
-        log.error("RemoteInternalOrderResService(PR/PO熔断)错误信息：{}",throwable.getMessage());
+
         return new RemoteInternalOrderResService(){
             /**
              * SAP800获取PR定时任务(周五)
@@ -21,6 +21,7 @@ public class RemoteInternalOrderResServiceFallbackFactory implements FallbackFac
              */
             @Override
             public R queryAndInsertDemandPRFromSap800Friday() {
+                log.error("RemoteInternalOrderResService.queryAndInsertDemandPRFromSap800Friday(PR/PO熔断)错误信息：{}",throwable.getMessage());
                 return R.error("服务器拥挤，请稍后再试！");
             }
 
@@ -31,6 +32,13 @@ public class RemoteInternalOrderResServiceFallbackFactory implements FallbackFac
              */
             @Override
             public R queryAndInsertDemandPRFromSap800Monday() {
+                log.error("RemoteInternalOrderResService.queryAndInsertDemandPRFromSap800Monday(PR/PO熔断)错误信息：{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
+            }
+
+            @Override
+            public R timeInsertFromSAP() {
+                log.error("RemoteInternalOrderResService.timeInsertFromSAP 错误信息：{}",throwable.getMessage());
                 return R.error("服务器拥挤，请稍后再试！");
             }
         };

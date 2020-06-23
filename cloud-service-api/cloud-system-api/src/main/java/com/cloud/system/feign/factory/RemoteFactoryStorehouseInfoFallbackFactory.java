@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 
 
 @Slf4j
@@ -18,7 +17,7 @@ public class RemoteFactoryStorehouseInfoFallbackFactory implements FallbackFacto
 
     @Override
     public RemoteFactoryStorehouseInfoService create(Throwable throwable) {
-        log.error("RemoteFactoryStorehouseInfoService错误信息：{}",throwable.getMessage());
+
         return new RemoteFactoryStorehouseInfoService() {
 
             /**
@@ -28,6 +27,7 @@ public class RemoteFactoryStorehouseInfoFallbackFactory implements FallbackFacto
              */
             @Override
             public R findOneByExample(CdFactoryStorehouseInfo cdFactoryStorehouseInfo) {
+                log.error("RemoteFactoryStorehouseInfoService.findOneByExample错误信息：{}",throwable.getMessage());
                 return R.error("服务器拥挤，请稍后再试！");
             }
             /**
@@ -36,8 +36,20 @@ public class RemoteFactoryStorehouseInfoFallbackFactory implements FallbackFacto
              * @return
              */
             @Override
-            public Map<String, Map<String, String>> selectStorehouseToMap(List<Dict> dicts) {
-                return null;
+            public R selectStorehouseToMap(List<Dict> dicts) {
+                log.error("RemoteFactoryStorehouseInfoService.selectStorehouseToMap错误信息：{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
+            }
+
+            /**
+             * 查询工厂库位 列表
+             * @param cdFactoryStorehouseInfoReq
+             * @return
+             */
+            @Override
+            public R listFactoryStorehouseInfo(String cdFactoryStorehouseInfoReq) {
+                log.error("RemoteFactoryStorehouseInfoService.listFactoryStorehouseInfo：{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
         };
     }

@@ -44,8 +44,9 @@ public class SmsDelaysDeliveryController extends BaseController {
      */
     @GetMapping("get")
     @ApiOperation(value = "根据id查询延期交付索赔 ", response = SmsDelaysDelivery.class)
-    public SmsDelaysDelivery get(Long id) {
-        return smsDelaysDeliveryService.selectByPrimaryKey(id);
+    public R get(Long id) {
+        SmsDelaysDelivery smsDelaysDelivery = smsDelaysDeliveryService.selectByPrimaryKey(id);
+        return R.data(smsDelaysDelivery);
 
     }
 
@@ -108,7 +109,7 @@ public class SmsDelaysDeliveryController extends BaseController {
     public R export(SmsDelaysDelivery smsDelaysDelivery) {
         Example example = assemblyConditions(smsDelaysDelivery);
         List<SmsDelaysDelivery> smsDelaysDeliveryList = smsDelaysDeliveryService.selectByExample(example);
-        String fileName = "延期交付索赔 .xlsx";
+        String fileName = "延期交付索赔.xlsx";
         return EasyExcelUtil.writeExcel(smsDelaysDeliveryList,fileName,fileName,new SmsDelaysDelivery());
     }
 
@@ -223,7 +224,7 @@ public class SmsDelaysDeliveryController extends BaseController {
     @HasPermissions("settle:delaysDelivery:supplierAppeal")
     @PostMapping("supplierAppeal")
     @ApiOperation(value = "延期索赔单供应商申诉(包含文件信息) ", response = SmsDelaysDelivery.class)
-    public R supplierAppeal(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription, @RequestParam("files") MultipartFile[] files) {
+    public R supplierAppeal(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription, @RequestPart("files") MultipartFile[] files) {
         SmsDelaysDelivery smsDelaysDelivery = new SmsDelaysDelivery();
         smsDelaysDelivery.setId(id);
         smsDelaysDelivery.setComplaintDescription(complaintDescription);

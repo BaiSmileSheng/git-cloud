@@ -120,4 +120,14 @@ public class OmsInternalOrderResController extends BaseController {
         return omsInternalOrderResService.SAP800PRFindInternalOrderRes(startDate,endDate);
     }
 
+    /**
+     * 获取PO接口定时任务
+     * @return
+     */
+    @PostMapping("timeInsertFromSAP")
+    @OperLog(title = "获取PO接口定时任务", businessType = BusinessType.INSERT)
+    @ApiOperation(value = "获取PO接口定时任务 ", response = R.class)
+    public R timeInsertFromSAP(){
+        return omsInternalOrderResService.timeInsertFromSAP();
+    }
 }

@@ -1,12 +1,10 @@
 package com.cloud.system.feign.factory;
 
-import com.cloud.system.domain.entity.CdFactoryInfo;
+import com.cloud.common.core.domain.R;
 import com.cloud.system.feign.RemoteFactoryInfoService;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 
 @Slf4j
@@ -15,7 +13,7 @@ public class RemoteFactoryInfoFallbackFactory implements FallbackFactory<RemoteF
 
     @Override
     public RemoteFactoryInfoService create(Throwable throwable) {
-        log.error("RemoteFactoryInfoService错误信息：{}",throwable.getMessage());
+
         return new RemoteFactoryInfoService() {
             /**
              * 查询工厂信息
@@ -23,8 +21,9 @@ public class RemoteFactoryInfoFallbackFactory implements FallbackFactory<RemoteF
              * @return null
              */
             @Override
-            public CdFactoryInfo selectOneByFactory(String factoryCode) {
-                return null;
+            public R selectOneByFactory(String factoryCode) {
+                log.error("RemoteFactoryInfoService.selectOneByFactory错误信息：{}",throwable.getMessage());
+                return R.error("服务拥挤，请稍后再试！");
             }
             /**
              * 根据公司V码查询
@@ -32,8 +31,25 @@ public class RemoteFactoryInfoFallbackFactory implements FallbackFactory<RemoteF
              * @return null
              */
             @Override
-            public Map<String, CdFactoryInfo> selectAllByCompanyCodeV(String companyCodeV) {
-                return null;
+            public R selectAllByCompanyCodeV(String companyCodeV) {
+                log.error("RemoteFactoryInfoService.selectAllByCompanyCodeV错误信息：{}",throwable.getMessage());
+                return R.error("服务拥挤，请稍后再试！");
+            }
+
+            /**
+             * 获取所有公司编码
+             * @return
+             */
+            @Override
+            public R getAllCompanyCode() {
+                log.error("RemoteFactoryInfoService.getAllCompanyCode错误信息：{}",throwable.getMessage());
+                return R.error("服务拥挤，请稍后再试！");
+            }
+
+            @Override
+            public R listAll() {
+                log.error("RemoteFactoryInfoService.listCdFactoryInfo错误信息 e：{}",throwable.getMessage());
+                return R.error("服务拥挤，请稍后再试！");
             }
         };
     }

@@ -1,5 +1,6 @@
 package com.cloud.system.service.impl;
 
+import cn.hutool.core.lang.Dict;
 import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
@@ -140,6 +141,16 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
     @Override
     public R selectList(List<CdProductStock> list) {
         return R.data(cdProductStockMapper.selectByList(list));
+    }
+
+    /**
+     * 根据工厂，专用号分组取成品库存
+     * @param dicts
+     * @return
+     */
+    @Override
+    public R selectProductStockToMap(List<Dict> dicts) {
+        return R.data(cdProductStockMapper.selectProductStockToMap(dicts));
     }
 
     /**

@@ -3,6 +3,7 @@ package com.cloud.common.easyexcel;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelReader;
 import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.metadata.Table;
 import com.alibaba.excel.read.metadata.ReadSheet;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.alibaba.excel.write.metadata.style.WriteCellStyle;
@@ -48,8 +49,8 @@ public class EasyExcelUtil {
             excelReader = EasyExcel.read(excel.getInputStream(), object.getClass(), excelListener).build();
             ReadSheet readSheet = EasyExcel.readSheet(sheetIndex).build();
             excelReader.read(readSheet);
-        } catch (Exception e) {
-            throw new BusinessException("导入Excel失败，请联系网站管理员！");
+        } catch (IOException e) {
+            throw new BusinessException(e.getMessage());
         } finally {
             // 这里千万别忘记关闭，读的时候会创建临时文件，到时磁盘会崩的
             excelReader.finish();
@@ -96,6 +97,34 @@ public class EasyExcelUtil {
     public static R writeExcel(List<?> list, String fileName, String sheetName, Object object) {
         fileName = getAbsoluteFile(DateUtils.dateTimeNow() + fileName);
         ExcelWriter excelWriter = EasyExcel.write(fileName, object.getClass())
+                .registerWriteHandler(setHorizontalCellStyleStrategy(13, 11))
+                .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()).build();
+        try {
+            WriteSheet writeSheet = EasyExcel.writerSheet(sheetName).build();
+            excelWriter.write(list, writeSheet);
+            return R.ok(fileName);
+        } catch (Exception e) {
+            throw new BusinessException("导出Excel失败，请联系网站管理员！");
+        } finally {
+            if (excelWriter != null) {
+                excelWriter.finish();
+            }
+        }
+    }
+
+    /**
+     * 导出 Excel ：一个 sheet，动态表头
+     *
+     * @param list      数据 list，要导出的实体
+     * @param fileName  导出的文件名，需要加后缀
+     * @param sheetName 导入文件的 sheet 名
+     * @param object    映射对象
+     */
+    public static R writeExcelWithHead(List<?> list, String fileName, String sheetName, Object object,List<List<String>> head) {
+        fileName = getAbsoluteFile(DateUtils.dateTimeNow() + fileName);
+        Table table = new Table(1);
+
+        ExcelWriter excelWriter = EasyExcel.write(fileName, object.getClass()).head(head)
                 .registerWriteHandler(setHorizontalCellStyleStrategy(13, 11))
                 .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()).build();
         try {

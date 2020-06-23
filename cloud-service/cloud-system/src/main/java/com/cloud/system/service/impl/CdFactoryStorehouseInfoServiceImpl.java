@@ -1,7 +1,6 @@
 package com.cloud.system.service.impl;
 
 import cn.hutool.core.lang.Dict;
-import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.system.domain.entity.CdFactoryStorehouseInfo;
@@ -9,10 +8,6 @@ import com.cloud.system.mapper.CdFactoryStorehouseInfoMapper;
 import com.cloud.system.service.ICdFactoryStorehouseInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -38,10 +33,10 @@ public class CdFactoryStorehouseInfoServiceImpl extends BaseServiceImpl<CdFactor
      * @param dicts
      * @return
      */
-    @Override
-    public Map<String, Map<String, String>> selectStorehouseToMap(List<Dict> dicts) {
-        return cdFactoryStorehouseInfoMapper.selectStorehouseToMap(dicts);
+    public R selectStorehouseToMap(List<Dict> dicts) {
+        return R.data(cdFactoryStorehouseInfoMapper.selectStorehouseToMap(dicts));
     }
+
     /**
      * 批量新增或修改
      *
@@ -50,7 +45,7 @@ public class CdFactoryStorehouseInfoServiceImpl extends BaseServiceImpl<CdFactor
      */
     @Transactional
     @Override
-    public R batchInsertOrUpdate (List < CdFactoryStorehouseInfo > list) {
+    public R batchInsertOrUpdate(List<CdFactoryStorehouseInfo> list) {
         //1.根据list去重  工厂编号+客户编号做唯一值
         Map<String, CdFactoryStorehouseInfo> map = new HashMap<>();
         list.forEach(cdFactoryStorehouseInfo -> {
@@ -74,3 +69,4 @@ public class CdFactoryStorehouseInfoServiceImpl extends BaseServiceImpl<CdFactor
         return R.ok();
     }
 }
+
