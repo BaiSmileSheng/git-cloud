@@ -302,7 +302,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         List<Map<String,String>> materialCodeComCodeList = smsScrapOrderMapper.selectMaterialAndCompanyCodeGroupBy(month, CollUtil.newArrayList(ScrapOrderStatusEnum.BF_ORDER_STATUS_DJS.getCode()));
         JCoDestination destination;
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog().builder()
-                .appId("SAP").interfaceName(SapConstants.ABAP_AS_SAP601)
+                .appId("SAP").interfaceName(SapConstants.ZSD_INT_DDPS_01)
                 .content(CollUtil.join(materialCodeComCodeList, "#")).build();
         Date date = DateUtil.date();
         StringBuffer error = new StringBuffer();
