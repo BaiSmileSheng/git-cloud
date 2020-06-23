@@ -157,7 +157,11 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         stuffNo.append("WH").append(DateUtils.dateTime()).append(seq);
         smsSupplementaryOrder.setStuffNo(stuffNo.toString());
         //根据线体号查询供应商编码
-        CdFactoryLineInfo factoryLineInfo = remotefactoryLineInfoService.selectInfoByCodeLineCode(omsProductionOrder.getProductLineCode());
+        R rFactory = remotefactoryLineInfoService.selectInfoByCodeLineCode(omsProductionOrder.getProductLineCode());
+        if (!rFactory.isSuccess()) {
+            return rFactory;
+        }
+        CdFactoryLineInfo factoryLineInfo = rFactory.getData(CdFactoryLineInfo.class);
         if (factoryLineInfo != null) {
             smsSupplementaryOrder.setSupplierCode(factoryLineInfo.getSupplierCode());
             smsSupplementaryOrder.setSupplierName(factoryLineInfo.getSupplierDesc());
@@ -395,22 +399,22 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         //将返回值Map转为CdMaterialPriceInfo
 //        CdMaterialPriceInfo cdMaterialPriceInfo = BeanUtil.mapToBean((Map<?, ?>) r.get("data"), CdMaterialPriceInfo.class, true);
         //2、校验修改申请数量是否是最小包装量的整数倍 CdMaterialInfo cdMaterialInfo
-        R cdMaterialInfoResult = remoteMaterialService.getByMaterialCode(smsSupplementaryOrder.getRawMaterialCode());
-        if (!cdMaterialInfoResult.isSuccess()) {
-            log.error(StrUtil.format("(物耗)未维护物料信息{}", smsSupplementaryOrder.getRawMaterialCode()));
-            return R.error("未维护物料信息！");
-        }
-        CdMaterialInfo cdMaterialInfo = cdMaterialInfoResult.getData(CdMaterialInfo.class);
+//        R cdMaterialInfoResult = remoteMaterialService.getByMaterialCode(smsSupplementaryOrder.getRawMaterialCode());
+//        if (!cdMaterialInfoResult.isSuccess()) {
+//            log.error(StrUtil.format("(物耗)未维护物料信息{}", smsSupplementaryOrder.getRawMaterialCode()));
+//            return R.error("未维护物料信息！");
+//        }
+//        CdMaterialInfo cdMaterialInfo = cdMaterialInfoResult.getData(CdMaterialInfo.class);
         int applyNum = smsSupplementaryOrder.getStuffAmount();//申请量
         //最小包装量
-        Double minUnit = Double.valueOf(cdMaterialInfo.getRoundingQuantit() == null ? "0" : cdMaterialInfo.getRoundingQuantit().toString());
-        if (minUnit == 0) {
-            return R.error(StrUtil.format("{}最小包装量不正确！",smsSupplementaryOrder.getRawMaterialCode()));
-        }
-        if (applyNum % minUnit != 0) {
-            log.error(StrUtil.format("(物耗)申请量必须是最小包装量的整数倍参数为{},{}", applyNum,minUnit));
-            return R.error(StrUtil.format("{}申请量必须是最小包装量的整数倍！",smsSupplementaryOrder.getRawMaterialCode()));
-        }
+//        Double minUnit = Double.valueOf(cdMaterialInfo.getRoundingQuantit() == null ? "0" : cdMaterialInfo.getRoundingQuantit().toString());
+//        if (minUnit == 0) {
+//            return R.error(StrUtil.format("{}最小包装量不正确！",smsSupplementaryOrder.getRawMaterialCode()));
+//        }
+//        if (applyNum % minUnit != 0) {
+//            log.error(StrUtil.format("(物耗)申请量必须是最小包装量的整数倍参数为{},{}", applyNum,minUnit));
+//            return R.error(StrUtil.format("{}申请量必须是最小包装量的整数倍！",smsSupplementaryOrder.getRawMaterialCode()));
+//        }
         //3、校验申请数量是否是单耗的整数倍
         //生产单号获取排产订单信息
         R omsProductionOrderResult = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
@@ -422,7 +426,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         //根据成品物料号和原材料物料号取bom单耗
         String productMaterialCode = omsProductionOrder.getProductMaterialCode();
         String rawMaterialCode = smsSupplementaryOrder.getRawMaterialCode();
-        //4、校验申请量与单号是否整数倍
+        //4、校验申请量与单耗是否整数倍
         R rBomNum = remoteBomService.checkBomNum(productMaterialCode, rawMaterialCode, applyNum);
         if (!rBomNum.isSuccess()) {
             return rBomNum;

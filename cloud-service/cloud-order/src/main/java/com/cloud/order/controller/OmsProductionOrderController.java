@@ -1,6 +1,7 @@
 package com.cloud.order.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.UserConstants;
@@ -8,7 +9,6 @@ import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.easyexcel.EasyExcelUtil;
-import com.cloud.common.enums.StatusEnums;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
@@ -17,6 +17,7 @@ import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.service.IOmsProductionOrderService;
 import com.cloud.order.util.DataScopeUtil;
+import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteFactoryLineInfoService;
 import io.swagger.annotations.*;
@@ -132,7 +133,7 @@ public class OmsProductionOrderController extends BaseController {
             @ApiImplicitParam(name = "actualEndDateStart", value = "实际开始日期起始值", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "actualEndDateEnd", value = "实际开始日期结束值", required = true, paramType = "query", dataType = "String")
     })
-    public List<OmsProductionOrder> listForDelays(@RequestParam("productEndDateEnd") String productEndDateEnd,
+    public R listForDelays(@RequestParam("productEndDateEnd") String productEndDateEnd,
                                                   @RequestParam("actualEndDateStart") String actualEndDateStart,
                                                   @RequestParam("actualEndDateEnd") String actualEndDateEnd){
         Example example = new Example(OmsProductionOrder.class);
@@ -148,7 +149,7 @@ public class OmsProductionOrderController extends BaseController {
         }
         criteria.andEqualTo("status",ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderService.selectByExample(example);
-        return omsProductionOrderList;
+        return R.data(omsProductionOrderList);
     }
     /**
      * 根据生产订单号查询排产订单信息
@@ -169,6 +170,35 @@ public class OmsProductionOrderController extends BaseController {
             return R.error("排产订单信息不存在,请检查数据");
         }
         return R.data(productionOrder);
+    }
+
+    /**
+     * 根据生产订单号查询排产订单信息和供应商信息
+     * @param prodctOrderCode
+     * @return OmsProductionOrder
+     */
+    @GetMapping("selectProInfoAndSupplierInfoByProdctOrderCode")
+    @ApiOperation(value = "根据生产订单号查询排产订单信息和供应商信息 ", response = OmsProductionOrder.class)
+    public R selectProInfoAndSupplierInfoByProdctOrderCode(String prodctOrderCode) {
+        if (StrUtil.isBlank(prodctOrderCode)) {
+            throw new BusinessException("参数：生产订单号为空！");
+        }
+        Example example = new Example(OmsProductionOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("productOrderCode",prodctOrderCode);
+        OmsProductionOrder productionOrder = omsProductionOrderService.findByExampleOne(example);
+        if(null == productionOrder){
+            return R.error("排产订单信息不存在,请检查数据");
+        }
+        R rFactory = remoteFactoryLineInfoService.selectInfoByCodeLineCode(productionOrder.getProductLineCode());
+        if (!rFactory.isSuccess()) {
+            return rFactory;
+        }
+        CdFactoryLineInfo factoryLineInfo = rFactory.getData(CdFactoryLineInfo.class);
+        Dict dict = new Dict().set("productionOrder", productionOrder)
+                .set("supplierCode",factoryLineInfo.getSupplierCode())
+                .set("supplierDesc",factoryLineInfo.getSupplierDesc());
+        return R.data(dict);
     }
 
     /**

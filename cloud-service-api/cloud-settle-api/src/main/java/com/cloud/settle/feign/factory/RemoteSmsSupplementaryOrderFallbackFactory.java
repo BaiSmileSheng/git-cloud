@@ -7,8 +7,6 @@ import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Slf4j
 @Component
 public class RemoteSmsSupplementaryOrderFallbackFactory implements FallbackFactory<RemoteSmsSupplementaryOrderService> {
@@ -80,7 +78,7 @@ public class RemoteSmsSupplementaryOrderFallbackFactory implements FallbackFacto
              * @return 物料号集合
              */
             @Override
-            public List<String> materialCodeListByStatus(String status) {
+            public R materialCodeListByStatus(String status) {
                 log.error("RemoteSmsSupplementaryOrderService.materialCodeListByStatus错误：{}",throwable.getMessage());
                 return null;
             }

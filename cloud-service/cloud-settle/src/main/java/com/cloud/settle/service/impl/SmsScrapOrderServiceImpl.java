@@ -118,8 +118,12 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         OmsProductionOrder omsProductionOrder = omsProductionOrderResult.getData(OmsProductionOrder.class);
         smsScrapOrder.setMachiningPrice(omsProductionOrder.getProcessCost());
         //根据线体号查询供应商编码
-        CdFactoryLineInfo factoryLineInfo = remotefactoryLineInfoService.selectInfoByCodeLineCode(omsProductionOrder.getProductLineCode());
-        if (factoryLineInfo != null) {
+        R rFactoryLineInfo=remotefactoryLineInfoService.selectInfoByCodeLineCode(omsProductionOrder.getProductLineCode());
+        if (!rFactoryLineInfo.isSuccess()) {
+            return rFactoryLineInfo;
+        }
+        CdFactoryLineInfo factoryLineInfo = rFactoryLineInfo.getData(CdFactoryLineInfo.class);
+         if (factoryLineInfo != null) {
             smsScrapOrder.setSupplierCode(factoryLineInfo.getSupplierCode());
             smsScrapOrder.setSupplierName(factoryLineInfo.getSupplierDesc());
         }

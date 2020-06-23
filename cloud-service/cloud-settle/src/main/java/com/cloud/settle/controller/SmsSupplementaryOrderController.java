@@ -308,7 +308,7 @@ public class SmsSupplementaryOrderController extends BaseController {
      */
     @GetMapping("materialCodeListByStatus")
     @ApiOperation(value = "根据状态查物料号", response = String.class)
-    public List<String> materialCodeListByStatus(String status){
-        return smsSupplementaryOrderService.materialCodeListByStatus(status);
+    public R materialCodeListByStatus(String status){
+        return R.data(smsSupplementaryOrderService.materialCodeListByStatus(status));
     }
 }

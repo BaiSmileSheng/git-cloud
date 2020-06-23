@@ -93,7 +93,7 @@ public class CdBomInfoController extends BaseController {
      * @return
      */
     @GetMapping("listByProductMaterialCode")
-    @ApiOperation(value = "bom清单数据", response = CdBomInfo.class)
+    @ApiOperation(value = "根据成品物料号查bom清单", response = CdBomInfo.class)
     public R listByProductMaterialCode(String productMaterialCode){
         Example example = new Example(CdBomInfo.class);
         Example.Criteria criteria = example.createCriteria();
