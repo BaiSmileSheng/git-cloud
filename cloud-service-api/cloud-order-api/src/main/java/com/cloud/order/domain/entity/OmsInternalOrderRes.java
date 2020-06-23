@@ -144,10 +144,17 @@ public class OmsInternalOrderRes extends BaseEntity {
     private BigDecimal deliveryNum;
 
     /**
-     * 交货状态
+     * 已删除标识：L：已删除
      */
-    @ExcelProperty(value = "交货状态")
-    @ApiModelProperty(value = "交货状态")
+    @ExcelProperty(value = "已删除标识：L：已删除")
+    @ApiModelProperty(value = "已删除标识：L：已删除")
+    private String sapDelFlag;
+
+    /**
+     * 交货完成标识：X：已交货完成
+     */
+    @ExcelProperty(value = "交货完成标识：X：已交货完成")
+    @ApiModelProperty(value = "交货完成标识：X：已交货完成")
     private String deliveryFlag;
 
     /**

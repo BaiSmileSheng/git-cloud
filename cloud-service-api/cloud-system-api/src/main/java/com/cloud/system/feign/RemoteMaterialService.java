@@ -34,7 +34,7 @@ public interface RemoteMaterialService {
     R updateUphBySap();
 
     /**
-     * 根据物料号查询物料信息
+     * 根据物料号查询一条物料信息(多条取一条)
      * @param materialCode
      * @return
      */

@@ -2627,7 +2627,16 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [],
+          "indexs": [
+            {
+              "name": "order_order_line_key",
+              "isUnique": true,
+              "fields": [
+                "order_code",
+                "order_line_code"
+              ]
+            }
+          ],
           "headers": [
             {
               "fieldName": "chnname",

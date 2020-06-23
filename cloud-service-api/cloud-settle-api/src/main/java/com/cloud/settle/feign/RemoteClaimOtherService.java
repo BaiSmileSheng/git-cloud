@@ -29,7 +29,7 @@ public interface RemoteClaimOtherService {
      * @return 成功或失败
      */
     @GetMapping("claimOther/get")
-    SmsClaimOther get(@RequestParam("id") Long id);
+    R get(@RequestParam("id") Long id);
 
     /**
      * 查询其他索赔(包含文件信息)

@@ -5,6 +5,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.order.feign.factory.RemoteInternalOrderResServiceFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 
 /**
  * 需求数据接入（800PR） Feign服务层
@@ -28,4 +29,12 @@ public interface RemoteInternalOrderResService {
      */
     @GetMapping("demand/queryAndInsertDemandPRFromSap800Monday")
     R queryAndInsertDemandPRFromSap800Monday();
+
+    /**
+     * 每天执行一次
+     * 获取PO接口定时任务
+     * @return
+     */
+    @PostMapping("demand/timeInsertFromSAP")
+    R timeInsertFromSAP();
 }

@@ -4,6 +4,8 @@ import org.apache.ibatis.annotations.Param;
 import com.cloud.common.core.dao.BaseMapper;
 import com.cloud.order.domain.entity.OmsInternalOrderRes;
 
+import java.util.List;
+
 /**
  * 内单PR/PO原 Mapper接口
  *
@@ -14,4 +16,5 @@ public interface OmsInternalOrderResMapper extends BaseMapper<OmsInternalOrderRe
 
     int deleteByMarker(@Param("marker")String marker);
 
+    int batchInsertOrUpdate(List<OmsInternalOrderRes> omsInternalOrderResList);
 }
