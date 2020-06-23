@@ -482,7 +482,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
         TransactionStatus transaction = dstManager.getTransaction(def); // 获得事务状态
         try {
             if (flag) {
-//                cdBomInfoService.deleteAll();
+                cdBomInfoService.deleteAll();
             }
             if (!CollectionUtils.isEmpty(cdBomInfoList)) {
                 cdBomInfoService.insertList(cdBomInfoList);
