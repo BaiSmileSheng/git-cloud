@@ -64,6 +64,11 @@ public class SapConstants {
      */
     public static final String ZSD_INT_DDPS_03= "ZSD_INT_DDPS_03";
 
+    /**
+     * 获取SAP销售价格
+     */
+    public static final String ZSD_INT_DDPS_01= "ZSD_INT_DDPS_01";
+
     //TODO ================卡奥斯SAP系统连接  end=====================
 
     /**

@@ -174,6 +174,12 @@ public class Oms2weeksDemandOrderEditHis extends BaseEntity {
     private Long orderNum;
 
     /**
+     * 单位
+     */
+    @ApiModelProperty(value = "单位")
+    private String unit;
+
+    /**
      * 数据版本 年度-周数
      */
     @ExcelProperty(value = "数据版本 年度-周数")

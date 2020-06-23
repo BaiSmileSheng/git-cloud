@@ -125,7 +125,7 @@ public class Oms2weeksDemandOrderHis extends BaseEntity {
      * 交付日期
      */
     @ExcelProperty(value = "交付日期")
-    @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat("yyyy-MM-dd")
     @ApiModelProperty(value = "交付日期")
     private Date deliveryDate;
 
@@ -149,6 +149,12 @@ public class Oms2weeksDemandOrderHis extends BaseEntity {
     @ExcelProperty(value = "订单数量")
     @ApiModelProperty(value = "订单数量")
     private Long orderNum;
+
+    /**
+     * 单位
+     */
+    @ApiModelProperty(value = "单位")
+    private String unit;
 
     /**
      * 数据版本 年度-周数
