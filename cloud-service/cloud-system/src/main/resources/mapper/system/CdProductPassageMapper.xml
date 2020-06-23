@@ -44,5 +44,13 @@
     <delete id="deleteAll">
         delete from cd_product_passage;
     </delete>
-
+    <select id="selectByList" resultMap="CdProductPassageResult" parameterType="list">
+        <include refid="selectCdProductPassageVo"/>
+        WHERE
+        <foreach collection="list" index="index" item="item" open="(" close=")" separator="or">
+            ( product_factory_code=#{item.productFactoryCode}
+            and product_material_code=#{item.productMaterialCode}
+            and storehouse_to = #{item.storehouseTo} )
+        </foreach>
+    </select>
 </mapper>

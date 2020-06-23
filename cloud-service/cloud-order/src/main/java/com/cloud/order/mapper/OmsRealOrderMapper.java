@@ -13,6 +13,4 @@ import java.util.List;
  */
 public interface OmsRealOrderMapper extends BaseMapper<OmsRealOrder>{
 
-    List<OmsRealOrder> selectListByGroup(OmsRealOrder omsRealOrder);
-
 }

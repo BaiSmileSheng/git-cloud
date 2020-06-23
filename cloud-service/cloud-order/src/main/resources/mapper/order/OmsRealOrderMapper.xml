@@ -37,26 +37,4 @@
     <sql id="selectOmsRealOrderVo">
         select id, order_code, order_type, order_from, order_class, product_material_code, product_material_desc, customer_code, customer_desc, product_factory_code, product_factory_desc, mrp_range, bom_version, purchase_group_code, order_num,unit, delivery_date, product_date, place, status, data_source, del_flag, remark, create_time, create_by, update_time, update_by from oms_real_order
     </sql>
-    <select id="selectListByGroup" resultMap="OmsRealOrderResult" parameterType="OmsRealOrder">
-        SELECT order_from,product_material_code,product_material_desc,product_factory_code,customer_code,customer_desc,delivery_date, product_date,sum (IFNULL(order_num,0)) as order_num
-        from oms_real_order
-        group by order_from, product_factory_code,product_material_code,customer_code,product_date,product_material_desc,customer_desc
-    </select>
-    <select id="selectListByFactoryAndMaterial" resultMap="OmsRealOrderResult" parameterType="OmsRealOrder">
-        SELECT order_from,product_material_code,product_material_desc,product_factory_code,customer_code,customer_desc,delivery_date, product_date,sum (IFNULL(order_num,0)) as order_num
-        from oms_real_order
-        <where>
-            product_date > DATE_FORMAT(now(),'%Y-%m-%d')
-            <if test="productFactoryCode != null and productFactoryCode != ''">
-                and product_factory_code = #{productFactoryCode}
-            </if>
-            <if test="productMaterialCode != null and productMaterialCode != ''">
-                and product_material_code = #{productMaterialCode}
-            </if>
-            <if test="productDate != null and productDate != ''">
-                and product_date <![CDATA[ <= ]]> #{productDate}
-            </if>
-        </where>
-        group by order_from, product_factory_code,product_material_code,customer_code,product_material_desc,customer_desc
-    </select>
 </mapper>

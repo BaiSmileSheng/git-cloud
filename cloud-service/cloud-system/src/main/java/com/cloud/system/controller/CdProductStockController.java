@@ -210,4 +210,13 @@ public class CdProductStockController extends BaseController {
 
         return cdProductStockService.timeSycProductStock();
     }
+
+    /**
+     * 根据生产工厂、成品专用号查询成品库存
+     */
+    @PostMapping("queryOneByFactoryAndMaterial")
+    @ApiOperation(value = "根据生产工厂、成品专用号查询成品库存", response = CdProductStock.class)
+    public R queryOneByFactoryAndMaterial(@RequestBody List<CdProductStock> list) {
+        return cdProductStockService.selectList(list);
+    }
 }
