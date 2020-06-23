@@ -22,6 +22,7 @@
         <result property="year" column="year"/>
         <result property="weeks" column="weeks"/>
         <result property="orderNum" column="order_num"/>
+        <result property="unit" column="unit"/>
         <result property="version" column="version"/>
         <result property="delFlag" column="del_flag"/>
         <result property="remark" column="remark"/>
@@ -49,6 +50,7 @@
                year,
                weeks,
                order_num,
+               unit,
                version,
                del_flag,
                remark,
@@ -63,4 +65,17 @@
     <delete id="deleteAll">
         delete from oms2weeks_demand_order
     </delete>
+
+    <select id="selectInfoInMaterialCodeAndFactoryCode" parameterType="java.util.List"
+            resultMap="Oms2weeksDemandOrderResult">
+        <include refid="selectOms2weeksDemandOrderVo"></include>
+        <where>
+            <foreach collection="list" item="item" separator="or">
+                (product_material_code = #{item.productMaterialCode} and product_factory_code =
+                #{item.productFactoryCode} )
+            </foreach>
+            and del_flag = 0
+        </where>
+        ORDER BY delivery_date asc
+    </select>
 </mapper>
