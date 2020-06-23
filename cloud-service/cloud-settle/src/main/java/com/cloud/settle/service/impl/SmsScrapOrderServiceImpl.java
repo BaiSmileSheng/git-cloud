@@ -129,7 +129,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         }
         smsScrapOrder.setFactoryCode(omsProductionOrder.getProductFactoryCode());
         R rFactory = remoteFactoryInfoService.selectOneByFactory(omsProductionOrder.getProductFactoryCode());
-        if(rFactory.isSuccess()){
+        if(!rFactory.isSuccess()){
             log.error(StrUtil.format("(报废)报废申请新增保存开始：公司信息为空参数为{}", omsProductionOrder.getProductFactoryCode()));
             return R.error("公司信息为空！");
         }

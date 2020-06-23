@@ -171,7 +171,7 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     }
 
     /**
-     * 需求数据导入
+     * 滚动计划需求操作导入
      * @param file
      * @return
      */
@@ -209,7 +209,7 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     }
 
     /**
-     * 查询滚动计划需求操作 列表
+     * 13周滚动需求汇总分页查询
      */
     @GetMapping("week13DemandGatherList")
     @ApiOperation(value = "13周滚动需求汇总分页查询", response = OmsDemandOrderGatherEdit.class)

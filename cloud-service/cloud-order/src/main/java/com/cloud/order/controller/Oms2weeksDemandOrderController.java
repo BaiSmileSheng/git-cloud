@@ -96,7 +96,7 @@ public class Oms2weeksDemandOrderController extends BaseController {
     }
 
     /**
-     * 查询滚动计划需求 列表
+     * 计划需求导入-导出
      */
     @GetMapping("export")
     @ApiOperation(value = "计划需求导入-导出")
