@@ -92,7 +92,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             JCoContext.end(destination);
             //获取返回的参数
             JCoParameterList jCoFields = fm.getExportParameterList();
-            if ("S".equals(jCoFields.getString("ZTYPE"))) {
+            if (SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(jCoFields.getString("ZTYPE"))) {
                 //获取返回的Table
                 JCoTable outTableOutput = fm.getTableParameterList().getTable("OUTPUT");
                 //从输出table中获取每一行数据
@@ -147,8 +147,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             JCoContext.end(destination);
             //获取返回的参数
             JCoParameterList jCoFields = fm.getExportParameterList();
-            String type = jCoFields.getString("ZTYPE");
-            if ("S".equals(type)) {
+            if (SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(jCoFields.getString("ZTYPE"))) {
                 //获取返回的Table
                 JCoTable outTableOutput = fm.getTableParameterList().getTable("OUTPUT");
                 //从输出table中获取每一行数据
@@ -227,7 +226,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             JCoContext.end(destination);
             //获取返回的参数
             JCoParameterList jCoFields = fm.getExportParameterList();
-            if ("S".equals(jCoFields.getString("ZTYPE"))) {
+            if (SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(jCoFields.getString("ZTYPE"))) {
                 //获取返回的Table
                 JCoTable outTableOutput = fm.getTableParameterList().getTable("OUTPUT");
                 //从输出table中获取每一行数据
@@ -312,7 +311,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             JCoContext.end(destination);
             //获取返回的参数
             JCoParameterList jCoFields = fm.getExportParameterList();
-            if ("S".equals(jCoFields.getString("FLAG"))) {
+            if (SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(jCoFields.getString("FLAG"))) {
                 //获取返回的Table
                 JCoTable outTableOutput = fm.getTableParameterList().getTable("OUTPUT");
                 //从输出table中获取每一行数据
@@ -327,7 +326,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                         cdBomInfo.setProductFactoryCode(outTableOutput.getString("WERKS"));//工厂编码
                         cdBomInfo.setRawMaterialCode(outTableOutput.getString("IDNRK"));//原材料物料
                         cdBomInfo.setRawMaterialDesc(outTableOutput.getString("STLAN"));//原材料物料描述
-                        cdBomInfo.setBasicNum(outTableOutput.getLong("BMENG"));//基本数量
+                        cdBomInfo.setBasicNum(outTableOutput.getBigDecimal("BMENG"));//基本数量
                         cdBomInfo.setBomNum(outTableOutput.getBigDecimal("DANHAO"));//单耗
                         cdBomInfo.setProductUnit(outTableOutput.getString("MMEIN"));//成品单位
                         cdBomInfo.setComponentUnit(outTableOutput.getString("MEINS"));//组件单位
