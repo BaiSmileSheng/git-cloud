@@ -86,4 +86,20 @@ public interface IOmsDemandOrderGatherEditService extends BaseService<OmsDemandO
      */
     R week13DemandGatherExport(OmsDemandOrderGatherEdit omsDemandOrderGatherEdit,SysUser sysUser);
 
+
+    /**
+     * 下达SAP
+     * @param ids
+     * @return
+     */
+    R toSAP(List<Long> ids,SysUser sysUser);
+
+
+    /**
+     * 根据需求订单号批量更新
+     * @param list
+     * @return
+     */
+	int updateBatchByDemandOrderCode(List<OmsDemandOrderGatherEdit> list);
+
 }
