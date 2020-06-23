@@ -116,7 +116,7 @@ public class SmsQualityOrderController extends BaseController {
     public R export(SmsQualityOrder smsQualityOrder) {
         Example example = assemblyConditions(smsQualityOrder);
         List<SmsQualityOrder> smsQualityOrderList = smsQualityOrderService.selectByExample(example);
-        String fileName = "质量索赔 .xlsx";
+        String fileName = "质量索赔.xlsx";
         return EasyExcelUtil.writeExcel(smsQualityOrderList, fileName, fileName, new SmsQualityOrder());
     }
 

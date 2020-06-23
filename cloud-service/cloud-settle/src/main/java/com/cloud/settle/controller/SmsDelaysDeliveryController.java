@@ -109,7 +109,7 @@ public class SmsDelaysDeliveryController extends BaseController {
     public R export(SmsDelaysDelivery smsDelaysDelivery) {
         Example example = assemblyConditions(smsDelaysDelivery);
         List<SmsDelaysDelivery> smsDelaysDeliveryList = smsDelaysDeliveryService.selectByExample(example);
-        String fileName = "延期交付索赔 .xlsx";
+        String fileName = "延期交付索赔.xlsx";
         return EasyExcelUtil.writeExcel(smsDelaysDeliveryList,fileName,fileName,new SmsDelaysDelivery());
     }
 

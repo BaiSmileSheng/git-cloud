@@ -105,7 +105,7 @@ public class SmsSettleInfoController extends BaseController {
             Integer differenceAmont = orderAmount - confirmAmont;
             smsSettleInfoRes.setDifferenceAmont(differenceAmont);
         }
-        String fileName = "加工费结算 .xlsx";
+        String fileName = "加工费结算.xlsx";
         return EasyExcelUtil.writeExcel(smsSettleInfoList, fileName, fileName, new SmsSettleInfo());
     }
     /**
