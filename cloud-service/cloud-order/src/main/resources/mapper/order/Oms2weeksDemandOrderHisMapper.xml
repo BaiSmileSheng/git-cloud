@@ -22,6 +22,7 @@
         <result property="year" column="year"/>
         <result property="weeks" column="weeks"/>
         <result property="orderNum" column="order_num"/>
+        <result property="unit" column="unit"/>
         <result property="version" column="version"/>
         <result property="delFlag" column="del_flag"/>
         <result property="remark" column="remark"/>
@@ -49,6 +50,7 @@
                year,
                weeks,
                order_num,
+               unit,
                version,
                del_flag,
                remark,

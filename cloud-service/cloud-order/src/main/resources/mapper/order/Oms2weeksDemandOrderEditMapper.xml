@@ -25,6 +25,7 @@
         <result property="year" column="year"/>
         <result property="weeks" column="weeks"/>
         <result property="orderNum" column="order_num"/>
+        <result property="unit" column="unit"/>
         <result property="version" column="version"/>
         <result property="planOrderOrder" column="plan_order_order"/>
         <result property="sapMessages" column="sap_messages"/>
@@ -59,6 +60,7 @@
                year,
                weeks,
                order_num,
+               unit,
                version,
                plan_order_order,
                sap_messages,
@@ -70,8 +72,137 @@
                create_by,
                update_time,
                update_by
-        from oms_2weeks_demand_order_edit
+        from oms2weeks_demand_order_edit
     </sql>
+    <delete id="deleteByCreateByAndCustomerCode">
+        delete from oms2weeks_demand_order_edit
+        <where>
+            <if test="createBy != null and createBy != ''">
+                and create_by=#{createBy}
+            </if>
+            <if test="customerCodes != null">
+                and customer_code in
+                <foreach collection="customerCodes" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </delete>
+    <select id="selectDistinctMaterialCodeAndFactoryCode" parameterType="Oms2weeksDemandOrderEdit"
+            resultMap="Oms2weeksDemandOrderEditResult">
+        select DISTINCT product_material_code,product_factory_code from oms2weeks_demand_order_edit
+        <where>
+            <if test="dto.productMaterialCode != null and dto.productMaterialCode != ''">
+                and product_material_code=#{dto.productMaterialCode}
+            </if>
+            <if test="dto.productFactoryCode != null and dto.productFactoryCode != ''">
+                and product_factory_code=#{dto.productFactoryCode}
+            </if>
+            <if test="dto.orderFrom != null and dto.orderFrom != ''">
+                and order_from=#{dto.orderFrom}
+            </if>
+            <if test="dto.productFactoryList != null ">
+                and product_factory_code in
+                <foreach collection="dto.productFactoryList" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY product_material_code,product_factory_code DESC
+    </select>
 
+    <select id="selectInfoInMaterialCodeAndFactoryCode" parameterType="java.util.List"
+            resultMap="Oms2weeksDemandOrderEditResult">
+        <include refid="selectOms2weeksDemandOrderEditVo"></include>
+        <where>
+            <foreach collection="list" item="item" separator="or">
+                (product_material_code = #{item.productMaterialCode} and product_factory_code =
+                #{item.productFactoryCode} )
+            </foreach>
+            and del_flag = 0
+        </where>
+        ORDER BY delivery_date asc
+    </select>
 
+    <update id="updateBatchByDemandOrderCode" parameterType="java.util.List">
+        <foreach collection="list" item="updated" index="index" open="" close="" separator=";">
+            update oms2weeks_demand_order_edit
+            <set>
+                <if test="updated.orderType != null and updated.orderType != ''">
+                    order_type = #{updated.orderType},
+                </if>
+                <if test="updated.orderFrom != null and updated.orderFrom != ''">
+                    order_from = #{updated.orderFrom},
+                </if>
+                <if test="updated.productMaterialCode != null and updated.productMaterialCode != ''">
+                    product_material_code = #{updated.productMaterialCode},
+                </if>
+                <if test="updated.productMaterialDesc != null and updated.productMaterialDesc != ''">
+                    product_material_desc = #{updated.productMaterialDesc},
+                </if>
+                <if test="updated.productType != null and updated.productType != ''">
+                    product_type = #{updated.productType},
+                </if>
+                <if test="updated.lifeCycle != null and updated.lifeCycle != ''">
+                    life_cycle = #{updated.lifeCycle},
+                </if>
+                <if test="updated.productFactoryCode != null and updated.productFactoryCode != ''">
+                    product_factory_code = #{updated.productFactoryCode},
+                </if>
+                <if test="updated.customerCode != null and updated.customerCode != ''">
+                    customer_code = #{updated.customerCode},
+                </if>
+                <if test="updated.customerDesc != null and updated.customerDesc != ''">
+                    customer_desc = #{updated.customerDesc},
+                </if>
+                <if test="updated.mrpRange != null and updated.mrpRange != ''">
+                    mrp_range = #{updated.mrpRange},
+                </if>
+                <if test="updated.bomVersion != null and updated.bomVersion != ''">
+                    bom_version = #{updated.bomVersion},
+                </if>
+                <if test="updated.purchaseGroupCode != null and updated.purchaseGroupCode != ''">
+                    purchase_group_code = #{updated.purchaseGroupCode},
+                </if>
+                <if test="updated.place != null and updated.place != ''">
+                    place = #{updated.place},
+                </if>
+                <if test="updated.deliveryDate != null">
+                    delivery_date = #{updated.deliveryDate},
+                </if>
+                <if test="updated.year != null and updated.year != ''">
+                    year = #{updated.year},
+                </if>
+                <if test="updated.weeks != null and updated.weeks != ''">
+                    weeks = #{updated.weeks},
+                </if>
+                <if test="updated.orderNum != null">
+                    order_num = #{updated.orderNum},
+                </if>
+                <if test="updated.unit != null and updated.unit != ''">
+                    unit = #{updated.unit},
+                </if>
+                <if test="updated.version != null and updated.version != ''">
+                    version = #{updated.version},
+                </if>
+                <if test="updated.planOrderOrder != null and updated.planOrderOrder != ''">
+                    plan_order_order = #{updated.planOrderOrder},
+                </if>
+                <if test="updated.status != null and updated.status != ''">
+                    status = #{updated.status},
+                </if>
+                <if test="updated.auditStatus != null and updated.auditStatus != ''">
+                    audit_status = #{updated.auditStatus},
+                </if>
+                <if test="updated.sapMessages != null and updated.sapMessages != ''">
+                    sap_messages = #{updated.sapMessages}
+                </if>
+            </set>
+            <where>
+                <if test="updated.demandOrderCode != null and updated.demandOrderCode != ''">
+                    demand_order_code=#{updated.demandOrderCode}
+                </if>
+            </where>
+        </foreach>
+    </update>
 </mapper>
