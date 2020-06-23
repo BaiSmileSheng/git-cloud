@@ -4,6 +4,8 @@ import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
+import com.cloud.order.converter.DemandOrderGatherEditAuditStatusConverter;
+import com.cloud.order.converter.DemandOrderGatherEditStatusConverter;
 import com.cloud.order.converter.OrderFromConverter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -186,6 +188,7 @@ public class OmsDemandOrderGatherEdit extends BaseEntity {
     /**
      * 状态 0：初始，1：待传SAP，2：传SAP中，3：已传SAP，4：传SAP异常
      */
+    @ExcelProperty(value = "状态",index = 15,converter= DemandOrderGatherEditStatusConverter.class)
     @ApiModelProperty(value = "状态 0：初始，1：待传SAP，2：传SAP中，3：已传SAP，4：传SAP异常")
     private String status;
 
@@ -198,6 +201,7 @@ public class OmsDemandOrderGatherEdit extends BaseEntity {
     /**
      * 审核状态 0：无需审核，1：审核中，2：审核完成
      */
+    @ExcelProperty(value = "审核状态",index = 16,converter = DemandOrderGatherEditAuditStatusConverter.class)
     @ApiModelProperty(value = "审核状态 0：无需审核，1：审核中，2：审核完成")
     private String auditStatus;
 

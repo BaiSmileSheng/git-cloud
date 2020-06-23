@@ -195,8 +195,8 @@ public class OmsProductionOrder extends BaseEntity {
     /**
      * 交货日期
      */
-    @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat("yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "交货日期")
     private Date deliveryDate;
 

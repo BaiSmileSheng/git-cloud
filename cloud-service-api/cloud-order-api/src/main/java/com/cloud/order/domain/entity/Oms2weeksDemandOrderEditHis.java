@@ -4,6 +4,7 @@ import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -16,18 +17,18 @@ import javax.persistence.Id;
 import java.util.Date;
 
 /**
- * T+1-T+2周需求历史 对象 oms_2weeks_demand_order_his
+ * T+1-T+2周需求接入历史 对象 oms_2weeks_demand_order_edit_his
  *
  * @author cs
- * @date 2020-06-12
+ * @date 2020-06-22
  */
 @ExcelIgnoreUnannotated
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ApiModel(value = "T+1-T+2周需求历史 ")
-public class Oms2weeksDemandOrderHis extends BaseEntity {
+@ApiModel(value = "T+1-T+2周需求接入历史 ")
+public class Oms2weeksDemandOrderEditHis extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -36,6 +37,13 @@ public class Oms2weeksDemandOrderHis extends BaseEntity {
     @Id
     @KeySql(useGeneratedKeys = true)
     private Long id;
+
+    /**
+     * 需求订单号
+     */
+    @ExcelProperty(value = "需求订单号")
+    @ApiModelProperty(value = "需求订单号")
+    private String demandOrderCode;
 
     /**
      * 订单类型
@@ -64,6 +72,20 @@ public class Oms2weeksDemandOrderHis extends BaseEntity {
     @ExcelProperty(value = "成品物料描述")
     @ApiModelProperty(value = "成品物料描述")
     private String productMaterialDesc;
+
+    /**
+     * 产品类别
+     */
+    @ExcelProperty(value = "产品类别")
+    @ApiModelProperty(value = "产品类别")
+    private String productType;
+
+    /**
+     * 生命周期
+     */
+    @ExcelProperty(value = "生命周期")
+    @ApiModelProperty(value = "生命周期")
+    private String lifeCycle;
 
     /**
      * 生产工厂编码
@@ -126,6 +148,7 @@ public class Oms2weeksDemandOrderHis extends BaseEntity {
      */
     @ExcelProperty(value = "交付日期")
     @DateTimeFormat("yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "交付日期")
     private Date deliveryDate;
 
@@ -162,6 +185,34 @@ public class Oms2weeksDemandOrderHis extends BaseEntity {
     @ExcelProperty(value = "数据版本 年度-周数")
     @ApiModelProperty(value = "数据版本 年度-周数")
     private String version;
+
+    /**
+     * 计划订单号
+     */
+    @ExcelProperty(value = "计划订单号")
+    @ApiModelProperty(value = "计划订单号")
+    private String planOrderOrder;
+
+    /**
+     * SAP返回信息 传SAP返回信息
+     */
+    @ExcelProperty(value = "SAP返回信息 传SAP返回信息")
+    @ApiModelProperty(value = "SAP返回信息 传SAP返回信息")
+    private String sapMessages;
+
+    /**
+     * 状态 0：初始，1：待传SAP，2：传SAP中，3：已传SAP，4：传SAP异常
+     */
+    @ExcelProperty(value = "状态 0：初始，1：待传SAP，2：传SAP中，3：已传SAP，4：传SAP异常")
+    @ApiModelProperty(value = "状态 0：初始，1：待传SAP，2：传SAP中，3：已传SAP，4：传SAP异常")
+    private String status;
+
+    /**
+     * 审核状态 0：无需审核，1：审核中，2：审核完成
+     */
+    @ExcelProperty(value = "审核状态 0：无需审核，1：审核中，2：审核完成")
+    @ApiModelProperty(value = "审核状态 0：无需审核，1：审核中，2：审核完成")
+    private String auditStatus;
 
     /**
      * 是否删除 0：有效，1：删除

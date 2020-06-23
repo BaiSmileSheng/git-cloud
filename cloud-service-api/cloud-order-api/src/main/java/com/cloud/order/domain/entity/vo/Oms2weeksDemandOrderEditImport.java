@@ -1,4 +1,4 @@
-package com.cloud.order.domain.entity;
+package com.cloud.order.domain.entity.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -13,17 +13,17 @@ import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 /**
- * 滚动计划需求操作 导入对象
+ * T+1、T+2草稿计划 导入对象
  *
  * @author cs
- * @date 2020-06-16
+ * @date 2020-06-22
  */
 @ExcelIgnoreUnannotated
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class OmsDemandOrderGatherEditImport{
+public class Oms2weeksDemandOrderEditImport {
     private static final long serialVersionUID = 1L;
 
 
