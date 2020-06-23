@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 /**
@@ -104,15 +105,15 @@ public class OmsDemandOrderGatherEditImport{
      * 交付日期
      */
     @ExcelProperty(value = "交付日期")
-    @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
-    @NotBlank
+    @DateTimeFormat("yyyy-MM-dd")
+    @NotNull
     private Date deliveryDate;
 
     /**
      * 订单数量
      */
     @ExcelProperty(value = "数量")
-    @NotBlank
+    @NotNull
     private Long orderNum;
 
     /**

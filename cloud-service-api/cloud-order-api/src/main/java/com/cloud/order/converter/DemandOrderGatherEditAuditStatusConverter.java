@@ -5,13 +5,13 @@ import com.alibaba.excel.enums.CellDataTypeEnum;
 import com.alibaba.excel.metadata.CellData;
 import com.alibaba.excel.metadata.GlobalConfiguration;
 import com.alibaba.excel.metadata.property.ExcelContentProperty;
-import com.cloud.order.enums.DemandOrderGatherEditStatusEnum;
+import com.cloud.order.enums.DemandOrderGatherEditAuditStatusEnum;
 
 /**
- * 滚动计划需求操作状态转化器
+ * 滚动计划需求操作审核状态转化器
  * @author cs
  */
-public class DemandOrderGatherEditStatusConverter implements Converter<String> {
+public class DemandOrderGatherEditAuditStatusConverter implements Converter<String> {
 
 
         @Override
@@ -27,11 +27,11 @@ public class DemandOrderGatherEditStatusConverter implements Converter<String> {
         @Override
         public String convertToJavaData(CellData cellData, ExcelContentProperty excelContentProperty, GlobalConfiguration globalConfiguration)  {
             String stringValue = cellData.getStringValue();
-            return DemandOrderGatherEditStatusEnum.getCodeByMsg(stringValue);
+            return DemandOrderGatherEditAuditStatusEnum.getCodeByMsg(stringValue);
         }
 
         @Override
         public CellData convertToExcelData(String string, ExcelContentProperty excelContentProperty, GlobalConfiguration globalConfiguration) {
-            return new CellData(DemandOrderGatherEditStatusEnum.getMsgByCode(string));
+            return new CellData(DemandOrderGatherEditAuditStatusEnum.getMsgByCode(string));
         }
 }

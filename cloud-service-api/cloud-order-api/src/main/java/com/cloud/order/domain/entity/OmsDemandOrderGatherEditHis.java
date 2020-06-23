@@ -139,7 +139,7 @@ public class OmsDemandOrderGatherEditHis extends BaseEntity {
      * 交付日期
      */
     @ExcelProperty(value = "交付日期")
-    @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat("yyyy-MM-dd")
     @ApiModelProperty(value = "交付日期")
     private Date deliveryDate;
 
