@@ -29,5 +29,18 @@ public interface OmsDemandOrderGatherEditMapper extends BaseMapper<OmsDemandOrde
      */
     List<OmsDemandOrderGatherEdit> selectDistinctMaterialCodeAndFactoryCode(@Param("dto")OmsDemandOrderGatherEdit omsDemandOrderGatherEdit);
 
+    /**
+     * 根据物料号和工厂查询
+     * @param list
+     * @return
+     */
     List<OmsDemandOrderGatherEdit> selectInfoInMaterialCodeAndFactoryCode(List<OmsDemandOrderGatherEdit> list);
+
+    /**
+     * 根据需求订单号批量更新
+     * @param list
+     * @return
+     */
+    int updateBatchByDemandOrderCode(@Param("list")List<OmsDemandOrderGatherEdit> list);
+
 }
