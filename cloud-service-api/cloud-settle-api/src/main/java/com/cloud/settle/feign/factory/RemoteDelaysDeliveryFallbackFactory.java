@@ -29,7 +29,8 @@ public class RemoteDelaysDeliveryFallbackFactory implements FallbackFactory<Remo
              */
             @Override
             public R batchAddDelaysDelivery() {
-                return R.error("定时任务调用批量新增保存延期交付索赔(并发送邮件)失败");
+                log.error("RemoteDelaysDeliveryService.batchAddDelaysDelivery error:{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             /**
@@ -38,8 +39,9 @@ public class RemoteDelaysDeliveryFallbackFactory implements FallbackFactory<Remo
              * @return 延期交付索赔信息
              */
             @Override
-            public SmsDelaysDelivery get(Long id) {
-                return null;
+            public R get(Long id) {
+                log.error("RemoteDelaysDeliveryService.get error:{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             /**
@@ -49,7 +51,8 @@ public class RemoteDelaysDeliveryFallbackFactory implements FallbackFactory<Remo
              */
             @Override
             public R selectById(Long id) {
-                return R.error("查询延期交付索赔详情失败");
+                log.error("RemoteDelaysDeliveryService.selectById error:{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             /**
@@ -59,7 +62,8 @@ public class RemoteDelaysDeliveryFallbackFactory implements FallbackFactory<Remo
              */
             @Override
             public R editSave(SmsDelaysDelivery smsDelaysDelivery) {
-                return R.error("修改延期索赔信息失败");
+                log.error("RemoteDelaysDeliveryService.editSave error:{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             /**
@@ -68,7 +72,8 @@ public class RemoteDelaysDeliveryFallbackFactory implements FallbackFactory<Remo
              */
             @Override
             public R overTimeSendMail() {
-                return R.error("48H超时未确认发送邮件失败");
+                log.error("RemoteDelaysDeliveryService.overTimeSendMail error:{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
 
             /**
@@ -77,7 +82,8 @@ public class RemoteDelaysDeliveryFallbackFactory implements FallbackFactory<Remo
              */
             @Override
             public R overTimeConfim() {
-                return R.error("72H超时供应商自动确认失败");
+                log.error("RemoteDelaysDeliveryService.overTimeConfim error:{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
         };
     }

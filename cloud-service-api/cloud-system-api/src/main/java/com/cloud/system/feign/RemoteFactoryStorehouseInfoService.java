@@ -38,4 +38,12 @@ public interface RemoteFactoryStorehouseInfoService {
      */
     @PostMapping("factoryStorehouse/selectStorehouseToMap")
     R selectStorehouseToMap(@RequestBody List<Dict> dicts);
+
+    /**
+     * 查询工厂库位 列表
+     * @param cdFactoryStorehouseInfoReq
+     * @return
+     */
+    @GetMapping("factoryStorehouse/listFactoryStorehouseInfo")
+    R listFactoryStorehouseInfo(@RequestParam("cdFactoryStorehouseInfoReq") String cdFactoryStorehouseInfoReq);
 }

@@ -22,22 +22,6 @@ import java.util.List;
 public interface RemoteSettleInfoService {
 
     /**
-     * 分页查询加工费结算 列表
-     * @param smsSettleInfo 加工费结算信息
-     * @return TableDataInfo 加工费结算分页列表
-     */
-    @GetMapping("/smsSettleInfo/list")
-    TableDataInfo list(@RequestParam("smsSettleInfo") SmsSettleInfo smsSettleInfo);
-
-    /**
-     * 查询加工费结算 列表
-     * @param smsSettleInfo 加工费结算信息
-     * @return TableDataInfo 加工费结算列表
-     */
-    @PostMapping(value = "/smsSettleInfo/listByCondition")
-    List<SmsSettleInfo> listByCondition(@RequestBody SmsSettleInfo smsSettleInfo);
-
-    /**
      * 修改保存加工费结算
      * @param smsSettleInfo 加工费结算信息
      * @return R 修改成功或失败

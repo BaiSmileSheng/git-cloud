@@ -9,6 +9,7 @@ import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.service.ICdMaterialInfoService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 
@@ -119,7 +120,7 @@ public class CdMaterialInfoController extends BaseController {
     public R saveMaterialInfo(){return cdMaterialInfoService.saveMaterialInfo();}
 
     /**
-     * 根据物料号查询物料信息
+     * 根据物料号查询一条物料信息(多条取一条)
      * @param materialCode
      * @return
      */
@@ -129,10 +130,11 @@ public class CdMaterialInfoController extends BaseController {
         Example example = new Example(CdMaterialInfo.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("materialCode", materialCode);
-        CdMaterialInfo cdMaterialInfo = cdMaterialInfoService.findByExampleOne(example);
-        if(null == cdMaterialInfo){
+        List<CdMaterialInfo> cdMaterialInfoList = cdMaterialInfoService.selectByExample(example);
+        if(CollectionUtils.isEmpty(cdMaterialInfoList)){
             return R.error("物料信息不存在,请检查数据");
         }
+        CdMaterialInfo cdMaterialInfo = cdMaterialInfoList.get(0);
         return R.data(cdMaterialInfo);
     }
 

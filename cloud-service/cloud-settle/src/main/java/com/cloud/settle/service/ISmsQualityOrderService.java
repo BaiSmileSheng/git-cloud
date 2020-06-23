@@ -39,6 +39,15 @@ public interface ISmsQualityOrderService extends BaseService<SmsQualityOrder> {
     R updateSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder, MultipartFile[] files);
 
     /**
+     * 新增或修改时提交质量索赔信息
+     * @param smsQualityOrder 质量索赔信息
+     * @param files 质量索赔对应的文件信息
+     * @return
+     */
+    R insertOrupdateSubmit(SmsQualityOrder smsQualityOrder, MultipartFile[] files);
+
+
+    /**
      * 删除质量索赔信息
      * @param ids 主键id
      * @return 删除结果成功或失败

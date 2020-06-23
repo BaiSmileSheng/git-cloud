@@ -5,45 +5,85 @@
 <mapper namespace="com.cloud.order.mapper.OmsRealOrderMapper">
 
     <resultMap type="OmsRealOrder" id="OmsRealOrderResult">
-                    <result property="id" column="id"/>
-                    <result property="orderCode" column="order_code"/>
-                    <result property="orderType" column="order_type"/>
-                    <result property="orderFrom" column="order_from"/>
-                    <result property="orderClass" column="order_class"/>
-                    <result property="productMaterialCode" column="product_material_code"/>
-                    <result property="productMaterialDesc" column="product_material_desc"/>
-                    <result property="customerCode" column="customer_code"/>
-                    <result property="customerDesc" column="customer_desc"/>
-                    <result property="productFactoryCode" column="product_factory_code"/>
-                    <result property="productFactoryDesc" column="product_factory_desc"/>
-                    <result property="mrpRange" column="mrp_range"/>
-                    <result property="bomVersion" column="bom_version"/>
-                    <result property="purchaseGroupCode" column="purchase_group_code"/>
-                    <result property="orderNum" column="order_num"/>
-                    <result property="unit" column="unit"/>
-                    <result property="deliveryDate" column="delivery_date"/>
-                    <result property="productDate" column="product_date"/>
-                    <result property="place" column="place"/>
-                    <result property="status" column="status"/>
-                    <result property="dataSource" column="data_source"/>
-                    <result property="delFlag" column="del_flag"/>
-                    <result property="remark" column="remark"/>
-                    <result property="createTime" column="create_time"/>
-                    <result property="createBy" column="create_by"/>
-                    <result property="updateTime" column="update_time"/>
-                    <result property="updateBy" column="update_by"/>
-                    </resultMap>
+        <result property="id" column="id"/>
+        <result property="orderCode" column="order_code"/>
+        <result property="orderType" column="order_type"/>
+        <result property="orderFrom" column="order_from"/>
+        <result property="orderClass" column="order_class"/>
+        <result property="productMaterialCode" column="product_material_code"/>
+        <result property="productMaterialDesc" column="product_material_desc"/>
+        <result property="customerCode" column="customer_code"/>
+        <result property="customerDesc" column="customer_desc"/>
+        <result property="productFactoryCode" column="product_factory_code"/>
+        <result property="productFactoryDesc" column="product_factory_desc"/>
+        <result property="mrpRange" column="mrp_range"/>
+        <result property="bomVersion" column="bom_version"/>
+        <result property="purchaseGroupCode" column="purchase_group_code"/>
+        <result property="orderNum" column="order_num"/>
+        <result property="unit" column="unit"/>
+        <result property="deliveryDate" column="delivery_date"/>
+        <result property="productDate" column="product_date"/>
+        <result property="place" column="place"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="status" column="status"/>
+        <result property="dataSource" column="data_source"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+    </resultMap>
 
     <sql id="selectOmsRealOrderVo">
-        select id, order_code, order_type, order_from, order_class, product_material_code, product_material_desc, customer_code, customer_desc, product_factory_code, product_factory_desc, mrp_range, bom_version, purchase_group_code, order_num,unit, delivery_date, product_date, place, status, data_source, del_flag, remark, create_time, create_by, update_time, update_by from oms_real_order
+        select id,
+               order_code,
+               order_type,
+               order_from,
+               order_class,
+               product_material_code,
+               product_material_desc,
+               customer_code,
+               customer_desc,
+               product_factory_code,
+               product_factory_desc,
+               mrp_range,
+               bom_version,
+               purchase_group_code,
+               order_num,
+               unit,
+               delivery_date,
+               product_date,
+               place,
+               audit_status,
+               status,
+               data_source,
+               del_flag,
+               remark,
+               create_time,
+               create_by,
+               update_time,
+               update_by
+        from oms_real_order
     </sql>
     <select id="selectListByGroup" resultMap="OmsRealOrderResult" parameterType="OmsRealOrder">
-        SELECT order_from,product_material_code,product_material_desc,product_factory_code,customer_code,customer_desc,delivery_date, product_date,sum (IFNULL(order_num,0)) as order_num
+        SELECT order_from,
+               product_material_code,
+               product_material_desc,
+               product_factory_code,
+               customer_code,
+               customer_desc,
+               delivery_date,
+               product_date,
+               sum(IFNULL(order_num, 0)) as order_num
         from oms_real_order
-        group by order_from, product_factory_code,product_material_code,customer_code,product_date,product_material_desc,customer_desc
+        group by order_from,
+                 product_factory_code,product_material_code,customer_code,product_date,product_material_desc,customer_desc
     </select>
     <select id="selectListByFactoryAndMaterial" resultMap="OmsRealOrderResult" parameterType="OmsRealOrder">
-        SELECT order_from,product_material_code,product_material_desc,product_factory_code,customer_code,customer_desc,delivery_date, product_date,sum (IFNULL(order_num,0)) as order_num
+        SELECT
+        order_from,product_material_code,product_material_desc,product_factory_code,customer_code,customer_desc,delivery_date,
+        product_date,sum (IFNULL(order_num,0)) as order_num
         from oms_real_order
         <where>
             product_date > DATE_FORMAT(now(),'%Y-%m-%d')
@@ -57,6 +97,80 @@
                 and product_date <![CDATA[ <= ]]> #{productDate}
             </if>
         </where>
-        group by order_from, product_factory_code,product_material_code,customer_code,product_material_desc,customer_desc
+        group by order_from,
+        product_factory_code,product_material_code,customer_code,product_material_desc,customer_desc
     </select>
+
+    <insert id="batchInsetOrUpdate" parameterType="java.util.List">
+        insert into oms_real_order (
+        order_code,
+        order_type,
+        order_from,
+        order_class,
+        product_material_code,
+        product_material_desc,
+        customer_code,
+        customer_desc,
+        product_factory_code,
+        product_factory_desc,
+        mrp_range,
+        bom_version,
+        purchase_group_code,
+        order_num,
+        unit,
+        delivery_date,
+        product_date,
+        place,
+        status,
+        audit_status,
+        data_source,
+        del_flag,
+        remark,
+        create_time,
+        create_by
+        )values
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.orderCode},
+            ifnull(#{item.orderType}, ''),
+            #{item.orderFrom},
+            #{item.orderClass},
+            #{item.productMaterialCode},
+            ifnull(#{item.productMaterialDesc}, ''),
+            #{item.customerCode},
+            ifnull(#{item.customerDesc}, ''),
+            #{item.productFactoryCode},
+            ifnull(#{item.productFactoryDesc}, ''),
+            #{item.mrpRange},
+            #{item.bomVersion},
+            ifnull(#{item.purchaseGroupCode}, ''),
+            #{item.orderNum},
+            ifnull(#{item.unit}, ''),
+            #{item.deliveryDate},
+            ifnull(#{item.productDate}, ''),
+            #{item.place},
+            ifnull(#{item.status}, 0),
+            ifnull(#{item.auditStatus}, 0),
+            #{item.dataSource},
+            0,
+            ifnull(#{item.remark}, ''),
+            now(),
+            ifnull(#{item.createBy}, '')
+            )
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        order_from = VALUES(order_from),
+        order_class = VALUES(order_class),
+        product_material_desc = VALUES(product_material_desc),
+        mrp_range = VALUES(mrp_range),
+        bom_version = VALUES(bom_version),
+        order_num = VALUES(order_num),
+        unit = VALUES(unit),
+        product_date = VALUES(product_date),
+        place = VALUES(place),
+        data_source = VALUES(data_source),
+        remark = VALUES(remark),
+        create_by = VALUES(create_by),
+        update_time = now()
+    </insert>
 </mapper>

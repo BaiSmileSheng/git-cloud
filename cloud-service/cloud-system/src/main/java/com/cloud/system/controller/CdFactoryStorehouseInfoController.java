@@ -1,6 +1,7 @@
 package com.cloud.system.controller;
 
 import cn.hutool.core.lang.Dict;
+import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.core.controller.BaseController;
@@ -92,6 +93,18 @@ public class CdFactoryStorehouseInfoController extends BaseController {
             criteria.andEqualTo("storehouseTo",cdFactoryStorehouseInfo.getStorehouseTo());
         }
         return example;
+    }
+
+    /**
+     * 查询工厂库位 列表
+     */
+    @GetMapping("listFactoryStorehouseInfo")
+    @ApiOperation(value = "查询工厂库位 列表", response = CdFactoryStorehouseInfo.class)
+    public R listFactoryStorehouseInfo(String cdFactoryStorehouseInfoReq){
+        CdFactoryStorehouseInfo cdFactoryStorehouseInfo = JSONObject.parseObject(cdFactoryStorehouseInfoReq,CdFactoryStorehouseInfo.class);
+        Example example = assemblyConditions(cdFactoryStorehouseInfo);
+        List<CdFactoryStorehouseInfo> cdFactoryStorehouseInfoList = cdFactoryStorehouseInfoService.selectByExample(example);
+        return R.data(cdFactoryStorehouseInfoList);
     }
     /**
      * 导出模板

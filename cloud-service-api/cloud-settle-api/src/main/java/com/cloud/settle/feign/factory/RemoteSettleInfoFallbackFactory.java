@@ -22,27 +22,6 @@ public class RemoteSettleInfoFallbackFactory implements FallbackFactory<RemoteSe
     public RemoteSettleInfoService create(Throwable throwable) {
         return new RemoteSettleInfoService(){
 
-            /**
-             * 分页查询加工费结算 列表
-             * @param smsSettleInfo 订单结算信息--加工费结算信息
-             * @return null
-             */
-            @Override
-            public TableDataInfo list(SmsSettleInfo smsSettleInfo) {
-                log.error("RemoteSettleInfoService.list错误：{}",throwable.getMessage());
-                return null;
-            }
-
-            /**
-             * 查询加工费结算 列表
-             * @param smsSettleInfo 订单结算信息--加工费结算信息
-             * @return R 查询失败
-             */
-            @Override
-            public List<SmsSettleInfo> listByCondition(SmsSettleInfo smsSettleInfo) {
-                log.error("RemoteSettleInfoService.listByCondition错误：{}",throwable.getMessage());
-                return null;
-            }
 
             /**
              * 修改保存加工费结算

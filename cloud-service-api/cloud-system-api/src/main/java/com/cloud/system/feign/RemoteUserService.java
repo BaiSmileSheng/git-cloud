@@ -57,5 +57,5 @@ public interface RemoteUserService {
      * @return 用户信息
      */
     @GetMapping("user/findUserBySupplierCode/{supplierCode}")
-    public SysUser findUserBySupplierCode(@PathVariable("supplierCode") String supplierCode);
+    public R findUserBySupplierCode(@PathVariable("supplierCode") String supplierCode);
 }

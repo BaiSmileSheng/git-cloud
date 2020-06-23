@@ -30,7 +30,7 @@ public interface RemoteDelaysDeliveryService {
      * @return 延期交付索赔信息
      */
     @GetMapping("delaysDelivery/get")
-    SmsDelaysDelivery get(@RequestParam("id") Long id);
+    R get(@RequestParam("id") Long id);
 
     /**
      * 查询延期交付索赔详情

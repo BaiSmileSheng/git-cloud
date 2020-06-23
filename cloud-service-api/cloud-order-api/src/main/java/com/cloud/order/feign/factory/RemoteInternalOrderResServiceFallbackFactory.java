@@ -35,6 +35,12 @@ public class RemoteInternalOrderResServiceFallbackFactory implements FallbackFac
                 log.error("RemoteInternalOrderResService.queryAndInsertDemandPRFromSap800Monday(PR/PO熔断)错误信息：{}",throwable.getMessage());
                 return R.error("服务器拥挤，请稍后再试！");
             }
+
+            @Override
+            public R timeInsertFromSAP() {
+                log.error("RemoteInternalOrderResService.timeInsertFromSAP 错误信息：{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
+            }
         };
     }
 }

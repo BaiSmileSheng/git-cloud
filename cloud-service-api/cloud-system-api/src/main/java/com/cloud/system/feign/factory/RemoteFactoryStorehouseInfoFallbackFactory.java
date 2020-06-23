@@ -40,6 +40,17 @@ public class RemoteFactoryStorehouseInfoFallbackFactory implements FallbackFacto
                 log.error("RemoteFactoryStorehouseInfoService.selectStorehouseToMap错误信息：{}",throwable.getMessage());
                 return R.error("服务器拥挤，请稍后再试！");
             }
+
+            /**
+             * 查询工厂库位 列表
+             * @param cdFactoryStorehouseInfoReq
+             * @return
+             */
+            @Override
+            public R listFactoryStorehouseInfo(String cdFactoryStorehouseInfoReq) {
+                log.error("RemoteFactoryStorehouseInfoService.listFactoryStorehouseInfo：{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
+            }
         };
     }
 }

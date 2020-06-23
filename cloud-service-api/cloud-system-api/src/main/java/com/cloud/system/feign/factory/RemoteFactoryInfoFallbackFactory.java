@@ -45,6 +45,12 @@ public class RemoteFactoryInfoFallbackFactory implements FallbackFactory<RemoteF
                 log.error("RemoteFactoryInfoService.getAllCompanyCode错误信息：{}",throwable.getMessage());
                 return R.error("服务拥挤，请稍后再试！");
             }
+
+            @Override
+            public R listAll() {
+                log.error("RemoteFactoryInfoService.listCdFactoryInfo错误信息 e：{}",throwable.getMessage());
+                return R.error("服务拥挤，请稍后再试！");
+            }
         };
     }
 }
