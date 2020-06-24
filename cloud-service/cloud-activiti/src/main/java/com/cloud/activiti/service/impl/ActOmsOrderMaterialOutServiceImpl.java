@@ -56,6 +56,7 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
      */
     @Override
     public R getBizInfoByTableId(String businessKey) {
+        //TODO 对应多表
         logger.info("真单工作流根据业务key获取真单信息 businessKey:{}",businessKey);
         BizBusiness business = bizBusinessService.selectBizBusinessById(businessKey);
         if (null != business) {
@@ -127,25 +128,26 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
     @GlobalTransactional
     @Override
     public R audit(BizAudit bizAudit, SysUser sysUser) {
+        //TODO 对应多表
         //1.查询可处理业务逻辑(获取其他索赔id)
         BizBusiness bizBusiness = bizBusinessService.selectBizBusinessById(bizAudit.getBusinessKey().toString());
         if (bizBusiness == null) {
-            logger.error ("真单  审批流程 查询流程业务失败Req主键id:{}",bizAudit.getBusinessKey().toString());
-            return R.error("真单 审批流程 查询流程业务失败");
+            logger.error ("下市流程审批 查询流程业务失败Req主键id:{}",bizAudit.getBusinessKey().toString());
+            return R.error("下市流程审批 查询流程业务失败");
         }
-        //2.根据id获取真单 判断是否待审批
-        logger.info ("真单 审批流程 获取其他索赔信息主键id:{}",bizBusiness.getTableId());
+        //2.根据id获取 判断是否待审批
+        logger.info ("下市流程审批 获取其他索赔信息主键id:{}",bizBusiness.getTableId());
         R omsRealOrderR = remoteOmsRealOrderService.get(Long.valueOf(bizBusiness.getTableId()));
         if(!omsRealOrderR.isSuccess()){
-            logger.error ("真单 审批流程 查询真单信息失败Req主键id:{}",bizBusiness.getTableId());
-            return R.error("真单审批流程 查询真单信息失败");
+            logger.error ("下市流程审批查询真单信息失败Req主键id:{}",bizBusiness.getTableId());
+            return R.error("下市流程审批 查询信息失败");
         }
         OmsRealOrder omsRealOrder = omsRealOrderR.getData(OmsRealOrder.class);
         //状态是否是审核中
         Boolean flagStatus3 = RealOrderAduitStatusEnum.AUDIT_STATUS_SHZ.getCode().equals(omsRealOrder.getAuditStatus());
         if (!flagStatus3) {
-            logger.error ("真单审批流程 查询真单信息失败Req主键id:{} 状态:{}",bizBusiness.getTableId(),omsRealOrder.getAuditStatus());
-            return R.error("真单审批流程 真单不可审核");
+            logger.error ("下市流程审批 查询信息失败Req主键id:{} 状态:{}",bizBusiness.getTableId(),omsRealOrder.getAuditStatus());
+            return R.error("下市流程审批 不可审核");
         }
 
         //3.根据结果修改真单信息
@@ -158,17 +160,17 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
             omsRealOrder.setAuditStatus(RealOrderAduitStatusEnum.AUDIT_STATUS_SHBO.getCode());
         }
         //更新真单审核状态
-        logger.info ("真单审批流程 更新更新真单审核主键id:{} 状态:{}",omsRealOrder.getId(),omsRealOrder.getAuditStatus());
+        logger.info ("下市流程审批 更新审核主键id:{} 状态:{}",omsRealOrder.getId(),omsRealOrder.getAuditStatus());
         R updateResult = remoteOmsRealOrderService.editSave(omsRealOrder);
         if(!updateResult.isSuccess()){
-            logger.error("真单审批流程 更新更新真单审核主键id:{}res:{}",omsRealOrder.getId(),JSONObject.toJSON(updateResult));
-            throw new BusinessException("真单审批流程 更新更新真单审核失败 ");
+            logger.error("下市流程审批 更新审核主键id:{}res:{}",omsRealOrder.getId(),JSONObject.toJSON(updateResult));
+            throw new BusinessException("下市流程审批 更新审核失败 ");
         }
         //4.审批 推进工作流
         R resultAck = actTaskService.audit(bizAudit, sysUser.getUserId());
         if(!resultAck.isSuccess()){
-            logger.error("真单审批流程 审批 推进工作流 req:{}res:{}",JSONObject.toJSON(bizAudit),JSONObject.toJSON(updateResult));
-            throw new BusinessException("真单审批流程审批 推进工作流失败 ");
+            logger.error("下市流程审批 推进工作流 req:{}res:{}",JSONObject.toJSON(bizAudit),JSONObject.toJSON(updateResult));
+            throw new BusinessException("下市流程审批推进工作流失败 ");
         }
         return R.error();
     }

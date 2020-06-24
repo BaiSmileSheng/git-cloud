@@ -29,7 +29,7 @@ import java.util.List;
  * @Date 2020-06-22
  */
 @RestController
-@RequestMapping(" actOmsOrderMaterialOut")
+@RequestMapping("actOmsOrderMaterialOut")
 @Api(tags = "下市审批工作流")
 public class ActOmsOrderMaterialOutController extends BaseController {
 
