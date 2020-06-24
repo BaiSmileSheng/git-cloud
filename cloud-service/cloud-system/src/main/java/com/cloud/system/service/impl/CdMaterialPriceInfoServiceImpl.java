@@ -14,6 +14,7 @@ import com.cloud.system.domain.entity.SysInterfaceLog;
 import com.cloud.system.mapper.CdMaterialPriceInfoMapper;
 import com.cloud.system.service.ICdMaterialPriceInfoService;
 import com.cloud.system.service.ISysInterfaceLogService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.sap.conn.jco.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,8 +98,12 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
     public R synPrice() {
 
         //1.查询sms_supplementary_order 待结算状态的物料编号 调SAP接口查原材料价格
-        List<String> materialCodeList = remoteSmsSupplementaryOrderService.materialCodeListByStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode());
-        List<CdMaterialPriceInfo> cdMaterialPriceInfoListY = selectSapCharges("YCL",materialCodeList);
+        R rMaterialCode = remoteSmsSupplementaryOrderService.materialCodeListByStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode());
+        if (!rMaterialCode.isSuccess()) {
+            return rMaterialCode;
+        }
+        List<String> materialCodeList=rMaterialCode.getCollectData(new TypeReference<List<String>>() {});
+         List<CdMaterialPriceInfo> cdMaterialPriceInfoListY = selectSapCharges("YCL",materialCodeList);
         //2.调SAP接口查加工费
         List<CdMaterialPriceInfo> cdMaterialPriceInfoListJ= selectSapCharges("JGF",new ArrayList<>());
         //3.删除cd_material_price_info的所有信息

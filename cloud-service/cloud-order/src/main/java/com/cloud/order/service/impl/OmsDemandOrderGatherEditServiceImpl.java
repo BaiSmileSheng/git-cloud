@@ -9,6 +9,7 @@ import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.EasyExcel;
 import com.cloud.common.constant.RoleConstants;
+import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.easyexcel.DTO.ExcelImportErrObjectDto;
@@ -32,15 +33,14 @@ import com.cloud.order.service.IOmsDemandOrderGatherEditHisService;
 import com.cloud.order.service.IOmsDemandOrderGatherEditImportService;
 import com.cloud.order.service.IOmsDemandOrderGatherEditService;
 import com.cloud.order.util.DataScopeUtil;
-import com.cloud.system.domain.entity.CdMaterialExtendInfo;
-import com.cloud.system.domain.entity.CdMaterialInfo;
-import com.cloud.system.domain.entity.CdProductStock;
-import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.entity.*;
 import com.cloud.system.enums.LifeCycleEnum;
 import com.cloud.system.enums.MaterialTypeEnum;
 import com.cloud.system.feign.*;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.sap.conn.jco.*;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +59,7 @@ import java.util.stream.Collectors;
  * @author cs
  * @date 2020-06-16
  */
+@Slf4j
 @Service
 public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDemandOrderGatherEdit> implements IOmsDemandOrderGatherEditService, IOmsDemandOrderGatherEditImportService {
     @Autowired
@@ -77,6 +78,8 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
     private IOmsDemandOrderGatherEditImportService omsDemandOrderGatherEditImportService;
     @Autowired
     private RemoteProductStockService remoteProductStockService;
+    @Autowired
+    private RemoteInterfaceLogService remoteInterfaceLogService;
 
     @Override
     public R updateWithLimit(OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
@@ -94,6 +97,10 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             return R.error("此状态数据不允许修改");
         }
         omsDemandOrderGatherEditNew.setOrderNum(omsDemandOrderGatherEdit.getOrderNum());
+        if (StrUtil.equals(status, DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode())) {
+            omsDemandOrderGatherEditNew.setStatus(DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getCode());
+        }
+
         int i=updateByPrimaryKeySelective(omsDemandOrderGatherEditNew);
         return i > 0 ? R.ok() : R.error();
     }
@@ -111,7 +118,10 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         List<String> list = CollUtil.newArrayList(ids.split(StrUtil.COMMA));
         for (String id : list) {
             OmsDemandOrderGatherEdit omsDemandOrderGatherEdit = selectByPrimaryKey(Long.valueOf(id));
-            if (!StrUtil.equals(omsDemandOrderGatherEdit.getStatus(), DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode())) {
+            if (!StrUtil.equals(omsDemandOrderGatherEdit.getStatus(),
+                    DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode())||
+             StrUtil.equals(omsDemandOrderGatherEdit.getAuditStatus(),
+                            DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHZ.getCode())) {
                 return R.error(StrUtil.format("此状态数据不允许删除！需求订单号：{}",omsDemandOrderGatherEdit.getDemandOrderCode()));
             }
         }
@@ -527,7 +537,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         }
         //从T+3周开始
         int gatherWeek = weekNum + 3;
-        //所有周数
+        //所有周数 11周
         int[] weekRange= NumberUtil.range(gatherWeek, gatherWeek+10);
         //查出全部数据了
         Map<String,List<OmsDemandOrderGatherEdit>> mapGroup=omsDemandOrderGatherEditList.stream()
@@ -543,9 +553,6 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         List<CdProductStock> listProStock=rProStock.getCollectData(new TypeReference<List<CdProductStock>>() {});
         Map<String,List<CdProductStock>> mapProStock=listProStock.stream()
                 .collect(Collectors.groupingBy(e -> fetchGroupKey(e)));
-
-
-
         List<OmsDemandOrderGatherEditExport> listExport = new ArrayList<>();
         //根据工厂和物料号分组了
         mapGroup.forEach((key,list)->{
@@ -594,8 +601,9 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
          return EasyExcelUtil.writeExcelWithHead(listExport, "13周滚动需求汇总.xlsx", "sheet", new OmsDemandOrderGatherEditExport(),headList);
     }
 
+
     /**
-     * 导出表头数据
+     * 13周需求导出表头数据
      * @param weekRange
      * @return
      */
@@ -649,5 +657,129 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         return headList;
     }
 
+    /**
+     * 下达SAP(13周需求下达SAP创建生产订单)
+     * @param ids
+     * @return
+     */
+    @Override
+    @Transactional
+    public R toSAP(List<Long> ids,SysUser sysUser) {
+        if (CollUtil.isEmpty(ids)) {
+            return R.error("参数为空！");
+        }
+        Example example = new Example(OmsDemandOrderGatherEdit.class);
+        example.and().andIn("id", ids);
+        List<OmsDemandOrderGatherEdit> demandOrderGatherEdits=selectByExample(example);
+        //只能下达待传SAP和传SAP异常的数据
+        List<String> statusList = CollUtil.newArrayList(DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getCode()
+        ,DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());
+        boolean checkBo = demandOrderGatherEdits.stream().allMatch(demandOrderGatherEdit -> statusList.contains(demandOrderGatherEdit.getStatus()));
+        if (!checkBo) {
+            return R.error(StrUtil.format("只允许下达状态为：{}或{}的数据",
+                    DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getMsg(),
+                    DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getMsg()));
+        }
+        SysInterfaceLog sysInterfaceLog = new SysInterfaceLog().builder()
+                .appId("SAP").interfaceName(SapConstants.ZPP_INT_DDPS_04)
+                .content(StrUtil.format("参数为oms_demand_order_gather_edit表id：{}",CollUtil.join(ids, "#"))).build();
+        //检查数据状态
+        try {
+            //创建与SAP的连接
+            JCoDestination destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP601);
+            //获取repository
+            JCoRepository repository = destination.getRepository();
+            //获取函数信息
+            JCoFunction fm = repository.getFunction(SapConstants.ZPP_INT_DDPS_04);
+            if (fm == null) {
+                throw new RuntimeException("Function does not exists in SAP system.");
+            }
+            //获取输入参数
+            JCoTable inputTable = fm.getTableParameterList().getTable("INPUT");
+            demandOrderGatherEdits.forEach(demandOrderGatherEdit->{
+                //附加表的最后一个新行,行指针,它指向新添加的行。
+                inputTable.appendRow();
+                inputTable.setValue("XQDDH",demandOrderGatherEdit.getDemandOrderCode());//唯一单号
+                inputTable.setValue("PAART", demandOrderGatherEdit.getOrderType());//订单类型
+                inputTable.setValue("MATNR", demandOrderGatherEdit.getProductMaterialCode());//物料号
+                inputTable.setValue("PWWRK", demandOrderGatherEdit.getProductFactoryCode());//工厂
+                inputTable.setValue("BERID", demandOrderGatherEdit.getMrpRange());//MRP 范围
+                inputTable.setValue("VERID", demandOrderGatherEdit.getBomVersion());//生产版本
+                inputTable.setValue("GSMNG", demandOrderGatherEdit.getOrderNum());//数量
+                inputTable.setValue("PSTTR", demandOrderGatherEdit.getDeliveryDate());//计划订单上的订单开始日期
+                inputTable.setValue("LGORT", demandOrderGatherEdit.getPlace());//库存地点
+            });
+            //执行函数
+            JCoContext.begin(destination);
+            fm.execute(destination);
+            JCoContext.end(destination);
+            //获取返回的Table
+            JCoTable outTableOutput = fm.getTableParameterList().getTable("OUTPUT");
+            //从输出table中获取每一行数据
+            if (outTableOutput != null && outTableOutput.getNumRows() > 0) {
+                //返回成功的数据
+                List<OmsDemandOrderGatherEdit> successList = new ArrayList<>();
+                //返回失败的数据
+                List<OmsDemandOrderGatherEdit> failList = new ArrayList<>();
+                StringBuffer sapBuffer = new StringBuffer();
+                //循环取table行数据
+                for (int i = 0; i < outTableOutput.getNumRows(); i++) {
+                    //设置指针位置
+                    outTableOutput.setRow(i);
+                    String demandCode = outTableOutput.getString("XQDDH");//唯一单号
+                    String flag = outTableOutput.getString("FLAG");
+                    String message = outTableOutput.getString("MESSAGE");
+                    String plnum = outTableOutput.getString("PLNUM");//计划订单号
+                    String messageOne = StrUtil.format("XQDDH:{},FLAG:{},MESSAGE:{},PLNUM:{};"
+                            ,demandCode,flag,message,plnum);
+                    sapBuffer.append(messageOne);
+                    if (SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(flag)) {
+                        //成功：状态改为已传SAP，更新计划订单号
+                        OmsDemandOrderGatherEdit edit = new OmsDemandOrderGatherEdit().builder()
+                                .demandOrderCode(demandCode)
+                                .status(DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode())
+                                .sapMessages(message)
+                                .planOrderOrder(plnum).build();
+                        edit.setUpdateBy(sysUser.getLoginName());
+                        successList.add(edit);
+                    }else{
+                        //失败：更新状态为传SAP异常
+                        OmsDemandOrderGatherEdit edit = new OmsDemandOrderGatherEdit().builder()
+                                .demandOrderCode(demandCode)
+                                .status(DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode())
+                                .sapMessages(message)
+                                .planOrderOrder(plnum).build();
+                        edit.setUpdateBy(sysUser.getLoginName());
+                        failList.add(edit);
+                    }
+                }
+                sysInterfaceLog.setResults(sapBuffer.toString());
+                if (CollUtil.isNotEmpty(successList)) {
+                    omsDemandOrderGatherEditMapper.updateBatchByDemandOrderCode(successList);
+                }
+                if (CollUtil.isNotEmpty(failList)) {
+                    omsDemandOrderGatherEditMapper.updateBatchByDemandOrderCode(failList);
+                }
+            }
+        } catch (JCoException e) {
+            log.error("Connect SAP fault, error msg: " + e.toString());
+            throw new BusinessException(e.getMessage());
+        }finally {
+            sysInterfaceLog.setCreateBy(sysUser.getLoginName());
+            sysInterfaceLog.setCreateTime(DateUtil.date());
+            sysInterfaceLog.setRemark("下达SAP(13周需求下达SAP创建生产订单)");
+            remoteInterfaceLogService.saveInterfaceLog(sysInterfaceLog);
+        }
+        return R.ok();
+    }
 
+    /**
+     * 根据需求订单号批量更新
+     * @param list
+     * @return
+     */
+	@Override
+	public int updateBatchByDemandOrderCode(List<OmsDemandOrderGatherEdit> list){
+		 return omsDemandOrderGatherEditMapper.updateBatchByDemandOrderCode(list);
+	}
 }

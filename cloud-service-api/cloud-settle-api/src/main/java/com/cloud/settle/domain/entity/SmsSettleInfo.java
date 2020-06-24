@@ -165,7 +165,7 @@ public class SmsSettleInfo extends BaseEntity {
      * 基本开始日期
      */
     @ExcelProperty(value = "基本开始日期",index = 9)
-    @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat("yyyy-MM-dd")
     @ApiModelProperty(value = "基本开始日期")
     private Date productStartDate;
 
@@ -173,7 +173,7 @@ public class SmsSettleInfo extends BaseEntity {
      * 基本结束日期
      */
     @ExcelProperty(value = "基本结束日期",index = 10)
-    @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat("yyyy-MM-dd")
     @ApiModelProperty(value = "基本结束日期")
     private Date productEndDate;
 
@@ -181,11 +181,21 @@ public class SmsSettleInfo extends BaseEntity {
      * 实际结束日期
      */
     @ExcelProperty(value = "实际结束日期",index = 11)
-    @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat("yyyy-MM-dd")
     @ApiModelProperty(value = "实际结束日期")
     private Date actualEndDate;
 
     @Transient
     @ApiModelProperty(value = "1:基本开始时间,2:基本结束时间,3:实际结束时间")
     private String timeType;
+
+    @Transient  //tk 不操作字段
+    @ApiModelProperty(value = "合计金额")
+    private BigDecimal totalMoney;
+
+    @Transient  //tk 不操作字段
+    @ApiModelProperty(value = "在本月的第几天")
+    private int dayNum;
+
+
 }

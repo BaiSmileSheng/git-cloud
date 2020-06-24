@@ -3,6 +3,7 @@ package com.cloud.system.service;
 import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.SysRole;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.domain.po.SysUserRights;
 
 import java.util.List;
@@ -200,7 +201,7 @@ public interface ISysUserService {
      * @param supplierCode 供应商编号
      * @return 用户信息
      */
-    SysUser findUserBySupplierCode(String supplierCode);
+    SysUserVo findUserBySupplierCode(String supplierCode);
     /**
     * Description: 查询用户的权限
     * Param:

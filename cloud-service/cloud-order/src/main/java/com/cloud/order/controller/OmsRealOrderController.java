@@ -1,27 +1,18 @@
 package com.cloud.order.controller;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
-import com.alibaba.excel.EasyExcel;
-import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.easyexcel.DTO.ExcelImportErrObjectDto;
-import com.cloud.common.easyexcel.DTO.ExcelImportOtherObjectDto;
-import com.cloud.common.easyexcel.DTO.ExcelImportSucObjectDto;
 import com.cloud.common.easyexcel.EasyExcelUtil;
-import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.order.domain.entity.OmsRealOrder;
 import com.cloud.order.domain.entity.vo.OmsRealOrderExcelExportVo;
-import com.cloud.order.domain.entity.vo.OmsRealOrderExcelImportErrorVo;
 import com.cloud.order.domain.entity.vo.OmsRealOrderExcelImportVo;
 import com.cloud.order.enums.RealOrderFromEnum;
-import com.cloud.order.service.IOmsRealOrderExcelImportService;
 import com.cloud.order.service.IOmsRealOrderService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.system.domain.entity.SysUser;
@@ -32,7 +23,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,10 +34,8 @@ import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 真单 提供者
@@ -63,16 +51,15 @@ public class OmsRealOrderController extends BaseController {
     @Autowired
     private IOmsRealOrderService omsRealOrderService;
 
-    @Autowired
-    private IOmsRealOrderExcelImportService omsRealOrderExcelImportService;
 
     /**
      * 查询真单
      */
     @GetMapping("get")
     @ApiOperation(value = "根据id查询真单", response = OmsRealOrder.class)
-    public OmsRealOrder get(Long id) {
-        return omsRealOrderService.selectByPrimaryKey(id);
+    public R get(Long id) {
+        OmsRealOrder omsRealOrder = omsRealOrderService.selectByPrimaryKey(id);
+        return R.data(omsRealOrder);
 
     }
 
@@ -208,7 +195,8 @@ public class OmsRealOrderController extends BaseController {
     @ApiOperation(value = "内单导入", response = OmsRealOrder.class)
     public R importByPCY(@RequestPart("file") MultipartFile file)throws IOException {
         SysUser sysUser = getUserInfo(SysUser.class);
-        return omsRealOrderService.importRealOrderFile(file,RealOrderFromEnum.ORDER_FROM_1.getCode(),sysUser);
+        long loginId = getCurrentUserId();
+        return omsRealOrderService.importRealOrderFile(file,RealOrderFromEnum.ORDER_FROM_1.getCode(),sysUser,loginId);
     }
 
     /**
@@ -221,7 +209,8 @@ public class OmsRealOrderController extends BaseController {
     @ApiOperation(value = "外单导入", response = OmsRealOrder.class)
     public R importByYW(@RequestPart("file") MultipartFile file)throws IOException {
         SysUser sysUser = getUserInfo(SysUser.class);
-        return omsRealOrderService.importRealOrderFile(file,RealOrderFromEnum.ORDER_FROM_2.getCode(),sysUser);
+        long loginId = getCurrentUserId();
+        return omsRealOrderService.importRealOrderFile(file,RealOrderFromEnum.ORDER_FROM_2.getCode(),sysUser,loginId);
     }
 
     /**
@@ -238,11 +227,11 @@ public class OmsRealOrderController extends BaseController {
     /**
      * 修改保存真单
      */
-    @HasPermissions("order:realOrder:update")
-    @PostMapping("update")
+    @HasPermissions("order:realOrder:updateByYWOrPCY")
+    @PostMapping("updateByYWOrPCY")
     @OperLog(title = "修改保存真单", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存真单", response = R.class)
-    public R editSave(@RequestBody OmsRealOrder omsRealOrder) {
+    public R updateByYWOrPCY(@RequestBody OmsRealOrder omsRealOrder) {
         if (!StringUtils.isBlank(omsRealOrder.getRemark())) {
             return R.error("请填写备注");
         }
@@ -251,6 +240,17 @@ public class OmsRealOrderController extends BaseController {
         long userId = getCurrentUserId();
         R result = omsRealOrderService.editSaveOmsRealOrder(omsRealOrder, sysUser, userId);
         return result;
+    }
+
+
+    /**
+     * 修改保存真单
+     */
+    @PostMapping("update")
+    @OperLog(title = "修改保存真单", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "修改保存真单", response = R.class)
+    public R editSave(@RequestBody OmsRealOrder omsRealOrder) {
+        return toAjax(omsRealOrderService.updateByPrimaryKeySelective(omsRealOrder));
     }
 
     /**

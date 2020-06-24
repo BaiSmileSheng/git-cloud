@@ -11,6 +11,7 @@ import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.RandomUtil;
 import com.cloud.system.domain.entity.SysRole;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.service.ISysMenuService;
 import com.cloud.system.service.ISysUserService;
 import com.cloud.system.util.PasswordUtil;
@@ -197,8 +198,8 @@ public class SysUserController extends BaseController {
     @ApiOperation(value = "根据id查询延期交付索赔 ", response = SysUser.class)
     @GetMapping("findUserBySupplierCode/{supplierCode}")
     public R findUserBySupplierCode(@PathVariable("supplierCode") String supplierCode) {
-        SysUser sysUser = sysUserService.findUserBySupplierCode(supplierCode);
-        return R.data(sysUser);
+        SysUserVo sysUservo = sysUserService.findUserBySupplierCode(supplierCode);
+        return R.data(sysUservo);
     }
     /**
      * Description:  查询用户权限

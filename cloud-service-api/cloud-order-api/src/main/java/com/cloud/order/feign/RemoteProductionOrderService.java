@@ -2,15 +2,12 @@ package com.cloud.order.feign;
 
 import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.common.core.domain.R;
-import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.feign.factory.RemoteProductionOrderFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
 
 /**
  * 生产管理 Feign服务层
@@ -36,7 +33,7 @@ public interface RemoteProductionOrderService {
      * @return 排产订单 列表
      */
     @GetMapping("productionOrder/listForDelays")
-    List<OmsProductionOrder> listForDelays(@RequestParam("productEndDateEnd") String productEndDateEnd,
+    R listForDelays(@RequestParam("productEndDateEnd") String productEndDateEnd,
                                            @RequestParam("actualEndDateStart") String actualEndDateStart,
                                            @RequestParam("actualEndDateEnd") String actualEndDateEnd);
     /**

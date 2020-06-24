@@ -3,7 +3,6 @@ package com.cloud.system.feign;
 import cn.hutool.core.lang.Dict;
 import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.common.core.domain.R;
-import com.cloud.system.domain.entity.CdBomInfo;
 import com.cloud.system.feign.factory.RemoteBomFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 数据BOM Feign服务层
@@ -29,7 +27,7 @@ public interface RemoteBomService {
      * @return
      */
     @GetMapping("bom/listByProductAndMaterial")
-    CdBomInfo listByProductAndMaterial(@RequestParam("productMaterialCode") String productMaterialCode, @RequestParam("rawMaterialCode") String rawMaterialCode);
+    R listByProductAndMaterial(@RequestParam("productMaterialCode") String productMaterialCode, @RequestParam("rawMaterialCode") String rawMaterialCode);
 
     /**
      * 校验申请数量是否是单耗的整数倍
@@ -45,7 +43,7 @@ public interface RemoteBomService {
      * @return
      */
     @PostMapping("bom/selectVersionMap")
-    Map<String, Map<String, String>> selectVersionMap(@RequestBody List<Dict> dicts);
+    R selectVersionMap(@RequestBody List<Dict> dicts);
     /**
      * Description:  根据成品专用号、生产工厂、版本查询
      * Param: [list]

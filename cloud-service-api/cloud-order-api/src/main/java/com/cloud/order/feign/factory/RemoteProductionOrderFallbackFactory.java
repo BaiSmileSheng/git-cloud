@@ -1,13 +1,10 @@
 package com.cloud.order.feign.factory;
 
 import com.cloud.common.core.domain.R;
-import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.feign.RemoteProductionOrderService;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Slf4j
 @Component
@@ -38,9 +35,9 @@ public class RemoteProductionOrderFallbackFactory implements FallbackFactory<Rem
              * @return 排产订单 列表
              */
             @Override
-            public List<OmsProductionOrder> listForDelays(String productEndDateEnd, String actualEndDateStart, String actualEndDateEnd) {
+            public R listForDelays(String productEndDateEnd, String actualEndDateStart, String actualEndDateEnd) {
                 log.error("RemoteProductionOrderService.listForDelays(生产订单)错误信息：{}",throwable.getMessage());
-                return null;
+                return R.error("服务拥挤请稍后再试");
             }
             /**
              * Description:  根据id查询排产订单

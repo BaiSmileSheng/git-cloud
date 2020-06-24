@@ -14,7 +14,7 @@ import com.cloud.system.domain.entity.CdProductPassage;
 import com.cloud.system.domain.entity.CdProductStock;
 import com.cloud.system.domain.entity.CdProductWarehouse;
 import com.cloud.system.domain.entity.SysInterfaceLog;
-import com.cloud.system.domain.po.CdProductStockDetail;
+import com.cloud.system.domain.vo.CdProductStockDetailVo;
 import com.cloud.system.mapper.CdProductStockMapper;
 import com.cloud.system.service.ICdFactoryInfoService;
 import com.cloud.system.service.ICdMaterialExtendInfoService;
@@ -122,7 +122,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
     @Override
     public R export(CdProductStock cdProductStock) {
 
-        CdProductStockDetail cdProductStockDetail = new CdProductStockDetail();
+        CdProductStockDetailVo cdProductStockDetail = new CdProductStockDetailVo();
         //1.查询主表数据
         List<CdProductStock> cdProductStockList = listByCondition(cdProductStock);
         for (CdProductStock cdProductStockRes : cdProductStockList) {
@@ -317,7 +317,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
 
                 //2.调用SAP  ZSD_INT_DDPS_02 获取SAP成品库存信息
                 logger.info("调用SAP  ZSD_INT_DDPS_02 获取SAP成品库存信息 factoryCode:{},materials:{}",factoryCode,materials);
-                CdProductStockDetail cdProductStockDetail = sycSAPProductStock(Arrays.asList(factoryCode),materials);
+                CdProductStockDetailVo cdProductStockDetail = sycSAPProductStock(Arrays.asList(factoryCode),materials);
                 //成品库存主表 寄售不足列表
                 List<CdProductStock> cdProductStockList = cdProductStockDetail.getCdProductStockList();
                 //成品库存在产明细
@@ -364,7 +364,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
      * @param cdProductStockDetail
      * @param flag
      */
-    private void taskInsertStockDb(final CdProductStockDetail cdProductStockDetail, final Boolean flag) {
+    private void taskInsertStockDb(final CdProductStockDetailVo cdProductStockDetail, final Boolean flag) {
         threadPoolTaskExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -384,7 +384,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
      * @param cdProductStockDetail
      * @param flag
      */
-    private void insertDb(CdProductStockDetail cdProductStockDetail,Boolean flag){
+    private void insertDb(CdProductStockDetailVo cdProductStockDetail, Boolean flag){
         DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW); // 事物隔离级别，开启新事务，这样会比较安全些。
         TransactionStatus transaction = dstManager.getTransaction(def); // 获得事务状态
@@ -574,7 +574,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
      * @param materialCodeList 物料号
      * @return
      */
-    private CdProductStockDetail sycSAPProductStock(List<String> factoryCodeList,List<String> materialCodeList) {
+    private CdProductStockDetailVo sycSAPProductStock(List<String> factoryCodeList, List<String> materialCodeList) {
         JCoDestination destination;
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog();
         sysInterfaceLog.setAppId("SAP");
@@ -627,7 +627,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
             JCoTable outputJS = fm.getTableParameterList().getTable("OUTPUT_JS");
             List<CdProductStock> productStockList = getJSStock(outputJS);
 
-            CdProductStockDetail cdProductStockDetail = new CdProductStockDetail();
+            CdProductStockDetailVo cdProductStockDetail = new CdProductStockDetailVo();
             cdProductStockDetail.setCdProductInProductionList(productInProductionList);
             cdProductStockDetail.setCdProductStockList(productStockList);
             cdProductStockDetail.setCdProductPassageList(productPassageList);

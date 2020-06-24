@@ -1,5 +1,8 @@
 package com.cloud.settle.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUtil;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.settle.domain.entity.SmsSettleInfo;
@@ -14,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -76,5 +80,36 @@ public class SmsSettleInfoServiceImpl extends BaseServiceImpl<SmsSettleInfo> imp
     @Override
     public List<SmsSettleInfo> selectForMonthSettle(String month, String orderStatus) {
         return smsSettleInfoMapper.selectForMonthSettle(month,orderStatus);
+    }
+
+    /**
+     * 费用结算单明细（打印用）
+     * @param smsSettleInfo
+     * @return
+     */
+    @Override
+    public R selectInfoForPrint(SmsSettleInfo smsSettleInfo) {
+        if (BeanUtil.isEmpty(smsSettleInfo)) {
+            return R.error("参数为空！");
+        }
+        Example example = new Example(SmsSettleInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("settleNo",smsSettleInfo.getSettleNo());
+        //根据结算单号查询结算信息
+        List<SmsSettleInfo> smsSettleInfoList = selectByExample(example);
+        if (CollUtil.isEmpty(smsSettleInfoList)) {
+            return R.error("无结算信息！");
+        }
+        for (SmsSettleInfo settleInfo : smsSettleInfoList) {
+            Date actualEndDate=settleInfo.getActualEndDate();
+            if (actualEndDate == null) {
+                continue;
+            }
+            int dayNum = DateUtil.dayOfMonth(actualEndDate);
+            settleInfo.setDayNum(dayNum);
+            //合计金额（订单数量*不含税单价） 与结算金额相等
+            settleInfo.setTotalMoney(settleInfo.getSettlePrice());
+        }
+        return R.data(smsSettleInfoList);
     }
 }

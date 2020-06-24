@@ -2,14 +2,12 @@ package com.cloud.system.feign.factory;
 
 import cn.hutool.core.lang.Dict;
 import com.cloud.common.core.domain.R;
-import com.cloud.system.domain.entity.CdBomInfo;
 import com.cloud.system.feign.RemoteBomService;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 
 
 @Slf4j
@@ -27,8 +25,9 @@ public class RemoteBomFallbackFactory implements FallbackFactory<RemoteBomServic
              * @return
              */
             @Override
-            public CdBomInfo listByProductAndMaterial(String productMaterialCode, String rawMaterialCode) {
-                return null;
+            public R listByProductAndMaterial(String productMaterialCode, String rawMaterialCode) {
+                log.error("RemoteBomService.listByProductAndMaterial错误信息：{}",throwable.getMessage());
+                return R.error("服务拥挤，请稍后再试！");
             }
 
             /**
@@ -40,6 +39,7 @@ public class RemoteBomFallbackFactory implements FallbackFactory<RemoteBomServic
              */
             @Override
             public R checkBomNum(String rawMaterialCode, String productMaterialCode, int applyNum) {
+                log.error("RemoteBomService.checkBomNum错误信息：{}",throwable.getMessage());
                 return R.error("服务器拥挤，请稍后再试！");
             }
             /**
@@ -48,8 +48,9 @@ public class RemoteBomFallbackFactory implements FallbackFactory<RemoteBomServic
              * @return
              */
             @Override
-            public Map<String, Map<String, String>> selectVersionMap(List<Dict> dicts) {
-                return null;
+            public R selectVersionMap(List<Dict> dicts) {
+                log.error("RemoteBomService.checkBomNum错误信息：{}",throwable.getMessage());
+                return R.error("服务拥挤，请稍后再试！");
             }
             /**
              * Description:  根据成品专用号、生产工厂、版本查询

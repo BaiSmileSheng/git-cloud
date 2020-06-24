@@ -1,4 +1,4 @@
-package com.cloud.system.domain.po;
+package com.cloud.system.domain.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -31,7 +31,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @ApiModel(value = "成品库存详细信息 ")
-public class CdProductStockDetail extends BaseEntity {
+public class CdProductStockDetailVo extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /**
