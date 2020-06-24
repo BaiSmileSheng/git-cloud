@@ -42,7 +42,26 @@ public class RemoteProductionOrderFallbackFactory implements FallbackFactory<Rem
                 log.error("RemoteProductionOrderService.listForDelays(生产订单)错误信息：{}",throwable.getMessage());
                 return null;
             }
-
+            /**
+             * Description:  根据id查询排产订单
+             * Param: [id]
+             * return: com.cloud.order.domain.entity.OmsProductionOrder
+             * Author: ltq
+             * Date: 2020/6/23
+             */
+            @Override
+            public OmsProductionOrder get(Long id) {
+                log.error("RemoteProductionOrderService.listForDelays(生产订单)错误信息：{}",throwable.getMessage());
+                return null;
+            }
+            /**
+             * 修改保存排产订单
+             */
+            @Override
+            public R editSave(OmsProductionOrder omsProductionOrder) {
+                log.error("RemoteProductionOrderService.editSave(排产订单更新)错误信息：{}",throwable.getMessage());
+                return R.error("服务拥挤请稍后再试");
+            }
 
         };
     }
