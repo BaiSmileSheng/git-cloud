@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import tk.mybatis.mapper.annotation.KeySql;
 
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import java.math.BigDecimal;
 
 /**
@@ -188,5 +189,17 @@ public class OmsRealOrder extends BaseEntity {
      * 是否删除 0：有效，1：删除
      */
     private String delFlag;
+
+    /**
+     * 流程实例ID
+     */
+    @Transient
+    private String procDefId;
+
+    /**
+     * 流程实例名称
+     */
+    @Transient
+    private String procName;
 
 }

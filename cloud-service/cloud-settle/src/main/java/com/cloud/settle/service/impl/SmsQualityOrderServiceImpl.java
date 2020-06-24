@@ -10,6 +10,7 @@ import com.cloud.settle.mail.MailService;
 import com.cloud.settle.service.ISequeceService;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteOssService;
 import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -87,6 +88,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
     @Override
     public R selectById(Long id) {
         logger.info("根据id查询质量索赔单详情 id:{}", id);
+        Map<String, Object> map = new HashMap<>();
         SmsQualityOrder smsQualityOrderRes = smsQualityOrderMapper.selectByPrimaryKey(id);
         if (null != smsQualityOrderRes || StringUtils.isNotBlank(smsQualityOrderRes.getQualityNo())) {
             //索赔文件编号
@@ -98,19 +100,22 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
                 throw new BusinessException("据id查询质量索赔单详情获取图片信息失败");
             }
             List<SysOss> claimListReault = claimListR.getCollectData(new TypeReference<List<SysOss>>() {});
-            //申诉文件编号
-            String appealOrderNo = smsQualityOrderRes.getQualityNo() + ORDER_NO_QUALITY_APPEAL_END;
-            R appealListR  = remoteOssService.listByOrderNo(appealOrderNo);
-            if(!appealListR.isSuccess()){
-                logger.error("据id查询质量索赔单详情获取申诉图片信息失败claimOrderNo:{},res:{}",
-                        claimOrderNo, JSONObject.toJSON(appealListR));
-                throw new BusinessException("据id查询质量索赔单详情获取图片信息失败");
+            //如果申诉过再查申诉文件
+            if(StringUtils.isNotBlank(smsQualityOrderRes.getComplaintDescription())){
+                //申诉文件编号
+                String appealOrderNo = smsQualityOrderRes.getQualityNo() + ORDER_NO_QUALITY_APPEAL_END;
+                R appealListR  = remoteOssService.listByOrderNo(appealOrderNo);
+                if(!appealListR.isSuccess()){
+                    logger.error("据id查询质量索赔单详情获取申诉图片信息失败claimOrderNo:{},res:{}",
+                            claimOrderNo, JSONObject.toJSON(appealListR));
+                    throw new BusinessException("据id查询质量索赔单详情获取图片信息失败");
+                }
+                List<SysOss> appealListReault = appealListR.getCollectData(new TypeReference<List<SysOss>>() {});
+                map.put("appealSysOssList", appealListReault);
+
             }
-            List<SysOss> appealListReault = appealListR.getCollectData(new TypeReference<List<SysOss>>() {});
-            Map<String, Object> map = new HashMap<>();
             map.put("smsQualityOrder", smsQualityOrderRes);
             map.put("claimSysOssList", claimListReault);
-            map.put("appealSysOssList", appealListReault);
             return R.ok(map);
         }
 
@@ -124,9 +129,18 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
      * @param files           质量索赔对应的文件信息
      * @return
      */
+
     @GlobalTransactional
     @Override
     public R addSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder, MultipartFile[] files) {
+        if(files.length == 0){
+            return R.error("上传文件数组长度0");
+        }
+        for(MultipartFile file : files){
+            if(file.isEmpty()){
+                return R.error("上传文件不存在");
+            }
+        }
         //1.索赔单号生成规则 ZL+年月日+4位顺序号，循序号每日清零
         StringBuffer qualityNoBuffer = new StringBuffer(QUALITY_ORDER_PRE);
         qualityNoBuffer.append(DateUtils.getDate().replace("-", ""));
@@ -161,7 +175,14 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
     @Override
     public R updateSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder, MultipartFile[] files) {
         logger.info("修改质量索赔单信息 id:{},qualityNo:{}", smsQualityOrder.getId(), smsQualityOrder.getQualityNo());
-
+        if(files.length == 0){
+            return R.error("上传文件数组长度0");
+        }
+        for(MultipartFile file : files){
+            if(file.isEmpty()){
+                return R.error("上传文件不存在");
+            }
+        }
         //1.查询索赔单数据,判断状态是否是待提交,待提交可修改
         SmsQualityOrder smsQualityOrderRes = smsQualityOrderMapper.selectByPrimaryKey(smsQualityOrder.getId());
         if (null == smsQualityOrderRes) {
@@ -300,7 +321,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
                 logger.error("提交质量索赔时查询供应商信息失败供应商编号 supplierCode:{}", supplierCode);
                 throw new BusinessException("提交质量索赔时查询供应商信息失败");
             }
-            SysUser sysUser = sysUserR.getData(SysUser.class);
+            SysUserVo sysUser = sysUserR.getData(SysUserVo.class);
             String mailSubject = "质量索赔邮件";
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条质量索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
@@ -406,7 +427,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
                 logger.error("定时发送邮件时查询供应商信息失败供应商编号 supplierCode:{}", supplierCode);
                 throw new BusinessException("定时发送邮件时查询供应商信息失败");
             }
-            SysUser sysUser = sysUserR.getData(SysUser.class);
+            SysUserVo sysUser = sysUserR.getData(SysUserVo.class);
             String mailSubject = "质量索赔邮件";
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条质量索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
