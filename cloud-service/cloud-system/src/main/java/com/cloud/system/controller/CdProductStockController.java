@@ -13,7 +13,7 @@ import com.cloud.system.domain.entity.CdProductInProduction;
 import com.cloud.system.domain.entity.CdProductPassage;
 import com.cloud.system.domain.entity.CdProductStock;
 import com.cloud.system.domain.entity.CdProductWarehouse;
-import com.cloud.system.domain.po.CdProductStockDetail;
+import com.cloud.system.domain.vo.CdProductStockDetailVo;
 import com.cloud.system.service.ICdProductStockService;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
@@ -87,7 +87,7 @@ public class CdProductStockController extends BaseController {
         if(!result.isSuccess()){
             return result;
         }
-        CdProductStockDetail cdProductStockDetail = (CdProductStockDetail)result.get("data");
+        CdProductStockDetailVo cdProductStockDetail = (CdProductStockDetailVo)result.get("data");
         List<SheetExcelData>  sheetExcelDataList= new ArrayList<>();
         SheetExcelData sheetExcelDataZ = new SheetExcelData();
         sheetExcelDataZ.setDataList(cdProductStockDetail.getCdProductStockList());

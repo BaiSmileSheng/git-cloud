@@ -50,7 +50,7 @@
 		where dict_type = #{dictType} and dict_value = #{dictValue}
 	</select>
 
-    <select id="selectListDictLabel" resultType="java.util.List">
+    <select id="selectListDictLabel" resultType="String">
         select dict_label from sys_dict_data
         where dict_type = #{dictType} and dict_value = #{dictValue}
     </select>
