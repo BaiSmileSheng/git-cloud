@@ -175,4 +175,15 @@ public class CdBomInfoController extends BaseController {
     public Map<String,Map<String, String>> selectVersionMap(@RequestBody List<Dict> dicts){
         return cdBomInfoService.selectVersionMap(dicts);
     }
+    /**
+     * Description:  根据成品专用号、生产工厂、版本查询
+     * Param: [list]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/18
+     */
+    @PostMapping("selectBomList")
+    public R selectBomList(@RequestBody List<Dict> list){
+        return cdBomInfoService.selectBomList(list);
+    }
 }

@@ -1,6 +1,9 @@
 package com.cloud.system.service;
 
+import com.cloud.common.core.domain.R;
+import com.cloud.system.domain.entity.SysRole;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.po.SysUserRights;
 
 import java.util.List;
 import java.util.Set;
@@ -198,4 +201,12 @@ public interface ISysUserService {
      * @return 用户信息
      */
     SysUser findUserBySupplierCode(String supplierCode);
+    /**
+    * Description: 查询用户的权限
+    * Param:
+    * return:
+    * Author: ltq
+    * Date: 2020/6/19
+    */
+    R selectUserRights(String roleKey);
 }

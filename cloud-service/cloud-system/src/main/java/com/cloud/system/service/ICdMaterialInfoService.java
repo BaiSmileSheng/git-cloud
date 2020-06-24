@@ -1,11 +1,14 @@
 package com.cloud.system.service;
 
+import cn.hutool.core.lang.Dict;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.webService.material.RowRisk;
 
+import java.util.Dictionary;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 物料信息 Service接口
@@ -56,4 +59,12 @@ public interface ICdMaterialInfoService extends BaseService<CdMaterialInfo> {
      * @return
      */
     R selectInfoByInMaterialCodeAndMaterialType(List<String> materialCodes,String materialType);
-}
+    /**
+     * Description:  根据成品专用号、生产工厂、物料类型查询
+     * Param: [list]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/18
+     */
+    R selectListByMaterialList(List<Dict> list);
+    }

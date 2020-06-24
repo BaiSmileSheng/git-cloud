@@ -3,11 +3,13 @@ package com.cloud.system.service.impl;
 import cn.hutool.core.util.ArrayUtil;
 import com.cloud.common.annotation.DataScope;
 import com.cloud.common.constant.UserConstants;
+import com.cloud.common.core.domain.R;
 import com.cloud.common.core.text.Convert;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.common.utils.security.Md5Utils;
 import com.cloud.system.domain.entity.*;
+import com.cloud.system.domain.po.SysUserRights;
 import com.cloud.system.mapper.*;
 import com.cloud.system.service.ISysConfigService;
 import com.cloud.system.service.ISysUserService;
@@ -460,5 +462,31 @@ public class SysUserServiceImpl implements ISysUserService {
             return sysUser;
         }
         return null;
+    }
+    /**
+     * Description:  查询用户权限
+     * Param: []
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/19
+     */
+    @Override
+    public R selectUserRights(String roleKey) {
+        //查询指定角色用户
+        List<SysUserRights> userRights = userMapper.selectListByRoleKey(roleKey);
+        if (userRights.size() > 0) {
+            userRights.forEach(u -> {
+                //根据用户查询工厂权限
+                List<String> factorys = userMapper.selectFactorysByUser(u.getId());
+                u.setProductFactorys(factorys);
+                //根据用户查询采购组权限
+                List<String> groupCodes = userMapper.selectGroupCodesByUser(u.getId());
+                u.setPurchaseGroups(groupCodes);
+            });
+        } else {
+           log.error("根据角色没有查询出用户信息！");
+           return R.error("根据角色没有查询出用户信息！");
+        }
+        return R.data(userRights);
     }
 }

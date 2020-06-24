@@ -9,6 +9,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.RandomUtil;
+import com.cloud.system.domain.entity.SysRole;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.service.ISysMenuService;
 import com.cloud.system.service.ISysUserService;
@@ -198,5 +199,17 @@ public class SysUserController extends BaseController {
     public R findUserBySupplierCode(@PathVariable("supplierCode") String supplierCode) {
         SysUser sysUser = sysUserService.findUserBySupplierCode(supplierCode);
         return R.data(sysUser);
+    }
+    /**
+     * Description:  查询用户权限
+     * Param: []
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/19
+     */
+    @PostMapping("selectUserRights")
+    @ApiOperation(value = "查询用户权限 ", response = R.class)
+    public R selectUserRights(@RequestBody String roleKey){
+        return sysUserService.selectUserRights(roleKey);
     }
 }

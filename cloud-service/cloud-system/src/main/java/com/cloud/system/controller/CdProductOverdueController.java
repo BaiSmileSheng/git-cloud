@@ -1,5 +1,6 @@
 package com.cloud.system.controller;
 
+import cn.hutool.core.util.StrUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.easyexcel.EasyExcelUtil;
@@ -181,5 +182,25 @@ public class CdProductOverdueController extends BaseController {
     public R remove(@RequestBody String ids) {
         return toAjax(cdProductOverdueService.deleteByIds(ids));
     }
+    /**
+     * Description: 根据工厂、物料号查询超期库存
+     * Param: [cdProductOverdue]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/24
+     */
+    @PostMapping("selectOverStockByFactoryAndMaterial")
+    @ApiOperation(value = "根据工厂、物料号查询超期库存  ", response = R.class)
+    public R selectOverStockByFactoryAndMaterial(@RequestBody CdProductOverdue cdProductOverdue){
 
+        Example example = new Example(CdProductOverdue.class);
+        Example.Criteria criteria = example.createCriteria();
+        if (StrUtil.isNotBlank(cdProductOverdue.getProductFactoryCode())) {
+            criteria.andEqualTo("productFactoryCode",cdProductOverdue.getProductFactoryCode());
+        }
+        if (StrUtil.isNotBlank(cdProductOverdue.getProductMaterialCode())) {
+            criteria.andEqualTo("productMaterialCode",cdProductOverdue.getProductMaterialCode());
+        }
+        return R.data(cdProductOverdueService.selectByExample(example));
+    }
 }

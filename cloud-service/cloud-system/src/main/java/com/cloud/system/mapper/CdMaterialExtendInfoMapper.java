@@ -1,8 +1,15 @@
 package com.cloud.system.mapper;
 
+import cn.hutool.core.lang.Dict;
+import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.common.core.dao.BaseMapper;
 import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import org.apache.ibatis.annotations.MapKey;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+import java.util.Map;
+
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -31,4 +38,22 @@ public interface CdMaterialExtendInfoMapper extends BaseMapper<CdMaterialExtendI
      */
     @MapKey("materialCode")
     Map<String, CdMaterialExtendInfo> selectInfoInMaterialCodes(@Param(value = "materialCodes") List<String> materialCodes);
+    /**
+     * Description:  根据物料List查询
+     * Param:
+     * return:
+     * Author: ltq
+     * Date: 2020/6/23
+     */
+    List<CdMaterialExtendInfo> selectByMaterialCodeList(@Param(value = "list") List<Dict> list);
+    /**
+    * Description:  根据物料查询一条数据
+    * Param:
+    * return:
+    * Author: ltq
+    * Date: 2020/6/23
+    */
+    CdMaterialExtendInfo selectOneByMaterialCode(@Param("materialCode")String materialCode);
+
+
 }
