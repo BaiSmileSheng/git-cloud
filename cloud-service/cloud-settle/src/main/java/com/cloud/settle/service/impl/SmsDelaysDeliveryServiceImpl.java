@@ -18,6 +18,7 @@ import com.cloud.settle.service.ISmsDelaysDeliveryService;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteFactoryLineInfoService;
 import com.cloud.system.feign.RemoteOssService;
 import com.cloud.system.feign.RemoteUserService;
@@ -132,7 +133,7 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
         //2.插入延期索赔信息
         int count = smsDelaysDeliveryMapper.insertList(smsDelaysDeliveryList);
         //供应商V码对应的供应商信息
-        Map<String,SysUser> mapSysUser = new HashMap<>();
+        Map<String,SysUserVo> mapSysUser = new HashMap<>();
         //获取供应商信息
         for(String supplierCode : supplierSet){
             logger.info("新增保存延期交付索赔时获取供应商信息 supplierCode:{}",supplierCode);
@@ -141,14 +142,14 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
                 logger.error("新增保存延期交付索赔 供应商信息不存在supplierCode:{}", supplierCode);
                 throw new BusinessException("新增保存延期交付索赔 供应商信息不存在");
             }
-            SysUser sysUser = sysUserR.getData(SysUser.class);
+            SysUserVo sysUser = sysUserR.getData(SysUserVo.class);
             mapSysUser.put(supplierCode,sysUser);
         }
         //3.发送邮件
         String mailSubject = "延期索赔邮件";
         for(SmsDelaysDelivery smsDelaysDeliveryMail :smsDelaysDeliveryList ){
             String supplierCode = smsDelaysDeliveryMail.getSupplierCode();
-            SysUser sysUser = mapSysUser.get(supplierCode);
+            SysUserVo sysUser = mapSysUser.get(supplierCode);
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条延期交付订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
             mailTextBuffer.append(smsDelaysDeliveryMail.getSupplierName()).append("+").append(supplierCode).append("+")
@@ -284,7 +285,7 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
                 logger.error("定时发送邮件时查询供应商信息失败供应商编号 supplierCode:{}",supplierCode);
                 throw new BusinessException("定时发送邮件时查询供应商信息失败");
             }
-            SysUser sysUser = sysUserR.getData(SysUser.class);
+            SysUserVo sysUser = sysUserR.getData(SysUserVo.class);
             String mailSubject = "延期索赔邮件";
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条延期索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉

@@ -10,6 +10,7 @@ import com.cloud.settle.enums.ClaimOtherStatusEnum;
 import com.cloud.settle.mail.MailService;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteOssService;
 import com.cloud.system.feign.RemoteSequeceService;
 import com.cloud.system.feign.RemoteUserService;
@@ -275,7 +276,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
                 logger.error("提交其他索赔时查询供应商信息失败供应商编号 supplierCode:{}",supplierCode);
                 throw new BusinessException("提交其他索赔时查询供应商信息失败");
             }
-            SysUser sysUser = sysUserR.getData(SysUser.class);
+            SysUserVo sysUser = sysUserR.getData(SysUserVo.class);
             String mailSubject = "其他索赔邮件";
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条其他索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
@@ -380,7 +381,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
                 logger.error("定时发送邮件时查询供应商信息失败供应商编号 supplierCode:{}",supplierCode);
                 throw new BusinessException("定时发送邮件时查询供应商信息失败");
             }
-            SysUser sysUser = sysUserR.getData(SysUser.class);
+            SysUserVo sysUser = sysUserR.getData(SysUserVo.class);
             String mailSubject = "其他索赔邮件";
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条其他索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉

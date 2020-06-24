@@ -1,6 +1,7 @@
 package com.cloud.system.service;
 
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.SysUserVo;
 
 import java.util.List;
 import java.util.Set;
@@ -197,5 +198,5 @@ public interface ISysUserService {
      * @param supplierCode 供应商编号
      * @return 用户信息
      */
-    SysUser findUserBySupplierCode(String supplierCode);
+    SysUserVo findUserBySupplierCode(String supplierCode);
 }
