@@ -1,7 +1,7 @@
 cloud:
   job:
     admin:
-      addresses: http://10.133.1.8:8081/job
+      addresses: http://orw-job.khaos.cosmoplat.com/job
     accessToken:
     executor:
       appname: cloud-job-executor

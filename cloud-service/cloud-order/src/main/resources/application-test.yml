@@ -79,7 +79,7 @@ sap:
     sysnr: 10
     client: 300
     user: A0000363
-    passwd: liuyisi,03
+    passwd: liuyisi,04
     lang: ZH
   client601:
     ashost: 10.133.28.69
