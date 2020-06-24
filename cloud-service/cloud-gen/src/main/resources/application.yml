@@ -20,17 +20,17 @@ spring:
     time-zone: GMT+8
   cloud:
     nacos:
-      #      config:
-      #        server-addr: 127.0.0.1:8848
-      #        file-extension: yml
       discovery:
-        server-addr: 127.0.0.1:8848
-
-
+        server-addr: nacos.khaos.cosmoplat.com:80
 feign:
   hystrix:
     enabled: true
-
+  httpclient:
+    max-connections: 200
+    max-connections-per-route: 50
+    enabled: false
+  okhttp:
+    enabled: true
 
 
 # MyBatis
@@ -49,4 +49,4 @@ pagehelper:
   helperDialect: mysql
   reasonable: true
   supportMethodsArguments: true
-  params: count=countSql       
+  params: count=countSql

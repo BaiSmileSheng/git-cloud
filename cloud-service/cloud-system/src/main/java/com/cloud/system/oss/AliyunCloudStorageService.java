@@ -2,10 +2,13 @@ package com.cloud.system.oss;
 
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
+import com.cloud.common.enums.StatusEnums;
+import com.cloud.common.exception.SkeletonException;
 import com.cloud.common.exception.file.OssException;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * 阿里云存储
@@ -29,6 +32,12 @@ public class AliyunCloudStorageService extends CloudStorageService {
         return upload(new ByteArrayInputStream(data), path);
     }
 
+    /**
+     *
+     * @param inputStream 字节流
+     * @param path        文件路径，包含文件名
+     * @return 返回http地址
+     */
     @Override
     public String upload(InputStream inputStream, String path) {
         try {
@@ -47,5 +56,24 @@ public class AliyunCloudStorageService extends CloudStorageService {
     @Override
     public String uploadSuffix(InputStream inputStream, String suffix) {
         return upload(inputStream, getPath(config.getAliyunPrefix(), suffix));
+    }
+
+    /**
+     * 功能暂无
+     * @param fileName
+     * @param os
+     */
+    @Override
+    public void downLoad(String fileName, OutputStream os) {
+        throw new SkeletonException(StatusEnums.METHOD_NOT_REALIZE);
+    }
+
+    /**
+     * 功能暂无
+     * @param fileName
+     */
+    @Override
+    public void deleteFile(String fileName) {
+        throw new SkeletonException(StatusEnums.METHOD_NOT_REALIZE);
     }
 }

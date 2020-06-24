@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.settle.mapper.SmsQualityOrderMapper">
+
+    <resultMap type="SmsQualityOrder" id="SmsQualityOrderResult">
+                    <result property="id" column="id"/>
+                    <result property="qualityNo" column="quality_no"/>
+                    <result property="productOrderCode" column="product_order_code"/>
+                    <result property="supplierCode" column="supplier_code"/>
+                    <result property="supplierName" column="supplier_name"/>
+                    <result property="factoryCode" column="factory_code"/>
+                    <result property="productMaterialCode" column="product_material_code"/>
+                    <result property="productMaterialName" column="product_material_name"/>
+                    <result property="companyCode" column="company_code"/>
+                    <result property="qualityStatus" column="quality_status"/>
+                    <result property="qualityAmount" column="quality_amount"/>
+                    <result property="projectName" column="project_name"/>
+                    <result property="claimClause" column="claim_clause"/>
+                    <result property="claimReason" column="claim_reason"/>
+                    <result property="claimAmount" column="claim_amount"/>
+                    <result property="submitDate" column="submit_date"/>
+                    <result property="complaintDescription" column="complaint_description"/>
+                    <result property="complaintDate" column="complaint_date"/>
+                    <result property="supplierConfirmDate" column="supplier_confirm_date"/>
+                    <result property="settleNo" column="settle_no"/>
+                    <result property="settleFee" column="settle_fee"/>
+                    <result property="cashAmount" column="cash_amount"/>
+                    <result property="delFlag" column="del_flag"/>
+                    <result property="remark" column="remark"/>
+                    <result property="createBy" column="create_by"/>
+                    <result property="createTime" column="create_time"/>
+                    <result property="updateBy" column="update_by"/>
+                    <result property="updateTime" column="update_time"/>
+                    </resultMap>
+
+    <sql id="selectSmsQualityOrderVo">
+        select id, quality_no, product_order_code, supplier_code, supplier_name, factory_code, product_material_code, product_material_name,company_code, quality_status, quality_amount, project_name, claim_clause, claim_reason, claim_amount, submit_date, complaint_description, complaint_date, supplier_confirm_date, settle_no, settle_fee, cash_amount, del_flag, remark, create_by, create_time, update_by, update_time from sms_quality_order
+    </sql>
+
+
+    <select id="selectByMonthAndStatus" resultMap="SmsQualityOrderResult">
+        <include refid="selectSmsQualityOrderVo"/>
+        <where>
+            <if test="month != null">
+                DATE_FORMAT(supplier_confirm_date, '%Y%m') = #{month}
+            </if>
+            AND quality_status in
+            <foreach collection="qualityStatus" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+            and del_flag='0'
+        </where>
+    </select>
+</mapper>

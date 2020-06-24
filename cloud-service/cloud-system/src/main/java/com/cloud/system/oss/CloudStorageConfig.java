@@ -1,8 +1,7 @@
 package com.cloud.system.oss;
 
 import com.cloud.system.oss.valdator.AliyunGroup;
-import com.cloud.system.oss.valdator.QcloudGroup;
-import com.cloud.system.oss.valdator.QiniuGroup;
+import com.cloud.system.oss.valdator.HuaweiGroup;
 import lombok.Data;
 import org.hibernate.validator.constraints.Range;
 import org.hibernate.validator.constraints.URL;
@@ -19,29 +18,10 @@ public class CloudStorageConfig implements Serializable {
     //
     private static final long serialVersionUID = 9035033846176792944L;
 
-    // 类型 1：七牛 2：阿里云 3：腾讯云
-    @Range(min = 1, max = 3, message = "类型错误")
+    // 类型 1：华为 2：阿里云
+    @Range(min = 1, max = 2, message = "类型错误")
     private Integer type;
 
-    // 七牛绑定的域名
-    @NotBlank(message = "七牛绑定的域名不能为空", groups = QiniuGroup.class)
-    @URL(message = "七牛绑定的域名格式不正确", groups = QiniuGroup.class)
-    private String qiniuDomain;
-
-    // 七牛路径前缀
-    private String qiniuPrefix;
-
-    // 七牛ACCESS_KEY
-    @NotBlank(message = "七牛AccessKey不能为空", groups = QiniuGroup.class)
-    private String qiniuAccessKey;
-
-    // 七牛SECRET_KEY
-    @NotBlank(message = "七牛SecretKey不能为空", groups = QiniuGroup.class)
-    private String qiniuSecretKey;
-
-    // 七牛存储空间名
-    @NotBlank(message = "七牛空间名不能为空", groups = QiniuGroup.class)
-    private String qiniuBucketName;
 
     // 阿里云绑定的域名
     @NotBlank(message = "阿里云绑定的域名不能为空", groups = AliyunGroup.class)
@@ -68,28 +48,23 @@ public class CloudStorageConfig implements Serializable {
     @NotBlank(message = "阿里云BucketName不能为空", groups = AliyunGroup.class)
     private String aliyunBucketName;
 
-    // 腾讯云绑定的域名
-    @NotBlank(message = "腾讯云绑定的域名不能为空", groups = QcloudGroup.class)
-    @URL(message = "腾讯云绑定的域名格式不正确", groups = QcloudGroup.class)
-    private String qcloudDomain;
+    //华为云EndPoint
+    @NotBlank(message = "华为云EndPoint不能为空", groups = HuaweiGroup.class)
+    private String hcloudendPoint;
 
-    // 腾讯云路径前缀
-    private String qcloudPrefix;
+    //华为云接入证书
+    @NotBlank(message = "华为云AK不能为空", groups = HuaweiGroup.class)
+    private String hcloudAk;
 
-    // 腾讯云SecretId
-    @NotBlank(message = "腾讯云SecretId不能为空", groups = QcloudGroup.class)
-    private String qcloudSecretId;
+    //华为云安全证书
+    @NotBlank(message = "华为云SK不能为空", groups = HuaweiGroup.class)
+    private String hcloudSk;
 
-    // 腾讯云SecretKey
-    @NotBlank(message = "腾讯云SecretKey不能为空", groups = QcloudGroup.class)
-    private String qcloudSecretKey;
+    //华为云桶名
+    @NotBlank(message = "华为云BucketName不能为空", groups = HuaweiGroup.class)
+    private String hcloudBucketName;
 
-    // 腾讯云BucketName
-    @NotBlank(message = "腾讯云BucketName不能为空", groups = QcloudGroup.class)
-    private String qcloudBucketName;
-
-    // 腾讯云COS所属地区
-    @NotBlank(message = "所属地区不能为空", groups = QcloudGroup.class)
-    private String qcloudRegion;
+    //华为云下载地址前缀   暂为空
+    private String hcloudPrefix;
 
 }

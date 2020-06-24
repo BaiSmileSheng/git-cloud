@@ -1,7 +1,10 @@
 package com.cloud.system.service;
 
+import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.SysOss;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -50,5 +53,27 @@ public interface ISysOssService {
      * @return 结果
      */
     public int deleteSysOssByIds(String ids);
+
+    /**
+     * 根据订单号查询文件列表
+     * @param orderNo 订单编号
+     * @return List<SysOss> 文件上传集合
+     */
+    public List<SysOss> selectSysOssListByOrderNo(String orderNo);
+
+    /**
+     * 根据订单编号修改文件上传列表(存在就先删后增)
+     * @param orderNo 订单编号
+     * @param files 文件数组
+     * @return 成功或失败
+     */
+    public R updateListByOrderNo(String orderNo, MultipartFile[] files) throws IOException;
+
+    /**
+     * 根据订单编号删除文件上传列表
+     * @param orderNo 订单编号
+     * @return 成功或失败
+     */
+    public R deleteListByOrderNo(String orderNo);
 
 }

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.order.mapper.Oms2weeksDemandOrderHisMapper">
+
+    <resultMap type="Oms2weeksDemandOrderHis" id="Oms2weeksDemandOrderHisResult">
+        <result property="id" column="id"/>
+        <result property="orderType" column="order_type"/>
+        <result property="orderFrom" column="order_from"/>
+        <result property="productMaterialCode" column="product_material_code"/>
+        <result property="productMaterialDesc" column="product_material_desc"/>
+        <result property="productFactoryCode" column="product_factory_code"/>
+        <result property="productFactoryDesc" column="product_factory_desc"/>
+        <result property="customerCode" column="customer_code"/>
+        <result property="customerDesc" column="customer_desc"/>
+        <result property="mrpRange" column="mrp_range"/>
+        <result property="bomVersion" column="bom_version"/>
+        <result property="purchaseGroupCode" column="purchase_group_code"/>
+        <result property="place" column="place"/>
+        <result property="deliveryDate" column="delivery_date"/>
+        <result property="year" column="year"/>
+        <result property="weeks" column="weeks"/>
+        <result property="orderNum" column="order_num"/>
+        <result property="unit" column="unit"/>
+        <result property="version" column="version"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+    </resultMap>
+
+    <sql id="selectOms2weeksDemandOrderHisVo">
+        select id,
+               order_type,
+               order_from,
+               product_material_code,
+               product_material_desc,
+               product_factory_code,
+               product_factory_desc,
+               customer_code,
+               customer_desc,
+               mrp_range,
+               bom_version,
+               purchase_group_code,
+               place,
+               delivery_date,
+               year,
+               weeks,
+               order_num,
+               unit,
+               version,
+               del_flag,
+               remark,
+               create_time,
+               create_by,
+               update_time,
+               update_by
+        from oms2weeks_demand_order_his
+    </sql>
+
+
+</mapper>

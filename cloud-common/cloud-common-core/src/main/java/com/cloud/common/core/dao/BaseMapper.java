@@ -5,9 +5,11 @@
  */
 package com.cloud.common.core.dao;
 
+import com.cloud.common.core.tkmybatis.BatchMapper;
 import tk.mybatis.mapper.common.ConditionMapper;
 import tk.mybatis.mapper.common.IdsMapper;
 import tk.mybatis.mapper.common.Mapper;
+import tk.mybatis.mapper.common.MySqlMapper;
 import tk.mybatis.mapper.common.special.InsertListMapper;
 
 /**
@@ -20,5 +22,5 @@ import tk.mybatis.mapper.common.special.InsertListMapper;
  * @author 张孟如
  * @version 1.0
  */
-public interface BaseMapper<T> extends Mapper<T>, IdsMapper<T>, InsertListMapper<T>, ConditionMapper<T> {
+public interface BaseMapper<T> extends Mapper<T>, IdsMapper<T>, InsertListMapper<T>, MySqlMapper<T>, BatchMapper<T>,ConditionMapper<T>{
 }

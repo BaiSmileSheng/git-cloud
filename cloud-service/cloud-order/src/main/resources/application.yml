@@ -1,0 +1,106 @@
+server:
+  port: 8002
+# 日志配置
+logging:
+  level:
+    com.cloud: debug
+    org.springframework: warn
+    com.alibaba.nacos.client.naming: error
+spring:
+  application:
+    name: cloud-order
+  profiles:
+    active: dev
+  devtools:
+    restart:
+      enabled: true
+  main:
+    allow-bean-definition-overriding: true
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  cloud:
+    nacos:
+      discovery:
+        server-addr: nacos.khaos.cosmoplat.com:80
+  servlet:
+    multipart:
+      maxFileSize: 5MB  #单位必须大写MB或不写(即为B)
+      maxRequestSize: 10MB
+  mail:
+    host: mail.mhaq.cn
+    port: 25
+    username: ws@mhaq.cn
+    password: Haier.123
+    protocol: smtp
+    defaultEncoding: utf-8
+
+feign:
+  hystrix:
+    enabled: true
+  httpclient:
+    max-connections: 200
+    max-connections-per-route: 50
+    enabled: false
+  okhttp:
+    enabled: true
+# 暴露监控端点
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+ribbon:
+  OkToRetryOnAllOperations: false #对所有操作请求都进行重试,默认false
+  ReadTimeout: 5000   #负载均衡超时时间，默认值5000
+  ConnectTimeout: 2000 #ribbon请求连接的超时时间，默认值2000
+  MaxAutoRetries: 0     #对当前实例的重试次数，默认0
+  MaxAutoRetriesNextServer: 1 #对切换实例的重试次数，默认1
+
+hystrix:
+  command:
+    default:  #default全局有效，service id指定应用有效
+      execution:
+        timeout:
+          enabled: true
+        isolation:
+          thread:
+            timeoutInMilliseconds: 10000 #断路器超时时间，默认1000ms
+
+# MyBatis
+mybatis:
+  # 搜索指定包别名
+  typeAliasesPackage: com.cloud
+  # 配置mapper的扫描，找到所有的mapper.xml映射文件
+  mapperLocations: classpath*:mapper/**/*Mapper.xml
+
+mapper:
+  not-empty: true
+  identity: MYSQL
+
+# PageHelper分页插件
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+
+# seata配置,分布式事务
+seata:
+  enabled: true
+  application-id: ${spring.application.name}
+  tx-service-group: ${spring.application.name}-group
+  enable-auto-data-source-proxy: true
+  use-jdk-proxy: true
+  service:
+    vgroup-mapping:
+      cloud-order-group: cloud-tx # seata  server段的cluster
+    enable-degrade: false # 是否启用降级
+    disable-global-transaction: false # 是否禁用全局事务
+  registry:
+    type: nacos
+    nacos:
+      server-addr: ${spring.cloud.nacos.discovery.server-addr}
+
+

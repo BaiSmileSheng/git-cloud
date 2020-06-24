@@ -6,6 +6,7 @@ import com.cloud.system.mapper.SysOperLogMapper;
 import com.cloud.system.service.ISysOperLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ public class SysOperLogServiceImpl implements ISysOperLogService {
      * @param operLog 操作日志对象
      */
     @Override
+    @Transactional
     public void insertOperlog(SysOperLog operLog) {
         operLogMapper.insertOperlog(operLog);
     }

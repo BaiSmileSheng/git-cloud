@@ -1,24 +1,27 @@
 package com.cloud.auth.service;
 
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
+import cn.hutool.core.util.StrUtil;
+import com.cloud.auth.form.HucProperties;
+import com.cloud.auth.form.UucProperties;
 import com.cloud.common.constant.Constants;
 import com.cloud.common.constant.UserConstants;
+import com.cloud.common.core.domain.R;
 import com.cloud.common.enums.UserStatus;
-import com.cloud.common.exception.user.UserBlockedException;
-import com.cloud.common.exception.user.UserDeleteException;
-import com.cloud.common.exception.user.UserNotExistsException;
-import com.cloud.common.exception.user.UserPasswordNotMatchException;
+import com.cloud.common.exception.BusinessException;
+import com.cloud.common.exception.user.*;
 import com.cloud.common.log.publish.PublishFactory;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.IpUtils;
 import com.cloud.common.utils.MessageUtils;
 import com.cloud.common.utils.ServletUtils;
+import com.cloud.system.domain.entity.CdSupplierInfo;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.feign.RemoteSupplierInfoService;
 import com.cloud.system.feign.RemoteUserService;
 import com.cloud.system.util.PasswordUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component
 public class SysLoginService {
@@ -26,10 +29,25 @@ public class SysLoginService {
     @Autowired
     private RemoteUserService userService;
 
+    @Autowired
+    private RemoteSupplierInfoService supplierInfoService;
+
+    @Autowired
+    private UucLoginCheckService uucLoginCheckService;
+
+    @Autowired
+    private HucLoginCheckService hucLoginCheckService;
+
+    @Autowired
+    private UucProperties uucProperties;
+
+    @Autowired
+    private HucProperties hucProperties;
+
     /**
      * 登录
      */
-    public SysUser login(String username, String password) {
+    public SysUser login(String username, String password) throws Exception {
         // 验证码校验
         // if
         // (!StringUtils.isEmpty(ServletUtils.getRequest().getAttribute(ShiroConstants.CURRENT_CAPTCHA)))
@@ -44,6 +62,8 @@ public class SysLoginService {
             PublishFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("not.null"));
             throw new UserNotExistsException();
         }
+
+
         // 密码如果不在指定范围内 错误
         if (password.length() < UserConstants.PASSWORD_MIN_LENGTH
                 || password.length() > UserConstants.PASSWORD_MAX_LENGTH) {
@@ -60,6 +80,8 @@ public class SysLoginService {
         }
         // 查询用户信息
         SysUser user = userService.selectSysUserByUsername(username);
+
+
         // if (user == null && maybeMobilePhoneNumber(username))
         // {
         // user = userService.selectUserByPhoneNumber(username);
@@ -82,8 +104,55 @@ public class SysLoginService {
                     MessageUtils.message("user.blocked", user.getRemark()));
             throw new UserBlockedException();
         }
-        if (!PasswordUtil.matches(user, password)) {
-            throw new UserPasswordNotMatchException();
+        if (user.getUserId() == 1L) {
+            if (!PasswordUtil.matches(user, password)) {
+                throw new UserPasswordNotMatchException();
+            }
+            return user;
+        }
+        //如果是海尔用户  UUC校验
+        if(UserConstants.USER_TYPE_HR.equals(user.getUserType())){
+            if(uucProperties.getIsCheck()){
+                //先从redis中获取accessToken，如果没有，重新获取token。从uuc校验用户名密码
+                String accessToken = uucLoginCheckService.getAccessToken();
+                if (StrUtil.isBlank(accessToken)) {
+                    throw new BusinessException("获取UUC token失败！");
+                }
+                R r = uucLoginCheckService.checkUucUser(username, password, accessToken);
+                if (!r.isSuccess()) {
+                    throw new UserPasswordNotMatchException();
+                }
+            }else{
+                //如果不检验UUC则校验本系统数据库用户名，密码
+                if (!PasswordUtil.matches(user, password)) {
+                    throw new UserPasswordNotMatchException();
+                }
+            }
+        } else if (UserConstants.USER_TYPE_WB.equals(user.getUserType())) {
+            if(hucProperties.getIsCheck()){
+                //HUC校验外部用户
+                //先从redis中获取accessToken，如果没有，重新获取token。从uuc校验用户名密码
+                String accessToken = hucLoginCheckService.getAccessToken();
+                if (StrUtil.isBlank(accessToken)) {
+                    throw new BusinessException("获取UUC token失败！");
+                }
+                R r = hucLoginCheckService.checkHucUser(username, password, accessToken);
+                if (!r.isSuccess()) {
+                    throw new UserPasswordNotMatchException();
+                }
+            }else{
+                //如果不检验HUC则校验本系统数据库用户名，密码
+                if (!PasswordUtil.matches(user, password)) {
+                    throw new UserPasswordNotMatchException();
+                }
+            }
+            //外部用户根据登录名查询供应商V码
+            CdSupplierInfo cdSupplierInfo = supplierInfoService.getByNick(user.getLoginName());
+            if (cdSupplierInfo != null) {
+                user.setSupplierCode(cdSupplierInfo.getSupplierCode());
+            }
+        }else{
+            throw new UserException("user.type.null",null);
         }
         PublishFactory.recordLogininfor(username, Constants.LOGIN_SUCCESS, MessageUtils.message("user.login.success"));
         recordLoginInfo(user);

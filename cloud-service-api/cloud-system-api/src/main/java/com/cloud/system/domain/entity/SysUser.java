@@ -1,35 +1,47 @@
 package com.cloud.system.domain.entity;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
+import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
+import com.alibaba.excel.annotation.ExcelProperty;
+import com.cloud.common.core.domain.BaseEntity;
+import com.cloud.common.easyexcel.converter.SexConverter;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.cloud.common.annotation.Excel;
-import com.cloud.common.annotation.Excel.Type;
-import com.cloud.common.core.domain.BaseEntity;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 用户对象 sys_user
  *
  * @author cloud
  */
+@ApiModel(value = "用户类")
+@ExcelIgnoreUnannotated
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class SysUser extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /**
      * 用户ID
      */
-    @Excel(name = "用户序号", prompt = "用户编号")
+    @ExcelProperty(value = "用户序号")
+    @ApiModelProperty(value = "用户序号")
     private Long userId;
 
     /**
      * 部门ID
      */
-    @Excel(name = "部门编号", type = Type.IMPORT)
     private Long deptId;
 
     /**
@@ -40,31 +52,28 @@ public class SysUser extends BaseEntity {
     /**
      * 登录名称
      */
-    @Excel(name = "登录名称")
     private String loginName;
 
     /**
      * 用户名称
      */
-    @Excel(name = "用户名称")
+    @ExcelProperty(value = "用户名称")
     private String userName;
 
     /**
      * 用户邮箱
      */
-    @Excel(name = "用户邮箱")
     private String email;
 
     /**
      * 手机号码
      */
-    @Excel(name = "手机号码")
     private String phonenumber;
 
     /**
      * 用户性别
      */
-    @Excel(name = "用户性别", readConverterExp = "0=男,1=女,2=未知")
+    @ExcelProperty(value = "性别",converter = SexConverter.class)
     private String sex;
 
     /**
@@ -85,8 +94,12 @@ public class SysUser extends BaseEntity {
     /**
      * 帐号状态（0正常 1停用）
      */
-    @Excel(name = "帐号状态", readConverterExp = "0=正常,1=停用")
     private String status;
+
+    /**
+     * 用户类型（1、海尔用户 2、外部用户）
+     */
+    private String userType;
 
     /**
      * 删除标志（0代表存在 2代表删除）
@@ -96,28 +109,31 @@ public class SysUser extends BaseEntity {
     /**
      * 最后登陆IP
      */
-    @Excel(name = "最后登陆IP", type = Type.EXPORT)
     private String loginIp;
 
     /**
      * 最后登陆时间
      */
-    @Excel(name = "最后登陆时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss", type = Type.EXPORT)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date loginDate;
 
     /**
      * 部门对象
      */
-    @Excel(name = "部门名称", targetAttr = "deptName", type = Type.EXPORT)
+    @ApiModelProperty(hidden = true)
     private SysDept dept;
 
     private List<SysRole> roles;
 
     /**
-     * 角色组
+     * 角色Id组
      */
     private List<Long> roleIds;
+
+    /**
+     * 角色名称组
+     */
+    private List<String> roleKeys;
 
     /**
      * 岗位组
@@ -125,6 +141,16 @@ public class SysUser extends BaseEntity {
     private Long[] postIds;
 
     private Set<String> buttons;
+
+    /**
+     * 外部用户 供应商V码
+     */
+    private String supplierCode;
+
+    /**
+     * 法人公司
+     */
+    private String corporation;
 
     public Long getUserId() {
         return userId;
@@ -297,6 +323,30 @@ public class SysUser extends BaseEntity {
 
     public void setButtons(Set<String> buttons) {
         this.buttons = buttons;
+    }
+
+    public String getUserType() {
+        return userType;
+    }
+
+    public void setUserType(String userType) {
+        this.userType = userType;
+    }
+
+    public String getSupplierCode() {
+        return supplierCode;
+    }
+
+    public void setSupplierCode(String supplierCode) {
+        this.supplierCode = supplierCode;
+    }
+
+    public List<String> getRoleKeys() {
+        return roleKeys;
+    }
+
+    public void setRoleKeys(List<String> roleKeys) {
+        this.roleKeys = roleKeys;
     }
 
     @Override

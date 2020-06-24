@@ -1,5 +1,6 @@
 package com.cloud.system.feign.factory;
 
+import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.SysOperLog;
 import org.springframework.stereotype.Component;
 
@@ -14,10 +15,11 @@ import lombok.extern.slf4j.Slf4j;
 public class RemoteLogFallbackFactory implements FallbackFactory<RemoteLogService> {
     @Override
     public RemoteLogService create(Throwable throwable) {
-        log.error(throwable.getMessage());
+        log.error("RemoteLogService错误信息：{}",throwable.getMessage());
         return new RemoteLogService() {
             @Override
-            public void insertOperlog(SysOperLog operLog) {
+            public R insertOperlog(SysOperLog operLog) {
+                return R.error("前方拥挤，请稍等~");
             }
 
             @Override

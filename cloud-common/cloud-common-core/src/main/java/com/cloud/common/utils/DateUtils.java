@@ -1,11 +1,18 @@
 package com.cloud.common.utils;
 
+import com.cloud.common.exception.BusinessException;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.lang.management.ManagementFactory;
+import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import org.apache.commons.lang3.time.DateFormatUtils;
+import java.util.*;
 
 /**
  * 时间工具类
@@ -13,9 +20,13 @@ import org.apache.commons.lang3.time.DateFormatUtils;
  * @author cloud
  */
 public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
+    private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
+
     public static String YYYY = "yyyy";
 
     public static String YYYY_MM = "yyyy-MM";
+
+    public static String MM_dd = "MM/dd";
 
     public static String YYYY_MM_DD = "yyyy-MM-dd";
 
@@ -27,6 +38,8 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
             "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm", "yyyy-MM",
             "yyyy/MM/dd", "yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd HH:mm", "yyyy/MM",
             "yyyy.MM.dd", "yyyy.MM.dd HH:mm:ss", "yyyy.MM.dd HH:mm", "yyyy.MM"};
+
+    public static final long DAY = 24 * 60 * 60 * 1000L;
 
     /**
      * 获取当前Date型日期
@@ -131,5 +144,178 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         // 计算差多少秒//输出结果
         // long sec = diff % nd % nh % nm / ns;
         return day + "天" + hour + "小时" + min + "分钟";
+    }
+
+    /**
+     * 将String类型转换为Date，根据自定义模式
+     */
+    public static Date string2Date(String date, String pattern) {
+        DateFormat dataformat = new SimpleDateFormat(pattern);
+        dataformat.setLenient(false);
+        try {
+            return dataformat.parse(date);
+        } catch (ParseException e) {
+            logger.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    public static String dateFormat(Date date, String format) {
+        SimpleDateFormat sdf1 = new SimpleDateFormat(format);
+        sdf1.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));// 设置时区
+        return sdf1.format(date);
+    }
+
+    /**
+     * 获取当前时间的n天后时间
+     */
+    public static Timestamp getDaysTime(int date) {
+        Calendar now = Calendar.getInstance();
+        now.setTime(new Date());
+        now.add(Calendar.DAY_OF_MONTH, date);
+        DateFormat df = new SimpleDateFormat(YYYY_MM_DD_HH_MM_SS);
+        String nowTime = df.format(now.getTime());
+        Timestamp buydate = Timestamp.valueOf(nowTime);
+        return buydate;
+    }
+
+    /**
+     * 获取当前时间的n天后时间 YYYY_MM_DD
+     */
+    public static String getDaysTimeString(int date) {
+        Timestamp timestampDate = getDaysTime(date);
+        String dateString = new SimpleDateFormat(YYYY_MM_DD).format(timestampDate);
+        return dateString;
+    }
+
+    /**
+     * 时间转换, Date转换成 XMLGregorianCalendar
+     * @param date
+     * @return
+     * @throws Exception
+     */
+    public static XMLGregorianCalendar convertToXMLGregorianCalendar(Date date){
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.setTime(date);
+        XMLGregorianCalendar gc = null;
+        try{
+            gc = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new BusinessException("日期转换异常");
+        }
+
+        return gc;
+    }
+
+    /**
+     * 时间差值 天数
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static int dayDiff(Date date1, Date date2) {
+        long diff = date1.getTime() - date2.getTime();
+        return (int) (diff / DAY);
+    }
+
+    /**
+     * 时间差值 天数
+     * @param dateStr1
+     * @param dateStr2
+     * @param pattern  时间类型
+     * @return
+     */
+    public static int dayDiffSt(String dateStr1, String dateStr2,String pattern) {
+        Date date1 = string2Date(dateStr1,pattern);
+        Date date2 = string2Date(dateStr2,pattern);
+        long diff = date1.getTime() - date2.getTime();
+        return (int) (diff / DAY);
+    }
+
+    /**
+     * 根据year年的第week周，查询week周的起止时间
+     * @param year
+     * @param week
+     * @return startDate开始时间 endDate结束时间
+     */
+    public static Map<String,String> weekToDayFormate(int year, int week){
+        Map<String, String> map = new HashMap<>();
+        Calendar calendar = Calendar.getInstance();
+        // ①.设置该年份的开始日期：第一个月的第一天
+        calendar.set(year,0,1);
+        // ②.计算出第一周还剩几天：+1是因为1号是1天
+        int dayOfWeek = 7 - calendar.get(Calendar.DAY_OF_WEEK) + 1;
+        // ③.周数减去第一周再减去要得到的周
+        week = week - 2;
+        // ④.计算起止日期
+        calendar.add(Calendar.DAY_OF_YEAR,week * 7 + dayOfWeek);
+        map.put("startDate",new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime()));
+        calendar.add(Calendar.DAY_OF_YEAR, 6);
+        map.put("endDate",new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime()));
+        return map;
+    }
+
+    /**
+     * 获取n个月后时间
+     */
+    public static Timestamp getMonthTime(int month) {
+        Date dt = new Date();
+        Calendar now = Calendar.getInstance();
+        now.setTime(dt);
+        now.add(Calendar.MONTH, month);
+        Date threeMonthAgoDate = now.getTime();
+        DateFormat df = new SimpleDateFormat(YYYY_MM_DD_HH_MM_SS);
+        String nowTime = df.format(threeMonthAgoDate);
+        Timestamp buydate = Timestamp.valueOf(nowTime);
+        return buydate;
+    }
+
+    /**
+     * 返回指定天数位移后的日期
+     */
+    public static String dayOffset(String dateString, int offset,String paramFormat){
+        Date date = string2Date(dateString,paramFormat);
+        Date dateResult = dayOffset(date,offset);
+        SimpleDateFormat sdf1 = new SimpleDateFormat(paramFormat);
+        String dateResultString = sdf1.format(dateResult);
+        return dateResultString;
+    }
+
+
+    /**
+     * 返回指定天数位移后的日期
+     */
+    public static Date dayOffset(Date date, int offset) {
+
+        return offsetDate(date, Calendar.DATE, offset);
+    }
+
+    /**
+     * 返回指定日期相应位移后的日期
+     *
+     * @param date
+     *            参考日期
+     * @param field
+     *            位移单位，见 {@link Calendar}
+     * @param offset
+     *            位移数量，正数表示之后的时间，负数表示之前的时间
+     * @return 位移后的日期
+     */
+    public static Date offsetDate(Date date, int field, int offset) {
+        Calendar calendar = convert(date);
+        calendar.add(field, offset);
+        return calendar.getTime();
+    }
+
+    /**
+     * 获取 Calendar 类型时间
+     * @param date
+     * @return
+     */
+    private static Calendar convert(Date date) {
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        return calendar;
     }
 }

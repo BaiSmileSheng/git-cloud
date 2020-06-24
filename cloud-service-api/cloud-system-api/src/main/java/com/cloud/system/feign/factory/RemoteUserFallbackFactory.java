@@ -45,6 +45,17 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
             public Set<Long> selectUserIdsInDepts(String deptIds) {
                 return null;
             }
+
+            /**
+             * 根据供应商V码查询供应商信息
+             * @param supplierCode 供应商编号
+             * @return 用户信息
+             */
+            @Override
+            public R findUserBySupplierCode(String supplierCode) {
+                log.error("RemoteUserService.findUserBySupplierCode error:{}",throwable.getMessage());
+                return R.error("服务拥挤，请稍后再试！");
+            }
         };
     }
 }

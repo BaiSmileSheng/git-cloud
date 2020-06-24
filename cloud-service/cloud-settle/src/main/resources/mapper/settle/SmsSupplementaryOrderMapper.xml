@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.settle.mapper.SmsSupplementaryOrderMapper">
+
+    <resultMap type="SmsSupplementaryOrder" id="SmsSupplementaryOrderResult">
+        <result property="id" column="id"/>
+        <result property="stuffNo" column="stuff_no"/>
+        <result property="supplierCode" column="supplier_code"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="factoryCode" column="factory_code"/>
+        <result property="companyCode" column="company_code"/>
+        <result property="productOrderCode" column="product_order_code"/>
+        <result property="stuffStatus" column="stuff_status"/>
+        <result property="rawMaterialCode" column="raw_material_code"/>
+        <result property="rawMaterialName" column="raw_material_name"/>
+        <result property="stuffAmount" column="stuff_amount"/>
+        <result property="stuffPrice" column="stuff_price"/>
+        <result property="stuffUnit" column="stuff_unit"/>
+        <result property="submitDate" column="submit_date"/>
+        <result property="sapStoreage" column="sap_storeage"/>
+        <result property="sapResult" column="sap_result"/>
+        <result property="sapRemark" column="sap_remark"/>
+        <result property="postingNo" column="posting_no"/>
+        <result property="sapDate" column="sap_date"/>
+        <result property="settleNo" column="settle_no"/>
+        <result property="settleFee" column="settle_fee"/>
+        <result property="cashAmount" column="cash_amount"/>
+        <result property="rate" column="rate"/>
+        <result property="currency" column="currency"/>
+        <result property="purchaseGroupCode" column="purchase_group_code"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+
+    <sql id="selectSmsSupplementaryOrderVo">
+        select id,
+               stuff_no,
+               supplier_code,
+               supplier_name,
+               factory_code,
+               company_code,
+               product_order_code,
+               stuff_status,
+               raw_material_code,
+               raw_material_name,
+               stuff_amount,
+               stuff_price,
+               stuff_unit,
+               submit_date,
+               sap_storeage,
+               sap_result,
+               sap_remark,
+               posting_no,
+               sap_date,
+               settle_no,
+               settle_fee,
+               cash_amount,
+               uncash_amount,
+               currency,
+               rate,
+               purchase_group_code,
+               del_flag,
+               remark,
+               create_by,
+               create_time,
+               update_by,
+               update_time
+        from sms_supplementary_order
+    </sql>
+
+    <select id="selectByMonthAndStatus" resultMap="SmsSupplementaryOrderResult">
+        <include refid="selectSmsSupplementaryOrderVo"/>
+        <where>
+            <if test="month != null">
+                DATE_FORMAT(sap_date, '%Y%m') = #{month}
+            </if>
+            AND stuff_status in
+            <foreach collection="stuffStatus" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+            and del_flag='0'
+        </where>
+    </select>
+
+    <select id="selectMaterialByMonthAndStatus" resultType="java.lang.String">
+        select
+        DISTINCT raw_material_code
+        from sms_supplementary_order
+        <where>
+            <if test="month != null">
+                DATE_FORMAT(sap_date, '%Y%m') = #{month}
+            </if>
+            AND stuff_status in
+            <foreach collection="stuffStatus" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+            and del_flag='0'
+        </where>
+    </select>
+
+    <select id="materialCodeListByStatus" parameterType="java.lang.String" resultType="java.lang.String">
+        select DISTINCT product_order_code
+        from sms_supplementary_order
+        where stuff_status = #{status}
+    </select>
+</mapper>

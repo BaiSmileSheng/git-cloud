@@ -25,7 +25,25 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-okhttp</artifactId>
+        </dependency>
+        <!--seata分布式事务管理-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.seata</groupId>
+                    <artifactId>seata-spring-boot-starter</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-spring-boot-starter</artifactId>
+        </dependency>
         <!--web 模块 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -55,7 +73,12 @@
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
 
-
+        <!-- 结算模块 -->
+        <dependency>
+            <groupId>com.cloud</groupId>
+            <artifactId>cloud-settle-api</artifactId>
+            <version>${cloud.version}</version>
+        </dependency>
         <!-- 系统模块 -->
         <dependency>
             <groupId>com.cloud</groupId>
@@ -133,7 +156,55 @@
             <artifactId>gson</artifactId>
         </dependency>
 
-
+        <!--jco 直连SAP-->
+        <dependency>
+            <groupId>com.github.easonjim</groupId>
+            <artifactId>com.sap.conn.jco.sapjco3</artifactId>
+        </dependency>
+        <!--华为云-->
+        <dependency>
+            <groupId>com.huaweicloud</groupId>
+            <artifactId>esdk-obs-java</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.squareup.okio</groupId>
+                    <artifactId>okio</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- axis 1.4 jar start -->
+        <dependency>
+            <groupId>org.apache.axis</groupId>
+            <artifactId>axis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-discovery</groupId>
+            <artifactId>commons-discovery</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis</groupId>
+            <artifactId>axis-jaxrpc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis</groupId>
+            <artifactId>axis-saaj</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>wsdl4j</groupId>
+            <artifactId>wsdl4j</artifactId>
+        </dependency>
+        <!-- axis 1.4 jar end -->
+        <!--jco 直连SAP-->
+        <dependency>
+            <groupId>com.github.easonjim</groupId>
+            <artifactId>com.sap.conn.jco.sapjco3</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -151,6 +222,35 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--   docker       -->
+            <!--            <plugin>-->
+            <!--                <groupId>com.spotify</groupId>-->
+            <!--                <artifactId>docker-maven-plugin</artifactId>-->
+            <!--                <version>1.1.0</version>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <id>build-image</id>-->
+            <!--                        <phase>package</phase>-->
+            <!--                        <goals>-->
+            <!--                            <goal>build</goal>-->
+            <!--                        </goals>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--                <configuration>-->
+            <!--                    <imageName>mva/${project.artifactId}:${project.version}</imageName>-->
+            <!--                    <dockerHost>http://10.133.28.55:2375</dockerHost>-->
+            <!--                    <baseImage>java:8</baseImage>-->
+            <!--                    <entryPoint>["java", "-jar","/${project.build.finalName}.jar"]-->
+            <!--                    </entryPoint>-->
+            <!--                    <resources>-->
+            <!--                        <resource>-->
+            <!--                            <targetPath>/</targetPath>-->
+            <!--                            <directory>${project.build.directory}</directory>-->
+            <!--                            <include>${project.build.finalName}.jar</include>-->
+            <!--                        </resource>-->
+            <!--                    </resources>-->
+            <!--                </configuration>-->
+            <!--            </plugin>-->
         </plugins>
     </build>
 </project>

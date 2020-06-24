@@ -18,7 +18,7 @@ import tk.mybatis.spring.annotation.MapperScan;
 @MapperScan("com.cloud.*.mapper")
 public class CloudSystemApplication {
     public static void main(String[] args) {
-        // System.setProperty("spring.devtools.restart.enabled", "false");
+        //   System.setProperty("spring.devtools.restart.enabled", "false");
         SpringApplication.run(CloudSystemApplication.class, args);
     }
 }

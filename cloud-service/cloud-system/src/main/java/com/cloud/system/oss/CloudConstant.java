@@ -11,17 +11,13 @@ public class CloudConstant {
      */
     public enum CloudService {
         /**
-         * 七牛云
+         * 华为云
          */
-        QINIU(1),
+        HUAWEIYUN(1),
         /**
          * 阿里云
          */
-        ALIYUN(2),
-        /**
-         * 腾讯云
-         */
-        QCLOUD(3);
+        ALIYUN(2);
         private int value;
 
         CloudService(int value) {

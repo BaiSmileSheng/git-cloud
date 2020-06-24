@@ -18,11 +18,8 @@ spring:
     time-zone: GMT+8
   cloud:
     nacos:
-      #      config:
-      #        server-addr: 127.0.0.1:8848
-      #        file-extension: yml
       discovery:
-        server-addr: 10.133.1.8:8848
+        server-addr: nacos.khaos.cosmoplat.com:80
   profiles:
     active: dev
   main:
@@ -31,5 +28,10 @@ spring:
 feign:
   hystrix:
     enabled: true
+  httpclient:
+    max-connections: 200
+    max-connections-per-route: 50
+    enabled: false
+  okhttp:
+    enabled: true
 
- 

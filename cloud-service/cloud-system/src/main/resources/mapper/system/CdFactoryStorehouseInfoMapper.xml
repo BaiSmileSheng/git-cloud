@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.system.mapper.CdFactoryStorehouseInfoMapper">
+
+    <resultMap type="CdFactoryStorehouseInfo" id="CdFactoryStorehouseInfoResult">
+        <result property="id" column="id"/>
+        <result property="productFactoryCode" column="product_factory_code"/>
+        <result property="productFactoryDesc" column="product_factory_desc"/>
+        <result property="customerCode" column="customer_code"/>
+        <result property="customerDesc" column="customer_desc"/>
+        <result property="storehouseFrom" column="storehouse_from"/>
+        <result property="storehouseTo" column="storehouse_to"/>
+        <result property="leadTime" column="lead_time"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+    </resultMap>
+
+    <sql id="selectCdFactoryStorehouseInfoVo">
+        select id,
+               product_factory_code,
+               product_factory_desc,
+               customer_code,
+               customer_desc,
+               storehouse_from,
+               storehouse_to,
+               lead_time,
+               del_flag,
+               remark,
+               create_time,
+               create_by,
+               update_time,
+               update_by
+        from cd_factory_storehouse_info
+    </sql>
+    <select id="batchSelectListByCondition" parameterType="java.util.List" resultMap="CdFactoryStorehouseInfoResult">
+        <include refid="selectCdFactoryStorehouseInfoVo"/>
+        WHERE
+        <foreach collection="list" item="item"  separator="or">
+            (product_factory_code = #{item.productFactoryCode} and customer_code = #{item.customerCode} and del_flag = 0)
+        </foreach>
+    </select>
+    <select id="selectStorehouseToMap" parameterType="list" resultType="java.util.HashMap">
+        SELECT
+        CONCAT( product_factory_code, customer_code ) as keyValue,
+        GROUP_CONCAT( storehouse_to ) as storehouseTo
+        FROM
+        cd_factory_storehouse_info
+        where del_flag='0'
+        and product_factory_code in
+        <foreach collection="list" index="index" item="dict" open="(" close=")" separator=",">
+            #{dict.productFactoryCode}
+        </foreach>
+        and customer_code in
+        <foreach collection="list" index="index" item="dict" open="(" close=")" separator=",">
+            #{dict.customerCode}
+        </foreach>
+        GROUP BY
+        product_factory_code,
+        customer_code
+    </select>
+
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<wsdl:definitions
+     name="GeneralMDMDataRelease"
+     targetNamespace="http://xmlns.oracle.com/Interface/GeneralMDMDataRelease/GeneralMDMDataRelease"
+     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+     xmlns:client="http://xmlns.oracle.com/Interface/GeneralMDMDataRelease/GeneralMDMDataRelease"
+     xmlns:plnk="http://schemas.xmlsoap.org/ws/2003/05/partner-link/"
+     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    >
+    <wsdl:documentation>
+        <abstractWSDL>http://bpel.mdm.haier.com:7778/soa-infra/services/interface/GeneralMDMDataRelease!1.0/GeneralMDMDataRelease.wsdl</abstractWSDL>
+    </wsdl:documentation>
+    <plnk:partnerLinkType name="GeneralMDMDataRelease">
+        <plnk:role name="GeneralMDMDataReleaseProvider">
+            <plnk:portType name="client:GeneralMDMDataRelease"/>
+        </plnk:role>
+    </plnk:partnerLinkType>
+    <wsdl:types>
+        <schema xmlns="http://www.w3.org/2001/XMLSchema">
+            <import namespace="http://xmlns.oracle.com/Interface/GeneralMDMDataRelease/GeneralMDMDataRelease"
+                 schemaLocation="http://bpel.mdm.haier.com:7778/soa-infra/services/interface/GeneralMDMDataRelease/generalmdmdatarelease_client_ep?XSD=xsd/GeneralMDMDataRelease.xsd"/>
+        </schema>
+    </wsdl:types>
+    <wsdl:message name="GeneralMDMDataReleaseRequestMessage">
+        <wsdl:part name="payload" element="client:process"/>
+    </wsdl:message>
+    <wsdl:message name="GeneralMDMDataReleaseResponseMessage">
+        <wsdl:part name="payload" element="client:rowRisk"/>
+    </wsdl:message>
+    <wsdl:portType name="GeneralMDMDataRelease">
+        <wsdl:operation name="process">
+            <wsdl:input message="client:GeneralMDMDataReleaseRequestMessage"/>
+            <wsdl:output message="client:GeneralMDMDataReleaseResponseMessage"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="GeneralMDMDataReleaseBinding" type="client:GeneralMDMDataRelease">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="process">
+            <soap:operation style="document" soapAction="process"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="generalmdmdatarelease_client_ep">
+        <wsdl:port name="GeneralMDMDataRelease_pt" binding="client:GeneralMDMDataReleaseBinding">
+            <soap:address location="http://bpel.mdm.haier.com:7778/soa-infra/services/interface/GeneralMDMDataRelease/generalmdmdatarelease_client_ep"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

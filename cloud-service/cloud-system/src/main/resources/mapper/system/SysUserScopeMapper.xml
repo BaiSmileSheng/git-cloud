@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.system.mapper.SysUserScopeMapper">
+
+    <resultMap type="SysUserScope" id="SysUserScopeResult">
+                    <result property="id" column="id"/>
+                    <result property="userId" column="user_id"/>
+                    <result property="dataScopeId" column="data_scope_id"/>
+                    </resultMap>
+
+    <sql id="selectSysUserScopeVo">
+        select id, user_id, data_scope_id from sys_user_scope
+    </sql>
+    <select id="selectDataScopeIdByUserIdAndType" resultType="java.lang.String">
+        select group_concat(us.data_scope_id) from sys_user_scope us
+        left join sys_data_scope ds on us.data_scope_id=ds.id
+        where ds.status=0 and ds.del_flag=0 and  us.user_id=#{userId} and ds.type=#{type} GROUP BY us.user_id
+    </select>
+    <delete id="deleteByUserId">
+        delete from sys_user_scope where user_id=#{userId}
+    </delete>
+
+
+</mapper>

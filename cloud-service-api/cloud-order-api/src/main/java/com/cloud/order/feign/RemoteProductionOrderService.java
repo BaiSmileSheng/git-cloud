@@ -1,0 +1,40 @@
+package com.cloud.order.feign;
+
+import com.cloud.common.constant.ServiceNameConstants;
+import com.cloud.common.core.domain.R;
+import com.cloud.order.domain.entity.OmsProductionOrder;
+import com.cloud.order.feign.factory.RemoteProductionOrderFallbackFactory;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
+
+/**
+ * 生产管理 Feign服务层
+ *
+ * @author cs
+ * @date 2020-05-20
+ */
+@FeignClient(name = ServiceNameConstants.ORDER_SERVICE, fallbackFactory = RemoteProductionOrderFallbackFactory.class)
+public interface RemoteProductionOrderService {
+    /**
+     * 根据生产订单号查询排产订单信息
+     * @param prodctOrderCode
+     * @return OmsProductionOrder
+     */
+    @GetMapping("productionOrder/selectByProdctOrderCode")
+    R selectByProdctOrderCode(@RequestParam("prodctOrderCode") String prodctOrderCode);
+
+    /**
+     * 查询排产订单 列表
+     * @param productEndDateEnd  基本结束时间 结束值
+     * @param actualEndDateStart 实际结束时间 起始值
+     * @param actualEndDateEnd 实际结束时间 结束值
+     * @return 排产订单 列表
+     */
+    @GetMapping("productionOrder/listForDelays")
+    List<OmsProductionOrder> listForDelays(@RequestParam("productEndDateEnd") String productEndDateEnd,
+                                           @RequestParam("actualEndDateStart") String actualEndDateStart,
+                                           @RequestParam("actualEndDateEnd") String actualEndDateEnd);
+}

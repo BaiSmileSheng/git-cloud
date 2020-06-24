@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.system.mapper.CdMaterialPriceInfoMapper">
+
+    <resultMap type="CdMaterialPriceInfo" id="CdMaterialPriceInfoResult">
+        <result property="id" column="id"/>
+        <result property="materialCode" column="material_code"/>
+        <result property="materialDesc" column="material_desc"/>
+        <result property="processPrice" column="process_price"/>
+        <result property="memberCode" column="member_code"/>
+        <result property="memberName" column="member_name"/>
+        <result property="purchasingGroup" column="purchasing_group"/>
+        <result property="taxCode" column="tax_code"/>
+        <result property="netWorth" column="net_worth"/>
+        <result property="kbetr" column="kbetr"/>
+        <result property="currency" column="currency"/>
+        <result property="priceUnit" column="price_unit"/>
+        <result property="unit" column="unit"/>
+        <result property="agencyFee" column="agency_fee"/>
+        <result property="beginDate" column="begin_date"/>
+        <result property="endDate" column="end_date"/>
+        <result property="sapCreatedDate" column="sap_created_date"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="mapKey" column="mapKey"/>
+    </resultMap>
+
+    <sql id="selectCdMaterialPriceInfoVo">
+        select id,
+               material_code,
+               material_desc,
+               process_price,
+               member_code,
+               member_name,
+               purchasing_group,
+               tax_code,
+               net_worth,
+               kbetr,
+               currency,
+               price_unit,
+               unit,
+               agency_fee,
+               begin_date,
+               end_date,
+               sap_created_date,
+               remark,
+               del_flag,
+               create_by,
+               create_time,
+               update_by,
+               update_time
+        from cd_material_price_info
+    </sql>
+
+    <select id="selectPriceByInMaterialCodeAndDate" resultMap="CdMaterialPriceInfoResult">
+        select id,
+        material_code,
+        material_desc,
+        process_price,
+        member_code,
+        member_name,
+        purchasing_group,
+        tax_code,
+        net_worth,
+        kbetr,
+        currency,
+        price_unit,
+        unit,
+        agency_fee,
+        begin_date,
+        end_date,
+        sap_created_date,
+        remark,
+        del_flag,
+        create_by,
+        create_time,
+        update_by,
+        update_time,CONCAT(material_code,purchasing_organization) as mapKey
+        from cd_material_price_info
+        where
+        del_flag='0' and
+        material_code in
+        <foreach collection="materialCodes" item="materialCode" open="(" separator="," close=")">
+            #{materialCode}
+        </foreach>
+        and
+        <![CDATA[
+        begin_date <= #{beginDate} and end_date>=#{endDate}
+        ]]>
+    </select>
+    <delete id="deleteAll">
+        DELETE FROM cd_material_price_info;
+    </delete>
+
+</mapper>

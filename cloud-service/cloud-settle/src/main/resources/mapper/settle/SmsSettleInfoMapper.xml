@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.settle.mapper.SmsSettleInfoMapper">
+
+    <sql id="Base_Column_List">
+        id,
+            line_no,
+            supplier_code,
+            supplier_name,
+            factory_code,
+            product_order_code,
+            order_status,
+            company_code,
+            product_material_code,
+            product_material_name,
+            bom_version,
+            order_amount,
+            confirm_amont,
+            outsource_way,
+            machining_price,
+            settle_price,
+            settle_no,
+            del_flag,
+            remark,
+            create_by,
+            create_time,
+            update_by,
+            update_time,
+            product_start_date,
+            product_end_date,
+            actual_end_date
+    </sql>
+    <resultMap type="SmsSettleInfo" id="SmsSettleInfoResult">
+        <result property="id" column="id"/>
+        <result property="lineNo" column="line_no"/>
+        <result property="supplierCode" column="supplier_code"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="factoryCode" column="factory_code"/>
+        <result property="productOrderCode" column="product_order_code"/>
+        <result property="orderStatus" column="order_status"/>
+        <result property="companyCode" column="company_code"/>
+        <result property="productMaterialCode" column="product_material_code"/>
+        <result property="productMaterialName" column="product_material_name"/>
+        <result property="bomVersion" column="bom_version"/>
+        <result property="orderAmount" column="order_amount"/>
+        <result property="confirmAmont" column="confirm_amont"/>
+        <result property="outsourceWay" column="outsource_way"/>
+        <result property="machiningPrice" column="machining_price"/>
+        <result property="settlePrice" column="settle_price"/>
+        <result property="settleNo" column="settle_no"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="productStartDate" column="product_start_date"/>
+        <result property="productEndDate" column="product_end_date"/>
+        <result property="actualEndDate" column="actual_end_date"/>
+    </resultMap>
+
+    <sql id="selectSmsSettleInfoVo">
+        select id,
+               line_no,
+               supplier_code,
+               supplier_name,
+               factory_code,
+               product_order_code,
+               order_status,
+               company_code,
+               product_material_code,
+               product_material_name,
+               bom_version,
+               order_amount,
+               confirm_amont,
+               outsource_way,
+               machining_price,
+               settle_price,
+               settle_no,
+               del_flag,
+               remark,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               product_start_date,
+               product_end_date,
+               actual_end_date
+        from sms_settle_info
+    </sql>
+    <select id="selectForMonthSettle" resultMap="SmsSettleInfoResult">
+        <include refid="selectSmsSettleInfoVo"/>
+        WHERE DATE_FORMAT(product_start_date, '%Y%m') = #{month}
+          AND order_status = #{orderStatus}
+        and del_flag='0'
+    </select>
+
+    <update id="updateBySupplierCodeAndCompanyCodeAndOrderStatusAndMonth">
+        update sms_settle_info
+        <set>
+            <if test="updated.id != null">
+                id = #{updated.id},
+            </if>
+            <if test="updated.lineNo != null and updated.lineNo != ''">
+                line_no = #{updated.lineNo},
+            </if>
+            <if test="updated.supplierCode != null and updated.supplierCode != ''">
+                supplier_code = #{updated.supplierCode},
+            </if>
+            <if test="updated.supplierName != null and updated.supplierName != ''">
+                supplier_name = #{updated.supplierName},
+            </if>
+            <if test="updated.factoryCode != null and updated.factoryCode != ''">
+                factory_code = #{updated.factoryCode},
+            </if>
+            <if test="updated.productOrderCode != null and updated.productOrderCode != ''">
+                product_order_code = #{updated.productOrderCode},
+            </if>
+            <if test="updated.orderStatus != null and updated.orderStatus != ''">
+                order_status = #{updated.orderStatus},
+            </if>
+            <if test="updated.companyCode != null and updated.companyCode != ''">
+                company_code = #{updated.companyCode},
+            </if>
+            <if test="updated.productMaterialCode != null and updated.productMaterialCode != ''">
+                product_material_code = #{updated.productMaterialCode},
+            </if>
+            <if test="updated.productMaterialName != null and updated.productMaterialName != ''">
+                product_material_name = #{updated.productMaterialName},
+            </if>
+            <if test="updated.bomVersion != null and updated.bomVersion != ''">
+                bom_version = #{updated.bomVersion},
+            </if>
+            <if test="updated.orderAmount != null">
+                order_amount = #{updated.orderAmount},
+            </if>
+            <if test="updated.confirmAmont != null">
+                confirm_amont = #{updated.confirmAmont},
+            </if>
+            <if test="updated.outsourceWay != null and updated.outsourceWay != ''">
+                outsource_way = #{updated.outsourceWay},
+            </if>
+            <if test="updated.machiningPrice != null">
+                machining_price = #{updated.machiningPrice},
+            </if>
+            <if test="updated.settlePrice != null">
+                settle_price = #{updated.settlePrice},
+            </if>
+            <if test="updated.settleNo != null and updated.settleNo != ''">
+                settle_no = #{updated.settleNo},
+            </if>
+            <if test="updated.delFlag != null and updated.delFlag != ''">
+                del_flag = #{updated.delFlag},
+            </if>
+            <if test="updated.remark != null and updated.remark != ''">
+                remark = #{updated.remark},
+            </if>
+            <if test="updated.createBy != null and updated.createBy != ''">
+                create_by = #{updated.createBy},
+            </if>
+            <if test="updated.createTime != null">
+                create_time = #{updated.createTime},
+            </if>
+            <if test="updated.updateBy != null and updated.updateBy != ''">
+                update_by = #{updated.updateBy},
+            </if>
+            <if test="updated.updateTime != null">
+                update_time = #{updated.updateTime},
+            </if>
+            <if test="updated.productStartDate != null">
+                product_start_date = #{updated.productStartDate},
+            </if>
+            <if test="updated.productEndDate != null">
+                product_end_date = #{updated.productEndDate},
+            </if>
+            <if test="updated.actualEndDate != null">
+                actual_end_date = #{updated.actualEndDate},
+            </if>
+        </set>
+        <where>
+            <if test="supplierCode != null and supplierCode != ''">
+                and supplier_code=#{supplierCode}
+            </if>
+            <if test="companyCode != null and companyCode != ''">
+                and company_code=#{companyCode}
+            </if>
+            <if test="orderStatus != null and orderStatus != ''">
+                and order_status=#{orderStatus}
+            </if>
+            <if test="month != null and month != ''">
+                and DATE_FORMAT( product_start_date, '%Y%m' )=#{month}
+            </if>
+        </where>
+    </update>
+
+
+</mapper>

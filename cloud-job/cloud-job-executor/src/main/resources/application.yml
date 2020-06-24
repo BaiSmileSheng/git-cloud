@@ -1,0 +1,67 @@
+server:
+  port: 8082
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: nacos.khaos.cosmoplat.com:80
+  application:
+    name: cloud-job-executor
+  main:
+    allow-bean-definition-overriding: true
+  profiles:
+    active: dev
+
+  # log config
+logging:
+  config: classpath:logback-spring.xml
+
+feign:
+  hystrix:
+    enabled: true
+  httpclient:
+    max-connections: 200
+    max-connections-per-route: 50
+    enabled: false
+  okhttp:
+    enabled: true
+
+ribbon:
+  OkToRetryOnAllOperations: false #对所有操作请求都进行重试,默认false
+  ReadTimeout: 300000   #负载均衡超时时间，默认值5000
+  ConnectTimeout: 3000 #ribbon请求连接的超时时间，默认值2000
+  MaxAutoRetries: 0     #对当前实例的重试次数，默认0
+  MaxAutoRetriesNextServer: 1 #对切换实例的重试次数，默认1
+
+hystrix:
+  command:
+    default:  #default全局有效，service id指定应用有效
+      execution:
+        timeout:
+          enabled: true
+        isolation:
+          thread:
+            timeoutInMilliseconds: 200000 #断路器超时时间，默认1000ms
+    RemoteMaterialService#saveMaterialInfo():
+      execution:
+        timeout:
+          enabled: true
+        isolation:
+          thread:
+            timeoutInMilliseconds: 600000 #断路器超时时间，默认1000ms
+    RemoteSapSystemInterfaceService#sycBomInfo():
+      sycBomInfo:
+        execution:
+          timeout:
+            enabled: true
+          isolation:
+            thread:
+              timeoutInMilliseconds: 10000000 #断路器超时时间，默认1000ms
+    RemoteProductStockService#timeSycProductStock():
+      sycBomInfo:
+        execution:
+          timeout:
+            enabled: true
+          isolation:
+            thread:
+              timeoutInMilliseconds: 10000000 #断路器超时时间，默认1000ms

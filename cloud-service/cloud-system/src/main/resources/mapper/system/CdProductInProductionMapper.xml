@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.system.mapper.CdProductInProductionMapper">
+
+    <resultMap type="CdProductInProduction" id="CdProductInProductionResult">
+        <result property="id" column="id"/>
+        <result property="productMaterialCode" column="product_material_code"/>
+        <result property="productMaterialDesc" column="product_material_desc"/>
+        <result property="productFactoryCode" column="product_factory_code"/>
+        <result property="productFactoryDesc" column="product_factory_desc"/>
+        <result property="inProductionVersion" column="in_production_version"/>
+        <result property="inProductionNum" column="in_production_num"/>
+        <result property="unit" column="unit"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+    </resultMap>
+
+    <sql id="selectCdProductInProductionVo">
+        select id,
+               product_material_code,
+               product_material_desc,
+               product_factory_code,
+               product_factory_desc,
+               in_production_version,
+               in_production_num,
+               unit,
+               del_flag,
+               remark,
+               create_time,
+               create_by,
+               update_time,
+               update_by
+        from cd_product_in_production
+    </sql>
+
+    <delete id="deleteAll">
+        delete from cd_product_in_production;
+    </delete>
+
+</mapper>
