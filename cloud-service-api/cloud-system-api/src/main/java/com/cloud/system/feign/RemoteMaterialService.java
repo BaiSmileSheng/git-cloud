@@ -1,7 +1,9 @@
 package com.cloud.system.feign;
 
+import cn.hutool.core.lang.Dict;
 import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.common.core.domain.R;
+import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.feign.factory.RemoteMaterialFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @Description:物料数据
@@ -48,5 +53,13 @@ public interface RemoteMaterialService {
      */
     @PostMapping("material/selectInfoByInMaterialCodeAndMaterialType")
     R  selectInfoByInMaterialCodeAndMaterialType(@RequestBody List<String> materialCodes,@RequestParam(value = "materialType") String materialType);
-
+    /**
+     * Description: 根据成品专用号、生产工厂、物料类型查询
+     * Param: [list]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/18
+     */
+    @PostMapping("material/selectListByMaterialList")
+    R selectListByMaterialList(@RequestBody List<Dict> list);
 }
