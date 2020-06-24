@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
  * @author cs
  * @date 2020-06-22
  */
-public interface IOms2weeksDemandOrderEditService extends BaseService<Oms2weeksDemandOrderEdit> {
+public interface IOms2weeksDemandOrderEditImportService extends BaseService<Oms2weeksDemandOrderEdit> {
     /**
      * T+1、T+2草稿计划导入
      *
