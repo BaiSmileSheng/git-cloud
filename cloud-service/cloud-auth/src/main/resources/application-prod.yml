@@ -18,14 +18,14 @@ spring:
   cloud:
     nacos:
       discovery:
-        namespace: orw-test
+        namespace: orw-prod
 uuc:
-  apiUrl: http://uuctest.cosmoplat.com
-  clientId: ZKDDPS
-  clientSecret: 5b638080ef2c95fc8efec2599f7afa86
+  apiUrl: https://uuc.cosmoplat.com
+  clientId: ORW
+  clientSecret: 0a48727bd0c366b7c74af9bcf55469b6
   isCheck: false
 huc:
-  apiUrl: https://tuser.haier.net:8182
-  appKey: ZKDDPS
-  secret: 131665df773d7b7b9b816fb46d7569ec
-  isCheck: false
+  apiUrl: https://user.haier.net
+  appKey: ORW
+  secret: 42ce45fd59d236d94cc492d0fee95910
+  isCheck: true
