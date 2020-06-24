@@ -11,7 +11,6 @@ import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.order.domain.entity.OmsInternalOrderRes;
-import com.cloud.order.enums.InternalOrderResEnum;
 import com.cloud.order.mapper.OmsInternalOrderResMapper;
 import com.cloud.order.service.IOmsInternalOrderResService;
 import com.cloud.order.service.IOrderFromSap800InterfaceService;
@@ -22,8 +21,6 @@ import com.cloud.system.feign.RemoteFactoryInfoService;
 import com.cloud.system.feign.RemoteMaterialService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.seata.spring.annotation.GlobalTransactional;
-import com.fasterxml.jackson.core.type.TypeReference;
-import io.seata.spring.annotation.GlobalTransactional;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import tk.mybatis.mapper.entity.Example;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -99,10 +93,11 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
         List<Dict> maps = list.stream().map(s -> new Dict().set("productFactoryCode",s.getProductFactoryCode())
                 .set("productMaterialCode",s.getProductMaterialCode())).distinct().collect(Collectors.toList());
         //获取bom版本
-        Map<String, Map<String, String>> bomMap = remoteBomService.selectVersionMap(maps);
-        if (MapUtil.isEmpty(bomMap)) {
+        R rBomMap = remoteBomService.selectVersionMap(maps);
+        if (!rBomMap.isSuccess()) {
             return R.error("获取bom版本失败！");
         }
+        Map<String, Map<String, String>> bomMap=rBomMap.getCollectData(new TypeReference<Map<String, Map<String, String>>>() {});
         list.forEach(internalOrderRes -> {
             String productFactoryCode = internalOrderRes.getProductFactoryCode();
             String key = StrUtil.concat(true, internalOrderRes.getProductMaterialCode(), productFactoryCode);
@@ -240,11 +235,12 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
         List<Dict> maps = internalOrderResList.stream().map(s -> new Dict().set("productFactoryCode",s.getProductFactoryCode())
                 .set("productMaterialCode",s.getProductMaterialCode())).distinct().collect(Collectors.toList());
         //获取bom版本
-        Map<String, Map<String, String>> bomMap = remoteBomService.selectVersionMap(maps);
-        if (MapUtil.isEmpty(bomMap)) {
-            logger.error("获取bom版本失败 req:{},res:{}",maps,JSONObject.toJSON(bomMap));
+        R rbomMap = remoteBomService.selectVersionMap(maps);
+        if (!rbomMap.isSuccess()) {
+            logger.error("获取bom版本失败 req:{},res:{}",maps,JSONObject.toJSON(rbomMap));
             throw new BusinessException("获取bom版本失败！");
         }
+        Map<String, Map<String, String>> bomMap =rbomMap.getCollectData(new TypeReference<Map<String, Map<String, String>>>() {});
         return bomMap;
     }
 }

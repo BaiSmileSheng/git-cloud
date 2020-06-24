@@ -22,7 +22,8 @@ public class Remote2weeksDemandOrderEditFallbackFactory implements FallbackFacto
              */
             @Override
             public R queryPlanOrderCodeFromSap601() {
-                return null;
+                log.error("Remote2weeksDemandOrderEditService.queryPlanOrderCodeFromSap601熔断错误信息：{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
         };
     }

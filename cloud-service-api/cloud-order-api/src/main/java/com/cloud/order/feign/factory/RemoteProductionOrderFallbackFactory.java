@@ -37,7 +37,7 @@ public class RemoteProductionOrderFallbackFactory implements FallbackFactory<Rem
             @Override
             public R listForDelays(String productEndDateEnd, String actualEndDateStart, String actualEndDateEnd) {
                 log.error("RemoteProductionOrderService.listForDelays(生产订单)错误信息：{}",throwable.getMessage());
-                return null;
+                return R.error("服务拥挤请稍后再试");
             }
 
 

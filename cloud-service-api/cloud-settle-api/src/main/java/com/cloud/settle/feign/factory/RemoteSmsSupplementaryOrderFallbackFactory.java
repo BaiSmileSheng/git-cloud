@@ -80,7 +80,7 @@ public class RemoteSmsSupplementaryOrderFallbackFactory implements FallbackFacto
             @Override
             public R materialCodeListByStatus(String status) {
                 log.error("RemoteSmsSupplementaryOrderService.materialCodeListByStatus错误：{}",throwable.getMessage());
-                return null;
+                return R.error("服务拥挤请稍后再试");
             }
             /**
              * 小微主审批通过传SAPY61
