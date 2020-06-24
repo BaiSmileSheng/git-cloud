@@ -2,6 +2,9 @@ package com.cloud.system.mapper;
 
 import com.cloud.system.domain.entity.CdProductPassage;
 import com.cloud.common.core.dao.BaseMapper;
+
+import java.util.List;
+
 /**
  * 成品库存在途明细 Mapper接口
  *
@@ -14,4 +17,9 @@ public interface CdProductPassageMapper extends BaseMapper<CdProductPassage>{
      * @return
      */
     int deleteAll();
+    /**
+     * 根据生产工厂、成品专用号、库位查询在途
+     * @return list
+     */
+    List<CdProductPassage> selectByList(List<CdProductPassage> list);
 }

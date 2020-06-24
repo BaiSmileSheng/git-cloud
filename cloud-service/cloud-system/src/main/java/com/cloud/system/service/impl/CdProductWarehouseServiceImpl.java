@@ -9,6 +9,8 @@ import com.cloud.system.service.ICdProductWarehouseService;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * 成品库存在库明细 Service业务层处理
  *
@@ -28,5 +30,10 @@ public class CdProductWarehouseServiceImpl extends BaseServiceImpl<CdProductWare
     public R deleteAll() {
         cdProductWarehouseMapper.deleteAll();
         return R.ok();
+    }
+
+    @Override
+    public R selectByList(List<CdProductWarehouse> list) {
+        return R.data(cdProductWarehouseMapper.selectByList(list));
     }
 }

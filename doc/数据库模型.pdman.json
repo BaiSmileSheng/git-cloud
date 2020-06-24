@@ -2527,15 +2527,21 @@
             },
             {
               "name": "order_num",
-              "type": "DefaultString",
+              "type": "Money",
               "remark": "",
               "chnname": "订单数量"
             },
             {
               "name": "delivery_num",
-              "type": "DefaultString",
+              "type": "Money",
               "remark": "",
               "chnname": "已交货数量"
+            },
+            {
+              "name": "sap_del_flag",
+              "type": "Char",
+              "remark": "",
+              "chnname": "已删除标识"
             },
             {
               "name": "delivery_flag",
@@ -2832,6 +2838,14 @@
               "type": "Char",
               "remark": "0：初始，1：已调整",
               "chnname": "状态"
+            },
+            {
+              "name": "audit_status",
+              "type": "DefaultString",
+              "remark": "0：无需审核，1：审核中，2：审核完成",
+              "chnname": "审核状态",
+              "notNull": false,
+              "defaultValue": "''"
             },
             {
               "name": "data_source",
@@ -3255,6 +3269,12 @@
               "notNull": true
             },
             {
+              "name": "unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "单位"
+            },
+            {
               "name": "version",
               "type": "DefaultString",
               "remark": "年度-周数",
@@ -3494,6 +3514,12 @@
               "remark": "",
               "chnname": "订单数量",
               "notNull": true
+            },
+            {
+              "name": "unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "单位"
             },
             {
               "name": "version",
@@ -3742,6 +3768,12 @@
               "chnname": "订单数量",
               "defaultValue": "0",
               "notNull": true
+            },
+            {
+              "name": "unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "单位"
             },
             {
               "name": "version",
@@ -4018,6 +4050,12 @@
               "chnname": "订单数量",
               "defaultValue": "0",
               "notNull": true
+            },
+            {
+              "name": "unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "单位"
             },
             {
               "name": "version",
@@ -4357,6 +4395,13 @@
               "notNull": true
             },
             {
+              "name": "product_order_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生产订单号",
+              "defaultValue": "''"
+            },
+            {
               "name": "order_class",
               "type": "DefaultString",
               "remark": "1：正常，2：追加，3：储备，4：新品，5：返修",
@@ -4553,13 +4598,6 @@
               "defaultValue": "''"
             },
             {
-              "name": "product_order_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "生产订单号",
-              "defaultValue": "''"
-            },
-            {
               "name": "csd_flag",
               "type": "Char",
               "remark": "0：否，1：是",
@@ -4648,7 +4686,7 @@
           "indexs": [
             {
               "name": "idx_join_index",
-              "isUnique": true,
+              "isUnique": false,
               "fields": [
                 "order_type",
                 "product_material_code",
@@ -4727,6 +4765,12 @@
               "notNull": true
             },
             {
+              "name": "product_factory_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生产工厂"
+            },
+            {
               "name": "material_code",
               "type": "DefaultString",
               "remark": "",
@@ -4742,14 +4786,20 @@
             },
             {
               "name": "bom_num",
-              "type": "Double",
+              "type": "Money",
               "remark": "",
               "chnname": "单耗",
               "notNull": true
             },
             {
+              "name": "basic_num",
+              "type": "Money",
+              "remark": "",
+              "chnname": "基本数量"
+            },
+            {
               "name": "raw_material_product_num",
-              "type": "DefaultString",
+              "type": "Money",
               "remark": "",
               "chnname": "原材料排产量",
               "defaultValue": "0",
@@ -5142,7 +5192,7 @@
             },
             {
               "name": "product_num",
-              "type": "Integer",
+              "type": "Money",
               "remark": "",
               "chnname": "成品排产量",
               "notNull": true
@@ -5156,7 +5206,7 @@
             },
             {
               "name": "product_content_num",
-              "type": "Integer",
+              "type": "Money",
               "remark": "",
               "chnname": "成品满足量",
               "notNull": true
@@ -5291,17 +5341,23 @@
               "autoIncrement": true
             },
             {
-              "name": "order_from",
-              "type": "Char",
-              "remark": "1：内单，2：外单",
-              "chnname": "订单来源",
-              "notNull": true,
+              "name": "order_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "排产订单号",
+              "notNull": true
+            },
+            {
+              "name": "product_order_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生产订单号",
               "defaultValue": "''"
             },
             {
               "name": "order_class",
               "type": "DefaultString",
-              "remark": "1：正常，2：追加，3：储备，4：新品",
+              "remark": "1：正常，2：追加，3：储备，4：新品，5：返修",
               "chnname": "订单种类",
               "notNull": true,
               "defaultValue": "''"
@@ -5363,6 +5419,13 @@
               "notNull": true
             },
             {
+              "name": "delivery_num",
+              "type": "Money",
+              "remark": "",
+              "chnname": "交货量",
+              "defaultValue": "0"
+            },
+            {
               "name": "unit",
               "type": "DefaultString",
               "remark": "",
@@ -5398,11 +5461,23 @@
               "notNull": true
             },
             {
+              "name": "actual_end_date",
+              "type": "Date",
+              "remark": "",
+              "chnname": "实际结束日期"
+            },
+            {
               "name": "bom_version",
               "type": "Integer",
               "remark": "",
               "chnname": "BOM版本",
               "notNull": true
+            },
+            {
+              "name": "new_version",
+              "type": "Integer",
+              "remark": "",
+              "chnname": "新BOM版本"
             },
             {
               "name": "sequence",
@@ -5471,15 +5546,8 @@
             {
               "name": "outsource_type",
               "type": "Char",
-              "remark": "0：半委外，1：全委外",
-              "chnname": "委外方式",
-              "defaultValue": "''"
-            },
-            {
-              "name": "product_order_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "生产订单号",
+              "remark": "0：半成品，1：成品",
+              "chnname": "加工承揽方式",
               "defaultValue": "''"
             },
             {
@@ -5497,9 +5565,16 @@
               "defaultValue": "''"
             },
             {
+              "name": "life_cycle",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生命周期",
+              "defaultValue": "''"
+            },
+            {
               "name": "status",
               "type": "DefaultString",
-              "remark": "0：待审核，1：待下达，2：反馈中，3：待调整，4：已调整，5：已下达，6：已关单",
+              "remark": "0：待评审，1：反馈中，2：待调整，3：已评审，4：待传SAP，5：传SAP中，6：已传SAP，7：传SAP异常，8：已关单",
               "chnname": "状态",
               "notNull": true,
               "defaultValue": "0"
@@ -5507,10 +5582,16 @@
             {
               "name": "audit_status",
               "type": "DefaultString",
-              "remark": "0：初始，1：JIT处长已审核",
+              "remark": "0：无需审核，1：审核中，2：审核完成",
               "chnname": "审核状态",
               "notNull": false,
               "defaultValue": "''"
+            },
+            {
+              "name": "sap_messages",
+              "type": "Intro",
+              "remark": "传SAP返回信息",
+              "chnname": "SAP返回信息"
             },
             {
               "name": "del_flag",
@@ -5628,11 +5709,17 @@
               "autoIncrement": true
             },
             {
-              "name": "pid",
-              "type": "BigInt",
+              "name": "product_order_code",
+              "type": "DefaultString",
               "remark": "",
-              "chnname": "主表ID",
+              "chnname": "排产订单号",
               "notNull": true
+            },
+            {
+              "name": "product_factory_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生产工厂"
             },
             {
               "name": "material_code",
@@ -5650,14 +5737,20 @@
             },
             {
               "name": "bom_num",
-              "type": "Double",
+              "type": "Money",
               "remark": "",
               "chnname": "单耗",
               "notNull": true
             },
             {
+              "name": "basic_num",
+              "type": "Money",
+              "remark": "",
+              "chnname": "基本数量"
+            },
+            {
               "name": "raw_material_product_num",
-              "type": "DefaultString",
+              "type": "Money",
               "remark": "",
               "chnname": "原材料排产量",
               "defaultValue": "0",
@@ -5678,7 +5771,7 @@
               "notNull": true
             },
             {
-              "name": "purchase_group_code",
+              "name": "purchase_group",
               "type": "DefaultString",
               "remark": "",
               "chnname": "采购组",
@@ -5690,6 +5783,12 @@
               "remark": "",
               "chnname": "仓储点",
               "notNull": true
+            },
+            {
+              "name": "status",
+              "type": "Char",
+              "remark": "0：未确认，1：已确认，2：反馈中",
+              "chnname": "状态"
             },
             {
               "name": "del_flag",
@@ -6198,6 +6297,12 @@
               "notNull": true
             },
             {
+              "name": "unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "单位"
+            },
+            {
               "name": "version",
               "type": "DefaultString",
               "remark": "年度-周数",
@@ -6418,6 +6523,12 @@
               "chnname": "订单数量",
               "defaultValue": "0",
               "notNull": true
+            },
+            {
+              "name": "unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "单位"
             },
             {
               "name": "version",
@@ -6660,6 +6771,12 @@
               "chnname": "订单数量",
               "defaultValue": "0",
               "notNull": true
+            },
+            {
+              "name": "unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "单位"
             },
             {
               "name": "version",
@@ -6932,6 +7049,12 @@
               "chnname": "订单数量",
               "defaultValue": "0",
               "notNull": true
+            },
+            {
+              "name": "unit",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "单位"
             },
             {
               "name": "version",

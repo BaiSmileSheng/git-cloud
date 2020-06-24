@@ -2,6 +2,9 @@ package com.cloud.system.mapper;
 
 import com.cloud.system.domain.entity.CdProductWarehouse;
 import com.cloud.common.core.dao.BaseMapper;
+
+import java.util.List;
+
 /**
  * 成品库存在库明细 Mapper接口
  *
@@ -14,4 +17,9 @@ public interface CdProductWarehouseMapper extends BaseMapper<CdProductWarehouse>
      * @return
      */
     int deleteAll();
+    /**
+     * 根据生产工厂、成品专用号、库位查询在库库存
+     * @return list
+     */
+    List<CdProductWarehouse> selectByList(List<CdProductWarehouse> list);
 }
