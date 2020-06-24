@@ -81,6 +81,11 @@
             <artifactId>cloud-order-api</artifactId>
             <version>${cloud.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.cloud</groupId>
+            <artifactId>cloud-activiti-api</artifactId>
+            <version>${cloud.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
