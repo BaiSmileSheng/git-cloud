@@ -99,18 +99,21 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
         logger.info("根据id查询延期索赔单详情 id:{}",id);
         SmsDelaysDelivery smsDelaysDeliveryRes = smsDelaysDeliveryMapper.selectByPrimaryKey(id);
         if(null != smsDelaysDeliveryRes || StringUtils.isNotBlank(smsDelaysDeliveryRes.getDelaysNo())){
-            //索赔文件编号
-            String claimOrderNo = smsDelaysDeliveryRes.getDelaysNo();
-            R sysOssR = remoteOssService.listByOrderNo(claimOrderNo);
-            if(!sysOssR.isSuccess()){
-                logger.error("根据id查询延期索赔单详情获取图片信息失败claimOrderNo:{},res:{}",
-                        claimOrderNo, JSONObject.toJSON(sysOssR));
-                throw new BusinessException("根据id查询延期索赔单详情获取图片信息失败");
-            }
-            List<SysOss> sysOssList = sysOssR.getCollectData(new TypeReference<List<SysOss>>() {});
             Map<String,Object> map = new HashMap<>();
+            //如果申诉过查文件
+            if(StringUtils.isNotBlank(smsDelaysDeliveryRes.getComplaintDescription())){
+                //索赔文件编号
+                String claimOrderNo = smsDelaysDeliveryRes.getDelaysNo();
+                R sysOssR = remoteOssService.listByOrderNo(claimOrderNo);
+                if(!sysOssR.isSuccess()){
+                    logger.error("根据id查询延期索赔单详情获取图片信息失败claimOrderNo:{},res:{}",
+                            claimOrderNo, JSONObject.toJSON(sysOssR));
+                    throw new BusinessException("根据id查询延期索赔单详情获取图片信息失败");
+                }
+                List<SysOss> sysOssList = sysOssR.getCollectData(new TypeReference<List<SysOss>>() {});
+                map.put("sysOssList",sysOssList);
+            }
             map.put("smsDelaysDelivery",smsDelaysDeliveryRes);
-            map.put("sysOssList",sysOssList);
             return R.ok(map);
         }
 

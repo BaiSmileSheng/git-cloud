@@ -88,6 +88,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
     @Override
     public R selectById(Long id) {
         logger.info("根据id查询质量索赔单详情 id:{}", id);
+        Map<String, Object> map = new HashMap<>();
         SmsQualityOrder smsQualityOrderRes = smsQualityOrderMapper.selectByPrimaryKey(id);
         if (null != smsQualityOrderRes || StringUtils.isNotBlank(smsQualityOrderRes.getQualityNo())) {
             //索赔文件编号
@@ -99,19 +100,22 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
                 throw new BusinessException("据id查询质量索赔单详情获取图片信息失败");
             }
             List<SysOss> claimListReault = claimListR.getCollectData(new TypeReference<List<SysOss>>() {});
-            //申诉文件编号
-            String appealOrderNo = smsQualityOrderRes.getQualityNo() + ORDER_NO_QUALITY_APPEAL_END;
-            R appealListR  = remoteOssService.listByOrderNo(appealOrderNo);
-            if(!appealListR.isSuccess()){
-                logger.error("据id查询质量索赔单详情获取申诉图片信息失败claimOrderNo:{},res:{}",
-                        claimOrderNo, JSONObject.toJSON(appealListR));
-                throw new BusinessException("据id查询质量索赔单详情获取图片信息失败");
+            //如果申诉过再查申诉文件
+            if(StringUtils.isNotBlank(smsQualityOrderRes.getComplaintDescription())){
+                //申诉文件编号
+                String appealOrderNo = smsQualityOrderRes.getQualityNo() + ORDER_NO_QUALITY_APPEAL_END;
+                R appealListR  = remoteOssService.listByOrderNo(appealOrderNo);
+                if(!appealListR.isSuccess()){
+                    logger.error("据id查询质量索赔单详情获取申诉图片信息失败claimOrderNo:{},res:{}",
+                            claimOrderNo, JSONObject.toJSON(appealListR));
+                    throw new BusinessException("据id查询质量索赔单详情获取图片信息失败");
+                }
+                List<SysOss> appealListReault = appealListR.getCollectData(new TypeReference<List<SysOss>>() {});
+                map.put("appealSysOssList", appealListReault);
+
             }
-            List<SysOss> appealListReault = appealListR.getCollectData(new TypeReference<List<SysOss>>() {});
-            Map<String, Object> map = new HashMap<>();
             map.put("smsQualityOrder", smsQualityOrderRes);
             map.put("claimSysOssList", claimListReault);
-            map.put("appealSysOssList", appealListReault);
             return R.ok(map);
         }
 
