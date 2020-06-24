@@ -21,7 +21,7 @@ spring:
   application:
     name: cloud-job-admin
   profiles:
-    active: test
+    active: prod
     devtools:
       restart:
         enabled: true

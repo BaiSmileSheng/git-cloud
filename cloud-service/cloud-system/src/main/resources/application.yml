@@ -10,7 +10,7 @@ spring:
   application:
     name: cloud-system
   profiles:
-    active: test
+    active: dev
   devtools:
     restart:
       enabled: true
@@ -26,7 +26,7 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 10.133.1.8:8848
+        server-addr: nacos.khaos.cosmoplat.com:80
   mail:
     host: mail.mhaq.cn
     port: 25
