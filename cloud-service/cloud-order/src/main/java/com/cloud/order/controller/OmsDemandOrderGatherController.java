@@ -2,6 +2,7 @@ package com.cloud.order.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
@@ -30,7 +31,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("demandOrderGather")
-@Api(tags = "滚动计划需求")
+@Api(tags = "13周滚动计划需求-接入")
 public class OmsDemandOrderGatherController extends BaseController {
 
     @Autowired
@@ -157,6 +158,7 @@ public class OmsDemandOrderGatherController extends BaseController {
             @ApiImplicitParam(name = "beginTime", value = "交付开始日期", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "endTime", value = "交付结束日期", required = false, paramType = "query", dataType = "String")
     })
+    @HasPermissions("order:demandOrderGather:export")
     public R export(@ApiIgnore() OmsDemandOrderGather omsDemandOrderGather) {
         Example example = listCondition(omsDemandOrderGather);
         SysUser sysUser = getUserInfo(SysUser.class);

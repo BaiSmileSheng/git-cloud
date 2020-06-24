@@ -195,7 +195,7 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
                     .productFactoryCode(res.getProductFactoryCode()).productFactoryDesc(res.getProductFactoryDesc())
                     .customerCode(res.getCustomerCode()).customerDesc(res.getCustomerDesc())
                     .mrpRange(res.getMrpRange()).bomVersion(res.getVersion()).purchaseGroupCode(res.getPurchaseGroupCode())
-                    .place(storeHouse).deliveryDate(deliveryDate).year(deliveryYear)
+                    .place(storeHouse).deliveryDate(deliveryDate).year(deliveryYear).unit(res.getUnit())
                     .weeks(Integer.toString(weekNum)).orderNum(orderNumTotal.longValue()).version(StrUtil.concat(true,DateUtil.now(),Integer.toString(weekNum))).build();
             oms2weeksDemandOrder.setCreateBy("定时任务");
             oms2weeksDemandOrder.setCreateTime(date);
@@ -274,7 +274,7 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
                     .productFactoryCode(res.getProductFactoryCode()).productFactoryDesc(res.getProductFactoryDesc())
                     .customerCode(res.getCustomerCode()).customerDesc(res.getCustomerDesc())
                     .mrpRange(res.getMrpRange()).bomVersion(res.getVersion()).purchaseGroupCode(res.getPurchaseGroupCode())
-                    .place(storeHouse).deliveryDate(deliveryDate).year(deliveryYear)
+                    .place(storeHouse).deliveryDate(deliveryDate).year(deliveryYear).unit(res.getUnit())
                     .weeks(deliveryWeek).orderNum(orderNumTotal.longValue())
                     .version(StrUtil.concat(true,StrUtil.toString(DateUtil.year(date)),StrUtil.toString(thisWeek))).build();
             omsDemandOrderGather.setCreateBy("定时任务");

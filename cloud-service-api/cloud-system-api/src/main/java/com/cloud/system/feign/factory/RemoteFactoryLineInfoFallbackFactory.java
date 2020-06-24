@@ -14,7 +14,7 @@ public class RemoteFactoryLineInfoFallbackFactory implements FallbackFactory<Rem
 
     @Override
     public RemoteFactoryLineInfoService create(Throwable throwable) {
-        log.error("RemoteFactoryLineInfoService错误信息：{}",throwable.getMessage());
+
         return new RemoteFactoryLineInfoService() {
             /**
              * 查询工厂线体关系
@@ -23,6 +23,7 @@ public class RemoteFactoryLineInfoFallbackFactory implements FallbackFactory<Rem
              */
             @Override
             public R listByExample(CdFactoryLineInfo cdFactoryLineInfo) {
+                log.error("RemoteFactoryLineInfoService.listByExample错误信息：{}",throwable.getMessage());
                 return R.error("服务器拥挤，请稍后再试！");
             }
 
@@ -33,6 +34,7 @@ public class RemoteFactoryLineInfoFallbackFactory implements FallbackFactory<Rem
              */
             @Override
             public R selectLineCodeBySupplierCode(String supplierCode) {
+                log.error("RemoteFactoryLineInfoService.selectLineCodeBySupplierCode错误信息：{}",throwable.getMessage());
                 return R.error("服务器拥挤，请稍后再试！");
             }
 
@@ -42,8 +44,9 @@ public class RemoteFactoryLineInfoFallbackFactory implements FallbackFactory<Rem
              * @return 供应商编码
              */
             @Override
-            public CdFactoryLineInfo selectInfoByCodeLineCode(String produceLineCode) {
-                return null;
+            public R selectInfoByCodeLineCode(String produceLineCode) {
+                log.error("RemoteFactoryLineInfoService.selectInfoByCodeLineCode错误信息：{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
             }
             /**
              * 定时任务获取工厂线体关系数据，并保存
@@ -51,6 +54,7 @@ public class RemoteFactoryLineInfoFallbackFactory implements FallbackFactory<Rem
              */
             @Override
             public R saveFactoryLineInfo() {
+                log.error("RemoteFactoryLineInfoService.saveFactoryLineInfo错误信息：{}",throwable.getMessage());
                 return R.error("服务器拥挤，请稍后再试！");
             }
         };

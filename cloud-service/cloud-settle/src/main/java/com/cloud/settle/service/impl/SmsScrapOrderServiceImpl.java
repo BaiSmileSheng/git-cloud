@@ -118,14 +118,18 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         OmsProductionOrder omsProductionOrder = omsProductionOrderResult.getData(OmsProductionOrder.class);
         smsScrapOrder.setMachiningPrice(omsProductionOrder.getProcessCost());
         //根据线体号查询供应商编码
-        CdFactoryLineInfo factoryLineInfo = remotefactoryLineInfoService.selectInfoByCodeLineCode(omsProductionOrder.getProductLineCode());
-        if (factoryLineInfo != null) {
+        R rFactoryLineInfo=remotefactoryLineInfoService.selectInfoByCodeLineCode(omsProductionOrder.getProductLineCode());
+        if (!rFactoryLineInfo.isSuccess()) {
+            return rFactoryLineInfo;
+        }
+        CdFactoryLineInfo factoryLineInfo = rFactoryLineInfo.getData(CdFactoryLineInfo.class);
+         if (factoryLineInfo != null) {
             smsScrapOrder.setSupplierCode(factoryLineInfo.getSupplierCode());
             smsScrapOrder.setSupplierName(factoryLineInfo.getSupplierDesc());
         }
         smsScrapOrder.setFactoryCode(omsProductionOrder.getProductFactoryCode());
         R rFactory = remoteFactoryInfoService.selectOneByFactory(omsProductionOrder.getProductFactoryCode());
-        if(rFactory.isSuccess()){
+        if(!rFactory.isSuccess()){
             log.error(StrUtil.format("(报废)报废申请新增保存开始：公司信息为空参数为{}", omsProductionOrder.getProductFactoryCode()));
             return R.error("公司信息为空！");
         }
@@ -302,7 +306,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         List<Map<String,String>> materialCodeComCodeList = smsScrapOrderMapper.selectMaterialAndCompanyCodeGroupBy(month, CollUtil.newArrayList(ScrapOrderStatusEnum.BF_ORDER_STATUS_DJS.getCode()));
         JCoDestination destination;
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog().builder()
-                .appId("SAP").interfaceName(SapConstants.ABAP_AS_SAP601)
+                .appId("SAP").interfaceName(SapConstants.ZSD_INT_DDPS_01)
                 .content(CollUtil.join(materialCodeComCodeList, "#")).build();
         Date date = DateUtil.date();
         StringBuffer error = new StringBuffer();

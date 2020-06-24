@@ -111,6 +111,10 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
             return R.error("id不能为空！");
         }
         SmsSupplementaryOrder smsSupplementaryOrderCheck = remoteSmsSupplementaryOrderService.get(id);
+        if (smsSupplementaryOrder == null) {
+            log.error(StrUtil.format("(物耗)物耗表数据为空,id(物耗)参数为{}", id));
+            return R.error("未找到物耗业务数据！");
+        }
         if (!SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DTJ.getCode().equals(smsSupplementaryOrderCheck.getStuffStatus())) {
             log.error(StrUtil.format("(物耗)只有待提交状态数据可以提交!原状态参数为{}", smsSupplementaryOrderCheck.getStuffStatus()));
             return R.error("只有待提交状态数据可以提交！");
