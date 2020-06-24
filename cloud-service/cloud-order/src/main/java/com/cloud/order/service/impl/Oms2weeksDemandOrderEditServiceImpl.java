@@ -183,13 +183,24 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
         return R.ok();
     }
 
+    /**
+     * 根据创建人和客户编码删除
+     * @param createBy
+     * @param customerCodes
+     * @return
+     */
     @Override
     public int deleteByCreateByAndCustomerCode(String createBy, List<String> customerCodes) {
         return oms2weeksDemandOrderEditMapper.deleteByCreateByAndCustomerCode(createBy,customerCodes);
     }
 
 
-
+    /**
+     * 导入数据检查
+     * @param objects
+     * @param <T>
+     * @return
+     */
     @Override
     public <T> ExcelImportResult checkImportExcel(List<T> objects) {
         if (CollUtil.isEmpty(objects)) {
@@ -381,6 +392,33 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
         return R.ok();
     }
 
+    /**
+     * 带逻辑删除已下达SAP数据
+     * @param ids
+     * @return
+     */
+    @Override
+    public R deleteWithLimitXDSAP(String ids) {
+        if (StrUtil.isEmpty(ids)) {
+            return R.error("参数为空！");
+        }
+        List<String> list = CollUtil.newArrayList(ids.split(StrUtil.COMMA));
+        for (String id : list) {
+            Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit = selectByPrimaryKey(Long.valueOf(id));
+            if (!StrUtil.equals(oms2weeksDemandOrderEdit.getStatus()
+                    , DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode())) {
+                return R.error(StrUtil.format("此状态数据不允许删除！需求订单号：{}",oms2weeksDemandOrderEdit.getDemandOrderCode()));
+            }
+        }
+        deleteByIds(ids);
+        return R.ok();
+    }
+
+    /**
+     * 确认下达
+     * @param ids
+     * @return
+     */
     @Override
     public R confirmRelease(String ids) {
         Example example = new Example(Oms2weeksDemandOrderEdit.class);
@@ -596,7 +634,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
 
 
     /**
-     * 下达SAP
+     * 下达SAP 2周需求传SAP
      * @param ids
      * @return
      */
@@ -631,8 +669,8 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             //获取函数信息
             JCoFunction fm = repository.getFunction(SapConstants.ZPP_INT_DDPS_02);
             if (fm == null) {
-                log.error("================获取SAP系统创建生产订单接口函数为空================");
-                throw new RuntimeException("获取SAP系统创建生产订单接口函数为空");
+                log.error("================2周需求下达SAP传生产订单信息接口函数为空================");
+                throw new RuntimeException("2周需求下达SAP传生产订单信息接口函数为空");
             }
             //获取输入参数
             JCoTable inputTable = fm.getTableParameterList().getTable("INPUT");
@@ -676,8 +714,8 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 updateBatchByDemandOrderCode(successList);
             } else {
                 sysInterfaceLog.setResults("SAP返回数据为空！");
-                log.error("联动SAP创建生产订单返回信息为空！");
-                return R.error("联动SAP创建生产订单返回信息为空！");
+                log.error("2周需求下达SAP传生产订单信息返回信息为空！");
+                return R.error("2周需求下达SAP传生产订单信息返回信息为空！");
             }
         } catch (JCoException e) {
             log.error("Connect SAP fault, error msg: " + e.toString());
@@ -685,7 +723,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
         }finally {
             sysInterfaceLog.setCreateBy(sysUser.getLoginName());
             sysInterfaceLog.setCreateTime(DateUtil.date());
-            sysInterfaceLog.setRemark("2周需求下达SAP");
+            sysInterfaceLog.setRemark("2周需求下达SAP传生产订单信息");
             remoteInterfaceLogService.saveInterfaceLog(sysInterfaceLog);
         }
         return R.ok();

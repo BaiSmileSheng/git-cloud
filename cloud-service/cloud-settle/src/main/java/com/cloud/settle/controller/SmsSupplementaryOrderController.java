@@ -276,6 +276,7 @@ public class SmsSupplementaryOrderController extends BaseController {
             @ApiImplicitParam(name = "beginTime", value = "申请日期开始", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "endTime", value = "申请日期结束", required = false, paramType = "query", dataType = "String")
     })
+    @HasPermissions("settle:supplementary:exportZB")
     public R exportGeneral(@ApiIgnore() SmsSupplementaryOrder smsSupplementaryOrder) {
         Example example = new Example(SmsSupplementaryOrder.class);
         Example.Criteria criteria = example.createCriteria();

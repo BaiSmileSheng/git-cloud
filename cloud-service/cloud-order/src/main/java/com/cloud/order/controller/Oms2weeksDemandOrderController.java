@@ -1,6 +1,7 @@
 package com.cloud.order.controller;
 
 import cn.hutool.core.util.StrUtil;
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -9,10 +10,7 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.order.domain.entity.Oms2weeksDemandOrder;
 import com.cloud.order.service.IOms2weeksDemandOrderService;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -28,6 +26,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("weeksDemandOrder")
+@Api(tags = "T+1、T+2草稿计划-接入")
 public class Oms2weeksDemandOrderController extends BaseController {
 
     @Autowired
@@ -107,6 +106,7 @@ public class Oms2weeksDemandOrderController extends BaseController {
             @ApiImplicitParam(name = "beginTime", value = "交付开始日期", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "endTime", value = "交付结束日期", required = false, paramType = "query", dataType = "String")
     })
+    @HasPermissions("order:weeksDemandOrder:export")
     public R export(@ApiIgnore() Oms2weeksDemandOrder oms2weeksDemandOrder) {
         Example example = listCondition(oms2weeksDemandOrder);
         List<Oms2weeksDemandOrder> oms2weeksDemandOrders = oms2weeksDemandOrderService.selectByExample(example);

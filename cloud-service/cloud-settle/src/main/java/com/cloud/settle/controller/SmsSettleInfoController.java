@@ -242,6 +242,7 @@ public class SmsSettleInfoController extends BaseController {
             @ApiImplicitParam(name = "settleNo", value = "结算单号", required = false, paramType = "query", dataType = "String")
     })
     @ApiOperation(value = "费用结算单明细（打印用）", response = SmsSettleInfo.class)
+    @HasPermissions("settle:smsSettleInfo:jgPrint")
     public R selectInfoForPrint(@ApiIgnore SmsSettleInfo smsSettleInfo) {
         return smsSettleInfoService.selectInfoForPrint(smsSettleInfo);
     }

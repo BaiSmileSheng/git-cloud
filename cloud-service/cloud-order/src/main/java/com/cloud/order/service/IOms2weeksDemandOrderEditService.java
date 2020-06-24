@@ -56,6 +56,14 @@ public interface IOms2weeksDemandOrderEditService extends BaseService<Oms2weeksD
     R deleteWithLimit(String ids);
 
     /**
+     * 带逻辑删除已下达SAP数据
+     * @param ids
+     * @return
+     */
+    R deleteWithLimitXDSAP(String ids);
+
+
+    /**
      * 确认下达
      * @param ids
      * @return
@@ -84,7 +92,7 @@ public interface IOms2weeksDemandOrderEditService extends BaseService<Oms2weeksD
     R t1t2GatherListExport(Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit, SysUser sysUser);
 
     /**
-     * 下达SAP
+     * 下达SAP 2周需求传SAP
      * @param ids
      * @return
      */

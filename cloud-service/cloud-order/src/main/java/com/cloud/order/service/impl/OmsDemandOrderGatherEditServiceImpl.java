@@ -658,7 +658,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
     }
 
     /**
-     * 下达SAP
+     * 下达SAP(13周需求下达SAP创建生产订单)
      * @param ids
      * @return
      */
@@ -767,7 +767,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         }finally {
             sysInterfaceLog.setCreateBy(sysUser.getLoginName());
             sysInterfaceLog.setCreateTime(DateUtil.date());
-            sysInterfaceLog.setRemark("下达SAP");
+            sysInterfaceLog.setRemark("下达SAP(13周需求下达SAP创建生产订单)");
             remoteInterfaceLogService.saveInterfaceLog(sysInterfaceLog);
         }
         return R.ok();

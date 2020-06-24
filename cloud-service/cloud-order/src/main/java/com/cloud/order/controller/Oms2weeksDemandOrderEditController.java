@@ -2,6 +2,7 @@ package com.cloud.order.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
@@ -128,6 +129,7 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
      */
     @PostMapping("importExcel")
     @ApiOperation(value = "T+1、T+2草稿计划导入 ", response = R.class)
+    @HasPermissions("order:oms2weeksDemandOrderEdit:importExcel")
     public R importExcel(MultipartFile file) {
         return oms2weeksDemandOrderEditService.import2weeksDemandEdit(file,getUserInfo(SysUser.class));
     }
@@ -149,6 +151,7 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
     @PostMapping("update")
     @OperLog(title = "修改保存T+1-T+2周需求导入 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存T+1-T+2周需求导入 ", response = R.class)
+    @HasPermissions("order:oms2weeksDemandOrderEdit:editSave")
     public R editSave(@RequestBody Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit) {
         return oms2weeksDemandOrderEditService.updateWithLimit(oms2weeksDemandOrderEdit);
     }
@@ -160,9 +163,23 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
     @OperLog(title = "删除T+1-T+2周需求导入 ", businessType = BusinessType.DELETE)
     @ApiOperation(value = "删除T+1-T+2周需求导入 ", response = R.class)
     @ApiParam(name = "ids", value = "需删除数据的id")
+    @HasPermissions("order:oms2weeksDemandOrderEdit:remove")
     public R remove(@RequestBody String ids) {
         return oms2weeksDemandOrderEditService.deleteWithLimit(ids);
     }
+
+    /**
+     * 删除T+1-T+2周需求导入（已下达SAP）
+     */
+    @PostMapping("removeWithXDSAP")
+    @OperLog(title = "删除T+1-T+2周需求导入已下达SAP） ", businessType = BusinessType.DELETE)
+    @ApiOperation(value = "删除T+1-T+2周需求导入已下达SAP） ", response = R.class)
+    @ApiParam(name = "ids", value = "需删除数据的id")
+    @HasPermissions("order:oms2weeksDemandOrderEdit:removeWithXDSAP")
+    public R removeWithXDSAP(@RequestBody String ids) {
+        return oms2weeksDemandOrderEditService.deleteWithLimit(ids);
+    }
+
 
     /**
      * 计划需求导入-导出
@@ -181,6 +198,7 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
             @ApiImplicitParam(name = "beginTime", value = "交付开始日期", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "endTime", value = "交付结束日期", required = false, paramType = "query", dataType = "String")
     })
+    @HasPermissions("order:oms2weeksDemandOrderEdit:export")
     public R export(@ApiIgnore() Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit) {
         Example example = listCondition(oms2weeksDemandOrderEdit);
         SysUser sysUser = getUserInfo(SysUser.class);
@@ -199,6 +217,7 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
     @PostMapping("confirmRelease")
     @ApiOperation(value = "确认下达 ", response = R.class)
     @ApiParam(name = "ids", value = "需确认下达数据的id")
+    @HasPermissions("order:oms2weeksDemandOrderEdit:confirmRelease")
     public R confirmRelease(String ids){
         return oms2weeksDemandOrderEditService.confirmRelease(ids);
     }
@@ -243,6 +262,7 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
             @ApiImplicitParam(name = "productMaterialCode", value = "成品专用号", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = false, paramType = "query", dataType = "String"),
     })
+    @HasPermissions("order:oms2weeksDemandOrderEdit:t1t2GatherListExport")
     public R t1t2GatherListExport(@ApiIgnore Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit) {
         return oms2weeksDemandOrderEditService.t1t2GatherListExport(oms2weeksDemandOrderEdit,getUserInfo(SysUser.class));
     }
@@ -272,12 +292,13 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
     }
 
     /**
-     * 下达SAP
+     * 下达SAP 2周需求传SAP
      * @param ids
      * @return
      */
-    @PostMapping("toSAPlist")
+    @PostMapping("toSAP")
     @ApiOperation(value = "下达SAP")
+    @HasPermissions("order:oms2weeksDemandOrderEdit:toSAP")
     public R toSAP(@RequestParam("ids") List<Long> ids){
         SysUser sysUser = getUserInfo(SysUser.class);
         return oms2weeksDemandOrderEditService.toSAP(ids,sysUser);

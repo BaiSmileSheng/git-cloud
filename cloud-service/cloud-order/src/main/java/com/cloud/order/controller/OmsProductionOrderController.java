@@ -3,6 +3,7 @@ package com.cloud.order.controller;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.controller.BaseController;
@@ -246,6 +247,7 @@ public class OmsProductionOrderController extends BaseController {
             @ApiImplicitParam(name = "productStartDate", value = "基本开始日期", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productEndDate", value = "到", required = false, paramType = "query", dataType = "String")
     })
+    @HasPermissions("order:productionOrder:export")
     public R export(@ApiIgnore() OmsProductionOrder omsProductionOrder) {
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();

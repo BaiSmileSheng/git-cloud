@@ -88,7 +88,7 @@ public interface IOmsDemandOrderGatherEditService extends BaseService<OmsDemandO
 
 
     /**
-     * 下达SAP
+     * 下达SAP(13周需求下达SAP创建生产订单)
      * @param ids
      * @return
      */
