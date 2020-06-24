@@ -1,15 +1,5 @@
 package com.cloud.common.utils;
 
-import java.lang.management.ManagementFactory;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-
 import com.cloud.common.exception.BusinessException;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
@@ -17,6 +7,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import java.lang.management.ManagementFactory;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * 时间工具类
@@ -29,6 +25,8 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
     public static String YYYY = "yyyy";
 
     public static String YYYY_MM = "yyyy-MM";
+
+    public static String MM_dd = "MM/dd";
 
     public static String YYYY_MM_DD = "yyyy-MM-dd";
 
@@ -233,5 +231,91 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         Date date2 = string2Date(dateStr2,pattern);
         long diff = date1.getTime() - date2.getTime();
         return (int) (diff / DAY);
+    }
+
+    /**
+     * 根据year年的第week周，查询week周的起止时间
+     * @param year
+     * @param week
+     * @return startDate开始时间 endDate结束时间
+     */
+    public static Map<String,String> weekToDayFormate(int year, int week){
+        Map<String, String> map = new HashMap<>();
+        Calendar calendar = Calendar.getInstance();
+        // ①.设置该年份的开始日期：第一个月的第一天
+        calendar.set(year,0,1);
+        // ②.计算出第一周还剩几天：+1是因为1号是1天
+        int dayOfWeek = 7 - calendar.get(Calendar.DAY_OF_WEEK) + 1;
+        // ③.周数减去第一周再减去要得到的周
+        week = week - 2;
+        // ④.计算起止日期
+        calendar.add(Calendar.DAY_OF_YEAR,week * 7 + dayOfWeek);
+        map.put("startDate",new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime()));
+        calendar.add(Calendar.DAY_OF_YEAR, 6);
+        map.put("endDate",new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime()));
+        return map;
+    }
+
+    /**
+     * 获取n个月后时间
+     */
+    public static Timestamp getMonthTime(int month) {
+        Date dt = new Date();
+        Calendar now = Calendar.getInstance();
+        now.setTime(dt);
+        now.add(Calendar.MONTH, month);
+        Date threeMonthAgoDate = now.getTime();
+        DateFormat df = new SimpleDateFormat(YYYY_MM_DD_HH_MM_SS);
+        String nowTime = df.format(threeMonthAgoDate);
+        Timestamp buydate = Timestamp.valueOf(nowTime);
+        return buydate;
+    }
+
+    /**
+     * 返回指定天数位移后的日期
+     */
+    public static String dayOffset(String dateString, int offset,String paramFormat){
+        Date date = string2Date(dateString,paramFormat);
+        Date dateResult = dayOffset(date,offset);
+        SimpleDateFormat sdf1 = new SimpleDateFormat(paramFormat);
+        String dateResultString = sdf1.format(dateResult);
+        return dateResultString;
+    }
+
+
+    /**
+     * 返回指定天数位移后的日期
+     */
+    public static Date dayOffset(Date date, int offset) {
+
+        return offsetDate(date, Calendar.DATE, offset);
+    }
+
+    /**
+     * 返回指定日期相应位移后的日期
+     *
+     * @param date
+     *            参考日期
+     * @param field
+     *            位移单位，见 {@link Calendar}
+     * @param offset
+     *            位移数量，正数表示之后的时间，负数表示之前的时间
+     * @return 位移后的日期
+     */
+    public static Date offsetDate(Date date, int field, int offset) {
+        Calendar calendar = convert(date);
+        calendar.add(field, offset);
+        return calendar.getTime();
+    }
+
+    /**
+     * 获取 Calendar 类型时间
+     * @param date
+     * @return
+     */
+    private static Calendar convert(Date date) {
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        return calendar;
     }
 }

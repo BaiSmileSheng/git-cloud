@@ -109,11 +109,12 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
      */
     private R supplierAppeal(SmsQualityOrder smsQualityOrder, MultipartFile[] files) {
         //1.查询索赔单数据,判断状态是否是待提交,待提交可修改
-        SmsQualityOrder smsQualityOrderRes = remoteQualityOrderService.get(smsQualityOrder.getId());
-        if(null == smsQualityOrderRes){
+        R smsQualityOrderResR = remoteQualityOrderService.get(smsQualityOrder.getId());
+        if(smsQualityOrderResR.isSuccess()){
             logger.error("质量索赔单申诉时索赔单不存在 索赔单id:{}",smsQualityOrder.getId());
             throw new BusinessException("索赔单不存在");
         }
+        SmsQualityOrder smsQualityOrderRes = smsQualityOrderResR.getData(SmsQualityOrder.class);
         Boolean flagResult = QualityStatusEnum.QUALITY_STATUS_1.getCode().equals(smsQualityOrderRes.getQualityStatus())
                 ||QualityStatusEnum.QUALITY_STATUS_7.getCode().equals(smsQualityOrderRes.getQualityStatus());
         if(!flagResult){
@@ -124,8 +125,7 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
         smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_4.getCode());
         smsQualityOrder.setComplaintDate(new Date());
         R result = remoteQualityOrderService.editSave(smsQualityOrder);
-        flagResult = "0".equals(result.get("code").toString());
-        if(!flagResult){
+        if(!result.isSuccess()){
             logger.error("质量索赔单申诉时修改索赔单异常 索赔单号:{},res:{}",smsQualityOrder.getQualityNo(),
                     JSONObject.toJSONString(result));
             throw new BusinessException("质量索赔单供应商申诉时修改状态失败");
@@ -133,8 +133,7 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
         //3.根据订单号新增文件
         String orderNo = smsQualityOrderRes.getQualityNo() + ORDER_NO_QUALITY_APPEAL_END;
         R uplodeFileResult = remoteOssService.updateListByOrderNo(orderNo,files);
-        flagResult = "0".equals(uplodeFileResult.get("code").toString());
-        if(!flagResult){
+        if(!uplodeFileResult.isSuccess()){
             logger.error("质量索赔单申诉时新增文件异常 索赔单号:{},res:{}",smsQualityOrder.getQualityNo()
                     ,JSONObject.toJSONString(uplodeFileResult));
             throw new BusinessException("质量索赔单供应商申诉时新增文件失败");
@@ -179,11 +178,12 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
         }
         //获取质量索赔信息
         logger.info ("质量索赔审批流程 获取质量索赔信息主键id:{}",bizBusiness.getTableId());
-        SmsQualityOrder smsQualityOrder = remoteQualityOrderService.get(Long.valueOf(bizBusiness.getTableId()));
-        if(null == smsQualityOrder){
+        R smsQualityOrderR = remoteQualityOrderService.get(Long.valueOf(bizBusiness.getTableId()));
+        if(!smsQualityOrderR.isSuccess()){
             logger.error("质量索赔审批流程 查询质量索赔信息失败Req主键id:{}",bizBusiness.getTableId());
             throw new BusinessException("质量索赔审批流程 查询质量索赔信息失败");
         }
+        SmsQualityOrder smsQualityOrder = smsQualityOrderR.getData(SmsQualityOrder.class);
         //状态是否是待质量部部长审核
         Boolean flagStatus4 = QualityStatusEnum.QUALITY_STATUS_4.getCode().equals(smsQualityOrder.getQualityStatus());
         //状态是否是待小微主审核
@@ -213,9 +213,15 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
         //更新质量索赔状态
         logger.info ("质量索赔审批流程 更新质量索赔主键id:{} 状态:{}",smsQualityOrder.getId(),smsQualityOrder.getQualityStatus());
         R updateResult = remoteQualityOrderService.editSave(smsQualityOrder);
-        if("0".equals(updateResult.get("code").toString())){
-            //审批 推进工作流
-            return actTaskService.audit(bizAudit, sysUser.getUserId());
+        if(!updateResult.isSuccess()){
+            logger.error("质量索赔审批流程 更新质量索赔失败 主键id:{}res:{}",smsQualityOrder.getId(),JSONObject.toJSON(updateResult));
+            throw new BusinessException("质量索赔审批流程 更新质量索赔失败 ");
+        }
+        //审批 推进工作流
+        R resultAck =  actTaskService.audit(bizAudit, sysUser.getUserId());
+        if(!resultAck.isSuccess()){
+            logger.error("质量索赔审批流程 审批 推进工作流 req:{}res:{}",JSONObject.toJSON(bizAudit),JSONObject.toJSON(updateResult));
+            throw new BusinessException("质量索赔审批流程 审批 推进工作流失败 ");
         }
         return R.error();
     }

@@ -23,7 +23,7 @@ public interface RemoteQualityOrderService {
      * @return SmsQualityOrder 质量索赔信息
      */
     @GetMapping("qualityOrder/get")
-    SmsQualityOrder get(@RequestParam("id") Long id);
+    R get(@RequestParam("id") Long id);
 
     /**
      * 查询质量索赔详情

@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 /**
@@ -32,6 +33,7 @@ public class OmsDemandOrderGatherEditImport{
      * 订单类型
      */
     @ExcelProperty(value = "订单类型")
+    @NotBlank
     private String orderType;
 
     /**
@@ -45,6 +47,7 @@ public class OmsDemandOrderGatherEditImport{
      * 成品物料号
      */
     @ExcelProperty(value = "成品物料")
+    @NotBlank
     private String productMaterialCode;
 
 
@@ -52,6 +55,7 @@ public class OmsDemandOrderGatherEditImport{
      * 生产工厂编码
      */
     @ExcelProperty(value = "工厂")
+    @NotBlank
     private String productFactoryCode;
 
 
@@ -59,49 +63,57 @@ public class OmsDemandOrderGatherEditImport{
      * 客户编码
      */
     @ExcelProperty(value = "客户编码")
+    @NotBlank
     private String customerCode;
 
     /**
      * 客户描述
      */
     @ExcelProperty(value = "客户名称")
+    @NotBlank
     private String customerDesc;
 
     /**
      * MRP范围
      */
     @ExcelProperty(value = "MRP范围")
+    @NotBlank
     private String mrpRange;
 
     /**
      * BOM版本
      */
     @ExcelProperty(value = "版本")
+    @NotBlank
     private String bomVersion;
 
     /**
      * 采购组
      */
     @ExcelProperty(value = "采购组")
+    @NotBlank
     private String purchaseGroupCode;
 
     /**
      * 地点
      */
     @ExcelProperty(value = "地点")
+    @NotBlank
     private String place;
 
     /**
      * 交付日期
      */
     @ExcelProperty(value = "交付日期")
-    @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat("yyyy-MM-dd")
+    @NotNull
     private Date deliveryDate;
 
     /**
      * 订单数量
      */
     @ExcelProperty(value = "数量")
+    @NotNull
     private Long orderNum;
 
     /**

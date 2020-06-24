@@ -23,6 +23,7 @@
         <result property="year" column="year"/>
         <result property="weeks" column="weeks"/>
         <result property="orderNum" column="order_num"/>
+        <result property="unit" column="unit"/>
         <result property="version" column="version"/>
         <result property="planOrderOrder" column="plan_order_order"/>
         <result property="status" column="status"/>
@@ -54,6 +55,7 @@
                year,
                weeks,
                order_num,
+               unit,
                version,
                plan_order_order,
                status,

@@ -79,6 +79,18 @@ public class CdFactoryInfoController extends BaseController {
         return getDataTable(cdFactoryInfoList);
     }
 
+    /**
+     * 查询工厂信息 列表
+     */
+    @GetMapping("listAll")
+    @ApiOperation(value = "查询工厂信息 列表 ", response = CdFactoryInfo.class)
+    public R listAll(){
+        Example example = new Example(CdFactoryInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        startPage();
+        List<CdFactoryInfo> cdFactoryInfoList = cdFactoryInfoService.selectByExample(example);
+        return R.data(cdFactoryInfoList);
+    }
 
     /**
      * 新增保存工厂信息

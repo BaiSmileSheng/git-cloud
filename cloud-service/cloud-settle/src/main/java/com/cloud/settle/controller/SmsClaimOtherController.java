@@ -47,8 +47,9 @@ public class SmsClaimOtherController extends BaseController {
      */
     @GetMapping("get")
     @ApiOperation(value = "根据id查询其他索赔", response = SmsClaimOther.class)
-    public SmsClaimOther get(Long id) {
-        return smsClaimOtherService.selectByPrimaryKey(id);
+    public R get(Long id) {
+        SmsClaimOther smsClaimOther = smsClaimOtherService.selectByPrimaryKey(id);
+        return R.data(smsClaimOther);
 
     }
 

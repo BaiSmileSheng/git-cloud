@@ -50,8 +50,9 @@ public class SmsQualityOrderController extends BaseController {
      */
     @GetMapping("get")
     @ApiOperation(value = "查询质量索赔", response = SmsQualityOrder.class)
-    public SmsQualityOrder get(Long id) {
-        return smsQualityOrderService.selectByPrimaryKey(id);
+    public R get(Long id) {
+        SmsQualityOrder smsQualityOrder = smsQualityOrderService.selectByPrimaryKey(id);
+        return R.data(smsQualityOrder);
 
     }
 
@@ -115,7 +116,7 @@ public class SmsQualityOrderController extends BaseController {
     public R export(SmsQualityOrder smsQualityOrder) {
         Example example = assemblyConditions(smsQualityOrder);
         List<SmsQualityOrder> smsQualityOrderList = smsQualityOrderService.selectByExample(example);
-        String fileName = "质量索赔 .xlsx";
+        String fileName = "质量索赔.xlsx";
         return EasyExcelUtil.writeExcel(smsQualityOrderList, fileName, fileName, new SmsQualityOrder());
     }
 
@@ -209,6 +210,23 @@ public class SmsQualityOrderController extends BaseController {
         ValidatorUtils.validateEntity(smsQualityOrder);
         smsQualityOrder.setUpdateBy(getLoginName());
         return smsQualityOrderService.updateSmsQualityOrderAndSysOss(smsQualityOrder, files);
+    }
+
+    /**
+     * 新增或修改时提交
+     *
+     * @param smsQualityOrderReq 质量索赔信息
+     * @return 修成功或失败
+     */
+    @HasPermissions("settle:qualityOrder:insertOrupdateSubmit")
+    @PostMapping("insertOrupdateSubmit")
+    @ApiOperation(value = "新增或修改时提交", response = R.class)
+    public R insertOrupdateSubmit(@RequestParam("smsQualityOrder") String smsQualityOrderReq, @RequestPart("files") MultipartFile[] files) {
+        SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq, SmsQualityOrder.class);
+        //校验入参
+        ValidatorUtils.validateEntity(smsQualityOrder);
+        smsQualityOrder.setUpdateBy(getLoginName());
+        return smsQualityOrderService.insertOrupdateSubmit(smsQualityOrder, files);
     }
 
     /**

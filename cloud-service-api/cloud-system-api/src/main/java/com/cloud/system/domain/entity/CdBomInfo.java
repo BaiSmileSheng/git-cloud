@@ -76,7 +76,7 @@ public class CdBomInfo extends BaseEntity {
      */
     @ExcelProperty(value = "基本数量")
     @ApiModelProperty(value = "基本数量")
-    private Long basicNum;
+    private BigDecimal basicNum;
 
     /**
      * 单耗

@@ -16,6 +16,7 @@ import com.cloud.settle.enums.DeplayStatusEnum;
 import com.cloud.settle.feign.RemoteDelaysDeliveryService;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteOssService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.Map;
 
@@ -111,12 +113,12 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
      */
     private R supplierAppeal(SmsDelaysDelivery smsDelaysDeliveryReq, MultipartFile[] files) {
         logger.info("延期索赔单供应商申诉(包含文件信息) 单号:{}",smsDelaysDeliveryReq.getDelaysNo());
-        SmsDelaysDelivery selectSmsDelaysDelivery = remoteDelaysDeliveryService.get(smsDelaysDeliveryReq.getId());
-        Boolean flagSelect = (null == selectSmsDelaysDelivery || null == selectSmsDelaysDelivery.getDelaysStatus());
-        if(flagSelect){
+        R selectSmsDelaysDeliveryR = remoteDelaysDeliveryService.get(smsDelaysDeliveryReq.getId());
+        if(!selectSmsDelaysDeliveryR.isSuccess()){
             logger.info("延期索赔单申诉异常 索赔单号:{}",smsDelaysDeliveryReq.getDelaysNo());
             throw new BusinessException("此延期索赔单不存在");
         }
+        SmsDelaysDelivery selectSmsDelaysDelivery = selectSmsDelaysDeliveryR.getData(SmsDelaysDelivery.class);
         Boolean flagSelectStatus = DeplayStatusEnum.DELAYS_STATUS_1.getCode().equals(selectSmsDelaysDelivery.getDelaysStatus())
                 ||DeplayStatusEnum.DELAYS_STATUS_7.getCode().equals(selectSmsDelaysDelivery.getDelaysStatus());
         if(!flagSelectStatus){
@@ -126,10 +128,18 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
         //修改延期索赔单
         smsDelaysDeliveryReq.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_4.getCode());
         smsDelaysDeliveryReq.setComplaintDate(new Date());
-        remoteDelaysDeliveryService.editSave(smsDelaysDeliveryReq);
+        R updateR = remoteDelaysDeliveryService.editSave(smsDelaysDeliveryReq);
+        if(!updateR.isSuccess()){
+            logger.info("延期索赔单申诉修改延期索赔单状态 索赔单号:{}",smsDelaysDeliveryReq.getDelaysNo());
+            throw new  BusinessException("延期索赔单申诉修改延期索赔单状态异常");
+        }
         //修改文件信息
         String orderNo = selectSmsDelaysDelivery.getDelaysNo();
         R result = remoteOssService.updateListByOrderNo(orderNo,files);
+        if(!result.isSuccess()){
+            logger.info("延期索赔单申诉修改文件 索赔单号:{}",smsDelaysDeliveryReq.getDelaysNo());
+            throw new  BusinessException("延期索赔单申诉修改文件异常");
+        }
         return result;
     }
 
@@ -168,11 +178,12 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
             return R.error("延期索赔审批流程 查询流程业务失败");
         }
         logger.info ("延期索赔审批流程 获取延期索赔信息主键id:{}",bizBusiness.getTableId());
-        SmsDelaysDelivery smsDelaysDelivery = remoteDelaysDeliveryService.get(Long.valueOf(bizBusiness.getTableId()));
-        if(null == smsDelaysDelivery){
+        R smsDelaysDeliveryR = remoteDelaysDeliveryService.get(Long.valueOf(bizBusiness.getTableId()));
+        if(!smsDelaysDeliveryR.isSuccess()){
             logger.error ("延期索赔审批流程 查询延期索赔信息失败Req主键id:{}",bizBusiness.getTableId());
             return R.error("延期索赔审批流程 查询延期索赔信息失败");
         }
+        SmsDelaysDelivery smsDelaysDelivery = smsDelaysDeliveryR.getCollectData(new TypeReference<SmsDelaysDelivery>() {});
         //状态是否是待订单部部长审核
         Boolean flagStatus4 = DeplayStatusEnum.DELAYS_STATUS_4.getCode().equals(smsDelaysDelivery.getDelaysStatus());
         //状态是否是待小微主审核
@@ -198,9 +209,15 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
         //更新延期索赔状态
         logger.info ("延期索赔审批流程 更新延期索赔主键id:{} 状态:{}",smsDelaysDelivery.getId(),smsDelaysDelivery.getDelaysStatus());
         R updateResult = remoteDelaysDeliveryService.editSave(smsDelaysDelivery);
-        if("0".equals(updateResult.get("code").toString())){
-            //审批 推进工作流
-            return actTaskService.audit(bizAudit, sysUser.getUserId());
+        if(!updateResult.isSuccess()){
+            logger.error("延期索赔审批流程 更新延期索赔失败 主键id:{}res:{}",smsDelaysDelivery.getId(),JSONObject.toJSON(updateResult));
+            throw new BusinessException("延期索赔审批流程 更新索赔索赔失败 ");
+        }
+        //审批 推进工作流
+        R  resultAck =actTaskService.audit(bizAudit, sysUser.getUserId());
+        if(!resultAck.isSuccess()){
+            logger.error("延期索赔审批流程 审批 推进工作流 req:{}res:{}",JSONObject.toJSON(bizAudit),JSONObject.toJSON(updateResult));
+            throw new BusinessException("延期索赔审批流程 审批 推进工作流失败 ");
         }
         return R.error();
     }

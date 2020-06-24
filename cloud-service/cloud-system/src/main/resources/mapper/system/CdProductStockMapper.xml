@@ -48,4 +48,23 @@
         delete from cd_product_stock;
     </delete>
 
+    <select id="selectProductStockToMap" parameterType="list" resultMap="CdProductStockResult">
+        <include refid="selectCdProductStockVo"/>
+        where del_flag='0'
+        and product_factory_code in
+        <foreach collection="list" index="index" item="dict" open="(" close=")" separator=",">
+            #{dict.productFactoryCode}
+        </foreach>
+        and product_material_code in
+        <foreach collection="list" index="index" item="dict" open="(" close=")" separator=",">
+            #{dict.productMaterialCode}
+        </foreach>
+    </select>
+    <select id="selectByList" resultMap="CdProductStockResult" parameterType="list">
+        <include refid="selectCdProductStockVo"/>
+        WHERE
+        <foreach collection="list" index="index" item="item" open="(" close=")" separator="or">
+            ( product_factory_code=#{item.productFactoryCode} and product_material_code=#{item.productMaterialCode} )
+        </foreach>
+    </select>
 </mapper>

@@ -1,37 +1,27 @@
 package com.cloud.system.controller;
 
+import cn.hutool.core.lang.Dict;
 import com.cloud.common.auth.annotation.HasPermissions;
+import com.cloud.common.core.controller.BaseController;
+import com.cloud.common.core.domain.R;
+import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.easyexcel.SheetExcelData;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.CdProductInProduction;
 import com.cloud.system.domain.entity.CdProductPassage;
+import com.cloud.system.domain.entity.CdProductStock;
 import com.cloud.system.domain.entity.CdProductWarehouse;
 import com.cloud.system.domain.po.CdProductStockDetail;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import com.cloud.system.service.ICdProductStockService;
+import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.cloud.common.core.domain.R;
-import com.cloud.common.core.controller.BaseController;
-import com.cloud.system.domain.entity.CdProductStock;
-import com.cloud.system.service.ICdProductStockService;
-import com.cloud.common.core.page.TableDataInfo;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,7 +87,7 @@ public class CdProductStockController extends BaseController {
         if(!result.isSuccess()){
             return result;
         }
-        CdProductStockDetail cdProductStockDetail = (CdProductStockDetail)result.get("com.cloud.system.domain.po.CdProductStockDetail");
+        CdProductStockDetail cdProductStockDetail = (CdProductStockDetail)result.get("data");
         List<SheetExcelData>  sheetExcelDataList= new ArrayList<>();
         SheetExcelData sheetExcelDataZ = new SheetExcelData();
         sheetExcelDataZ.setDataList(cdProductStockDetail.getCdProductStockList());
@@ -207,7 +197,46 @@ public class CdProductStockController extends BaseController {
     @OperLog(title = "定时任务同步成品库存接口 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "定时任务同步成品库存接口 ", response = R.class)
     public R timeSycProductStock() {
-
         return cdProductStockService.timeSycProductStock();
+    }
+
+    /**
+     * 根据Example查询一条数据
+     * @param cdProductStock
+     * @return
+     */
+    @PostMapping("findOneByExample")
+    @ApiOperation(value = "根据Example查询一条数据", response = R.class)
+    public R findOneByExample(@RequestBody CdProductStock cdProductStock) {
+        Example example = new Example(CdProductStock.class);
+        Example.Criteria criteria = example.createCriteria();
+        if(StringUtils.isNotBlank(cdProductStock.getProductFactoryCode())){
+            criteria.andEqualTo("productFactoryCode", cdProductStock.getProductFactoryCode());
+        }
+        if(StringUtils.isNotBlank(cdProductStock.getProductMaterialCode())){
+            criteria.andEqualTo("productMaterialCode", cdProductStock.getProductMaterialCode());
+        }
+        cdProductStock=cdProductStockService.findByExampleOne(example);
+        return R.data(cdProductStock);
+    }
+
+    /**
+     * 根据工厂，专用号分组取成品库存
+     * @param dicts
+     * @return
+     */
+    @PostMapping("selectProductStockToMap")
+    public R selectProductStockToMap(@RequestBody List<Dict> dicts){
+        return cdProductStockService.selectProductStockToMap(dicts);
+    }
+
+
+    /**
+     * 根据生产工厂、成品专用号查询成品库存
+     */
+    @PostMapping("queryOneByFactoryAndMaterial")
+    @ApiOperation(value = "根据生产工厂、成品专用号查询成品库存", response = CdProductStock.class)
+    public R queryOneByFactoryAndMaterial(@RequestBody List<CdProductStock> list) {
+        return cdProductStockService.selectList(list);
     }
 }
