@@ -348,7 +348,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
                 if (deleteFlag == 1) {
                     insertDb(cdProductStockDetail,Boolean.TRUE);
                 } else {
-                    taskInsertBomDb(cdProductStockDetail, Boolean.FALSE);
+                    taskInsertStockDb(cdProductStockDetail, Boolean.FALSE);
                 }
             }
         }
@@ -359,7 +359,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
      * @param cdProductStockDetail
      * @param flag
      */
-    private void taskInsertBomDb(final CdProductStockDetail cdProductStockDetail, final Boolean flag) {
+    private void taskInsertStockDb(final CdProductStockDetail cdProductStockDetail, final Boolean flag) {
         threadPoolTaskExecutor.execute(new Runnable() {
             @Override
             public void run() {
