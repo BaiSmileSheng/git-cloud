@@ -154,6 +154,11 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
         return R.data(cdProductStockDetail);
     }
 
+    @Override
+    public R selectList(List<CdProductStock> list) {
+        return R.data(cdProductStockMapper.selectByList(list));
+    }
+
     /**
      * 根据工厂，专用号分组取成品库存
      * @param dicts
@@ -809,5 +814,4 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
         cdProductStock.setDelFlag(DeleteFlagConstants.NO_DELETED);
         return cdProductStock;
     }
-
 }

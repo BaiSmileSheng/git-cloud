@@ -1,26 +1,20 @@
 package com.cloud.system.controller;
 
+import com.cloud.common.core.controller.BaseController;
+import com.cloud.common.core.domain.R;
+import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
-import io.swagger.annotations.Api;
+import com.cloud.system.domain.entity.CdProductWarehouse;
+import com.cloud.system.service.ICdProductWarehouseService;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.cloud.common.core.domain.R;
-import com.cloud.common.core.controller.BaseController;
-import com.cloud.system.domain.entity.CdProductWarehouse;
-import com.cloud.system.service.ICdProductWarehouseService;
-import com.cloud.common.core.page.TableDataInfo;
 
 import java.util.List;
 
@@ -116,6 +110,29 @@ public class CdProductWarehouseController extends BaseController {
     @ApiParam(name = "ids", value = "需删除数据的id")
     public R remove(@RequestBody String ids) {
         return toAjax(cdProductWarehouseService.deleteByIds(ids));
+    }
+
+    /**
+     * 查询库位库存
+     */
+    @PostMapping("queryOneByExample")
+    @ApiOperation(value = "成品库位库存", response = CdProductWarehouse.class)
+    public R queryOneByExample(@RequestBody CdProductWarehouse cdProductWarehouse){
+        Example example = new Example(CdProductWarehouse.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("productMaterialCode",cdProductWarehouse.getProductMaterialCode());
+        criteria.andEqualTo("storehouse",cdProductWarehouse.getStorehouse());
+        criteria.andEqualTo("productFactoryCode",cdProductWarehouse.getProductFactoryCode());
+        return R.data(cdProductWarehouseService.selectOneByExample(example));
+    }
+
+    /**
+     * 查询库位库存
+     */
+    @PostMapping("queryByList")
+    @ApiOperation(value = "成品库位库存", response = CdProductWarehouse.class)
+    public R queryByList(@RequestBody List<CdProductWarehouse> list){
+        return cdProductWarehouseService.selectByList(list);
     }
 
 }

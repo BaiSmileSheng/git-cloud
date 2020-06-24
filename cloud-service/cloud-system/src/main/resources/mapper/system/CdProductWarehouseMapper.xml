@@ -43,5 +43,13 @@
     <delete id="deleteAll">
         delete from cd_product_warehouse;
     </delete>
-
+    <select id="selectByList" resultMap="CdProductWarehouseResult" parameterType="list">
+        <include refid="selectCdProductWarehouseVo"/>
+        WHERE
+        <foreach collection="list" index="index" item="item" open="(" close=")" separator="or">
+            ( product_factory_code=#{item.productFactoryCode}
+            and product_material_code=#{item.productMaterialCode}
+            and storehouse = #{item.storehouse} )
+        </foreach>
+    </select>
 </mapper>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.order.mapper.OmsProductionOrderAnalysisMapper">
+
+    <resultMap type="OmsProductionOrderAnalysis" id="OmsProductionOrderAnalysisResult">
+                    <result property="id" column="id"/>
+                    <result property="orderFrom" column="order_from"/>
+                    <result property="productMaterialCode" column="product_material_code"/>
+                    <result property="productMaterialDesc" column="product_material_desc"/>
+                    <result property="productFactoryCode" column="product_factory_code"/>
+                    <result property="productFactoryDesc" column="product_factory_desc"/>
+                    <result property="demandOrderNum" column="demand_order_num"/>
+                    <result property="customerBreachNum" column="customer_breach_num"/>
+                    <result property="gapCustomer" column="gap_customer"/>
+                    <result property="totalCustomer" column="total_customer"/>
+                    <result property="surplusNum" column="surplus_num"/>
+                    <result property="stockNum" column="stock_num"/>
+                    <result property="unit" column="unit"/>
+                    <result property="deliveryDate" column="delivery_date"/>
+                    <result property="productDate" column="product_date"/>
+                    <result property="delFlag" column="del_flag"/>
+                    <result property="remark" column="remark"/>
+                    <result property="createTime" column="create_time"/>
+                    <result property="createBy" column="create_by"/>
+                    <result property="updateTime" column="update_time"/>
+                    <result property="updateBy" column="update_by"/>
+                    </resultMap>
+    <resultMap id="OmsProductionOrderAnalysisResultVo" type="OmsProductionOrderAnalysisVo">
+        <result property="orderFrom" column="order_from"/>
+        <result property="productMaterialCode" column="product_material_code"/>
+        <result property="productFactoryCode" column="product_factory_code"/>
+        <result property="unit" column="unit"/>
+    </resultMap>
+
+    <sql id="selectOmsProductionOrderAnalysisVo">
+        select id, order_from, product_material_code, product_material_desc, product_factory_code, product_factory_desc, demand_order_num, customer_breach_num, gap_customer, total_customer, surplus_num,stock_num, delivery_date, product_date, del_flag, remark, create_time, create_by, update_time, update_by from oms_production_order_analysis
+    </sql>
+    <delete id="deleteAll">
+        delete from oms_production_order_analysis
+    </delete>
+    <select id="selectListByGroup" resultMap="OmsProductionOrderAnalysisResultVo" parameterType="OmsProductionOrderAnalysis">
+        select distinct product_material_code,product_factory_code,unit,order_from from oms_production_order_analysis
+        <where>
+            1=1
+            <if test="productMaterialCode != null and productMaterialCode != ''">
+                and product_material_code like concat('%',#{productMaterialCode},'%')
+            </if>
+            <if test="productFactoryCode != null and productFactoryCode != ''">
+                and product_factory_code like concat('%',#{productFactoryCode},'%')
+            </if>
+            <if test="orderFrom != null and orderFrom != ''">
+                and order_from= #{orderFrom}
+            </if>
+            <if test="productFactoryCodeList != null and productFactoryCodeList != ''">
+                and product_factory_code in (${productFactoryCodeList})
+            </if>
+        </where>
+    </select>
+    <select id="selectListByFactoryAndMaterial" resultMap="OmsProductionOrderAnalysisResult" parameterType="list">
+        <include refid="selectOmsProductionOrderAnalysisVo"/>
+        <where>
+            <foreach collection="list" item="item" index="index" open="(" close=")" separator="or">
+                product_factory_code = #{item.productFactoryCode}
+                and product_material_code = #{item.productMaterialCode}
+            </foreach>
+            and product_date > DATE_FORMAT(now(),'%Y-%m-%d')
+            and product_date <![CDATA[<= ]]> DATE_FORMAT(DATE_ADD(now(),INTERVAL 14 day),'%Y-%m-%d')
+        </where>
+        order by product_factory_code,product_material_code,product_date
+    </select>
+</mapper>

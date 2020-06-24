@@ -48,4 +48,6 @@ public interface ICdProductStockService extends BaseService<CdProductStock> {
      * @return
      */
     R selectProductStockToMap(List<Dict> dicts);
+
+    R selectList(List<CdProductStock> list);
 }

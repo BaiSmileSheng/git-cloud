@@ -24,11 +24,11 @@ import java.util.List;
 @Service
 public class OrderFromSap800InterfaceServiceImpl implements IOrderFromSap800InterfaceService {
     /**
-     * @Description: 获取SAP800系统13周PR需求
-     * @Param: [startDate, endDate]
-     * @return: com.cloud.common.core.domain.R
-     * @Author: ltq
-     * @Date: 2020/6/5
+     * Description: 获取SAP800系统13周PR需求
+     * Param: [startDate, endDate]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/5
      */
     @Override
     public R queryDemandPRFromSap800(Date startDate, Date endDate) {
@@ -62,7 +62,7 @@ public class OrderFromSap800InterfaceServiceImpl implements IOrderFromSap800Inte
             JCoParameterList outParam = fm.getExportParameterList();
             //获取返回的Table
             JCoTable outTableOutput = fm.getTableParameterList().getTable("OUTPUT");
-            if ("S".equals(outParam.getString("FLAG"))) {
+            if (SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(outParam.getString("FLAG"))) {
                 //从输出table中获取每一行数据
                 if (outTableOutput != null && outTableOutput.getNumRows() > 0) {
                     //循环取table行数据
@@ -87,6 +87,8 @@ public class OrderFromSap800InterfaceServiceImpl implements IOrderFromSap800Inte
                         omsInternalOrderRes.setMrpRange(outTableOutput.getString("BERID"));//MRP范围
                         omsInternalOrderRes.setMarker("PR");
                         omsInternalOrderRes.setDelFlag("0");
+                        omsInternalOrderRes.setCreateBy("定时任务");
+                        omsInternalOrderRes.setCreateTime(new Date());
                         dataList.add(omsInternalOrderRes);
                     }
                 } else {
@@ -104,17 +106,18 @@ public class OrderFromSap800InterfaceServiceImpl implements IOrderFromSap800Inte
         log.info("===============获取SAP800系统13周PR需求方法  end================");
         return R.data(dataList);
     }
+
     /**
-     * @Description: 获取SAP800系统PO真单
-     * @Param: [startDate, endDate]
-     * @return: com.cloud.common.core.domain.R
-     * @Author: ltq
-     * @Date: 2020/6/5
+     * Description: 获取SAP800系统PO真单
+     * Param: [startDate, endDate]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/5
      */
     @Override
     public R queryDemandPOFromSap800(Date startDate, Date endDate) {
         log.info("================获取SAP800系统PO真单方法  start================");
-        JCoDestination destination = null;
+        JCoDestination destination;
         if (startDate == null || endDate == null) {
             log.error("================获取SAP800系统PO真单方法,传入参数为空================");
             return R.error("获取SAP800系统PO真单方法,传入参数为空！");
@@ -143,14 +146,14 @@ public class OrderFromSap800InterfaceServiceImpl implements IOrderFromSap800Inte
             JCoParameterList outParam = fm.getExportParameterList();
             //获取返回的Table
             JCoTable outTableOutput = fm.getTableParameterList().getTable("OUTPUT");
-            if ("S".equals(outParam.getString("FLAG"))) {
+            if (SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(outParam.getString("FLAG"))) {
                 //从输出table中获取每一行数据
                 if (outTableOutput != null && outTableOutput.getNumRows() > 0) {
                     //循环取table行数据
                     for (int i = 0; i < outTableOutput.getNumRows(); i++) {
                         //设置指针位置
                         outTableOutput.setRow(i);
-                        dataList.add(OmsInternalOrderRes.builder()
+                        OmsInternalOrderRes omsInternalOrderRes = OmsInternalOrderRes.builder()
                                 .orderCode(outTableOutput.getString("EBELN"))//采购申请号
                                 .orderLineCode(outTableOutput.getString("EBELP"))//采购申请行号
                                 .deliveryFlag(outTableOutput.getString("ELIKZ"))//交货已完成标识
@@ -170,7 +173,10 @@ public class OrderFromSap800InterfaceServiceImpl implements IOrderFromSap800Inte
                                 .mrpRange(outTableOutput.getString("BERID"))//MRP范围
                                 .marker("PO")
                                 .delFlag("0")
-                                .build());
+                                .build();
+                        omsInternalOrderRes.setCreateTime(new Date());
+                        omsInternalOrderRes.setCreateBy("定时任务");
+                        dataList.add(omsInternalOrderRes);
                     }
                 } else {
                     log.error("获取SAP800系统PO真单返回信息为空！");
@@ -178,7 +184,7 @@ public class OrderFromSap800InterfaceServiceImpl implements IOrderFromSap800Inte
                 }
             } else {
                 log.error("获取SAP800系统PO真单数据失败：" + outParam.getString("MESSAGE"));
-                return R.error(jCoFields.getString("MESSAGE"));
+                return R.error(outParam.getString("MESSAGE"));
             }
         } catch (Exception e) {
             log.error("获取SAP800系统PO真单方法异常:" + e);
