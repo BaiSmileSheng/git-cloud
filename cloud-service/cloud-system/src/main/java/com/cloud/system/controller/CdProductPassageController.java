@@ -115,5 +115,27 @@ public class CdProductPassageController extends BaseController {
     public R remove(@RequestBody String ids) {
         return toAjax(cdProductPassageService.deleteByIds(ids));
     }
+    /**
+     * 查询成品在途
+     */
+    @PostMapping("queryOneByExample")
+    @ApiOperation(value = "查询成品在途", response = CdProductPassage.class)
+    public R queryOneByExample(@RequestBody CdProductPassage cdProductPassage){
+        Example example = new Example(CdProductPassage.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("productMaterialCode",cdProductPassage.getProductMaterialCode());
+        criteria.andEqualTo("storehouseTo",cdProductPassage.getStorehouseTo());
+        criteria.andEqualTo("productFactoryCode",cdProductPassage.getProductFactoryCode());
+        return R.data(cdProductPassageService.selectByExample(example));
+    }
+
+    /**
+     * 查询成品在途
+     */
+    @PostMapping("queryByList")
+    @ApiOperation(value = "查询成品在途", response = CdProductPassage.class)
+    public R queryByList(@RequestBody List<CdProductPassage> list){
+        return cdProductPassageService.selectByList(list);
+    }
 
 }

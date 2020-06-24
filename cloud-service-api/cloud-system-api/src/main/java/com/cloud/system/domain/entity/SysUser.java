@@ -5,11 +5,8 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.cloud.common.core.domain.BaseEntity;
 import com.cloud.common.easyexcel.converter.SexConverter;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,7 +29,6 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@JsonIgnoreProperties
 public class SysUser extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
@@ -132,7 +128,6 @@ public class SysUser extends BaseEntity {
     /**
      * 角色Id组
      */
-    @JsonIgnore
     private List<Long> roleIds;
 
     /**
@@ -165,7 +160,6 @@ public class SysUser extends BaseEntity {
         this.userId = userId;
     }
 
-    @JsonIgnore
     public boolean isAdmin() {
         return isAdmin(this.userId);
     }

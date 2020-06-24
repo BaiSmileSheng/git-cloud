@@ -19,6 +19,8 @@ public interface CdProductStockMapper extends BaseMapper<CdProductStock>{
      */
     int deleteAll();
 
+    List<CdProductStock> selectByList(List<CdProductStock> list);
+
     /**
      * 根据工厂，专用号分组取成品库存
      * @param dicts
