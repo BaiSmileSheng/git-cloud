@@ -5,7 +5,6 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.cloud.common.core.domain.BaseEntity;
 import com.cloud.common.easyexcel.converter.SexConverter;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -160,7 +159,7 @@ public class SysUser extends BaseEntity {
     public void setUserId(Long userId) {
         this.userId = userId;
     }
-    @JsonIgnore
+
     public boolean isAdmin() {
         return isAdmin(this.userId);
     }
