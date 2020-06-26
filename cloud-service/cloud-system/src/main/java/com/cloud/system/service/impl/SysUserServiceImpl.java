@@ -1,6 +1,7 @@
 package com.cloud.system.service.impl;
 
 import cn.hutool.core.util.ArrayUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.annotation.DataScope;
 import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.text.Convert;
@@ -8,6 +9,7 @@ import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.common.utils.security.Md5Utils;
 import com.cloud.system.domain.entity.*;
+import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.mapper.*;
 import com.cloud.system.service.ISysConfigService;
 import com.cloud.system.service.ISysUserService;
@@ -441,23 +443,24 @@ public class SysUserServiceImpl implements ISysUserService {
      * @return 用户信息
      */
     @Override
-    public SysUser findUserBySupplierCode(String supplierCode) {
+    public SysUserVo findUserBySupplierCode(String supplierCode) {
         log.info("根据供应商V码查询供应商信息 V码:{}",supplierCode);
         Example exampleCdSupplierInfo = new Example(CdSupplierInfo.class);
         Example.Criteria criteriaCdSupplierInfo = exampleCdSupplierInfo.createCriteria();
         criteriaCdSupplierInfo.andEqualTo("supplierCode", supplierCode);
         CdSupplierInfo cdSupplierInfo = cdSupplierInfoMapper.selectOneByExample(exampleCdSupplierInfo);
         if(null != cdSupplierInfo){
-            SysUser sysUser = new SysUser();
-            sysUser.setCorporation(cdSupplierInfo.getCorporation());
             String userName = cdSupplierInfo.getNick();
             if(StringUtils.isBlank(userName)){
                 log.info("根据供应商V码查询供应商信息登录名称不存在 V码:{}",supplierCode);
                 return null;
             }
             log.info("根据供应商V码查询供应商信息 昵称:{}",userName);
-            sysUser = userMapper.selectUserByLoginName(userName);
-            return sysUser;
+            SysUser sysUser = userMapper.selectUserByLoginName(userName);
+            String jsonUser = JSONObject.toJSONString(sysUser);
+            SysUserVo sysUserVo = JSONObject.parseObject(jsonUser,SysUserVo.class);
+            sysUserVo.setCorporation(cdSupplierInfo.getCorporation());
+            return sysUserVo;
         }
         return null;
     }

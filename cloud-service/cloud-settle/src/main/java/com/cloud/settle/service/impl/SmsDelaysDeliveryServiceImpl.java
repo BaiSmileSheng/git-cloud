@@ -18,6 +18,7 @@ import com.cloud.settle.service.ISmsDelaysDeliveryService;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteFactoryLineInfoService;
 import com.cloud.system.feign.RemoteOssService;
 import com.cloud.system.feign.RemoteUserService;
@@ -31,7 +32,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -98,18 +98,21 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
         logger.info("根据id查询延期索赔单详情 id:{}",id);
         SmsDelaysDelivery smsDelaysDeliveryRes = smsDelaysDeliveryMapper.selectByPrimaryKey(id);
         if(null != smsDelaysDeliveryRes || StringUtils.isNotBlank(smsDelaysDeliveryRes.getDelaysNo())){
-            //索赔文件编号
-            String claimOrderNo = smsDelaysDeliveryRes.getDelaysNo();
-            R sysOssR = remoteOssService.listByOrderNo(claimOrderNo);
-            if(!sysOssR.isSuccess()){
-                logger.error("根据id查询延期索赔单详情获取图片信息失败claimOrderNo:{},res:{}",
-                        claimOrderNo, JSONObject.toJSON(sysOssR));
-                throw new BusinessException("根据id查询延期索赔单详情获取图片信息失败");
-            }
-            List<SysOss> sysOssList = sysOssR.getCollectData(new TypeReference<List<SysOss>>() {});
             Map<String,Object> map = new HashMap<>();
+            //如果申诉过查文件
+            if(StringUtils.isNotBlank(smsDelaysDeliveryRes.getComplaintDescription())){
+                //索赔文件编号
+                String claimOrderNo = smsDelaysDeliveryRes.getDelaysNo();
+                R sysOssR = remoteOssService.listByOrderNo(claimOrderNo);
+                if(!sysOssR.isSuccess()){
+                    logger.error("根据id查询延期索赔单详情获取图片信息失败claimOrderNo:{},res:{}",
+                            claimOrderNo, JSONObject.toJSON(sysOssR));
+                    throw new BusinessException("根据id查询延期索赔单详情获取图片信息失败");
+                }
+                List<SysOss> sysOssList = sysOssR.getCollectData(new TypeReference<List<SysOss>>() {});
+                map.put("sysOssList",sysOssList);
+            }
             map.put("smsDelaysDelivery",smsDelaysDeliveryRes);
-            map.put("sysOssList",sysOssList);
             return R.ok(map);
         }
 
@@ -132,7 +135,7 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
         //2.插入延期索赔信息
         int count = smsDelaysDeliveryMapper.insertList(smsDelaysDeliveryList);
         //供应商V码对应的供应商信息
-        Map<String,SysUser> mapSysUser = new HashMap<>();
+        Map<String,SysUserVo> mapSysUser = new HashMap<>();
         //获取供应商信息
         for(String supplierCode : supplierSet){
             logger.info("新增保存延期交付索赔时获取供应商信息 supplierCode:{}",supplierCode);
@@ -141,14 +144,14 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
                 logger.error("新增保存延期交付索赔 供应商信息不存在supplierCode:{}", supplierCode);
                 throw new BusinessException("新增保存延期交付索赔 供应商信息不存在");
             }
-            SysUser sysUser = sysUserR.getData(SysUser.class);
+            SysUserVo sysUser = sysUserR.getData(SysUserVo.class);
             mapSysUser.put(supplierCode,sysUser);
         }
         //3.发送邮件
         String mailSubject = "延期索赔邮件";
         for(SmsDelaysDelivery smsDelaysDeliveryMail :smsDelaysDeliveryList ){
             String supplierCode = smsDelaysDeliveryMail.getSupplierCode();
-            SysUser sysUser = mapSysUser.get(supplierCode);
+            SysUserVo sysUser = mapSysUser.get(supplierCode);
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条延期交付订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
             mailTextBuffer.append(smsDelaysDeliveryMail.getSupplierName()).append("+").append(supplierCode).append("+")
@@ -172,10 +175,11 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
         //获取昨天时间
         String date = DateUtils.getDaysTimeString(dateBeforeOne);
         List<SmsDelaysDelivery> smsDelaysDeliveryList = new ArrayList<>();
-        List<OmsProductionOrder> listRes = remoteProductionOrderService.listForDelays(date,date,DateUtils.getDate());
-        if(CollectionUtils.isEmpty(listRes)){
+        R rRes = remoteProductionOrderService.listForDelays(date,date,DateUtils.getDate());
+        if (!rRes.isSuccess()) {
             return null;
         }
+        List<OmsProductionOrder> listRes=rRes.getCollectData(new TypeReference<List<OmsProductionOrder>>() {});
         for(OmsProductionOrder omsProductionOrderRes : listRes){
             SmsDelaysDelivery smsDelaysDelivery = new SmsDelaysDelivery();
             smsDelaysDelivery.setDelaysAmount(DELAYS_AMOUNT);
@@ -202,8 +206,12 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
             smsDelaysDelivery.setDelFlag(DeleteFlagConstants.NO_DELETED);
 
             //根据线体获取供应商信息
-            CdFactoryLineInfo cdFactoryLineInfo =remoteFactoryLineInfoService
+            R rFactoryLineInfo=remoteFactoryLineInfoService
                     .selectInfoByCodeLineCode(omsProductionOrderRes.getProductLineCode());
+            if (!rFactoryLineInfo.isSuccess()) {
+                throw new BusinessException(rFactoryLineInfo.getStr("msg"));
+            }
+            CdFactoryLineInfo cdFactoryLineInfo=rFactoryLineInfo.getData(CdFactoryLineInfo.class);
             if(null != cdFactoryLineInfo){
                 smsDelaysDelivery.setSupplierCode(cdFactoryLineInfo.getSupplierCode());
                 smsDelaysDelivery.setSupplierName(cdFactoryLineInfo.getSupplierDesc());
@@ -284,7 +292,7 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
                 logger.error("定时发送邮件时查询供应商信息失败供应商编号 supplierCode:{}",supplierCode);
                 throw new BusinessException("定时发送邮件时查询供应商信息失败");
             }
-            SysUser sysUser = sysUserR.getData(SysUser.class);
+            SysUserVo sysUser = sysUserR.getData(SysUserVo.class);
             String mailSubject = "延期索赔邮件";
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条延期索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉

@@ -29,4 +29,9 @@ public class ActivitiProDefKeyConstants {
      */
     public static final String ACTIVITI_PRO_DEF_KEY_CHAIM_OTHER_TEST = "chaimOther";
 
+    /**
+     * 下市管理服务相关流程key
+     */
+    public static final String ACTIVITI_PRO_DEF_KEY_MATERIAL_OUT_TEST = "materialOut";
+
 }

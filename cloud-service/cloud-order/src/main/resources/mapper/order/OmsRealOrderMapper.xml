@@ -101,7 +101,7 @@
         product_factory_code,product_material_code,customer_code,product_material_desc,customer_desc
     </select>
 
-    <insert id="batchInsetOrUpdate" parameterType="java.util.List">
+    <insert id="batchInsetOrUpdate" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         insert into oms_real_order (
         order_code,
         order_type,

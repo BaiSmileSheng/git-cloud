@@ -10,6 +10,7 @@ public enum Weeks2DemandOrderEditAuditStatusEnum {
     DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_WXSH("0","无需审核"),
     DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHZ("1","审核中"),
     DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHWC("2","审核完成"),
+    DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHBH("2","审核驳回"),
 
 
     ;

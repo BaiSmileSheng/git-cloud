@@ -8,11 +8,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
 
 /**
  * 物耗管理 Feign服务层
@@ -68,7 +64,7 @@ public interface RemoteSmsSupplementaryOrderService {
      * @return 物料号集合
      */
     @GetMapping(value = "supplementary/materialCodeListByStatus")
-    List<String> materialCodeListByStatus(@RequestParam("status")String status);
+    R materialCodeListByStatus(@RequestParam("status")String status);
 
     /**
      * 小微主审批通过传SAPY61

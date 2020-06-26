@@ -110,7 +110,7 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
     private R supplierAppeal(SmsQualityOrder smsQualityOrder, MultipartFile[] files) {
         //1.查询索赔单数据,判断状态是否是待提交,待提交可修改
         R smsQualityOrderResR = remoteQualityOrderService.get(smsQualityOrder.getId());
-        if(smsQualityOrderResR.isSuccess()){
+        if(!smsQualityOrderResR.isSuccess()){
             logger.error("质量索赔单申诉时索赔单不存在 索赔单id:{}",smsQualityOrder.getId());
             throw new BusinessException("索赔单不存在");
         }

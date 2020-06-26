@@ -172,7 +172,7 @@ public class SmsScrapOrderController extends BaseController {
     /**
      * 查询报废申请 导出
      */
-    @GetMapping("export")
+    @PostMapping("export")
     @ApiOperation(value = "报废申请 导出", response = SmsScrapOrder.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "scrapNo", value = "报废单号", required = false, paramType = "query", dataType = "String"),

@@ -10,6 +10,7 @@ import com.cloud.settle.enums.ClaimOtherStatusEnum;
 import com.cloud.settle.mail.MailService;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteOssService;
 import com.cloud.system.feign.RemoteSequeceService;
 import com.cloud.system.feign.RemoteUserService;
@@ -89,6 +90,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         logger.info("根据id查询其他索赔单详情 id:{}",id);
         SmsClaimOther smsClaimOtherRes = smsClaimOtherMapper.selectByPrimaryKey(id);
         if(null != smsClaimOtherRes || StringUtils.isNotBlank(smsClaimOtherRes.getClaimCode())){
+            Map<String,Object> map = new HashMap<>();
             //索赔文件编号
             String claimOrderNo =smsClaimOtherRes.getClaimCode() + ORDER_NO_OTHER_CLAIM_END;
             R claimListR = remoteOssService.listByOrderNo(claimOrderNo);
@@ -98,19 +100,22 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
                 throw new BusinessException("根据id查询其他索赔单详情时获取索赔图片信息失败");
             }
             List<SysOss> claimListReault = claimListR.getCollectData(new TypeReference<List<SysOss>>() {});
-            //申诉文件编号
-            String appealOrderNo = smsClaimOtherRes.getClaimCode() + ORDER_NO_OTHER_APPEAL_END;
-            R appealListR = remoteOssService.listByOrderNo(appealOrderNo);
-            if(!appealListR.isSuccess()){
-                logger.error("根据id查询其他索赔单详情时获取申诉图片信息失败appealOrderNo:{},res:{}",
-                        claimOrderNo,JSONObject.toJSON(appealListR));
-                throw new BusinessException("根据id查询其他索赔单详情时获取审诉图片信息失败");
+            //如果申诉过则查申诉文件
+            if(StringUtils.isNotBlank(smsClaimOtherRes.getComplaintDescription())){
+                //申诉文件编号
+                String appealOrderNo = smsClaimOtherRes.getClaimCode() + ORDER_NO_OTHER_APPEAL_END;
+                R appealListR = remoteOssService.listByOrderNo(appealOrderNo);
+                if(!appealListR.isSuccess()){
+                    logger.error("根据id查询其他索赔单详情时获取申诉图片信息失败appealOrderNo:{},res:{}",
+                            claimOrderNo,JSONObject.toJSON(appealListR));
+                    throw new BusinessException("根据id查询其他索赔单详情时获取审诉图片信息失败");
+                }
+                List<SysOss> appealListReault = appealListR.getCollectData(new TypeReference<List<SysOss>>() {});
+                map.put("appealSysOssList",appealListReault);
             }
-            List<SysOss> appealListReault = appealListR.getCollectData(new TypeReference<List<SysOss>>() {});
-            Map<String,Object> map = new HashMap<>();
+
             map.put("smsClaimOther",smsClaimOtherRes);
             map.put("claimSysOssList",claimListReault);
-            map.put("appealSysOssList",appealListReault);
             return R.ok(map);
         }
         return R.error("查询索赔单失败");
@@ -275,7 +280,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
                 logger.error("提交其他索赔时查询供应商信息失败供应商编号 supplierCode:{}",supplierCode);
                 throw new BusinessException("提交其他索赔时查询供应商信息失败");
             }
-            SysUser sysUser = sysUserR.getData(SysUser.class);
+            SysUserVo sysUser = sysUserR.getData(SysUserVo.class);
             String mailSubject = "其他索赔邮件";
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条其他索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
@@ -380,7 +385,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
                 logger.error("定时发送邮件时查询供应商信息失败供应商编号 supplierCode:{}",supplierCode);
                 throw new BusinessException("定时发送邮件时查询供应商信息失败");
             }
-            SysUser sysUser = sysUserR.getData(SysUser.class);
+            SysUserVo sysUser = sysUserR.getData(SysUserVo.class);
             String mailSubject = "其他索赔邮件";
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条其他索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
