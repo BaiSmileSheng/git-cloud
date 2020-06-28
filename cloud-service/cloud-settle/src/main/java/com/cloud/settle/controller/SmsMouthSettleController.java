@@ -150,7 +150,7 @@ public class SmsMouthSettleController extends BaseController {
             @ApiImplicitParam(name = "id", value = "id", required = true,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "settleStatus", value = "状态：12、内控确认 13、小微主确认", required = true,paramType = "query", dataType = "String")
     })
-    @HasPermissions("settle:mouthSettle:confirm")
+    @HasPermissions("settle:mouthSettle:xwzConfirm,settle:mouthSettle:nkConfirm")
     public R confirm(Long id,String settleStatus) {
         return smsMouthSettleService.confirm(id,settleStatus);
     }
