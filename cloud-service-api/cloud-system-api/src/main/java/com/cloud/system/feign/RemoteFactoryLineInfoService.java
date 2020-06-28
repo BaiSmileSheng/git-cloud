@@ -35,6 +35,7 @@ public interface RemoteFactoryLineInfoService {
     /**
      * 根据线体查询信息
      * @param produceLineCode
+     * @param factoryCode
      * @return 供应商编码
      */
     @PostMapping("factoryLine/selectInfoByCodeLineCode")

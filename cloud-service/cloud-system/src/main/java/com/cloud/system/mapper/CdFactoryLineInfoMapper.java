@@ -24,6 +24,7 @@ public interface CdFactoryLineInfoMapper extends BaseMapper<CdFactoryLineInfo> {
      * 根据线体查询信息
      *
      * @param produceLineCode
+     * @param factoryCode
      * @return 供应商编码
      */
     CdFactoryLineInfo selectInfoByCodeLineCode(@Param("produceLineCode") String produceLineCode, @Param("factoryCode") String factoryCode);

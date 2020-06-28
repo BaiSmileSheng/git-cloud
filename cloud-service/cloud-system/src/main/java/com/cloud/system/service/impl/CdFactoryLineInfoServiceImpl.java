@@ -45,6 +45,7 @@ public class CdFactoryLineInfoServiceImpl extends BaseServiceImpl<CdFactoryLineI
     /**
      * 根据线体查询信息
      * @param produceLineCode
+     * @param factoryCode
      * @return 供应商编码
      */
     @Override
