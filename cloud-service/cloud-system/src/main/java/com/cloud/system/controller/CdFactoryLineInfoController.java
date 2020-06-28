@@ -1,5 +1,6 @@
 package com.cloud.system.controller;
 
+import cn.hutool.core.lang.Dict;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 工厂线体关系  提供者
@@ -149,5 +151,18 @@ public class CdFactoryLineInfoController extends BaseController {
     @ApiOperation(value = "获取SAP系统工厂线体关系数据，保存", response = R.class)
     public R saveFactoryLineInfo(){
         return  cdFactoryLineInfoService.saveFactoryLineInfo();
+    }
+
+    /**
+     * Description:  根据List<Map<String,String>>工厂、线体查询线体信息
+     * Param: [list]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/18
+     */
+    @PostMapping("selectListByMapList")
+    @ApiOperation(value = "根据List<Map<String,String>>工厂、线体查询线体信息", response = R.class)
+    public R selectListByMapList(@RequestBody List<Dict> list){
+        return cdFactoryLineInfoService.selectListByMapList(list);
     }
 }

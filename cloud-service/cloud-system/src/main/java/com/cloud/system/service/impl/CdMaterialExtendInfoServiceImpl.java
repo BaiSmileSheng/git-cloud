@@ -1,5 +1,6 @@
 package com.cloud.system.service.impl;
 
+import cn.hutool.core.lang.Dict;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
@@ -20,6 +21,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -55,6 +57,28 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
         }).collect(Collectors.toList());
         //2.传SAP
         return fromSAPDDPS03(materialCodeList);
+    }
+    /**
+     * Description:  根据多个成品专用号查询
+     * Param: [list]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/18
+     */
+    @Override
+    public R selectByMaterialCodeList(List<Dict> list) {
+        return R.data(cdMaterialExtendInfoMapper.selectByMaterialCodeList(list));
+    }
+    /**
+     * Description:  根据物料查询一条数据
+     * Param: [materialCode]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/23
+     */
+    @Override
+    public R selectOneByMaterialCode(String materialCode) {
+        return R.data(cdMaterialExtendInfoMapper.selectOneByMaterialCode(materialCode));
     }
 
     /**
