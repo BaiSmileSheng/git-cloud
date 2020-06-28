@@ -100,12 +100,12 @@ public class CdProductOverdueController extends BaseController {
         return example;
     }
     /**
-     * 导出模板
+     * 导入模板下载
      * @return
      */
     @PostMapping("exportTemplate")
     @HasPermissions("system:productOverdue:exportTemplate")
-    @ApiOperation(value = "导出模板", response = CdProductOverdue.class)
+    @ApiOperation(value = "导入模板下载", response = CdProductOverdue.class)
     public R exportTemplate(){
         String fileName = "超期库存模板.xlsx";
         return EasyExcelUtil.writeExcel(Arrays.asList(),fileName,fileName,new CdProductOverdue());
@@ -140,19 +140,8 @@ public class CdProductOverdueController extends BaseController {
         if(file.isEmpty()){
             return R.error("文件不能为空");
         }
-//        List<CdProductOverdue> list =  (List<CdProductOverdue>)EasyExcelUtil.readMulExcel(file,new CdProductOverdue());
-//        if(CollectionUtils.isEmpty(list)){
-//            return R.error("导入数据不存在");
-//        }
-//        for(CdProductOverdue cdProductOverdue : list){
-//            //校验入参
-//            ValidatorUtils.validateEntity(cdProductOverdue);
-//            cdProductOverdue.setDelFlag(DeleteFlagConstants.NO_DELETED);
-//            cdProductOverdue.setCreateBy(getLoginName());
-//            cdProductOverdue.setCreateTime(new Date());
-//        }
-        long loginId = getCurrentUserId();
-        return cdProductOverdueService.importFactoryStorehouse(file,loginId);
+        String loginName = getLoginName();
+        return cdProductOverdueService.importFactoryStorehouse(file,loginName);
     }
 
 

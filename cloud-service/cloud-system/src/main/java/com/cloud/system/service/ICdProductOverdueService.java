@@ -21,5 +21,5 @@ public interface ICdProductOverdueService extends BaseService<CdProductOverdue> 
      * @param file
      * @return
      */
-    R importFactoryStorehouse(MultipartFile file, long loginId) throws IOException;
+    R importFactoryStorehouse(MultipartFile file, String loginName) throws IOException;
 }

@@ -415,8 +415,8 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         List<ExcelImportOtherObjectDto> otherDtos = new ArrayList<>();
 
         List<OmsRealOrderExcelImportVo> listImport = (List<OmsRealOrderExcelImportVo>) objects;
-        List<OmsRealOrder> list= listImport.stream().map(demandOrderGatherEditIMport ->
-                BeanUtil.copyProperties(demandOrderGatherEditIMport,OmsRealOrder.class)).collect(Collectors.toList());
+        List<OmsRealOrder> list= listImport.stream().map(omsRealOrderExcelImportVo ->
+                BeanUtil.copyProperties(omsRealOrderExcelImportVo,OmsRealOrder.class)).collect(Collectors.toList());
 
         //获取工厂库位基础表
         R listFactoryStorehouseInfoResult = remoteFactoryStorehouseInfoService.listFactoryStorehouseInfo(JSONObject.toJSONString(new CdFactoryStorehouseInfo()));
