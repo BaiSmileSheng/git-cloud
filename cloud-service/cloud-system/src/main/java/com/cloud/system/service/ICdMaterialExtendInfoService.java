@@ -1,10 +1,14 @@
 package com.cloud.system.service;
 
+import cn.hutool.core.lang.Dict;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 
 import java.util.List;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 物料扩展信息 Service接口
@@ -35,4 +39,21 @@ public interface ICdMaterialExtendInfoService extends BaseService<CdMaterialExte
      * @return
      */
     R selectInfoInMaterialCodes(List<String> materialCodes);
+    /**
+     * Description:  根据多个成品专用号查询
+     * Param: [list]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/18
+     */
+    R selectByMaterialCodeList(List<Dict> list);
+    /**
+     * Description:  根据物料查询一条数据
+     * Param: [materialCode]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/23
+     */
+    R selectOneByMaterialCode(String materialCode);
+
 }

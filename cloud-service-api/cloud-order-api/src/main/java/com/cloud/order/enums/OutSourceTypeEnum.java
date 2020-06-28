@@ -7,8 +7,9 @@ package com.cloud.order.enums;
  */
 public enum OutSourceTypeEnum {
 
-    OUT_SOURCE_TYPE_BWW("0","半委外"),
-    OUT_SOURCE_TYPE_QWW("1","全委外"),
+    OUT_SOURCE_TYPE_BWW("0","半成品"),
+    OUT_SOURCE_TYPE_QWW("1","成品"),
+    OUT_SOURCE_TYPE_ZZ("2","自制"),
     ;
     private String code;
     private String msg;

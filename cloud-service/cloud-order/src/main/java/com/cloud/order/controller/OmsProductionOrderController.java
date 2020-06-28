@@ -15,20 +15,25 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
+import com.cloud.order.domain.entity.vo.OmsProductionOrderVo;
 import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.service.IOmsProductionOrderService;
 import com.cloud.order.util.DataScopeUtil;
+import com.cloud.system.domain.entity.CdFactoryStorehouseInfo;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteFactoryLineInfoService;
 import io.swagger.annotations.*;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 排产订单  提供者
@@ -52,7 +57,7 @@ public class OmsProductionOrderController extends BaseController {
      */
     @GetMapping("get")
     @ApiOperation(value = "根据id查询排产订单 ", response = OmsProductionOrder.class)
-    public OmsProductionOrder get(Long id) {
+    public OmsProductionOrder get(@RequestParam("id") Long id) {
         return omsProductionOrderService.selectByPrimaryKey(id);
 
     }
@@ -81,24 +86,24 @@ public class OmsProductionOrderController extends BaseController {
             criteria.andEqualTo("productFactoryCode", omsProductionOrder.getProductFactoryCode());
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getProductLineCode())) {
-            criteria.andEqualTo("productLineCode",omsProductionOrder.getProductLineCode());
+            criteria.andEqualTo("productLineCode", omsProductionOrder.getProductLineCode());
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getStatus())) {
-            criteria.andEqualTo("status",omsProductionOrder.getStatus());
+            criteria.andEqualTo("status", omsProductionOrder.getStatus());
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getProductMaterialCode())) {
             criteria.andLike("productMaterialCode", omsProductionOrder.getProductMaterialCode());
         }
-        if (omsProductionOrder.getProductStartDate()!=null) {
+        if (omsProductionOrder.getProductStartDate() != null) {
             criteria.andGreaterThanOrEqualTo("productStartDate", omsProductionOrder.getProductStartDate());
         }
-        if (omsProductionOrder.getProductEndDate()!=null) {
+        if (omsProductionOrder.getProductEndDate() != null) {
             criteria.andLessThanOrEqualTo("productEndDate", omsProductionOrder.getProductEndDate());
         }
         //查询订单状态已下达和已关单的两个状态的订单
         List<String> statusList = CollectionUtil.toList(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode(),
                 ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
-        criteria.andIn("status",statusList);
+        criteria.andIn("status", statusList);
 
         SysUser sysUser = getUserInfo(SysUser.class);
         if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
@@ -111,8 +116,8 @@ public class OmsProductionOrderController extends BaseController {
             criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
         }else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
             //班长、分主管查询工厂下的数据
-            if(CollectionUtil.contains(sysUser.getRoleKeys(),RoleConstants.ROLE_KEY_BZ)
-            ||CollectionUtil.contains(sysUser.getRoleKeys(),RoleConstants.ROLE_KEY_FZG)){
+            if (CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_BZ)
+                    || CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_FZG)) {
                 criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
             }
         }
@@ -123,9 +128,10 @@ public class OmsProductionOrderController extends BaseController {
 
     /**
      * 查询排产订单 列表
+     *
      * @param productEndDateEnd  基本结束时间 结束值
      * @param actualEndDateStart 实际结束时间 起始值
-     * @param actualEndDateEnd 实际结束时间 结束值
+     * @param actualEndDateEnd   实际结束时间 结束值
      * @return 排产订单 列表
      */
     @GetMapping("listForDelays")
@@ -153,8 +159,10 @@ public class OmsProductionOrderController extends BaseController {
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderService.selectByExample(example);
         return R.data(omsProductionOrderList);
     }
+
     /**
      * 根据生产订单号查询排产订单信息
+     *
      * @param prodctOrderCode
      * @return OmsProductionOrder
      */
@@ -166,7 +174,7 @@ public class OmsProductionOrderController extends BaseController {
         }
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("productOrderCode",prodctOrderCode);
+        criteria.andEqualTo("productOrderCode", prodctOrderCode);
         OmsProductionOrder productionOrder = omsProductionOrderService.findByExampleOne(example);
         if(null == productionOrder){
             return R.error("排产订单信息不存在,请检查数据");
@@ -257,24 +265,24 @@ public class OmsProductionOrderController extends BaseController {
             criteria.andEqualTo("productFactoryCode", omsProductionOrder.getProductFactoryCode());
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getProductLineCode())) {
-            criteria.andEqualTo("productLineCode",omsProductionOrder.getProductLineCode());
+            criteria.andEqualTo("productLineCode", omsProductionOrder.getProductLineCode());
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getStatus())) {
-            criteria.andEqualTo("status",omsProductionOrder.getStatus());
+            criteria.andEqualTo("status", omsProductionOrder.getStatus());
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getProductMaterialCode())) {
             criteria.andLike("productMaterialCode", omsProductionOrder.getProductMaterialCode());
         }
-        if (omsProductionOrder.getProductStartDate()!=null) {
+        if (omsProductionOrder.getProductStartDate() != null) {
             criteria.andGreaterThanOrEqualTo("productStartDate", omsProductionOrder.getProductStartDate());
         }
-        if (omsProductionOrder.getProductEndDate()!=null) {
+        if (omsProductionOrder.getProductEndDate() != null) {
             criteria.andLessThanOrEqualTo("productEndDate", omsProductionOrder.getProductEndDate());
         }
         //查询订单状态已下达和已关单的两个状态的订单
         List<String> statusList = CollectionUtil.toList(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode(),
                 ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
-        criteria.andIn("status",statusList);
+        criteria.andIn("status", statusList);
 
         SysUser sysUser = getUserInfo(SysUser.class);
         if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
@@ -283,15 +291,132 @@ public class OmsProductionOrderController extends BaseController {
                 return R.error("数据为空！");
             }
             String lineCodes = r.get("data").toString();
-            criteria.andIn("productLineCode",CollectionUtil.toList(lineCodes.split(",")));
-        }else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
+            criteria.andIn("productLineCode", CollectionUtil.toList(lineCodes.split(",")));
+        } else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
             //班长、分主管查询工厂下的数据
-            if(CollectionUtil.contains(sysUser.getRoleKeys(),RoleConstants.ROLE_KEY_BZ)
-                    ||CollectionUtil.contains(sysUser.getRoleKeys(),RoleConstants.ROLE_KEY_FZG)){
+            if (CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_BZ)
+                    || CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_FZG)) {
                 criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
             }
         }
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderService.selectByExample(example);
         return EasyExcelUtil.writeExcel(omsProductionOrderList, "生产订单.xlsx", "sheet", new OmsProductionOrder());
     }
+
+    /**
+     * 查询排产订单 列表
+     */
+    @GetMapping("selectAllPage")
+    @ApiOperation(value = "排产订单分页查询", response = OmsProductionOrder.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productMaterialCode", value = "专用号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productFactoryCode", value = "工厂", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productLineCode", value = "线体", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "status", value = "状态", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "checkDateStart", value = "查询开始日期", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "checkDateEnd", value = "查询结束日期", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "orderType", value = "sap订单类型", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "dateType", value = "查询日期类型", required = false, paramType = "query", dataType = "String")
+    })
+    public TableDataInfo selectAllPage(@ApiIgnore() OmsProductionOrder omsProductionOrder) {
+        SysUser sysUser = getUserInfo(SysUser.class);
+        startPage();
+        List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderService.selectPageInfo(omsProductionOrder,sysUser);
+        return getDataTable(omsProductionOrderList);
+    }
+
+    /**
+     * 导出模板
+     * @return
+     */
+    @GetMapping("exportTemplate")
+    @HasPermissions("system:productionOrder:exportTemplate")
+    @ApiOperation(value = "导出模板", response = OmsProductionOrderVo.class)
+    public R exportTemplate(){
+        String fileName = "排产订单.xlsx";
+        return EasyExcelUtil.writeExcel(Arrays.asList(),fileName,fileName,new OmsProductionOrderVo());
+    }
+
+    /**
+     * 导入
+     *
+     * @return
+     */
+    @PostMapping("importProductOrder")
+    @HasPermissions("system:productOrder:importProductOrder")
+    @ApiOperation(value = "导入", response = OmsProductionOrder.class)
+    public R importProductOrder(@RequestParam("file") MultipartFile file) {
+        SysUser sysUser = getUserInfo(SysUser.class);
+        List<OmsProductionOrderVo> list = (List<OmsProductionOrderVo>) EasyExcelUtil.readMulExcel(file, new OmsProductionOrderVo());
+        return omsProductionOrderService.importProductOrder(list, sysUser);
+    }
+
+    /**
+     * 查询排产订单导出 列表
+     */
+    @GetMapping("exportAll")
+    @ApiOperation(value = "排产订单导出功能", response = OmsProductionOrder.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "productMaterialCode", value = "专用号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productFactoryCode", value = "工厂", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productLineCode", value = "线体", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "status", value = "状态", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "checkDateStart", value = "查询开始日期", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "checkDateEnd", value = "查询结束日期", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "orderType", value = "sap订单类型", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "dateType", value = "查询日期类型", required = false, paramType = "query", dataType = "String")
+    })
+    public R exportAll(@ApiIgnore() OmsProductionOrder omsProductionOrder) {
+        SysUser sysUser = getUserInfo(SysUser.class);
+        List<OmsProductionOrder> productionOrderVos = omsProductionOrderService.exportAll(omsProductionOrder,sysUser);
+        return EasyExcelUtil.writeExcel(productionOrderVos, "排产订单.xlsx", "sheet", new OmsProductionOrder());
+    }
+
+    /**
+     * 删除排产订单
+     */
+    @PostMapping("delete")
+    @OperLog(title = "排产订单删除 ", businessType = BusinessType.DELETE)
+    @ApiOperation(value = "排产订单删除 ", response = R.class)
+    @ApiParam(name = "ids", value = "需删除数据的id")
+    public R delete(@RequestBody String ids) {
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return omsProductionOrderService.deleteByIdString(ids,sysUser);
+    }
+    /**
+     * 更新保存排产订单
+     */
+    @PostMapping("updateSave")
+    @OperLog(title = "更新保存排产订单 ", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "更新保存排产订单 ", response = R.class)
+    public R updateSave(@RequestBody OmsProductionOrder omsProductionOrder){
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return omsProductionOrderService.updateSave(omsProductionOrder,sysUser);
+    }
+    /**
+     * 确认下达
+     */
+    @PostMapping("confirmRelease")
+    @OperLog(title = "确认下达 ", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "确认下达 ", response = R.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "productMaterialCode", value = "专用号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productFactoryCode", value = "工厂", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productLineCode", value = "线体", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "status", value = "状态", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "checkDateStart", value = "查询开始日期", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "checkDateEnd", value = "查询结束日期", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "orderType", value = "sap订单类型", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "dateType", value = "查询日期类型", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "ids", value = "id字符串", required = false, paramType = "query", dataType = "String")
+    })
+    public R confirmRelease(@ApiIgnore OmsProductionOrder omsProductionOrder){
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return omsProductionOrderService.confirmRelease(omsProductionOrder,sysUser);
+    }
+
 }

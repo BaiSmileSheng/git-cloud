@@ -44,4 +44,13 @@ public interface RemoteBomService {
      */
     @PostMapping("bom/selectVersionMap")
     R selectVersionMap(@RequestBody List<Dict> dicts);
+    /**
+     * Description:  根据成品专用号、生产工厂、版本查询
+     * Param: [list]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/18
+     */
+    @PostMapping("bom/selectBomList")
+    R selectBomList(@RequestBody List<Dict> list);
 }

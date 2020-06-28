@@ -52,6 +52,17 @@ public class RemoteBomFallbackFactory implements FallbackFactory<RemoteBomServic
                 log.error("RemoteBomService.checkBomNum错误信息：{}",throwable.getMessage());
                 return R.error("服务拥挤，请稍后再试！");
             }
+            /**
+             * Description:  根据成品专用号、生产工厂、版本查询
+             * Param: [list]
+             * return: com.cloud.common.core.domain.R
+             * Author: ltq
+             * Date: 2020/6/18
+             */
+            @Override
+            public R selectBomList(List<Dict> list) {
+                return R.error("服务器拥挤，请稍后再试！");
+            }
 
 
         };

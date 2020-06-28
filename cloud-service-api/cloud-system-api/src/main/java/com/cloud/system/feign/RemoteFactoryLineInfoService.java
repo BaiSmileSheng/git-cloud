@@ -1,5 +1,6 @@
 package com.cloud.system.feign;
 
+import cn.hutool.core.lang.Dict;
 import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
@@ -8,6 +9,9 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 工厂线体关系 Feign服务层
@@ -47,4 +51,13 @@ public interface RemoteFactoryLineInfoService {
      */
     @PostMapping("factoryLine/saveFactoryLineInfo")
     R saveFactoryLineInfo();
+    /**
+     * Description:  根据List<Map<String,String>>工厂、线体查询线体信息
+     * Param: [list]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/18
+     */
+    @PostMapping("factoryLine/selectListByMapList")
+    R selectListByMapList(@RequestBody List<Dict> list);
 }

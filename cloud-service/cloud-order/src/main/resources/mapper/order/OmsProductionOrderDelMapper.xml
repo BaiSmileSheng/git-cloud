@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.order.mapper.OmsProductionOrderDelMapper">
+
+    <resultMap type="OmsProductionOrderDel" id="OmsProductionOrderDelResult">
+                    <result property="id" column="id"/>
+                    <result property="orderCode" column="order_code"/>
+                    <result property="productOrderCode" column="product_order_code"/>
+                    <result property="orderClass" column="order_class"/>
+                    <result property="branchOffice" column="branch_office"/>
+                    <result property="monitor" column="monitor"/>
+                    <result property="productMaterialCode" column="product_material_code"/>
+                    <result property="productMaterialDesc" column="product_material_desc"/>
+                    <result property="productFactoryCode" column="product_factory_code"/>
+                    <result property="productFactoryDesc" column="product_factory_desc"/>
+                    <result property="orderType" column="order_type"/>
+                    <result property="productNum" column="product_num"/>
+                    <result property="deliveryNum" column="delivery_num"/>
+                    <result property="unit" column="unit"/>
+                    <result property="productLineCode" column="product_line_code"/>
+                    <result property="productStartDate" column="product_start_date"/>
+                    <result property="productEndDate" column="product_end_date"/>
+                    <result property="productEndTime" column="product_end_time"/>
+                    <result property="actualEndDate" column="actual_end_date"/>
+                    <result property="bomVersion" column="bom_version"/>
+                    <result property="newVersion" column="new_version"/>
+                    <result property="sequence" column="sequence"/>
+                    <result property="destination" column="destination"/>
+                    <result property="deliveryDate" column="delivery_date"/>
+                    <result property="oldNew" column="old_new"/>
+                    <result property="useTime" column="use_time"/>
+                    <result property="rhythm" column="rhythm"/>
+                    <result property="productQuota" column="product_quota"/>
+                    <result property="pcbSpecialCode" column="pcb_special_code"/>
+                    <result property="processCost" column="process_cost"/>
+                    <result property="outsourceType" column="outsource_type"/>
+                    <result property="csdFlag" column="csd_flag"/>
+                    <result property="productStatus" column="product_status"/>
+                    <result property="lifeCycle" column="life_cycle"/>
+                    <result property="status" column="status"/>
+                    <result property="auditStatus" column="audit_status"/>
+                    <result property="sapMessages" column="sap_messages"/>
+                    <result property="delFlag" column="del_flag"/>
+                    <result property="remark" column="remark"/>
+                    <result property="createTime" column="create_time"/>
+                    <result property="createBy" column="create_by"/>
+                    <result property="updateTime" column="update_time"/>
+                    <result property="updateBy" column="update_by"/>
+                    </resultMap>
+
+    <sql id="selectOmsProductionOrderDelVo">
+        select id, order_code, product_order_code, order_class, branch_office, monitor, product_material_code, product_material_desc, product_factory_code, product_factory_desc, order_type, product_num, delivery_num, unit, product_line_code, product_start_date, product_end_date, product_end_time, actual_end_date, bom_version, new_version, sequence, destination, delivery_date, old_new, use_time, rhythm, product_quota, pcb_special_code, process_cost, outsource_type, csd_flag, product_status, life_cycle, status, audit_status, sap_messages, del_flag, remark, create_time, create_by, update_time, update_by from oms_production_order_del
+    </sql>
+
+
+</mapper>

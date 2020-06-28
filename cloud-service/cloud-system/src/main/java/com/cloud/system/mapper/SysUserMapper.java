@@ -1,6 +1,9 @@
 package com.cloud.system.mapper;
 
+import com.cloud.system.domain.entity.SysRole;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.po.SysUserRights;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Set;
@@ -140,4 +143,10 @@ public interface SysUserMapper {
      * @author zmr
      */
     public Set<Long> selectUserIdsInDepts(Long[] deptIds);
+
+    List<SysUserRights> selectListByRoleKey(String roleKey);
+
+    List<String> selectFactorysByUser(String userId);
+
+    List<String> selectGroupCodesByUser(String userId);
 }

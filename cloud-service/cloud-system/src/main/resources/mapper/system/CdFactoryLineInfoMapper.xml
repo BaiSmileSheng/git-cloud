@@ -61,4 +61,14 @@
         and product_factory_code=#{factoryCode}
          and del_flag='0' LIMIT 1
     </select>
+
+    <select id="selectListByMapList" resultMap="CdFactoryLineInfoResult" parameterType="list">
+        <include refid="selectCdFactoryLineInfoVo"/>
+        <where>
+            <foreach collection="list" item="item" separator="or" open="(" close=")" index="index">
+                product_factory_code = #{item.productFactoryCode}
+                and produce_line_code = #{item.productLineCode}
+            </foreach>
+        </where>
+    </select>
 </mapper>
