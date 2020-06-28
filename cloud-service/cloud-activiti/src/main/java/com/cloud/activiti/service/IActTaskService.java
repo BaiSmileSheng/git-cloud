@@ -24,4 +24,22 @@ public interface IActTaskService {
      * @return 是否成功
      */
     R auditBatch(BizAudit bizAudit,long auditUserId);
+
+    /**
+     * Description:  开启审批流
+     * Param: [key, orderId, orderCode, userId, title]
+     * return: com.cloud.common.core.domain.R
+     * Author: cs
+     * Date: 2020/6/24
+     */
+    R startActProcess(String key,String orderId,String orderCode,Long userId,String title);
+
+    /**
+     * Description:  根据Key查询最新版本流程
+     * Param: [key]
+     * return: com.cloud.common.core.domain.R
+     * Author: cs
+     * Date: 2020/6/24
+     */
+    R getByKey(String key);
 }
