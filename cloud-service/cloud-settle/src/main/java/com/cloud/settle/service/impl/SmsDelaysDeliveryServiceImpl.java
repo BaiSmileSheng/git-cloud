@@ -32,7 +32,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -176,10 +175,11 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
         //获取昨天时间
         String date = DateUtils.getDaysTimeString(dateBeforeOne);
         List<SmsDelaysDelivery> smsDelaysDeliveryList = new ArrayList<>();
-        List<OmsProductionOrder> listRes = remoteProductionOrderService.listForDelays(date,date,DateUtils.getDate());
-        if(CollectionUtils.isEmpty(listRes)){
+        R rRes = remoteProductionOrderService.listForDelays(date,date,DateUtils.getDate());
+        if (!rRes.isSuccess()) {
             return null;
         }
+        List<OmsProductionOrder> listRes=rRes.getCollectData(new TypeReference<List<OmsProductionOrder>>() {});
         for(OmsProductionOrder omsProductionOrderRes : listRes){
             SmsDelaysDelivery smsDelaysDelivery = new SmsDelaysDelivery();
             smsDelaysDelivery.setDelaysAmount(DELAYS_AMOUNT);
@@ -206,8 +206,12 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
             smsDelaysDelivery.setDelFlag(DeleteFlagConstants.NO_DELETED);
 
             //根据线体获取供应商信息
-            CdFactoryLineInfo cdFactoryLineInfo =remoteFactoryLineInfoService
+            R rFactoryLineInfo=remoteFactoryLineInfoService
                     .selectInfoByCodeLineCode(omsProductionOrderRes.getProductLineCode());
+            if (!rFactoryLineInfo.isSuccess()) {
+                throw new BusinessException(rFactoryLineInfo.getStr("msg"));
+            }
+            CdFactoryLineInfo cdFactoryLineInfo=rFactoryLineInfo.getData(CdFactoryLineInfo.class);
             if(null != cdFactoryLineInfo){
                 smsDelaysDelivery.setSupplierCode(cdFactoryLineInfo.getSupplierCode());
                 smsDelaysDelivery.setSupplierName(cdFactoryLineInfo.getSupplierDesc());

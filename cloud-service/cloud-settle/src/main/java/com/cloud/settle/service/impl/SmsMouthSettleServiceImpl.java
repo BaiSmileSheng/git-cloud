@@ -14,10 +14,14 @@ import com.cloud.settle.domain.webServicePO.BaseClaimDetail;
 import com.cloud.settle.domain.webServicePO.BaseClaimResponse;
 import com.cloud.settle.domain.webServicePO.BaseMultiItemClaimSaveRequest;
 import com.cloud.settle.enums.*;
-import com.cloud.settle.mapper.*;
+import com.cloud.settle.mapper.SmsClaimOtherMapper;
+import com.cloud.settle.mapper.SmsDelaysDeliveryMapper;
+import com.cloud.settle.mapper.SmsMouthSettleMapper;
+import com.cloud.settle.mapper.SmsQualityOrderMapper;
 import com.cloud.settle.service.*;
 import com.cloud.system.enums.SettleRatioEnum;
-import com.cloud.system.feign.*;
+import com.cloud.system.feign.RemoteCdMouthRateService;
+import com.cloud.system.feign.RemoteSequeceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -1112,6 +1116,11 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         }
         if(MonthSettleStatusEnum.YD_SETTLE_STATUS_DJS.getCode().equals(settleStatus)){
             //内控确认
+            BigDecimal includeTaxeFee = smsMouthSettle.getIncludeTaxeFee();
+            BigDecimal invoiceFee = smsMouthSettle.getInvoiceFee();
+            if (includeTaxeFee.compareTo(invoiceFee) != 0) {
+                return R.error("含税金额与发票金额不等，不允许提交！");
+            }
             smsMouthSettle.setSettleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_NKQR.getCode());
             updateByPrimaryKeySelective(smsMouthSettle);
         }else if(MonthSettleStatusEnum.YD_SETTLE_STATUS_NKQR.getCode().equals(settleStatus)){

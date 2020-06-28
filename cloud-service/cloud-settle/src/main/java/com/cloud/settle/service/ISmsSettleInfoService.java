@@ -41,7 +41,12 @@ public interface ISmsSettleInfoService extends BaseService<SmsSettleInfo> {
      */
     List<SmsSettleInfo> selectForMonthSettle(String month, String orderStatus);
 
-
+    /**
+     * 费用结算单明细（打印用）
+     * @param smsSettleInfo
+     * @return
+     */
+    R selectInfoForPrint(SmsSettleInfo smsSettleInfo);
 
 
 

@@ -2,6 +2,7 @@ package com.cloud.order.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
@@ -74,7 +75,7 @@ public class OmsDemandOrderGatherEditController extends BaseController {
             @ApiImplicitParam(name = "endTime", value = "交付结束日期", required = false, paramType = "query", dataType = "String")
 
     })
-    public TableDataInfo list(OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
+    public TableDataInfo list(@ApiIgnore OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
         Example example = listCondition(omsDemandOrderGatherEdit);
         SysUser sysUser = getUserInfo(SysUser.class);
         if(CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
@@ -143,6 +144,7 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     @PostMapping("update")
     @OperLog(title = "修改保存滚动计划需求操作 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存滚动计划需求操作 ", response = R.class)
+    @HasPermissions("order:demandOrderGatherEdit:editSave")
     public R editSave(@RequestBody OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
         return omsDemandOrderGatherEditService.updateWithLimit(omsDemandOrderGatherEdit);
     }
@@ -154,6 +156,7 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     @OperLog(title = "删除滚动计划需求操作 ", businessType = BusinessType.DELETE)
     @ApiOperation(value = "删除滚动计划需求操作 ", response = R.class)
     @ApiParam(name = "ids", value = "需删除数据的id")
+    @HasPermissions("order:demandOrderGatherEdit:remove")
     public R remove(@RequestBody String ids) {
         return omsDemandOrderGatherEditService.deleteWithLimit(ids);
     }
@@ -166,23 +169,25 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     @PostMapping("confirmRelease")
     @ApiOperation(value = "确认下达 ", response = R.class)
     @ApiParam(name = "ids", value = "需确认下达数据的id")
+    @HasPermissions("order:demandOrderGatherEdit:confirmRelease")
     public R confirmRelease(String ids){
         return omsDemandOrderGatherEditService.confirmRelease(ids);
     }
 
     /**
-     * 需求数据导入
+     * 滚动计划需求操作导入
      * @param file
      * @return
      */
     @PostMapping("importExcel")
     @ApiOperation(value = "滚动计划需求操作导入 ", response = R.class)
+    @HasPermissions("order:demandOrderGatherEdit:importExcel")
     public R importExcel(MultipartFile file) {
         return omsDemandOrderGatherEditService.importDemandGatherEdit(file,getUserInfo(SysUser.class));
     }
 
     /**
-     * 查询滚动计划需求 列表
+     * 计划需求导入-导出
      */
     @GetMapping("export")
     @ApiOperation(value = "计划需求导入-导出", response = OmsDemandOrderGather.class)
@@ -198,19 +203,19 @@ public class OmsDemandOrderGatherEditController extends BaseController {
             @ApiImplicitParam(name = "beginTime", value = "交付开始日期", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "endTime", value = "交付结束日期", required = false, paramType = "query", dataType = "String")
     })
+    @HasPermissions("order:demandOrderGatherEdit:export")
     public R export(@ApiIgnore() OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
         Example example = listCondition(omsDemandOrderGatherEdit);
         SysUser sysUser = getUserInfo(SysUser.class);
         if(CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
             example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
         }
-        startPage();
         List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList = omsDemandOrderGatherEditService.selectByExample(example);
         return EasyExcelUtil.writeExcel(omsDemandOrderGatherEditList, "需求导入.xlsx", "sheet", new OmsDemandOrderGatherEdit());
     }
 
     /**
-     * 查询滚动计划需求操作 列表
+     * 13周滚动需求汇总分页查询
      */
     @GetMapping("week13DemandGatherList")
     @ApiOperation(value = "13周滚动需求汇总分页查询", response = OmsDemandOrderGatherEdit.class)
@@ -227,9 +232,11 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     public TableDataInfo week13DemandGatherList(@ApiIgnore OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
         SysUser sysUser = getUserInfo(SysUser.class);
         startPage();
+        //先分页查询去重的物料号和工厂
         R r = omsDemandOrderGatherEditService.selectDistinctMaterialCodeAndFactoryCode(omsDemandOrderGatherEdit,sysUser);
         if (r.isSuccess()) {
             List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList=r.getCollectData(new TypeReference<List<OmsDemandOrderGatherEdit>>() {});
+            //根据前面分页查询的物料号和工厂查询出相关信息并组织数据结构
             R rReturn = omsDemandOrderGatherEditService.week13DemandGatherList(omsDemandOrderGatherEditList);
             if (rReturn.isSuccess()) {
                 List<OmsDemandOrderGatherEdit> listReturn=rReturn.getCollectData(new TypeReference<List<OmsDemandOrderGatherEdit>>() {});
@@ -249,7 +256,47 @@ public class OmsDemandOrderGatherEditController extends BaseController {
             @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "orderFrom", value = "订单来源", required = false, paramType = "query", dataType = "String"),
     })
+    @HasPermissions("order:demandOrderGatherEdit:week13DemandGatherExport")
     public R week13DemandGatherExport(@ApiIgnore() OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
         return omsDemandOrderGatherEditService.week13DemandGatherExport(omsDemandOrderGatherEdit,getUserInfo(SysUser.class));
     }
+
+
+    /**
+     * 13周滚动需求下达SAP分页
+     */
+    @GetMapping("toSAPlist")
+    @ApiOperation(value = "13周滚动需求下达SAP分页", response = OmsDemandOrderGatherEdit.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productMaterialCode", value = "成品专用号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "status", value = "状态", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "beginTime", value = "交付开始日期", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "endTime", value = "交付结束日期", required = false, paramType = "query", dataType = "String")
+
+    })
+    public TableDataInfo toSAPlist(@ApiIgnore OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
+        Example example = listCondition(omsDemandOrderGatherEdit);
+        startPage();
+        List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList = omsDemandOrderGatherEditService.selectByExample(example);
+        return getDataTable(omsDemandOrderGatherEditList);
+    }
+
+    /**
+     * 下达SAP(13周需求下达SAP创建生产订单)
+     * @param ids
+     * @return
+     */
+    @PostMapping("toSAP")
+    @ApiOperation(value = "下达SAP")
+    @HasPermissions("order:demandOrderGatherEdit:toSAP")
+    public R toSAP(@RequestParam("ids") List<Long> ids){
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return omsDemandOrderGatherEditService.toSAP(ids,sysUser);
+    }
+
 }

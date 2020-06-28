@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * bom清单数据  提供者
@@ -93,7 +92,7 @@ public class CdBomInfoController extends BaseController {
      * @return
      */
     @GetMapping("listByProductMaterialCode")
-    @ApiOperation(value = "bom清单数据", response = CdBomInfo.class)
+    @ApiOperation(value = "根据成品物料号查bom清单", response = CdBomInfo.class)
     public R listByProductMaterialCode(String productMaterialCode){
         Example example = new Example(CdBomInfo.class);
         Example.Criteria criteria = example.createCriteria();
@@ -107,7 +106,7 @@ public class CdBomInfoController extends BaseController {
      * 根据成品物料号、原材料物料号确定一条数据
      */
     @GetMapping("listByProductAndMaterial")
-    public CdBomInfo listByProductAndMaterial(String productMaterialCode,String rawMaterialCode) {
+    public R listByProductAndMaterial(String productMaterialCode,String rawMaterialCode) {
         Example example = new Example(CdBomInfo.class);
         Example.Criteria criteria = example.createCriteria();
         if (StrUtil.isBlank(productMaterialCode)) {
@@ -120,7 +119,7 @@ public class CdBomInfoController extends BaseController {
         criteria.andEqualTo("rawMaterialCode",rawMaterialCode);
         criteria.andEqualTo("delFlag","0");
         CdBomInfo cdBomInfo = cdBomInfoService.findByExampleOne(example);
-        return cdBomInfo;
+        return R.data(cdBomInfo);
     }
 
     /**
@@ -172,7 +171,7 @@ public class CdBomInfoController extends BaseController {
      * @return
      */
     @PostMapping("selectVersionMap")
-    public Map<String,Map<String, String>> selectVersionMap(@RequestBody List<Dict> dicts){
-        return cdBomInfoService.selectVersionMap(dicts);
+    public R selectVersionMap(@RequestBody List<Dict> dicts){
+        return R.data(cdBomInfoService.selectVersionMap(dicts));
     }
 }

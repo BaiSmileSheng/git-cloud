@@ -115,10 +115,6 @@ public class SmsSettleInfoController extends BaseController {
      */
     @GetMapping("listByCondition")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "lineNo", value = "线体号", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "supplierCode", value = "供应商编号", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productOrderCode", value = "生产订单号", required = false, paramType = "query", dataType = "String"),
@@ -236,4 +232,18 @@ public class SmsSettleInfoController extends BaseController {
         return toAjax(smsSettleInfoService.deleteByIds(ids));
     }
 
+    /**
+     * 费用结算单明细（打印用）
+     * @param smsSettleInfo 加工费结算信息
+     * @return List<SmsSettleInfo> 加工费结算列表
+     */
+    @GetMapping("selectInfoForPrint")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "settleNo", value = "结算单号", required = false, paramType = "query", dataType = "String")
+    })
+    @ApiOperation(value = "费用结算单明细（打印用）", response = SmsSettleInfo.class)
+    @HasPermissions("settle:smsSettleInfo:jgPrint")
+    public R selectInfoForPrint(@ApiIgnore SmsSettleInfo smsSettleInfo) {
+        return smsSettleInfoService.selectInfoForPrint(smsSettleInfo);
+    }
 }
