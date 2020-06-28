@@ -95,7 +95,7 @@ public class SmsClaimOtherController extends BaseController {
      * @return
      */
     @HasPermissions("settle:claimOther:export")
-    @GetMapping("export")
+    @PostMapping("export")
     @ApiOperation(value = "导出其他索赔列表", response = SmsClaimOther.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "claimCode", value = "索赔单号", required = false, paramType = "query", dataType = "String"),

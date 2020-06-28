@@ -95,7 +95,7 @@ public class SmsDelaysDeliveryController extends BaseController {
      * @return 延期交付索赔列表
      */
     @HasPermissions("settle:delaysDelivery:export")
-    @GetMapping("export")
+    @PostMapping("export")
     @ApiOperation(value = "导出延期交付索赔 列表", response = SmsDelaysDelivery.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "delaysNo", value = "索赔单号", required = false,paramType = "query", dataType = "String"),

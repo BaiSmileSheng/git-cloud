@@ -183,7 +183,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 return omsRealOrderExcelImportErrorVo;
             }).collect(Collectors.toList());
             //导出excel
-            return EasyExcelUtil.writeExcel(errorResults, "真单导入错误信息.xlsx", "sheet", new ExcelImportErrObjectDto());
+            return EasyExcelUtil.writeExcel(errorResults, "真单导入错误信息.xlsx", "sheet", new OmsRealOrderExcelImportErrorVo());
         }
         return R.ok();
     }
@@ -201,7 +201,6 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         if(CollectionUtils.isEmpty(successResult)){
             return R.error("无需要插入的数据");
         }
-
         successResult.forEach( omsRealOrder -> {
             String orderCode = getOrderCode();
             omsRealOrder.setOrderCode(orderCode);
@@ -218,34 +217,36 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
 
         logger.info("导入真单开启审批流开始");
         //key 工厂编号 ,客户编号 物料号,交货日期,订单类型
-        Map<String,OmsRealOrder> auditResultMap = auditResult.stream().collect(Collectors.toMap(
-                omsRealOrder -> omsRealOrder.getProductFactoryCode() + omsRealOrder.getCustomerCode() + omsRealOrder.getProductMaterialCode()
-                + omsRealOrder.getDeliveryDate() + omsRealOrder.getOrderClass(),
-                cdProductStock -> cdProductStock,(key1,key2) ->key2));
+        if(!CollectionUtils.isEmpty(auditResult)){
+            Map<String,OmsRealOrder> auditResultMap = auditResult.stream().collect(Collectors.toMap(
+                    omsRealOrder -> omsRealOrder.getProductFactoryCode() + omsRealOrder.getCustomerCode() + omsRealOrder.getProductMaterialCode()
+                            + omsRealOrder.getDeliveryDate() + omsRealOrder.getOrderClass(),
+                    cdProductStock -> cdProductStock,(key1,key2) ->key2));
 
-        Map<String,OmsRealOrder> successResultMap = successResult.stream().collect(Collectors.toMap(
-                omsRealOrder -> omsRealOrder.getProductFactoryCode() + omsRealOrder.getCustomerCode() + omsRealOrder.getProductMaterialCode()
-                        + omsRealOrder.getDeliveryDate() + omsRealOrder.getOrderClass(),
-                cdProductStock -> cdProductStock,(key1,key2) ->key2));
+            Map<String,OmsRealOrder> successResultMap = successResult.stream().collect(Collectors.toMap(
+                    omsRealOrder -> omsRealOrder.getProductFactoryCode() + omsRealOrder.getCustomerCode() + omsRealOrder.getProductMaterialCode()
+                            + omsRealOrder.getDeliveryDate() + omsRealOrder.getOrderClass(),
+                    cdProductStock -> cdProductStock,(key1,key2) ->key2));
 
-        OmsOrderMaterialOutVo auditResultReq = new OmsOrderMaterialOutVo();
-        List<OmsOrderMaterialOutVo> omsOrderMaterialOutVoList = new ArrayList<>();
-         auditResultMap.keySet().forEach(code -> {
-            OmsRealOrder omsRealOrder = successResultMap.get(code);
-             OmsOrderMaterialOutVo omsOrderMaterialOutVo = new OmsOrderMaterialOutVo();
-             omsOrderMaterialOutVo.setLoginId(loginId);
-             omsOrderMaterialOutVo.setCreateBy(sysUser.getLoginName());
-             omsOrderMaterialOutVo.setOrderCode(omsRealOrder.getOrderCode());
-             omsOrderMaterialOutVo.setId(omsRealOrder.getId());
-             omsOrderMaterialOutVoList.add(omsOrderMaterialOutVo);
-        });
-        auditResultReq.setOmsOrderMaterialOutVoList(omsOrderMaterialOutVoList);
-        R auditResultR = remoteActOmsOrderMaterialOutService.addSave(auditResultReq);
-        if(!auditResultR.isSuccess()){
-            logger.error("下市的数据开启审批流失败 e:{}",auditResultR.toString());
-            throw new BusinessException("下市的数据开启审批流失败");
+            OmsOrderMaterialOutVo auditResultReq = new OmsOrderMaterialOutVo();
+            List<OmsOrderMaterialOutVo> omsOrderMaterialOutVoList = new ArrayList<>();
+            auditResultMap.keySet().forEach(code -> {
+                OmsRealOrder omsRealOrder = successResultMap.get(code);
+                OmsOrderMaterialOutVo omsOrderMaterialOutVo = new OmsOrderMaterialOutVo();
+                omsOrderMaterialOutVo.setLoginId(loginId);
+                omsOrderMaterialOutVo.setCreateBy(sysUser.getLoginName());
+                omsOrderMaterialOutVo.setOrderCode(omsRealOrder.getOrderCode());
+                omsOrderMaterialOutVo.setId(omsRealOrder.getId());
+                omsOrderMaterialOutVoList.add(omsOrderMaterialOutVo);
+            });
+            auditResultReq.setOmsOrderMaterialOutVoList(omsOrderMaterialOutVoList);
+            R auditResultR = remoteActOmsOrderMaterialOutService.addSave(auditResultReq);
+            if(!auditResultR.isSuccess()){
+                logger.error("下市的数据开启审批流失败 e:{}",auditResultR.toString());
+                throw new BusinessException("下市的数据开启审批流失败");
+            }
+
         }
-
         return R.ok();
     }
 

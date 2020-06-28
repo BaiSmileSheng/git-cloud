@@ -6,6 +6,7 @@ import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.ValidatorUtils;
+import com.cloud.system.domain.entity.SysUser;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -29,6 +30,7 @@ import com.cloud.system.domain.entity.CdProductOverdue;
 import com.cloud.system.service.ICdProductOverdueService;
 import com.cloud.common.core.page.TableDataInfo;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -101,7 +103,7 @@ public class CdProductOverdueController extends BaseController {
      * 导出模板
      * @return
      */
-    @GetMapping("exportTemplate")
+    @PostMapping("exportTemplate")
     @HasPermissions("system:productOverdue:exportTemplate")
     @ApiOperation(value = "导出模板", response = CdProductOverdue.class)
     public R exportTemplate(){
@@ -109,7 +111,7 @@ public class CdProductOverdueController extends BaseController {
         return EasyExcelUtil.writeExcel(Arrays.asList(),fileName,fileName,new CdProductOverdue());
     }
 
-    @GetMapping("export")
+    @PostMapping("export")
     @HasPermissions("system:productOverdue:export")
     @ApiOperation(value = "超期库存 导出", response = CdProductOverdue.class)
     @ApiImplicitParams({
@@ -134,19 +136,23 @@ public class CdProductOverdueController extends BaseController {
     @PostMapping("importFactoryStorehouse")
     @HasPermissions("system:productOverdue:importFactoryStorehouse")
     @ApiOperation(value = "导入", response = CdProductOverdue.class)
-    public R importFactoryStorehouse(@RequestPart("file") MultipartFile file){
-        List<CdProductOverdue> list =  (List<CdProductOverdue>)EasyExcelUtil.readMulExcel(file,new CdProductOverdue());
-        if(CollectionUtils.isEmpty(list)){
-            return R.error("导入数据不存在");
+    public R importFactoryStorehouse(@RequestPart("file") MultipartFile file) throws IOException {
+        if(file.isEmpty()){
+            return R.error("文件不能为空");
         }
-        for(CdProductOverdue cdProductOverdue : list){
-            //校验入参
-            ValidatorUtils.validateEntity(cdProductOverdue);
-            cdProductOverdue.setDelFlag(DeleteFlagConstants.NO_DELETED);
-            cdProductOverdue.setCreateBy(getLoginName());
-            cdProductOverdue.setCreateTime(new Date());
-        }
-        return cdProductOverdueService.importFactoryStorehouse(list);
+//        List<CdProductOverdue> list =  (List<CdProductOverdue>)EasyExcelUtil.readMulExcel(file,new CdProductOverdue());
+//        if(CollectionUtils.isEmpty(list)){
+//            return R.error("导入数据不存在");
+//        }
+//        for(CdProductOverdue cdProductOverdue : list){
+//            //校验入参
+//            ValidatorUtils.validateEntity(cdProductOverdue);
+//            cdProductOverdue.setDelFlag(DeleteFlagConstants.NO_DELETED);
+//            cdProductOverdue.setCreateBy(getLoginName());
+//            cdProductOverdue.setCreateTime(new Date());
+//        }
+        long loginId = getCurrentUserId();
+        return cdProductOverdueService.importFactoryStorehouse(file,loginId);
     }
 
 

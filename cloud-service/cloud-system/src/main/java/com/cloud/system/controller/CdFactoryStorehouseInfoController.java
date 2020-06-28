@@ -110,7 +110,7 @@ public class CdFactoryStorehouseInfoController extends BaseController {
      * 导出模板
      * @return
      */
-    @GetMapping("exportTemplate")
+    @PostMapping("exportTemplate")
     @HasPermissions("system:factoryStorehouse:exportTemplate")
     @ApiOperation(value = "导出模板", response = CdFactoryStorehouseInfo.class)
     public R exportTemplate(){
@@ -122,7 +122,7 @@ public class CdFactoryStorehouseInfoController extends BaseController {
      * 导出
      * @return
      */
-    @GetMapping("export")
+    @PostMapping("export")
     @HasPermissions("system:factoryStorehouse:export")
     @ApiOperation(value = "导出", response = CdFactoryStorehouseInfo.class)
     @ApiImplicitParams({
