@@ -63,6 +63,7 @@ public class SmsSupplementaryOrderController extends BaseController {
             @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "stuffNo", value = "物耗单号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productOrderCode", value = "生产订单号", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "supplierCode", value = "供应商编码", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "supplierName", value = "供应商名称", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "stuffStatus", value = "订单状态 0 待提交、1jit待审核、2jit驳回、3小微主待审核、4小微主审核通过、5小微主驳回、 6 SAP成功、7 SAP创单失败、 11待结算、 12结算完成", required = false, paramType = "query", dataType = "String"),
@@ -132,6 +133,9 @@ public class SmsSupplementaryOrderController extends BaseController {
     void listCondition(SmsSupplementaryOrder smsSupplementaryOrder, Example.Criteria criteria) {
         if (StringUtils.isNotBlank(smsSupplementaryOrder.getStuffNo())) {
             criteria.andLike("stuffNo", smsSupplementaryOrder.getStuffNo());
+        }
+        if (StringUtils.isNotBlank(smsSupplementaryOrder.getProductOrderCode())) {
+            criteria.andLike("productOrderCode", smsSupplementaryOrder.getProductOrderCode());
         }
         if (StringUtils.isNotBlank(smsSupplementaryOrder.getSupplierCode())) {
             criteria.andLike("supplierCode", smsSupplementaryOrder.getSupplierCode());
