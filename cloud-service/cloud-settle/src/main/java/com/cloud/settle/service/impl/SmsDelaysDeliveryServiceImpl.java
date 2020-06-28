@@ -1,5 +1,6 @@
 package com.cloud.settle.service.impl;
 
+import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.core.domain.R;
@@ -199,7 +200,7 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
             smsDelaysDelivery.setProductMaterialCode(omsProductionOrderRes.getProductMaterialCode());
             smsDelaysDelivery.setProductMaterialName(omsProductionOrderRes.getProductMaterialDesc());
             smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_1.getCode());
-            smsDelaysDelivery.setDeliveryDate(omsProductionOrderRes.getProductEndDate());
+            smsDelaysDelivery.setDeliveryDate(DateUtil.parseDate(omsProductionOrderRes.getProductEndDate()));
             smsDelaysDelivery.setActDeliveryDate(omsProductionOrderRes.getActualEndDate());
             smsDelaysDelivery.setCreateTime(new Date());
             smsDelaysDelivery.setDelFlag(DeleteFlagConstants.NO_DELETED);
