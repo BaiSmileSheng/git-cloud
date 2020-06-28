@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -94,12 +95,26 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         log.info(StrUtil.format("报废申请新增保存开始：参数为{}", smsScrapOrder.toString()));
         //生产订单号
         String productOrderCode = smsScrapOrder.getProductOrderCode();
+        //生产单号获取排产订单信息
+        R omsProductionOrderResult = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
+        if(!omsProductionOrderResult.isSuccess()){
+            log.error("根据生产单号获取排产订单信息失败 productOrderCode:{},res:{}",productOrderCode, JSONObject.toJSON(omsProductionOrderResult));
+            throw new BusinessException(omsProductionOrderResult.get("msg").toString());
+        }
+        OmsProductionOrder omsProductionOrder = omsProductionOrderResult.getData(OmsProductionOrder.class);
+        Example example = new Example(SmsScrapOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("productOrderCode", productOrderCode);
+        int num = selectCountByExample(example);
+        if (num > 0) {
+            return R.error(StrUtil.format("订单：{}已申请过报废单，请到报废管理进行修改！",productOrderCode));
+        }
+
         //校验
         R rCheck = checkScrapOrderCondition(smsScrapOrder,productOrderCode);
         if (!rCheck.isSuccess()) {
             throw new BusinessException(rCheck.getStr("msg"));
         }
-
         R seqResult = remoteSequeceService.selectSeq("scrap_seq", 4);
         if(!seqResult.isSuccess()){
             throw new BusinessException("获取序列号失败");
@@ -109,16 +124,11 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         //WH+年月日+4位顺序号
         scrapNo.append("BF").append(DateUtils.dateTime()).append(seq);
         smsScrapOrder.setScrapNo(scrapNo.toString());
-        //生产单号获取排产订单信息
-        R omsProductionOrderResult = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
-        if(!omsProductionOrderResult.isSuccess()){
-            log.error("根据生产单号获取排产订单信息失败 productOrderCode:{},res:{}",productOrderCode, JSONObject.toJSON(omsProductionOrderResult));
-            throw new BusinessException(omsProductionOrderResult.get("msg").toString());
-        }
-        OmsProductionOrder omsProductionOrder = omsProductionOrderResult.getData(OmsProductionOrder.class);
+
         smsScrapOrder.setMachiningPrice(omsProductionOrder.getProcessCost());
         //根据线体号查询供应商编码
-        R rFactoryLineInfo=remotefactoryLineInfoService.selectInfoByCodeLineCode(omsProductionOrder.getProductLineCode());
+        R rFactoryLineInfo=remotefactoryLineInfoService.selectInfoByCodeLineCode(omsProductionOrder.getProductLineCode(),
+                omsProductionOrder.getProductFactoryCode());
         if (!rFactoryLineInfo.isSuccess()) {
             return rFactoryLineInfo;
         }
