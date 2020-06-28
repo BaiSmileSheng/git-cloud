@@ -20,7 +20,6 @@ public interface ServiceNameConstants {
      * settle模块
      */
     String SETTLE_SERVICE = "cloud-settle";
-
     /**
      * activiti模块
      */

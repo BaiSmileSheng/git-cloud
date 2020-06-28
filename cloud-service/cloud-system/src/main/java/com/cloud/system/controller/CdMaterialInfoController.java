@@ -1,5 +1,6 @@
 package com.cloud.system.controller;
 
+import cn.hutool.core.lang.Dict;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
+
+import java.util.Map;
 
 /**
  * 物料信息  提供者
@@ -158,4 +161,17 @@ public class CdMaterialInfoController extends BaseController {
     public R selectInfoByInMaterialCodeAndMaterialType(@RequestBody List<String> materialCodes,@RequestParam(value = "materialType")String materialType) {
         return cdMaterialInfoService.selectInfoByInMaterialCodeAndMaterialType(materialCodes,materialType);
     }
+    /**
+     * Description:  根据成品专用号、生产工厂、物料类型查询
+     * Param: [list]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/18
+     */
+    @PostMapping("selectListByMaterialList")
+    @ApiOperation(value = "根据成品专用号、生产工厂、物料类型查询 ", response = R.class)
+    public R selectListByMaterialList(@RequestBody List<Dict> list){
+        return cdMaterialInfoService.selectListByMaterialList(list);
+    }
+
 }

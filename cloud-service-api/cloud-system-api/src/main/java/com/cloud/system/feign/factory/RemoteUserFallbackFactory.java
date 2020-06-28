@@ -2,6 +2,7 @@ package com.cloud.system.feign.factory;
 
 import java.util.Set;
 
+import com.cloud.system.domain.entity.SysRole;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteUserService;
 import org.springframework.stereotype.Component;
@@ -55,6 +56,18 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
             public R findUserBySupplierCode(String supplierCode) {
                 log.error("RemoteUserService.findUserBySupplierCode error:{}",throwable.getMessage());
                 return R.error("服务拥挤，请稍后再试！");
+            }
+            /**
+             * Description:  查询用户权限
+             * Param: []
+             * return: com.cloud.common.core.domain.R
+             * Author: ltq
+             * Date: 2020/6/19
+             */
+            @Override
+            public R selectUserRights(String roleKey) {
+                log.error("查询用户权限失败，原因{}："+throwable.getMessage());
+                return R.error("查询用户权限失败，原因{}："+throwable.getMessage());
             }
         };
     }

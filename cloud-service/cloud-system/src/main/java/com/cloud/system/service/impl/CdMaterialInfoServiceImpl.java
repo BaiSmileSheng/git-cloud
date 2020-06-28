@@ -1,6 +1,7 @@
 package com.cloud.system.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.Dict;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.utils.StringUtils;
@@ -230,6 +231,17 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
         //4执行更新方法
         cdMaterialInfoMapper.updateBatchByFactoryAndMaterial(uphList);
         return R.ok();
+    }
+    /**
+     * Description:  根据成品专用号、生产工厂、物料类型查询
+     * Param: [list]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/18
+     */
+    @Override
+    public R selectListByMaterialList(List<Dict> list) {
+        return R.data(cdMaterialInfoMapper.selectListByMaterialList(list));
     }
 
     /**

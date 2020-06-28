@@ -1,7 +1,13 @@
 package com.cloud.system.mapper;
 
+import cn.hutool.core.lang.Dict;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.common.core.dao.BaseMapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+import java.util.Map;
+
 /**
  * 工厂线体关系 Mapper接口
  *
@@ -23,4 +29,6 @@ public interface CdFactoryLineInfoMapper extends BaseMapper<CdFactoryLineInfo>{
      * @return 供应商编码
      */
     CdFactoryLineInfo selectInfoByCodeLineCode(String produceLineCode);
+
+    List<CdFactoryLineInfo> selectListByMapList(@Param(value = "list") List<Dict> list);
 }

@@ -27,7 +27,7 @@
                     </resultMap>
 
     <sql id="selectCdBomVo">
-        select id, product_material_code, product_material_desc, product_factory_code, raw_material_code, raw_material_desc, basic_num, bom_num, product_unit, component_unit, version, purchase_group, storage_point, del_flag, remark, create_time, create_by, update_time, update_by from cd_bom
+        select id, product_material_code, product_material_desc, product_factory_code, raw_material_code, raw_material_desc, basic_num, bom_num, product_unit, component_unit, version, purchase_group, storage_point, del_flag, remark, create_time, create_by, update_time, update_by from cd_bom_info
     </sql>
 
 
@@ -53,4 +53,14 @@
     <delete id="deleteAll">
         delete from cd_bom_info;
     </delete>
+    <select id="selectBomList" parameterType="list" resultMap="CdBomResult">
+        <include refid="selectCdBomVo"/>
+        <where>
+            <foreach collection="list" index="index" item="item" open="(" close=")" separator="or">
+                product_material_code = #{item.productMaterialCode}
+                and product_factory_code = #{item.productFactoryCode}
+                and version = #{item.bomVersion}
+            </foreach>
+        </where>
+    </select>
 </mapper>
