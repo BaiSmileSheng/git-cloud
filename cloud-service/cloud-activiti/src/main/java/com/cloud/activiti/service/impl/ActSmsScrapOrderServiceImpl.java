@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.consts.ActivitiConstant;
 import com.cloud.activiti.consts.ActivitiProTitleConstants;
+import com.cloud.activiti.consts.ActivitiTableNameConstants;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.service.IActSmsScrapOrderService;
@@ -210,6 +211,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         BizBusiness business = new BizBusiness();
         business.setOrderNo(smsScrapOrder.getScrapNo());
         business.setTableId(smsScrapOrder.getId().toString());
+        business.setTableName(ActivitiTableNameConstants.ACTIVITI_TABLE_NAME_SCRAP);
         business.setProcDefId(smsScrapOrder.getProcDefId());
         business.setTitle(ActivitiProTitleConstants.ACTIVITI_PRO_TITLE_SCRAP_TEST);
         business.setProcName(smsScrapOrder.getProcName());

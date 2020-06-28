@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.consts.ActivitiConstant;
 import com.cloud.activiti.consts.ActivitiProTitleConstants;
+import com.cloud.activiti.consts.ActivitiTableNameConstants;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.service.IActSmsSupplementaryOrderService;
@@ -230,6 +231,7 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
         BizBusiness business = new BizBusiness();
         business.setOrderNo(smsSupplementaryOrder.getStuffNo());
         business.setTableId(smsSupplementaryOrder.getId().toString());
+        business.setTableName(ActivitiTableNameConstants.ACTIVITI_TABLE_NAME_SUPPLEMENTARY);
         business.setProcDefId(smsSupplementaryOrder.getProcDefId());
         business.setTitle(ActivitiProTitleConstants.ACTIVITI_PRO_TITLE_SUPPLEMENTARY_TEST);
         business.setProcName(smsSupplementaryOrder.getProcName());

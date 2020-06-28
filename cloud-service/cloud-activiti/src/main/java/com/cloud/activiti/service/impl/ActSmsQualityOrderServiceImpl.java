@@ -3,6 +3,7 @@ package com.cloud.activiti.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.consts.ActivitiConstant;
 import com.cloud.activiti.consts.ActivitiProTitleConstants;
+import com.cloud.activiti.consts.ActivitiTableNameConstants;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.service.IActSmsQualityOrderService;
@@ -150,6 +151,7 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
         BizBusiness business = new BizBusiness();
         business.setOrderNo(smsQualityOrder.getQualityNo());
         business.setTableId(smsQualityOrder.getId().toString());
+        business.setTableName(ActivitiTableNameConstants.ACTIVITI_TABLE_NAME_QUALITY);
         business.setProcDefId(smsQualityOrder.getProcDefId());
         business.setTitle(ActivitiProTitleConstants.ACTIVITI_PRO_TITLE_SQUALITY_TEST);
         business.setProcName(smsQualityOrder.getProcName());

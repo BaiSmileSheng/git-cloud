@@ -1,17 +1,15 @@
 package com.cloud.activiti.domain;
 
-import java.io.Serializable;
-import java.util.Date;
-
-import javax.persistence.Id;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import tk.mybatis.mapper.annotation.KeySql;
+
+import javax.persistence.Id;
+import java.io.Serializable;
+import java.util.Date;
 
 @Data
 @Accessors(chain = true)
@@ -32,6 +30,8 @@ public class BizBusiness implements Serializable {
     private Long userId;
 
     private String tableId;
+    //关联表名称
+    private String tableName;
 
     private String procDefId;
 

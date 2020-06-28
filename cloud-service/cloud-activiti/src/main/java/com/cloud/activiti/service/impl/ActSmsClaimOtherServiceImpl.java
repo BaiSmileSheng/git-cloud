@@ -2,12 +2,13 @@ package com.cloud.activiti.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.consts.ActivitiConstant;
+import com.cloud.activiti.consts.ActivitiProTitleConstants;
+import com.cloud.activiti.consts.ActivitiTableNameConstants;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.service.IActSmsClaimOtherService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
-import com.cloud.activiti.consts.ActivitiProTitleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.settle.domain.entity.SmsClaimOther;
@@ -152,6 +153,7 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         BizBusiness business = new BizBusiness();
         business.setOrderNo(smsClaimOther.getClaimCode());
         business.setTableId(smsClaimOther.getId().toString());
+        business.setTableName(ActivitiTableNameConstants.ACTIVITI_TABLE_NAME_OTHER);
         business.setProcDefId(smsClaimOther.getProcDefId());
         business.setTitle(ActivitiProTitleConstants.ACTIVITI_PRO_TITLE_SCHAIM_TEST);
         business.setProcName(smsClaimOther.getProcName());
