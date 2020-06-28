@@ -24,7 +24,7 @@ public interface ICdFactoryLineInfoService extends BaseService<CdFactoryLineInfo
      * @param produceLineCode
      * @return 供应商编码
      */
-    CdFactoryLineInfo selectInfoByCodeLineCode(String produceLineCode);
+    CdFactoryLineInfo selectInfoByCodeLineCode(String produceLineCode,String factoryCode);
     /**
      * @Description: 获取SAP系统工厂线体关系数据，保存
      * @Param: []

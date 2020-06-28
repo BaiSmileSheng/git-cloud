@@ -131,12 +131,13 @@ public class CdFactoryLineInfoController extends BaseController {
     /**
      * 根据线体查询信息
      * @param produceLineCode
+     * @param factoryCode
      * @return CdFactoryLineInfo
      */
     @PostMapping("selectInfoByCodeLineCode")
     @ApiOperation(value = "根据线体查询信息", response = CdFactoryLineInfo.class)
-    public R selectInfoByCodeLineCode(String produceLineCode) {
-        return R.data(cdFactoryLineInfoService.selectInfoByCodeLineCode(produceLineCode));
+    public R selectInfoByCodeLineCode(String produceLineCode,String factoryCode) {
+        return R.data(cdFactoryLineInfoService.selectInfoByCodeLineCode(produceLineCode,factoryCode));
     }
     /**
      * @Description: 获取SAP系统工厂线体关系数据，保存

@@ -48,8 +48,8 @@ public class CdFactoryLineInfoServiceImpl extends BaseServiceImpl<CdFactoryLineI
      * @return 供应商编码
      */
     @Override
-    public CdFactoryLineInfo selectInfoByCodeLineCode(String produceLineCode) {
-        return cdFactoryLineInfoMapper.selectInfoByCodeLineCode(produceLineCode);
+    public CdFactoryLineInfo selectInfoByCodeLineCode(String produceLineCode,String factoryCode) {
+        return cdFactoryLineInfoMapper.selectInfoByCodeLineCode(produceLineCode,factoryCode);
     }
     /**
      * 1、调用SAP系统获取工厂线体关系数据接口

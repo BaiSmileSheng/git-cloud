@@ -17,7 +17,6 @@ import com.cloud.settle.service.ISequeceService;
 import com.cloud.settle.service.ISmsDelaysDeliveryService;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.SysOss;
-import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteFactoryLineInfoService;
 import com.cloud.system.feign.RemoteOssService;
@@ -207,7 +206,8 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
 
             //根据线体获取供应商信息
             R rFactoryLineInfo=remoteFactoryLineInfoService
-                    .selectInfoByCodeLineCode(omsProductionOrderRes.getProductLineCode());
+                    .selectInfoByCodeLineCode(omsProductionOrderRes.getProductLineCode(),
+                            omsProductionOrderRes.getProductFactoryCode());
             if (!rFactoryLineInfo.isSuccess()) {
                 throw new BusinessException(rFactoryLineInfo.getStr("msg"));
             }

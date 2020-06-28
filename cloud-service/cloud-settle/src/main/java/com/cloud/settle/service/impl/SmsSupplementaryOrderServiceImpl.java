@@ -157,7 +157,8 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         stuffNo.append("WH").append(DateUtils.dateTime()).append(seq);
         smsSupplementaryOrder.setStuffNo(stuffNo.toString());
         //根据线体号查询供应商编码
-        R rFactory = remotefactoryLineInfoService.selectInfoByCodeLineCode(omsProductionOrder.getProductLineCode());
+        R rFactory = remotefactoryLineInfoService.selectInfoByCodeLineCode(omsProductionOrder.getProductLineCode(),
+                                                omsProductionOrder.getProductFactoryCode());
         if (!rFactory.isSuccess()) {
             return rFactory;
         }
