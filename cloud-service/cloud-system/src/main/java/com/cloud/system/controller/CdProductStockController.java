@@ -63,6 +63,7 @@ public class CdProductStockController extends BaseController {
             @ApiImplicitParam(name = "productFactoryCode", value = "专用号", required = false, paramType = "query", dataType = "String")
     })
     public TableDataInfo list(@ApiIgnore CdProductStock cdProductStock) {
+        startPage();
         List<CdProductStock> cdProductStockList = listByCondition(cdProductStock);
         return getDataTable(cdProductStockList);
     }

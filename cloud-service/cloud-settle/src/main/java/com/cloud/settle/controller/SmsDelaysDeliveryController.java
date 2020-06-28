@@ -14,10 +14,18 @@ import com.cloud.settle.enums.DeplayStatusEnum;
 import com.cloud.settle.service.ISmsDelaysDeliveryService;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.enums.UserTypeEnum;
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
@@ -218,18 +226,19 @@ public class SmsDelaysDeliveryController extends BaseController {
      * 延期索赔单供应商申诉(包含文件信息)
      * @param id 主键id
      * @param complaintDescription 申诉描述
-     * @param files
+     * @param ossIds
      * @return 延期索赔单供应商申诉结果成功或失败
      */
     @HasPermissions("settle:delaysDelivery:supplierAppeal")
     @PostMapping("supplierAppeal")
     @ApiOperation(value = "延期索赔单供应商申诉(包含文件信息) ", response = SmsDelaysDelivery.class)
-    public R supplierAppeal(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription, @RequestPart("files") MultipartFile[] files) {
+    public R supplierAppeal(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription,
+                            @RequestParam("ossIds") String ossIds) {
         SmsDelaysDelivery smsDelaysDelivery = new SmsDelaysDelivery();
         smsDelaysDelivery.setId(id);
         smsDelaysDelivery.setComplaintDescription(complaintDescription);
         smsDelaysDelivery.setUpdateBy(getLoginName());
-        return smsDelaysDeliveryService.supplierAppeal(smsDelaysDelivery,files);
+        return smsDelaysDeliveryService.supplierAppeal(smsDelaysDelivery,ossIds);
     }
 
     /**

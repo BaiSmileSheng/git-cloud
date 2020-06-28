@@ -5,6 +5,7 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
 import com.cloud.settle.converter.DeplayStatusConverter;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -118,16 +119,18 @@ public class SmsDelaysDelivery extends BaseEntity {
      * 基本完成日期
      */
     @ExcelProperty(value = "基本完成日期",index = 8)
-    @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat("yyyy-MM-dd")
     @ApiModelProperty(value = "基本完成日期")
+    @JsonFormat(pattern="yyyy-MM-dd",timezone="GMT+8")
     private Date deliveryDate;
 
     /**
      * 实际完成日期
      */
     @ExcelProperty(value = "实际完成日期",index = 9)
-    @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat("yyyy-MM-dd")
     @ApiModelProperty(value = "实际完成日期")
+    @JsonFormat(pattern="yyyy-MM-dd",timezone="GMT+8")
     private Date actDeliveryDate;
 
     /**
@@ -142,6 +145,7 @@ public class SmsDelaysDelivery extends BaseEntity {
      */
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "提交时间")
+    @JsonFormat(pattern="yyyy-MM-dd yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date submitDate;
 
     /**
@@ -157,6 +161,7 @@ public class SmsDelaysDelivery extends BaseEntity {
     @ExcelProperty(value = "申诉时间",index = 13)
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "申诉时间")
+    @JsonFormat(pattern="yyyy-MM-dd yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date complaintDate;
 
     /**
@@ -165,6 +170,7 @@ public class SmsDelaysDelivery extends BaseEntity {
     @ExcelProperty(value = "供应商确认时间",index = 11)
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "供应商确认时间")
+    @JsonFormat(pattern="yyyy-MM-dd yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date supplierConfirmDate;
 
     /**

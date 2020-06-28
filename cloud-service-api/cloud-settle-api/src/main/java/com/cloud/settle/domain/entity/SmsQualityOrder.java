@@ -5,6 +5,7 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
 import com.cloud.settle.converter.QualityStatusConverter;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -125,12 +126,28 @@ public class SmsQualityOrder extends BaseEntity {
     private String projectName;
 
     /**
+     * 问题分类id
+     */
+    @Valid
+    @NotNull(message = "问题分类id不能为空")
+    @ApiModelProperty(value = "问题分类id")
+    private Long projectId;
+
+    /**
      * 索赔条款
      */
     @Valid
     @NotNull(message = "索赔条款不能为空")
     @ApiModelProperty(value = "索赔条款")
     private String claimClause;
+
+    /**
+     * 索赔条款id
+     */
+    @Valid
+    @NotNull(message = "索赔条款id不能为空")
+    @ApiModelProperty(value = "索赔条款id")
+    private Long claimId;
 
     /**
      * 索赔理由
@@ -152,6 +169,7 @@ public class SmsQualityOrder extends BaseEntity {
      * 提交时间
      */
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern="yyyy-MM-dd",timezone="GMT+8")
     private Date submitDate;
 
     /**
@@ -167,6 +185,7 @@ public class SmsQualityOrder extends BaseEntity {
     @ExcelProperty(value = "申诉时间",index = 14)
     @ApiModelProperty(value = "申诉时间")
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern="yyyy-MM-dd yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date complaintDate;
 
     /**

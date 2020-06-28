@@ -20,8 +20,12 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
@@ -172,13 +176,13 @@ public class SmsQualityOrderController extends BaseController {
     @HasPermissions("settle:qualityOrder:save")
     @PostMapping("save")
     @ApiOperation(value = "新增保存质量索赔(包含文件)", response = R.class)
-    public R addSave(@RequestParam("smsQualityOrderReq") String smsQualityOrderReq, @RequestPart("files") MultipartFile[] files) {
+    public R addSave(@RequestParam("smsQualityOrderReq") String smsQualityOrderReq, @RequestParam("ossIds") String ossIds) {
         SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq, SmsQualityOrder.class);
         //校验入参
         ValidatorUtils.validateEntity(smsQualityOrder);
         String name = getLoginName();
         smsQualityOrder.setCreateBy(name);
-        smsQualityOrderService.addSmsQualityOrderAndSysOss(smsQualityOrder, files);
+        smsQualityOrderService.addSmsQualityOrderAndSysOss(smsQualityOrder, ossIds);
         return R.data(smsQualityOrder.getId());
     }
 
@@ -204,12 +208,12 @@ public class SmsQualityOrderController extends BaseController {
     @HasPermissions("settle:qualityOrder:update")
     @PostMapping("update")
     @ApiOperation(value = "修改保存质量索赔(包含文件信息)", response = R.class)
-    public R updateQuality(@RequestParam("smsQualityOrder") String smsQualityOrderReq, @RequestPart("files") MultipartFile[] files) {
+    public R updateQuality(@RequestParam("smsQualityOrder") String smsQualityOrderReq, @RequestParam(value = "ossIds",required = false) String ossIds) {
         SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq, SmsQualityOrder.class);
         //校验入参
         ValidatorUtils.validateEntity(smsQualityOrder);
         smsQualityOrder.setUpdateBy(getLoginName());
-        return smsQualityOrderService.updateSmsQualityOrderAndSysOss(smsQualityOrder, files);
+        return smsQualityOrderService.updateSmsQualityOrderAndSysOss(smsQualityOrder, ossIds);
     }
 
     /**
@@ -221,12 +225,12 @@ public class SmsQualityOrderController extends BaseController {
     @HasPermissions("settle:qualityOrder:insertOrupdateSubmit")
     @PostMapping("insertOrupdateSubmit")
     @ApiOperation(value = "新增或修改时提交", response = R.class)
-    public R insertOrupdateSubmit(@RequestParam("smsQualityOrder") String smsQualityOrderReq, @RequestPart("files") MultipartFile[] files) {
+    public R insertOrupdateSubmit(@RequestParam("smsQualityOrder") String smsQualityOrderReq,@RequestParam(value = "ossIds",required = false) String ossIds) {
         SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq, SmsQualityOrder.class);
         //校验入参
         ValidatorUtils.validateEntity(smsQualityOrder);
         smsQualityOrder.setUpdateBy(getLoginName());
-        return smsQualityOrderService.insertOrupdateSubmit(smsQualityOrder, files);
+        return smsQualityOrderService.insertOrupdateSubmit(smsQualityOrder, ossIds);
     }
 
     /**
@@ -274,18 +278,19 @@ public class SmsQualityOrderController extends BaseController {
      * 索赔单供应商申诉(包含文件信息)
      * @param id 主键id
      * @param complaintDescription 申诉描述
-     * @param files
+     * @param ossIds
      * @return 索赔单供应商申诉结果成功或失败
      */
     @HasPermissions("settle:qualityOrder:supplierAppeal")
     @PostMapping("supplierAppeal")
     @ApiOperation(value = "索赔单供应商申诉 ", response = R.class)
-    public R supplierAppeal(@RequestParam("id") Long id, @RequestParam("complaintDescription") String complaintDescription, @RequestPart("files") MultipartFile[] files) {
+    public R supplierAppeal(@RequestParam("id") Long id, @RequestParam("complaintDescription") String complaintDescription,
+                            @RequestParam("ossIds") String ossIds) {
         SmsQualityOrder smsQualityOrder = new SmsQualityOrder();
         smsQualityOrder.setId(id);
         smsQualityOrder.setComplaintDescription(complaintDescription);
         smsQualityOrder.setUpdateBy(getLoginName());
-        return smsQualityOrderService.supplierAppeal(smsQualityOrder, files);
+        return smsQualityOrderService.supplierAppeal(smsQualityOrder, ossIds);
     }
 
     /**
