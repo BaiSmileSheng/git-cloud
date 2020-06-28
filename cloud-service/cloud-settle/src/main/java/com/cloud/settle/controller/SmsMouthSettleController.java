@@ -118,7 +118,7 @@ public class SmsMouthSettleController extends BaseController {
         List<SmsClaimCashDetailDTO> list = new ArrayList<>();
         List<String> typeList = CollUtil.newArrayList(SettleRatioEnum.SPLX_BF.getCode()
         ,SettleRatioEnum.SPLX_WH.getCode(),SettleRatioEnum.SPLX_YQ.getCode()
-        ,SettleRatioEnum.SPLX_ZL.getCode(),SettleRatioEnum.SPLX_QY.getCode());
+        ,SettleRatioEnum.SPLX_ZL.getCode(),SettleRatioEnum.SPLX_QT.getCode());
         typeList.forEach(type->{
             SmsClaimCashDetailDTO dto = new SmsClaimCashDetailDTO();
             dto.setClaimType(type);
