@@ -3,6 +3,7 @@ package com.cloud.common.core.domain;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.ObjectUtil;
 import com.cloud.common.constant.Constants;
+import com.cloud.common.utils.StringUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -41,6 +42,15 @@ public class R extends Dict {
     public static R data(Object obj) {
         if (ObjectUtil.isEmpty(obj)) {
             return R.error("数据为空！");
+        }
+        R r = new R();
+        r.put("data", obj);
+        return r;
+    }
+
+    public static R dataWithPrefix(Object obj,String prefix) {
+        if (ObjectUtil.isEmpty(obj)) {
+            return R.error(StringUtils.format("{}数据为空！",prefix));
         }
         R r = new R();
         r.put("data", obj);
