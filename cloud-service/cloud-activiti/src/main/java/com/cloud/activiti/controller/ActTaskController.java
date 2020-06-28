@@ -5,11 +5,14 @@
  */
 package com.cloud.activiti.controller;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.consts.ActivitiConstant;
 import com.cloud.activiti.domain.BizAudit;
+import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizAuditService;
+import com.cloud.activiti.service.IBizBusinessService;
 import com.cloud.activiti.vo.HiTaskVo;
 import com.cloud.activiti.vo.RuTask;
 import com.cloud.common.core.controller.BaseController;
@@ -18,6 +21,8 @@ import com.cloud.common.core.page.PageDomain;
 import com.cloud.system.feign.RemoteUserService;
 import com.google.common.collect.Maps;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -27,10 +32,12 @@ import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>File：ActTaskController.java</p>
@@ -61,6 +68,9 @@ public class ActTaskController extends BaseController {
     @Autowired
     private IActTaskService actTaskService;
 
+    @Autowired
+    private IBizBusinessService bizBusinessService;
+
 
     /**
      * task待办
@@ -68,8 +78,12 @@ public class ActTaskController extends BaseController {
      * @return
      * @author zmr
      */
-    @RequestMapping(value = "ing")
-    public R ing(RuTask ruTask, PageDomain page) {
+    @RequestMapping(value = "ing",method = RequestMethod.GET)
+    @ApiOperation(value = "我的代办")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "orderNo", value = "订单号", required = false, paramType = "query", dataType = "String")
+    })
+    public R ing(@ApiIgnore RuTask ruTask, PageDomain page) {
         List<RuTask> list = new ArrayList<>();
         Long userId = getCurrentUserId();
         TaskQuery query = taskService.createTaskQuery().taskCandidateOrAssigned(userId + "").orderByTaskCreateTime()
@@ -77,6 +91,7 @@ public class ActTaskController extends BaseController {
         if (StrUtil.isNotBlank(ruTask.getProcessDefKey())) {
             query.processDefinitionKey(ruTask.getProcessDefKey());
         }
+
         long count = query.count();
         int first = (page.getPageNum() - 1) * page.getPageSize();
         List<Task> taskList = query.listPage(first, page.getPageSize());
@@ -96,6 +111,10 @@ public class ActTaskController extends BaseController {
                 // 关联业务key
                 ProcessInstance pi = runtimeService.createProcessInstanceQuery().processInstanceId(rt.getProcInstId())
                         .singleResult();
+                BizBusiness bizBusiness = bizBusinessService.selectBizBusinessById(pi.getBusinessKey());
+                if (bizBusiness != null) {
+                    rt.setOrderNo(bizBusiness.getOrderNo());
+                }
                 rt.setBusinessKey(pi.getBusinessKey());
                 rt.setProcessName(pi.getName());
                 rt.setProcessDefKey(pi.getProcessDefinitionKey());
@@ -104,10 +123,17 @@ public class ActTaskController extends BaseController {
             });
         }
         Map<String, Object> map = Maps.newHashMap();
-        map.put("rows", list);
+        //如果有业务订单号的查询条件
+        if (StrUtil.isNotBlank(ruTask.getOrderNo())) {
+            List<RuTask> listNew=list.stream().filter(e -> StrUtil.equals(e.getOrderNo(), ruTask.getOrderNo())).collect(Collectors.toList());
+            map.put("rows", listNew);
+            map.put("total", CollUtil.isEmpty(listNew)?0:listNew.size() );
+        }else {
+            map.put("rows", list);
+            map.put("total", count);
+        }
         map.put("pageNum", page.getPageNum());
-        map.put("total", count);
-        return R.ok(map);
+        return R.data(map);
     }
 
     /**
@@ -117,8 +143,14 @@ public class ActTaskController extends BaseController {
      * @return
      * @author zmr
      */
-    @RequestMapping(value = "done")
-    public R done(HiTaskVo hiTaskVo) {
+    @RequestMapping(value = "done",method = RequestMethod.GET)
+    @ApiOperation(value = "我的已办")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "orderNo", value = "订单号", required = false, paramType = "query", dataType = "String")
+    })
+    public R done(@ApiIgnore HiTaskVo hiTaskVo) {
         startPage();
         hiTaskVo.setAuditorId(getCurrentUserId());
         hiTaskVo.setDeleteReason(ActivitiConstant.REASON_COMPLETED);
