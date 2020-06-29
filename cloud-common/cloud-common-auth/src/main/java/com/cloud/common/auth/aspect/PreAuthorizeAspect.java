@@ -1,10 +1,11 @@
 package com.cloud.common.auth.aspect;
 
-import java.lang.reflect.Method;
-import java.util.Optional;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.cloud.common.auth.annotation.HasPermissions;
+import com.cloud.common.constant.Constants;
+import com.cloud.common.exception.ForbiddenException;
+import com.cloud.common.utils.ServletUtils;
+import com.cloud.system.feign.RemoteMenuService;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
@@ -13,13 +14,9 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.cloud.common.auth.annotation.HasPermissions;
-import com.cloud.common.constant.Constants;
-import com.cloud.common.exception.ForbiddenException;
-import com.cloud.common.utils.ServletUtils;
-import com.cloud.system.feign.RemoteMenuService;
-
-import lombok.extern.slf4j.Slf4j;
+import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Method;
+import java.util.Optional;
 
 @Aspect
 @Component
@@ -55,7 +52,7 @@ public class PreAuthorizeAspect {
             if (userId == 1L) {
                 return true;
             }
-            return sysMenuClient.selectPermsByUserId(userId).stream().anyMatch(authority::equals);
+            return sysMenuClient.selectPermsByUserId(userId).stream().anyMatch(str-> authority.contains(str));
         }
         return false;
     }

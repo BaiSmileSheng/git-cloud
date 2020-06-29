@@ -109,8 +109,9 @@ public class OmsProductionOrderController extends BaseController {
                 return getDataTable(CollectionUtil.newArrayList());
             }
             String lineCodes = r.get("data").toString();
-            criteria.andIn("productLineCode", CollectionUtil.toList(lineCodes.split(",")));
-        } else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
+            criteria.andIn("productLineCode",CollectionUtil.toList(lineCodes.split(",")));
+            criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+        }else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
             //班长、分主管查询工厂下的数据
             if (CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_BZ)
                     || CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_FZG)) {
@@ -196,7 +197,8 @@ public class OmsProductionOrderController extends BaseController {
         if(null == productionOrder){
             return R.error("排产订单信息不存在,请检查数据");
         }
-        R rFactory = remoteFactoryLineInfoService.selectInfoByCodeLineCode(productionOrder.getProductLineCode());
+        R rFactory = remoteFactoryLineInfoService.selectInfoByCodeLineCode(productionOrder.getProductLineCode(),
+                                                            productionOrder.getProductFactoryCode());
         if (!rFactory.isSuccess()) {
             return rFactory;
         }

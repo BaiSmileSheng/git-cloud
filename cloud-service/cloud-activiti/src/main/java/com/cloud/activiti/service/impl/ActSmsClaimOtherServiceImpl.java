@@ -3,6 +3,8 @@ package com.cloud.activiti.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.consts.ActivitiConstant;
+import com.cloud.activiti.consts.ActivitiProTitleConstants;
+import com.cloud.activiti.consts.ActivitiTableNameConstants;
 import com.cloud.activiti.consts.ActivitiProDefKeyConstants;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
@@ -10,7 +12,6 @@ import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
 import com.cloud.activiti.service.IActSmsClaimOtherService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
-import com.cloud.activiti.consts.ActivitiProTitleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.settle.domain.entity.SmsClaimOther;
@@ -27,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -88,7 +88,6 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
      * @param id 主键id
      * @param complaintDescription 申诉描述
      * @param sysUser 当前用户信息
-     * @param files  文件
      * @return 成功或失败
      */
     @GlobalTransactional
@@ -209,6 +208,7 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         BizBusiness business = new BizBusiness();
         business.setOrderNo(smsClaimOther.getClaimCode());
         business.setTableId(smsClaimOther.getId().toString());
+        business.setTableName(ActivitiTableNameConstants.ACTIVITI_TABLE_NAME_OTHER);
         business.setTitle(ActivitiProTitleConstants.ACTIVITI_PRO_TITLE_SCHAIM_TEST);
         business.setProcDefId(processDefinitionAct.getId());
         business.setProcName(processDefinitionAct.getName());

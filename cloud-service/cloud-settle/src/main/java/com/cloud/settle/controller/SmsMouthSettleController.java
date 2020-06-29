@@ -118,7 +118,7 @@ public class SmsMouthSettleController extends BaseController {
         List<SmsClaimCashDetailDTO> list = new ArrayList<>();
         List<String> typeList = CollUtil.newArrayList(SettleRatioEnum.SPLX_BF.getCode()
         ,SettleRatioEnum.SPLX_WH.getCode(),SettleRatioEnum.SPLX_YQ.getCode()
-        ,SettleRatioEnum.SPLX_ZL.getCode(),SettleRatioEnum.SPLX_QY.getCode());
+        ,SettleRatioEnum.SPLX_ZL.getCode(),SettleRatioEnum.SPLX_QT.getCode());
         typeList.forEach(type->{
             SmsClaimCashDetailDTO dto = new SmsClaimCashDetailDTO();
             dto.setClaimType(type);
@@ -150,7 +150,7 @@ public class SmsMouthSettleController extends BaseController {
             @ApiImplicitParam(name = "id", value = "id", required = true,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "settleStatus", value = "状态：12、内控确认 13、小微主确认", required = true,paramType = "query", dataType = "String")
     })
-    @HasPermissions("settle:mouthSettle:confirm")
+    @HasPermissions("settle:mouthSettle:xwzConfirm,settle:mouthSettle:nkConfirm")
     public R confirm(Long id,String settleStatus) {
         return smsMouthSettleService.confirm(id,settleStatus);
     }

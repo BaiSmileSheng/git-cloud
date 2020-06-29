@@ -79,6 +79,9 @@ public class RuTask {
 
     private String businessKey;
 
+    //业务订单号
+    private String orderNo;
+
     public RuTask(Task task) {
         setId(task.getId());
         setName(task.getName());

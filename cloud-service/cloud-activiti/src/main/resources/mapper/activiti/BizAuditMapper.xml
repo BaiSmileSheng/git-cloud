@@ -26,6 +26,7 @@
         <result property="businessKey" column="business_key"/>
         <result property="startUserId" column="start_user_id"/>
         <result property="delFlag" column="del_flag"/>
+        <result property="orderNo" column="order_no"/>
     </resultMap>
 
     <select id="getHistoryTaskList" resultMap="HiTaskVoResult">
@@ -50,17 +51,20 @@
         ba.del_flag,
         hp.BUSINESS_KEY_ AS business_key,
         hp.NAME_ AS title,
-        hp.START_USER_ID_ AS start_user_id
+        hp.START_USER_ID_ AS start_user_id,
+        bb.order_no
         FROM
         act_hi_taskinst ht
         LEFT JOIN biz_audit ba ON ht.ID_ = ba.task_id
         LEFT JOIN act_hi_procinst hp ON ht.PROC_INST_ID_ = hp.ID_
+        LEFT JOIN biz_business bb ON hp.BUSINESS_KEY_ = bb.id
         <where>
             <if test="deleteReason !=null and deleteReason !=''">and ht.DELETE_REASON_ =#{deleteReason}</if>
             <if test="auditorId !=null">and ba.auditor_id =#{auditorId}</if>
             <if test="taskName !=null and taskName !=''">and ht.NAME_ like concat('%', #{taskName}, '%')</if>
             <if test="delFlag !=null">and ba.del_flag =#{delFlag}</if>
             <if test="procInstId !=null and procInstId !=''">and ht.PROC_INST_ID_ =#{procInstId}</if>
+            <if test="orderNo !=null and orderNo !=''">and bb.order_no =#{orderNo}</if>
         </where>
         order by ht.START_TIME_ desc
     </select>

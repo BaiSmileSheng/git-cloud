@@ -3,9 +3,12 @@ package com.cloud.activiti.service.impl;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.consts.ActivitiConstant;
+import com.cloud.activiti.consts.ActivitiProDefKeyConstants;
 import com.cloud.activiti.consts.ActivitiProTitleConstants;
+import com.cloud.activiti.consts.ActivitiTableNameConstants;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
+import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
 import com.cloud.activiti.service.IActSmsSupplementaryOrderService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
@@ -42,7 +45,6 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
 
     /**
      * 开启流程 物耗申请单逻辑  新增、编辑提交时开启
-     * 待加全局事务
      *
      * @param smsSupplementaryOrder
      * @return R
@@ -84,9 +86,15 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
 
     @Override
     @GlobalTransactional
-    public R startActList(List<SmsSupplementaryOrder> smsSupplementaryOrders, SysUser sysUser, String procDefId, String procName) {
+    public R startActList(List<SmsSupplementaryOrder> smsSupplementaryOrders, SysUser sysUser) {
+        R keyMap = actTaskService.getByKey(ActivitiProDefKeyConstants.ACTIVITI_PRO_DEF_KEY_SUPPLEMENTARY_TEST);
+        if (!keyMap.isSuccess()) {
+            log.error("根据Key获取最新版流程实例失败："+keyMap.get("msg"));
+            throw new BusinessException("根据Key获取最新版流程实例失败!");
+        }
+        ProcessDefinitionAct processDefinitionAct = keyMap.getData(ProcessDefinitionAct.class);
         smsSupplementaryOrders.forEach(smsSupplementaryOrder->{
-            R r = startAct(smsSupplementaryOrder, sysUser, procDefId, procName);
+            R r = startAct(smsSupplementaryOrder, sysUser, processDefinitionAct.getId(), processDefinitionAct.getName());
             if (!r.isSuccess()) {
                 throw new BusinessException(r.getStr("msg"));
             }
@@ -126,7 +134,16 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
         if (!rUpdate.isSuccess()) {
             throw new BusinessException(rUpdate.getStr("msg"));
         }
+        R keyMap = actTaskService.getByKey(ActivitiProDefKeyConstants.ACTIVITI_PRO_DEF_KEY_SUPPLEMENTARY_TEST);
+        if (!keyMap.isSuccess()) {
+            log.error("根据Key获取最新版流程实例失败："+keyMap.get("msg"));
+            throw new BusinessException("根据Key获取最新版流程实例失败!");
+        }
+        ProcessDefinitionAct processDefinitionAct = keyMap.getData(ProcessDefinitionAct.class);
+        smsSupplementaryOrder.setProcName(processDefinitionAct.getName());
+        smsSupplementaryOrder.setProcDefId(processDefinitionAct.getId());
         //插入流程物业表  并开启流程
+        smsSupplementaryOrder.setStuffNo(smsSupplementaryOrderCheck.getStuffNo());
         BizBusiness business = initBusiness(smsSupplementaryOrder, userId);
         bizBusinessService.insertBizBusiness(business);
         Map<String, Object> variables = Maps.newHashMap();
@@ -230,6 +247,7 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
         BizBusiness business = new BizBusiness();
         business.setOrderNo(smsSupplementaryOrder.getStuffNo());
         business.setTableId(smsSupplementaryOrder.getId().toString());
+        business.setTableName(ActivitiTableNameConstants.ACTIVITI_TABLE_NAME_SUPPLEMENTARY);
         business.setProcDefId(smsSupplementaryOrder.getProcDefId());
         business.setTitle(ActivitiProTitleConstants.ACTIVITI_PRO_TITLE_SUPPLEMENTARY_TEST);
         business.setProcName(smsSupplementaryOrder.getProcName());

@@ -157,7 +157,8 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         stuffNo.append("WH").append(DateUtils.dateTime()).append(seq);
         smsSupplementaryOrder.setStuffNo(stuffNo.toString());
         //根据线体号查询供应商编码
-        R rFactory = remotefactoryLineInfoService.selectInfoByCodeLineCode(omsProductionOrder.getProductLineCode());
+        R rFactory = remotefactoryLineInfoService.selectInfoByCodeLineCode(omsProductionOrder.getProductLineCode(),
+                                                omsProductionOrder.getProductFactoryCode());
         if (!rFactory.isSuccess()) {
             return rFactory;
         }
@@ -301,8 +302,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
     public R autidSuccessToSAPY61(SmsSupplementaryOrder smsSupplementaryOrder) {
         Date date = DateUtil.date();
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog().builder()
-                .appId("SAP").interfaceName(SapConstants.ZESP_IM_001)
-                .content(smsSupplementaryOrder.toString()).build();
+                .appId("SAP").interfaceName(SapConstants.ZESP_IM_001).build();
         //发送SAP
         JCoDestination destination =null;
         try {
@@ -329,7 +329,12 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             inputTable.setValue("ERFME", smsSupplementaryOrder.getStuffUnit());//基本计量单位
             inputTable.setValue("ERFMG", smsSupplementaryOrder.getStuffAmount());//数量
             inputTable.setValue("AUFNR", smsSupplementaryOrder.getProductOrderCode());//生产订单号
-
+            String content = StrUtil.format("BWARTWA:{},BKTXT:{},WERKS:{},LGORT:{},MATNR:{}" +
+                            ",ERFME:{},ERFMG:{},AUFNR:{}","261",
+                    StrUtil.concat(true,smsSupplementaryOrder.getSupplierCode(),smsSupplementaryOrder.getStuffNo()),
+                    smsSupplementaryOrder.getFactoryCode(),"0088",smsSupplementaryOrder.getRawMaterialCode(),
+                    smsSupplementaryOrder.getStuffUnit(),smsSupplementaryOrder.getStuffAmount(),smsSupplementaryOrder.getProductOrderCode());
+            sysInterfaceLog.setContent(content);
             //执行函数
             JCoContext.begin(destination);
             fm.execute(destination);
@@ -362,6 +367,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             log.error("Connect SAP fault, error msg: " + e.toString());
             throw new BusinessException(e.getMessage());
         }finally {
+            sysInterfaceLog.setDelFlag("0");
             sysInterfaceLog.setCreateBy("定时任务");
             sysInterfaceLog.setCreateTime(date);
             sysInterfaceLog.setRemark("定时任务物耗审核通过传SAP261");
