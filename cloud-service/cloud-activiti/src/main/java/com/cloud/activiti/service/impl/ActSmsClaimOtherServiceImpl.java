@@ -200,7 +200,7 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
      */
     private BizBusiness initBusiness(SmsClaimOther smsClaimOther,SysUser sysUser) {
         //构造质量索赔流程信息
-        R keyMap = getByKey(ActivitiProDefKeyConstants.ACTIVITI_PRO_DEF_KEY_QUALITY_TEST);
+        R keyMap = getByKey(ActivitiProDefKeyConstants.ACTIVITI_PRO_DEF_KEY_CHAIM_OTHER_TEST);
         if (!keyMap.isSuccess()) {
             logger.error("根据Key获取最新版流程实例失败："+keyMap.get("msg"));
             throw new BusinessException("根据Key获取最新版流程实例失败!");
