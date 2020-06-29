@@ -13,14 +13,13 @@ import com.cloud.settle.domain.entity.SmsDelaysDelivery;
 import com.cloud.settle.enums.DeplayStatusEnum;
 import com.cloud.settle.mail.MailService;
 import com.cloud.settle.mapper.SmsDelaysDeliveryMapper;
-import com.cloud.settle.service.ISequeceService;
 import com.cloud.settle.service.ISmsDelaysDeliveryService;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.SysOss;
-import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteFactoryLineInfoService;
 import com.cloud.system.feign.RemoteOssService;
+import com.cloud.system.feign.RemoteSequeceService;
 import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.seata.spring.annotation.GlobalTransactional;
@@ -29,11 +28,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 延期交付索赔 Service业务层处理
@@ -56,7 +60,7 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
     private MailService mailService;
 
     @Autowired
-    private ISequeceService sequeceService;
+    private RemoteSequeceService remoteSequeceService;
 
     @Autowired
     private RemoteOssService remoteOssService;
@@ -66,6 +70,8 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
 
     @Autowired
     private RemoteFactoryLineInfoService remoteFactoryLineInfoService;
+
+    public static String YYYY_MM_DD = "yyyy-MM-dd";
 
     /**
      * 索赔单序列号生成所对应的序列
@@ -188,7 +194,12 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
             //1.获取索赔单号
             StringBuffer qualityNoBuffer = new StringBuffer(DELAYS_ORDER_PRE);
             qualityNoBuffer.append(DateUtils.getDate().replace("-",""));
-            String seq = sequeceService.selectSeq(DELAYS_SEQ_NAME,DELAYS_SEQ_LENGTH);
+            R seqR = remoteSequeceService.selectSeq(DELAYS_SEQ_NAME,DELAYS_SEQ_LENGTH);
+            if(!seqR.isSuccess()){
+                logger.info("新增保存延期交付索赔获取序列号失败 res:{}",JSONObject.toJSONString(seqR));
+                throw new BusinessException("新增保存延期交付索赔获取序列号失败");
+            }
+            String seq = seqR.getStr("data");
             logger.info("新增保存延期交付索赔获取序列号 seq:{}",seq);
             qualityNoBuffer.append(seq);
             smsDelaysDelivery.setDelaysNo(qualityNoBuffer.toString());
@@ -200,7 +211,7 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
             smsDelaysDelivery.setProductMaterialCode(omsProductionOrderRes.getProductMaterialCode());
             smsDelaysDelivery.setProductMaterialName(omsProductionOrderRes.getProductMaterialDesc());
             smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_1.getCode());
-            smsDelaysDelivery.setDeliveryDate(omsProductionOrderRes.getProductEndDate());
+            smsDelaysDelivery.setDeliveryDate(DateUtils.string2Date(omsProductionOrderRes.getProductEndDate(),YYYY_MM_DD));
             smsDelaysDelivery.setActDeliveryDate(omsProductionOrderRes.getActualEndDate());
             smsDelaysDelivery.setCreateTime(new Date());
             smsDelaysDelivery.setDelFlag(DeleteFlagConstants.NO_DELETED);
@@ -229,8 +240,12 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
      */
     @GlobalTransactional
     @Override
-    public R supplierAppeal(SmsDelaysDelivery smsDelaysDeliveryReq, MultipartFile[] files) {
+    public R supplierAppeal(SmsDelaysDelivery smsDelaysDeliveryReq,String ossIds) {
         logger.info("延期索赔单供应商申诉(包含文件信息) 单号:{}",smsDelaysDeliveryReq.getDelaysNo());
+        String[] ossIdsString = ossIds.split(",");
+        if(ossIdsString.length == 0){
+            throw new BusinessException("上传图片id不能为空");
+        }
         SmsDelaysDelivery selectSmsDelaysDelivery = smsDelaysDeliveryMapper.selectByPrimaryKey(smsDelaysDeliveryReq.getId());
         Boolean flagSelect = (null == selectSmsDelaysDelivery || null == selectSmsDelaysDelivery.getDelaysStatus());
         if(flagSelect){
@@ -249,8 +264,15 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
         smsDelaysDeliveryMapper.updateByPrimaryKeySelective(smsDelaysDeliveryReq);
         //修改文件信息
         String orderNo = selectSmsDelaysDelivery.getDelaysNo();
-        R result = remoteOssService.updateListByOrderNo(orderNo,files);
-        return result;
+        List<SysOss> sysOssList = new ArrayList<>();
+        for(String ossId : ossIdsString){
+            SysOss sysOss = new SysOss();
+            sysOss.setId(Long.valueOf(ossId));
+            sysOss.setOrderNo(orderNo);
+            sysOssList.add(sysOss);
+        }
+        R uplodeFileResult = remoteOssService.batchEditSaveById(sysOssList);
+        return uplodeFileResult;
     }
 
     @Override

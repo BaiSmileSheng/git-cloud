@@ -16,7 +16,6 @@ public class RoleConstants {
     public final static String ROLE_KEY_BZ = "BZ"; //班长
     public final static String ROLE_KEY_FZG = "FZG"; //分主管
     public final static String ROLE_KEY_ZLBBZ = "ZLBBZ"; //质量部部长
-    public final static String ROLE_KEY_DDBBZ = "DDBBZ"; //订单部部长
     public final static String ROLE_KEY_PCY = "PCY";//排产员
     public final static String ROLE_KEY_ORDER = "ORDER";//订单经理
     public final static String ROLE_KEY_ZLGCS = "ZLGCS";//质量工程师

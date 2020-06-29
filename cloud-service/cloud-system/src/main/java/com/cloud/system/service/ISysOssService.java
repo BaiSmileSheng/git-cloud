@@ -47,6 +47,13 @@ public interface ISysOssService {
     public int updateSysOss(SysOss sysOss);
 
     /**
+     * 按id批量修改
+     * @param sysOssList
+     * @return
+     */
+    R batchEditSaveById(List<SysOss> sysOssList);
+
+    /**
      * 删除文件上传信息
      *
      * @param ids 需要删除的数据ID
