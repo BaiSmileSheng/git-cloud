@@ -411,8 +411,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
     public R autidSuccessToSAP261(SmsScrapOrder smsScrapOrder) {
         Date date = DateUtil.date();
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog().builder()
-                .appId("SAP").interfaceName(SapConstants.ZESP_IM_001)
-                .content(smsScrapOrder.toString()).build();
+                .appId("SAP").interfaceName(SapConstants.ZESP_IM_001).build();
         //发送SAP
         JCoDestination destination =null;
         try {
@@ -439,7 +438,12 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             inputTable.setValue("ERFME", smsScrapOrder.getMeasureUnit());//基本计量单位
             inputTable.setValue("ERFMG", smsScrapOrder.getScrapAmount());//数量
             inputTable.setValue("AUFNR", smsScrapOrder.getProductOrderCode());//生产订单号
-
+            String content = StrUtil.format("BWARTWA:{},BKTXT:{},WERKS:{},LGORT:{},MATNR:{}" +
+                    ",ERFME:{},ERFMG:{},AUFNR:{}","261",
+                    StrUtil.concat(true,smsScrapOrder.getSupplierCode(),smsScrapOrder.getScrapNo()),
+                    smsScrapOrder.getFactoryCode(),"0088",smsScrapOrder.getProductMaterialCode(),
+                    smsScrapOrder.getMeasureUnit(),smsScrapOrder.getScrapAmount(),smsScrapOrder.getProductOrderCode());
+            sysInterfaceLog.setContent(content);
             //执行函数
             JCoContext.begin(destination);
             fm.execute(destination);
@@ -470,6 +474,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             log.error("Connect SAP fault, error msg: " + e.toString());
             throw new BusinessException(e.getMessage());
         }finally {
+            sysInterfaceLog.setDelFlag("0");
             sysInterfaceLog.setCreateBy("定时任务");
             sysInterfaceLog.setCreateTime(date);
             sysInterfaceLog.setRemark("定时任务报废审核通过传SAP261");

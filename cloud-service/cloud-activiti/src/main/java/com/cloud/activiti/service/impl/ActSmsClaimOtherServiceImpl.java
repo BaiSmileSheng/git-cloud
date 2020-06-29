@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -89,7 +88,6 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
      * @param id 主键id
      * @param complaintDescription 申诉描述
      * @param sysUser 当前用户信息
-     * @param files  文件
      * @return 成功或失败
      */
     @GlobalTransactional
@@ -211,7 +209,6 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         business.setOrderNo(smsClaimOther.getClaimCode());
         business.setTableId(smsClaimOther.getId().toString());
         business.setTableName(ActivitiTableNameConstants.ACTIVITI_TABLE_NAME_OTHER);
-        business.setProcDefId(smsClaimOther.getProcDefId());
         business.setTitle(ActivitiProTitleConstants.ACTIVITI_PRO_TITLE_SCHAIM_TEST);
         business.setProcDefId(processDefinitionAct.getId());
         business.setProcName(processDefinitionAct.getName());
