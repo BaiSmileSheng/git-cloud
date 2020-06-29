@@ -1,5 +1,6 @@
 package com.cloud.gateway.fiflt;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.constant.Constants;
@@ -31,7 +32,7 @@ import java.util.Arrays;
 public class AuthFilter implements GlobalFilter, Ordered {
     // 排除过滤的 uri 地址
     // swagger排除自行添加
-    private static final String[] whiteList = {"/auth/login", "/auth/validateCode","/user/register", "/system/v2/api-docs", "/auth/v2/api-docs", "/auth/getToken", "/order/v2/api-docs","/settle/v2/api-docs", "/act/v2/api-docs","/act/models/newModel","/modeler.html"};
+    private static final String[] whiteList = {"/auth/login", "/auth/validateCode","/user/register", "/system/v2/api-docs", "/auth/v2/api-docs", "/auth/getToken", "/order/v2/api-docs","/settle/v2/api-docs", "/act/v2/api-docs","/act/models/newModel"};
 
     @Resource(name = "stringRedisTemplate")
     private ValueOperations<String, String> ops;
@@ -41,7 +42,8 @@ public class AuthFilter implements GlobalFilter, Ordered {
         String url = exchange.getRequest().getURI().getPath();
         log.info("url:{}", url);
         // 跳过不需要验证的路径
-        if (Arrays.asList(whiteList).contains(url)) {
+        if (Arrays.asList(whiteList).contains(url)||StrUtil.contains(url,"static")||StrUtil.contains(url,"service/model")
+        ||StrUtil.contains(url,"service/editor")) {
             return chain.filter(exchange);
         }
         String token = exchange.getRequest().getHeaders().getFirst(Constants.TOKEN);
