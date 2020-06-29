@@ -126,17 +126,17 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
         if(ossIdsString.length == 0){
             throw new BusinessException("上传图片id不能为空");
         }
-        logger.info("延期索赔单供应商申诉(包含文件信息) 单号:{}",smsDelaysDeliveryReq.getDelaysNo());
+        logger.info("延期索赔单供应商申诉(包含文件信息) id:{}",smsDelaysDeliveryReq.getId());
         R selectSmsDelaysDeliveryR = remoteDelaysDeliveryService.get(smsDelaysDeliveryReq.getId());
         if(!selectSmsDelaysDeliveryR.isSuccess()){
-            logger.info("延期索赔单申诉异常 索赔单号:{}",smsDelaysDeliveryReq.getDelaysNo());
+            logger.info("延期索赔单申诉异常 id:{}",smsDelaysDeliveryReq.getId());
             throw new BusinessException("此延期索赔单不存在");
         }
         SmsDelaysDelivery selectSmsDelaysDelivery = selectSmsDelaysDeliveryR.getData(SmsDelaysDelivery.class);
         Boolean flagSelectStatus = DeplayStatusEnum.DELAYS_STATUS_1.getCode().equals(selectSmsDelaysDelivery.getDelaysStatus())
                 ||DeplayStatusEnum.DELAYS_STATUS_7.getCode().equals(selectSmsDelaysDelivery.getDelaysStatus());
         if(!flagSelectStatus){
-            logger.info("延期索赔单申诉状态异常 索赔单号:{}",smsDelaysDeliveryReq.getDelaysNo());
+            logger.info("延期索赔单申诉状态异常 索赔单号:{}",selectSmsDelaysDelivery.getDelaysNo());
             throw new  BusinessException("此延期索赔单不可再申诉");
         }
         //修改延期索赔单
