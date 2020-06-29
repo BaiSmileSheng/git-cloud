@@ -45,17 +45,15 @@ public class ActSmsSupplementaryOrderActController extends BaseController {
     /**
      * 物耗审核开启流程  新增、编辑提交时开启
      * @param smsSupplementaryOrders
-     * @param procDefId
-     * @param procName
      * @return
      */
     @PostMapping("open")
     @OperLog(title = "物耗审核开启流程(新增、编辑)", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "开启流程(新增、编辑) ", response = R.class)
     @HasPermissions("settle:supplementary:commit")
-    public R addSave(@RequestBody List<SmsSupplementaryOrder> smsSupplementaryOrders, String procDefId, String procName) {
+    public R addSave(@RequestBody List<SmsSupplementaryOrder> smsSupplementaryOrders) {
         //开启审核流程
-        return actSmsSupplementaryOrderService.startActList(smsSupplementaryOrders,getUserInfo(SysUser.class),procDefId,procName);
+        return actSmsSupplementaryOrderService.startActList(smsSupplementaryOrders,getUserInfo(SysUser.class));
     }
 
     /**

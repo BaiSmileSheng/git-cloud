@@ -45,10 +45,11 @@ public class RemoteFactoryLineInfoFallbackFactory implements FallbackFactory<Rem
             /**
              * 根据线体查询信息
              * @param produceLineCode
+             * @param factoryCode
              * @return 供应商编码
              */
             @Override
-            public R selectInfoByCodeLineCode(String produceLineCode) {
+            public R selectInfoByCodeLineCode(String produceLineCode,String factoryCode) {
                 log.error("RemoteFactoryLineInfoService.selectInfoByCodeLineCode错误信息：{}",throwable.getMessage());
                 return R.error("服务器拥挤，请稍后再试！");
             }

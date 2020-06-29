@@ -21,9 +21,9 @@ spring:
         namespace: orw-prod
 uuc:
   apiUrl: https://uuc.cosmoplat.com
-  clientId: ORW
-  clientSecret: 0a48727bd0c366b7c74af9bcf55469b6
-  isCheck: false
+  clientId: ZKDDPS
+  clientSecret: c6e3ed545938a9a339eefa35bac5bcca
+  isCheck: true
 huc:
   apiUrl: https://user.haier.net
   appKey: ORW

@@ -3,9 +3,12 @@ package com.cloud.activiti.service.impl;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.consts.ActivitiConstant;
+import com.cloud.activiti.consts.ActivitiProDefKeyConstants;
 import com.cloud.activiti.consts.ActivitiProTitleConstants;
+import com.cloud.activiti.consts.ActivitiTableNameConstants;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
+import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
 import com.cloud.activiti.service.IActSmsScrapOrderService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
@@ -75,6 +78,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         }
         //插入流程物业表  并开启流程
         BizBusiness business = initBusiness(smsScrapOrder, sysUser.getUserId());
+
         bizBusinessService.insertBizBusiness(business);
         Map<String, Object> variables = Maps.newHashMap();
         bizBusinessService.startProcess(business, variables);
@@ -113,6 +117,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         if (!rUpdate.isSuccess()) {
             throw new BusinessException(rUpdate.getStr("msg"));
         }
+        smsScrapOrder.setScrapNo(smsScrapOrderCheck.getScrapNo());
         //插入流程物业表  并开启流程
         BizBusiness business = initBusiness(smsScrapOrder, userId);
         bizBusinessService.insertBizBusiness(business);
@@ -208,11 +213,19 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
      */
     private BizBusiness initBusiness(SmsScrapOrder smsScrapOrder, long userId) {
         BizBusiness business = new BizBusiness();
+        //获取流程信息
+        R keyMap = actTaskService.getByKey(ActivitiProDefKeyConstants.ACTIVITI_PRO_DEF_KEY_SCRAP_TEST);
+        if (!keyMap.isSuccess()) {
+            log.error("根据Key获取最新版流程实例失败："+keyMap.get("msg"));
+            throw new BusinessException("根据Key获取最新版流程实例失败!");
+        }
+        ProcessDefinitionAct processDefinitionAct = keyMap.getData(ProcessDefinitionAct.class);
+        business.setProcDefId(processDefinitionAct.getId());
+        business.setProcName(processDefinitionAct.getName());
         business.setOrderNo(smsScrapOrder.getScrapNo());
         business.setTableId(smsScrapOrder.getId().toString());
-        business.setProcDefId(smsScrapOrder.getProcDefId());
+        business.setTableName(ActivitiTableNameConstants.ACTIVITI_TABLE_NAME_SCRAP);
         business.setTitle(ActivitiProTitleConstants.ACTIVITI_PRO_TITLE_SCRAP_TEST);
-        business.setProcName(smsScrapOrder.getProcName());
         business.setUserId(userId);
         SysUser user = remoteUserService.selectSysUserByUserId(userId);
         business.setApplyer(user.getUserName());

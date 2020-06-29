@@ -28,7 +28,7 @@ public interface IActSmsSupplementaryOrderService {
      * @param smsSupplementaryOrders
      * @return R
      */
-    R startActList(List<SmsSupplementaryOrder> smsSupplementaryOrders, SysUser sysUser, String procDefId, String procName);
+    R startActList(List<SmsSupplementaryOrder> smsSupplementaryOrders, SysUser sysUser);
 
 
     /**

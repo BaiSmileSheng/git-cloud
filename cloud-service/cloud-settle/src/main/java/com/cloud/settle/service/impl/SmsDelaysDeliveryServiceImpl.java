@@ -1,5 +1,6 @@
 package com.cloud.settle.service.impl;
 
+import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.core.domain.R;
@@ -212,13 +213,15 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
             smsDelaysDelivery.setProductMaterialName(omsProductionOrderRes.getProductMaterialDesc());
             smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_1.getCode());
             smsDelaysDelivery.setDeliveryDate(DateUtils.string2Date(omsProductionOrderRes.getProductEndDate(),YYYY_MM_DD));
+            smsDelaysDelivery.setDeliveryDate(DateUtil.parseDate(omsProductionOrderRes.getProductEndDate()));
             smsDelaysDelivery.setActDeliveryDate(omsProductionOrderRes.getActualEndDate());
             smsDelaysDelivery.setCreateTime(new Date());
             smsDelaysDelivery.setDelFlag(DeleteFlagConstants.NO_DELETED);
 
             //根据线体获取供应商信息
             R rFactoryLineInfo=remoteFactoryLineInfoService
-                    .selectInfoByCodeLineCode(omsProductionOrderRes.getProductLineCode());
+                    .selectInfoByCodeLineCode(omsProductionOrderRes.getProductLineCode(),
+                            omsProductionOrderRes.getProductFactoryCode());
             if (!rFactoryLineInfo.isSuccess()) {
                 throw new BusinessException(rFactoryLineInfo.getStr("msg"));
             }
