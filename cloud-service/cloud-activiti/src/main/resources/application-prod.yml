@@ -31,3 +31,5 @@ seata:
   registry:
     nacos:
       namespace: ${spring.cloud.nacos.discovery.namespace}
+gate:
+  url: http://orw-khaos.cosmoplat.com
