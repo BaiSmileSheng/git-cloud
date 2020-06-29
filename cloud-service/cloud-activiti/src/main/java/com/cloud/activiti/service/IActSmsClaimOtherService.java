@@ -24,10 +24,10 @@ public interface IActSmsClaimOtherService {
      * @param id 主键id
      * @param complaintDescription 申诉描述
      * @param sysUser 当前用户信息
-     * @param files  文件
+     * @param ossIds  文件
      * @return 成功或失败
      */
-    R addSave(Long id,String complaintDescription, MultipartFile[] files, SysUser sysUser);
+    R addSave(Long id,String complaintDescription, String ossIds, SysUser sysUser);
 
     /**
      * 其他索赔审批流程

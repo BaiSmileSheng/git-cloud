@@ -4488,14 +4488,14 @@
             },
             {
               "name": "product_start_date",
-              "type": "Date",
+              "type": "DefaultString",
               "remark": "",
               "chnname": "生产开始日期",
               "notNull": true
             },
             {
               "name": "product_end_date",
-              "type": "Date",
+              "type": "DefaultString",
               "remark": "",
               "chnname": "生产结束日期",
               "notNull": true
@@ -4542,7 +4542,7 @@
             },
             {
               "name": "delivery_date",
-              "type": "Date",
+              "type": "DefaultString",
               "remark": "",
               "chnname": "交货日期",
               "notNull": true
@@ -5441,14 +5441,14 @@
             },
             {
               "name": "product_start_date",
-              "type": "Date",
+              "type": "DefaultString",
               "remark": "",
               "chnname": "生产开始日期",
               "notNull": true
             },
             {
               "name": "product_end_date",
-              "type": "Date",
+              "type": "DefaultString",
               "remark": "",
               "chnname": "生产结束日期",
               "notNull": true
@@ -5495,7 +5495,7 @@
             },
             {
               "name": "delivery_date",
-              "type": "Date",
+              "type": "DefaultString",
               "remark": "",
               "chnname": "交货日期",
               "notNull": true
@@ -8219,11 +8219,23 @@
               "defaultValue": "''"
             },
             {
+              "name": "project_id",
+              "type": "BIGINT_19",
+              "remark": "",
+              "chnname": "问题分类id"
+            },
+            {
               "name": "claim_clause",
               "type": "VARCHAR_2000",
               "remark": "",
               "chnname": "索赔条款",
               "defaultValue": "''"
+            },
+            {
+              "name": "claim_id",
+              "type": "BIGINT_19",
+              "remark": "",
+              "chnname": "索赔条款id"
             },
             {
               "name": "claim_reason",

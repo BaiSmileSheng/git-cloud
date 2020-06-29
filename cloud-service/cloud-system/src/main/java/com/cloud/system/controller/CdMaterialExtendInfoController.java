@@ -3,8 +3,25 @@ package com.cloud.system.controller;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
+import cn.hutool.core.lang.Dict;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import org.hibernate.validator.constraints.pl.REGON;
+import tk.mybatis.mapper.entity.Example;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import com.cloud.common.core.domain.R;
+import com.cloud.common.core.controller.BaseController;
 import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.system.service.ICdMaterialExtendInfoService;
 import io.swagger.annotations.*;
@@ -13,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 物料扩展信息  提供者
@@ -101,6 +119,16 @@ public class CdMaterialExtendInfoController extends BaseController {
     public R timeSycMaterialCode() {
         return cdMaterialExtendInfoService.timeSycMaterialCode();
     }
+    /**
+     * 根据多个成品专用号查询
+     *
+     * @return
+     */
+    @PostMapping("selectByMaterialList")
+    @ApiOperation(value = "根据多个成品专用号查询 ", response = R.class)
+    public R selectByMaterialList(@RequestBody List<Dict> list){
+        return cdMaterialExtendInfoService.selectByMaterialCodeList(list);
+    }
 
     /**
      * 根据生命周期查询物料号集合
@@ -120,5 +148,14 @@ public class CdMaterialExtendInfoController extends BaseController {
     @PostMapping("selectInfoInMaterialCodes")
     public R selectInfoInMaterialCodes(@RequestBody List<String> materialCodes) {
         return cdMaterialExtendInfoService.selectInfoInMaterialCodes(materialCodes);
+    }
+    /**
+     * 根据物料查询一条记录
+     * @param materialCode
+     * @return
+     */
+    @PostMapping("selectOneByMaterialCode")
+    public R selectOneByMaterialCode(@RequestParam("materialCode") String materialCode){
+        return cdMaterialExtendInfoService.selectOneByMaterialCode(materialCode);
     }
 }

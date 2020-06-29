@@ -1,29 +1,37 @@
 package com.cloud.activiti.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.consts.ActivitiConstant;
+import com.cloud.activiti.consts.ActivitiProTitleConstants;
+import com.cloud.activiti.consts.ActivitiTableNameConstants;
+import com.cloud.activiti.consts.ActivitiProDefKeyConstants;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
+import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
 import com.cloud.activiti.service.IActSmsClaimOtherService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
-import com.cloud.activiti.consts.ActivitiProTitleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.settle.domain.entity.SmsClaimOther;
 import com.cloud.settle.enums.ClaimOtherStatusEnum;
 import com.cloud.settle.feign.RemoteClaimOtherService;
+import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteOssService;
 import com.google.common.collect.Maps;
 import io.seata.spring.annotation.GlobalTransactional;
+import org.activiti.engine.RepositoryService;
+import org.activiti.engine.repository.ProcessDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,6 +55,9 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
 
     @Autowired
     private RemoteOssService remoteOssService;
+
+    @Autowired
+    private RepositoryService repositoryService;
 
     /**
      * 索赔单所对应的申诉文件订单号后缀
@@ -77,12 +88,11 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
      * @param id 主键id
      * @param complaintDescription 申诉描述
      * @param sysUser 当前用户信息
-     * @param files  文件
      * @return 成功或失败
      */
     @GlobalTransactional
     @Override
-    public R addSave(Long id,String complaintDescription, MultipartFile[] files, SysUser sysUser) {
+    public R addSave(Long id,String complaintDescription, String ossIds, SysUser sysUser) {
         SmsClaimOther smsClaimOther = new SmsClaimOther();
         smsClaimOther.setId(id);
         smsClaimOther.setComplaintDescription(complaintDescription);
@@ -90,13 +100,14 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         logger.info("其他索赔开启流程 其他索赔id:{},其他索赔索赔单号:{}",smsClaimOther.getId(),
                 smsClaimOther.getClaimCode());
         //1.供应商申诉
-        R appealResult = supplierAppeal(smsClaimOther,files);
-        Boolean flagResult = (null == appealResult || !"0".equals(appealResult.get("code").toString()));
-        if(flagResult){
+        R appealResult = supplierAppeal(smsClaimOther,ossIds);
+        if(!appealResult.isSuccess()){
             logger.error("其他索赔开启流程失败 其他索赔索赔单号:{},res:{}", smsClaimOther.getClaimCode(),
-                    JSONObject.toJSON(flagResult));
+                    JSONObject.toJSON(appealResult));
             return appealResult;
         }
+        String claimCode = appealResult.getStr("data");
+        smsClaimOther.setClaimCode(claimCode);
         //2.构造其他索赔流程信息
         BizBusiness business = initBusiness(smsClaimOther,sysUser);
         //新增其他索赔流程
@@ -110,10 +121,14 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
     /**
      * 供应商申诉
      * @param smsClaimOther 其他索赔信息
-     * @param files 文件
+     * @param ossIds 文件
      * @return 成功或失败
      */
-    private R supplierAppeal(SmsClaimOther smsClaimOther, MultipartFile[] files) {
+    private R supplierAppeal(SmsClaimOther smsClaimOther, String ossIds) {
+        String[] ossIdsString = ossIds.split(",");
+        if(ossIdsString.length == 0){
+            throw new BusinessException("上传图片id不能为空");
+        }
         //1.查询索赔单数据,判断状态是否是待提交,待提交可修改
         R smsClaimOtherResR = remoteClaimOtherService.get(smsClaimOther.getId());
         if(!smsClaimOtherResR.isSuccess()){
@@ -137,11 +152,47 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         }
         String orderNo = smsClaimOtherRes.getClaimCode() + ORDER_NO_OTHER_APPEAL_END;
         //3.根据订单号新增文件
-        R uplodeFileResult = remoteOssService.updateListByOrderNo(orderNo,files);
-        if(!uplodeFileResult.isSuccess()){
-            throw new BusinessException("其他索赔单供应商申诉时新增文件失败");
+        //修改文件信息
+        List<SysOss> sysOssList = new ArrayList<>();
+        for(String ossId : ossIdsString){
+            SysOss sysOss = new SysOss();
+            sysOss.setId(Long.valueOf(ossId));
+            sysOss.setOrderNo(orderNo);
+            sysOssList.add(sysOss);
         }
-        return R.ok();
+        R uplodeFileResult = remoteOssService.batchEditSaveById(sysOssList);
+        if(!uplodeFileResult.isSuccess()){
+            logger.info("其他索赔单申诉修改文件 索赔单号:{}",smsClaimOtherRes.getClaimCode());
+            throw new  BusinessException("其他索赔单申诉修改文件异常");
+        }
+        return R.data(smsClaimOtherRes.getClaimCode());
+    }
+
+    /**
+     * Description:  根据Key查询最新版本流程
+     * Param: [key]
+     * return: com.cloud.common.core.domain.R
+     */
+    private R getByKey(String key) {
+        // 使用repositoryService查询单个流程实例
+        ProcessDefinition processDefinition = repositoryService
+                .createProcessDefinitionQuery().processDefinitionKey(key).latestVersion().singleResult();
+        if (BeanUtil.isEmpty(processDefinition)) {
+            logger.error("根据Key值查询流程实例失败!");
+            return R.error("根据Key值查询流程实例失败！");
+        }
+        ProcessDefinitionAct processDefinitionAct =
+                ProcessDefinitionAct.builder()
+                        .id(processDefinition.getId())
+                        .name(processDefinition.getName())
+                        .category(processDefinition.getCategory())
+                        .deploymentId(processDefinition.getDeploymentId())
+                        .description(processDefinition.getDescription())
+                        .diagramResourceName(processDefinition.getDiagramResourceName())
+                        .resourceName(processDefinition.getResourceName())
+                        .tenantId(processDefinition.getTenantId())
+                        .version(processDefinition.getVersion()).build();
+        return R.data(processDefinitionAct);
     }
     /**
      * biz构造业务信息
@@ -149,12 +200,20 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
      * @return
      */
     private BizBusiness initBusiness(SmsClaimOther smsClaimOther,SysUser sysUser) {
+        //构造质量索赔流程信息
+        R keyMap = getByKey(ActivitiProDefKeyConstants.ACTIVITI_PRO_DEF_KEY_CHAIM_OTHER_TEST);
+        if (!keyMap.isSuccess()) {
+            logger.error("根据Key获取最新版流程实例失败："+keyMap.get("msg"));
+            throw new BusinessException("根据Key获取最新版流程实例失败!");
+        }
+        ProcessDefinitionAct processDefinitionAct = keyMap.getData(ProcessDefinitionAct.class);
         BizBusiness business = new BizBusiness();
         business.setOrderNo(smsClaimOther.getClaimCode());
         business.setTableId(smsClaimOther.getId().toString());
-        business.setProcDefId(smsClaimOther.getProcDefId());
+        business.setTableName(ActivitiTableNameConstants.ACTIVITI_TABLE_NAME_OTHER);
         business.setTitle(ActivitiProTitleConstants.ACTIVITI_PRO_TITLE_SCHAIM_TEST);
-        business.setProcName(smsClaimOther.getProcName());
+        business.setProcDefId(processDefinitionAct.getId());
+        business.setProcName(processDefinitionAct.getName());
         business.setUserId(sysUser.getUserId());
         business.setApplyer(sysUser.getUserName());
         //设置流程状态

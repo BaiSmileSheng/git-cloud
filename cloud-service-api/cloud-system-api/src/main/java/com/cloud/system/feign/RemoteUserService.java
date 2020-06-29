@@ -2,6 +2,7 @@ package com.cloud.system.feign;
 
 import java.util.Set;
 
+import com.cloud.system.domain.entity.SysRole;
 import com.cloud.system.domain.entity.SysUser;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -58,4 +59,13 @@ public interface RemoteUserService {
      */
     @GetMapping("user/findUserBySupplierCode/{supplierCode}")
     public R findUserBySupplierCode(@PathVariable("supplierCode") String supplierCode);
+    /**
+     * Description:  查询用户权限
+     * Param: []
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/19
+     */
+    @PostMapping("user/selectUserRights")
+    R selectUserRights(@RequestBody String roleKey);
 }

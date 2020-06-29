@@ -76,8 +76,8 @@ public class OrderFromSap601InterfaceServiceImpl implements IOrderFromSap601Inte
                     omsProductionOrder.setProductMaterialCode(outTableOutput.getString("MATNR"));//成品物料号
                     omsProductionOrder.setProductFactoryCode(outTableOutput.getString("WERKS"));//生产工厂
                     omsProductionOrder.setOrderType(outTableOutput.getString("AUART"));//订单类型
-                    omsProductionOrder.setProductStartDate(sft.parse(outTableOutput.getString("GSTRP")));//基本开始日期
-                    omsProductionOrder.setProductEndDate(sft.parse(outTableOutput.getString("GLTRP")));//基本结束日期
+                    omsProductionOrder.setProductStartDate(outTableOutput.getString("GSTRP"));//基本开始日期
+                    omsProductionOrder.setProductEndDate(outTableOutput.getString("GLTRP"));//基本结束日期
                     omsProductionOrder.setProductNum(outTableOutput.getBigDecimal("GAMNG"));//订单数量
                     omsProductionOrder.setDestination(outTableOutput.getString("LGORT"));//地点、发往地
                     omsProductionOrder.setProductLineCode(outTableOutput.getString("CY_SEQNR"));//线体
@@ -136,7 +136,7 @@ public class OrderFromSap601InterfaceServiceImpl implements IOrderFromSap601Inte
                 inputTable.setValue("LGORT", omsProductionOrder.getDestination());
                 inputTable.setValue("ABLAD", omsProductionOrder.getOrderCode());
                 inputTable.setValue("CY_SEQNR", omsProductionOrder.getProductLineCode());
-                inputTable.setValue("STLAL", omsProductionOrder.getBomVersion());
+                inputTable.setValue("VERID", omsProductionOrder.getBomVersion());
             }
             //执行函数
             JCoContext.begin(destination);

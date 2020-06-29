@@ -1,30 +1,37 @@
 package com.cloud.activiti.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.consts.ActivitiConstant;
+import com.cloud.activiti.consts.ActivitiProDefKeyConstants;
 import com.cloud.activiti.consts.ActivitiProTitleConstants;
+import com.cloud.activiti.consts.ActivitiTableNameConstants;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
+import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
 import com.cloud.activiti.service.IActSmsQualityOrderService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
-import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.settle.domain.entity.SmsQualityOrder;
 import com.cloud.settle.enums.QualityStatusEnum;
 import com.cloud.settle.feign.RemoteQualityOrderService;
+import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteOssService;
 import com.google.common.collect.Maps;
 import io.seata.spring.annotation.GlobalTransactional;
+import org.activiti.engine.RepositoryService;
+import org.activiti.engine.repository.ProcessDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,6 +55,9 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
 
     @Autowired
     private RemoteOssService remoteOssService;
+
+    @Autowired
+    private RepositoryService repositoryService;
 
     /**
      * 索赔单所对应的申诉文件订单号后缀
@@ -77,12 +87,12 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
      * 质量索赔信息开启流程
      * @param id 主键id
      * @param complaintDescription 申诉描述
-     * @param files
+     * @param ossIds
      * @return 成功或失败
      */
     @GlobalTransactional
     @Override
-    public R addSave(Long id,String complaintDescription,MultipartFile[] files, SysUser sysUser) {
+    public R addSave(Long id,String complaintDescription,String ossIds, SysUser sysUser) {
 
         SmsQualityOrder smsQualityOrder = new SmsQualityOrder();
         smsQualityOrder.setId(id);
@@ -91,8 +101,12 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
         logger.info("质量索赔信息开启流程 质量索赔id:{},质量索赔索赔单号:{}",smsQualityOrder.getId(),
                 smsQualityOrder.getQualityNo());
         //1.供应商发起申诉
-        supplierAppeal(smsQualityOrder,files);
-        //构造质量索赔流程信息
+        R suppResult = supplierAppeal(smsQualityOrder,ossIds);
+        if(!suppResult.isSuccess()){
+            return suppResult;
+        }
+        String orderNo = suppResult.getStr("data");
+        smsQualityOrder.setQualityNo(orderNo);
         BizBusiness business = initBusiness(smsQualityOrder,sysUser);
         //新增质量索赔流程
         bizBusinessService.insertBizBusiness(business);
@@ -107,7 +121,11 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
      * @param smsQualityOrder 质量索赔信息
      * @return 索赔单供应商申诉结果成功或失败
      */
-    private R supplierAppeal(SmsQualityOrder smsQualityOrder, MultipartFile[] files) {
+    private R supplierAppeal(SmsQualityOrder smsQualityOrder,String ossIds) {
+        String[] ossIdsString = ossIds.split(",");
+        if(ossIdsString.length == 0){
+            throw new BusinessException("上传图片id不能为空");
+        }
         //1.查询索赔单数据,判断状态是否是待提交,待提交可修改
         R smsQualityOrderResR = remoteQualityOrderService.get(smsQualityOrder.getId());
         if(!smsQualityOrderResR.isSuccess()){
@@ -132,27 +150,67 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
         }
         //3.根据订单号新增文件
         String orderNo = smsQualityOrderRes.getQualityNo() + ORDER_NO_QUALITY_APPEAL_END;
-        R uplodeFileResult = remoteOssService.updateListByOrderNo(orderNo,files);
-        if(!uplodeFileResult.isSuccess()){
-            logger.error("质量索赔单申诉时新增文件异常 索赔单号:{},res:{}",smsQualityOrder.getQualityNo()
-                    ,JSONObject.toJSONString(uplodeFileResult));
-            throw new BusinessException("质量索赔单供应商申诉时新增文件失败");
+        List<SysOss> sysOssList = new ArrayList<>();
+        for(String ossId : ossIdsString){
+            SysOss sysOss = new SysOss();
+            sysOss.setId(Long.valueOf(ossId));
+            sysOss.setOrderNo(orderNo);
+            sysOssList.add(sysOss);
         }
-        return R.ok();
+        R uplodeFileResult = remoteOssService.batchEditSaveById(sysOssList);
+        if(!uplodeFileResult.isSuccess()){
+            logger.info("质量索赔单申诉修改文件 索赔单号:{}",smsQualityOrderRes.getQualityNo());
+            throw new  BusinessException("质量索赔单申诉修改文件异常");
+        }
+        return R.data(smsQualityOrderRes.getQualityNo());
     }
 
+    /**
+     * Description:  根据Key查询最新版本流程
+     * Param: [key]
+     * return: com.cloud.common.core.domain.R
+     */
+    private R getByKey(String key) {
+        // 使用repositoryService查询单个流程实例
+        ProcessDefinition processDefinition = repositoryService
+                .createProcessDefinitionQuery().processDefinitionKey(key).latestVersion().singleResult();
+        if (BeanUtil.isEmpty(processDefinition)) {
+            logger.error("根据Key值查询流程实例失败!");
+            return R.error("根据Key值查询流程实例失败！");
+        }
+        ProcessDefinitionAct processDefinitionAct =
+                ProcessDefinitionAct.builder()
+                        .id(processDefinition.getId())
+                        .name(processDefinition.getName())
+                        .category(processDefinition.getCategory())
+                        .deploymentId(processDefinition.getDeploymentId())
+                        .description(processDefinition.getDescription())
+                        .diagramResourceName(processDefinition.getDiagramResourceName())
+                        .resourceName(processDefinition.getResourceName())
+                        .tenantId(processDefinition.getTenantId())
+                        .version(processDefinition.getVersion()).build();
+        return R.data(processDefinitionAct);
+    }
     /**
      * biz构造业务信息
      * @param smsQualityOrder 质量索赔信息
      * @return
      */
     private BizBusiness initBusiness(SmsQualityOrder smsQualityOrder,SysUser sysUser) {
+        //构造质量索赔流程信息
+        R keyMap = getByKey(ActivitiProDefKeyConstants.ACTIVITI_PRO_DEF_KEY_QUALITY_TEST);
+        if (!keyMap.isSuccess()) {
+            logger.error("根据Key获取最新版流程实例失败："+keyMap.get("msg"));
+            throw new BusinessException("根据Key获取最新版流程实例失败!");
+        }
+        ProcessDefinitionAct processDefinitionAct = keyMap.getData(ProcessDefinitionAct.class);
         BizBusiness business = new BizBusiness();
         business.setOrderNo(smsQualityOrder.getQualityNo());
         business.setTableId(smsQualityOrder.getId().toString());
-        business.setProcDefId(smsQualityOrder.getProcDefId());
+        business.setProcDefId(processDefinitionAct.getId());
+        business.setTableName(ActivitiTableNameConstants.ACTIVITI_TABLE_NAME_QUALITY);
         business.setTitle(ActivitiProTitleConstants.ACTIVITI_PRO_TITLE_SQUALITY_TEST);
-        business.setProcName(smsQualityOrder.getProcName());
+        business.setProcName(processDefinitionAct.getName());
         business.setUserId(sysUser.getUserId());
         business.setApplyer(sysUser.getUserName());
         //设置流程状态
@@ -184,11 +242,9 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
             throw new BusinessException("质量索赔审批流程 查询质量索赔信息失败");
         }
         SmsQualityOrder smsQualityOrder = smsQualityOrderR.getData(SmsQualityOrder.class);
-        //状态是否是待质量部部长审核
+        //状态是否是待质量部长审核
         Boolean flagStatus4 = QualityStatusEnum.QUALITY_STATUS_4.getCode().equals(smsQualityOrder.getQualityStatus());
-        //状态是否是待小微主审核
-        Boolean flagStatus5 = QualityStatusEnum.QUALITY_STATUS_5.getCode().equals(smsQualityOrder.getQualityStatus());
-        if (null == smsQualityOrder) {
+        if (null == smsQualityOrder || !flagStatus4) {
             logger.error ("质量索赔审批流程 查询质量索赔信息失败Req主键id:{} 状态:{}",bizBusiness.getTableId(),smsQualityOrder.getQualityStatus());
             throw new BusinessException("质量索赔审批流程 查询质量索赔信息失败");
         }
@@ -198,14 +254,7 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
         //根据角色和质量索赔状态审批
         if(flagBizResult){
             //质量部部长审批: 将供应商申诉4--->待小微主审核5 //小微主审批: 将待小微主审核5--->待结算11
-            if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_ZLBBZ) && flagStatus4){
-                smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_5.getCode());
-            }else if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ) && flagStatus5){
-                smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_11.getCode());
-            }else{
-                logger.error ("质量索赔审批流程 此质量索赔单不可审批Req主键id:{} 状态:{}",bizBusiness.getTableId(),smsQualityOrder.getQualityStatus());
-                throw new BusinessException("此质量索赔单不可审批");
-            }
+            smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_11.getCode());
         }else{
             smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_7.getCode());
         }

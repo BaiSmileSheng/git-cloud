@@ -4,6 +4,7 @@ import cn.hutool.core.lang.Dict;
 import com.cloud.common.core.dao.BaseMapper;
 import com.cloud.system.domain.entity.CdBomInfo;
 import org.apache.ibatis.annotations.MapKey;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -26,4 +27,6 @@ public interface CdBomInfoMapper extends BaseMapper<CdBomInfo>{
     Map<String,Map<String, String>> selectVersionMap(@RequestParam(value = "dicts") List<Dict> dicts);
 
     int deleteAll();
+
+    List<CdBomInfo> selectBomList(@Param(value = "list") List<Dict> list);
 }

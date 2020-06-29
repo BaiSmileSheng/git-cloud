@@ -27,7 +27,7 @@ public class ActivitiProDefKeyConstants {
     /**
      * 其他索赔管理服务相关流程key
      */
-    public static final String ACTIVITI_PRO_DEF_KEY_CHAIM_OTHER_TEST = "chaimOther";
+    public static final String ACTIVITI_PRO_DEF_KEY_CHAIM_OTHER_TEST = "claimOther";
 
     /**
      * 下市管理服务相关流程key

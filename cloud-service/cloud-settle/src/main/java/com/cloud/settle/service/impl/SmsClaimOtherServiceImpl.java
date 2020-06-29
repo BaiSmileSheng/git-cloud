@@ -124,12 +124,16 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
     /**
      * 新增其他索赔信息(包含文件信息)
      * @param smsClaimOther 其他索赔信息
-     * @param files 文件信息
+     * @param ossIds 文件信息
      * @return 新增结果
      */
     @GlobalTransactional
     @Override
-    public R insertClaimOtherAndOss(SmsClaimOther smsClaimOther, MultipartFile[] files) {
+    public R insertClaimOtherAndOss(SmsClaimOther smsClaimOther,String ossIds) {
+        String[] ossIdsString = ossIds.split(",");
+        if(ossIdsString.length == 0){
+            throw new BusinessException("上传图片id不能为空");
+        }
         //1.生成单号 索赔单号生成规则 QT+年月日+4位顺序号，循序号每日清零
         StringBuffer qualityNoBuffer = new StringBuffer(OTHER_ORDER_PRE);
         qualityNoBuffer.append(DateUtils.getDate().replace("-",""));
@@ -149,9 +153,15 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         //上传其他索赔附件上传的时候order_no 为 索赔单号_01
         //3.根据订单号新增文件
         String orderNo = smsClaimOther.getClaimCode() + ORDER_NO_OTHER_CLAIM_END;
-        R uplodeFileResult = remoteOssService.updateListByOrderNo(orderNo,files);
-        Boolean flagResult = "0".equals(uplodeFileResult.get("code").toString());
-        if(!flagResult){
+        List<SysOss> sysOssList = new ArrayList<>();
+        for(String ossId : ossIdsString){
+            SysOss sysOss = new SysOss();
+            sysOss.setId(Long.valueOf(ossId));
+            sysOss.setOrderNo(orderNo);
+            sysOssList.add(sysOss);
+        }
+        R uplodeFileResult = remoteOssService.batchEditSaveById(sysOssList);
+        if(!uplodeFileResult.isSuccess()){
             logger.error("新增其他索赔时新增文件失败订单号 orderNo:{},res:{}",orderNo, JSONObject.toJSON(uplodeFileResult));
             throw new BusinessException("新增其他索赔时新增质新增文件失败");
         }
@@ -169,12 +179,12 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
     /**
      * 修改保存其他索赔(包含图片信息)
      * @param smsClaimOther  其他索赔信息
-     * @param files 文件信息
+     * @param ossIds 文件信息
      * @return 修改成功或失败
      */
     @GlobalTransactional
     @Override
-    public R updateClaimOtherAndOss(SmsClaimOther smsClaimOther, MultipartFile[] files) {
+    public R updateClaimOtherAndOss(SmsClaimOther smsClaimOther,String ossIds) {
         logger.info("修改其他索赔单信息 id:{},claimCode:{}",smsClaimOther.getId(),smsClaimOther.getClaimCode());
 
         //1.查询索赔单数据,判断状态是否是待提交,待提交可修改
@@ -192,12 +202,25 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         smsClaimOtherMapper.updateByPrimaryKeySelective(smsClaimOtherRes);
 
         //3.根据索赔单号对所对应的文件修改(先删后增)
-        String orderNo = smsClaimOtherRes.getClaimCode() + ORDER_NO_OTHER_CLAIM_END;
-        R result = remoteOssService.updateListByOrderNo(orderNo,files);
-        if(!result.isSuccess()){
-            logger.error("修改其他索赔时修改文件失败订单号 orderNo:{},res:{}",orderNo, JSONObject.toJSON(result));
-            throw new BusinessException("修改其他索赔单时新增文件信息失败");
+        if(StringUtils.isNotBlank(ossIds)){
+            String[] ossIdsString = ossIds.split(",");
+            if(ossIdsString.length >0 ){
+                String orderNo = smsClaimOtherRes.getClaimCode() + ORDER_NO_OTHER_CLAIM_END;
+                List<SysOss> sysOssList = new ArrayList<>();
+                for(String ossId : ossIdsString){
+                    SysOss sysOss = new SysOss();
+                    sysOss.setId(Long.valueOf(ossId));
+                    sysOss.setOrderNo(orderNo);
+                    sysOssList.add(sysOss);
+                }
+                R uplodeFileResult = remoteOssService.batchEditSaveById(sysOssList);
+                if (!uplodeFileResult.isSuccess()) {
+                    logger.error("修改其他索赔时会写文件订单号失败 orderNo:{},ossIds:{},res:{}", orderNo, ossIds,JSONObject.toJSON(uplodeFileResult));
+                    throw new BusinessException("修改其他索赔时会写文件订单号失败");
+                }
+            }
         }
+
         //4.若直接提交调用提交接口
         if(smsClaimOther.getFlagCommit()){
             R resultResult = submit(smsClaimOther.getId().toString());
@@ -206,7 +229,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
                 throw new BusinessException("修改其他索赔时提交失败");
             }
         }
-        return result;
+        return R.ok();
     }
 
     /**
@@ -336,7 +359,11 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
      */
     @GlobalTransactional
     @Override
-    public R supplierAppeal(SmsClaimOther smsClaimOther, MultipartFile[] files) {
+    public R supplierAppeal(SmsClaimOther smsClaimOther, String ossIds) {
+        String[] ossIdsString = ossIds.split(",");
+        if(ossIdsString.length == 0){
+            throw new BusinessException("上传图片id不能为空");
+        }
         //1.查询索赔单数据,判断状态是否是待提交,待提交可修改
         SmsClaimOther smsClaimOtherRes = smsClaimOtherMapper.selectByPrimaryKey(smsClaimOther.getId());
         if(null == smsClaimOtherRes){
@@ -356,11 +383,15 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         smsClaimOtherMapper.updateByPrimaryKeySelective(smsClaimOtherRes);
         String orderNo = smsClaimOtherRes.getClaimCode() + ORDER_NO_OTHER_APPEAL_END;
         //3.根据订单号新增文件
-        R uplodeFileResult = remoteOssService.updateListByOrderNo(orderNo,files);
-        if(!uplodeFileResult.isSuccess()){
-            throw new BusinessException("其他索赔单供应商申诉时新增文件失败");
+        List<SysOss> sysOssList = new ArrayList<>();
+        for(String ossId : ossIdsString){
+            SysOss sysOss = new SysOss();
+            sysOss.setId(Long.valueOf(ossId));
+            sysOss.setOrderNo(orderNo);
+            sysOssList.add(sysOss);
         }
-        return R.ok();
+        R uplodeFileResult = remoteOssService.batchEditSaveById(sysOssList);
+        return uplodeFileResult;
     }
 
     /**

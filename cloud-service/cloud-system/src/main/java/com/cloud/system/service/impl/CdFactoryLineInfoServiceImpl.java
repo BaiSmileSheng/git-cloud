@@ -1,5 +1,6 @@
 package com.cloud.system.service.impl;
 
+import cn.hutool.core.lang.Dict;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.system.domain.entity.CdFactoryInfo;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 工厂线体关系 Service业务层处理
@@ -45,11 +47,12 @@ public class CdFactoryLineInfoServiceImpl extends BaseServiceImpl<CdFactoryLineI
     /**
      * 根据线体查询信息
      * @param produceLineCode
+     * @param factoryCode
      * @return 供应商编码
      */
     @Override
-    public CdFactoryLineInfo selectInfoByCodeLineCode(String produceLineCode) {
-        return cdFactoryLineInfoMapper.selectInfoByCodeLineCode(produceLineCode);
+    public CdFactoryLineInfo selectInfoByCodeLineCode(String produceLineCode,String factoryCode) {
+        return cdFactoryLineInfoMapper.selectInfoByCodeLineCode(produceLineCode,factoryCode);
     }
     /**
      * 1、调用SAP系统获取工厂线体关系数据接口
@@ -109,5 +112,16 @@ public class CdFactoryLineInfoServiceImpl extends BaseServiceImpl<CdFactoryLineI
                 cdFactoryLineInfoMapper.updateBatchByPrimaryKeySelective(updateFactoryLine);
             }
         return R.ok();
+    }
+    /**
+     * Description:  根据List<Map<String,String>>工厂、线体查询线体信息
+     * Param: [list]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/18
+     */
+    @Override
+    public R selectListByMapList(List<Dict> list) {
+        return R.data(cdFactoryLineInfoMapper.selectListByMapList(list));
     }
 }

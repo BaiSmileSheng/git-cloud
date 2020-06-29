@@ -45,7 +45,7 @@ spring:
         - id: cloud-activiti
           uri: lb://cloud-activiti
           predicates:
-            - Path=/act/**
+            - Path=/act/**,/static/**
           filters:
             - StripPrefix=1
         #system 模块

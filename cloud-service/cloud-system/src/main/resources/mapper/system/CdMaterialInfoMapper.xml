@@ -33,19 +33,19 @@
             update cd_material_info
             <trim prefix="set" suffixOverrides=",">
                 <if test="item.primaryUom != null and item.primaryUom != ''">
-                    primary_uom = #{item.primaryUom}
+                    primary_uom = #{item.primaryUom},
                 </if>
                 <if test="item.mtlGroupCode != null and item.mtlGroupCode != ''">
-                    mtl_group_code = #{item.mtlGroupCode}
+                    mtl_group_code = #{item.mtlGroupCode},
                 </if>
                 <if test="item.purchaseGroupCode != null and item.purchaseGroupCode != ''">
-                    purchase_group_code = #{item.purchaseGroupCode}
+                    purchase_group_code = #{item.purchaseGroupCode},
                 </if>
                 <if test="item.roundingQuantit != null">
-                    rounding_quantit = #{item.roundingQuantit}
+                    rounding_quantit = #{item.roundingQuantit},
                 </if>
                 <if test="item.lastUpdate != null and item.lastUpdate != ''">
-                    last_update = #{item.lastUpdate}
+                    last_update = #{item.lastUpdate},
                 </if>
                 <if test="item.uph != null">
                     uph = #{item.uph}
@@ -75,5 +75,15 @@
         <if test="materialType != null and materialType != ''">
             and material_type = #{materialType}
         </if>
+    </select>
+    <select id="selectListByMaterialList" parameterType="list" resultMap="CdMaterialInfoResult">
+      <include refid="selectCdMaterialInfoVo"/>
+        <where>
+            <foreach collection="list" index="index" separator="or" open="(" close=")" item="item">
+               material_code = #{item.productMaterialCode,jdbcType=VARCHAR}
+                and plant_code = #{item.productFactoryCode,jdbcType=VARCHAR}
+                and material_type = #{item.materialType,jdbcType=VARCHAR}
+            </foreach>
+        </where>
     </select>
 </mapper>

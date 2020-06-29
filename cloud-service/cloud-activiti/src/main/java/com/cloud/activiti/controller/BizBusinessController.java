@@ -1,17 +1,16 @@
 package com.cloud.activiti.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.service.IBizBusinessService;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * 流程业务 提供者
@@ -21,6 +20,7 @@ import com.cloud.common.core.domain.R;
  */
 @RestController
 @RequestMapping("business")
+@Api(tags = "流程业务")
 public class BizBusinessController extends BaseController {
     @Autowired
     private IBizBusinessService bizBusinessService;
@@ -37,7 +37,18 @@ public class BizBusinessController extends BaseController {
      * 查询流程业务列表
      */
     @GetMapping("list/my")
-    public R list(BizBusiness bizBusiness) {
+    @ApiOperation(value = "我的申请")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "title", value = "申请标题", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "status", value = "状态", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "result", value = "审批结果", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "orderNo", value = "订单号", required = false, paramType = "query", dataType = "String")
+    })
+    public R list(@ApiIgnore BizBusiness bizBusiness) {
         startPage();
         bizBusiness.setUserId(getCurrentUserId());
         bizBusiness.setDelFlag(false);

@@ -45,4 +45,12 @@ public interface ICdBomInfoService extends BaseService<CdBomInfo> {
      * @return
      */
     R deleteAll();
+    /**
+     * Description:  根据成品专用号、生产工厂、版本查询
+     * Param: [list]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/18
+     */
+    R selectBomList(List<Dict> list);
 }
