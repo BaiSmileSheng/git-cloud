@@ -5,35 +5,69 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.constant.ActProcessContants;
-import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
 import com.cloud.activiti.feign.RemoteActOmsProductionOrderService;
-import com.cloud.common.constant.*;
+import com.cloud.common.constant.DeleteFlagConstants;
+import com.cloud.common.constant.EmailConstants;
+import com.cloud.common.constant.ProductOrderConstants;
+import com.cloud.common.constant.RawMaterialFeedbackConstants;
+import com.cloud.common.constant.RoleConstants;
+import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.StringUtils;
-import com.cloud.order.domain.entity.*;
+import com.cloud.order.domain.entity.OmsProductionOrder;
+import com.cloud.order.domain.entity.OmsProductionOrderDel;
+import com.cloud.order.domain.entity.OmsProductionOrderDetail;
+import com.cloud.order.domain.entity.OmsProductionOrderDetailDel;
+import com.cloud.order.domain.entity.OmsRawMaterialFeedback;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderVo;
+import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.mail.MailService;
 import com.cloud.order.mapper.OmsProductionOrderMapper;
-import com.cloud.order.service.*;
+import com.cloud.order.service.IOmsProductionOrderDelService;
+import com.cloud.order.service.IOmsProductionOrderDetailDelService;
+import com.cloud.order.service.IOmsProductionOrderDetailService;
+import com.cloud.order.service.IOmsProductionOrderService;
+import com.cloud.order.service.IOmsRawMaterialFeedbackService;
+import com.cloud.order.service.IOrderFromSap601InterfaceService;
 import com.cloud.order.util.DataScopeUtil;
-import com.cloud.system.domain.entity.*;
+import com.cloud.system.domain.entity.CdBomInfo;
+import com.cloud.system.domain.entity.CdFactoryLineInfo;
+import com.cloud.system.domain.entity.CdMaterialExtendInfo;
+import com.cloud.system.domain.entity.CdMaterialInfo;
+import com.cloud.system.domain.entity.CdProductOverdue;
+import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.po.SysUserRights;
-import com.cloud.system.feign.*;
+import com.cloud.system.feign.RemoteBomService;
+import com.cloud.system.feign.RemoteCdProductOverdueService;
+import com.cloud.system.feign.RemoteFactoryLineInfoService;
+import com.cloud.system.feign.RemoteMaterialExtendInfoService;
+import com.cloud.system.feign.RemoteMaterialService;
+import com.cloud.system.feign.RemoteSequeceService;
+import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -102,7 +136,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     private RemoteActOmsProductionOrderService remoteActOmsProductionOrderService;
     @Autowired
     private RemoteCdProductOverdueService remoteCdProductOverdueService;
-
+    @Autowired
+    private IOrderFromSap601InterfaceService orderFromSap601InterfaceService;
     /**
      * Description:  排产订单导入
      * Param: [list, sysUser]
@@ -1068,5 +1103,37 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         );
         return list;
 
+    }
+
+
+
+    /**
+     * 下达SAP
+     * @param list
+     * @return
+     */
+    @Override
+    public R giveSAP(List<OmsProductionOrder> list) {
+        //1.获取list
+        if(CollectionUtils.isEmpty(list)){
+            Example example = new Example(OmsProductionOrder.class);
+            Example.Criteria criteria = example.createCriteria();
+            criteria.andEqualTo("status", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_DCSAP.getCode());
+            list = omsProductionOrderMapper.selectByExample(example);
+        }
+        //2.下达SAP
+        R resultSAP = orderFromSap601InterfaceService.createProductOrderFromSap601(list);
+        if(!resultSAP.isSuccess()){
+            log.error("下达SAP调用SAP接口异常res:{}", JSONObject.toJSONString(resultSAP));
+            return resultSAP;
+        }
+        //3.修改排产订单状态
+        List<OmsProductionOrder> listSapRes = (List<OmsProductionOrder>)resultSAP.get("data");
+        listSapRes.forEach(omsProductionOrder ->{
+            omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPZ.getCode());
+        });
+        //TODO
+//        omsProductionOrderMapper.batchUpdateByOrderCode(listSapRes);
+        return R.ok();
     }
 }
