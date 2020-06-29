@@ -1,26 +1,25 @@
 package com.cloud.system.feign.factory;
 
-import java.util.Set;
-
-import com.cloud.system.domain.entity.SysRole;
+import cn.hutool.core.util.StrUtil;
+import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteUserService;
-import org.springframework.stereotype.Component;
-
-import com.cloud.common.core.domain.R;
-
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import java.util.Set;
 
 @Slf4j
 @Component
 public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserService> {
     @Override
     public RemoteUserService create(Throwable throwable) {
-        log.error(throwable.getMessage());
+
         return new RemoteUserService() {
             @Override
             public SysUser selectSysUserByUsername(String username) {
+                log.error(StrUtil.format("RemoteUserFallbackFactory.selectSysUserByUsername错误信息：",throwable.getMessage()));
                 return null;
             }
 
