@@ -70,7 +70,8 @@ public class RemoteOssFallbackFactory implements FallbackFactory<RemoteOssServic
              */
             @Override
             public R updateListByOrderNo(String orderNo, MultipartFile[] files) {
-                return R.error("根据订单号修改文件信息失败");
+                log.error("RemoteOssFallbackFactory.updateListByOrderNo：{}",throwable.getMessage());
+                return R.error("服务拥挤请稍后再试");
             }
 
             /**
@@ -80,7 +81,14 @@ public class RemoteOssFallbackFactory implements FallbackFactory<RemoteOssServic
              */
             @Override
             public R deleteListByOrderNo(String orderNo) {
-                return R.error("根据订单号删除文件信息失败");
+                log.error("RemoteOssFallbackFactory.deleteListByOrderNo：{}",throwable.getMessage());
+                return R.error("服务拥挤请稍后再试");
+            }
+
+            @Override
+            public R batchEditSaveById(List<SysOss> sysOssList) {
+                log.error("RemoteOssFallbackFactory.batchEditSaveById：{}",throwable.getMessage());
+                return R.error("服务拥挤请稍后再试");
             }
         };
     }

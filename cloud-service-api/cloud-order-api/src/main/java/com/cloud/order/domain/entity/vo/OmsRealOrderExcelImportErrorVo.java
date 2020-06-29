@@ -117,14 +117,14 @@ public class OmsRealOrderExcelImportErrorVo {
     /**
      * 单位
      */
-    @ExcelProperty(value = "单位")
+    @ExcelProperty(value = "单位",index = 9)
     @ApiModelProperty(value = "单位")
     private String unit;
 
     /**
      * 交付日期
      */
-    @ExcelProperty(value = "交付日期",index = 9)
+    @ExcelProperty(value = "交付日期",index = 10)
     @ApiModelProperty(value = "交付日期")
     private String deliveryDate;
 
@@ -137,7 +137,7 @@ public class OmsRealOrderExcelImportErrorVo {
     /**
      * 地点
      */
-    @ExcelProperty(value = "地点",index = 10)
+    @ExcelProperty(value = "地点",index = 11)
     @ApiModelProperty(value = "地点")
     private String place;
 
@@ -167,14 +167,14 @@ public class OmsRealOrderExcelImportErrorVo {
     /**
      * 备注
      */
-    @ExcelProperty(value = "备注",index = 10)
+    @ExcelProperty(value = "备注",index = 12)
     @ApiModelProperty(value = "备注")
     private String remark;
 
     /**
      * 错误信息
      */
-    @ExcelProperty(value = "错误信息",index = 11)
+    @ExcelProperty(value = "错误信息",index = 13)
     @ApiModelProperty(value = "错误信息")
     private String errorMessage;
 

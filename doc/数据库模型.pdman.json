@@ -8219,11 +8219,23 @@
               "defaultValue": "''"
             },
             {
+              "name": "project_id",
+              "type": "BIGINT_19",
+              "remark": "",
+              "chnname": "问题分类id"
+            },
+            {
               "name": "claim_clause",
               "type": "VARCHAR_2000",
               "remark": "",
               "chnname": "索赔条款",
               "defaultValue": "''"
+            },
+            {
+              "name": "claim_id",
+              "type": "BIGINT_19",
+              "remark": "",
+              "chnname": "索赔条款id"
             },
             {
               "name": "claim_reason",

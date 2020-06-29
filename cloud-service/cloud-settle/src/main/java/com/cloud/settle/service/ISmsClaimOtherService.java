@@ -23,18 +23,18 @@ public interface ISmsClaimOtherService extends BaseService<SmsClaimOther> {
     /**
      * 新增其他索赔信息(包含文件信息)
      * @param smsClaimOther 其他索赔信息
-     * @param files 文件信息
+     * @param ossIds 文件信息
      * @return 新增结果
      */
-    R insertClaimOtherAndOss(SmsClaimOther smsClaimOther, MultipartFile[] files);
+    R insertClaimOtherAndOss(SmsClaimOther smsClaimOther, String ossIds);
 
     /**
      * 修改保存其他索赔(包含图片信息)
      * @param smsClaimOther  其他索赔信息
-     * @param files 文件信息
+     * @param ossIds 文件信息
      * @return 修改成功或失败
      */
-    R updateClaimOtherAndOss(SmsClaimOther smsClaimOther, MultipartFile[] files);
+    R updateClaimOtherAndOss(SmsClaimOther smsClaimOther, String ossIds);
 
     /**
      * 删除其他索赔
@@ -62,7 +62,7 @@ public interface ISmsClaimOtherService extends BaseService<SmsClaimOther> {
      * @param smsClaimOther 其他索赔信息
      * @return 索赔单供应商申诉结果成功或失败
      */
-    R supplierAppeal(SmsClaimOther smsClaimOther,MultipartFile[] files);
+    R supplierAppeal(SmsClaimOther smsClaimOther,String ossIds);
 
     /**
      * 超时发送邮件

@@ -136,7 +136,7 @@ public class OrderFromSap601InterfaceServiceImpl implements IOrderFromSap601Inte
                 inputTable.setValue("LGORT", omsProductionOrder.getDestination());
                 inputTable.setValue("ABLAD", omsProductionOrder.getOrderCode());
                 inputTable.setValue("CY_SEQNR", omsProductionOrder.getProductLineCode());
-                inputTable.setValue("STLAL", omsProductionOrder.getBomVersion());
+                inputTable.setValue("VERID", omsProductionOrder.getBomVersion());
             }
             //执行函数
             JCoContext.begin(destination);

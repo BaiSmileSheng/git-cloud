@@ -5,6 +5,7 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
 import com.cloud.settle.converter.QualityStatusConverter;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -15,7 +16,7 @@ import tk.mybatis.mapper.annotation.KeySql;
 
 import javax.persistence.Id;
 import javax.persistence.Transient;
-import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -59,8 +60,7 @@ public class SmsQualityOrder extends BaseEntity {
     /**
      * 供应商编码
      */
-    @Valid
-    @NotNull(message = "供应商编码不能为空")
+    @NotBlank(message = "供应商编码不能为空")
     @ExcelProperty(value = "供应商编码",index = 2)
     @ApiModelProperty(value = "供应商编码")
     private String supplierCode;
@@ -75,8 +75,7 @@ public class SmsQualityOrder extends BaseEntity {
     /**
      * 工厂
      */
-    @Valid
-    @NotNull(message = "工厂不能为空")
+    @NotBlank(message = "工厂不能为空")
     @ExcelProperty(value = "工厂",index = 4)
     @ApiModelProperty(value = "工厂")
     private String factoryCode;
@@ -118,19 +117,31 @@ public class SmsQualityOrder extends BaseEntity {
     /**
      * 问题分类
      */
-    @Valid
-    @NotNull(message = "问题分类不能为空")
+    @NotBlank(message = "问题分类不能为空")
     @ExcelProperty(value = "问题分类",index = 9)
     @ApiModelProperty(value = "问题分类")
     private String projectName;
 
     /**
+     * 问题分类id
+     */
+    @NotNull(message = "问题分类id不能为空")
+    @ApiModelProperty(value = "问题分类id")
+    private Long projectId;
+
+    /**
      * 索赔条款
      */
-    @Valid
-    @NotNull(message = "索赔条款不能为空")
+    @NotBlank(message = "索赔条款不能为空")
     @ApiModelProperty(value = "索赔条款")
     private String claimClause;
+
+    /**
+     * 索赔条款id
+     */
+    @NotNull(message = "索赔条款id不能为空")
+    @ApiModelProperty(value = "索赔条款id")
+    private Long claimId;
 
     /**
      * 索赔理由
@@ -142,7 +153,6 @@ public class SmsQualityOrder extends BaseEntity {
     /**
      * 索赔金额
      */
-    @Valid
     @NotNull(message = "索赔金额不能为空")
     @ExcelProperty(value = "索赔金额",index = 8)
     @ApiModelProperty(value = "索赔金额")
@@ -152,6 +162,7 @@ public class SmsQualityOrder extends BaseEntity {
      * 提交时间
      */
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern="yyyy-MM-dd",timezone="GMT+8")
     private Date submitDate;
 
     /**
@@ -167,6 +178,7 @@ public class SmsQualityOrder extends BaseEntity {
     @ExcelProperty(value = "申诉时间",index = 14)
     @ApiModelProperty(value = "申诉时间")
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern="yyyy-MM-dd yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date complaintDate;
 
     /**

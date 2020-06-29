@@ -2,16 +2,19 @@ package com.cloud.settle.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.core.domain.R;
+import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.StringUtils;
+import com.cloud.settle.domain.entity.SmsQualityOrder;
 import com.cloud.settle.enums.QualityStatusEnum;
 import com.cloud.settle.mail.MailService;
-import com.cloud.settle.service.ISequeceService;
+import com.cloud.settle.mapper.SmsQualityOrderMapper;
+import com.cloud.settle.service.ISmsQualityOrderService;
 import com.cloud.system.domain.entity.SysOss;
-import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteOssService;
+import com.cloud.system.feign.RemoteSequeceService;
 import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.seata.spring.annotation.GlobalTransactional;
@@ -19,15 +22,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.cloud.settle.mapper.SmsQualityOrderMapper;
-import com.cloud.settle.domain.entity.SmsQualityOrder;
-import com.cloud.settle.service.ISmsQualityOrderService;
-import com.cloud.common.core.service.impl.BaseServiceImpl;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
-import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -49,7 +47,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
     @Autowired
     private RemoteOssService remoteOssService;
     @Autowired
-    private ISequeceService sequeceService;
+    private RemoteSequeceService remoteSequeceService;
     @Autowired
     private RemoteUserService remoteUserService;
     @Autowired
@@ -126,28 +124,26 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
      * 新增质量索赔信息
      *
      * @param smsQualityOrder 质量索赔信息
-     * @param files           质量索赔对应的文件信息
+     * @param ossIds           质量索赔对应的文件信息
      * @return
      */
 
     @GlobalTransactional
     @Override
-    public R addSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder, MultipartFile[] files) {
-        if(files.length == 0){
-            return R.error("上传文件数组长度0");
-        }
-        for(MultipartFile file : files){
-            if(file.isEmpty()){
-                return R.error("上传文件不存在");
-            }
+    public R addSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder,String ossIds) {
+
+        String[] ossIdsString = ossIds.split(",");
+        if(ossIdsString.length == 0){
+            throw new BusinessException("上传图片id不能为空");
         }
         //1.索赔单号生成规则 ZL+年月日+4位顺序号，循序号每日清零
         StringBuffer qualityNoBuffer = new StringBuffer(QUALITY_ORDER_PRE);
         qualityNoBuffer.append(DateUtils.getDate().replace("-", ""));
-        String seq = sequeceService.selectSeq(QUALITY_SEQ_NAME, QUALITY_SEQ_LENGTH);
-        if (StringUtils.isBlank(seq)) {
+        R seqR = remoteSequeceService.selectSeq(QUALITY_SEQ_NAME, QUALITY_SEQ_LENGTH);
+        if (!seqR.isSuccess()) {
             throw new BusinessException("新增质量索赔信息时获取序列号异常");
         }
+        String seq = seqR.getStr("data");
         logger.info("新增质量索赔信息时获取序列号seq:{}", seq);
         qualityNoBuffer.append(seq);
         smsQualityOrder.setQualityNo(qualityNoBuffer.toString());
@@ -156,10 +152,18 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
 
         //2.上传质量索赔附件上传的时候order_no 为 索赔单号_01
         String orderNo = smsQualityOrder.getQualityNo() + ORDER_NO_QUALITY_CLAIM_END;
-        R uplodeFileResult = remoteOssService.updateListByOrderNo(orderNo, files);
+
+        List<SysOss> sysOssList = new ArrayList<>();
+        for(String ossId : ossIdsString){
+            SysOss sysOss = new SysOss();
+            sysOss.setId(Long.valueOf(ossId));
+            sysOss.setOrderNo(orderNo);
+            sysOssList.add(sysOss);
+        }
+        R uplodeFileResult = remoteOssService.batchEditSaveById(sysOssList);
         if (!uplodeFileResult.isSuccess()) {
-            logger.error("新增质量索赔时新增文件失败订单号 orderNo:{},res:{}", orderNo, JSONObject.toJSON(uplodeFileResult));
-            throw new BusinessException("新增文件失败");
+            logger.error("新增质量索赔时会写文件订单号失败 orderNo:{},ossIds:{},res:{}", orderNo, ossIds,JSONObject.toJSON(uplodeFileResult));
+            throw new BusinessException("新增质量索赔时会写文件订单号失败");
         }
         return R.data(smsQualityOrder.getId());
     }
@@ -168,21 +172,14 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
      * 修改质量索赔信息
      *
      * @param smsQualityOrder 质量索赔信息
-     * @param files           质量索赔对应的文件信息
+     * @param ossIds           质量索赔对应的文件信息
      * @return
      */
     @GlobalTransactional
     @Override
-    public R updateSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder, MultipartFile[] files) {
+    public R updateSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder, String ossIds) {
         logger.info("修改质量索赔单信息 id:{},qualityNo:{}", smsQualityOrder.getId(), smsQualityOrder.getQualityNo());
-        if(files.length == 0){
-            return R.error("上传文件数组长度0");
-        }
-        for(MultipartFile file : files){
-            if(file.isEmpty()){
-                return R.error("上传文件不存在");
-            }
-        }
+
         //1.查询索赔单数据,判断状态是否是待提交,待提交可修改
         SmsQualityOrder smsQualityOrderRes = smsQualityOrderMapper.selectByPrimaryKey(smsQualityOrder.getId());
         if (null == smsQualityOrderRes) {
@@ -197,11 +194,23 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
         //2.修改索赔单信息
         smsQualityOrderMapper.updateByPrimaryKeySelective(smsQualityOrder);
         //3.根据索赔单号所对应的索赔文件订单号查文件
-        String orderNo = smsQualityOrderRes.getQualityNo() + ORDER_NO_QUALITY_CLAIM_END;
-        R result = remoteOssService.updateListByOrderNo(orderNo, files);
-        if (!result.isSuccess()) {
-            logger.error("修改质量索赔时修改文件失败订单号 orderNo:{},res:{}", orderNo, JSONObject.toJSON(result));
-            throw new BusinessException("修改质量索赔单时新增文件信息失败");
+        if(StringUtils.isNotBlank(ossIds)){
+            String[] ossIdsString = ossIds.split(",");
+            if(ossIdsString.length >0 ){
+                String orderNo = smsQualityOrderRes.getQualityNo() + ORDER_NO_QUALITY_CLAIM_END;
+                List<SysOss> sysOssList = new ArrayList<>();
+                for(String ossId : ossIdsString){
+                    SysOss sysOss = new SysOss();
+                    sysOss.setId(Long.valueOf(ossId));
+                    sysOss.setOrderNo(orderNo);
+                    sysOssList.add(sysOss);
+                }
+                R uplodeFileResult = remoteOssService.batchEditSaveById(sysOssList);
+                if (!uplodeFileResult.isSuccess()) {
+                    logger.error("修改质量索赔时会写文件订单号失败 orderNo:{},ossIds:{},res:{}", orderNo, ossIds,JSONObject.toJSON(uplodeFileResult));
+                    throw new BusinessException("修改质量索赔时会写文件订单号失败");
+                }
+            }
         }
         return R.ok();
     }
@@ -210,23 +219,23 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
      * 新增或修改时提交质量索赔信息
      *
      * @param smsQualityOrder 质量索赔信息
-     * @param files           质量索赔对应的文件信息
+     * @param ossIds           质量索赔对应的文件信息
      * @return
      */
     @Override
-    public R insertOrupdateSubmit(SmsQualityOrder smsQualityOrder, MultipartFile[] files) {
+    public R insertOrupdateSubmit(SmsQualityOrder smsQualityOrder, String ossIds) {
 
         Long id = smsQualityOrder.getId();
         R result;
         if(null == id){
-            result = addSmsQualityOrderAndSysOss(smsQualityOrder,files);
+            result = addSmsQualityOrderAndSysOss(smsQualityOrder,ossIds);
             if(!result.isSuccess()){
                 logger.error("提交时新增质量索赔信息异常 res{}",JSONObject.toJSONString(result));
                 throw new BusinessException(result.get("msg").toString());
             }
             id = result.getLong("data");
         }else{
-            result = updateSmsQualityOrderAndSysOss(smsQualityOrder,files);
+            result = updateSmsQualityOrderAndSysOss(smsQualityOrder,ossIds);
             if(!result.isSuccess()){
                 logger.error("提交时修改质量索赔信息异常 res{}",JSONObject.toJSONString(result));
                 throw new BusinessException(result.get("msg").toString());
@@ -380,7 +389,11 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
      */
     @GlobalTransactional
     @Override
-    public R supplierAppeal(SmsQualityOrder smsQualityOrder, MultipartFile[] files) {
+    public R supplierAppeal(SmsQualityOrder smsQualityOrder,String ossIds) {
+        String[] ossIdsString = ossIds.split(",");
+        if(ossIdsString.length == 0){
+            throw new BusinessException("上传图片id不能为空");
+        }
         //1.查询索赔单数据,判断状态是否是待提交,待提交可修改
         SmsQualityOrder smsQualityOrderRes = smsQualityOrderMapper.selectByPrimaryKey(smsQualityOrder.getId());
         if (null == smsQualityOrderRes) {
@@ -397,11 +410,15 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
         smsQualityOrderMapper.updateByPrimaryKeySelective(smsQualityOrder);
         //3.根据订单号新增文件
         String orderNo = smsQualityOrderRes.getQualityNo() + ORDER_NO_QUALITY_APPEAL_END;
-        R uplodeFileResult = remoteOssService.updateListByOrderNo(orderNo, files);
-        if (!uplodeFileResult.isSuccess()) {
-            throw new BusinessException("质量索赔单供应商申诉时新增文件失败");
+        List<SysOss> sysOssList = new ArrayList<>();
+        for(String ossId : ossIdsString){
+            SysOss sysOss = new SysOss();
+            sysOss.setId(Long.valueOf(ossId));
+            sysOss.setOrderNo(orderNo);
+            sysOssList.add(sysOss);
         }
-        return R.ok();
+        R uplodeFileResult = remoteOssService.batchEditSaveById(sysOssList);
+        return uplodeFileResult;
     }
 
     /**

@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tk.mybatis.mapper.annotation.KeySql;
 
 /**
  * 文件上传
@@ -32,6 +33,7 @@ public class SysOss implements Serializable {
     private static final long serialVersionUID = 1356257283938225230L;
 
     @Id
+    @KeySql(useGeneratedKeys = true)
     @ApiModelProperty(value = "主键id")
     private Long id;
 

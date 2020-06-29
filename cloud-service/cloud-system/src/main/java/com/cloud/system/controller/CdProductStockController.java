@@ -63,6 +63,7 @@ public class CdProductStockController extends BaseController {
             @ApiImplicitParam(name = "productFactoryCode", value = "专用号", required = false, paramType = "query", dataType = "String")
     })
     public TableDataInfo list(@ApiIgnore CdProductStock cdProductStock) {
+        startPage();
         List<CdProductStock> cdProductStockList = listByCondition(cdProductStock);
         return getDataTable(cdProductStockList);
     }
@@ -70,7 +71,7 @@ public class CdProductStockController extends BaseController {
     /**
      * 导出成品库存主表列表
      */
-    @GetMapping("export")
+    @PostMapping("export")
     @HasPermissions("system:productStock:export")
     @ApiOperation(value = "导出成品库存主表列表", response = CdProductStock.class)
     @ApiImplicitParams({

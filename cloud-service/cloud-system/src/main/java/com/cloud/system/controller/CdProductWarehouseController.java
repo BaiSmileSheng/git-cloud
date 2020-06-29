@@ -7,6 +7,7 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.CdProductWarehouse;
 import com.cloud.system.service.ICdProductWarehouseService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -26,6 +27,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("productWarehouse")
+@Api(tags = "成品库存在库明细  提供者")
 public class CdProductWarehouseController extends BaseController {
 
     @Autowired
@@ -50,11 +52,17 @@ public class CdProductWarehouseController extends BaseController {
             @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productMaterialCode", value = "物料号", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "stockType", value = "0:良品;1:不良品", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = true, paramType = "query", dataType = "String")
     })
     public TableDataInfo list(CdProductWarehouse cdProductWarehouse) {
         Example example = new Example(CdProductWarehouse.class);
         Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("productMaterialCode",cdProductWarehouse.getProductMaterialCode());
+        criteria.andEqualTo("stockType",cdProductWarehouse.getStockType());
+        criteria.andEqualTo("productFactoryCode",cdProductWarehouse.getProductFactoryCode());
         startPage();
         List<CdProductWarehouse> cdProductWarehouseList = cdProductWarehouseService.selectByExample(example);
         return getDataTable(cdProductWarehouseList);
@@ -70,14 +78,14 @@ public class CdProductWarehouseController extends BaseController {
             @ApiImplicitParam(name = "stockType", value = "0:良品;1:不良品", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = true, paramType = "query", dataType = "String")
     })
-    public List<CdProductWarehouse> showListDetails(@ApiIgnore CdProductWarehouse cdProductWarehouse){
+    public R showListDetails(@ApiIgnore CdProductWarehouse cdProductWarehouse){
         Example example = new Example(CdProductWarehouse.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("productMaterialCode",cdProductWarehouse.getProductMaterialCode());
         criteria.andEqualTo("stockType",cdProductWarehouse.getStockType());
         criteria.andEqualTo("productFactoryCode",cdProductWarehouse.getProductFactoryCode());
         List<CdProductWarehouse> cdProductWarehouseList = cdProductWarehouseService.selectByExample(example);
-        return cdProductWarehouseList;
+        return R.data(cdProductWarehouseList);
     }
 
     /**

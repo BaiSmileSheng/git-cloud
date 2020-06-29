@@ -19,12 +19,10 @@ import com.cloud.order.domain.entity.vo.OmsProductionOrderVo;
 import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.service.IOmsProductionOrderService;
 import com.cloud.order.util.DataScopeUtil;
-import com.cloud.system.domain.entity.CdFactoryStorehouseInfo;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteFactoryLineInfoService;
 import io.swagger.annotations.*;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,7 +31,6 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 排产订单  提供者
@@ -419,4 +416,15 @@ public class OmsProductionOrderController extends BaseController {
         return omsProductionOrderService.confirmRelease(omsProductionOrder,sysUser);
     }
 
+
+    /**
+     * 下达SAP
+     */
+    @PostMapping("giveSAP")
+    @OperLog(title = "下达SAP ", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "下达SAP ", response = R.class)
+    public R giveSAP(List<OmsProductionOrder> list){
+        R result = omsProductionOrderService.giveSAP(list);
+        return result;
+    }
 }

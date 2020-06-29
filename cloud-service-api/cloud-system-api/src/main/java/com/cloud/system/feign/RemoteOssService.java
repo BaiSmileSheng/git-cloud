@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -79,6 +80,14 @@ public interface RemoteOssService {
      */
     @PostMapping("oss/deleteListByOrderNo")
     public R deleteListByOrderNo(@RequestParam("orderNo") String orderNo);
+
+    /**
+     * 按订单号批量修改
+     * @param sysOssList
+     * @return
+     */
+    @PostMapping("oss/batchEditSaveById")
+    public R batchEditSaveById(@RequestBody List<SysOss> sysOssList);
 
     class MultipartSupportConfig {
         @Bean

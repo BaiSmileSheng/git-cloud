@@ -65,4 +65,10 @@ public interface IOmsProductionOrderService extends BaseService<OmsProductionOrd
      * Date: 2020/6/23
      */
     List<OmsProductionOrder> exportAll(OmsProductionOrder omsProductionOrder,SysUser sysUser);
+    /**
+     * 下达SAP
+     * @param list
+     * @return
+     */
+    R giveSAP(List<OmsProductionOrder> list);
 }

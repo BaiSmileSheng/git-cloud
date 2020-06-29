@@ -90,6 +90,12 @@ public class SysOssServiceImpl implements ISysOssService {
         return sysOssMapper.updateByPrimaryKeySelective(sysOss);
     }
 
+    @Override
+    public R batchEditSaveById(List<SysOss> sysOssList) {
+        sysOssMapper.updateBatchByPrimaryKeySelective(sysOssList);
+        return R.ok();
+    }
+
     /**
      * 删除文件上传对象
      *

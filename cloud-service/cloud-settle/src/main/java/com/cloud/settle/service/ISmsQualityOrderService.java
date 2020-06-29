@@ -1,9 +1,8 @@
 package com.cloud.settle.service;
 
 import com.cloud.common.core.domain.R;
-import com.cloud.settle.domain.entity.SmsQualityOrder;
 import com.cloud.common.core.service.BaseService;
-import org.springframework.web.multipart.MultipartFile;
+import com.cloud.settle.domain.entity.SmsQualityOrder;
 
 import java.util.List;
 
@@ -25,26 +24,26 @@ public interface ISmsQualityOrderService extends BaseService<SmsQualityOrder> {
     /**
      * 新增质量索赔信息
      * @param smsQualityOrder 质量索赔信息
-     * @param files 质量索赔对应的文件信息
+     * @param ossIds 文件id
      * @return
      */
-    R addSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder, MultipartFile[] files);
+    R addSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder, String ossIds);
 
     /**
      * 修改质量索赔信息
      * @param smsQualityOrder 质量索赔信息
-     * @param files 质量索赔对应的文件信息
+     * @param ossIds 质量索赔对应的文件信息
      * @return
      */
-    R updateSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder, MultipartFile[] files);
+    R updateSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder, String ossIds);
 
     /**
      * 新增或修改时提交质量索赔信息
      * @param smsQualityOrder 质量索赔信息
-     * @param files 质量索赔对应的文件信息
+     * @param ossIds 质量索赔对应的文件信息
      * @return
      */
-    R insertOrupdateSubmit(SmsQualityOrder smsQualityOrder, MultipartFile[] files);
+    R insertOrupdateSubmit(SmsQualityOrder smsQualityOrder, String ossIds);
 
 
     /**
@@ -80,7 +79,7 @@ public interface ISmsQualityOrderService extends BaseService<SmsQualityOrder> {
      * @param smsQualityOrder 质量索赔信息
      * @return 索赔单供应商申诉结果成功或失败
      */
-    R supplierAppeal(SmsQualityOrder smsQualityOrder, MultipartFile[] files);
+    R supplierAppeal(SmsQualityOrder smsQualityOrder,String ossIds);
 
     /**
      * 超时发送邮件
