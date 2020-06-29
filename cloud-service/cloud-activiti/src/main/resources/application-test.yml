@@ -27,3 +27,5 @@ seata:
   registry:
     nacos:
       namespace: ${spring.cloud.nacos.discovery.namespace}
+gate:
+  url: http://10.133.28.55/:9527

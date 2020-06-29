@@ -1,7 +1,14 @@
 package com.cloud.activiti.controller;
 
-import java.io.UnsupportedEncodingException;
-
+import com.cloud.activiti.config.GateUrlConfig;
+import com.cloud.activiti.domain.ActReModel;
+import com.cloud.activiti.service.IActReModelService;
+import com.cloud.common.core.controller.BaseController;
+import com.cloud.common.core.domain.R;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.pagehelper.PageHelper;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.editor.constants.ModelDataJsonConstants;
@@ -11,20 +18,9 @@ import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.Model;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.pagehelper.PageHelper;
-import com.cloud.activiti.domain.ActReModel;
-import com.cloud.activiti.service.IActReModelService;
-import com.cloud.common.core.controller.BaseController;
-import com.cloud.common.core.domain.R;
+import java.io.UnsupportedEncodingException;
 
 /**
  * 模型管理
@@ -37,6 +33,9 @@ public class ModelerController extends BaseController {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    private GateUrlConfig gateUrlConfig;
 
 
     @Autowired
@@ -74,7 +73,8 @@ public class ModelerController extends BaseController {
         stencilSetNode.put("namespace", "http://b3mn.org/stencilset/bpmn2.0#");
         editorNode.replace("stencilset", stencilSetNode);
         repositoryService.addModelEditorSource(id, editorNode.toString().getBytes("utf-8"));
-        return "redirect:/modeler.html?modelId=" + id;
+        String url=gateUrlConfig.getUrl()+"/static/modeler.html?modelId=" + id;
+        return "redirect:" + url;
     }
 
     /**

@@ -15,7 +15,7 @@ import java.util.Set;
 public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserService> {
     @Override
     public RemoteUserService create(Throwable throwable) {
-
+        log.error(throwable.getMessage());
         return new RemoteUserService() {
             @Override
             public SysUser selectSysUserByUsername(String username) {
@@ -25,6 +25,7 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
 
             @Override
             public R updateUserLoginRecord(SysUser user) {
+                log.error(StrUtil.format("RemoteUserFallbackFactory.updateUserLoginRecord错误信息：",throwable.getMessage()));
                 return R.error();
             }
 
@@ -38,11 +39,13 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
 
             @Override
             public Set<Long> selectUserIdsHasRoles(String roleId) {
+                log.error(StrUtil.format("RemoteUserFallbackFactory.selectUserIdsHasRoles错误信息：",throwable.getMessage()));
                 return null;
             }
 
             @Override
             public Set<Long> selectUserIdsInDepts(String deptIds) {
+                log.error(StrUtil.format("RemoteUserFallbackFactory.selectUserIdsInDepts错误信息：",throwable.getMessage()));
                 return null;
             }
 
