@@ -107,6 +107,8 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
                     JSONObject.toJSON(appealResult));
             return appealResult;
         }
+        String claimCode = appealResult.getStr("data");
+        smsClaimOther.setClaimCode(claimCode);
         //2.构造其他索赔流程信息
         BizBusiness business = initBusiness(smsClaimOther,sysUser);
         //新增其他索赔流程

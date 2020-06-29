@@ -5,6 +5,7 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
 import com.cloud.settle.converter.ClaimOtherStatusConverter;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -109,6 +110,7 @@ public class SmsClaimOther extends BaseEntity {
      */
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "提交时间")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date submitDate;
 
     /**
@@ -124,6 +126,7 @@ public class SmsClaimOther extends BaseEntity {
     @ExcelProperty(value = "申诉时间",index = 9)
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "申诉时间")
+    @JsonFormat(pattern="yyyy-MM-dd",timezone="GMT+8")
     private Date complaintDate;
 
     /**
@@ -132,6 +135,7 @@ public class SmsClaimOther extends BaseEntity {
     @ExcelProperty(value = "供应商确认时间",index = 7)
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "供应商确认时间")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date supplierConfirmDate;
 
     /**

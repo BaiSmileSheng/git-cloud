@@ -143,7 +143,7 @@ public class SmsDelaysDelivery extends BaseEntity {
      */
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "提交时间")
-    @JsonFormat(pattern="yyyy-MM-dd yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date submitDate;
 
     /**
@@ -159,7 +159,7 @@ public class SmsDelaysDelivery extends BaseEntity {
     @ExcelProperty(value = "申诉时间",index = 13)
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "申诉时间")
-    @JsonFormat(pattern="yyyy-MM-dd yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date complaintDate;
 
     /**
@@ -168,7 +168,7 @@ public class SmsDelaysDelivery extends BaseEntity {
     @ExcelProperty(value = "供应商确认时间",index = 11)
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "供应商确认时间")
-    @JsonFormat(pattern="yyyy-MM-dd yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date supplierConfirmDate;
 
     /**
