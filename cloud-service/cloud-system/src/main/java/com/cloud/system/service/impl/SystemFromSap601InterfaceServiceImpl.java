@@ -522,12 +522,14 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
         int deleteFlag = 0; //删除原材料库存标记
         for (int z = 0; z < cdFactoryInfoList.size(); z++) {
             String factoryCode = cdFactoryInfoList.get(z).getFactoryCode();
+            log.info("连接SAP获取原材料库存数据开始 factoryCode:{}",factoryCode);
             R result = queryRawMaterialStockFromSap601(Arrays.asList(factoryCode), null);
             if (!result.isSuccess()) {
                 log.error("连接SAP获取原材料库存数据异常 factoryCode:{},materials:{},res:{}", factoryCode, null, JSONObject.toJSON(result));
                 continue;
             }
             List<CdRawMaterialStock> list = (List<CdRawMaterialStock>) result.get("data");
+            log.info("连接SAP获取原材料库存数据结束factoryCode:{},size:{}",factoryCode,list.size());
             deleteFlag++;
             if (deleteFlag == 1) {
                 insertRawMaterialStockDb(list, Boolean.TRUE);
