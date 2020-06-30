@@ -79,7 +79,7 @@ public class SmsSettleInfoController extends BaseController {
     }
 
     @HasPermissions("settle:smsSettleInfo:export")
-    @PostMapping("export")
+    @GetMapping("export")
     @ApiOperation(value = "加工费结算导出", response = SmsSettleInfo.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
@@ -158,18 +158,18 @@ public class SmsSettleInfoController extends BaseController {
         }
         if(TimeTypeEnum.BASIC_BEGIN_TIME_TYPE.getCode().equals(smsSettleInfo.getTimeType())){
             if(StringUtils.isNotBlank(smsSettleInfo.getBeginTime())){
-                criteria.andGreaterThanOrEqualTo("produceStartDate",smsSettleInfo.getBeginTime());
+                criteria.andGreaterThanOrEqualTo("productStartDate",smsSettleInfo.getBeginTime());
             }
             if(StringUtils.isNotBlank(smsSettleInfo.getEndTime())){
-                criteria.andLessThanOrEqualTo("produceStartDate",smsSettleInfo.getEndTime());
+                criteria.andLessThanOrEqualTo("productStartDate",smsSettleInfo.getEndTime());
             }
         }
         if(TimeTypeEnum.BASIC_END_TIME_TYPE.getCode().equals(smsSettleInfo.getTimeType())){
             if(StringUtils.isNotBlank(smsSettleInfo.getBeginTime())){
-                criteria.andGreaterThanOrEqualTo("produceEndDate",smsSettleInfo.getBeginTime());
+                criteria.andGreaterThanOrEqualTo("productEndDate",smsSettleInfo.getBeginTime());
             }
             if(StringUtils.isNotBlank(smsSettleInfo.getEndTime())){
-                criteria.andLessThanOrEqualTo("produceEndDate",smsSettleInfo.getEndTime());
+                criteria.andLessThanOrEqualTo("productEndDate",smsSettleInfo.getEndTime());
             }
         }
 
