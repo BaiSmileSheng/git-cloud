@@ -15,15 +15,17 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://10.133.116.86:3306/rycloud?useUnicode=true&characterEncoding=utf8&nullCatalogMeansCurrent=true&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
-    username: cloud
-    password: Cloud,123456
+    url: jdbc:mysql://10.202.89.21:5730/orw?allowMultiQueries=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    username: appadmin
+    password: OI%TPkmL
   cloud:
     nacos:
       discovery:
-        namespace: a2eeae72-3ab5-4789-ac7f-7370330f9293
+        namespace: cs
 #seata命名空间
 seata:
   registry:
     nacos:
       namespace: ${spring.cloud.nacos.discovery.namespace}
+gate:
+  url: http://127.0.0.1:9527
