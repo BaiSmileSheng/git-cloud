@@ -4,6 +4,7 @@ import com.cloud.common.exception.file.OssException;
 import com.obs.services.ObsClient;
 import com.obs.services.ObsConfiguration;
 import com.obs.services.exception.ObsException;
+import com.obs.services.model.AccessControlList;
 import com.obs.services.model.ObsObject;
 
 import java.io.ByteArrayInputStream;
@@ -48,6 +49,7 @@ public class HuawCloudStorageService extends  CloudStorageService{
     public String upload(InputStream inputStream, String path) {
         try {
             obsClient.putObject(config.getHcloudBucketName(), path, inputStream);
+            obsClient.setObjectAcl(config.getHcloudBucketName(), path, AccessControlList.REST_CANNED_PUBLIC_READ);
         } catch (Exception e) {
             throw new OssException("上传文件失败，请检查配置信息");
         }finally {
