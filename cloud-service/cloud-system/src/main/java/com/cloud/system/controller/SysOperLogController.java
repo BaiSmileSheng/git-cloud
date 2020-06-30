@@ -3,11 +3,11 @@ package com.cloud.system.controller;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.SysOperLog;
 import com.cloud.system.service.ISysOperLogService;
+import com.cloud.system.util.EasyExcelUtilOSS;
 import io.seata.core.context.RootContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +51,8 @@ public class SysOperLogController extends BaseController {
     @PostMapping("/export")
     public R export(SysOperLog operLog) {
         List<SysOperLog> list = sysOperLogService.selectOperLogList(operLog);
-        return EasyExcelUtil.writeExcel(list,"操作日志.xlsx","sheet",new SysOperLog());
+        return EasyExcelUtilOSS.writeExcel(list,"操作日志.xlsx","sheet",new SysOperLog());
+
     }
 
     /**

@@ -122,7 +122,7 @@ public class HuawCloudStorageService extends  CloudStorageService{
         try {
             obsClient.deleteObject(config.getHcloudBucketName(), objectKey);
         } catch (ObsException e) {
-            throw new ObsException("上传文件错误");
+            throw new ObsException("删除文件错误");
         }  finally {
             if (obsClient != null) {
                 try {

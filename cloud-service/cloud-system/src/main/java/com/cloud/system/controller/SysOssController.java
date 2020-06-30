@@ -9,8 +9,11 @@ import com.cloud.common.utils.StringUtils;
 import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.common.utils.file.FileUtils;
 import com.cloud.system.domain.entity.SysOss;
-import com.cloud.system.oss.*;
+import com.cloud.system.oss.CloudConstant;
 import com.cloud.system.oss.CloudConstant.CloudService;
+import com.cloud.system.oss.CloudStorageConfig;
+import com.cloud.system.oss.CloudStorageService;
+import com.cloud.system.oss.OSSFactory;
 import com.cloud.system.oss.valdator.AliyunGroup;
 import com.cloud.system.oss.valdator.HuaweiGroup;
 import com.cloud.system.service.ISysConfigService;
@@ -147,7 +150,7 @@ public class SysOssController extends BaseController {
      *
      */
     @PostMapping("downLoad")
-    public void downLoad(String url,String fileName) throws IOException {
+    public void downLoad(String url,String fileName,Boolean delete) throws IOException {
         String realName = new String();
         if(StringUtils.isNotBlank(fileName)){
             realName=fileName;
@@ -162,6 +165,10 @@ public class SysOssController extends BaseController {
         getResponse().setHeader("Content-Disposition",
                 "attachment;filename=" + FileUtils.setFileDownloadHeader(getRequest(), realName));
         storage.downLoad(url,getResponse().getOutputStream());
+        if (delete) {
+            CloudStorageService storageDel = OSSFactory.build();
+            storageDel.deleteFile(url);
+        }
     }
 
     /**
