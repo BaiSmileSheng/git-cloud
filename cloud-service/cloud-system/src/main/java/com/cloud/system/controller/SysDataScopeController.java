@@ -5,6 +5,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.common.utils.RandomUtil;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.system.domain.entity.SysDataScope;
 import com.cloud.system.service.ISysDataScopeService;
@@ -75,7 +76,7 @@ public class SysDataScopeController extends BaseController {
         if(sysDataScopeService.selectByPrimaryKey(sysDataScope.getMaterialCode())!=null){
             return R.error("物料号不能重复！");
         }
-        sysDataScope.setId(sysDataScope.getMaterialCode());
+        sysDataScope.setId(RandomUtil.randomStr(15));
         sysDataScope.setDelFlag("0");
         sysDataScope.setStatus("0");
         sysDataScope.setCreateBy(getLoginName());

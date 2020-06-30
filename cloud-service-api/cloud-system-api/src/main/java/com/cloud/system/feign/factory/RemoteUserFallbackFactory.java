@@ -1,16 +1,14 @@
 package com.cloud.system.feign.factory;
 
-import java.util.Set;
-
-import com.cloud.system.domain.entity.SysRole;
+import cn.hutool.core.util.StrUtil;
+import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteUserService;
-import org.springframework.stereotype.Component;
-
-import com.cloud.common.core.domain.R;
-
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -21,11 +19,13 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
         return new RemoteUserService() {
             @Override
             public SysUser selectSysUserByUsername(String username) {
+                log.error(StrUtil.format("RemoteUserFallbackFactory.selectSysUserByUsername错误信息：",throwable.getMessage()));
                 return null;
             }
 
             @Override
             public R updateUserLoginRecord(SysUser user) {
+                log.error(StrUtil.format("RemoteUserFallbackFactory.updateUserLoginRecord错误信息：",throwable.getMessage()));
                 return R.error();
             }
 
@@ -39,11 +39,13 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
 
             @Override
             public Set<Long> selectUserIdsHasRoles(String roleId) {
+                log.error(StrUtil.format("RemoteUserFallbackFactory.selectUserIdsHasRoles错误信息：",throwable.getMessage()));
                 return null;
             }
 
             @Override
             public Set<Long> selectUserIdsInDepts(String deptIds) {
+                log.error(StrUtil.format("RemoteUserFallbackFactory.selectUserIdsInDepts错误信息：",throwable.getMessage()));
                 return null;
             }
 

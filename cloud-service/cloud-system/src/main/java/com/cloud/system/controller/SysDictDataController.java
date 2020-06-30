@@ -5,8 +5,13 @@ import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.common.redis.annotation.RedisCache;
+import com.cloud.common.redis.annotation.RedisEvict;
+import com.cloud.common.redis.util.RedisUtils;
 import com.cloud.system.domain.entity.SysDictData;
 import com.cloud.system.service.ISysDictDataService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,10 +25,13 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("dict/data")
+@Api(tags = "字典测试")
 public class SysDictDataController extends BaseController {
 
     @Autowired
     private ISysDictDataService sysDictDataService;
+    @Autowired
+    private RedisUtils redisUtils;
 
     /**
      * 查询字典数据
@@ -46,11 +54,13 @@ public class SysDictDataController extends BaseController {
 
     /**
      * 根据字典类型查询字典数据信息
-     *
+     * 从redis中取值，过期时间一周
      * @param dictType 字典类型
      * @return 参数键值
      */
     @GetMapping("type")
+    @ApiOperation(value = "根据类型查询")
+    @RedisCache(key = "dict", fieldKey = "#dictType", expired = 604800)
     public List<SysDictData> getType(String dictType) {
         return sysDictDataService.selectDictDataByType(dictType);
     }
@@ -86,6 +96,7 @@ public class SysDictDataController extends BaseController {
     @OperLog(title = "字典数据", businessType = BusinessType.INSERT)
     @HasPermissions("system:dict:add")
     @PostMapping("save")
+    @RedisEvict(key = "dict",fieldKey = "#sysDictData.dictType")
     public R addSave(@RequestBody SysDictData sysDictData) {
         return toAjax(sysDictDataService.insertDictData(sysDictData));
     }
@@ -96,6 +107,7 @@ public class SysDictDataController extends BaseController {
     @OperLog(title = "字典数据", businessType = BusinessType.UPDATE)
     @HasPermissions("system:dict:edit")
     @PostMapping("update")
+    @RedisEvict(key = "dict",fieldKey = "#sysDictData.dictType")
     public R editSave(@RequestBody SysDictData sysDictData) {
         return toAjax(sysDictDataService.updateDictData(sysDictData));
     }
