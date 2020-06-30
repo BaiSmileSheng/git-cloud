@@ -195,8 +195,7 @@ public class OmsRealOrderController extends BaseController {
     @ApiOperation(value = "内单导入", response = OmsRealOrder.class)
     public R importByPCY(@RequestPart("file") MultipartFile file)throws IOException {
         SysUser sysUser = getUserInfo(SysUser.class);
-        long loginId = getCurrentUserId();
-        return omsRealOrderService.importRealOrderFile(file,RealOrderFromEnum.ORDER_FROM_1.getCode(),sysUser,loginId);
+        return omsRealOrderService.importRealOrderFile(file,RealOrderFromEnum.ORDER_FROM_1.getCode(),sysUser);
     }
 
     /**
@@ -209,8 +208,7 @@ public class OmsRealOrderController extends BaseController {
     @ApiOperation(value = "外单导入", response = OmsRealOrder.class)
     public R importByYW(@RequestPart("file") MultipartFile file)throws IOException {
         SysUser sysUser = getUserInfo(SysUser.class);
-        long loginId = getCurrentUserId();
-        return omsRealOrderService.importRealOrderFile(file,RealOrderFromEnum.ORDER_FROM_2.getCode(),sysUser,loginId);
+        return omsRealOrderService.importRealOrderFile(file,RealOrderFromEnum.ORDER_FROM_2.getCode(),sysUser);
     }
 
     /**

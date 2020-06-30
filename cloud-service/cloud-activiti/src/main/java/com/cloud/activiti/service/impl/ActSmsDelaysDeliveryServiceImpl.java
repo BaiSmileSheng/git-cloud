@@ -271,7 +271,7 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
         //审批 推进工作流
         R  resultAck =actTaskService.audit(bizAudit, sysUser.getUserId());
         if(!resultAck.isSuccess()){
-            logger.error("延期索赔审批流程 审批 推进工作流 req:{}res:{}",JSONObject.toJSON(bizAudit),JSONObject.toJSON(updateResult));
+            logger.error("延期索赔审批流程 审批 推进工作流 req:{}res:{}",JSONObject.toJSON(bizAudit),JSONObject.toJSON(resultAck));
             throw new BusinessException("延期索赔审批流程 审批 推进工作流失败 ");
         }
         return R.error();
