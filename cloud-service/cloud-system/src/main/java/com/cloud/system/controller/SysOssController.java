@@ -146,6 +146,26 @@ public class SysOssController extends BaseController {
     }
 
     /**
+     * 文件上传
+     * @param file 文件
+     * @return 上传是否成功
+     * @throws IOException
+     */
+    @PostMapping("onlyForUpload")
+    @ApiOperation(value = "新增文件",response = R.class)
+    public R onlyForUpload(@RequestPart("file") MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new OssException("上传文件不能为空");
+        }
+        // 上传文件
+        String fileName = file.getOriginalFilename();
+        String suffix = fileName.substring(fileName.lastIndexOf("."));
+        CloudStorageService storage = OSSFactory.build();
+        String url = storage.uploadSuffix(file.getBytes(), suffix);
+        return R.data(url);
+    }
+
+    /**
      * 下载文件
      *
      */

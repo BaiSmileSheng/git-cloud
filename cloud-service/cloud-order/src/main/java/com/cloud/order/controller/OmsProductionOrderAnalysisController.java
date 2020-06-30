@@ -1,31 +1,27 @@
 package com.cloud.order.controller;
+
 import cn.hutool.core.collection.CollectionUtil;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.UserConstants;
-import com.cloud.common.easyexcel.EasyExcelUtil;
+import com.cloud.common.core.controller.BaseController;
+import com.cloud.common.core.domain.R;
+import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
+import com.cloud.order.domain.entity.OmsProductionOrderAnalysis;
 import com.cloud.order.domain.entity.OmsRealOrder;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderAnalysisVo;
+import com.cloud.order.service.IOmsProductionOrderAnalysisService;
 import com.cloud.order.service.IOmsRealOrderService;
 import com.cloud.order.util.DataScopeUtil;
+import com.cloud.order.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.SysUser;
 import io.swagger.annotations.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.cloud.common.core.domain.R;
-import com.cloud.common.core.controller.BaseController;
-import com.cloud.order.domain.entity.OmsProductionOrderAnalysis;
-import com.cloud.order.service.IOmsProductionOrderAnalysisService;
-import com.cloud.common.core.page.TableDataInfo;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -49,7 +45,7 @@ public class OmsProductionOrderAnalysisController extends BaseController {
     private IOmsRealOrderService omsRealOrderService;
 
     /**
-     * 查询待排产订单分析 
+     * 查询待排产订单分析
      */
     @GetMapping("get")
     @ApiOperation(value = "根据id查询待排产订单分析 ", response = OmsProductionOrderAnalysis.class)
@@ -87,7 +83,7 @@ public class OmsProductionOrderAnalysisController extends BaseController {
 
 
     /**
-     * 新增保存待排产订单分析 
+     * 新增保存待排产订单分析
      */
     @PostMapping("save")
     @OperLog(title = "新增保存待排产订单分析 ", businessType = BusinessType.INSERT)
@@ -98,7 +94,7 @@ public class OmsProductionOrderAnalysisController extends BaseController {
     }
 
     /**
-     * 修改保存待排产订单分析 
+     * 修改保存待排产订单分析
      */
     @PostMapping("update")
     @OperLog(title = "修改保存待排产订单分析 ", businessType = BusinessType.UPDATE)
@@ -108,7 +104,7 @@ public class OmsProductionOrderAnalysisController extends BaseController {
     }
 
     /**
-     * 删除待排产订单分析 
+     * 删除待排产订单分析
      */
     @PostMapping("remove")
     @OperLog(title = "删除待排产订单分析 ", businessType = BusinessType.DELETE)
@@ -153,7 +149,7 @@ public class OmsProductionOrderAnalysisController extends BaseController {
         criteria.andGreaterThan("productDate",sft.format(new Date()));
         criteria.andLessThanOrEqualTo("productDate",sft.format(date.getTime()));
         List<OmsProductionOrderAnalysis> omsProductionOrderAnalysisList = omsProductionOrderAnalysisService.selectByExample(example);
-        return EasyExcelUtil.writeExcel(omsProductionOrderAnalysisList, "待排产订单分析数据.xlsx", "sheet", new OmsProductionOrderAnalysis());
+        return EasyExcelUtilOSS.writeExcel(omsProductionOrderAnalysisList, "待排产订单分析数据.xlsx", "sheet", new OmsProductionOrderAnalysis());
     }
     /**
      * Description:  查询客户缺口量明细

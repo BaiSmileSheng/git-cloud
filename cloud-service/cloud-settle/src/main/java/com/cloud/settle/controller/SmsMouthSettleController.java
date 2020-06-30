@@ -8,7 +8,6 @@ import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.settle.domain.entity.PO.SmsClaimCashDetailDTO;
@@ -20,6 +19,7 @@ import com.cloud.settle.service.ISmsClaimCashDetailService;
 import com.cloud.settle.service.ISmsInvoiceInfoService;
 import com.cloud.settle.service.ISmsMouthSettleService;
 import com.cloud.settle.service.ISmsSettleInfoService;
+import com.cloud.settle.util.EasyExcelUtilOSS;
 import com.cloud.system.enums.SettleRatioEnum;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -217,6 +217,6 @@ public class SmsMouthSettleController extends BaseController {
         criteria.andEqualTo(smsMouthSettle);
         startPage();
         List<SmsMouthSettle> smsMouthSettleList = smsMouthSettleService.selectByExample(example);
-        return EasyExcelUtil.writeExcel(smsMouthSettleList, "月度结算.xlsx", "sheet", new SmsMouthSettle());
+        return EasyExcelUtilOSS.writeExcel(smsMouthSettleList, "月度结算.xlsx", "sheet", new SmsMouthSettle());
     }
 }

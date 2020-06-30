@@ -1,14 +1,12 @@
 package com.cloud.system.service.impl;
 
 import com.cloud.common.core.domain.R;
-import com.cloud.common.easyexcel.EasyExcelUtil;
-import com.cloud.system.domain.entity.SysOperLog;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import com.cloud.system.mapper.CdRawMaterialStockMapper;
-import com.cloud.system.domain.entity.CdRawMaterialStock;
-import com.cloud.system.service.ICdRawMaterialStockService;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
+import com.cloud.system.domain.entity.CdRawMaterialStock;
+import com.cloud.system.mapper.CdRawMaterialStockMapper;
+import com.cloud.system.service.ICdRawMaterialStockService;
+import com.cloud.system.util.EasyExcelUtilOSS;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,7 +32,7 @@ public class CdRawMaterialStockServiceImpl extends BaseServiceImpl<CdRawMaterial
     @Override
     public R exportRawMaterialExcel(CdRawMaterialStock cdRawMaterialStock) {
         List<CdRawMaterialStock> cdRawMaterialStocks = cdRawMaterialStockMapper.select(cdRawMaterialStock);
-        return EasyExcelUtil.writeExcel(cdRawMaterialStocks, "原材料库存报表.xlsx", "sheet", new CdRawMaterialStock());
+        return EasyExcelUtilOSS.writeExcel(cdRawMaterialStocks, "原材料库存报表.xlsx", "sheet", new CdRawMaterialStock());
     }
 
     /**

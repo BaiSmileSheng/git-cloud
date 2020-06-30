@@ -7,13 +7,13 @@ import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
 import com.cloud.settle.enums.ScrapOrderStatusEnum;
 import com.cloud.settle.service.ISmsScrapOrderService;
 import com.cloud.settle.util.DataScopeUtil;
+import com.cloud.settle.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.SysUser;
 import com.sap.conn.jco.JCoException;
 import io.swagger.annotations.*;
@@ -208,7 +208,7 @@ public class SmsScrapOrderController extends BaseController {
             }
         }
         List<SmsScrapOrder> smsScrapOrderList = smsScrapOrderService.selectByExample(example);
-        return EasyExcelUtil.writeExcel(smsScrapOrderList,"报废申请.xlsx","sheet",new SmsScrapOrder());
+        return EasyExcelUtilOSS.writeExcel(smsScrapOrderList,"报废申请.xlsx","sheet",new SmsScrapOrder());
     }
 
     /**

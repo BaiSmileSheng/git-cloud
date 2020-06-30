@@ -7,7 +7,6 @@ import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
@@ -16,6 +15,7 @@ import com.cloud.settle.domain.entity.SmsSupplementaryOrderZB;
 import com.cloud.settle.enums.SupplementaryOrderStatusEnum;
 import com.cloud.settle.service.ISmsSupplementaryOrderService;
 import com.cloud.settle.util.DataScopeUtil;
+import com.cloud.settle.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.SysUser;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.*;
@@ -263,7 +263,7 @@ public class SmsSupplementaryOrderController extends BaseController {
             }
         }
         List<SmsSupplementaryOrder> smsSupplementaryOrderList = smsSupplementaryOrderService.selectByExample(example);
-        return EasyExcelUtil.writeExcel(smsSupplementaryOrderList, "物耗申请.xlsx", "sheet", new SmsSupplementaryOrder());
+        return EasyExcelUtilOSS.writeExcel(smsSupplementaryOrderList, "物耗申请.xlsx", "sheet", new SmsSupplementaryOrder());
     }
 
     /**
@@ -293,7 +293,7 @@ public class SmsSupplementaryOrderController extends BaseController {
             BeanUtil.copyProperties(entity,vo);
             return vo;
         });
-        return EasyExcelUtil.writeExcel(smsSupplementaryOrderZBList, "物耗申请总部.xlsx", "sheet", new SmsSupplementaryOrder());
+        return EasyExcelUtilOSS.writeExcel(smsSupplementaryOrderZBList, "物耗申请总部.xlsx", "sheet", new SmsSupplementaryOrder());
     }
 
     /**

@@ -5,25 +5,23 @@ import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.common.utils.ValidatorUtils;
-import com.cloud.settle.enums.ClaimOtherStatusEnum;
 import com.cloud.settle.domain.entity.SmsClaimOther;
+import com.cloud.settle.enums.ClaimOtherStatusEnum;
 import com.cloud.settle.service.ISmsClaimOtherService;
+import com.cloud.settle.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.enums.UserTypeEnum;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -108,7 +106,7 @@ public class SmsClaimOtherController extends BaseController {
         Example example = assemblyConditions(smsClaimOther);
         List<SmsClaimOther> smsClaimOtherList = smsClaimOtherService.selectByExample(example);
         String fileName = "其他索赔.xlsx";
-        return EasyExcelUtil.writeExcel(smsClaimOtherList,fileName,fileName,new SmsClaimOther());
+        return EasyExcelUtilOSS.writeExcel(smsClaimOtherList,fileName,fileName,new SmsClaimOther());
     }
 
     /**
