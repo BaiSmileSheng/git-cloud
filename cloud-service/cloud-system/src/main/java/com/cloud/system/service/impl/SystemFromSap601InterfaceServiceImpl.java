@@ -463,7 +463,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                 } catch (Exception e) {
                     StringWriter w = new StringWriter();
                     e.printStackTrace(new PrintWriter(w));
-                    log.error("插入bom青单异常 e:{}", w.toString());
+                    log.error("插入bom清单异常 e:{}", w.toString());
                 }
             }
         });
@@ -488,6 +488,9 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             }
             dstManager.commit(transaction);
         } catch (Exception e) {
+            StringWriter w = new StringWriter();
+            e.printStackTrace(new PrintWriter(w));
+            log.error("插入bom清单异常 e:{}", w.toString());
             dstManager.rollback(transaction);
         }
 
@@ -511,17 +514,93 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
         //1.获取工厂全部信息cd_factory_info
         Example exampleFactoryInfo = new Example(CdFactoryInfo.class);
         List<CdFactoryInfo> cdFactoryInfoList = cdFactoryInfoService.selectByExample(exampleFactoryInfo);
-        List<String> factoryCodelist = cdFactoryInfoList.stream().map(cdFactoryInfo -> {
-            return cdFactoryInfo.getFactoryCode();
-        }).collect(Collectors.toList());
-        R result = queryRawMaterialStockFromSap601(factoryCodelist, null);
-        if (!result.isSuccess()) {
-            return result;
+        if (CollectionUtils.isEmpty(cdFactoryInfoList)) {
+            throw new BusinessException("获取工厂信息失败");
         }
-        List<CdRawMaterialStock> list = (List<CdRawMaterialStock>) result.get("data");
-        cdRawMaterialStockService.deleteAll();
-        cdRawMaterialStockService.insertList(list);
+        //2.获取物料信息
+        List<CdMaterialExtendInfo> materialExtendInfoList = getMaterial();
+        if (CollectionUtils.isEmpty(materialExtendInfoList)) {
+            throw new BusinessException("获取物料信息失败");
+        }
+        double size = materialExtendInfoList.size();
+        double smallSize = SMALL_SIZE;
+        int materialExtendInfoCount = (int) Math.ceil(size / smallSize);
+        //3.连接SAP获取数据
+        int deleteFlag = 0; //删除原材料库存标记
+        for (int z = 0; z < cdFactoryInfoList.size(); z++) {
+            String factoryCode = cdFactoryInfoList.get(z).getFactoryCode();
+            for (int i = 0; i < materialExtendInfoCount; i++) {
+                int startCont = (int) (i * SMALL_SIZE);
+                int nextI = i + 1;
+                int endCount = (int) (nextI * SMALL_SIZE);
+                if (endCount > materialExtendInfoList.size()) {
+                    endCount = materialExtendInfoList.size();
+                }
+                List<String> materials = new ArrayList<>();
+                for (int j = startCont; j < endCount; j++) {
+                    materials.add(materialExtendInfoList.get(j).getMaterialCode());
+                }
+                R result = queryRawMaterialStockFromSap601(Arrays.asList(factoryCode), materials);
+                if (!result.isSuccess()) {
+                    log.error("连接SAP获取原材料库存数据异常 factoryCode:{},materials:{},res:{}", factoryCode, materials, JSONObject.toJSON(result));
+                    continue;
+                }
+                List<CdRawMaterialStock> list = (List<CdRawMaterialStock>) result.get("data");
+                deleteFlag++;
+                if (deleteFlag == 1) {
+                    insertRawMaterialStockDb(list, Boolean.TRUE);
+                } else {
+                    taskRawMaterialStockBomDb(list, Boolean.FALSE);
+                }
+            }
+        }
         return R.ok();
     }
 
+    /**
+     * 插入原材料数据库
+     *
+     * @param list
+     * @param flag
+     */
+    private void taskRawMaterialStockBomDb(final List<CdRawMaterialStock> list, final Boolean flag) {
+        threadPoolTaskExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    insertRawMaterialStockDb(list, flag);
+                } catch (Exception e) {
+                    StringWriter w = new StringWriter();
+                    e.printStackTrace(new PrintWriter(w));
+                    log.error("插入原材料异常 e:{}", w.toString());
+                }
+            }
+        });
+    }
+
+    /**
+     * 插入数据库
+     *
+     * @param list
+     * @param flag          是否是第一次插入数据库,若是,则删除全表
+     */
+    private void insertRawMaterialStockDb(final List<CdRawMaterialStock> list, final Boolean flag) {
+        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW); // 事物隔离级别，开启新事务，这样会比较安全些。
+        TransactionStatus transaction = dstManager.getTransaction(def); // 获得事务状态
+        try {
+            if (flag) {
+                cdRawMaterialStockService.deleteAll();
+            }
+            if (!CollectionUtils.isEmpty(list)) {
+                cdRawMaterialStockService.insertList(list);
+            }
+            dstManager.commit(transaction);
+        } catch (Exception e) {
+            StringWriter w = new StringWriter();
+            e.printStackTrace(new PrintWriter(w));
+            log.error("插入原材料异常 e:{}", w.toString());
+            dstManager.rollback(transaction);
+        }
+    }
 }
