@@ -517,41 +517,22 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
         if (CollectionUtils.isEmpty(cdFactoryInfoList)) {
             throw new BusinessException("获取工厂信息失败");
         }
-        //2.获取物料信息
-        List<CdMaterialExtendInfo> materialExtendInfoList = getMaterial();
-        if (CollectionUtils.isEmpty(materialExtendInfoList)) {
-            throw new BusinessException("获取物料信息失败");
-        }
-        double size = materialExtendInfoList.size();
-        double smallSize = SMALL_SIZE;
-        int materialExtendInfoCount = (int) Math.ceil(size / smallSize);
-        //3.连接SAP获取数据
+
+        //2.连接SAP获取数据
         int deleteFlag = 0; //删除原材料库存标记
         for (int z = 0; z < cdFactoryInfoList.size(); z++) {
             String factoryCode = cdFactoryInfoList.get(z).getFactoryCode();
-            for (int i = 0; i < materialExtendInfoCount; i++) {
-                int startCont = (int) (i * SMALL_SIZE);
-                int nextI = i + 1;
-                int endCount = (int) (nextI * SMALL_SIZE);
-                if (endCount > materialExtendInfoList.size()) {
-                    endCount = materialExtendInfoList.size();
-                }
-                List<String> materials = new ArrayList<>();
-                for (int j = startCont; j < endCount; j++) {
-                    materials.add(materialExtendInfoList.get(j).getMaterialCode());
-                }
-                R result = queryRawMaterialStockFromSap601(Arrays.asList(factoryCode), materials);
-                if (!result.isSuccess()) {
-                    log.error("连接SAP获取原材料库存数据异常 factoryCode:{},materials:{},res:{}", factoryCode, materials, JSONObject.toJSON(result));
-                    continue;
-                }
-                List<CdRawMaterialStock> list = (List<CdRawMaterialStock>) result.get("data");
-                deleteFlag++;
-                if (deleteFlag == 1) {
-                    insertRawMaterialStockDb(list, Boolean.TRUE);
-                } else {
-                    taskRawMaterialStockBomDb(list, Boolean.FALSE);
-                }
+            R result = queryRawMaterialStockFromSap601(Arrays.asList(factoryCode), null);
+            if (!result.isSuccess()) {
+                log.error("连接SAP获取原材料库存数据异常 factoryCode:{},materials:{},res:{}", factoryCode, null, JSONObject.toJSON(result));
+                continue;
+            }
+            List<CdRawMaterialStock> list = (List<CdRawMaterialStock>) result.get("data");
+            deleteFlag++;
+            if (deleteFlag == 1) {
+                insertRawMaterialStockDb(list, Boolean.TRUE);
+            } else {
+                taskRawMaterialStockBomDb(list, Boolean.FALSE);
             }
         }
         return R.ok();
