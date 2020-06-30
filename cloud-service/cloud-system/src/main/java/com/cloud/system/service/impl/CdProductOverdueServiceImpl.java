@@ -10,7 +10,6 @@ import com.cloud.common.easyexcel.DTO.ExcelImportErrObjectDto;
 import com.cloud.common.easyexcel.DTO.ExcelImportOtherObjectDto;
 import com.cloud.common.easyexcel.DTO.ExcelImportResult;
 import com.cloud.common.easyexcel.DTO.ExcelImportSucObjectDto;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.system.domain.entity.CdProductOverdue;
@@ -19,6 +18,7 @@ import com.cloud.system.feign.RemoteFactoryInfoService;
 import com.cloud.system.mapper.CdProductOverdueMapper;
 import com.cloud.system.service.ICdProductOverdueExcelImportService;
 import com.cloud.system.service.ICdProductOverdueService;
+import com.cloud.system.util.EasyExcelUtilOSS;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -94,7 +94,7 @@ public class CdProductOverdueServiceImpl extends BaseServiceImpl<CdProductOverdu
                 return cdProductOverdueExcelImportErrorVo;
             }).collect(Collectors.toList());
             //导出excel
-            return EasyExcelUtil.writeExcel(errorResults, "超期库存导入错误信息.xlsx", "sheet", new CdProductOverdueExcelImportErrorVo());
+            return EasyExcelUtilOSS.writeExcel(errorResults, "超期库存导入错误信息.xlsx", "sheet", new CdProductOverdueExcelImportErrorVo());
         }
         return R.ok();
     }

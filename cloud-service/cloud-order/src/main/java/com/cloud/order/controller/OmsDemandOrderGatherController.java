@@ -7,12 +7,12 @@ import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.order.domain.entity.OmsDemandOrderGather;
 import com.cloud.order.service.IOmsDemandOrderGatherService;
 import com.cloud.order.util.DataScopeUtil;
+import com.cloud.order.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.SysUser;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -166,6 +166,6 @@ public class OmsDemandOrderGatherController extends BaseController {
             example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
         }
         List<OmsDemandOrderGather> omsDemandOrderGatherList = omsDemandOrderGatherService.selectByExample(example);
-        return EasyExcelUtil.writeExcel(omsDemandOrderGatherList, "13周滚动需求.xlsx", "sheet", new OmsDemandOrderGather());
+        return EasyExcelUtilOSS.writeExcel(omsDemandOrderGatherList, "13周滚动需求.xlsx", "sheet", new OmsDemandOrderGather());
     }
 }

@@ -39,6 +39,17 @@ public interface RemoteOssService {
     R uploadFile(@RequestPart(value = "file") MultipartFile file, @RequestParam(value = "orderNo",required = false) String orderNo);
 
     /**
+     * 上传文件到华为云
+     * @param file
+     * @return
+     */
+    @RequestMapping(value = "oss/onlyForUpload", method = RequestMethod.POST,
+            produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    R onlyForUpload(@RequestPart(value = "file") MultipartFile file);
+
+
+    /**
      * 下载文件
      * @param url   文件表url
      * @param fileName   下载文件名

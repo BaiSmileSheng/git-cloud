@@ -18,7 +18,6 @@ import com.cloud.common.easyexcel.DTO.ExcelImportErrObjectDto;
 import com.cloud.common.easyexcel.DTO.ExcelImportOtherObjectDto;
 import com.cloud.common.easyexcel.DTO.ExcelImportResult;
 import com.cloud.common.easyexcel.DTO.ExcelImportSucObjectDto;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
@@ -35,6 +34,7 @@ import com.cloud.order.service.IOmsDemandOrderGatherEditHisService;
 import com.cloud.order.service.IOmsDemandOrderGatherEditImportService;
 import com.cloud.order.service.IOmsDemandOrderGatherEditService;
 import com.cloud.order.util.DataScopeUtil;
+import com.cloud.order.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.*;
 import com.cloud.system.enums.LifeCycleEnum;
 import com.cloud.system.enums.MaterialTypeEnum;
@@ -440,7 +440,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 return omsDemandOrderGatherEditImport;
             }).collect(Collectors.toList());
             //导出excel
-            return EasyExcelUtil.writeExcel(errorResults, "需求导入错误信息.xlsx", "sheet", new OmsDemandOrderGatherEditImport());
+            return EasyExcelUtilOSS.writeExcel(errorResults, "需求导入错误信息.xlsx", "sheet", new OmsDemandOrderGatherEditImport());
         }
         return R.ok();
     }
@@ -631,7 +631,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             listExport.add(export);
         });
         List<List<String>> headList = headList(weekRange);
-         return EasyExcelUtil.writeExcelWithHead(listExport, "13周滚动需求汇总.xlsx", "sheet", new OmsDemandOrderGatherEditExport(),headList);
+         return EasyExcelUtilOSS.writeExcelWithHead(listExport, "13周滚动需求汇总.xlsx", "sheet", new OmsDemandOrderGatherEditExport(),headList);
     }
 
 

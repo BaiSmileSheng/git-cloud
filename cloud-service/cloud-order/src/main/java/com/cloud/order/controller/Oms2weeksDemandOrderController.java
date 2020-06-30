@@ -5,11 +5,11 @@ import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.order.domain.entity.Oms2weeksDemandOrder;
 import com.cloud.order.service.IOms2weeksDemandOrderService;
+import com.cloud.order.util.EasyExcelUtilOSS;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -110,7 +110,7 @@ public class Oms2weeksDemandOrderController extends BaseController {
     public R export(@ApiIgnore() Oms2weeksDemandOrder oms2weeksDemandOrder) {
         Example example = listCondition(oms2weeksDemandOrder);
         List<Oms2weeksDemandOrder> oms2weeksDemandOrders = oms2weeksDemandOrderService.selectByExample(example);
-        return EasyExcelUtil.writeExcel(oms2weeksDemandOrders, "T+1、T+2草稿计划-接入.xlsx", "sheet", new Oms2weeksDemandOrder());
+        return EasyExcelUtilOSS.writeExcel(oms2weeksDemandOrders, "T+1、T+2草稿计划-接入.xlsx", "sheet", new Oms2weeksDemandOrder());
     }
 
     /**

@@ -4,7 +4,6 @@ import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
@@ -12,20 +11,12 @@ import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.settle.domain.entity.SmsDelaysDelivery;
 import com.cloud.settle.enums.DeplayStatusEnum;
 import com.cloud.settle.service.ISmsDelaysDeliveryService;
+import com.cloud.settle.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.enums.UserTypeEnum;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
@@ -118,7 +109,7 @@ public class SmsDelaysDeliveryController extends BaseController {
         Example example = assemblyConditions(smsDelaysDelivery);
         List<SmsDelaysDelivery> smsDelaysDeliveryList = smsDelaysDeliveryService.selectByExample(example);
         String fileName = "延期交付索赔.xlsx";
-        return EasyExcelUtil.writeExcel(smsDelaysDeliveryList,fileName,fileName,new SmsDelaysDelivery());
+        return EasyExcelUtilOSS.writeExcel(smsDelaysDeliveryList,fileName,fileName,new SmsDelaysDelivery());
     }
 
     /**

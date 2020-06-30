@@ -16,6 +16,7 @@ import com.cloud.system.mail.MailService;
 import com.cloud.system.service.ISysDeptService;
 import com.cloud.system.service.ISysDictTypeService;
 import com.cloud.system.service.ISysOperLogService;
+import com.cloud.system.util.EasyExcelUtilOSS;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +57,7 @@ public class SysTestLogController extends BaseController {
     @ApiOperation(value = "测试导出一个sheet页", response = SysDictType.class)
     public R export(SysOperLog operLog) {
         List<SysOperLog> list = sysOperLogService.selectOperLogList(operLog);
-         return EasyExcelUtil.writeExcel(list,"操作日志.xlsx","sheet",new SysOperLog());
+         return EasyExcelUtilOSS.writeExcel(list,"操作日志.xlsx","sheet",new SysOperLog());
     }
 
     /**

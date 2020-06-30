@@ -7,12 +7,12 @@ import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.order.domain.entity.Oms2weeksDemandOrderEdit;
 import com.cloud.order.service.IOms2weeksDemandOrderEditService;
 import com.cloud.order.util.DataScopeUtil;
+import com.cloud.order.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.SysUser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.*;
@@ -206,7 +206,7 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
             example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
         }
         List<Oms2weeksDemandOrderEdit> oms2weeksDemandOrderEditList = oms2weeksDemandOrderEditService.selectByExample(example);
-        return EasyExcelUtil.writeExcel(oms2weeksDemandOrderEditList, "T+1-T+2周需求导入.xlsx", "sheet", new Oms2weeksDemandOrderEdit());
+        return EasyExcelUtilOSS.writeExcel(oms2weeksDemandOrderEditList, "T+1-T+2周需求导入.xlsx", "sheet", new Oms2weeksDemandOrderEdit());
     }
 
     /**
