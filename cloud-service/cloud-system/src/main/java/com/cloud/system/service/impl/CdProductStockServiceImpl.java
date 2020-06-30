@@ -125,16 +125,6 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
         CdProductStockDetailVo cdProductStockDetail = new CdProductStockDetailVo();
         //1.查询主表数据
         List<CdProductStock> cdProductStockList = listByCondition(cdProductStock);
-        for (CdProductStock cdProductStockRes : cdProductStockList) {
-            //在库库存
-            BigDecimal stockWNum = cdProductStockRes.getStockWNum();
-            //在途库存
-            BigDecimal stockINum = cdProductStockRes.getStockINum();
-            //寄售不足
-            BigDecimal stockKNum = cdProductStockRes.getStockKNum();
-            BigDecimal sumNum = stockWNum.add(stockINum).multiply(stockKNum);
-            cdProductStockRes.setSumNum(sumNum);
-        }
         cdProductStockDetail.setCdProductStockList(cdProductStockList);
         //2.在产信息
         List<CdProductInProduction> cdProductInProductionList = listProductInProduction(cdProductStock);
@@ -418,6 +408,14 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
             logger.info("在库成品库存 插入数据库结束");
             List<CdProductStock> productStockList = cdProductStockDetail.getCdProductStockList();
             logger.info("成品库存主数据 插入数据库开始");
+            productStockList.forEach(productStock ->{
+                BigDecimal stockPNum = productStock.getStockPNum();
+                BigDecimal stockWNum = productStock.getStockWNum();
+                BigDecimal stockINum = productStock.getStockINum();
+                BigDecimal stockKNum = productStock.getStockKNum();
+                BigDecimal sumNum = stockPNum.add(stockWNum).add(stockWNum).add(stockINum).multiply(stockKNum);
+                productStock.setSumNum(sumNum);
+            });
             cdProductStockMapper.insertList(productStockList);
             logger.info("成品库存主数据 插入数据库结束");
 

@@ -10461,6 +10461,12 @@
               "notNull": true
             },
             {
+              "name": "sum_num",
+              "type": "Money",
+              "remark": "库存总量(在产+在途+在库-寄售不足)",
+              "chnname": "库存总量"
+            },
+            {
               "name": "rejects_num",
               "type": "Money",
               "remark": "",

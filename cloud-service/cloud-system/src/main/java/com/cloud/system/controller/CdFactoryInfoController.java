@@ -87,7 +87,6 @@ public class CdFactoryInfoController extends BaseController {
     public R listAll(){
         Example example = new Example(CdFactoryInfo.class);
         Example.Criteria criteria = example.createCriteria();
-        startPage();
         List<CdFactoryInfo> cdFactoryInfoList = cdFactoryInfoService.selectByExample(example);
         return R.data(cdFactoryInfoList);
     }
