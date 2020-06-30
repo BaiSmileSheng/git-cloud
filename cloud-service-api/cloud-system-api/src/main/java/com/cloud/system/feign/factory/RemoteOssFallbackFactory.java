@@ -32,6 +32,16 @@ public class RemoteOssFallbackFactory implements FallbackFactory<RemoteOssServic
             }
 
             /**
+             * 上传文件到华为云
+             * @param file
+             * @return
+             */
+            @Override
+            public R onlyForUpload(MultipartFile file) {
+                return R.error("服务器拥挤，请稍后再试！");
+            }
+
+            /**
              * 下载文件
              * @param url   文件表url
              * @param fileName   下载文件名

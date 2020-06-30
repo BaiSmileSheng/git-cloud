@@ -16,7 +16,6 @@ import com.cloud.common.easyexcel.DTO.ExcelImportErrObjectDto;
 import com.cloud.common.easyexcel.DTO.ExcelImportOtherObjectDto;
 import com.cloud.common.easyexcel.DTO.ExcelImportResult;
 import com.cloud.common.easyexcel.DTO.ExcelImportSucObjectDto;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
@@ -34,6 +33,7 @@ import com.cloud.order.service.IOms2weeksDemandOrderEditImportService;
 import com.cloud.order.service.IOms2weeksDemandOrderEditService;
 import com.cloud.order.service.IOms2weeksDemandOrderService;
 import com.cloud.order.util.DataScopeUtil;
+import com.cloud.order.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.domain.entity.SysInterfaceLog;
@@ -124,7 +124,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 return oms2weeksDemandOrderEditImport;
             }).collect(Collectors.toList());
             //导出excel
-            return EasyExcelUtil.writeExcel(errorResults, "T+1、T+2草稿计划导入错误信息.xlsx", "sheet", new Oms2weeksDemandOrderEditImport());
+            return EasyExcelUtilOSS.writeExcel(errorResults, "T+1、T+2草稿计划导入错误信息.xlsx", "sheet", new Oms2weeksDemandOrderEditImport());
         }
         return R.ok();
     }
@@ -610,7 +610,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 listReturn.add(info);
             }
         });
-        return EasyExcelUtil.writeExcel(listReturn, "T+1、T+2草稿计划对比分析.xlsx", "sheet", new Oms2weeksDemandOrderEditExportVO());
+        return EasyExcelUtilOSS.writeExcel(listReturn, "T+1、T+2草稿计划对比分析.xlsx", "sheet", new Oms2weeksDemandOrderEditExportVO());
     }
 
     /**

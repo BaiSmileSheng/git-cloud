@@ -19,6 +19,7 @@ import com.cloud.order.domain.entity.vo.OmsProductionOrderVo;
 import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.service.IOmsProductionOrderService;
 import com.cloud.order.util.DataScopeUtil;
+import com.cloud.order.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteFactoryLineInfoService;
@@ -297,7 +298,7 @@ public class OmsProductionOrderController extends BaseController {
             }
         }
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderService.selectByExample(example);
-        return EasyExcelUtil.writeExcel(omsProductionOrderList, "生产订单.xlsx", "sheet", new OmsProductionOrder());
+        return EasyExcelUtilOSS.writeExcel(omsProductionOrderList, "生产订单.xlsx", "sheet", new OmsProductionOrder());
     }
 
     /**
@@ -335,7 +336,7 @@ public class OmsProductionOrderController extends BaseController {
     @ApiOperation(value = "导出模板", response = OmsProductionOrderVo.class)
     public R exportTemplate(){
         String fileName = "排产订单.xlsx";
-        return EasyExcelUtil.writeExcel(Arrays.asList(),fileName,fileName,new OmsProductionOrderVo());
+        return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new OmsProductionOrderVo());
     }
 
     /**
@@ -370,7 +371,7 @@ public class OmsProductionOrderController extends BaseController {
     public R exportAll(@ApiIgnore() OmsProductionOrder omsProductionOrder) {
         SysUser sysUser = getUserInfo(SysUser.class);
         List<OmsProductionOrder> productionOrderVos = omsProductionOrderService.exportAll(omsProductionOrder,sysUser);
-        return EasyExcelUtil.writeExcel(productionOrderVos, "排产订单.xlsx", "sheet", new OmsProductionOrder());
+        return EasyExcelUtilOSS.writeExcel(productionOrderVos, "排产订单.xlsx", "sheet", new OmsProductionOrder());
     }
 
     /**
