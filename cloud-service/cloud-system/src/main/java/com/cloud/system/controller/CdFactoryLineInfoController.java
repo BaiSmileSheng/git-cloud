@@ -85,6 +85,12 @@ public class CdFactoryLineInfoController extends BaseController {
         if (StringUtils.isNotBlank(cdFactoryLineInfo.getSupplierCode())) {
             criteria.andLike("supplierCode", cdFactoryLineInfo.getSupplierCode());
         }
+        if (StringUtils.isNotBlank(cdFactoryLineInfo.getProduceLineCode())) {
+            criteria.andLike("produceLineCode", cdFactoryLineInfo.getProduceLineCode());
+        }
+        if (StringUtils.isNotBlank(cdFactoryLineInfo.getProductFactoryCode())) {
+            criteria.andLike("productFactoryCode", cdFactoryLineInfo.getProductFactoryCode());
+        }
     }
 
     /**
