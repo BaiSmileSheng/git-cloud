@@ -88,11 +88,6 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
      */
     private R fromSAPDDPS03(List<String> materialCodeList) {
         JCoDestination destination;
-        SysInterfaceLog sysInterfaceLog = new SysInterfaceLog();
-        sysInterfaceLog.setAppId("SAP");
-        sysInterfaceLog.setInterfaceName(SapConstants.ZSD_INT_DDPS_03);
-        sysInterfaceLog.setCreateBy("定时任务");
-        sysInterfaceLog.setCreateTime(new Date());
 
         try {
             //创建与SAP的连接
@@ -112,8 +107,6 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
                 inputTableW.setValue("MATNR", materialCode);
             }
 
-            sysInterfaceLog.setContent(materialCodeList + "");
-
             //执行函数
             JCoContext.begin(destination);
             fm.execute(destination);
@@ -132,7 +125,6 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
                         String materialCode = outputTable.getString("MATNR");
                         String msg = outputTable.getString("MESSAGE");
                         remarkBuffer.append(materialCode + msg);
-                        sysInterfaceLog.setRemark(remarkBuffer.toString());
                         logger.error("传输成品物料异常信息异常 materialCode:{},res:{}",materialCode,msg);
                     }
                 }
@@ -143,10 +135,7 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
             e.printStackTrace(new PrintWriter(w));
             logger.error(
                     "传输成品物料接口异常: {}", w.toString());
-            sysInterfaceLog.setRemark(e.getMessage());
             throw new BusinessException("传输成品物料接口异常");
-        } finally {
-            sysInterfaceLogService.insertSelective(sysInterfaceLog);
         }
     }
 
