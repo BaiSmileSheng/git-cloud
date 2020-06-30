@@ -2,38 +2,24 @@ package com.cloud.system.controller;
 
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
-import com.cloud.common.constant.DeleteFlagConstants;
-import com.cloud.common.easyexcel.EasyExcelUtil;
+import com.cloud.common.core.controller.BaseController;
+import com.cloud.common.core.domain.R;
+import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
-import com.cloud.common.utils.ValidatorUtils;
-import com.cloud.system.domain.entity.SysUser;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import com.cloud.system.domain.entity.CdProductOverdue;
+import com.cloud.system.service.ICdProductOverdueService;
+import com.cloud.system.util.EasyExcelUtilOSS;
+import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.cloud.common.core.domain.R;
-import com.cloud.common.core.controller.BaseController;
-import com.cloud.system.domain.entity.CdProductOverdue;
-import com.cloud.system.service.ICdProductOverdueService;
-import com.cloud.common.core.page.TableDataInfo;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -109,7 +95,7 @@ public class CdProductOverdueController extends BaseController {
     @ApiOperation(value = "导入模板下载", response = CdProductOverdue.class)
     public R exportTemplate(){
         String fileName = "超期库存模板.xlsx";
-        return EasyExcelUtil.writeExcel(Arrays.asList(),fileName,fileName,new CdProductOverdue());
+        return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new CdProductOverdue());
     }
 
     @PostMapping("export")
@@ -128,7 +114,7 @@ public class CdProductOverdueController extends BaseController {
         String fileName = "超期库存.xlsx";
         Example example = assemblyConditions(cdProductOverdue);
         List<CdProductOverdue> cdProductOverdueList = cdProductOverdueService.selectByExample(example);
-        return EasyExcelUtil.writeExcel(cdProductOverdueList,fileName,fileName,new CdProductOverdue());
+        return EasyExcelUtilOSS.writeExcel(cdProductOverdueList,fileName,fileName,new CdProductOverdue());
     }
     /**
      * 导入

@@ -20,7 +20,6 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 
 /**
  * 排产订单 对象 oms_production_order
@@ -142,6 +141,7 @@ public class OmsProductionOrder extends BaseEntity {
      */
     @ExcelProperty(value = "基本开始日期",index = 10)
     @DateTimeFormat("yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "基本开始日期")
     @NotBlank
     private String productStartDate;
@@ -151,6 +151,7 @@ public class OmsProductionOrder extends BaseEntity {
      */
     @ExcelProperty(value = "基本结束日期",index=11)
     @DateTimeFormat("yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "基本结束日期")
     @NotBlank
     private String productEndDate;
@@ -167,6 +168,7 @@ public class OmsProductionOrder extends BaseEntity {
      */
     @ExcelProperty(value = "T-1交货日期",index = 13)
     @DateTimeFormat("yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "交货日期")
     @NotBlank
     private String deliveryDate;
@@ -176,6 +178,7 @@ public class OmsProductionOrder extends BaseEntity {
      */
     @ExcelProperty(value = "实际结束日期",index=14)
     @DateTimeFormat("yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "实际结束日期")
     private Date actualEndDate;
 

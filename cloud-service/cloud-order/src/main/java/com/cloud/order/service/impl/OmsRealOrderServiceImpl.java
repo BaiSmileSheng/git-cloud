@@ -17,7 +17,6 @@ import com.cloud.common.easyexcel.DTO.ExcelImportErrObjectDto;
 import com.cloud.common.easyexcel.DTO.ExcelImportOtherObjectDto;
 import com.cloud.common.easyexcel.DTO.ExcelImportResult;
 import com.cloud.common.easyexcel.DTO.ExcelImportSucObjectDto;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
@@ -25,17 +24,13 @@ import com.cloud.order.domain.entity.OmsInternalOrderRes;
 import com.cloud.order.domain.entity.OmsRealOrder;
 import com.cloud.order.domain.entity.vo.OmsRealOrderExcelImportErrorVo;
 import com.cloud.order.domain.entity.vo.OmsRealOrderExcelImportVo;
-import com.cloud.order.enums.InternalOrderResEnum;
-import com.cloud.order.enums.RealOrderAduitStatusEnum;
-import com.cloud.order.enums.RealOrderClassEnum;
-import com.cloud.order.enums.RealOrderDataSourceEnum;
-import com.cloud.order.enums.RealOrderFromEnum;
-import com.cloud.order.enums.RealOrderStatusEnum;
+import com.cloud.order.enums.*;
 import com.cloud.order.mapper.OmsRealOrderMapper;
 import com.cloud.order.service.IOmsInternalOrderResService;
 import com.cloud.order.service.IOmsRealOrderExcelImportService;
 import com.cloud.order.service.IOmsRealOrderService;
 import com.cloud.order.util.DataScopeUtil;
+import com.cloud.order.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.CdFactoryStorehouseInfo;
 import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.system.domain.entity.SysUser;
@@ -58,12 +53,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -183,7 +173,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 return omsRealOrderExcelImportErrorVo;
             }).collect(Collectors.toList());
             //导出excel
-            return EasyExcelUtil.writeExcel(errorResults, "真单导入错误信息.xlsx", "sheet", new OmsRealOrderExcelImportErrorVo());
+            return EasyExcelUtilOSS.writeExcel(errorResults, "真单导入错误信息.xlsx", "sheet", new OmsRealOrderExcelImportErrorVo());
         }
         return R.ok();
     }
