@@ -272,6 +272,6 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
             logger.error("质量索赔审批流程 审批 推进工作流 req:{}res:{}",JSONObject.toJSON(bizAudit),JSONObject.toJSON(resultAck));
             throw new BusinessException("质量索赔审批流程 审批 推进工作流失败 ");
         }
-        return R.error();
+        return R.ok();
     }
 }

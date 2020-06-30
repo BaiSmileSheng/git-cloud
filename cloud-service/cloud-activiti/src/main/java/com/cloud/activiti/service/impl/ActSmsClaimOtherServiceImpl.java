@@ -274,6 +274,6 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
             logger.error("其他索赔审批流程 审批 推进工作流 req:{}res:{}",JSONObject.toJSON(bizAudit),JSONObject.toJSON(resultAck));
             throw new BusinessException("其他索赔审批流程 审批 推进工作流失败 ");
         }
-        return R.error();
+        return R.ok();
     }
 }

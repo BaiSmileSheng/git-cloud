@@ -184,7 +184,7 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
             logger.error("下市流程审批 推进工作流 req:{}res:{}",JSONObject.toJSON(bizAudit),JSONObject.toJSON(resultAck));
             throw new BusinessException("下市流程审批推进工作流失败 ");
         }
-        return R.error();
+        return R.ok();
     }
 
     /**

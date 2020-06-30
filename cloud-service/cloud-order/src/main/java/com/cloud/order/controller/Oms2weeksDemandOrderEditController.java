@@ -318,7 +318,7 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
     /**
      * 修改保存T+1-T+2周需求导入(无业务)
      */
-    @PostMapping("update")
+    @PostMapping("updateOrderEdit")
     @OperLog(title = "修改保存T+1-T+2周需求导入 ", businessType = BusinessType.UPDATE)
     public R updateOrderEdit(@RequestBody Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit) {
         return toAjax(oms2weeksDemandOrderEditService.updateByPrimaryKeySelective(oms2weeksDemandOrderEdit));

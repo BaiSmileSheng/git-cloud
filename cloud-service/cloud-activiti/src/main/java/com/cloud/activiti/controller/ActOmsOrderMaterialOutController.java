@@ -53,7 +53,7 @@ public class ActOmsOrderMaterialOutController extends BaseController {
      * @return 成功或失败
      */
     @PostMapping("save")
-    @ApiOperation(value = "导入时物料下市开启真单审批流程",response = OmsRealOrder.class)
+    @ApiOperation(value = "下市审核开启流程",response = OmsRealOrder.class)
     public R addSave(@RequestBody OmsOrderMaterialOutVo omsOrderMaterialOutVo) {
         return actOmsOrderMaterialOutService.addSave(omsOrderMaterialOutVo);
     }
