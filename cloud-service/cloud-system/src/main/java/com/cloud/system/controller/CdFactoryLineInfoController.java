@@ -82,14 +82,26 @@ public class CdFactoryLineInfoController extends BaseController {
      * @param criteria
      */
     void listCondition(CdFactoryLineInfo cdFactoryLineInfo, Example.Criteria criteria) {
-        if (StringUtils.isNotBlank(cdFactoryLineInfo.getSupplierCode())) {
-            criteria.andLike("supplierCode", cdFactoryLineInfo.getSupplierCode());
+        if (StringUtils.isNotBlank(cdFactoryLineInfo.getProductFactoryCode())) {
+            criteria.andLike("productFactoryCode", cdFactoryLineInfo.getProductFactoryCode());
+        }
+        if (StringUtils.isNotBlank(cdFactoryLineInfo.getProductFactoryDesc())) {
+            criteria.andLike("productFactoryDesc", cdFactoryLineInfo.getProductFactoryDesc());
         }
         if (StringUtils.isNotBlank(cdFactoryLineInfo.getProduceLineCode())) {
             criteria.andLike("produceLineCode", cdFactoryLineInfo.getProduceLineCode());
         }
-        if (StringUtils.isNotBlank(cdFactoryLineInfo.getProductFactoryCode())) {
-            criteria.andLike("productFactoryCode", cdFactoryLineInfo.getProductFactoryCode());
+        if (StringUtils.isNotBlank(cdFactoryLineInfo.getProduceLineDesc())) {
+            criteria.andLike("produceLineDesc", cdFactoryLineInfo.getProduceLineDesc());
+        }
+        if (StringUtils.isNotBlank(cdFactoryLineInfo.getBranchOffice())) {
+            criteria.andLike("branchOffice", cdFactoryLineInfo.getBranchOffice());
+        }
+        if (StringUtils.isNotBlank(cdFactoryLineInfo.getMonitor())) {
+            criteria.andLike("monitor", cdFactoryLineInfo.getMonitor());
+        }
+        if (StringUtils.isNotBlank(cdFactoryLineInfo.getAttribute())) {
+            criteria.andLike("attribute", cdFactoryLineInfo.getAttribute());
         }
     }
 

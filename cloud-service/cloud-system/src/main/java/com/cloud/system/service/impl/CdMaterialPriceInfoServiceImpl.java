@@ -165,7 +165,6 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
             if (!MaterialPriceInfoSAPEnum.TYPE_S.getCode().equals(eType)) {
                 logger.error("SAP返回错误信息：eType {},msg {}", eType,msg);
                 sysInterfaceLog.setResults(msg);
-                sysInterfaceLogService.insertSelectiveNoTransactional(sysInterfaceLog);
                 throw new BusinessException(msg);
             }
 
@@ -181,11 +180,14 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
                 }
             }
         } catch (Exception e) {
+            sysInterfaceLog.setResults("调SAP接口查加工费/原材料价格异常");
             StringWriter w = new StringWriter();
             e.printStackTrace(new PrintWriter(w));
             logger.error(
                     "调SAP接口查加工费/原材料价格 : {}", w.toString());
             throw new BusinessException(e.getMessage());
+        }finally {
+            sysInterfaceLogService.insertSelectiveNoTransactional(sysInterfaceLog);
         }
 
         return chargsList;

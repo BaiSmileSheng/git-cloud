@@ -15,6 +15,7 @@ import com.cloud.system.domain.entity.CdProductStock;
 import com.cloud.system.domain.entity.CdProductWarehouse;
 import com.cloud.system.domain.vo.CdProductStockDetailVo;
 import com.cloud.system.service.ICdProductStockService;
+import com.cloud.system.util.EasyExcelUtilOSS;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,7 +120,7 @@ public class CdProductStockController extends BaseController {
         sheetExcelDataB.setTClass(CdProductWarehouse.class);
         sheetExcelDataList.add(sheetExcelDataB);
 
-        return EasyExcelUtil.writeMultiExcel("成品库存.xlsx", sheetExcelDataList);
+        return EasyExcelUtilOSS.writeMultiExcel("成品库存.xlsx", sheetExcelDataList);
     }
 
     /**
