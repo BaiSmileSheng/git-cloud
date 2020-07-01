@@ -134,6 +134,7 @@ public class SysDataScopeController extends BaseController {
     @GetMapping("allList")
     public R allList() {
         Example example = new Example(SysDataScope.class);
+        example.orderBy("orderNum").asc();
         return result(sysDataScopeService.selectByExample(example));
     }
 }
