@@ -7,16 +7,13 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.SysInterfaceLog;
 import com.cloud.system.service.ISysInterfaceLogService;
+import io.seata.core.context.RootContext;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
@@ -77,7 +74,9 @@ public class SysInterfaceLogController extends BaseController {
     @PostMapping("save")
     @ApiOperation(value = "新增保存接口调用日志表", response = SysInterfaceLog.class)
     public R addSave(@RequestBody SysInterfaceLog sysInterfaceLog) {
+        String unbindXid = RootContext.unbind();
         sysInterfaceLogService.insertUseGeneratedKeys(sysInterfaceLog);
+        RootContext.bind(unbindXid);
         return R.data(sysInterfaceLog.getId());
     }
 
