@@ -8,6 +8,8 @@ import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.EasyExcel;
+import com.cloud.activiti.domain.entity.vo.OmsOrderMaterialOutVo;
+import com.cloud.activiti.feign.RemoteActOmsOrderMaterialOutService;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
@@ -39,11 +41,13 @@ import com.cloud.system.enums.MaterialTypeEnum;
 import com.cloud.system.feign.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sap.conn.jco.*;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
@@ -80,6 +84,10 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
     private RemoteProductStockService remoteProductStockService;
     @Autowired
     private RemoteInterfaceLogService remoteInterfaceLogService;
+    @Autowired
+    private RemoteActOmsOrderMaterialOutService remoteActOmsOrderMaterialOutService;
+
+    private static final String TABLE_NAME = "oms_demand_order_gather_edit";
 
     @Override
     public R updateWithLimit(OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
@@ -315,7 +323,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
      * @return
      */
     @Override
-    @Transactional
+    @GlobalTransactional
     public R importDemandGatherEdit(List<OmsDemandOrderGatherEdit> successList,List<OmsDemandOrderGatherEdit> auditList, SysUser sysUser) {
         //1、判断工厂编码
         //2、取物料描述
@@ -337,8 +345,6 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             dto.setCreateBy(sysUser.getLoginName());
         });
 
-        //TODO:下市数据进入审批 审批数据：auditList
-
         //获取表里数据的数据版本
         List<OmsDemandOrderGatherEdit> demandOrderGatherEditOlds=omsDemandOrderGatherEditMapper.selectAll();
         if (!CollUtil.isEmpty(demandOrderGatherEditOlds)) {
@@ -359,6 +365,33 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             }
         }
         insertList(successList);
+
+        //下市数据进入审批 审批数据：successList 筛选状态是审核中的
+        if(!CollectionUtils.isEmpty(successList)){
+            log.info("开启下市审批流");
+            OmsOrderMaterialOutVo auditResultReq = new OmsOrderMaterialOutVo();
+            List<OmsOrderMaterialOutVo> omsOrderMaterialOutVoList = new ArrayList<>();
+            successList.forEach(omsDemandOrderGatherEdit -> {
+                if(DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHZ.getCode()
+                        .equals(omsDemandOrderGatherEdit.getAuditStatus())){
+                    OmsOrderMaterialOutVo omsOrderMaterialOutVo = new OmsOrderMaterialOutVo();
+                    omsOrderMaterialOutVo.setLoginId(sysUser.getUserId());
+                    omsOrderMaterialOutVo.setCreateBy(sysUser.getLoginName());
+                    omsOrderMaterialOutVo.setOrderCode(omsDemandOrderGatherEdit.getDemandOrderCode());
+                    omsOrderMaterialOutVo.setId(omsDemandOrderGatherEdit.getId());
+                    omsOrderMaterialOutVo.setTableName(TABLE_NAME);
+                    omsOrderMaterialOutVoList.add(omsOrderMaterialOutVo);
+                }
+            });
+            if(!CollectionUtils.isEmpty(omsOrderMaterialOutVoList)){
+                auditResultReq.setOmsOrderMaterialOutVoList(omsOrderMaterialOutVoList);
+                R auditResultR = remoteActOmsOrderMaterialOutService.addSave(auditResultReq);
+                if(!auditResultR.isSuccess()){
+                    log.error("下市的数据开启审批流失败 e:{}",auditResultR.toString());
+                    throw new BusinessException("下市的数据开启审批流失败");
+                }
+            }
+        }
         return R.ok();
     }
 
@@ -396,7 +429,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 OmsDemandOrderGatherEdit demandOrderGatherEdit = BeanUtil.copyProperties(excelImportSucObjectDto.getObject(), OmsDemandOrderGatherEdit.class);
                 return demandOrderGatherEdit;
             }).collect(Collectors.toList());
-            importDemandGatherEdit(successResult,auditResult,sysUser);
+                        importDemandGatherEdit(successResult,auditResult,sysUser);
         }
         //错误结果集 导出
         List<ExcelImportErrObjectDto> errList = easyExcelListener.getErrList();

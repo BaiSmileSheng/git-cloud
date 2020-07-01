@@ -43,6 +43,9 @@ public class OmsOrderMaterialOutVo {
     @ApiModelProperty(value = "创建人名称")
     private String createBy;
 
+    @ApiModelProperty(value = "表名")
+    private String tableName;
+
     @ApiModelProperty(value = "下市开启审批流vo集合")
     private List<OmsOrderMaterialOutVo> omsOrderMaterialOutVoList;
 

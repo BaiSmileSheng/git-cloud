@@ -15,6 +15,7 @@
         <result property="stockINum" column="stock_i_num"/>
         <result property="stockKNum" column="stock_k_num"/>
         <result property="rejectsNum" column="rejects_num"/>
+        <result property="sumNum" column="sum_num"/>
         <result property="unit" column="unit"/>
         <result property="delFlag" column="del_flag"/>
         <result property="remark" column="remark"/>
@@ -35,6 +36,7 @@
                stock_i_num,
                stock_k_num,
                rejects_num,
+               sum_num,
                unit,
                del_flag,
                remark,
