@@ -67,8 +67,26 @@ public interface IOmsProductionOrderService extends BaseService<OmsProductionOrd
     List<OmsProductionOrder> exportAll(OmsProductionOrder omsProductionOrder,SysUser sysUser);
     /**
      * 下达SAP
-     * @param list
+     * @param ids
      * @return
      */
-    R giveSAP(List<OmsProductionOrder> list);
+    R giveSAP(String ids);
+
+    /**
+     * SAP获取订单号
+     */
+    R timeSAPGetProductOrderCode();
+
+    /**
+     * 邮件推送
+     * @return
+     */
+    R mailPush();
+
+    /**
+     * 订单刷新
+     * @param ids
+     * @return
+     */
+    R orderRefresh(String ids);
 }
