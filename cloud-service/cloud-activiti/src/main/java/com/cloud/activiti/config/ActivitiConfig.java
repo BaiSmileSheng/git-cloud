@@ -1,17 +1,8 @@
 package com.cloud.activiti.config;
 
-import javax.sql.DataSource;
-
-import org.activiti.engine.DynamicBpmnService;
-import org.activiti.engine.FormService;
-import org.activiti.engine.HistoryService;
-import org.activiti.engine.IdentityService;
-import org.activiti.engine.ManagementService;
-import org.activiti.engine.ProcessEngine;
-import org.activiti.engine.ProcessEngineConfiguration;
-import org.activiti.engine.RepositoryService;
-import org.activiti.engine.RuntimeService;
-import org.activiti.engine.TaskService;
+import com.cloud.activiti.cover.ICustomProcessDiagramGenerator;
+import lombok.extern.slf4j.Slf4j;
+import org.activiti.engine.*;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.spring.ProcessEngineFactoryBean;
 import org.activiti.spring.SpringProcessEngineConfiguration;
@@ -21,7 +12,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.cloud.activiti.cover.ICustomProcessDiagramGenerator;
+import javax.sql.DataSource;
+import java.awt.*;
 
 /**
  * <p>File：ActivitiConfig.java</p>
@@ -34,6 +26,7 @@ import com.cloud.activiti.cover.ICustomProcessDiagramGenerator;
  * @version 1.0
  */
 @Configuration
+@Slf4j
 public class ActivitiConfig {
     @Autowired
     private ICustomProcessDiagramGenerator customProcessDiagramGenerator;
@@ -57,6 +50,12 @@ public class ActivitiConfig {
                 // id策略 流程图如果需要追踪，只有默认id策略可以结节连线问题
                 // processEngineConfiguration.setIdGenerator(idGenerator);
                 processEngineConfiguration.setTransactionManager(transactionManager);
+
+                GraphicsEnvironment e = GraphicsEnvironment.getLocalGraphicsEnvironment();
+                String[] fNames = e.getAvailableFontFamilyNames();
+                for (int i = 0; i < fNames.length; i++) {
+                    log.info("---------------------系统字体---------------------"+fNames[i]);
+                }
                 // 自定义字体
                 processEngineConfiguration.setActivityFontName("宋体");
                 processEngineConfiguration.setAnnotationFontName("宋体");
