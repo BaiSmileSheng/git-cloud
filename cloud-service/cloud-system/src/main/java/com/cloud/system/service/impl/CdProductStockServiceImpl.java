@@ -639,7 +639,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
             sysInterfaceLog.setRemark("获取sap成品库存信息异常");
             throw new BusinessException(e.getMessage());
         }finally {
-            sysInterfaceLogService.insertSelective(sysInterfaceLog);
+            sysInterfaceLogService.insertSelectiveNoTransactional(sysInterfaceLog);
         }
     }
 

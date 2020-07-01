@@ -165,7 +165,7 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
             if (!MaterialPriceInfoSAPEnum.TYPE_S.getCode().equals(eType)) {
                 logger.error("SAP返回错误信息：eType {},msg {}", eType,msg);
                 sysInterfaceLog.setResults(msg);
-                sysInterfaceLogService.insertUseGeneratedKeys(sysInterfaceLog);
+                sysInterfaceLogService.insertSelectiveNoTransactional(sysInterfaceLog);
                 throw new BusinessException(msg);
             }
 
