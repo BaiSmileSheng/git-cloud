@@ -1,7 +1,9 @@
 package com.cloud.system.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
+import cn.hutool.core.util.ObjectUtil;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.utils.StringUtils;
@@ -15,6 +17,7 @@ import com.cloud.system.webService.material.GeneralMDMDataReleaseBindingStub;
 import com.cloud.system.webService.material.Generalmdmdatarelease_client_epLocator;
 import com.cloud.system.webService.material.ProcessResponse;
 import com.cloud.system.webService.material.RowRisk;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,19 +55,15 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
     @Override
     public R saveMaterialInfo() {
         List<RowRisk> list = new ArrayList<>();
-        List<CdMaterialInfo> cdMaterialInfosInsert = new ArrayList<>();
-        List<CdMaterialInfo> cdMaterialInfosUpdate = new ArrayList<>();
-        try {
-            //接口获取物料数据
-            R r = materialInfoInterface(list, 0, null);
-            SimpleDateFormat sft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            if (r.isSuccess()) {
-                list = (List<RowRisk>) r.get("list");
-                for (RowRisk rowRisk : list) {
+        //接口获取物料数据
+        R r = materialInfoInterface(list, 0, null);
+        if (r.isSuccess()) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            list = objectMapper.convertValue(r.get("list"), new TypeReference<List<RowRisk>>() {});
+            if (ObjectUtil.isNotEmpty(list) && list.size() > 0) {
+                List<CdMaterialInfo> cdMaterialInfos = list.stream().map(rowRisk -> {
                     CdMaterialInfo cdMaterialInfo = new CdMaterialInfo();
                     cdMaterialInfo.setMaterialCode(rowRisk.getMATERIAL_CODE());
-                    //查询物料数据
-                    CdMaterialInfo materialInfo = cdMaterialInfoMapper.selectOne(cdMaterialInfo);
                     cdMaterialInfo.setMaterialDesc(rowRisk.getMATERIAL_DESCRITION());
                     cdMaterialInfo.setMaterialType(rowRisk.getMATERIAL_TYPE());
                     cdMaterialInfo.setPrimaryUom(rowRisk.getPRIMARY_UOM());
@@ -72,33 +71,23 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
                     cdMaterialInfo.setPlantCode(rowRisk.getPLANT_CODE());
                     cdMaterialInfo.setPurchaseGroupCode(rowRisk.getPURCHASE_GROUP_CODE());
                     cdMaterialInfo.setRoundingQuantit(new BigDecimal(StringUtils.isNotBlank(rowRisk.getROUNDING_QUANTITY().trim()) ? rowRisk.getROUNDING_QUANTITY().trim() : "0"));
-                    cdMaterialInfo.setLastUpdate(sft.parse(rowRisk.getLAST_UPD()));
+                    cdMaterialInfo.setLastUpdate(DateUtil.parse(rowRisk.getLAST_UPD(), "yyyy-MM-dd HH:mm:ss"));
                     cdMaterialInfo.setCreateTime(new Date());
                     cdMaterialInfo.setCreateBy("systemJob");
                     cdMaterialInfo.setDelFlag("0");
-                    //判断物料是否已存在
-                    if (materialInfo != null) {
-                        cdMaterialInfo.setId(materialInfo.getId());
-                        cdMaterialInfo.setUpdateBy("systemJob");
-                        cdMaterialInfosUpdate.add(cdMaterialInfo);
-                    } else {
-                        cdMaterialInfosInsert.add(cdMaterialInfo);
-                    }
-                }
-                if (cdMaterialInfosInsert.size() > 0) {
-                    //插入新数据
-                    cdMaterialInfoMapper.insertList(cdMaterialInfosInsert);
-                } else if (cdMaterialInfosUpdate.size() > 0) {
-                    //更新数据
-                    cdMaterialInfoMapper.updateBatchByPrimaryKeySelective(cdMaterialInfosUpdate);
-                }
+                    return cdMaterialInfo;
+                }).collect(Collectors.toList());
+                //根据生产工厂、物料号批量删除
+                cdMaterialInfoMapper.deleteBatchByFactoryAndMaterial(cdMaterialInfos);
+                //批量新增
+                cdMaterialInfoMapper.insertList(cdMaterialInfos);
             } else {
-                log.error(r.get("msg").toString());
-                return R.error(r.get("msg").toString());
+                log.error("接口获取物料主数据为空！");
+                return R.error("接口获取物料主数据为空！");
             }
-        } catch (Exception e) {
-            log.error("保存物料主数据失败！");
-            return R.error("保存物料主数据失败:" + e);
+        } else {
+            log.error(r.get("msg").toString());
+            return R.error(r.get("msg").toString());
         }
         return R.ok();
     }
@@ -134,10 +123,10 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
             String endDateString = sft.format(endDateTime);
             long startTime = System.currentTimeMillis(); // 获取开始时间
             //获取链接
-            GeneralMDMDataReleaseBindingStub generalMDMDataReleaseBindingStub =
+            GeneralMDMDataReleaseBindingStub generalMdmDataReleaseBindingStub =
                     (GeneralMDMDataReleaseBindingStub) new Generalmdmdatarelease_client_epLocator(mdmConnConfig).getGeneralMDMDataRelease_pt();
             //调外部接口方法
-            generalMDMDataReleaseBindingStub.process(mdmConnConfig.getSysName(), mdmConnConfig.getMasterType(),
+            generalMdmDataReleaseBindingStub.process(mdmConnConfig.getSysName(), mdmConnConfig.getMasterType(),
                     mdmConnConfig.getTableName(), startDateString, endDateString, String.valueOf(page), batchId,
                     outPage, outResult, outRetcode, outAllNum, outPageCon, pageAll, outRetmsg, onBatchId);
             long endTime = System.currentTimeMillis(); // 获取结束时间
@@ -227,11 +216,13 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
             log.error("调用SAP系统UPH接口返回数据失败，原因：" + r.get("msg"));
             return R.error("调用SAP系统UPH接口返回数据失败，原因：" + r.get("msg"));
         }
-        List<CdMaterialInfo> uphList = (List<CdMaterialInfo>) r.get("data");
+        List<CdMaterialInfo> uphList =
+                r.getCollectData(new TypeReference<List<CdMaterialInfo>>() {});
         //4执行更新方法
         cdMaterialInfoMapper.updateBatchByFactoryAndMaterial(uphList);
         return R.ok();
     }
+
     /**
      * Description:  根据成品专用号、生产工厂、物料类型查询
      * Param: [list]
@@ -246,17 +237,18 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
 
     /**
      * 根据物料号集合查询物料信息
+     *
      * @param materialCodes
      * @param materialType
      * @return
      */
     @Override
-    public R selectInfoByInMaterialCodeAndMaterialType(List<String> materialCodes,String materialType) {
+    public R selectInfoByInMaterialCodeAndMaterialType(List<String> materialCodes, String materialType) {
         List<CdMaterialInfo> list = cdMaterialInfoMapper.selectInfoByInMaterialCodeAndMaterialType(materialCodes, materialType);
-        if(CollUtil.isEmpty(list)){
+        if (CollUtil.isEmpty(list)) {
             return R.data(null);
         }
-        Map<String,List<CdMaterialInfo>> map=list.stream().collect(Collectors.groupingBy(CdMaterialInfo::getMaterialCode));
+        Map<String, List<CdMaterialInfo>> map = list.stream().collect(Collectors.groupingBy(CdMaterialInfo::getMaterialCode));
         return R.data(map);
     }
 }

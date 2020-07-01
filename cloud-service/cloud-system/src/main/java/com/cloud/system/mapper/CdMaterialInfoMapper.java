@@ -15,7 +15,7 @@ import java.util.Map;
  * @date 2020-06-01
  */
 public interface CdMaterialInfoMapper extends BaseMapper<CdMaterialInfo> {
-    int updateBatchByFactoryAndMaterial(List<CdMaterialInfo> list);
+    int updateBatchByFactoryAndMaterial(@Param(value = "list") List<CdMaterialInfo> list);
 
     /**
      * 根据物料号集合查询物料信息
@@ -27,4 +27,13 @@ public interface CdMaterialInfoMapper extends BaseMapper<CdMaterialInfo> {
 
 
     List<CdMaterialInfo> selectListByMaterialList(@Param(value = "list") List<Dict> list);
+
+    /**
+    * Description:  根据生产工厂、物料号批量删除
+    * Param: List<CdMaterialInfo> list
+    * return:  void
+    * Author: ltq
+    * Date: 2020/7/1
+    */
+    void deleteBatchByFactoryAndMaterial(@Param(value = "list") List<CdMaterialInfo> list);
 }

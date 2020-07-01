@@ -71,4 +71,14 @@
             </foreach>
         </where>
     </select>
+
+    <delete id="deleteBatchByFactoryLine" parameterType="list">
+        <foreach collection="list" item="item" separator=";">
+            delete from cd_factory_line_info
+            <where>
+                product_factory_code = #{item.productFactoryCode,jdbcType=VARCHAR}
+                and produce_line_code = #{item.produceLineCode,jdbcType=VARCHAR}
+            </where>
+        </foreach>
+    </delete>
 </mapper>
