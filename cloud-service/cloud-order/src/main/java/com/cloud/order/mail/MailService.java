@@ -3,7 +3,6 @@ package com.cloud.order.mail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.InputStreamSource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -15,14 +14,11 @@ import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Part;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.MimeUtility;
+import javax.mail.internet.*;
 import javax.mail.util.ByteArrayDataSource;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 
 /**
  * @auther cs
@@ -36,6 +32,13 @@ public class MailService {
 
     @Autowired // 项目启动时将mailSender注入
     private JavaMailSender javaMailSender;
+
+    /**
+     * 解决附件名过长导致乱码问题
+     */
+    static {
+        System.getProperties().setProperty("mail.mime.splitlongparameters", "false");
+    }
 
     /**
      * 发送文本邮件
@@ -81,7 +84,7 @@ public class MailService {
      * @param filePathList 文件列表
      * @throws MessagingException
      */
-    public void sendAttachmentMail(String to, String subject, String content, String[] filePathList) throws MessagingException {
+    public void sendAttachmentMail(String to, String subject, String content, String[] filePathList) throws MessagingException, UnsupportedEncodingException {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
@@ -93,7 +96,7 @@ public class MailService {
         for (String filePath : filePathList) {
             FileSystemResource fileSystemResource = new FileSystemResource(new File(filePath));
             String fileName = fileSystemResource.getFilename();
-            helper.addAttachment(fileName, fileSystemResource);
+            helper.addAttachment(MimeUtility.encodeText(fileName, "utf-8", "B"), fileSystemResource);
         }
 
         javaMailSender.send(message);
