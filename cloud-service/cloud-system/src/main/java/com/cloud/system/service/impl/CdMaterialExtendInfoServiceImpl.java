@@ -6,10 +6,8 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.system.domain.entity.CdMaterialExtendInfo;
-import com.cloud.system.domain.entity.SysInterfaceLog;
 import com.cloud.system.mapper.CdMaterialExtendInfoMapper;
 import com.cloud.system.service.ICdMaterialExtendInfoService;
-import com.cloud.system.service.ISysInterfaceLogService;
 import com.sap.conn.jco.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +17,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -37,9 +33,6 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
 
     @Autowired
     private CdMaterialExtendInfoMapper cdMaterialExtendInfoMapper;
-
-    @Autowired
-    private ISysInterfaceLogService sysInterfaceLogService;
 
     /**
      * 定时任务传输成品物料接口
