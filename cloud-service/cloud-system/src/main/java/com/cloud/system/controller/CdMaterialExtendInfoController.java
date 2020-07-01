@@ -113,7 +113,7 @@ public class CdMaterialExtendInfoController extends BaseController {
      *
      * @return
      */
-    @PostMapping("timeSycProductStock")
+    @PostMapping("timeSycMaterialCode")
     @OperLog(title = "定时任务传输成品物料接口 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "定时任务传输成品物料接口 ", response = R.class)
     public R timeSycMaterialCode() {

@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,6 +37,17 @@ public interface RemoteOssService {
             produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     R uploadFile(@RequestPart(value = "file") MultipartFile file, @RequestParam(value = "orderNo",required = false) String orderNo);
+
+    /**
+     * 上传文件到华为云
+     * @param file
+     * @return
+     */
+    @RequestMapping(value = "oss/onlyForUpload", method = RequestMethod.POST,
+            produces = {MediaType.APPLICATION_JSON_UTF8_VALUE},
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    R onlyForUpload(@RequestPart(value = "file") MultipartFile file);
+
 
     /**
      * 下载文件
@@ -79,6 +91,14 @@ public interface RemoteOssService {
      */
     @PostMapping("oss/deleteListByOrderNo")
     public R deleteListByOrderNo(@RequestParam("orderNo") String orderNo);
+
+    /**
+     * 按订单号批量修改
+     * @param sysOssList
+     * @return
+     */
+    @PostMapping("oss/batchEditSaveById")
+    public R batchEditSaveById(@RequestBody List<SysOss> sysOssList);
 
     class MultipartSupportConfig {
         @Bean

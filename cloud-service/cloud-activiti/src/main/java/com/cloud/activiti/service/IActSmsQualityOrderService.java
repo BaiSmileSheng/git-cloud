@@ -24,10 +24,10 @@ public interface IActSmsQualityOrderService {
      * 供应商申诉时质量索赔开启流程
      * @param id 主键id
      * @param complaintDescription 申诉描述
-     * @param files
+     * @param ossIds
      * @return 成功或失败
      */
-    R addSave(Long id,String complaintDescription,MultipartFile[] files, SysUser sysUser);
+    R addSave(Long id,String complaintDescription,String ossIds, SysUser sysUser);
 
     /**
      * 质量索赔审批流程

@@ -32,6 +32,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("productPassage")
+@Api(tags = "成品库存在途明细  提供者")
 public class CdProductPassageController extends BaseController {
 
     @Autowired
@@ -56,11 +57,15 @@ public class CdProductPassageController extends BaseController {
             @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productMaterialCode", value = "物料号", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = true, paramType = "query", dataType = "String")
     })
-    public TableDataInfo list(CdProductPassage cdProductPassage) {
+    public TableDataInfo list(@ApiIgnore CdProductPassage cdProductPassage) {
         Example example = new Example(CdProductPassage.class);
         Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("productMaterialCode",cdProductPassage.getProductMaterialCode());
+        criteria.andEqualTo("productFactoryCode",cdProductPassage.getProductFactoryCode());
         startPage();
         List<CdProductPassage> cdProductPassageList = cdProductPassageService.selectByExample(example);
         return getDataTable(cdProductPassageList);
@@ -73,16 +78,15 @@ public class CdProductPassageController extends BaseController {
     @ApiOperation(value = "查询成品库存在途明细 列表", response = CdProductPassage.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "productMaterialCode", value = "物料号", required = true, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "stockType", value = "0:良品;1:不良品", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = true, paramType = "query", dataType = "String")
     })
-    public List<CdProductPassage> showListDetails(@ApiIgnore CdProductPassage cdProductPassage){
+    public R showListDetails(@ApiIgnore CdProductPassage cdProductPassage){
         Example example = new Example(CdProductPassage.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("productMaterialCode",cdProductPassage.getProductMaterialCode());
         criteria.andEqualTo("productFactoryCode",cdProductPassage.getProductFactoryCode());
         List<CdProductPassage> cdProductPassageList = cdProductPassageService.selectByExample(example);
-        return cdProductPassageList;
+        return R.data(cdProductPassageList);
     }
     /**
      * 新增保存成品库存在途明细

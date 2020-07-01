@@ -102,7 +102,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
 
     private static final String STOCK_TYPE = "0";//良成品库位标记
 
-    private static final double SMALL_SIZE = 100;//获取成品库存数据每次传输物料号最大数量
+    private static final double SMALL_SIZE = 1000;//获取成品库存数据每次传输物料号最大数量
 
     /**
      * 删除全表
@@ -303,6 +303,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
         int deleteFlag = 0; //删除成品库存表标记 1时删除
         for(int i=0; i < factoryCodeList.size(); i++ ){
             String factoryCode = factoryCodeList.get(i);
+            //根据工厂在字典表里获取不良成品 库位
+            List<String> storehouseList = sysDictDataService.selectListDictLabel(FACTORY_REJECTSTORE_RELATION,factoryCode);
             for(int j=0; j <materialExtendInfoCount; j++ ){
                 int startCont = (int) (j * SMALL_SIZE);
                 int nextI = j + 1;
@@ -316,8 +318,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
                 }
 
                 //2.调用SAP  ZSD_INT_DDPS_02 获取SAP成品库存信息
-                logger.info("调用SAP  ZSD_INT_DDPS_02 获取SAP成品库存信息 factoryCode:{},materials:{}",factoryCode,materials);
-                CdProductStockDetailVo cdProductStockDetail = sycSAPProductStock(Arrays.asList(factoryCode),materials);
+                logger.info("调用SAP  ZSD_INT_DDPS_02 获取SAP成品库存信息 factoryCode:{},materials:{}",factoryCode,null);
+                CdProductStockDetailVo cdProductStockDetail = sycSAPProductStock(factoryCode,materials,storehouseList);
                 //成品库存主表 寄售不足列表
                 List<CdProductStock> cdProductStockList = cdProductStockDetail.getCdProductStockList();
                 //成品库存在产明细
@@ -570,11 +572,11 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
     /**
      * 获取sap成品库存信息 并插入日志
      *
-     * @param factoryCodeList 工厂编号
+     * @param factoryCode 工厂编号
      * @param materialCodeList 物料号
      * @return
      */
-    private CdProductStockDetailVo sycSAPProductStock(List<String> factoryCodeList, List<String> materialCodeList) {
+    private CdProductStockDetailVo sycSAPProductStock(String factoryCode, List<String> materialCodeList,List<String> storehouseList) {
         JCoDestination destination;
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog();
         sysInterfaceLog.setAppId("SAP");
@@ -595,10 +597,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
             }
             //获取输入参数
             JCoTable inputTableW = fm.getTableParameterList().getTable("WERKS");
-            for(String factoryCode : factoryCodeList){
-                inputTableW.appendRow();
-                inputTableW.setValue("WERKS",factoryCode);
-            }
+            inputTableW.appendRow();
+            inputTableW.setValue("WERKS",factoryCode);
             if(!CollectionUtils.isEmpty(materialCodeList)){
                 JCoTable inputTableM = fm.getTableParameterList().getTable("MATNR");
                 for(String materialCode : materialCodeList){
@@ -606,7 +606,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
                     inputTableM.setValue("MATNR",materialCode);
                 }
             }
-            sysInterfaceLog.setContent(factoryCodeList + "");
+            sysInterfaceLog.setContent(factoryCode + "");
 
             //执行函数
             JCoContext.begin(destination);
@@ -622,7 +622,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
             List<CdProductPassage> productPassageList = getPassageList(outputZT);
             //在库库存
             JCoTable outputZK = fm.getTableParameterList().getTable("OUTPUT_ZK");
-            List<CdProductWarehouse> productWarehouseList = getWarehouseList(outputZK);
+            List<CdProductWarehouse> productWarehouseList = getWarehouseList(outputZK,storehouseList);
             //寄售不足库存
             JCoTable outputJS = fm.getTableParameterList().getTable("OUTPUT_JS");
             List<CdProductStock> productStockList = getJSStock(outputJS);
@@ -641,7 +641,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
             sysInterfaceLog.setRemark("获取sap成品库存信息异常");
             throw new BusinessException(e.getMessage());
         }finally {
-            sysInterfaceLogService.insertSelective(sysInterfaceLog);
+            sysInterfaceLogService.insertSelectiveNoTransactional(sysInterfaceLog);
         }
     }
 
@@ -731,7 +731,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
      * @param outputZK 在库成品库存表
      * @return List<CdProductWarehouse> 在库成品库存集合
      */
-    private List<CdProductWarehouse> getWarehouseList(JCoTable outputZK){
+    private List<CdProductWarehouse> getWarehouseList(JCoTable outputZK,List<String> storehouseList){
         logger.info("将SAP在库成品库存转换成 CdProductWarehouse 插入数据库开始");
         List<CdProductWarehouse> productWarehousesList = new ArrayList<>();
 
@@ -741,7 +741,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
             for (int i = 0; i < outputZK.getNumRows(); i++) {
                 //设置指针位置
                 outputZK.setRow(i);
-                CdProductWarehouse cdProductWarehouse = changeWarehouse(outputZK);
+                CdProductWarehouse cdProductWarehouse = changeWarehouse(outputZK,storehouseList);
                 productWarehousesList.add(cdProductWarehouse);
             }
         }
@@ -753,7 +753,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
      * @param outputZK 在库成品库存表
      * @return CdProductWarehouse 在库成品库存转
      */
-    private CdProductWarehouse changeWarehouse(JCoTable outputZK){
+    private CdProductWarehouse changeWarehouse(JCoTable outputZK,List<String> storehouseList){
         CdProductWarehouse cdProductWarehouse = new CdProductWarehouse();
         cdProductWarehouse.setProductFactoryCode(outputZK.getString("WERKS"));
         cdProductWarehouse.setProductMaterialCode(outputZK.getString("MATNR"));
@@ -765,7 +765,6 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
         cdProductWarehouse.setCreateTime(new Date());
         cdProductWarehouse.setDelFlag(DeleteFlagConstants.NO_DELETED);
         //根据工厂在字典表里获取不良成品 库位
-        List<String> storehouseList = sysDictDataService.selectListDictLabel(FACTORY_REJECTSTORE_RELATION,outputZK.getString("WERKS"));
         //根据工厂查所对应的不良货位,如果库存地点是不良货位则设置类型为1
         Boolean flagStockType = storehouseList.contains(outputZK.getString("LGORT"));
         if(flagStockType){

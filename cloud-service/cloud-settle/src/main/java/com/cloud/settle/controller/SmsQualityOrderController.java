@@ -5,7 +5,6 @@ import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
@@ -13,6 +12,7 @@ import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.settle.domain.entity.SmsQualityOrder;
 import com.cloud.settle.enums.QualityStatusEnum;
 import com.cloud.settle.service.ISmsQualityOrderService;
+import com.cloud.settle.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.enums.UserTypeEnum;
 import io.swagger.annotations.Api;
@@ -21,7 +21,6 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
@@ -103,7 +102,7 @@ public class SmsQualityOrderController extends BaseController {
      * @return TableDataInfo 质量索赔分页信息
      */
     @HasPermissions("settle:qualityOrder:export")
-    @GetMapping("export")
+    @PostMapping("export")
     @ApiOperation(value = "导出查询质量索赔列表", response = SmsQualityOrder.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "qualityNo", value = "索赔单号", required = false, paramType = "query", dataType = "String"),
@@ -117,7 +116,7 @@ public class SmsQualityOrderController extends BaseController {
         Example example = assemblyConditions(smsQualityOrder);
         List<SmsQualityOrder> smsQualityOrderList = smsQualityOrderService.selectByExample(example);
         String fileName = "质量索赔.xlsx";
-        return EasyExcelUtil.writeExcel(smsQualityOrderList, fileName, fileName, new SmsQualityOrder());
+        return EasyExcelUtilOSS.writeExcel(smsQualityOrderList, fileName, fileName, new SmsQualityOrder());
     }
 
     /**
@@ -172,13 +171,13 @@ public class SmsQualityOrderController extends BaseController {
     @HasPermissions("settle:qualityOrder:save")
     @PostMapping("save")
     @ApiOperation(value = "新增保存质量索赔(包含文件)", response = R.class)
-    public R addSave(@RequestParam("smsQualityOrderReq") String smsQualityOrderReq, @RequestPart("files") MultipartFile[] files) {
+    public R addSave(@RequestParam("smsQualityOrderReq") String smsQualityOrderReq, @RequestParam("ossIds") String ossIds) {
         SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq, SmsQualityOrder.class);
         //校验入参
         ValidatorUtils.validateEntity(smsQualityOrder);
         String name = getLoginName();
         smsQualityOrder.setCreateBy(name);
-        smsQualityOrderService.addSmsQualityOrderAndSysOss(smsQualityOrder, files);
+        smsQualityOrderService.addSmsQualityOrderAndSysOss(smsQualityOrder, ossIds);
         return R.data(smsQualityOrder.getId());
     }
 
@@ -204,12 +203,12 @@ public class SmsQualityOrderController extends BaseController {
     @HasPermissions("settle:qualityOrder:update")
     @PostMapping("update")
     @ApiOperation(value = "修改保存质量索赔(包含文件信息)", response = R.class)
-    public R updateQuality(@RequestParam("smsQualityOrder") String smsQualityOrderReq, @RequestPart("files") MultipartFile[] files) {
+    public R updateQuality(@RequestParam("smsQualityOrder") String smsQualityOrderReq, @RequestParam(value = "ossIds",required = false) String ossIds) {
         SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq, SmsQualityOrder.class);
         //校验入参
         ValidatorUtils.validateEntity(smsQualityOrder);
         smsQualityOrder.setUpdateBy(getLoginName());
-        return smsQualityOrderService.updateSmsQualityOrderAndSysOss(smsQualityOrder, files);
+        return smsQualityOrderService.updateSmsQualityOrderAndSysOss(smsQualityOrder, ossIds);
     }
 
     /**
@@ -221,12 +220,12 @@ public class SmsQualityOrderController extends BaseController {
     @HasPermissions("settle:qualityOrder:insertOrupdateSubmit")
     @PostMapping("insertOrupdateSubmit")
     @ApiOperation(value = "新增或修改时提交", response = R.class)
-    public R insertOrupdateSubmit(@RequestParam("smsQualityOrder") String smsQualityOrderReq, @RequestPart("files") MultipartFile[] files) {
+    public R insertOrupdateSubmit(@RequestParam("smsQualityOrder") String smsQualityOrderReq,@RequestParam(value = "ossIds",required = false) String ossIds) {
         SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq, SmsQualityOrder.class);
         //校验入参
         ValidatorUtils.validateEntity(smsQualityOrder);
         smsQualityOrder.setUpdateBy(getLoginName());
-        return smsQualityOrderService.insertOrupdateSubmit(smsQualityOrder, files);
+        return smsQualityOrderService.insertOrupdateSubmit(smsQualityOrder, ossIds);
     }
 
     /**
@@ -274,18 +273,19 @@ public class SmsQualityOrderController extends BaseController {
      * 索赔单供应商申诉(包含文件信息)
      * @param id 主键id
      * @param complaintDescription 申诉描述
-     * @param files
+     * @param ossIds
      * @return 索赔单供应商申诉结果成功或失败
      */
     @HasPermissions("settle:qualityOrder:supplierAppeal")
     @PostMapping("supplierAppeal")
     @ApiOperation(value = "索赔单供应商申诉 ", response = R.class)
-    public R supplierAppeal(@RequestParam("id") Long id, @RequestParam("complaintDescription") String complaintDescription, @RequestPart("files") MultipartFile[] files) {
+    public R supplierAppeal(@RequestParam("id") Long id, @RequestParam("complaintDescription") String complaintDescription,
+                            @RequestParam("ossIds") String ossIds) {
         SmsQualityOrder smsQualityOrder = new SmsQualityOrder();
         smsQualityOrder.setId(id);
         smsQualityOrder.setComplaintDescription(complaintDescription);
         smsQualityOrder.setUpdateBy(getLoginName());
-        return smsQualityOrderService.supplierAppeal(smsQualityOrder, files);
+        return smsQualityOrderService.supplierAppeal(smsQualityOrder, ossIds);
     }
 
     /**

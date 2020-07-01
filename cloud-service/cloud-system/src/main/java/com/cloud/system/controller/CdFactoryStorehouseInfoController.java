@@ -13,6 +13,7 @@ import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.system.domain.entity.CdFactoryStorehouseInfo;
 import com.cloud.system.service.ICdFactoryStorehouseInfoService;
+import com.cloud.system.util.EasyExcelUtilOSS;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,19 +111,19 @@ public class CdFactoryStorehouseInfoController extends BaseController {
      * 导出模板
      * @return
      */
-    @GetMapping("exportTemplate")
+    @PostMapping("exportTemplate")
     @HasPermissions("system:factoryStorehouse:exportTemplate")
     @ApiOperation(value = "导出模板", response = CdFactoryStorehouseInfo.class)
     public R exportTemplate(){
         String fileName = "交货提前量模板.xlsx";
-        return EasyExcelUtil.writeExcel(Arrays.asList(),fileName,fileName,new CdFactoryStorehouseInfo());
+        return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new CdFactoryStorehouseInfo());
     }
 
     /**
      * 导出
      * @return
      */
-    @GetMapping("export")
+    @PostMapping("export")
     @HasPermissions("system:factoryStorehouse:export")
     @ApiOperation(value = "导出", response = CdFactoryStorehouseInfo.class)
     @ApiImplicitParams({
@@ -139,7 +140,7 @@ public class CdFactoryStorehouseInfoController extends BaseController {
         String fileName = "交货提前量.xlsx";
         Example example = assemblyConditions(cdFactoryStorehouseInfo);
         List<CdFactoryStorehouseInfo> cdFactoryStorehouseInfoList = cdFactoryStorehouseInfoService.selectByExample(example);
-        return EasyExcelUtil.writeExcel(cdFactoryStorehouseInfoList,fileName,fileName,new CdFactoryStorehouseInfo());
+        return EasyExcelUtilOSS.writeExcel(cdFactoryStorehouseInfoList,fileName,fileName,new CdFactoryStorehouseInfo());
     }
 
     /**

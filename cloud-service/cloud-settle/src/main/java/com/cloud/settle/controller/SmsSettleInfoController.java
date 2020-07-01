@@ -4,12 +4,12 @@ import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.settle.domain.entity.SmsSettleInfo;
 import com.cloud.settle.enums.TimeTypeEnum;
 import com.cloud.settle.service.ISmsSettleInfoService;
+import com.cloud.settle.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.enums.UserTypeEnum;
 import io.swagger.annotations.Api;
@@ -18,11 +18,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
@@ -106,7 +102,7 @@ public class SmsSettleInfoController extends BaseController {
             smsSettleInfoRes.setDifferenceAmont(differenceAmont);
         }
         String fileName = "加工费结算.xlsx";
-        return EasyExcelUtil.writeExcel(smsSettleInfoList, fileName, fileName, new SmsSettleInfo());
+        return EasyExcelUtilOSS.writeExcel(smsSettleInfoList, fileName, fileName, new SmsSettleInfo());
     }
     /**
      * 查询加工费结算 列表
@@ -162,18 +158,18 @@ public class SmsSettleInfoController extends BaseController {
         }
         if(TimeTypeEnum.BASIC_BEGIN_TIME_TYPE.getCode().equals(smsSettleInfo.getTimeType())){
             if(StringUtils.isNotBlank(smsSettleInfo.getBeginTime())){
-                criteria.andGreaterThanOrEqualTo("produceStartDate",smsSettleInfo.getBeginTime());
+                criteria.andGreaterThanOrEqualTo("productStartDate",smsSettleInfo.getBeginTime());
             }
             if(StringUtils.isNotBlank(smsSettleInfo.getEndTime())){
-                criteria.andLessThanOrEqualTo("produceStartDate",smsSettleInfo.getEndTime());
+                criteria.andLessThanOrEqualTo("productStartDate",smsSettleInfo.getEndTime());
             }
         }
         if(TimeTypeEnum.BASIC_END_TIME_TYPE.getCode().equals(smsSettleInfo.getTimeType())){
             if(StringUtils.isNotBlank(smsSettleInfo.getBeginTime())){
-                criteria.andGreaterThanOrEqualTo("produceEndDate",smsSettleInfo.getBeginTime());
+                criteria.andGreaterThanOrEqualTo("productEndDate",smsSettleInfo.getBeginTime());
             }
             if(StringUtils.isNotBlank(smsSettleInfo.getEndTime())){
-                criteria.andLessThanOrEqualTo("produceEndDate",smsSettleInfo.getEndTime());
+                criteria.andLessThanOrEqualTo("productEndDate",smsSettleInfo.getEndTime());
             }
         }
 

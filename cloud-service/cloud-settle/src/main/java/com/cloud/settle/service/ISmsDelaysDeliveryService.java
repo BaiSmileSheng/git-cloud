@@ -3,7 +3,6 @@ package com.cloud.settle.service;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.settle.domain.entity.SmsDelaysDelivery;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 延期交付索赔 Service接口
@@ -32,7 +31,7 @@ public interface ISmsDelaysDeliveryService extends BaseService<SmsDelaysDelivery
      * @param smsDelaysDeliveryReq 延期索赔信息
      * @return 延期索赔单供应商申诉结果成功或失败
      */
-    R supplierAppeal(SmsDelaysDelivery smsDelaysDeliveryReq, MultipartFile[] files);
+    R supplierAppeal(SmsDelaysDelivery smsDelaysDeliveryReq, String ossIds);
 
 
     /**

@@ -2,11 +2,6 @@ package com.cloud.activiti.service;
 
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.common.core.domain.R;
-import com.cloud.order.domain.entity.OmsProductionOrder;
-import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
-import com.cloud.system.domain.entity.SysUser;
-
-import java.util.List;
 
 /**
  * Description:  排产订单审批流程
@@ -41,4 +36,5 @@ public interface IActOmsProductionOrderService {
      * Date: 2020/6/24
      */
     R startActProcess(String key,String orderId,String orderCode,Long userId,String title);
+
 }

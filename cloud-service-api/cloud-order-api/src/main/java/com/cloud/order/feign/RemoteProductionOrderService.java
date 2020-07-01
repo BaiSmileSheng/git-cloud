@@ -2,6 +2,7 @@ package com.cloud.order.feign;
 
 import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.common.core.domain.R;
+import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.feign.factory.RemoteProductionOrderFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

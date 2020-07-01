@@ -11,7 +11,7 @@ public enum SettleRatioEnum {
     SPLX_BF("BF","报废"),
     SPLX_ZL("ZL","质量"),
     SPLX_YQ("YQ","延期"),
-    SPLX_QY("QY","其他");
+    SPLX_QT("QT","其他");
 
 
     private String code;

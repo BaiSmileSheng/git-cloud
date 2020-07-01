@@ -1,6 +1,7 @@
 package com.cloud.order.feign.factory;
 
 import com.cloud.common.core.domain.R;
+import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.feign.RemoteProductionOrderService;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;

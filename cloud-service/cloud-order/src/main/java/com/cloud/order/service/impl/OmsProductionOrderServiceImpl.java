@@ -5,22 +5,23 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.constant.ActProcessContants;
-import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
 import com.cloud.activiti.feign.RemoteActOmsProductionOrderService;
 import com.cloud.common.constant.*;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.*;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderVo;
+import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.mail.MailService;
 import com.cloud.order.mapper.OmsProductionOrderMapper;
 import com.cloud.order.service.*;
 import com.cloud.order.util.DataScopeUtil;
+import com.cloud.order.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.*;
 import com.cloud.system.domain.po.SysUserRights;
 import com.cloud.system.feign.*;
@@ -29,10 +30,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -102,7 +103,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     private RemoteActOmsProductionOrderService remoteActOmsProductionOrderService;
     @Autowired
     private RemoteCdProductOverdueService remoteCdProductOverdueService;
-
+    @Autowired
+    private IOrderFromSap601InterfaceService orderFromSap601InterfaceService;
     /**
      * Description:  排产订单导入
      * Param: [list, sysUser]
@@ -302,7 +304,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         exportProductOrder.addAll(noUphProductOrders);
         exportProductOrder.addAll(checkOrderStatus);
         if (exportProductOrder.size() > 0) {
-            return EasyExcelUtil.writeExcel(exportProductOrder, "排产订单.xlsx", "sheet", new OmsProductionOrderVo());
+            return EasyExcelUtilOSS.writeExcel(exportProductOrder, "排产订单.xlsx", "sheet", new OmsProductionOrderVo());
         } else {
             return R.ok();
         }
@@ -1068,5 +1070,37 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         );
         return list;
 
+    }
+
+
+
+    /**
+     * 下达SAP
+     * @param list
+     * @return
+     */
+    @Override
+    public R giveSAP(List<OmsProductionOrder> list) {
+        //1.获取list
+        if(CollectionUtils.isEmpty(list)){
+            Example example = new Example(OmsProductionOrder.class);
+            Example.Criteria criteria = example.createCriteria();
+            criteria.andEqualTo("status", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_DCSAP.getCode());
+            list = omsProductionOrderMapper.selectByExample(example);
+        }
+        //2.下达SAP
+        R resultSAP = orderFromSap601InterfaceService.createProductOrderFromSap601(list);
+        if(!resultSAP.isSuccess()){
+            log.error("下达SAP调用SAP接口异常res:{}", JSONObject.toJSONString(resultSAP));
+            return resultSAP;
+        }
+        //3.修改排产订单状态
+        List<OmsProductionOrder> listSapRes = (List<OmsProductionOrder>)resultSAP.get("data");
+        listSapRes.forEach(omsProductionOrder ->{
+            omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPZ.getCode());
+        });
+        //TODO
+//        omsProductionOrderMapper.batchUpdateByOrderCode(listSapRes);
+        return R.ok();
     }
 }

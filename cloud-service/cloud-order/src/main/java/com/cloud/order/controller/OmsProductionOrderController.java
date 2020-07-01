@@ -19,12 +19,11 @@ import com.cloud.order.domain.entity.vo.OmsProductionOrderVo;
 import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.service.IOmsProductionOrderService;
 import com.cloud.order.util.DataScopeUtil;
-import com.cloud.system.domain.entity.CdFactoryStorehouseInfo;
+import com.cloud.order.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteFactoryLineInfoService;
 import io.swagger.annotations.*;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,7 +32,6 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 排产订单  提供者
@@ -112,8 +110,9 @@ public class OmsProductionOrderController extends BaseController {
                 return getDataTable(CollectionUtil.newArrayList());
             }
             String lineCodes = r.get("data").toString();
-            criteria.andIn("productLineCode", CollectionUtil.toList(lineCodes.split(",")));
-        } else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
+            criteria.andIn("productLineCode",CollectionUtil.toList(lineCodes.split(",")));
+            criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+        }else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
             //班长、分主管查询工厂下的数据
             if (CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_BZ)
                     || CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_FZG)) {
@@ -199,7 +198,8 @@ public class OmsProductionOrderController extends BaseController {
         if(null == productionOrder){
             return R.error("排产订单信息不存在,请检查数据");
         }
-        R rFactory = remoteFactoryLineInfoService.selectInfoByCodeLineCode(productionOrder.getProductLineCode());
+        R rFactory = remoteFactoryLineInfoService.selectInfoByCodeLineCode(productionOrder.getProductLineCode(),
+                                                            productionOrder.getProductFactoryCode());
         if (!rFactory.isSuccess()) {
             return rFactory;
         }
@@ -298,7 +298,7 @@ public class OmsProductionOrderController extends BaseController {
             }
         }
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderService.selectByExample(example);
-        return EasyExcelUtil.writeExcel(omsProductionOrderList, "生产订单.xlsx", "sheet", new OmsProductionOrder());
+        return EasyExcelUtilOSS.writeExcel(omsProductionOrderList, "生产订单.xlsx", "sheet", new OmsProductionOrder());
     }
 
     /**
@@ -336,7 +336,7 @@ public class OmsProductionOrderController extends BaseController {
     @ApiOperation(value = "导出模板", response = OmsProductionOrderVo.class)
     public R exportTemplate(){
         String fileName = "排产订单.xlsx";
-        return EasyExcelUtil.writeExcel(Arrays.asList(),fileName,fileName,new OmsProductionOrderVo());
+        return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new OmsProductionOrderVo());
     }
 
     /**
@@ -371,7 +371,7 @@ public class OmsProductionOrderController extends BaseController {
     public R exportAll(@ApiIgnore() OmsProductionOrder omsProductionOrder) {
         SysUser sysUser = getUserInfo(SysUser.class);
         List<OmsProductionOrder> productionOrderVos = omsProductionOrderService.exportAll(omsProductionOrder,sysUser);
-        return EasyExcelUtil.writeExcel(productionOrderVos, "排产订单.xlsx", "sheet", new OmsProductionOrder());
+        return EasyExcelUtilOSS.writeExcel(productionOrderVos, "排产订单.xlsx", "sheet", new OmsProductionOrder());
     }
 
     /**
@@ -417,4 +417,15 @@ public class OmsProductionOrderController extends BaseController {
         return omsProductionOrderService.confirmRelease(omsProductionOrder,sysUser);
     }
 
+
+    /**
+     * 下达SAP
+     */
+    @PostMapping("giveSAP")
+    @OperLog(title = "下达SAP ", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "下达SAP ", response = R.class)
+    public R giveSAP(List<OmsProductionOrder> list){
+        R result = omsProductionOrderService.giveSAP(list);
+        return result;
+    }
 }

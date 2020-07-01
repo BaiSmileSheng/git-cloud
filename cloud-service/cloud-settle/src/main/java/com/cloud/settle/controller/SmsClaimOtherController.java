@@ -5,25 +5,23 @@ import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.common.utils.ValidatorUtils;
-import com.cloud.settle.enums.ClaimOtherStatusEnum;
 import com.cloud.settle.domain.entity.SmsClaimOther;
+import com.cloud.settle.enums.ClaimOtherStatusEnum;
 import com.cloud.settle.service.ISmsClaimOtherService;
+import com.cloud.settle.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.enums.UserTypeEnum;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -95,7 +93,7 @@ public class SmsClaimOtherController extends BaseController {
      * @return
      */
     @HasPermissions("settle:claimOther:export")
-    @GetMapping("export")
+    @PostMapping("export")
     @ApiOperation(value = "导出其他索赔列表", response = SmsClaimOther.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "claimCode", value = "索赔单号", required = false, paramType = "query", dataType = "String"),
@@ -108,7 +106,7 @@ public class SmsClaimOtherController extends BaseController {
         Example example = assemblyConditions(smsClaimOther);
         List<SmsClaimOther> smsClaimOtherList = smsClaimOtherService.selectByExample(example);
         String fileName = "其他索赔.xlsx";
-        return EasyExcelUtil.writeExcel(smsClaimOtherList,fileName,fileName,new SmsClaimOther());
+        return EasyExcelUtilOSS.writeExcel(smsClaimOtherList,fileName,fileName,new SmsClaimOther());
     }
 
     /**
@@ -154,36 +152,36 @@ public class SmsClaimOtherController extends BaseController {
 
     /**
      * 新增其他索赔信息(包含文件信息)
-     * @param files
+     * @param ossIds
      * @return
      */
     @HasPermissions("settle:claimOther:save")
     @PostMapping("save")
     @ApiOperation(value = "新增其他索赔信息(包含文件信息)", response = R.class)
-    public R addSave(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestPart("files") MultipartFile[] files) {
+    public R addSave(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestParam("ossIds")String ossIds) {
         SmsClaimOther smsClaimOther = JSONObject.parseObject(smsClaimOtherReq,SmsClaimOther.class);
         //校验入参
         ValidatorUtils.validateEntity(smsClaimOther);
         smsClaimOther.setCreateBy(getLoginName());
-        R result = smsClaimOtherService.insertClaimOtherAndOss(smsClaimOther,files);
+        R result = smsClaimOtherService.insertClaimOtherAndOss(smsClaimOther,ossIds);
         return result;
     }
 
     /**
      * 修改保存其他索赔(包含图片信息)
      * @param smsClaimOtherReq  其他索赔信息
-     * @param files  文件
+     * @param ossIds  文件
      * @return 修改成功或失败
      */
     @HasPermissions("settle:claimOther:updateClaimOther")
     @PostMapping("updateClaimOther")
     @ApiOperation(value = "修改保存其他索赔(包含图片信息)", response = R.class)
-    public R updateClaimOtherAndOss(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestPart("files") MultipartFile[] files) {
+    public R updateClaimOtherAndOss(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestParam(value = "ossIds",required = false)String ossIds) {
         SmsClaimOther smsClaimOther = JSONObject.parseObject(smsClaimOtherReq,SmsClaimOther.class);
         //校验入参
         ValidatorUtils.validateEntity(smsClaimOther);
         smsClaimOther.setUpdateBy(getLoginName());
-        R result = smsClaimOtherService.updateClaimOtherAndOss(smsClaimOther,files);
+        R result = smsClaimOtherService.updateClaimOtherAndOss(smsClaimOther,ossIds);
         return result;
     }
 
@@ -244,18 +242,18 @@ public class SmsClaimOtherController extends BaseController {
      * 索赔单供应商申诉(包含文件信息)
      * @param id 主键id
      * @param complaintDescription 申诉描述
-     * @param files
+     * @param ossIds
      * @return 索赔单供应商申诉结果成功或失败
      */
     @HasPermissions("settle:claimOther:supplierAppeal")
     @PostMapping("supplierAppeal")
     @ApiOperation(value = "索赔单供应商申诉 ", response = R.class)
-    public R supplierAppeal(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription, @RequestPart("files") MultipartFile[] files) {
+    public R supplierAppeal(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription, @RequestParam("ossIds")String ossIds) {
         SmsClaimOther smsClaimOther = new SmsClaimOther();
         smsClaimOther.setId(id);
         smsClaimOther.setComplaintDescription(complaintDescription);
         smsClaimOther.setUpdateBy(getLoginName());
-        return smsClaimOtherService.supplierAppeal(smsClaimOther,files);
+        return smsClaimOtherService.supplierAppeal(smsClaimOther,ossIds);
     }
 
     /**

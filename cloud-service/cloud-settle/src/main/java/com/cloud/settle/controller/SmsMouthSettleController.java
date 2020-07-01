@@ -8,7 +8,6 @@ import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.settle.domain.entity.PO.SmsClaimCashDetailDTO;
@@ -20,6 +19,7 @@ import com.cloud.settle.service.ISmsClaimCashDetailService;
 import com.cloud.settle.service.ISmsInvoiceInfoService;
 import com.cloud.settle.service.ISmsMouthSettleService;
 import com.cloud.settle.service.ISmsSettleInfoService;
+import com.cloud.settle.util.EasyExcelUtilOSS;
 import com.cloud.system.enums.SettleRatioEnum;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,7 +118,7 @@ public class SmsMouthSettleController extends BaseController {
         List<SmsClaimCashDetailDTO> list = new ArrayList<>();
         List<String> typeList = CollUtil.newArrayList(SettleRatioEnum.SPLX_BF.getCode()
         ,SettleRatioEnum.SPLX_WH.getCode(),SettleRatioEnum.SPLX_YQ.getCode()
-        ,SettleRatioEnum.SPLX_ZL.getCode(),SettleRatioEnum.SPLX_QY.getCode());
+        ,SettleRatioEnum.SPLX_ZL.getCode(),SettleRatioEnum.SPLX_QT.getCode());
         typeList.forEach(type->{
             SmsClaimCashDetailDTO dto = new SmsClaimCashDetailDTO();
             dto.setClaimType(type);
@@ -150,7 +150,7 @@ public class SmsMouthSettleController extends BaseController {
             @ApiImplicitParam(name = "id", value = "id", required = true,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "settleStatus", value = "状态：12、内控确认 13、小微主确认", required = true,paramType = "query", dataType = "String")
     })
-    @HasPermissions("settle:mouthSettle:confirm")
+    @HasPermissions("settle:mouthSettle:xwzConfirm,settle:mouthSettle:nkConfirm")
     public R confirm(Long id,String settleStatus) {
         return smsMouthSettleService.confirm(id,settleStatus);
     }
@@ -217,6 +217,6 @@ public class SmsMouthSettleController extends BaseController {
         criteria.andEqualTo(smsMouthSettle);
         startPage();
         List<SmsMouthSettle> smsMouthSettleList = smsMouthSettleService.selectByExample(example);
-        return EasyExcelUtil.writeExcel(smsMouthSettleList, "月度结算.xlsx", "sheet", new SmsMouthSettle());
+        return EasyExcelUtilOSS.writeExcel(smsMouthSettleList, "月度结算.xlsx", "sheet", new SmsMouthSettle());
     }
 }

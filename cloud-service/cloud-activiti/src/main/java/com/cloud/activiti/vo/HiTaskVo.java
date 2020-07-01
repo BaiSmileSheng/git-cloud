@@ -1,10 +1,9 @@
 package com.cloud.activiti.vo;
 
-import java.util.Date;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
-
 import lombok.Data;
+
+import java.util.Date;
 
 /**
  * <p>File：HiTaskVo.java</p>
@@ -77,4 +76,7 @@ public class HiTaskVo {
 
     // 删除原因 completed：任务执行 deleted：流程删除
     private String deleteReason;
+
+    //业务订单号
+    private String orderNo;
 }

@@ -9,21 +9,23 @@ spring:
     lettuce:
       pool:
         max-active: 1000  # 连接池最大连接数（使用负值表示没有限制）
-        max-wait: -1ms      # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        max-wait: -1      # 连接池最大阻塞等待时间（使用负值表示没有限制）
         max-idle: 10      # 连接池中的最大空闲连接
         min-idle: 5       # 连接池中的最小空闲连接
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://10.133.116.86:3306/rycloud?useUnicode=true&characterEncoding=utf8&nullCatalogMeansCurrent=true&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
-    username: cloud
-    password: Cloud,123456
+    url: jdbc:mysql://10.202.89.21:5730/orw?allowMultiQueries=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    username: appadmin
+    password: OI%TPkmL
   cloud:
     nacos:
       discovery:
-        namespace: a2eeae72-3ab5-4789-ac7f-7370330f9293
+        namespace: cs
 #seata命名空间
 seata:
   registry:
     nacos:
       namespace: ${spring.cloud.nacos.discovery.namespace}
+gate:
+  url: http://127.0.0.1:9527

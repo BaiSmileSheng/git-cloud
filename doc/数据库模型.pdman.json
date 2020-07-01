@@ -7515,6 +7515,69 @@
               "fields": [
                 "id"
               ]
+            },
+            {
+              "name": "sms_settle_info_n1",
+              "isUnique": false,
+              "fields": [
+                "supplier_code"
+              ]
+            },
+            {
+              "name": "sms_settle_info_n2",
+              "isUnique": false,
+              "fields": [
+                "product_order_code"
+              ]
+            },
+            {
+              "name": "sms_settle_info_n3",
+              "isUnique": false,
+              "fields": [
+                "order_status"
+              ]
+            },
+            {
+              "name": "sms_settle_info_n4",
+              "isUnique": false,
+              "fields": [
+                "product_material_code"
+              ]
+            },
+            {
+              "name": "sms_settle_info_n5",
+              "isUnique": false,
+              "fields": [
+                "product_start_date"
+              ]
+            },
+            {
+              "name": "sms_settle_info_n6",
+              "isUnique": false,
+              "fields": [
+                "product_end_date"
+              ]
+            },
+            {
+              "name": "sms_settle_info_n7",
+              "isUnique": false,
+              "fields": [
+                "actual_end_date"
+              ]
+            },
+            {
+              "name": "sms_settle_info_n8",
+              "isUnique": false,
+              "fields": [
+                "supplier_name"
+              ]
+            },
+            {
+              "name": "sms_settle_info_n9",
+              "isUnique": false,
+              "fields": [
+                "settle_no"
+              ]
             }
           ],
           "headers": [
@@ -7816,6 +7879,56 @@
                 "sap_date",
                 "posting_no"
               ]
+            },
+            {
+              "name": "sms_supplementary_order_n1",
+              "isUnique": false,
+              "fields": [
+                "stuff_no"
+              ]
+            },
+            {
+              "name": "sms_supplementary_order_n2",
+              "isUnique": false,
+              "fields": [
+                "supplier_code"
+              ]
+            },
+            {
+              "name": "sms_supplementary_order_n3",
+              "isUnique": false,
+              "fields": [
+                "supplier_name"
+              ]
+            },
+            {
+              "name": "sms_supplementary_order_n4",
+              "isUnique": false,
+              "fields": [
+                "raw_material_code"
+              ]
+            },
+            {
+              "name": "sms_supplementary_order_n5",
+              "isUnique": false,
+              "fields": [
+                "raw_material_name"
+              ]
+            },
+            {
+              "name": "sms_supplementary_order_n6",
+              "isUnique": false,
+              "fields": [
+                "stuff_status",
+                "product_order_code"
+              ]
+            },
+            {
+              "name": "sms_supplementary_order_n7",
+              "isUnique": false,
+              "fields": [
+                "settle_no"
+              ]
             }
           ],
           "headers": [
@@ -8102,6 +8215,69 @@
               "fields": [
                 "id"
               ]
+            },
+            {
+              "name": "sms_scrap_order_n1",
+              "isUnique": false,
+              "fields": [
+                "scrap_no"
+              ]
+            },
+            {
+              "name": "sms_scrap_order_n2",
+              "isUnique": false,
+              "fields": [
+                "product_order_code"
+              ]
+            },
+            {
+              "name": "sms_scrap_order_n3",
+              "isUnique": false,
+              "fields": [
+                "supplier_code"
+              ]
+            },
+            {
+              "name": "sms_scrap_order_n4",
+              "isUnique": false,
+              "fields": [
+                "supplier_name"
+              ]
+            },
+            {
+              "name": "sms_scrap_order_n5",
+              "isUnique": false,
+              "fields": [
+                "scrap_status"
+              ]
+            },
+            {
+              "name": "sms_scrap_order_n6",
+              "isUnique": false,
+              "fields": [
+                "posting_no"
+              ]
+            },
+            {
+              "name": "sms_scrap_order_n7",
+              "isUnique": false,
+              "fields": [
+                "product_material_code"
+              ]
+            },
+            {
+              "name": "sms_scrap_order_n8",
+              "isUnique": false,
+              "fields": [
+                "product_material_name"
+              ]
+            },
+            {
+              "name": "sms_scrap_order_n9",
+              "isUnique": false,
+              "fields": [
+                "settle_no"
+              ]
             }
           ],
           "headers": [
@@ -8242,11 +8418,23 @@
               "defaultValue": "''"
             },
             {
+              "name": "project_id",
+              "type": "BIGINT_19",
+              "remark": "",
+              "chnname": "问题分类id"
+            },
+            {
               "name": "claim_clause",
               "type": "VARCHAR_2000",
               "remark": "",
               "chnname": "索赔条款",
               "defaultValue": "''"
+            },
+            {
+              "name": "claim_id",
+              "type": "BIGINT_19",
+              "remark": "",
+              "chnname": "索赔条款id"
             },
             {
               "name": "claim_reason",
@@ -8385,6 +8573,69 @@
               "isUnique": true,
               "fields": [
                 "id"
+              ]
+            },
+            {
+              "name": "sms_quality_order_n1",
+              "isUnique": false,
+              "fields": [
+                "quality_no"
+              ]
+            },
+            {
+              "name": "sms_quality_order_n2",
+              "isUnique": false,
+              "fields": [
+                "supplier_code"
+              ]
+            },
+            {
+              "name": "sms_quality_order_n3",
+              "isUnique": false,
+              "fields": [
+                "supplier_name"
+              ]
+            },
+            {
+              "name": "sms_quality_order_n4",
+              "isUnique": false,
+              "fields": [
+                "product_material_code"
+              ]
+            },
+            {
+              "name": "sms_quality_order_n5",
+              "isUnique": false,
+              "fields": [
+                "product_material_name"
+              ]
+            },
+            {
+              "name": "sms_quality_order_n6",
+              "isUnique": false,
+              "fields": [
+                "quality_status"
+              ]
+            },
+            {
+              "name": "sms_quality_order_n7",
+              "isUnique": false,
+              "fields": [
+                "settle_no"
+              ]
+            },
+            {
+              "name": "sms_quality_order_n8",
+              "isUnique": false,
+              "fields": [
+                "create_time"
+              ]
+            },
+            {
+              "name": "sms_quality_order_n9",
+              "isUnique": false,
+              "fields": [
+                "submit_date"
               ]
             }
           ],
@@ -8653,6 +8904,90 @@
               "fields": [
                 "id"
               ]
+            },
+            {
+              "name": "sms_delays_delivery_n1",
+              "isUnique": false,
+              "fields": [
+                "product_line_code"
+              ]
+            },
+            {
+              "name": "sms_delays_delivery_n2",
+              "isUnique": false,
+              "fields": [
+                "delays_no"
+              ]
+            },
+            {
+              "name": "sms_delays_delivery_n3",
+              "isUnique": false,
+              "fields": [
+                "product_material_code"
+              ]
+            },
+            {
+              "name": "sms_delays_delivery_n4",
+              "isUnique": false,
+              "fields": [
+                "product_material_name"
+              ]
+            },
+            {
+              "name": "sms_delays_delivery_n5",
+              "isUnique": false,
+              "fields": [
+                "product_order_code"
+              ]
+            },
+            {
+              "name": "sms_delays_delivery_n6",
+              "isUnique": false,
+              "fields": [
+                "supplier_code"
+              ]
+            },
+            {
+              "name": "sms_delays_delivery_n7",
+              "isUnique": false,
+              "fields": [
+                "supplier_name"
+              ]
+            },
+            {
+              "name": "sms_delays_delivery_n8",
+              "isUnique": false,
+              "fields": [
+                "delays_status"
+              ]
+            },
+            {
+              "name": "sms_delays_delivery_n9",
+              "isUnique": false,
+              "fields": [
+                "settle_no"
+              ]
+            },
+            {
+              "name": "sms_delays_delivery_n10",
+              "isUnique": false,
+              "fields": [
+                "act_delivery_date"
+              ]
+            },
+            {
+              "name": "sms_delays_delivery_n11",
+              "isUnique": false,
+              "fields": [
+                "delivery_date"
+              ]
+            },
+            {
+              "name": "sms_delays_delivery_n12",
+              "isUnique": false,
+              "fields": [
+                "create_time"
+              ]
             }
           ],
           "headers": [
@@ -8875,7 +9210,57 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [],
+          "indexs": [
+            {
+              "name": "sms_claim_other_PK",
+              "isUnique": true,
+              "fields": [
+                "id"
+              ]
+            },
+            {
+              "name": "sms_claim_other_n1",
+              "isUnique": false,
+              "fields": [
+                "claim_code"
+              ]
+            },
+            {
+              "name": "sms_claim_other_n2",
+              "isUnique": false,
+              "fields": [
+                "product_order_code"
+              ]
+            },
+            {
+              "name": "sms_claim_other_n3",
+              "isUnique": false,
+              "fields": [
+                "supplier_code"
+              ]
+            },
+            {
+              "name": "sms_claim_other_n4",
+              "isUnique": false,
+              "fields": [
+                "supplier_name"
+              ]
+            },
+            {
+              "name": "sms_claim_other_n5",
+              "isUnique": false,
+              "fields": [
+                "settle_no"
+              ]
+            },
+            {
+              "name": "sms_claim_other_n6",
+              "isUnique": false,
+              "fields": [
+                "create_time"
+              ]
+            }
+          ],
           "headers": [
             {
               "fieldName": "chnname",
@@ -9095,7 +9480,50 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [],
+          "indexs": [
+            {
+              "name": "sms_mouth_settle_pk",
+              "isUnique": true,
+              "fields": [
+                "id"
+              ]
+            },
+            {
+              "name": "sms_mouth_settle_n1",
+              "isUnique": false,
+              "fields": [
+                "settle_no"
+              ]
+            },
+            {
+              "name": "sms_mouth_settle_n2",
+              "isUnique": false,
+              "fields": [
+                "supplier_code"
+              ]
+            },
+            {
+              "name": "sms_mouth_settle_n3",
+              "isUnique": false,
+              "fields": [
+                "data_moth"
+              ]
+            },
+            {
+              "name": "sms_mouth_settle_n4",
+              "isUnique": false,
+              "fields": [
+                "supplier_name"
+              ]
+            },
+            {
+              "name": "sms_mouth_settle_n5",
+              "isUnique": false,
+              "fields": [
+                "settle_status"
+              ]
+            }
+          ],
           "headers": [
             {
               "fieldName": "chnname",
@@ -9262,6 +9690,13 @@
                 "update_time",
                 "update_by"
               ]
+            },
+            {
+              "name": "sms_invoice_info_n1",
+              "isUnique": false,
+              "fields": [
+                "mouth_settle_id"
+              ]
             }
           ],
           "headers": [
@@ -9408,7 +9843,36 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [],
+          "indexs": [
+            {
+              "name": "sms_claim_cash_detail_pk",
+              "isUnique": true,
+              "fields": [
+                "id"
+              ]
+            },
+            {
+              "name": "sms_claim_cash_detail_n1",
+              "isUnique": false,
+              "fields": [
+                "claim_no"
+              ]
+            },
+            {
+              "name": "sms_claim_cash_detail_n2",
+              "isUnique": false,
+              "fields": [
+                "claim_type"
+              ]
+            },
+            {
+              "name": "sms_claim_cash_detail_n3",
+              "isUnique": false,
+              "fields": [
+                "settle_no"
+              ]
+            }
+          ],
           "headers": [
             {
               "fieldName": "chnname",

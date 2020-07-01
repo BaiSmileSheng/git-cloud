@@ -9,8 +9,11 @@ import com.cloud.common.utils.StringUtils;
 import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.common.utils.file.FileUtils;
 import com.cloud.system.domain.entity.SysOss;
-import com.cloud.system.oss.*;
+import com.cloud.system.oss.CloudConstant;
 import com.cloud.system.oss.CloudConstant.CloudService;
+import com.cloud.system.oss.CloudStorageConfig;
+import com.cloud.system.oss.CloudStorageService;
+import com.cloud.system.oss.OSSFactory;
 import com.cloud.system.oss.valdator.AliyunGroup;
 import com.cloud.system.oss.valdator.HuaweiGroup;
 import com.cloud.system.service.ISysConfigService;
@@ -34,7 +37,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("oss")
-@Api("文件上传")
+@Api(tags = "文件上传")
 public class SysOssController extends BaseController {
     private final static String KEY = CloudConstant.CLOUD_STORAGE_CONFIG_KEY;
 
@@ -101,6 +104,16 @@ public class SysOssController extends BaseController {
     }
 
     /**
+     * 按id批量修改
+     * @param sysOssList
+     * @return
+     */
+    @PostMapping("batchEditSaveById")
+    public R batchEditSaveById(@RequestBody List<SysOss> sysOssList){
+        return sysOssService.batchEditSaveById(sysOssList);
+    }
+
+    /**
      * 修改保存文件上传
      * @param file 文件
      * @param orderNo 订单号
@@ -108,6 +121,8 @@ public class SysOssController extends BaseController {
      * @throws IOException
      */
     @PostMapping("upload")
+    @HasPermissions("sys:oss:editSave")
+    @ApiOperation(value = "新增文件",response = R.class)
     public R editSave(@RequestPart("file") MultipartFile file,@RequestParam(value = "orderNo",required = false) String orderNo) throws IOException {
         if (file.isEmpty()) {
             throw new OssException("上传文件不能为空");
@@ -126,7 +141,28 @@ public class SysOssController extends BaseController {
         ossEntity.setCreateTime(new Date());
         ossEntity.setService(storage.getService());
         ossEntity.setOrderNo(orderNo);
-        return toAjax(sysOssService.insertSysOss(ossEntity));
+        sysOssService.insertSysOss(ossEntity);
+        return R.data(ossEntity.getId());
+    }
+
+    /**
+     * 文件上传
+     * @param file 文件
+     * @return 上传是否成功
+     * @throws IOException
+     */
+    @PostMapping("onlyForUpload")
+    @ApiOperation(value = "新增文件",response = R.class)
+    public R onlyForUpload(@RequestPart("file") MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new OssException("上传文件不能为空");
+        }
+        // 上传文件
+        String fileName = file.getOriginalFilename();
+        String suffix = fileName.substring(fileName.lastIndexOf("."));
+        CloudStorageService storage = OSSFactory.build();
+        String url = storage.uploadSuffix(file.getBytes(), suffix);
+        return R.data(url);
     }
 
     /**
@@ -134,7 +170,7 @@ public class SysOssController extends BaseController {
      *
      */
     @PostMapping("downLoad")
-    public void downLoad(String url,String fileName) throws IOException {
+    public void downLoad(String url,String fileName,Boolean delete) throws IOException {
         String realName = new String();
         if(StringUtils.isNotBlank(fileName)){
             realName=fileName;
@@ -149,6 +185,10 @@ public class SysOssController extends BaseController {
         getResponse().setHeader("Content-Disposition",
                 "attachment;filename=" + FileUtils.setFileDownloadHeader(getRequest(), realName));
         storage.downLoad(url,getResponse().getOutputStream());
+        if (delete) {
+            CloudStorageService storageDel = OSSFactory.build();
+            storageDel.deleteFile(url);
+        }
     }
 
     /**
@@ -156,6 +196,8 @@ public class SysOssController extends BaseController {
      * @param ids 需要删除的数据ID
      */
     @PostMapping("remove")
+    @HasPermissions("sys:oss:remove")
+    @ApiOperation(value = "删除文件上传",response = R.class)
     public R remove(String ids) {
         if(ids==null){
             return R.error("参数为空!!");

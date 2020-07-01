@@ -5,6 +5,7 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
 import com.cloud.settle.converter.ClaimOtherStatusConverter;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -15,11 +16,7 @@ import tk.mybatis.mapper.annotation.KeySql;
 
 import javax.persistence.Id;
 import javax.persistence.Transient;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-
-import tk.mybatis.mapper.annotation.KeySql;
-
+import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -62,8 +59,7 @@ public class SmsClaimOther extends BaseEntity {
      * 供应商编码
      */
     @ExcelProperty(value = "供应商编码",index = 0)
-    @Valid
-    @NotNull(message = "供应商编码不能为空")
+    @NotBlank(message = "供应商编码不能为空")
     @ApiModelProperty(value = "供应商编码")
     private String supplierCode;
 
@@ -78,8 +74,7 @@ public class SmsClaimOther extends BaseEntity {
      * 工厂
      */
     @ExcelProperty(value = "工厂",index = 2)
-    @Valid
-    @NotNull(message = "工厂不能为空")
+    @NotBlank(message = "工厂不能为空")
     @ApiModelProperty(value = "工厂")
     private String factoryCode;
 
@@ -115,6 +110,7 @@ public class SmsClaimOther extends BaseEntity {
      */
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "提交时间")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date submitDate;
 
     /**
@@ -130,6 +126,7 @@ public class SmsClaimOther extends BaseEntity {
     @ExcelProperty(value = "申诉时间",index = 9)
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "申诉时间")
+    @JsonFormat(pattern="yyyy-MM-dd",timezone="GMT+8")
     private Date complaintDate;
 
     /**
@@ -138,6 +135,7 @@ public class SmsClaimOther extends BaseEntity {
     @ExcelProperty(value = "供应商确认时间",index = 7)
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "供应商确认时间")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date supplierConfirmDate;
 
     /**
