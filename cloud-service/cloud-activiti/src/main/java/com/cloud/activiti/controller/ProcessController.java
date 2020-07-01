@@ -143,11 +143,6 @@ public class ProcessController {
      */
     @RequestMapping(value = "highlightImg/{procInstId}")
     public void getHighlightImg(@PathVariable String procInstId, HttpServletResponse response) {
-        GraphicsEnvironment e11 = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        String[] fNames = e11.getAvailableFontFamilyNames();
-        for (int i = 0; i < fNames.length; i++) {
-            log.info("---------------------系统字体---------------------"+fNames[i]);
-        }
         if (StringUtils.isBlank(procInstId)) {
             log.error("参数为空");
         }

@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
-import java.awt.*;
 
 /**
  * <p>File：ActivitiConfig.java</p>
@@ -50,12 +49,6 @@ public class ActivitiConfig {
                 // id策略 流程图如果需要追踪，只有默认id策略可以结节连线问题
                 // processEngineConfiguration.setIdGenerator(idGenerator);
                 processEngineConfiguration.setTransactionManager(transactionManager);
-
-                GraphicsEnvironment e = GraphicsEnvironment.getLocalGraphicsEnvironment();
-                String[] fNames = e.getAvailableFontFamilyNames();
-                for (int i = 0; i < fNames.length; i++) {
-                    log.info("---------------------系统字体---------------------"+fNames[i]);
-                }
                 // 自定义字体
                 processEngineConfiguration.setActivityFontName("宋体");
                 processEngineConfiguration.setAnnotationFontName("宋体");
