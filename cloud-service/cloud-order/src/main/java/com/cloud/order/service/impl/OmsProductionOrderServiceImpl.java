@@ -5,36 +5,84 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.metadata.WriteSheet;
+import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.constant.ActProcessContants;
 import com.cloud.activiti.feign.RemoteActOmsProductionOrderService;
-import com.cloud.common.constant.*;
+import com.cloud.common.constant.DeleteFlagConstants;
+import com.cloud.common.constant.EmailConstants;
+import com.cloud.common.constant.ProductOrderConstants;
+import com.cloud.common.constant.RawMaterialFeedbackConstants;
+import com.cloud.common.constant.RoleConstants;
+import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
+import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.StringUtils;
-import com.cloud.order.domain.entity.*;
+import com.cloud.order.domain.entity.OmsProductionOrder;
+import com.cloud.order.domain.entity.OmsProductionOrderDel;
+import com.cloud.order.domain.entity.OmsProductionOrderDetail;
+import com.cloud.order.domain.entity.OmsProductionOrderDetailDel;
+import com.cloud.order.domain.entity.OmsRawMaterialFeedback;
+import com.cloud.order.domain.entity.vo.OmsProductionOrderMailVo;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderVo;
 import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.mail.MailService;
 import com.cloud.order.mapper.OmsProductionOrderMapper;
-import com.cloud.order.service.*;
+import com.cloud.order.service.IOmsProductionOrderDelService;
+import com.cloud.order.service.IOmsProductionOrderDetailDelService;
+import com.cloud.order.service.IOmsProductionOrderDetailService;
+import com.cloud.order.service.IOmsProductionOrderService;
+import com.cloud.order.service.IOmsRawMaterialFeedbackService;
+import com.cloud.order.service.IOrderFromSap601InterfaceService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
-import com.cloud.system.domain.entity.*;
+import com.cloud.system.domain.entity.CdBomInfo;
+import com.cloud.system.domain.entity.CdFactoryLineInfo;
+import com.cloud.system.domain.entity.CdMaterialExtendInfo;
+import com.cloud.system.domain.entity.CdMaterialInfo;
+import com.cloud.system.domain.entity.CdProductOverdue;
+import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.po.SysUserRights;
-import com.cloud.system.feign.*;
+import com.cloud.system.feign.RemoteBomService;
+import com.cloud.system.feign.RemoteCdProductOverdueService;
+import com.cloud.system.feign.RemoteFactoryLineInfoService;
+import com.cloud.system.feign.RemoteMaterialExtendInfoService;
+import com.cloud.system.feign.RemoteMaterialService;
+import com.cloud.system.feign.RemoteSequeceService;
+import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.InputStreamSource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.math.BigDecimal;
-import java.util.*;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -1076,13 +1124,18 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
     /**
      * 下达SAP
-     * @param list
+     *
+     * @param ids
      * @return
      */
     @Override
-    public R giveSAP(List<OmsProductionOrder> list) {
+    public R giveSAP(String ids) {
+        List<OmsProductionOrder> list = new ArrayList<>();
+        if (StringUtils.isNotBlank(ids)) {
+            list = omsProductionOrderMapper.selectByIds(ids);
+        }
         //1.获取list
-        if(CollectionUtils.isEmpty(list)){
+        if (CollectionUtils.isEmpty(list)) {
             Example example = new Example(OmsProductionOrder.class);
             Example.Criteria criteria = example.createCriteria();
             criteria.andEqualTo("status", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_DCSAP.getCode());
@@ -1090,17 +1143,260 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         }
         //2.下达SAP
         R resultSAP = orderFromSap601InterfaceService.createProductOrderFromSap601(list);
-        if(!resultSAP.isSuccess()){
+        if (!resultSAP.isSuccess()) {
             log.error("下达SAP调用SAP接口异常res:{}", JSONObject.toJSONString(resultSAP));
             return resultSAP;
         }
         //3.修改排产订单状态
-        List<OmsProductionOrder> listSapRes = (List<OmsProductionOrder>)resultSAP.get("data");
-        listSapRes.forEach(omsProductionOrder ->{
+        List<OmsProductionOrder> listSapRes = (List<OmsProductionOrder>) resultSAP.get("data");
+        listSapRes.forEach(omsProductionOrder -> {
+            if ("S".equals(omsProductionOrder.getSapFlag())) {
+                omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPZ.getCode());
+            } else {
+                omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPYC.getCode());
+            }
+        });
+
+        omsProductionOrderMapper.batchUpdateByOrderCode(listSapRes);
+        return R.ok();
+    }
+
+    /**
+     * 定时获取生产订单号
+     *
+     * @return
+     */
+    @Override
+    public R timeSAPGetProductOrderCode() {
+        Example example = new Example(OmsProductionOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("status", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPZ.getCode());
+        List<OmsProductionOrder> list = omsProductionOrderMapper.selectByExample(example);
+        //调用SAP获取生产订单号
+        R resultSAP = orderFromSap601InterfaceService.queryProductOrderFromSap601(list);
+        if (!resultSAP.isSuccess()) {
+            log.error("调用SAP获取生产订单号接口异常res:{}", JSONObject.toJSONString(resultSAP));
+            return resultSAP;
+        }
+
+        List<OmsProductionOrder> listSapRes = (List<OmsProductionOrder>) resultSAP.get("data");
+        listSapRes.forEach(omsProductionOrder -> {
             omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPZ.getCode());
         });
-        //TODO
-//        omsProductionOrderMapper.batchUpdateByOrderCode(listSapRes);
+        //修改数据
+        omsProductionOrderMapper.batchUpdateByOrderCode(listSapRes);
+        return R.ok();
+    }
+
+    /**
+     * 邮件推送
+     *
+     * @return
+     */
+    @Override
+    public R mailPush() {
+        //1.查已传SAP的数据
+        Example example = new Example(OmsProductionOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("status", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode());
+        List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderMapper.selectByExample(example);
+        //key 是分公司主管
+        Map<String, List<OmsProductionOrder>> branchOfficeMap = new HashMap<>();
+        //key 是班长
+        Map<String, List<OmsProductionOrder>> monitorMap = new HashMap<>();
+        omsProductionOrderList.forEach(omsProductionOrder -> {
+            String branchOffice = omsProductionOrder.getBranchOffice();
+            String monitor = omsProductionOrder.getMonitor();
+            if (branchOfficeMap.containsKey(branchOffice)) {
+                List<OmsProductionOrder> omsProductionOrderListGet = branchOfficeMap.get(branchOffice);
+                omsProductionOrderListGet.add(omsProductionOrder);
+                branchOfficeMap.put(branchOffice, omsProductionOrderListGet);
+            } else {
+                List<OmsProductionOrder> omsProductionOrderListNew = new ArrayList<>();
+                omsProductionOrderListNew.add(omsProductionOrder);
+                branchOfficeMap.put(branchOffice, omsProductionOrderListNew);
+            }
+            if (monitorMap.containsKey(monitor)) {
+                List<OmsProductionOrder> omsProductionOrderListGet = monitorMap.get(monitor);
+                omsProductionOrderListGet.add(omsProductionOrder);
+                monitorMap.put(monitor, omsProductionOrderListGet);
+            } else {
+                List<OmsProductionOrder> omsProductionOrderListNew = new ArrayList<>();
+                omsProductionOrderListNew.add(omsProductionOrder);
+                monitorMap.put(monitor, omsProductionOrderListNew);
+            }
+        });
+        //2.获取工厂线体信息
+        R factoryLineInfoResult = remoteFactoryLineInfoService.listByExample(new CdFactoryLineInfo());
+        if (!factoryLineInfoResult.isSuccess()) {
+            log.error("获取工厂线体信息失败res:{}", JSONObject.toJSONString(factoryLineInfoResult));
+            return factoryLineInfoResult;
+        }
+        List<CdFactoryLineInfo> cdFactoryLineInfoList = factoryLineInfoResult.getCollectData(new TypeReference<List<CdFactoryLineInfo>>() {
+        });
+        //主管对应的邮箱
+        Map<String, CdFactoryLineInfo> branchOfficeFactoryLineMap = new HashMap<>();
+        //班长对应的邮箱
+        Map<String, CdFactoryLineInfo> monitorFactoryLineMap = new HashMap<>();
+        cdFactoryLineInfoList.forEach(cdFactoryLineInfo -> {
+            String branchOffice = cdFactoryLineInfo.getBranchOffice();
+            String monitor = cdFactoryLineInfo.getMonitor();
+            if (!branchOfficeFactoryLineMap.containsKey(branchOffice)) {
+                branchOfficeFactoryLineMap.put(branchOffice, cdFactoryLineInfo);
+            }
+            if (!monitorFactoryLineMap.containsKey(monitor)) {
+                monitorFactoryLineMap.put(monitor, cdFactoryLineInfo);
+            }
+        });
+
+        //3.发送附件
+        branchOfficeMap.keySet().forEach(branchOffice -> {
+            List<OmsProductionOrder> productionOrderList = branchOfficeMap.get(branchOffice);
+            CdFactoryLineInfo branchOfficeLineInfo = branchOfficeFactoryLineMap.get(branchOffice);
+//            if(null == branchOfficeLineInfo){
+//                log.error("请维护主管邮箱 branchOffice:{}",branchOffice);
+//                throw new BusinessException("请维护主管邮箱");
+//            }
+//            String to = branchOfficeFactoryLineMap.get(branchOffice).getBranchOfficeEmail();
+            String to = "1332549662@qq.com";
+            sendMail(productionOrderList, to);
+        });
+        monitorMap.keySet().forEach(monitor -> {
+            List<OmsProductionOrder> productionOrderList = monitorMap.get(monitor);
+            CdFactoryLineInfo monitorLineInfo = monitorFactoryLineMap.get(monitor);
+//            if(null == monitorLineInfo){
+//                log.error("请维护班长邮箱 branchOffice:{}",monitor);
+//                throw new BusinessException("请维护主管邮箱");
+//            }
+//            String to = monitorFactoryLineMap.get(monitor).getBranchOfficeEmail();
+            String to = "1332549662@qq.com";
+            sendMail(productionOrderList, to);
+        });
+        return R.ok();
+    }
+
+
+    /**
+     * 发送邮件
+     * @param productionOrderList
+     * @param to
+     */
+    private void sendMail(List<OmsProductionOrder> productionOrderList, String to) {
+        List<OmsProductionOrderMailVo> productionOrderMailVoList = productionOrderList.stream().map(omsProductionOrde ->
+                BeanUtil.copyProperties(omsProductionOrde,OmsProductionOrderMailVo.class)).collect(Collectors.toList());
+        log.info("发送邮件开始");
+        String fileName = "排产订单已下达SAP信息";
+        String subject = "排产订单已下达SAP信息";
+        String content = "排产订单已下达SAP信息";
+        String sheetName = "排产订单已下达SAP信息";
+        List<List<String>> excelHeader = mailPushExcellHeader();
+        ByteArrayOutputStream out = null;
+        try {
+            out = new ByteArrayOutputStream();
+            EasyExcel.write(out,OmsProductionOrderMailVo.class)
+                    .head(excelHeader)
+                    .sheet(fileName)
+                    .doWrite(productionOrderMailVoList);
+            ByteArrayInputStream iss = new ByteArrayInputStream(out.toByteArray());
+            out.close();
+
+            mailService.sendAttachmentsMail("1332549662@qq.com",subject,content,iss,fileName);
+        } catch (Exception e) {
+            StringWriter w = new StringWriter();
+            e.printStackTrace(new PrintWriter(w));
+            log.info("发送邮件异常 error:{}",w.toString());
+            throw new BusinessException("发送邮件异常");
+        }finally {
+            try {
+                out.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 邮件推送动态获取表头
+     *
+     * @return
+     */
+    private List<List<String>> mailPushExcellHeader() {
+
+        // 动态添加 表头 headList --> 所有表头行集合
+        List<List<String>> headList = new ArrayList<>();
+        // 第 n 行 的表头
+        List<String> headTitle0 = new ArrayList<>();
+        List<String> headTitle1 = new ArrayList<>();
+        String date = DateUtils.getDate();
+        headTitle0.add(date);
+        headTitle0.add("分公司");
+        headTitle0.add(date);
+        headTitle1.add("班长");
+        headTitle0.add(date);
+        headTitle1.add("线号");
+        headTitle0.add(date);
+        headTitle1.add("订单批次号");
+        headTitle0.add("智能电子生产部日生产定单计划");
+        headTitle1.add("成品专用号");
+        headTitle0.add("智能电子生产部日生产定单计划");
+        headTitle1.add("成品描述");
+        headTitle0.add("智能电子生产部日生产定单计划");
+        headTitle1.add("PCB专用号");
+        headTitle0.add("智能电子生产部日生产定单计划");
+        headTitle1.add("排产订单数量");
+        headTitle0.add("智能电子生产部日生产定单计划");
+        headTitle1.add("基本开始");
+        headTitle0.add("智能电子生产部日生产定单计划");
+        headTitle1.add("顺序");
+        headTitle0.add("智能电子生产部日生产定单计划");
+        headTitle1.add("事业部T-1交货");
+        headTitle0.add("智能电子生产部日生产定单计划");
+        headTitle1.add("UPH");
+        headTitle0.add("智能电子生产部日生产定单计划");
+        headTitle1.add("产品用时");
+        headTitle0.add("智能电子生产部日生产定单计划");
+        headTitle1.add("产品定员");
+        headTitle0.add("智能电子生产部日生产定单计划");
+        headTitle1.add("版本");
+        headTitle0.add("智能电子生产部日生产定单计划");
+        headTitle1.add("版本");
+        headTitle0.add("智能电子生产部日生产定单计划");
+        headTitle1.add("发往地");
+        headTitle0.add("智能电子生产部日生产定单计划");
+        headTitle1.add("老品/新品");
+        headTitle0.add("智能电子生产部日生产定单计划");
+        headTitle1.add("产品状态");
+        headTitle0.add("智能电子生产部日生产定单计划");
+        headTitle1.add("是否卡萨帝");
+
+        headList.add(headTitle0);
+        headList.add(headTitle1);
+        return headList;
+    }
+
+    /**
+     * 订单刷新
+     * @param ids
+     * @return
+     */
+    @Override
+    public R orderRefresh(String ids) {
+        //1.查数据
+        List<OmsProductionOrder> list = omsProductionOrderMapper.selectByIds(ids);
+        //2.调用SAP
+        R resultSAP = orderFromSap601InterfaceService.queryProductOrderFromSap601(list);
+        if (!resultSAP.isSuccess()) {
+            log.error("调用SAP获取生产订单号接口异常res:{}", JSONObject.toJSONString(resultSAP));
+            return resultSAP;
+        }
+        //3.修改数据库
+        List<OmsProductionOrder> listSapRes = (List<OmsProductionOrder>) resultSAP.get("data");
+        listSapRes.forEach(omsProductionOrder -> {
+            omsProductionOrder.setNewVersion(omsProductionOrder.getBomVersion());
+            omsProductionOrder.setBomVersion("");
+        });
+        //修改数据
+        omsProductionOrderMapper.batchUpdateByOrderCode(listSapRes);
         return R.ok();
     }
 }

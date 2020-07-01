@@ -369,6 +369,12 @@ public class OmsProductionOrder extends BaseEntity {
     private String checkDateEnd;
 
     /**
+     * SAP标记
+     */
+    @Transient
+    private String sapFlag;
+
+    /**
      * 流程实例ID
      */
     @Transient
