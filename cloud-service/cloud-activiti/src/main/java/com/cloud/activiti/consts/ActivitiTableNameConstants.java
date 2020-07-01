@@ -24,5 +24,20 @@ public class ActivitiTableNameConstants {
      * 其他索赔表名称
      */
     public static final String ACTIVITI_TABLE_NAME_OTHER = "sms_claim_other";
+
+    /**
+     * 真单表名
+     */
+    public static final String ACTIVITI_TABLE_NAME_REAL_ORDER = "oms_real_order";
+
+    /**
+     *滚动计划需求操作表
+     */
+    public static final String ACTIVITI_TABLE_NAME_ORDER_GATHER_EDIT= "oms_demand_order_gather_edit";
+
+    /**
+     * T+1-T+2周需求导入表
+     */
+    public static final String ACTIVITI_TABLE_NAME_DEMAND_ORDER_EDIT = "oms2weeks_demand_order_edit";
 }
 

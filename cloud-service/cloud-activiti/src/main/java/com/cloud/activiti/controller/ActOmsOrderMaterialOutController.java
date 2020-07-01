@@ -38,12 +38,12 @@ public class ActOmsOrderMaterialOutController extends BaseController {
 
 
     /**
-     * 根据业务key获取真单信息
+     * 根据业务key获取下市审核信息
      * @param businessKey biz_business的主键
      * @return 查询结果
      */
     @GetMapping("biz/{businessKey}")
-    @ApiOperation(value = "根据业务key获取真单信息",response = OmsRealOrder.class)
+    @ApiOperation(value = "根据业务key获取下市审核信息",response = OmsRealOrder.class)
     public R getBizInfoByTableId(@PathVariable("businessKey") String businessKey) {
         return actOmsOrderMaterialOutService.getBizInfoByTableId(businessKey);
     }
@@ -53,7 +53,7 @@ public class ActOmsOrderMaterialOutController extends BaseController {
      * @return 成功或失败
      */
     @PostMapping("save")
-    @ApiOperation(value = "导入时物料下市开启真单审批流程",response = OmsRealOrder.class)
+    @ApiOperation(value = "下市审核开启流程",response = OmsRealOrder.class)
     public R addSave(@RequestBody OmsOrderMaterialOutVo omsOrderMaterialOutVo) {
         return actOmsOrderMaterialOutService.addSave(omsOrderMaterialOutVo);
     }

@@ -19,7 +19,7 @@
         <result property="attribute" column="attribute"/>
         <result property="productQuota" column="product_quota"/>
         <result property="delFlag" column="del_flag"/>
-        <result property="remarks" column="remarks"/>
+        <result property="remark" column="remark"/>
         <result property="createTime" column="create_time"/>
         <result property="createBy" column="create_by"/>
         <result property="updateTime" column="update_time"/>
@@ -41,7 +41,7 @@
                attribute,
                product_quota,
                del_flag,
-               remarks,
+               remark,
                create_time,
                create_by,
                update_time,

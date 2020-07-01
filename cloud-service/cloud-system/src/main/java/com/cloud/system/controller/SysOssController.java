@@ -202,8 +202,8 @@ public class SysOssController extends BaseController {
         if(ids==null){
             return R.error("参数为空!!");
         }
-        CloudStorageService storage = OSSFactory.build();
         for(String id:ids.split(",")){
+            CloudStorageService storage = OSSFactory.build();
             SysOss sysOss = sysOssService.selectSysOssById(Long.parseLong(id));
             storage.deleteFile(sysOss.getUrl());
         }

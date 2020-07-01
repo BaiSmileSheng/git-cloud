@@ -9,6 +9,7 @@ import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.service.ICdFactoryLineInfoService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -28,6 +29,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("factoryLine")
+@Api(tags = "工厂线体关系")
 public class CdFactoryLineInfoController extends BaseController {
 
     @Autowired
@@ -82,8 +84,26 @@ public class CdFactoryLineInfoController extends BaseController {
      * @param criteria
      */
     void listCondition(CdFactoryLineInfo cdFactoryLineInfo, Example.Criteria criteria) {
-        if (StringUtils.isNotBlank(cdFactoryLineInfo.getSupplierCode())) {
-            criteria.andLike("supplierCode", cdFactoryLineInfo.getSupplierCode());
+        if (StringUtils.isNotBlank(cdFactoryLineInfo.getProductFactoryCode())) {
+            criteria.andLike("productFactoryCode", cdFactoryLineInfo.getProductFactoryCode());
+        }
+        if (StringUtils.isNotBlank(cdFactoryLineInfo.getProductFactoryDesc())) {
+            criteria.andLike("productFactoryDesc", cdFactoryLineInfo.getProductFactoryDesc());
+        }
+        if (StringUtils.isNotBlank(cdFactoryLineInfo.getProduceLineCode())) {
+            criteria.andLike("produceLineCode", cdFactoryLineInfo.getProduceLineCode());
+        }
+        if (StringUtils.isNotBlank(cdFactoryLineInfo.getProduceLineDesc())) {
+            criteria.andLike("produceLineDesc", cdFactoryLineInfo.getProduceLineDesc());
+        }
+        if (StringUtils.isNotBlank(cdFactoryLineInfo.getBranchOffice())) {
+            criteria.andLike("branchOffice", cdFactoryLineInfo.getBranchOffice());
+        }
+        if (StringUtils.isNotBlank(cdFactoryLineInfo.getMonitor())) {
+            criteria.andLike("monitor", cdFactoryLineInfo.getMonitor());
+        }
+        if (StringUtils.isNotBlank(cdFactoryLineInfo.getAttribute())) {
+            criteria.andLike("attribute", cdFactoryLineInfo.getAttribute());
         }
     }
 

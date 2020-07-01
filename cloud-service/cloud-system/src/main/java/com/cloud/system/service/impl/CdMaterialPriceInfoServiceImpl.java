@@ -106,6 +106,10 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
          List<CdMaterialPriceInfo> cdMaterialPriceInfoListY = selectSapCharges("YCL",materialCodeList);
         //2.调SAP接口查加工费
         List<CdMaterialPriceInfo> cdMaterialPriceInfoListJ= selectSapCharges("JGF",new ArrayList<>());
+        cdMaterialPriceInfoListJ.forEach(cdMaterialPriceInfo ->{
+            //净价值即加工费
+            cdMaterialPriceInfo.setProcessPrice(cdMaterialPriceInfo.getNetWorth());
+        });
         //3.删除cd_material_price_info的所有信息
         cdMaterialPriceInfoMapper.deleteAll();
         //4.新增 cd_material_price_info
@@ -161,7 +165,6 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
             if (!MaterialPriceInfoSAPEnum.TYPE_S.getCode().equals(eType)) {
                 logger.error("SAP返回错误信息：eType {},msg {}", eType,msg);
                 sysInterfaceLog.setResults(msg);
-                sysInterfaceLogService.insertSelectiveNoTransactional(sysInterfaceLog);
                 throw new BusinessException(msg);
             }
 
@@ -177,11 +180,14 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
                 }
             }
         } catch (Exception e) {
+            sysInterfaceLog.setResults("调SAP接口查加工费/原材料价格异常");
             StringWriter w = new StringWriter();
             e.printStackTrace(new PrintWriter(w));
             logger.error(
                     "调SAP接口查加工费/原材料价格 : {}", w.toString());
             throw new BusinessException(e.getMessage());
+        }finally {
+            sysInterfaceLogService.insertSelectiveNoTransactional(sysInterfaceLog);
         }
 
         return chargsList;

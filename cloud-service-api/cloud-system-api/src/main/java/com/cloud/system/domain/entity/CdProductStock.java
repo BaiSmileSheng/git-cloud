@@ -117,7 +117,6 @@ public class CdProductStock extends BaseEntity {
     /**
      * 库存总量
      */
-    @Transient
     @ExcelProperty(value = "库存总量",index = 10)
     @ApiModelProperty(value = "库存总量")
     private BigDecimal sumNum;
