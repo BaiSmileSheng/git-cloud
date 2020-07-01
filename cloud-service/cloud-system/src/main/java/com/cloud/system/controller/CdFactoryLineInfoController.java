@@ -9,6 +9,7 @@ import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.service.ICdFactoryLineInfoService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -28,6 +29,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("factoryLine")
+@Api(tags = "工厂线体关系")
 public class CdFactoryLineInfoController extends BaseController {
 
     @Autowired
