@@ -106,6 +106,10 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
          List<CdMaterialPriceInfo> cdMaterialPriceInfoListY = selectSapCharges("YCL",materialCodeList);
         //2.调SAP接口查加工费
         List<CdMaterialPriceInfo> cdMaterialPriceInfoListJ= selectSapCharges("JGF",new ArrayList<>());
+        cdMaterialPriceInfoListJ.forEach(cdMaterialPriceInfo ->{
+            //净价值即加工费
+            cdMaterialPriceInfo.setProcessPrice(cdMaterialPriceInfo.getNetWorth());
+        });
         //3.删除cd_material_price_info的所有信息
         cdMaterialPriceInfoMapper.deleteAll();
         //4.新增 cd_material_price_info
