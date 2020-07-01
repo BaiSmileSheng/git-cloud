@@ -25,7 +25,7 @@ public class RemoteBomFallbackFactory implements FallbackFactory<RemoteBomServic
              * @return
              */
             @Override
-            public R listByProductAndMaterial(String productMaterialCode, String rawMaterialCode) {
+            public R listByProductAndMaterial(String productMaterialCode, String rawMaterialCode,String bomVersion,String productFactoryCode) {
                 log.error("RemoteBomService.listByProductAndMaterial错误信息：{}",throwable.getMessage());
                 return R.error("服务拥挤，请稍后再试！");
             }

@@ -106,7 +106,7 @@ public class CdBomInfoController extends BaseController {
      * 根据成品物料号、原材料物料号确定一条数据
      */
     @GetMapping("listByProductAndMaterial")
-    public R listByProductAndMaterial(String productMaterialCode,String rawMaterialCode) {
+    public R listByProductAndMaterial(String productMaterialCode,String rawMaterialCode,String bomVersion,String productFactoryCode) {
         Example example = new Example(CdBomInfo.class);
         Example.Criteria criteria = example.createCriteria();
         if (StrUtil.isBlank(productMaterialCode)) {
@@ -115,8 +115,16 @@ public class CdBomInfoController extends BaseController {
         if (StrUtil.isBlank(rawMaterialCode)) {
             throw new BusinessException("参数：原材料物料号为空");
         }
+        if (StrUtil.isBlank(bomVersion)) {
+            throw new BusinessException("参数：Bom版本为空");
+        }
+        if (StrUtil.isBlank(productFactoryCode)) {
+            throw new BusinessException("参数：生产工厂为空");
+        }
         criteria.andEqualTo("productMaterialCode",productMaterialCode);
         criteria.andEqualTo("rawMaterialCode",rawMaterialCode);
+        criteria.andEqualTo("version",bomVersion);
+        criteria.andEqualTo("productFactoryCode",productFactoryCode);
         criteria.andEqualTo("delFlag","0");
         CdBomInfo cdBomInfo = cdBomInfoService.findByExampleOne(example);
         return R.data(cdBomInfo);

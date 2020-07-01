@@ -15,8 +15,8 @@ import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.*;
-import com.cloud.order.domain.entity.vo.OmsProductionOrderVo;
 import com.cloud.order.enums.ProductionOrderStatusEnum;
+import com.cloud.order.domain.entity.vo.OmsProductionOrderExportVo;
 import com.cloud.order.mail.MailService;
 import com.cloud.order.mapper.OmsProductionOrderMapper;
 import com.cloud.order.service.*;
@@ -113,7 +113,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      * Date: 2020/6/22
      */
     @Override
-    public R importProductOrder(List<OmsProductionOrderVo> list, SysUser sysUser) {
+    public R importProductOrder(List<OmsProductionOrderExportVo> list, SysUser sysUser) {
         if (CollectionUtil.isEmpty(list)) {
             return R.error("导入数据不存在");
         }
@@ -184,19 +184,19 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         List<String> outsourceStr = new ArrayList<>();
         outsourceStr.add("0");
         outsourceStr.add("1");
-        List<OmsProductionOrderVo> outsourceOrderList = list.stream().filter((OmsProductionOrderVo o) ->
+        List<OmsProductionOrderExportVo> outsourceOrderList = list.stream().filter((OmsProductionOrderExportVo o) ->
                 outsourceStr.contains(o.getOutsourceType())).collect(toList());
         //获取导入的加工承揽的但不允许加工承揽的排产订单,需返回给用户
-        List<OmsProductionOrderVo> noOutsourceOrderList = outsourceOrderList.stream().filter((OmsProductionOrderVo o) ->
+        List<OmsProductionOrderExportVo> noOutsourceOrderList = outsourceOrderList.stream().filter((OmsProductionOrderExportVo o) ->
                 noMaterialList.contains(o.getProductMaterialCode())).collect(toList());
         //定义失败原因
         noOutsourceOrderList.forEach(out -> out.setExportRemark(NO_OUTSOURCE_REMARK));
         //需导入数据
-        List<OmsProductionOrderVo> omsProductionOrderVos = list.stream()
+        List<OmsProductionOrderExportVo> omsProductionOrderExportVos = list.stream()
                 .filter(item -> !noOutsourceOrderList.contains(item)).collect(toList());
         //1-2、UPH节拍：根据导入信息的成品物料号、生产工厂获取物料信息表（cd_material_info）中对应的UPH节拍；
         //匹配UPH节拍数据
-        omsProductionOrderVos.forEach(o -> materialInfoList.forEach(m -> {
+        omsProductionOrderExportVos.forEach(o -> materialInfoList.forEach(m -> {
             if (o.getProductFactoryCode().equals(m.getPlantCode())
                     && o.getProductMaterialCode().equals(m.getMaterialCode())) {
                 o.setRhythm(m.getUph());
@@ -204,20 +204,20 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }
         }));
         //筛选没有UPH节拍的数据
-        List<OmsProductionOrderVo> noUphProductOrders = omsProductionOrderVos.stream()
+        List<OmsProductionOrderExportVo> noUphProductOrders = omsProductionOrderExportVos.stream()
                 .filter(o -> StringUtils.isBlank(o.getRhythm().toString())
                         || o.getRhythm().compareTo(BigDecimal.ZERO) == 0).collect(toList());
         //定义失败原因
         noUphProductOrders.forEach(uph -> uph.setExportRemark(NO_UPH_REMARK));
-        omsProductionOrderVos = omsProductionOrderVos.stream()
+        omsProductionOrderExportVos = omsProductionOrderExportVos.stream()
                 .filter(item -> !noUphProductOrders.contains(item)).collect(toList());
         //计算用时：排产量/UPH节拍
-        omsProductionOrderVos.forEach(o ->
+        omsProductionOrderExportVos.forEach(o ->
                 o.setUseTime(o.getProductNum().divide(o.getRhythm(), 2, BigDecimal.ROUND_HALF_UP)));
         //1-3、产品定员：根据成品生产工厂、线体获取工厂线体关系表（cd_factory_line_info）中的产品定员；
         //1-6、分公司主管、班长：根据生产工厂、线体获取工厂线体关系表（cd_factory_line_info）中的分公司主管、班长的信息；
         //匹配产品定员信息,分公司主管、班长
-        omsProductionOrderVos.forEach(o -> cdFactoryLineInfoList.forEach(f -> {
+        omsProductionOrderExportVos.forEach(o -> cdFactoryLineInfoList.forEach(f -> {
             if (o.getProductFactoryCode().equals(f.getProductFactoryCode())
                     && o.getProductLineCode().equals(f.getProduceLineCode())) {
                 o.setProductQuota(f.getProductQuota());
@@ -226,7 +226,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }
         }));
         //筛选没有产品定员、分公司主管、班长的信息
-        List<OmsProductionOrderVo> noQuotaProductOrders = omsProductionOrderVos.stream()
+        List<OmsProductionOrderExportVo> noQuotaProductOrders = omsProductionOrderExportVos.stream()
                 .filter(o ->
                         (StringUtils.isBlank(String.valueOf(o.getProductQuota()))
                                 || o.getProductQuota() == 0)
@@ -235,33 +235,33 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 .collect(toList());
         //定义失败原因
         noQuotaProductOrders.forEach(q -> q.setExportRemark(NO_QUOTA_REMARK));
-        omsProductionOrderVos = omsProductionOrderVos.stream()
+        omsProductionOrderExportVos = omsProductionOrderExportVos.stream()
                 .filter(item -> !noQuotaProductOrders.contains(item)).collect(toList());
 
         //1-7、生命周期：根据成品专用号获取物料扩展信息表（cd_material_extend_info）中的生命周期；
         //匹配生命周期
-        omsProductionOrderVos.forEach(o -> materialExtendInfoList.forEach(m -> {
+        omsProductionOrderExportVos.forEach(o -> materialExtendInfoList.forEach(m -> {
             if (o.getProductMaterialCode().equals(m.getMaterialCode())) {
                 o.setLifeCycle(m.getLifeCycle());
             }
         }));
         //筛选没有生命周期的数据
-        List<OmsProductionOrderVo> noLifeCycleProductOrders = omsProductionOrderVos.stream()
+        List<OmsProductionOrderExportVo> noLifeCycleProductOrders = omsProductionOrderExportVos.stream()
                 .filter(o -> StringUtils.isBlank(o.getLifeCycle()))
                 .collect(toList());
         noLifeCycleProductOrders.forEach(life -> life.setExportRemark(NO_LIFECYCLE_REMARK));
-        omsProductionOrderVos = omsProductionOrderVos.stream()
+        omsProductionOrderExportVos = omsProductionOrderExportVos.stream()
                 .filter(item -> !noLifeCycleProductOrders.contains(item))
                 .collect(toList());
 
         //根据生产工厂、成品物料、线体号、开始日期、结束日期、bom版本删除库中数据
-        List<OmsProductionOrderVo> checkOrderStatus = deleteOldProductOrder(omsProductionOrderVos);
+        List<OmsProductionOrderExportVo> checkOrderStatus = deleteOldProductOrder(omsProductionOrderExportVos);
         checkOrderStatus.forEach(o -> o.setExportRemark(CHECK_ORDER_STATUS));
-        omsProductionOrderVos = omsProductionOrderVos.stream()
+        omsProductionOrderExportVos = omsProductionOrderExportVos.stream()
                 .filter(item -> !checkOrderStatus.contains(item))
                 .collect(toList());
         //1-8、排产订单号：根据生成规则生成排产订单号；
-        List<OmsProductionOrder> omsProductionOrders = omsProductionOrderVos.stream().map(o -> {
+        List<OmsProductionOrder> omsProductionOrders = omsProductionOrderExportVos.stream().map(o -> {
             OmsProductionOrder omsProductionOrder = new OmsProductionOrder();
             BeanUtils.copyProperties(o, omsProductionOrder);
             //获取排产订单号
@@ -287,24 +287,29 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             log.error("BOM拆解流程失败，原因：" + bomDisassemblyResult.get("msg"));
             return R.error("BOM拆解流程失败!");
         }
-
+        if (omsProductionOrders.size() > 0) {
+            omsProductionOrderMapper.insertList(omsProductionOrders);
+            List<String> orderCodes = omsProductionOrders.stream().map(OmsProductionOrder::getOrderCode).collect(Collectors.toList());
+            omsProductionOrders = omsProductionOrderMapper.selectByOrderCode(orderCodes);
+        }
         //4、3版本审批校验，邮件通知排产员3版本审批
         List<OmsProductionOrder> checkOmsProductList = checkThreeVersion(omsProductionOrders, sysUser);
+        //5、超期库存审批流程，邮件通知订单经理
+        List<OmsProductionOrder> checkOverStockList = checkOverStock(checkOmsProductList,sysUser);
+        //6、、超期未关闭订单审批校验，邮件通知工厂订单 - 工厂小微主 超期未关闭订单审批
+        List<OmsProductionOrder> insertProductOrderList = checkOverdueNotCloseOrder(checkOverStockList, sysUser);
+        //更新排产订单的审核状态
+        omsProductionOrderMapper.updateBatchByPrimaryKeySelective(insertProductOrderList);
 
-        //5、超期未关闭订单审批校验，邮件通知工厂订单 - 工厂小微主 超期未关闭订单审批
-        List<OmsProductionOrder> insertProductOrderList = checkOverdueNotCloseOrder(checkOmsProductList, sysUser);
-        if (insertProductOrderList.size() > 0) {
-            omsProductionOrderMapper.insertList(insertProductOrderList);
-        }
         //组织缺基础数据的订单
-        List<OmsProductionOrderVo> exportProductOrder = new ArrayList<>();
+        List<OmsProductionOrderExportVo> exportProductOrder = new ArrayList<>();
         exportProductOrder.addAll(noLifeCycleProductOrders);
         exportProductOrder.addAll(noOutsourceOrderList);
         exportProductOrder.addAll(noQuotaProductOrders);
         exportProductOrder.addAll(noUphProductOrders);
         exportProductOrder.addAll(checkOrderStatus);
         if (exportProductOrder.size() > 0) {
-            return EasyExcelUtilOSS.writeExcel(exportProductOrder, "排产订单.xlsx", "sheet", new OmsProductionOrderVo());
+            return EasyExcelUtilOSS.writeExcel(exportProductOrder, "排产订单.xlsx", "sheet", new OmsProductionOrderExportVo());
         } else {
             return R.ok();
         }
@@ -405,23 +410,35 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         if (ProductOrderConstants.STATUS_ONE.equals(productionOrder.getStatus())
                 || ProductOrderConstants.STATUS_TWO.equals(productionOrder.getStatus())) {
             //”反馈中“、“待调整”状态的数据
-            //根据排产订单号查询原材料反馈信息表记录
+            //根据成品专用号、生产工厂、基本开始日期查询原材料反馈信息表记录
             List<OmsRawMaterialFeedback> omsRawMaterialFeedbacks =
                     omsRawMaterialFeedbackService.select(OmsRawMaterialFeedback.builder()
-                            .productOrderCode(productionOrder.getOrderCode()).status("0").build());
-            //如果存在反馈信息记录，判断修改后的量，如果小于等于所有反馈信息记录的成品满足量，
+                            .productMaterialCode(productionOrder.getProductMaterialCode())
+                            .productFactoryCode(productionOrder.getProductFactoryCode())
+                            .productStartDate(productionOrder.getProductStartDate()).status("0").build());
+            //根据成品专用号、生产工厂、基本开始日期查询除当前订单外的其他排产订单记录
+            Example example = new Example(OmsProductionOrder.class);
+            Example.Criteria criteria = example.createCriteria();
+            criteria.andEqualTo("productMaterialCode",omsProductionOrder.getProductMaterialCode());
+            criteria.andEqualTo("productFactoryCode",omsProductionOrder.getProductFactoryCode());
+            criteria.andEqualTo("productStartDate",omsProductionOrder.getProductStartDate());
+            criteria.andNotEqualTo("id",omsProductionOrder.getId());
+            List<OmsProductionOrder> omsProductionOrders = omsProductionOrderMapper.selectByExample(example);
+            //计算成品专用号、生产工厂、基本开始日期下的总排产量
+            BigDecimal orderSum = omsProductionOrders.stream()
+                    .map(OmsProductionOrder::getProductNum).reduce(BigDecimal.ZERO,BigDecimal::add);
+            orderSum = orderSum.add(omsProductionOrder.getProductNum());
+            //如果存在反馈信息记录，判断修改后的量，如果小于等于反馈信息记录的成品满足量，
             //则更新反馈信息表记录状态为“通过”，排产订单状态“已评审”，明细数据更新成“已确认”
-            omsRawMaterialFeedbacks.forEach(f -> {
-                if (omsProductionOrder.getProductNum().compareTo(f.getProductContentNum()) < 0) {
-                    f.setStatus(RawMaterialFeedbackConstants.STATUS_ONE);
+            int checkCount = 0;
+            for (OmsRawMaterialFeedback omsRawMaterialFeedback : omsRawMaterialFeedbacks) {
+                if (orderSum.compareTo(omsRawMaterialFeedback.getProductContentNum()) < 0) {
+                    omsRawMaterialFeedback.setStatus(RawMaterialFeedbackConstants.STATUS_ONE);
+                    checkCount++;
                 }
-            });
-            //统计修改后的量小于等于反馈记录成品满足量的记录
-            List<OmsRawMaterialFeedback> rawMaterialFeedbacks =
-                    omsRawMaterialFeedbacks.stream().filter(r -> omsProductionOrder.getProductNum()
-                            .compareTo(r.getProductContentNum()) < 0).collect(toList());
+            }
             //如果满足数量的记录条数与反馈信息总条数相同，则排产订单状态为“已评审”
-            if (omsRawMaterialFeedbacks.size() == rawMaterialFeedbacks.size()) {
+            if (omsRawMaterialFeedbacks.size() == checkCount) {
                 omsProductionOrder.setStatus(ProductOrderConstants.STATUS_THREE);
             }
         } else if (ProductOrderConstants.STATUS_THREE.equals(productionOrder.getStatus())) {
@@ -468,6 +485,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     .rawMaterialProductNum(rawMaterialProductNum)
                     .unit(bom.getComponentUnit())
                     .bomVersion(omsProductionOrder.getBomVersion())
+                    .productStartDate(omsProductionOrder.getProductStartDate())
                     .purchaseGroup(bom.getPurchaseGroup())
                     .storagePoint(bom.getStoragePoint())
                     .status(detailStatus)
@@ -640,7 +658,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     /**
      * Description:  排产订单导出
      * Param: [omsProductionOrder, sysUser]
-     * return: java.util.List<com.cloud.order.domain.entity.vo.OmsProductionOrderVo>
+     * return: java.util.List<com.cloud.order.domain.entity.vo.OmsProductionOrderExportVo>
      * Author: ltq
      * Date: 2020/6/23
      */
@@ -691,12 +709,78 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }
         }
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderMapper.selectByExample(example);
-        List<OmsProductionOrderVo> productionOrderVos = omsProductionOrderList.stream().map(o -> {
-            OmsProductionOrderVo omsProductionOrderVo = new OmsProductionOrderVo();
-            BeanUtils.copyProperties(o, omsProductionOrderVo);
-            return omsProductionOrderVo;
+        List<OmsProductionOrderExportVo> productionOrderVos = omsProductionOrderList.stream().map(o -> {
+            OmsProductionOrderExportVo omsProductionOrderExportVo = new OmsProductionOrderExportVo();
+            BeanUtils.copyProperties(o, omsProductionOrderExportVo);
+            return omsProductionOrderExportVo;
         }).collect(Collectors.toList());
         return omsProductionOrderList;
+    }
+    /**
+     * Description:  反馈信息处理-快捷修改查询
+     * Param: [omsProductionOrder, sysUser]
+     * return: java.util.List<com.cloud.order.domain.entity.OmsProductionOrder>
+     * Author: ltq
+     * Date: 2020/6/28
+     */
+    @Override
+    public List<OmsProductionOrder> queryProductOrder(OmsProductionOrder omsProductionOrder, SysUser sysUser) {
+        Example example = new Example(OmsProductionOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        if (StrUtil.isNotBlank(omsProductionOrder.getProductMaterialCode())) {
+            criteria.andEqualTo("productMaterialCode",omsProductionOrder.getProductMaterialCode());
+        }
+        if (StrUtil.isNotBlank(omsProductionOrder.getProductFactoryCode())) {
+            criteria.andEqualTo("productFactoryCode",omsProductionOrder.getProductFactoryCode());
+        }
+        if (StrUtil.isNotBlank(omsProductionOrder.getProductStartDate())) {
+            criteria.andEqualTo("productStartDate",omsProductionOrder.getProductStartDate());
+        }
+        if (StrUtil.isNotBlank(omsProductionOrder.getBomVersion())) {
+            criteria.andEqualTo("bomVersion",omsProductionOrder.getBomVersion());
+        }
+        if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
+            //排产员根据生产工厂权限查询
+            if (CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)) {
+                criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(",")));
+            }
+        }
+        List<OmsProductionOrder> list = omsProductionOrderMapper.selectByExample(example);
+        return list;
+    }
+    /**
+     * Description: 根据工厂、专用号、基本开始日期查询
+     * Param:
+     * return:
+     * Author: ltq
+     * Date: 2020/6/28
+     */
+    @Override
+    public List<OmsProductionOrder> selectByFactoryAndMaterialAndStartDate(List<OmsProductionOrder> list) {
+        return omsProductionOrderMapper.selectByFactoryAndMaterialAndStartDate(list);
+    }
+
+    /**
+     * Description:  根据排产订单号查询
+     * Param: [list]
+     * return: java.util.List<com.cloud.order.domain.entity.OmsProductionOrder>
+     * Author: ltq
+     * Date: 2020/6/29
+     */
+    @Override
+    public List<OmsProductionOrder> selectByOrderCode(List<String> list) {
+        return omsProductionOrderMapper.selectByOrderCode(list);
+    }
+    /**
+     * Description: 根据排产订单号批量更新
+     * Param: [list]
+     * return: int
+     * Author: ltq
+     * Date: 2020/6/29
+     */
+    @Override
+    public void updateByOrderCode(List<OmsProductionOrder> list) {
+        omsProductionOrderMapper.updateByOrderCode(list);
     }
 
     private String fetchGroupKey(CdBomInfo cdBomInfo) {
@@ -711,7 +795,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      * Date: 2020/6/19
      */
     private List<OmsProductionOrder> checkThreeVersion(List<OmsProductionOrder> list, SysUser sysUser) {
-        List<OmsProductionOrder> checkList = new ArrayList<>();
+        Set<OmsProductionOrder> checkList = new HashSet<>();
         list.forEach(o -> {
             if (ProductOrderConstants.BOM_VERSION_THREE.equals(o.getBomVersion())
                     && o.getProductNum().compareTo(ProductOrderConstants.BOM_VERSION_THREE_NUM) > 0) {
@@ -746,18 +830,20 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      */
     private List<OmsProductionOrder> checkOverdueNotCloseOrder(List<OmsProductionOrder> list, SysUser sysUser) {
         List<OmsProductionOrder> omsProductionOrders = omsProductionOrderMapper.selectByFactoryAndMaterialAndLine(list);
+        Set<OmsProductionOrder> checkOrders = new HashSet<>();
         list.forEach(o ->
                 omsProductionOrders.forEach(order -> {
                     if (o.getProductFactoryCode().equals(order.getProductFactoryCode())
                             && o.getProductMaterialCode().equals(order.getProductMaterialCode())
                             && o.getProductLineCode().equals(order.getProductLineCode())) {
-                        o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_TWO);
+                        o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_ONE);
+                        checkOrders.add(o);
                     }
                 })
         );
-        if (omsProductionOrders.size() > 0) {
+        if (checkOrders.size() > 0) {
             //  超期未关闭订单审批流程
-            omsProductionOrders.forEach(omsProductionOrder -> {
+            checkOrders.forEach(omsProductionOrder -> {
                 R r = remoteActOmsProductionOrderService.startActProcess(ActProcessContants.ACTIVITI_OVERDUE_NOT_CLOSE_ORDER_REVIEW
                         , omsProductionOrder.getId().toString(), omsProductionOrder.getOrderCode(), sysUser.getUserId()
                         , ActProcessContants.ACTIVITI_PRO_TITLE_OVERDUE_NOT_CLOSE);
@@ -775,7 +861,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             });
             Set<SysUser> sysUsers = new HashSet<>();
             sysUserRightsList.forEach(u ->
-                    omsProductionOrders.forEach(o -> {
+                    checkOrders.forEach(o -> {
                         if (u.getProductFactorys().contains(o.getProductFactoryCode())) {
                             sysUsers.add(SysUser.builder().userName(u.getUserName()).email(u.getEmail()).build());
                         }
@@ -799,7 +885,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      * Date: 2020/6/24
      */
     private List<OmsProductionOrder> checkOverStock(List<OmsProductionOrder> list, SysUser sysUser) {
-        List<OmsProductionOrder> omsProductionOrders = new ArrayList<>();
+        Set<OmsProductionOrder> omsProductionOrders = new HashSet<>();
         list.forEach(o -> {
             R overStockMap = remoteCdProductOverdueService.selectOverStockByFactoryAndMaterial(CdProductOverdue
                     .builder().productFactoryCode(o.getProductFactoryCode())
@@ -812,8 +898,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     });
             if (BeanUtil.isNotEmpty(productOverdues) && productOverdues.size() > 0) {
                 o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_ONE);
+                omsProductionOrders.add(o);
             }
-            omsProductionOrders.add(o);
         });
         if (omsProductionOrders.size() > 0) {
             omsProductionOrders.forEach(omsProductionOrder -> {
@@ -882,6 +968,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                         .rawMaterialProductNum(rawMaterialProductNum)
                         .unit(bom.getComponentUnit())
                         .bomVersion(o.getBomVersion())
+                        .productStartDate(o.getProductStartDate())
                         .purchaseGroup(bom.getPurchaseGroup())
                         .storagePoint(bom.getStoragePoint())
                         .status("0")
@@ -934,12 +1021,12 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     /**
      * Description:  删除重复数据
      * Param: [list]
-     * return: java.util.List<com.cloud.order.domain.entity.vo.OmsProductionOrderVo>
+     * return: java.util.List<com.cloud.order.domain.entity.vo.OmsProductionOrderExportVo>
      * Author: ltq
      * Date: 2020/6/23
      */
-    private List<OmsProductionOrderVo> deleteOldProductOrder(List<OmsProductionOrderVo> list) {
-        List<OmsProductionOrderVo> checkOrderStatus = new ArrayList<>();
+    private List<OmsProductionOrderExportVo> deleteOldProductOrder(List<OmsProductionOrderExportVo> list) {
+        List<OmsProductionOrderExportVo> checkOrderStatus = new ArrayList<>();
         list.forEach(o -> {
             OmsProductionOrder omsProductionOrder = omsProductionOrderMapper.selectOne(OmsProductionOrder.builder()
                     .productFactoryCode(o.getProductFactoryCode())
@@ -953,9 +1040,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     omsProductionOrderMapper.deleteByPrimaryKey(omsProductionOrder.getId());
                     omsProductionOrderDetailService.delectByProductOrderCode(omsProductionOrder.getOrderCode());
                 } else {
-                    OmsProductionOrderVo omsProductionOrderVo = new OmsProductionOrderVo();
-                    BeanUtils.copyProperties(omsProductionOrder, omsProductionOrderVo);
-                    checkOrderStatus.add(omsProductionOrderVo);
+                    OmsProductionOrderExportVo omsProductionOrderExportVo = new OmsProductionOrderExportVo();
+                    BeanUtils.copyProperties(omsProductionOrder, omsProductionOrderExportVo);
+                    checkOrderStatus.add(omsProductionOrderExportVo);
                 }
             }
         });
