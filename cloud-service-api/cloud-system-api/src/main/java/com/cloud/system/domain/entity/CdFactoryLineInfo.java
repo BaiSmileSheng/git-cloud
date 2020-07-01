@@ -125,11 +125,4 @@ public class CdFactoryLineInfo extends BaseEntity {
      */
     private String delFlag;
 
-    /**
-     * 备注
-     */
-    @ExcelProperty(value = "备注")
-    @ApiModelProperty(value = "备注")
-    private String remarks;
-
 }

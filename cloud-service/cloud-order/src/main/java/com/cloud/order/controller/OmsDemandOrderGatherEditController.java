@@ -48,8 +48,9 @@ public class OmsDemandOrderGatherEditController extends BaseController {
      */
     @GetMapping("get")
     @ApiOperation(value = "根据id查询滚动计划需求操作 ", response = OmsDemandOrderGatherEdit.class)
-    public OmsDemandOrderGatherEdit get(Long id) {
-        return omsDemandOrderGatherEditService.selectByPrimaryKey(id);
+    public R get(Long id) {
+        OmsDemandOrderGatherEdit omsDemandOrderGatherEdit = omsDemandOrderGatherEditService.selectByPrimaryKey(id);
+        return R.data(omsDemandOrderGatherEdit);
 
     }
 
@@ -147,6 +148,15 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     @HasPermissions("order:demandOrderGatherEdit:editSave")
     public R editSave(@RequestBody OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
         return omsDemandOrderGatherEditService.updateWithLimit(omsDemandOrderGatherEdit);
+    }
+
+    /**
+     * 修改(无业务处理)
+     */
+    @PostMapping("updateGatherEdit")
+    @OperLog(title = "修改(无业务处理) ", businessType = BusinessType.UPDATE)
+    public R updateGatherEdit(@RequestBody OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
+        return toAjax(omsDemandOrderGatherEditService.updateByPrimaryKeySelective(omsDemandOrderGatherEdit));
     }
 
     /**

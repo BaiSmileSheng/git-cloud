@@ -16,9 +16,9 @@ import java.util.List;
 public interface IActOmsOrderMaterialOutService {
 
     /**
-     * 根据业务key获取真单审核信息
+     * 根据业务key获取下市审核信息
      * @param businessKey biz_business的主键
-     * @return 查询结果包含 真单审核信息
+     * @return 查询结果包含 下市审核信息
      */
     R getBizInfoByTableId(String businessKey);
 

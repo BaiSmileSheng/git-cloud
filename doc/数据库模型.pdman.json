@@ -7504,23 +7504,7 @@
               "fields": [
                 "line_no",
                 "supplier_code",
-                "supplier_name",
-                "order_status",
-                "outsource_way"
-              ]
-            },
-            {
-              "name": "sms_settle_info_pk",
-              "isUnique": true,
-              "fields": [
-                "id"
-              ]
-            },
-            {
-              "name": "sms_settle_info_n1",
-              "isUnique": false,
-              "fields": [
-                "supplier_code"
+                "supplier_name"
               ]
             },
             {
@@ -7528,13 +7512,6 @@
               "isUnique": false,
               "fields": [
                 "product_order_code"
-              ]
-            },
-            {
-              "name": "sms_settle_info_n3",
-              "isUnique": false,
-              "fields": [
-                "order_status"
               ]
             },
             {
@@ -7563,13 +7540,6 @@
               "isUnique": false,
               "fields": [
                 "actual_end_date"
-              ]
-            },
-            {
-              "name": "sms_settle_info_n8",
-              "isUnique": false,
-              "fields": [
-                "supplier_name"
               ]
             },
             {
@@ -7861,23 +7831,14 @@
           ],
           "indexs": [
             {
-              "name": "sms_supplementary_order_pk",
-              "isUnique": true,
-              "fields": [
-                "id"
-              ]
-            },
-            {
               "name": "idx_join_index",
               "isUnique": false,
               "fields": [
-                "stuff_no",
                 "supplier_code",
+                "raw_material_code",
+                "factory_code",
                 "supplier_name",
-                "stuff_status",
-                "submit_date",
-                "sap_date",
-                "posting_no"
+                "raw_material_name"
               ]
             },
             {
@@ -7888,38 +7849,9 @@
               ]
             },
             {
-              "name": "sms_supplementary_order_n2",
-              "isUnique": false,
-              "fields": [
-                "supplier_code"
-              ]
-            },
-            {
-              "name": "sms_supplementary_order_n3",
-              "isUnique": false,
-              "fields": [
-                "supplier_name"
-              ]
-            },
-            {
-              "name": "sms_supplementary_order_n4",
-              "isUnique": false,
-              "fields": [
-                "raw_material_code"
-              ]
-            },
-            {
-              "name": "sms_supplementary_order_n5",
-              "isUnique": false,
-              "fields": [
-                "raw_material_name"
-              ]
-            },
-            {
               "name": "sms_supplementary_order_n6",
               "isUnique": false,
               "fields": [
-                "stuff_status",
                 "product_order_code"
               ]
             },
@@ -8201,19 +8133,11 @@
               "isUnique": false,
               "fields": [
                 "supplier_code",
+                "factory_code",
+                "product_material_code",
                 "supplier_name",
-                "scrap_status",
-                "posting_no",
-                "settle_no",
-                "submit_date",
-                "update_time"
-              ]
-            },
-            {
-              "name": "sms_scrap_order_pk",
-              "isUnique": true,
-              "fields": [
-                "id"
+                "product_material_name",
+                "settle_no"
               ]
             },
             {
@@ -8228,55 +8152,6 @@
               "isUnique": false,
               "fields": [
                 "product_order_code"
-              ]
-            },
-            {
-              "name": "sms_scrap_order_n3",
-              "isUnique": false,
-              "fields": [
-                "supplier_code"
-              ]
-            },
-            {
-              "name": "sms_scrap_order_n4",
-              "isUnique": false,
-              "fields": [
-                "supplier_name"
-              ]
-            },
-            {
-              "name": "sms_scrap_order_n5",
-              "isUnique": false,
-              "fields": [
-                "scrap_status"
-              ]
-            },
-            {
-              "name": "sms_scrap_order_n6",
-              "isUnique": false,
-              "fields": [
-                "posting_no"
-              ]
-            },
-            {
-              "name": "sms_scrap_order_n7",
-              "isUnique": false,
-              "fields": [
-                "product_material_code"
-              ]
-            },
-            {
-              "name": "sms_scrap_order_n8",
-              "isUnique": false,
-              "fields": [
-                "product_material_name"
-              ]
-            },
-            {
-              "name": "sms_scrap_order_n9",
-              "isUnique": false,
-              "fields": [
-                "settle_no"
               ]
             }
           ],
@@ -8552,27 +8427,10 @@
               "name": "idx_join_index",
               "isUnique": false,
               "fields": [
-                "quality_no",
                 "supplier_code",
                 "supplier_name",
                 "factory_code",
-                "quality_status",
-                "project_name",
-                "submit_date",
-                "complaint date",
-                "supplier_confirm_date",
-                "settle_no",
-                "create_by",
-                "update_by",
-                "create_time",
-                "update_time"
-              ]
-            },
-            {
-              "name": "sms_quality_order_pk",
-              "isUnique": true,
-              "fields": [
-                "id"
+                "create_time"
               ]
             },
             {
@@ -8583,59 +8441,10 @@
               ]
             },
             {
-              "name": "sms_quality_order_n2",
-              "isUnique": false,
-              "fields": [
-                "supplier_code"
-              ]
-            },
-            {
-              "name": "sms_quality_order_n3",
-              "isUnique": false,
-              "fields": [
-                "supplier_name"
-              ]
-            },
-            {
-              "name": "sms_quality_order_n4",
-              "isUnique": false,
-              "fields": [
-                "product_material_code"
-              ]
-            },
-            {
-              "name": "sms_quality_order_n5",
-              "isUnique": false,
-              "fields": [
-                "product_material_name"
-              ]
-            },
-            {
-              "name": "sms_quality_order_n6",
-              "isUnique": false,
-              "fields": [
-                "quality_status"
-              ]
-            },
-            {
               "name": "sms_quality_order_n7",
               "isUnique": false,
               "fields": [
                 "settle_no"
-              ]
-            },
-            {
-              "name": "sms_quality_order_n8",
-              "isUnique": false,
-              "fields": [
-                "create_time"
-              ]
-            },
-            {
-              "name": "sms_quality_order_n9",
-              "isUnique": false,
-              "fields": [
-                "submit_date"
               ]
             }
           ],
@@ -8885,52 +8694,19 @@
               "name": "idx_join_index",
               "isUnique": false,
               "fields": [
-                "delays_no",
+                "product_line_code",
                 "supplier_code",
+                "product_material_code",
+                "factory_code",
                 "supplier_name",
-                "delays_status",
-                "delivery_date",
-                "act_delivery_date",
-                "submit_date",
-                "supplier_confirm_date",
-                "settle_no",
-                "create_time",
-                "id"
-              ]
-            },
-            {
-              "name": "sms_delays_delivery",
-              "isUnique": true,
-              "fields": [
-                "id"
+                "product_material_name"
               ]
             },
             {
               "name": "sms_delays_delivery_n1",
               "isUnique": false,
               "fields": [
-                "product_line_code"
-              ]
-            },
-            {
-              "name": "sms_delays_delivery_n2",
-              "isUnique": false,
-              "fields": [
                 "delays_no"
-              ]
-            },
-            {
-              "name": "sms_delays_delivery_n3",
-              "isUnique": false,
-              "fields": [
-                "product_material_code"
-              ]
-            },
-            {
-              "name": "sms_delays_delivery_n4",
-              "isUnique": false,
-              "fields": [
-                "product_material_name"
               ]
             },
             {
@@ -8941,45 +8717,10 @@
               ]
             },
             {
-              "name": "sms_delays_delivery_n6",
-              "isUnique": false,
-              "fields": [
-                "supplier_code"
-              ]
-            },
-            {
-              "name": "sms_delays_delivery_n7",
-              "isUnique": false,
-              "fields": [
-                "supplier_name"
-              ]
-            },
-            {
-              "name": "sms_delays_delivery_n8",
-              "isUnique": false,
-              "fields": [
-                "delays_status"
-              ]
-            },
-            {
               "name": "sms_delays_delivery_n9",
               "isUnique": false,
               "fields": [
                 "settle_no"
-              ]
-            },
-            {
-              "name": "sms_delays_delivery_n10",
-              "isUnique": false,
-              "fields": [
-                "act_delivery_date"
-              ]
-            },
-            {
-              "name": "sms_delays_delivery_n11",
-              "isUnique": false,
-              "fields": [
-                "delivery_date"
               ]
             },
             {
@@ -9211,13 +8952,6 @@
             }
           ],
           "indexs": [
-            {
-              "name": "sms_claim_other_PK",
-              "isUnique": true,
-              "fields": [
-                "id"
-              ]
-            },
             {
               "name": "sms_claim_other_n1",
               "isUnique": false,
@@ -9482,13 +9216,6 @@
           ],
           "indexs": [
             {
-              "name": "sms_mouth_settle_pk",
-              "isUnique": true,
-              "fields": [
-                "id"
-              ]
-            },
-            {
               "name": "sms_mouth_settle_n1",
               "isUnique": false,
               "fields": [
@@ -9514,13 +9241,6 @@
               "isUnique": false,
               "fields": [
                 "supplier_name"
-              ]
-            },
-            {
-              "name": "sms_mouth_settle_n5",
-              "isUnique": false,
-              "fields": [
-                "settle_status"
               ]
             }
           ],
@@ -9673,22 +9393,10 @@
           ],
           "indexs": [
             {
-              "name": "sms_invoice_info_pk",
-              "isUnique": true,
-              "fields": [
-                "id"
-              ]
-            },
-            {
               "name": "idx_join_index",
               "isUnique": false,
               "fields": [
-                "mouth_settle_id",
-                "invoice_no",
-                "create_by",
-                "create_time",
-                "update_time",
-                "update_by"
+                "invoice_no"
               ]
             },
             {
@@ -9845,24 +9553,10 @@
           ],
           "indexs": [
             {
-              "name": "sms_claim_cash_detail_pk",
-              "isUnique": true,
-              "fields": [
-                "id"
-              ]
-            },
-            {
               "name": "sms_claim_cash_detail_n1",
               "isUnique": false,
               "fields": [
                 "claim_no"
-              ]
-            },
-            {
-              "name": "sms_claim_cash_detail_n2",
-              "isUnique": false,
-              "fields": [
-                "claim_type"
               ]
             },
             {
@@ -10482,6 +10176,12 @@
               "remark": "",
               "chnname": "寄售不足",
               "notNull": true
+            },
+            {
+              "name": "sum_num",
+              "type": "Money",
+              "remark": "库存总量(在产+在途+在库-寄售不足)",
+              "chnname": "库存总量"
             },
             {
               "name": "rejects_num",

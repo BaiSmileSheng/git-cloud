@@ -103,6 +103,8 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
      */
     private static final int OMS_REAL_ORDER_SEQ_LENGTH = 4;
 
+    private static String TABLE_NAME = "oms_real_order";
+
     /**
      * 修改保存真单
      * @param omsRealOrder 真单对象
@@ -138,7 +140,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
 
     @GlobalTransactional
     @Override
-    public R importRealOrderFile(MultipartFile file, String orderFrom,SysUser sysUser,long loginId) throws IOException {
+    public R importRealOrderFile(MultipartFile file, String orderFrom,SysUser sysUser) throws IOException {
         EasyWithErrorExcelListener easyExcelListener = new EasyWithErrorExcelListener(omsRealOrderExcelImportService, OmsRealOrderExcelImportVo.class);
         EasyExcel.read(file.getInputStream(),OmsRealOrderExcelImportVo.class,easyExcelListener).sheet().doRead();
         //需要审核的结果
@@ -157,7 +159,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 OmsRealOrder omsRealOrder = BeanUtil.copyProperties(excelImportSucObjectDto.getObject(), OmsRealOrder.class);
                 return omsRealOrder;
             }).collect(Collectors.toList());
-            R result = importOmsRealOrder(successResult,auditResult,sysUser,orderFrom,loginId);
+            R result = importOmsRealOrder(successResult,auditResult,sysUser,orderFrom);
             if(!result.isSuccess()){
                 logger.error("导入时插入数据异常 res:{}", JSONObject.toJSONString(result));
                 return result;
@@ -187,7 +189,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
      * @return
      */
     @Override
-    public R importOmsRealOrder(List<OmsRealOrder> successResult, List<OmsRealOrder> auditResult, SysUser sysUser,String orderFrom,long loginId) {
+    public R importOmsRealOrder(List<OmsRealOrder> successResult, List<OmsRealOrder> auditResult, SysUser sysUser,String orderFrom) {
         if(CollectionUtils.isEmpty(successResult)){
             return R.error("无需要插入的数据");
         }
@@ -223,10 +225,11 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             auditResultMap.keySet().forEach(code -> {
                 OmsRealOrder omsRealOrder = successResultMap.get(code);
                 OmsOrderMaterialOutVo omsOrderMaterialOutVo = new OmsOrderMaterialOutVo();
-                omsOrderMaterialOutVo.setLoginId(loginId);
+                omsOrderMaterialOutVo.setLoginId(sysUser.getUserId());
                 omsOrderMaterialOutVo.setCreateBy(sysUser.getLoginName());
                 omsOrderMaterialOutVo.setOrderCode(omsRealOrder.getOrderCode());
                 omsOrderMaterialOutVo.setId(omsRealOrder.getId());
+                omsOrderMaterialOutVo.setTableName(TABLE_NAME);
                 omsOrderMaterialOutVoList.add(omsOrderMaterialOutVo);
             });
             auditResultReq.setOmsOrderMaterialOutVoList(omsOrderMaterialOutVoList);
