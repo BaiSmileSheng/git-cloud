@@ -263,7 +263,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         //循环物耗，更新成本价格，计算索赔金额
         if (smsSupplementaryOrderList != null) {
             for (SmsSupplementaryOrder smsSupplementaryOrder : smsSupplementaryOrderList) {
-                CdMaterialPriceInfo cdMaterialPriceInfo = mapMaterialPrice.get(smsSupplementaryOrder.getRawMaterialCode()+smsSupplementaryOrder.getPurchaseGroupCode());
+                CdMaterialPriceInfo cdMaterialPriceInfo = mapMaterialPrice.get(smsSupplementaryOrder.getRawMaterialCode()+smsSupplementaryOrder.getPurchaseGroupCode()+smsSupplementaryOrder.getSupplierCode());
                 if (cdMaterialPriceInfo == null) {
                     //如果没有找到SAP价格，则更新备注
                     log.info(StrUtil.format("(月度结算定时任务)SAP价格未同步的物料号:{}", smsSupplementaryOrder.getRawMaterialCode()));
