@@ -61,26 +61,38 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
             ObjectMapper objectMapper = new ObjectMapper();
             list = objectMapper.convertValue(r.get("list"), new TypeReference<List<RowRisk>>() {});
             if (ObjectUtil.isNotEmpty(list) && list.size() > 0) {
-                List<CdMaterialInfo> cdMaterialInfos = list.stream().map(rowRisk -> {
+                //更新
+                List<CdMaterialInfo> cdMaterialInfosUpdate = new ArrayList<>();
+                //新增
+                List<CdMaterialInfo> cdMaterialInfosInsert = new ArrayList<>();
+                list.forEach(rowRisk -> {
                     CdMaterialInfo cdMaterialInfo = new CdMaterialInfo();
                     cdMaterialInfo.setMaterialCode(rowRisk.getMATERIAL_CODE());
+                    cdMaterialInfo.setPlantCode(rowRisk.getPLANT_CODE());
+                    CdMaterialInfo materialInfo = cdMaterialInfoMapper.selectOne(cdMaterialInfo);
                     cdMaterialInfo.setMaterialDesc(rowRisk.getMATERIAL_DESCRITION());
                     cdMaterialInfo.setMaterialType(rowRisk.getMATERIAL_TYPE());
                     cdMaterialInfo.setPrimaryUom(rowRisk.getPRIMARY_UOM());
                     cdMaterialInfo.setMtlGroupCode(rowRisk.getMTL_GROUP_CODE());
-                    cdMaterialInfo.setPlantCode(rowRisk.getPLANT_CODE());
                     cdMaterialInfo.setPurchaseGroupCode(rowRisk.getPURCHASE_GROUP_CODE());
                     cdMaterialInfo.setRoundingQuantit(new BigDecimal(StringUtils.isNotBlank(rowRisk.getROUNDING_QUANTITY().trim()) ? rowRisk.getROUNDING_QUANTITY().trim() : "0"));
                     cdMaterialInfo.setLastUpdate(DateUtil.parse(rowRisk.getLAST_UPD(), "yyyy-MM-dd HH:mm:ss"));
-                    cdMaterialInfo.setCreateTime(new Date());
-                    cdMaterialInfo.setCreateBy("systemJob");
                     cdMaterialInfo.setDelFlag("0");
-                    return cdMaterialInfo;
-                }).collect(Collectors.toList());
-                //根据生产工厂、物料号批量删除
-                cdMaterialInfoMapper.deleteBatchByFactoryAndMaterial(cdMaterialInfos);
+                    if (ObjectUtil.isNotEmpty(materialInfo)) {
+                        cdMaterialInfo.setId(materialInfo.getId());
+                        cdMaterialInfo.setUpdateBy("systemJob");
+                        cdMaterialInfosUpdate.add(cdMaterialInfo);
+                    } else {
+                        cdMaterialInfo.setCreateTime(new Date());
+                        cdMaterialInfo.setCreateBy("systemJob");
+                        cdMaterialInfosInsert.add(cdMaterialInfo);
+                    }
+
+                });
+                //批量更新
+                cdMaterialInfoMapper.updateBatchByPrimaryKeySelective(cdMaterialInfosUpdate);
                 //批量新增
-                cdMaterialInfoMapper.insertList(cdMaterialInfos);
+                cdMaterialInfoMapper.insertList(cdMaterialInfosInsert);
             } else {
                 log.error("接口获取物料主数据为空！");
                 return R.error("接口获取物料主数据为空！");

@@ -201,7 +201,6 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                         CdFactoryLineInfo cdFactoryLineInfo = new CdFactoryLineInfo();
                         cdFactoryLineInfo.setProductFactoryCode(outTableOutput.getString("WERKS"));
                         cdFactoryLineInfo.setProduceLineCode(outTableOutput.getString("CY_SEQNR"));
-                        cdFactoryLineInfo.setSupplierCode(outTableOutput.getString("VENDOR"));
                         cdFactoryLineInfo.setBranchOffice(outTableOutput.getString("BOSS"));
                         cdFactoryLineInfo.setMonitor(outTableOutput.getString("BANZ"));
                         cdFactoryLineInfo.setAttribute(outTableOutput.getString("SHUX"));
