@@ -43,7 +43,9 @@ public class DataScopeUtil {
             RemoteUserScopeService remoteUserScopeService = ApplicationContextUtil.getBean(RemoteUserScopeService.class);
             //采购组权限
             String purchaseScopes = remoteUserScopeService.selectDataScopeIdByUserIdAndType(userId, UserConstants.USER_SCOPE_TYPE_PURCHASE);
-            redis.set(ACCESS_USERID_SCOPE_PURCHASE + userId, purchaseScopes, EXPIRE);
+            if (StrUtil.isNotBlank(purchaseScopes)) {
+                redis.set(ACCESS_USERID_SCOPE_PURCHASE + userId, purchaseScopes, EXPIRE);
+            }
             return purchaseScopes;
         }
         return scocpes;
@@ -61,7 +63,9 @@ public class DataScopeUtil {
             //如果redis没有值则从数据库中查询
             RemoteUserScopeService remoteUserScopeService = ApplicationContextUtil.getBean(RemoteUserScopeService.class);
             String factoryScopes = remoteUserScopeService.selectDataScopeIdByUserIdAndType(userId, UserConstants.USER_SCOPE_TYPE_FACTORY);
-            redis.set(ACCESS_USERID_SCOPE_FACTORY + userId, factoryScopes, EXPIRE);
+            if (StrUtil.isNotBlank(factoryScopes)) {
+                redis.set(ACCESS_USERID_SCOPE_FACTORY + userId, factoryScopes, EXPIRE);
+            }
             return factoryScopes;
         }
         return scocpes;
