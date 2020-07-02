@@ -11921,8 +11921,8 @@
               "type": "DefaultString",
               "remark": "",
               "chnname": "供应商编码",
-              "notNull": true,
-              "defaultValue": ""
+              "notNull": false,
+              "defaultValue": "\""
             },
             {
               "name": "supplier_desc",
