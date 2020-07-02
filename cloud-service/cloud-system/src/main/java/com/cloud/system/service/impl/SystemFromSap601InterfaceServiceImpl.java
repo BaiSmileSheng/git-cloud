@@ -126,7 +126,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             //物料
             for (String materialCode : materials) {
                 inputTableMatnr.appendRow();
-                inputTableMatnr.setValue("MATNR", materialCode);
+                inputTableMatnr.setValue("MATNR", materialCode.toUpperCase());
             }
             //执行函数
             JCoContext.begin(destination);
@@ -259,7 +259,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             if (!CollectionUtils.isEmpty(materials)) {
                 for (String materialCode : materials) {
                     inputTableMatnr.appendRow();
-                    inputTableMatnr.setValue("MATNR", materialCode);
+                    inputTableMatnr.setValue("MATNR", materialCode.toUpperCase());
                 }
             }
             //执行函数
@@ -344,7 +344,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                 //物料
                 for (String materialCode : materials) {
                     inputTableMatnr.appendRow();
-                    inputTableMatnr.setValue("MATNR", materialCode);
+                    inputTableMatnr.setValue("MATNR", materialCode.toUpperCase());
                 }
             }
             //执行函数
