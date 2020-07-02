@@ -439,11 +439,11 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
 //        }
         R rBom = remoteBomService.listByProductAndMaterial(productMaterialCode, rawMaterialCode);
         if (!rBom.isSuccess()) {
-            return R.error("BOM信息为空！");
+            return R.error("申请物料不在使用范围内！");
         }
         CdBomInfo cdBom = rBom.getData(CdBomInfo.class);
         if (cdBom.getBomNum() == null) {
-            return R.error("BOM单耗信息为空！");
+            return R.error("申请物料的单耗信息为空！");
         }
         //5、校验申请量是否大于订单量*单耗,如果大于单耗，则判断超出部分是否大于最小包装量，大于则返回错误
         BigDecimal productNum = omsProductionOrder.getProductNum();

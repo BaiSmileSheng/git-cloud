@@ -133,10 +133,12 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             return rFactoryLineInfo;
         }
         CdFactoryLineInfo factoryLineInfo = rFactoryLineInfo.getData(CdFactoryLineInfo.class);
-         if (factoryLineInfo != null) {
-            smsScrapOrder.setSupplierCode(factoryLineInfo.getSupplierCode());
-            smsScrapOrder.setSupplierName(factoryLineInfo.getSupplierDesc());
+         if (factoryLineInfo == null) {
+             return R.error(StrUtil.format("工厂：{}，线体{}，缺少供应商信息",omsProductionOrder.getProductFactoryCode(),
+                     omsProductionOrder.getProductLineCode()));
         }
+        smsScrapOrder.setSupplierCode(factoryLineInfo.getSupplierCode());
+        smsScrapOrder.setSupplierName(factoryLineInfo.getSupplierDesc());
         smsScrapOrder.setFactoryCode(omsProductionOrder.getProductFactoryCode());
         R rFactory = remoteFactoryInfoService.selectOneByFactory(omsProductionOrder.getProductFactoryCode());
         if(!rFactory.isSuccess()){
