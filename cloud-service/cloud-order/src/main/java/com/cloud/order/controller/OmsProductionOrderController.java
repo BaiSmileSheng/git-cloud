@@ -17,7 +17,6 @@ import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderExportVo;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderImportVo;
-import com.cloud.order.domain.entity.vo.OmsProductionOrderVo;
 import com.cloud.order.enums.OutSourceTypeEnum;
 import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.service.IOmsProductionOrderService;
