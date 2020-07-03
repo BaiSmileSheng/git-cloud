@@ -525,10 +525,10 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
         int deleteFlag = 0;//删除标记
         int startInt = 0;
         int start = 1;//序列号起始值为1
-        int startNum = startInt * SAP_RAW_MATERIAL_SIZE + start;
-        int endNum = (startInt + 1) * SAP_RAW_MATERIAL_SIZE + start;
         Boolean querySapFlag = Boolean.TRUE;
         while (querySapFlag){
+            int startNum = startInt * SAP_RAW_MATERIAL_SIZE + start;
+            int endNum = (startInt + 1) * SAP_RAW_MATERIAL_SIZE;
             R result = queryRawMaterialStockFromSap601(null, null,startNum,endNum);
             startInt ++;
             if (!result.isSuccess()) {
