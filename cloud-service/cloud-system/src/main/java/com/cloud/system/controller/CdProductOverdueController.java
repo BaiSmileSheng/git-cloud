@@ -90,7 +90,7 @@ public class CdProductOverdueController extends BaseController {
      * 导入模板下载
      * @return
      */
-    @PostMapping("exportTemplate")
+    @GetMapping("exportTemplate")
     @HasPermissions("system:productOverdue:exportTemplate")
     @ApiOperation(value = "导入模板下载", response = CdProductOverdue.class)
     public R exportTemplate(){
@@ -98,7 +98,7 @@ public class CdProductOverdueController extends BaseController {
         return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new CdProductOverdue());
     }
 
-    @PostMapping("export")
+    @GetMapping("export")
     @HasPermissions("system:productOverdue:export")
     @ApiOperation(value = "超期库存 导出", response = CdProductOverdue.class)
     @ApiImplicitParams({

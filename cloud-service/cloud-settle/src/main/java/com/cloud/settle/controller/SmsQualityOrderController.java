@@ -102,7 +102,7 @@ public class SmsQualityOrderController extends BaseController {
      * @return TableDataInfo 质量索赔分页信息
      */
     @HasPermissions("settle:qualityOrder:export")
-    @PostMapping("export")
+    @GetMapping("export")
     @ApiOperation(value = "导出查询质量索赔列表", response = SmsQualityOrder.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "qualityNo", value = "索赔单号", required = false, paramType = "query", dataType = "String"),
@@ -171,7 +171,7 @@ public class SmsQualityOrderController extends BaseController {
     @HasPermissions("settle:qualityOrder:save")
     @PostMapping("save")
     @ApiOperation(value = "新增保存质量索赔(包含文件)", response = R.class)
-    public R addSave(@RequestParam("smsQualityOrderReq") String smsQualityOrderReq, @RequestParam("ossIds") String ossIds) {
+    public R addSave(@RequestParam("smsQualityOrderReq") String smsQualityOrderReq, @RequestParam(value = "ossIds",required = false) String ossIds) {
         SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq, SmsQualityOrder.class);
         //校验入参
         ValidatorUtils.validateEntity(smsQualityOrder);
