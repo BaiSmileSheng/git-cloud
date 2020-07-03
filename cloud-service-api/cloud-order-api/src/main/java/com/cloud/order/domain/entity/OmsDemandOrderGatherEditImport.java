@@ -3,6 +3,7 @@ package com.cloud.order.domain.entity;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
+import com.cloud.order.converter.OrderFromConverter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -39,7 +40,7 @@ public class OmsDemandOrderGatherEditImport{
     /**
      * 订单来源 1：内单，2：外单
      */
-    @ExcelProperty(value = "订单来源")
+    @ExcelProperty(value = "订单来源",converter = OrderFromConverter.class)
     @NotBlank
     private String orderFrom;
 
@@ -86,13 +87,6 @@ public class OmsDemandOrderGatherEditImport{
     @ExcelProperty(value = "版本")
     @NotBlank
     private String bomVersion;
-
-    /**
-     * 采购组
-     */
-    @ExcelProperty(value = "采购组")
-    @NotBlank
-    private String purchaseGroupCode;
 
     /**
      * 地点
