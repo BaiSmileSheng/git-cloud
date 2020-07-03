@@ -35,7 +35,7 @@ public interface SystemFromSap601InterfaceService {
      * @Author: ltq
      * @Date: 2020/6/5
      */
-    R queryRawMaterialStockFromSap601(List<String> factorys, List<String> materials);
+    R queryRawMaterialStockFromSap601(List<String> factorys, List<String> materials,Integer startNum,Integer endNum);
     /**
      * @Description: 获取BOM清单数据
      * @Param: [factorys, materials]

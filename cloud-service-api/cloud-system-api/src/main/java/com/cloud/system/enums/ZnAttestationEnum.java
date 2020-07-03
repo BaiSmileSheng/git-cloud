@@ -1,25 +1,21 @@
 package com.cloud.system.enums;
 
 /**
- * 生命周期枚举
- * @Author cs
- * @Date 2020-06-16
+ * 是否ZN认证
+ * @Author lihongxia
+ * @Date 2020-07-02
  */
-public enum LifeCycleEnum {
-//1、量产2、备件3、下市4、新品5、售后6、老品
-    SMZQ_LC("1","量产"),
-    SMZQ_BJ("2","备件"),
-    SMZQ_XS("3","下市"),
-    SMZQ_XP("4","新品"),
-    SMZQ_SH("5","售后"),
-    SMZQ_LP("6","老品");
+public enum ZnAttestationEnum {
+    //0：否，1：是
+    IS_ZN_ATTESTATION_0("0","否"),
+    IS_ZN_ATTESTATION_1("1","是"),
 
-
+    ;
 
     private String code;
     private String msg;
 
-    LifeCycleEnum(String code, String msg) {
+    ZnAttestationEnum(String code, String msg) {
         this.code = code;
         this.msg = msg;
     }
@@ -33,7 +29,7 @@ public enum LifeCycleEnum {
     }
 
     public static String getMsgByCode(String code) {
-        for (LifeCycleEnum enums : LifeCycleEnum.values()) {
+        for (ZnAttestationEnum enums : ZnAttestationEnum.values()) {
             if (enums.getCode().equals(code)) {
                 return enums.getMsg();
             }
@@ -41,7 +37,7 @@ public enum LifeCycleEnum {
         return "";
     }
     public static String getCodeByMsg(String msg) {
-        for (LifeCycleEnum bt : values()) {
+        for (ZnAttestationEnum bt : values()) {
             if (bt.msg .equals(msg) ) {
                 return bt.getCode();
             }

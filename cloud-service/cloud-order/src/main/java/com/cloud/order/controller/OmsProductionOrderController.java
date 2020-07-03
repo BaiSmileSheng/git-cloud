@@ -17,6 +17,7 @@ import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderExportVo;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderImportVo;
+import com.cloud.order.enums.OutSourceTypeEnum;
 import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.service.IOmsProductionOrderService;
 import com.cloud.order.util.DataScopeUtil;
@@ -31,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -155,6 +157,10 @@ public class OmsProductionOrderController extends BaseController {
             criteria.andLessThan("actualEndDate", actualEndDateEnd);
         }
         criteria.andEqualTo("status",ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
+        List<String> outsourceTypeList = new ArrayList<>();
+        outsourceTypeList.add(OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode());
+        outsourceTypeList.add(OutSourceTypeEnum.OUT_SOURCE_TYPE_QWW.getCode());
+        criteria.andIn("outsourceType",outsourceTypeList);
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderService.selectByExample(example);
         return R.data(omsProductionOrderList);
     }
@@ -207,7 +213,7 @@ public class OmsProductionOrderController extends BaseController {
         CdFactoryLineInfo factoryLineInfo = rFactory.getData(CdFactoryLineInfo.class);
         Dict dict = new Dict().set("productionOrder", productionOrder)
                 .set("supplierCode",factoryLineInfo.getSupplierCode())
-                .set("supplierDesc",factoryLineInfo.getSupplierDesc());
+                .set("supplierName",factoryLineInfo.getSupplierDesc());
         return R.data(dict);
     }
 
@@ -428,11 +434,47 @@ public class OmsProductionOrderController extends BaseController {
     /**
      * 下达SAP
      */
+    @HasPermissions("order:productionOrder:giveSAP")
     @PostMapping("giveSAP")
     @OperLog(title = "下达SAP ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "下达SAP ", response = R.class)
-    public R giveSAP(List<OmsProductionOrder> list){
-        R result = omsProductionOrderService.giveSAP(list);
+    public R giveSAP(@RequestParam(value = "ids",required = false) String ids){
+        R result = omsProductionOrderService.giveSAP(ids);
+        return result;
+    }
+
+    /**
+     * 定时任务SAP获取订单号
+     */
+    @PostMapping("timeSAPGetProductOrderCode")
+    @OperLog(title = "SAP获取订单号 ", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "定时任务SAP获取订单号 ", response = R.class)
+    public R timeSAPGetProductOrderCode(){
+        R result = omsProductionOrderService.timeSAPGetProductOrderCode();
+        return result;
+    }
+
+    /**
+     * 邮件推送
+     */
+    @HasPermissions("order:productionOrder:mailPush")
+    @PostMapping("mailPush")
+    @OperLog(title = "邮件推送 ", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "邮件推送 ", response = R.class)
+    public R mailPush(){
+        R result = omsProductionOrderService.mailPush();
+        return result;
+    }
+
+    /**
+     * 订单刷新
+     */
+    @HasPermissions("order:productionOrder:orderRefresh")
+    @PostMapping("orderRefresh")
+    @OperLog(title = "订单刷新", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "订单刷新 ", response = R.class)
+    public R orderRefresh(@RequestParam(value = "ids") String ids){
+        R result = omsProductionOrderService.orderRefresh(ids);
         return result;
     }
 }

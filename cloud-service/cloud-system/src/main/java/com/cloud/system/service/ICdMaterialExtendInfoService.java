@@ -4,11 +4,11 @@ import cn.hutool.core.lang.Dict;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.system.domain.entity.CdMaterialExtendInfo;
+import com.cloud.system.domain.entity.SysUser;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * 物料扩展信息 Service接口
@@ -55,5 +55,10 @@ public interface ICdMaterialExtendInfoService extends BaseService<CdMaterialExte
      * Date: 2020/6/23
      */
     R selectOneByMaterialCode(String materialCode);
+
+    /**
+     * 导入
+     */
+    R importMaterialExtendInfo(MultipartFile file, SysUser sysUser)throws IOException;
 
 }

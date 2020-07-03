@@ -81,7 +81,7 @@
         create_by,
         create_time,
         update_by,
-        update_time,CONCAT(material_code,purchasing_organization) as mapKey
+        update_time,CONCAT(material_code,purchasing_organization,member_code) as mapKey
         from cd_material_price_info
         where
         del_flag='0' and
@@ -98,4 +98,73 @@
         DELETE FROM cd_material_price_info;
     </delete>
 
+    <insert id="batchInsertOrUpdate">
+        insert into cd_material_price_info (
+        material_code,
+        material_desc,
+        process_price,
+        member_code,
+        member_name,
+        purchasing_group,
+        tax_code,
+        net_worth,
+        kbetr,
+        currency,
+        price_unit,
+        unit,
+        agency_fee,
+        begin_date,
+        end_date,
+        sap_created_date,
+        remark,
+        del_flag,
+        create_by,
+        update_by)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.materialCode},
+            #{item.materialDesc},
+            ifnull(#{item.processPrice}, null),
+            #{item.memberCode},
+            ifnull(#{item.memberName}, ''),
+            #{item.purchasingGroup},
+            ifnull(#{item.taxCode}, ''),
+            ifnull(#{item.netWorth}, null),
+            ifnull(#{item.kbetr}, ''),
+            ifnull(#{item.currency}, ''),
+            ifnull(#{item.priceUnit}, ''),
+            ifnull(#{item.unit}, ''),
+            ifnull(#{item.agencyFee}, null),
+            ifnull(#{item.beginDate}, null),
+            ifnull(#{item.endDate}, null),
+            ifnull(#{item.sapCreatedDate}, ''),
+            ifnull(#{item.remark}, ''),
+            ifnull(#{item.delFlag}, 0),
+            ifnull(#{item.createBy}, ''),
+            ifnull(#{item.updateBy}, '')
+            )
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        material_code = VALUES(material_code),
+        material_desc = VALUES(material_desc),
+        process_price = VALUES(process_price),
+        member_code = VALUES(member_code),
+        member_name = VALUES(member_name),
+        purchasing_group = VALUES(purchasing_group),
+        tax_code = VALUES(tax_code),
+        net_worth = VALUES(net_worth),
+        kbetr = VALUES(kbetr),
+        currency = VALUES(currency),
+        price_unit = VALUES(price_unit),
+        unit = VALUES(unit),
+        agency_fee = VALUES(agency_fee),
+        begin_date = VALUES(begin_date),
+        end_date = VALUES(end_date),
+        sap_created_date = VALUES(sap_created_date),
+        remark = VALUES(remark),
+        del_flag = VALUES(del_flag),
+        create_by = VALUES(create_by),
+        update_by = VALUES(update_by)
+    </insert>
 </mapper>

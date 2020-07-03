@@ -208,4 +208,26 @@
           </where>
       </foreach>
     </select>
+
+    <update id="batchUpdateByOrderCode" parameterType="list">
+        <foreach collection="list" separator=";" item="item">
+            update oms_production_order
+            <set>
+                <if test="status != null and status != ''">
+                    and status = #{item.status},
+                </if>
+                <if test="sapMessages != null and sapMessages != ''">
+                    and sap_messages= #{item.sapMessages},
+                </if>
+                <if test="productOrderCode != null and productOrderCode != ''">
+                    and product_order_code = #{item.productOrderCode},
+                </if>
+                <if test="newVersion != null and newVersion != ''">
+                    and new_version = #{item.newVersion},
+                </if>
+            </set>
+            where order_code=#{item.orderCode}
+        </foreach>
+    </update>
+
 </mapper>

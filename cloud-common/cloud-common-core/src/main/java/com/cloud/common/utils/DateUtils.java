@@ -318,4 +318,16 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         calendar.setTime(date);
         return calendar;
     }
+
+    /**
+     * 获取n个月后第一天时间
+     */
+    public static String getMonthFirstTime(int month) {
+        SimpleDateFormat format=new SimpleDateFormat(YYYY_MM_DD);
+        Calendar calendar=Calendar.getInstance();
+        calendar.add(Calendar.MONTH, month);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        String firstDay = format.format(calendar.getTime())+" 00:00:00";
+        return firstDay;
+    }
 }

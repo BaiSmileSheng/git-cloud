@@ -146,14 +146,25 @@ public class CdMaterialPriceInfoController extends BaseController {
     }
 
     /**
-     * 定时加工费/原材料价格同步
+     * 定时加工费价格同步
      * @return 成功或失败
      */
-    @PostMapping("synPrice")
-    @OperLog(title = "定时加工费/原材料价格同步 ", businessType = BusinessType.UPDATE)
-    @ApiOperation(value = "定时加工费/原材料价格同步 ", response = R.class)
-    public R synPrice(){
-        R result = cdMaterialPriceInfoService.synPrice();
+    @PostMapping("synPriceJGF")
+    @OperLog(title = "定时加工费价格同步", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "定时加工费价格同步", response = R.class)
+    public R synPriceJGF(){
+        R result = cdMaterialPriceInfoService.synPriceJGF();
+        return result;
+    }
+    /**
+     * 定时原材料价格同步
+     * @return 成功或失败
+     */
+    @PostMapping("synPriceYCL")
+    @OperLog(title = "定时原材料价格同步", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "定时原材料价格同步", response = R.class)
+    public R synPriceYCL(){
+        R result = cdMaterialPriceInfoService.synPriceYCL();
         return result;
     }
 }

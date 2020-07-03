@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -51,8 +52,10 @@ public class SapSystemInterfaceController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "factorys",value = "生产工厂编码",required = true),
             @ApiImplicitParam(name = "materials",value = "成品物料编码", required = true)})
-    public R queryBomInfo(@RequestBody List<String> factorys, List<String> materials) {
-        return systemFromSap601InterfaceService.queryBomInfoFromSap601(factorys,materials);
+    public R queryBomInfo(@RequestParam String factorys, @RequestParam("materials") String materials) {
+        List<String> factoryList = Arrays.asList(factorys.split(","));
+        List<String> materialList = Arrays.asList(materials.split(","));
+        return systemFromSap601InterfaceService.queryBomInfoFromSap601(factoryList,materialList);
     }
 
     /**
@@ -89,8 +92,13 @@ public class SapSystemInterfaceController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "factorys",value = "生产工厂编码",required = true),
             @ApiImplicitParam(name = "materials",value = "成品物料编码", required = true)})
-    public R queryRawMaterialStock(@RequestBody List<String> factorys, List<String> materials) {
-        return systemFromSap601InterfaceService.queryRawMaterialStockFromSap601(factorys,materials);
+    public R queryRawMaterialStock(@RequestParam(value = "factorys",required = false) String factorys,
+                                   @RequestParam(value = "materials",required = false) String materials,
+                                   @RequestParam(value = "startNum",required = false) Integer startNum,
+                                   @RequestParam(value = "endNum",required = false) Integer endNum) {
+        List<String> factoryList = Arrays.asList(factorys.split(","));
+        List<String> materialList = Arrays.asList(materials.split(","));
+        return systemFromSap601InterfaceService.queryRawMaterialStockFromSap601(factoryList,materialList,startNum,endNum);
     }
 
     /**
