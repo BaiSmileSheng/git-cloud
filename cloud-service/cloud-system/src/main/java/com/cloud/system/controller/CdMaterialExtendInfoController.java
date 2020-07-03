@@ -1,17 +1,23 @@
 package com.cloud.system.controller;
 
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
 import cn.hutool.core.lang.Dict;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.util.EasyExcelUtilOSS;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.pl.REGON;
+import org.springframework.web.multipart.MultipartFile;
+import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +35,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -65,16 +73,77 @@ public class CdMaterialExtendInfoController extends BaseController {
             @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "materialCode", value = "专用号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productType", value = "产品类别", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "lifeCycle", value = "生命周期", required = false, paramType = "query", dataType = "String")
     })
-    public TableDataInfo list(CdMaterialExtendInfo cdMaterialExtendInfo) {
+    public TableDataInfo list(@ApiIgnore CdMaterialExtendInfo cdMaterialExtendInfo) {
         Example example = new Example(CdMaterialExtendInfo.class);
         Example.Criteria criteria = example.createCriteria();
+        listCondition(cdMaterialExtendInfo,criteria);
         startPage();
         List<CdMaterialExtendInfo> cdMaterialExtendInfoList = cdMaterialExtendInfoService.selectByExample(example);
         return getDataTable(cdMaterialExtendInfoList);
     }
 
+    /**
+     * 组装条件
+     * @param cdMaterialExtendInfo
+     * @param criteria
+     */
+    private void listCondition(CdMaterialExtendInfo cdMaterialExtendInfo,Example.Criteria criteria){
+        if(StringUtils.isNotBlank(cdMaterialExtendInfo.getMaterialCode())){
+            criteria.andEqualTo("materialCode",cdMaterialExtendInfo.getMaterialCode());
+        }
+        if(StringUtils.isNotBlank(cdMaterialExtendInfo.getProductType())){
+            criteria.andEqualTo("productType",cdMaterialExtendInfo.getProductType());
+        }
+        if(StringUtils.isNotBlank(cdMaterialExtendInfo.getLifeCycle())){
+            criteria.andEqualTo("lifeCycle",cdMaterialExtendInfo.getLifeCycle());
+        }
+    }
+    /**
+     * 下载模板
+     */
+    @HasPermissions("sys:materialExtendInfo:downLoadTemplate")
+    @GetMapping("downLoadTemplate")
+    @ApiOperation(value = "下载模板")
+    public R downLoadTemplate(){
+        String fileName = "下载模板";
+        return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new CdMaterialExtendInfo());
+    }
+
+    /**
+     * 导出
+     */
+    @HasPermissions("sys:materialExtendInfo:export")
+    @GetMapping("export")
+    @ApiOperation(value = "导出")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "materialCode", value = "专用号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productType", value = "产品类别", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "lifeCycle", value = "生命周期", required = false, paramType = "query", dataType = "String")
+    })
+    public R export(@ApiIgnore CdMaterialExtendInfo cdMaterialExtendInfo){
+        Example example = new Example(CdMaterialExtendInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        listCondition(cdMaterialExtendInfo,criteria);
+        String fileName = "成品物料信息";
+        List<CdMaterialExtendInfo> cdMaterialExtendInfoList = cdMaterialExtendInfoService.selectByExample(example);
+        return EasyExcelUtilOSS.writeExcel(cdMaterialExtendInfoList,fileName,fileName,new CdMaterialExtendInfo());
+    }
+
+    /**
+     * 导入
+     */
+    @HasPermissions("sys:materialExtendInfo:importMaterialExtendInfo")
+    @GetMapping("importMaterialExtendInfo")
+    @ApiOperation(value = "导入")
+    public R importMaterialExtendInfo(@RequestPart("file") MultipartFile file)throws IOException {
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return cdMaterialExtendInfoService.importMaterialExtendInfo(file,sysUser);
+    }
 
     /**
      * 新增保存物料扩展信息

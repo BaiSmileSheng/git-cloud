@@ -25,6 +25,7 @@ import com.sap.conn.jco.JCoParameterList;
 import com.sap.conn.jco.JCoRepository;
 import com.sap.conn.jco.JCoTable;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -88,6 +89,8 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
     private String password;
 
     private static final double SMALL_SIZE = 100;//获取bom数据每次传输物料号最大数量
+
+    private static final int SAP_Raw_Material_SIZE = 10000;//获取原材料库存数据每次获取数量
 
     /**
      * @Description: 获取uph数据
@@ -227,12 +230,8 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
      * @Date: 2020/6/5
      */
     @Override
-    public R queryRawMaterialStockFromSap601(List<String> factorys, List<String> materials) {
+    public R queryRawMaterialStockFromSap601(List<String> factorys, List<String> materials,Integer startNum,Integer endNum) {
         JCoDestination destination = null;
-        if (factorys.size() <= 0) {
-            log.info("============获取原材料库存接口传入工厂参数为空！===========");
-            return R.error("获取原材料库存接口传入工厂参数为空!");
-        }
         //定义返回的data体
         List<CdRawMaterialStock> dataList = new ArrayList<>();
         try {
@@ -248,15 +247,25 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                 return R.error("获取原材料库存接口函数失败!");
             }
             //获取输入参数
-            JCoTable inputTableWerks = fm.getTableParameterList().getTable("WERKS");
-            JCoTable inputTableMatnr = fm.getTableParameterList().getTable("MATNR");
+            //开始序列号
+            if(null != startNum){
+                fm.getImportParameterList().setValue("BEGIN_NUM",startNum);
+            }
+            //结束序列号
+            if(null != endNum){
+                fm.getImportParameterList().setValue("END_NUM",endNum);
+            }
             //工厂
-            for (String factoryCode : factorys) {
-                inputTableWerks.appendRow();
-                inputTableWerks.setValue("WERKS", factoryCode);
+            if(!CollectionUtils.isEmpty(factorys)){
+                JCoTable inputTableWerks = fm.getTableParameterList().getTable("WERKS");
+                for (String factoryCode : factorys) {
+                    inputTableWerks.appendRow();
+                    inputTableWerks.setValue("WERKS", factoryCode);
+                }
             }
             //物料
             if (!CollectionUtils.isEmpty(materials)) {
+                JCoTable inputTableMatnr = fm.getTableParameterList().getTable("MATNR");
                 for (String materialCode : materials) {
                     inputTableMatnr.appendRow();
                     inputTableMatnr.setValue("MATNR", materialCode.toUpperCase());
@@ -411,7 +420,10 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
         if (CollectionUtils.isEmpty(materialExtendInfoList)) {
             throw new BusinessException("获取物料信息失败");
         }
-        double size = materialExtendInfoList.size();
+        List<String> materialCodeList = materialExtendInfoList.stream().map(cdMaterialExtendInfo->{
+            return cdMaterialExtendInfo.getMaterialCode().toUpperCase();
+        }).collect(Collectors.toList());
+        double size = materialCodeList.size();
         double smallSize = SMALL_SIZE;
         int materialExtendInfoCount = (int) Math.ceil(size / smallSize);
         //3.连接SAP获取数据
@@ -426,9 +438,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                     endCount = materialExtendInfoList.size();
                 }
                 List<String> materials = new ArrayList<>();
-                for (int j = startCont; j < endCount; j++) {
-                    materials.add(materialExtendInfoList.get(j).getMaterialCode());
-                }
+                materials = materialCodeList.subList(startCont,endCount);
                 R result = queryBomInfoFromSap601(Arrays.asList(factoryCode), materials);
                 if (!result.isSuccess()) {
                     log.error("连接SAP获取BOM数据异常 factoryCode:{},materials:{},res:{}", factoryCode, materials, JSONObject.toJSON(result));
@@ -511,31 +521,33 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
     @Transactional
     @Override
     public R sycRawMaterialStock() {
-        //1.获取工厂全部信息cd_factory_info
-        Example exampleFactoryInfo = new Example(CdFactoryInfo.class);
-        List<CdFactoryInfo> cdFactoryInfoList = cdFactoryInfoService.selectByExample(exampleFactoryInfo);
-        if (CollectionUtils.isEmpty(cdFactoryInfoList)) {
-            throw new BusinessException("获取工厂信息失败");
-        }
-
-        //2.连接SAP获取数据
+        //1.连接SAP获取数据
         int deleteFlag = 0; //删除原材料库存标记
-        for (int z = 0; z < cdFactoryInfoList.size(); z++) {
-            String factoryCode = cdFactoryInfoList.get(z).getFactoryCode();
-            log.info("连接SAP获取原材料库存数据开始 factoryCode:{}",factoryCode);
-            R result = queryRawMaterialStockFromSap601(Arrays.asList(factoryCode), null);
-            if (!result.isSuccess()) {
-                log.error("连接SAP获取原材料库存数据异常 factoryCode:{},materials:{},res:{}", factoryCode, null, JSONObject.toJSON(result));
-                continue;
-            }
-            List<CdRawMaterialStock> list = (List<CdRawMaterialStock>) result.get("data");
-            log.info("连接SAP获取原材料库存数据结束factoryCode:{},size:{}",factoryCode,list.size());
+        int startInt = 0;
+        int startNum = startInt * SAP_Raw_Material_SIZE;
+        int endNum = (startNum + 1) * SAP_Raw_Material_SIZE;
+        R result = queryRawMaterialStockFromSap601(null, null,startNum,endNum);
+        if (!result.isSuccess()) {
+            log.error("连接SAP获取原材料库存数据异常 res:{}",JSONObject.toJSON(result));
+            throw new BusinessException(result.get("msg").toString());
+        }
+        List<CdRawMaterialStock> list = (List<CdRawMaterialStock>) result.get("data");
+        if(list.size() == SAP_Raw_Material_SIZE){
             deleteFlag++;
-            if (deleteFlag == 1) {
-                insertRawMaterialStockDb(list, Boolean.TRUE);
-            } else {
-                taskRawMaterialStockBomDb(list, Boolean.FALSE);
+            startInt ++ ;
+            startNum = startInt * SAP_Raw_Material_SIZE;
+            endNum = (startNum + 1) * SAP_Raw_Material_SIZE;
+            result = queryRawMaterialStockFromSap601(null, null,startNum,endNum);
+            if (!result.isSuccess()) {
+                log.error("连接SAP获取原材料库存数据异常 res:{}",JSONObject.toJSON(result));
+                throw new BusinessException(result.get("msg").toString());
             }
+        }
+        log.info("连接SAP获取原材料库存数据结束size:{}",list.size());
+        if (deleteFlag == 1) {
+            insertRawMaterialStockDb(list, Boolean.TRUE);
+        } else {
+            taskRawMaterialStockBomDb(list, Boolean.FALSE);
         }
         return R.ok();
     }

@@ -48,6 +48,12 @@ public interface RemoteProductionOrderService {
     /**
      * 修改保存排产订单
      */
-    @PostMapping("update")
+    @PostMapping("productionOrder/update")
     R editSave(@RequestBody OmsProductionOrder omsProductionOrder);
+
+    /**
+     * 定时任务SAP获取订单号
+     */
+    @PostMapping("productionOrder/timeSAPGetProductOrderCode")
+    R timeSAPGetProductOrderCode();
 }

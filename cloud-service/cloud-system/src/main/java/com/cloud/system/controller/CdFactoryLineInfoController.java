@@ -59,6 +59,7 @@ public class CdFactoryLineInfoController extends BaseController {
     public TableDataInfo list(CdFactoryLineInfo cdFactoryLineInfo) {
         Example example = new Example(CdFactoryLineInfo.class);
         Example.Criteria criteria = example.createCriteria();
+        listCondition(cdFactoryLineInfo, criteria);
         startPage();
         List<CdFactoryLineInfo> cdFactoryLineInfoList = cdFactoryLineInfoService.selectByExample(example);
         return getDataTable(cdFactoryLineInfoList);
