@@ -132,10 +132,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
     @Override
     public R addSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder,String ossIds) {
 
-        String[] ossIdsString = ossIds.split(",");
-        if(ossIdsString.length == 0){
-            throw new BusinessException("上传图片id不能为空");
-        }
+
         //1.索赔单号生成规则 ZL+年月日+4位顺序号，循序号每日清零
         StringBuffer qualityNoBuffer = new StringBuffer(QUALITY_ORDER_PRE);
         qualityNoBuffer.append(DateUtils.getDate().replace("-", ""));
@@ -151,19 +148,22 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
         logger.info("新增质量索赔信息时成功后 主键id:{},索赔单号:{}", smsQualityOrder.getId(), smsQualityOrder.getQualityNo());
 
         //2.上传质量索赔附件上传的时候order_no 为 索赔单号_01
-        String orderNo = smsQualityOrder.getQualityNo() + ORDER_NO_QUALITY_CLAIM_END;
+        if(StringUtils.isNotBlank(ossIds)){
+            String[] ossIdsString = ossIds.split(",");
+            String orderNo = smsQualityOrder.getQualityNo() + ORDER_NO_QUALITY_CLAIM_END;
 
-        List<SysOss> sysOssList = new ArrayList<>();
-        for(String ossId : ossIdsString){
-            SysOss sysOss = new SysOss();
-            sysOss.setId(Long.valueOf(ossId));
-            sysOss.setOrderNo(orderNo);
-            sysOssList.add(sysOss);
-        }
-        R uplodeFileResult = remoteOssService.batchEditSaveById(sysOssList);
-        if (!uplodeFileResult.isSuccess()) {
-            logger.error("新增质量索赔时会写文件订单号失败 orderNo:{},ossIds:{},res:{}", orderNo, ossIds,JSONObject.toJSON(uplodeFileResult));
-            throw new BusinessException("新增质量索赔时会写文件订单号失败");
+            List<SysOss> sysOssList = new ArrayList<>();
+            for(String ossId : ossIdsString){
+                SysOss sysOss = new SysOss();
+                sysOss.setId(Long.valueOf(ossId));
+                sysOss.setOrderNo(orderNo);
+                sysOssList.add(sysOss);
+            }
+            R uplodeFileResult = remoteOssService.batchEditSaveById(sysOssList);
+            if (!uplodeFileResult.isSuccess()) {
+                logger.error("新增质量索赔时会写文件订单号失败 orderNo:{},ossIds:{},res:{}", orderNo, ossIds,JSONObject.toJSON(uplodeFileResult));
+                throw new BusinessException("新增质量索赔时会写文件订单号失败");
+            }
         }
         return R.data(smsQualityOrder.getId());
     }
@@ -313,15 +313,22 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
             logger.error("提交质量索赔单失败,质量索赔单不存在 ids:{}", ids);
             throw  new BusinessException("质量索赔单不存在");
         }
-        //1.校验状态 发送邮件
+        //1.校验状态,是否有图片 发送邮件
         for (SmsQualityOrder smsQualityOrder : selectListResult) {
             Boolean flagResult = QualityStatusEnum.QUALITY_STATUS_0.getCode().equals(smsQualityOrder.getQualityStatus());
+            String qualityNo = smsQualityOrder.getQualityNo();
             if (!flagResult) {
-                logger.error("提交其他索赔单失败,状态异常 id:{},qualityStatus:{}",
+                logger.error("提交质量索赔单失败,状态异常 id:{},qualityStatus:{}",
                         smsQualityOrder.getId(), smsQualityOrder.getQualityStatus());
-                throw  new BusinessException("请确认索赔单状态是否为待提交");
+                throw  new BusinessException("请确认索赔单" + qualityNo + "状态是否为待提交");
             }
-
+            //查图片
+            String orderNo = qualityNo + ORDER_NO_QUALITY_CLAIM_END;
+            R resultOss = remoteOssService.listByOrderNo(orderNo);
+            if(!resultOss.isSuccess()){
+                logger.error("提交质量索赔单失败,没有图片 qualityNo:{}",qualityNo);
+                throw new BusinessException("请对质量索赔单"+ qualityNo +"上传图片再提交");
+            }
             //发送邮件
             String supplierCode = smsQualityOrder.getSupplierCode();
             //根据供应商编号查询供应商信息

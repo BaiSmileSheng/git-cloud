@@ -130,10 +130,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
     @GlobalTransactional
     @Override
     public R insertClaimOtherAndOss(SmsClaimOther smsClaimOther,String ossIds) {
-        String[] ossIdsString = ossIds.split(",");
-        if(ossIdsString.length == 0){
-            throw new BusinessException("上传图片id不能为空");
-        }
+
         //1.生成单号 索赔单号生成规则 QT+年月日+4位顺序号，循序号每日清零
         StringBuffer qualityNoBuffer = new StringBuffer(OTHER_ORDER_PRE);
         qualityNoBuffer.append(DateUtils.getDate().replace("-",""));
@@ -152,19 +149,23 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
 
         //上传其他索赔附件上传的时候order_no 为 索赔单号_01
         //3.根据订单号新增文件
-        String orderNo = smsClaimOther.getClaimCode() + ORDER_NO_OTHER_CLAIM_END;
-        List<SysOss> sysOssList = new ArrayList<>();
-        for(String ossId : ossIdsString){
-            SysOss sysOss = new SysOss();
-            sysOss.setId(Long.valueOf(ossId));
-            sysOss.setOrderNo(orderNo);
-            sysOssList.add(sysOss);
+        if(StringUtils.isNotBlank(ossIds)){
+            String[] ossIdsString = ossIds.split(",");
+            String orderNo = smsClaimOther.getClaimCode() + ORDER_NO_OTHER_CLAIM_END;
+            List<SysOss> sysOssList = new ArrayList<>();
+            for(String ossId : ossIdsString){
+                SysOss sysOss = new SysOss();
+                sysOss.setId(Long.valueOf(ossId));
+                sysOss.setOrderNo(orderNo);
+                sysOssList.add(sysOss);
+            }
+            R uplodeFileResult = remoteOssService.batchEditSaveById(sysOssList);
+            if(!uplodeFileResult.isSuccess()){
+                logger.error("新增其他索赔时新增文件失败订单号 orderNo:{},res:{}",orderNo, JSONObject.toJSON(uplodeFileResult));
+                throw new BusinessException("新增其他索赔时新增质新增文件失败");
+            }
         }
-        R uplodeFileResult = remoteOssService.batchEditSaveById(sysOssList);
-        if(!uplodeFileResult.isSuccess()){
-            logger.error("新增其他索赔时新增文件失败订单号 orderNo:{},res:{}",orderNo, JSONObject.toJSON(uplodeFileResult));
-            throw new BusinessException("新增其他索赔时新增质新增文件失败");
-        }
+
         //4.若直接提交调用提交接口
         if(smsClaimOther.getFlagCommit()){
             R resultResult = submit(smsClaimOther.getId().toString());
@@ -288,13 +289,21 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
             logger.error("提交其他索赔单失败,其他索赔单不存在 ids:{}",ids);
             throw new BusinessException("其他索赔单不存在");
         }
-        //1.校验状态,发送邮件
+        //1.校验状态,是否有图片,发送邮件
         for(SmsClaimOther smsClaimOther : selectListResult){
             Boolean flagResult = ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_0.getCode().equals(smsClaimOther.getClaimOtherStatus());
+            String claimCode = smsClaimOther.getClaimCode();
             if(!flagResult){
                 logger.error("提交其他索赔单失败,状态异常 id:{},claimOtherStatus:{}",
                         smsClaimOther.getId(),smsClaimOther.getClaimOtherStatus());
-                throw new BusinessException("请确认其他索赔单状态是否为待提交");
+                throw new BusinessException("请确认其他索赔单"+ claimCode +"状态是否为待提交");
+            }
+            //查图片
+            String orderNo = claimCode + ORDER_NO_OTHER_CLAIM_END;
+            R resultOss = remoteOssService.listByOrderNo(orderNo);
+            if(!resultOss.isSuccess()){
+                logger.error("提交其他索赔单失败,没有图片 claimCode:{}",claimCode);
+                throw new BusinessException("请对其他索赔单"+ claimCode +"上传图片再提交");
             }
             String supplierCode = smsClaimOther.getSupplierCode();
             //根据供应商编号查询供应商信息

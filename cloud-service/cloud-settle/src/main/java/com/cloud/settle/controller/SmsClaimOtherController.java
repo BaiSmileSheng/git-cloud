@@ -158,7 +158,7 @@ public class SmsClaimOtherController extends BaseController {
     @HasPermissions("settle:claimOther:save")
     @PostMapping("save")
     @ApiOperation(value = "新增其他索赔信息(包含文件信息)", response = R.class)
-    public R addSave(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestParam("ossIds")String ossIds) {
+    public R addSave(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestParam(value = "ossIds",required = false)String ossIds) {
         SmsClaimOther smsClaimOther = JSONObject.parseObject(smsClaimOtherReq,SmsClaimOther.class);
         //校验入参
         ValidatorUtils.validateEntity(smsClaimOther);
