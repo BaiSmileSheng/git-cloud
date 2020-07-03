@@ -44,6 +44,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -87,6 +88,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     //加工承揽方式
     private static final String PUTTING_OUT_ZERO = "0";
     private static final String PUTTING_OUT_ONE = "1";
+
+    private static final String[] parsePatterns = {"yyyy.MM.dd","yyyy/MM/dd"};
 
 
     @Autowired
@@ -291,6 +294,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             omsProductionOrder.setStatus(ProductOrderConstants.STATUS_ZERO);
             omsProductionOrder.setDelFlag("0");
             omsProductionOrder.setAuditStatus("0");
+            omsProductionOrder.setProductStartDate(formatDateString(o.getProductStartDate()));
+            omsProductionOrder.setProductEndDate(formatDateString(o.getProductEndDate()));
+            omsProductionOrder.setDeliveryDate(formatDateString(o.getDeliveryDate()));
             return omsProductionOrder;
         }).collect(toList());
         //BOM拆解流程
@@ -1467,5 +1473,28 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
     private String getBomGroupKey(CdBomInfo cdBomInfo) {
         return StrUtil.concat(true, cdBomInfo.getProductMaterialCode(), cdBomInfo.getProductFactoryCode(), cdBomInfo.getVersion());
+    }
+    /**
+     * Description:  日期字符串格式转换
+     * Param: [dateStr]
+     * return: java.lang.String
+     * Author: ltq
+     * Date: 2020/7/3
+     */
+    private String formatDateString(String dateStr){
+            boolean isSuccess = true;
+            if (dateStr == null) {
+                return null;
+            }
+            try {
+                Date date =  DateUtils.parseDate(dateStr, parsePatterns);
+            } catch (ParseException e) {
+               isSuccess = false;
+            }
+            if (isSuccess) {
+                dateStr = StrUtil.replace(dateStr,".","-");
+                dateStr = StrUtil.replace(dateStr,"/","-");
+            }
+            return dateStr;
     }
 }

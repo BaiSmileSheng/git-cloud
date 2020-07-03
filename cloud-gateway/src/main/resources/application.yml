@@ -83,10 +83,12 @@ spring:
                 redis-rate-limiter.replenishRate: 10
                 redis-rate-limiter.burstCapacity: 20
               # 降级配置
-            - name: Hystrix
+            - name: SpecialHystrix
               args:
-                name: fallbackcmd
+                id: SpecialHystrix
                 fallbackUri: 'forward:/fallback'
+                timeout:
+                  productionOrder-importProductOrder: 60000
         #settle 模块
         - id: cloud-settle
           uri: lb://cloud-settle
@@ -120,10 +122,3 @@ hystrix:
         isolation:
           thread:
             timeoutInMilliseconds: 10000 #断路器超时时间，默认1000ms
-    IOmsProductionOrderService#importProductOrder():
-      execution:
-        timeout:
-          enabled: true
-        isolation:
-          thread:
-            timeoutInMilliseconds: 200000 #断路器超时时间，默认1000ms
