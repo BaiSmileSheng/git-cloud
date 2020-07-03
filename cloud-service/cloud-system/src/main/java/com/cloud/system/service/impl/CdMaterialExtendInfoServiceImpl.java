@@ -131,7 +131,7 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
             JCoTable inputTableW = fm.getTableParameterList().getTable("MATNR");
             for (String materialCode : materialCodeList) {
                 inputTableW.appendRow();
-                inputTableW.setValue("MATNR", materialCode);
+                inputTableW.setValue("MATNR", materialCode.toUpperCase());
             }
 
             //执行函数

@@ -98,7 +98,6 @@ public class CdFactoryLineInfoServiceImpl extends BaseServiceImpl<CdFactoryLineI
                     }
                     cdFactoryLineInfo.setBranchOffice(factoryLineInfo.getBranchOffice());
                     cdFactoryLineInfo.setMonitor(factoryLineInfo.getMonitor());
-                    cdFactoryLineInfo.setAttribute(factoryLineInfo.getAttribute());
                     cdFactoryLineInfo.setUpdateBy("systemJob");
                     cdFactoryLineInfo.setUpdateTime(new Date());
                     updateFactoryLines.add(cdFactoryLineInfo);
@@ -119,10 +118,14 @@ public class CdFactoryLineInfoServiceImpl extends BaseServiceImpl<CdFactoryLineI
                 }
 
             });
-            //批量更新
-            cdFactoryLineInfoMapper.updateBatchByPrimaryKeySelective(updateFactoryLines);
-            //批量新增
-            cdFactoryLineInfoMapper.insertList(insertFactoryLines);
+            if (ObjectUtil.isNotEmpty(updateFactoryLines) && updateFactoryLines.size() > 0) {
+                //批量更新
+                cdFactoryLineInfoMapper.updateBatchByPrimaryKeySelective(updateFactoryLines);
+            }
+            if (ObjectUtil.isNotEmpty(insertFactoryLines) && insertFactoryLines.size() > 0) {
+                //批量新增
+                cdFactoryLineInfoMapper.insertList(insertFactoryLines);
+            }
         } else {
             log.error("接口获取工厂线体信息为空！");
             return R.error("接口获取工厂线体信息为空！");

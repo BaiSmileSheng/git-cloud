@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -136,6 +137,16 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         if (!rCheck.isSuccess()) {
             return rCheck;
         }
+        Example example = new Example(SmsSupplementaryOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("productOrderCode", productOrderCode);
+        criteria.andNotIn("stuffStatus", CollUtil.newArrayList(
+                SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITBH.getCode()
+                ,SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZBH.getCode()));
+        int num = selectCountByExample(example);
+        if (num > 0) {
+            return R.error(StrUtil.format("订单：{}已申请过物耗单，请到物耗管理进行修改！",productOrderCode));
+        }
         //生产单号获取排产订单信息
         R omsProductionOrderResult = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
         if(!omsProductionOrderResult.isSuccess()){
@@ -163,10 +174,12 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             return rFactory;
         }
         CdFactoryLineInfo factoryLineInfo = rFactory.getData(CdFactoryLineInfo.class);
-        if (factoryLineInfo != null) {
-            smsSupplementaryOrder.setSupplierCode(factoryLineInfo.getSupplierCode());
-            smsSupplementaryOrder.setSupplierName(factoryLineInfo.getSupplierDesc());
+        if (factoryLineInfo == null||StrUtil.isEmpty(factoryLineInfo.getSupplierCode())) {
+            return R.error(StrUtil.format("工厂：{}，线体{}，缺少供应商信息",omsProductionOrder.getProductFactoryCode(),
+                    omsProductionOrder.getProductLineCode()));
         }
+        smsSupplementaryOrder.setSupplierCode(factoryLineInfo.getSupplierCode());
+        smsSupplementaryOrder.setSupplierName(factoryLineInfo.getSupplierDesc());
         smsSupplementaryOrder.setFactoryCode(omsProductionOrder.getProductFactoryCode());
         R rFactoryInfo= remoteFactoryInfoService.selectOneByFactory(omsProductionOrder.getProductFactoryCode());
         if(!rFactoryInfo.isSuccess()){
@@ -277,7 +290,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
                     updateByPrimaryKeySelective(smsSupplementaryOrder);
                     continue;
                 }
-                smsSupplementaryOrder.setStuffPrice(cdMaterialPriceInfo.getNetWorth());//单价  取得materialPrice表的净价值
+                smsSupplementaryOrder.setStuffPrice(cdMaterialPriceInfo.getNetWorth().divide(new BigDecimal(cdMaterialPriceInfo.getPriceUnit()),2));//单价  取得materialPrice表的净价值
                 smsSupplementaryOrder.setStuffUnit(cdMaterialPriceInfo.getUnit());
                 smsSupplementaryOrder.setCurrency(cdMaterialPriceInfo.getCurrency());//币种
                 //索赔金额=物耗数量* 原材料单价*物耗申请系数
@@ -331,7 +344,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             inputTable.setValue("BKTXT", StrUtil.concat(true,smsSupplementaryOrder.getSupplierCode(),smsSupplementaryOrder.getStuffNo()));//凭证抬头文本  V码+物耗单号
             inputTable.setValue("WERKS", smsSupplementaryOrder.getFactoryCode());//工厂
             inputTable.setValue("LGORT", "0088");//库存地点 成品报废库位默认0088，如果0088没有库存就选择0188
-            inputTable.setValue("MATNR", smsSupplementaryOrder.getRawMaterialCode());//物料号
+            inputTable.setValue("MATNR", smsSupplementaryOrder.getRawMaterialCode().toUpperCase());//物料号
             inputTable.setValue("ERFME", smsSupplementaryOrder.getStuffUnit());//基本计量单位
             inputTable.setValue("ERFMG", smsSupplementaryOrder.getStuffAmount());//数量
             inputTable.setValue("AUFNR", smsSupplementaryOrder.getProductOrderCode());//生产订单号
@@ -451,11 +464,11 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         }
         R rBom = remoteBomService.listByProductAndMaterial(productMaterialCode, rawMaterialCode,omsProductionOrder.getBomVersion(),omsProductionOrder.getProductFactoryCode());
         if (!rBom.isSuccess()) {
-            return R.error("BOM信息为空！");
+            return R.error("申请物料不在使用范围内！");
         }
         CdBomInfo cdBom = rBom.getData(CdBomInfo.class);
         if (cdBom.getBomNum() == null) {
-            return R.error("BOM单耗信息为空！");
+            return R.error("申请物料的单耗信息为空！");
         }
         //5、校验申请量是否大于订单量*单耗,如果大于单耗，则判断超出部分是否大于最小包装量，大于则返回错误
         BigDecimal productNum = omsProductionOrder.getProductNum();

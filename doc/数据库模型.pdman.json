@@ -11417,7 +11417,15 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [],
+          "indexs": [
+            {
+              "name": "cd_supplier_info_supplier_code_uindex",
+              "isUnique": true,
+              "fields": [
+                "supplier_code"
+              ]
+            }
+          ],
           "headers": [
             {
               "fieldName": "chnname",
