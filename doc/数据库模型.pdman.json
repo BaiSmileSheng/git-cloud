@@ -4785,6 +4785,12 @@
               "defaultValue": "''"
             },
             {
+              "name": "product_start_date",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "基本开始日期"
+            },
+            {
               "name": "bom_num",
               "type": "Money",
               "remark": "",
@@ -4836,7 +4842,7 @@
             {
               "name": "status",
               "type": "Char",
-              "remark": "0：未确认，1：已确认，2：反馈中",
+              "remark": "0：未确认，1：已确认，2：反馈中，3：反馈已确认",
               "chnname": "状态"
             },
             {
@@ -5150,12 +5156,6 @@
               "autoIncrement": true
             },
             {
-              "name": "product_order_code",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "排产订单号"
-            },
-            {
               "name": "product_material_code",
               "type": "DefaultString",
               "remark": "",
@@ -5168,6 +5168,18 @@
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "''"
+            },
+            {
+              "name": "product_factory_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生产工厂"
+            },
+            {
+              "name": "purchase_group",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "采购组"
             },
             {
               "name": "raw_material_code",
@@ -5184,10 +5196,10 @@
               "defaultValue": "''"
             },
             {
-              "name": "delivery_date",
-              "type": "Date",
+              "name": "product_start_date",
+              "type": "DefaultString",
               "remark": "",
-              "chnname": "交付日期",
+              "chnname": "基本开始日期",
               "notNull": true
             },
             {
@@ -5217,6 +5229,12 @@
               "remark": "",
               "chnname": "原材料满足量",
               "notNull": true
+            },
+            {
+              "name": "bom_version",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "BOM版本"
             },
             {
               "name": "status",
@@ -5275,8 +5293,7 @@
               "isUnique": true,
               "fields": [
                 "product_material_code",
-                "raw_material_code",
-                "delivery_date"
+                "raw_material_code"
               ]
             }
           ],
@@ -5734,6 +5751,12 @@
               "remark": "",
               "chnname": "原材料描述",
               "defaultValue": "''"
+            },
+            {
+              "name": "product_start_date",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "基本开始日期"
             },
             {
               "name": "bom_num",
@@ -11898,8 +11921,8 @@
               "type": "DefaultString",
               "remark": "",
               "chnname": "供应商编码",
-              "notNull": true,
-              "defaultValue": ""
+              "notNull": false,
+              "defaultValue": "\""
             },
             {
               "name": "supplier_desc",

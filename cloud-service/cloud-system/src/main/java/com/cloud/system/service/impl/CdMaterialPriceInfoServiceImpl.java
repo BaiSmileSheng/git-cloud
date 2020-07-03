@@ -6,6 +6,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
+import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
 import com.cloud.settle.enums.MaterialPriceInfoSAPEnum;
 import com.cloud.settle.enums.SupplementaryOrderStatusEnum;
 import com.cloud.settle.feign.RemoteSmsSupplementaryOrderService;
@@ -30,6 +31,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * SAP成本价格 Service业务层处理
@@ -95,26 +97,39 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
 
     @Transactional
     @Override
-    public R synPrice() {
-
-        //1.查询sms_supplementary_order 待结算状态的物料编号 调SAP接口查原材料价格
-        R rMaterialCode = remoteSmsSupplementaryOrderService.materialCodeListByStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode());
-        if (!rMaterialCode.isSuccess()) {
-            return rMaterialCode;
-        }
-        List<String> materialCodeList=rMaterialCode.getCollectData(new TypeReference<List<String>>() {});
-         List<CdMaterialPriceInfo> cdMaterialPriceInfoListY = selectSapCharges("YCL",materialCodeList);
-        //2.调SAP接口查加工费
+    public R synPriceJGF() {
+        //1.调SAP接口查加工费
         List<CdMaterialPriceInfo> cdMaterialPriceInfoListJ= selectSapCharges("JGF",new ArrayList<>());
         cdMaterialPriceInfoListJ.forEach(cdMaterialPriceInfo ->{
             //净价值即加工费
             cdMaterialPriceInfo.setProcessPrice(cdMaterialPriceInfo.getNetWorth());
         });
-        //3.删除cd_material_price_info的所有信息
-        cdMaterialPriceInfoMapper.deleteAll();
-        //4.新增 cd_material_price_info
-        cdMaterialPriceInfoMapper.insertList(cdMaterialPriceInfoListY);
-        cdMaterialPriceInfoMapper.insertList(cdMaterialPriceInfoListJ);
+        //3.新增 cd_material_price_info
+        cdMaterialPriceInfoMapper.batchInsertOrUpdate(cdMaterialPriceInfoListJ);
+        return R.ok();
+    }
+
+    @Transactional
+    @Override
+    public R synPriceYCL() {
+
+        //1.查询sms_supplementary_order 待结算状态的物料编号 调SAP接口查原材料价格
+        String createTimeStart = DateUtils.getMonthFirstTime(-1);
+        String createTimeEnd = DateUtils.getDate();
+        R rMaterialList= remoteSmsSupplementaryOrderService.listByTime(createTimeStart,createTimeEnd);
+        if (!rMaterialList.isSuccess()) {
+            return rMaterialList;
+        }
+        //2.调SAP接口查原材料价格
+        List<SmsSupplementaryOrder> materialList = rMaterialList.getCollectData(new TypeReference<List<SmsSupplementaryOrder>>() {});
+        List<String> materialCodeList =  new ArrayList<>();
+        materialList.forEach(smsSupplementaryOrder ->{
+            if(!materialCodeList.contains(smsSupplementaryOrder.getRawMaterialCode())){
+                materialCodeList.add(smsSupplementaryOrder.getRawMaterialCode());
+            }
+        });
+        List<CdMaterialPriceInfo> cdMaterialPriceInfoListY = selectSapCharges("YCL",materialCodeList);
+        cdMaterialPriceInfoMapper.batchInsertOrUpdate(cdMaterialPriceInfoListY);
         return R.ok();
     }
 
@@ -143,10 +158,7 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
                 throw new RuntimeException("Function does not exists in SAP system.");
             }
             fm.getImportParameterList().setValue("FYLX",lifnr);
-            if("YCL".equals(lifnr)){
-                if(CollectionUtils.isEmpty(materialCodeList)){
-                    return new ArrayList<>();
-                }
+            if(!CollectionUtils.isEmpty(materialCodeList)){
                 //获取输入参数
                 JCoTable inputTable = fm.getTableParameterList().getTable("T_INPUT");
                 materialCodeList.forEach(materialCode -> {
@@ -202,7 +214,7 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
         CdMaterialPriceInfo cdMaterialPriceInfo = new CdMaterialPriceInfo();
         cdMaterialPriceInfo.setMaterialCode(outTableOutput.getString("MATNR"));
         cdMaterialPriceInfo.setMaterialDesc(outTableOutput.getString("MAKTX"));
-        cdMaterialPriceInfo.setMemberCode(outTableOutput.getString("MAKTX"));
+        cdMaterialPriceInfo.setMemberCode(outTableOutput.getString("LIFNR"));
         cdMaterialPriceInfo.setMemberName(outTableOutput.getString("NAME1"));
         cdMaterialPriceInfo.setPurchasingGroup(outTableOutput.getString("EKGRP"));
         cdMaterialPriceInfo.setTaxCode(outTableOutput.getString("MWSKZ"));
@@ -210,7 +222,8 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
         cdMaterialPriceInfo.setKbetr(outTableOutput.getString("KBETR1"));
         cdMaterialPriceInfo.setCurrency(outTableOutput.getString("WAERS"));
         cdMaterialPriceInfo.setPriceUnit(outTableOutput.getString("KPEIN"));
-        cdMaterialPriceInfo.setAgencyFee(outTableOutput.getBigDecimal("KBETR"));
+        cdMaterialPriceInfo.setUnit(outTableOutput.getString("KMEIN"));
+        cdMaterialPriceInfo.setAgencyFee(outTableOutput.getBigDecimal("KBETR2"));
         cdMaterialPriceInfo.setBeginDate(outTableOutput.getDate("DATAB"));
         cdMaterialPriceInfo.setEndDate(outTableOutput.getDate("DATBI"));
         cdMaterialPriceInfo.setSapCreatedDate(outTableOutput.getDate("ERDAT"));

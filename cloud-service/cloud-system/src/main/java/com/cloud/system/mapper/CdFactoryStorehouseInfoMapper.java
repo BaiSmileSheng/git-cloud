@@ -32,4 +32,11 @@ public interface CdFactoryStorehouseInfoMapper extends BaseMapper<CdFactoryStore
      * @return
      */
     List<CdFactoryStorehouseInfo> batchSelectListByCondition(List<CdFactoryStorehouseInfo> listReq);
+
+    /**
+     * 增量更新
+     * @param list
+     * @return
+     */
+    int batchInsertOrUpdate(List<CdFactoryStorehouseInfo> list);
 }

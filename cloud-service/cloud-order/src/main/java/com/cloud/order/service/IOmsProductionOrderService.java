@@ -3,8 +3,7 @@ package com.cloud.order.service;
 import com.cloud.common.core.domain.R;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.common.core.service.BaseService;
-import com.cloud.order.domain.entity.vo.OmsProductionOrderVo;
-import com.cloud.system.domain.entity.SysRole;
+import com.cloud.order.domain.entity.vo.OmsProductionOrderExportVo;
 import com.cloud.system.domain.entity.SysUser;
 
 import java.util.List;
@@ -23,7 +22,7 @@ public interface IOmsProductionOrderService extends BaseService<OmsProductionOrd
      * Author: ltq
      * Date: 2020/6/22
      */
-    R importProductOrder(List<OmsProductionOrderVo> list, SysUser sysUser);
+    R importProductOrder(List<OmsProductionOrderExportVo> list, SysUser sysUser);
 
     /**
      * Description: 删除排产订单
@@ -60,7 +59,7 @@ public interface IOmsProductionOrderService extends BaseService<OmsProductionOrd
     /**
      * Description:  排产订单导出
      * Param: [omsProductionOrder, sysUser]
-     * return: java.util.List<com.cloud.order.domain.entity.vo.OmsProductionOrderVo>
+     * return: java.util.List<com.cloud.order.domain.entity.vo.OmsProductionOrderExportVo>
      * Author: ltq
      * Date: 2020/6/23
      */
@@ -82,6 +81,39 @@ public interface IOmsProductionOrderService extends BaseService<OmsProductionOrd
      * @return
      */
     R mailPush();
+
+    /**
+     * Description:  反馈信息处理-快捷修改查询
+     * Param: [omsProductionOrder, sysUser]
+     * return: java.util.List<com.cloud.order.domain.entity.OmsProductionOrder>
+     * Author: ltq
+     * Date: 2020/6/28
+     */
+    List<OmsProductionOrder> queryProductOrder(OmsProductionOrder omsProductionOrder,SysUser sysUser);
+    /**
+     * Description: 根据工厂、专用号、基本开始日期查询
+     * Param:
+     * return:
+     * Author: ltq
+     * Date: 2020/6/28
+     */
+    List<OmsProductionOrder> selectByFactoryAndMaterialAndStartDate(List<OmsProductionOrder> list);
+    /**
+     * Description:  根据排产订单号查询
+     * Param: [list]
+     * return: java.util.List<com.cloud.order.domain.entity.OmsProductionOrder>
+     * Author: ltq
+     * Date: 2020/6/29
+     */
+    List<OmsProductionOrder> selectByOrderCode(List<String> list);
+    /**
+     * Description: 根据排产订单号批量更新
+     * Param: [list]
+     * return:
+     * Author: ltq
+     * Date: 2020/6/29
+     */
+    void updateByOrderCode(List<OmsProductionOrder> list);
 
     /**
      * 订单刷新

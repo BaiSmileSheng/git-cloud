@@ -12,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 import tk.mybatis.mapper.annotation.KeySql;
 
@@ -70,7 +71,6 @@ public class OmsProductionOrderAnalysis extends BaseEntity {
     /**
      * 生产工厂描述
      */
-    @ExcelProperty(value = "生产工厂描述")
     @ApiModelProperty(value = "生产工厂描述")
     private String productFactoryDesc;
 
@@ -143,6 +143,8 @@ public class OmsProductionOrderAnalysis extends BaseEntity {
     /**
      * 工厂权限
      */
+    @Transient
+    @ApiModelProperty(value = "生产工厂权限")
     private String productFactoryCodeList;
 
 }

@@ -58,7 +58,18 @@ public class RemoteCdMaterialPriceInfoFallbackFactory implements FallbackFactory
              * @return 成功或失败
              */
             @Override
-            public R synPrice() {
+            public R synPriceJGF() {
+                log.error("RemoteCdMaterialPriceInfoService.synPriceJGF ：{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
+            }
+
+            /**
+             * 定时加工费/原材料价格同步
+             * @return 成功或失败
+             */
+            @Override
+            public R synPriceYCL() {
+                log.error("RemoteCdMaterialPriceInfoService.synPriceYCL ：{}",throwable.getMessage());
                 return R.error("服务器拥挤，请稍后再试！");
             }
 

@@ -12,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 import tk.mybatis.mapper.annotation.KeySql;
 
@@ -41,18 +42,24 @@ public class OmsRawMaterialFeedback extends BaseEntity {
     private Long id;
 
     /**
-     * 排产订单号
-     */
-    @ExcelProperty(value = "排产订单号")
-    @ApiModelProperty(value = "排产订单号")
-    private String productOrderCode;
-
-    /**
      * 成品物料号
      */
     @ExcelProperty(value = "成品物料号")
     @ApiModelProperty(value = "成品物料号")
     private String productMaterialCode;
+
+    /**
+     * 生产工厂
+     */
+    @ExcelProperty(value = "生产工厂")
+    @ApiModelProperty(value = "生产工厂")
+    private String productFactoryCode;
+    /**
+     * 采购组
+     */
+    @ExcelProperty(value = "采购组")
+    @ApiModelProperty(value = "采购组")
+    private String purchaseGroup;
 
     /**
      * 成品物料描述
@@ -76,12 +83,12 @@ public class OmsRawMaterialFeedback extends BaseEntity {
     private String rawMaterialDesc;
 
     /**
-     * 交付日期
+     * 基本开始日期
      */
-    @ExcelProperty(value = "交付日期")
+    @ExcelProperty(value = "基本开始日期")
     @DateTimeFormat("yyyy-MM-dd")
-    @ApiModelProperty(value = "交付日期")
-    private Date deliveryDate;
+    @ApiModelProperty(value = "基本开始日期")
+    private String productStartDate;
 
     /**
      * 成品排产量
@@ -110,6 +117,12 @@ public class OmsRawMaterialFeedback extends BaseEntity {
     @ExcelProperty(value = "原材料满足量")
     @ApiModelProperty(value = "原材料满足量")
     private BigDecimal rawMaterialContentNum;
+    /**
+     * bom版本
+     */
+    @ExcelProperty(value = "版本")
+    @ApiModelProperty(value = "bom版本")
+    private String bomVersion;
 
     /**
      * 状态 0：未审核，1：通过，2：驳回，3：未审核已下达
@@ -122,5 +135,31 @@ public class OmsRawMaterialFeedback extends BaseEntity {
      * 是否删除 0：有效，1：删除
      */
     private String delFlag;
+
+    /**
+     * 查询日期起始值
+     */
+    @Transient
+    @ApiModelProperty(value = "查询日期起始值")
+    private String checkDateStart;
+
+    /**
+     * 查询日期结束值
+     */
+    @Transient
+    @ApiModelProperty(value = "查询日期结束值")
+    private String checkDateEnd;
+    /**
+     * 通过/驳回标识
+     */
+    @Transient
+    @ApiModelProperty(value = "通过/驳回标识")
+    private String approvalFlag;
+    /**
+     * id字符串，逗号隔开
+     */
+    @Transient
+    @ApiModelProperty(value = "id字符串，逗号隔开")
+    private String ids;
 
 }

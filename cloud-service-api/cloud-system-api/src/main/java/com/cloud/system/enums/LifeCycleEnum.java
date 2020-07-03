@@ -31,4 +31,21 @@ public enum LifeCycleEnum {
     public String getMsg() {
         return msg;
     }
+
+    public static String getMsgByCode(String code) {
+        for (LifeCycleEnum enums : LifeCycleEnum.values()) {
+            if (enums.getCode().equals(code)) {
+                return enums.getMsg();
+            }
+        }
+        return "";
+    }
+    public static String getCodeByMsg(String msg) {
+        for (LifeCycleEnum bt : values()) {
+            if (bt.msg .equals(msg) ) {
+                return bt.getCode();
+            }
+        }
+        return msg;
+    }
 }

@@ -28,7 +28,7 @@
         select id, material_code, material_desc, material_type, primary_uom, mtl_group_code, purchase_group_code, plant_code, rounding_quantit, last_update,uph, del_flag, remark, create_time, create_by, update_time, update_by from cd_material_info
     </sql>
 
-    <update id="updateBatchByFactoryAndMaterial" parameterType="List">
+    <update id="updateBatchByFactoryAndMaterial" parameterType="list">
         <foreach collection="list" item="item" index="index" open="" close="" separator=";">
             update cd_material_info
             <trim prefix="set" suffixOverrides=",">
@@ -86,4 +86,14 @@
             </foreach>
         </where>
     </select>
+
+    <delete id="deleteBatchByFactoryAndMaterial" parameterType="list">
+        <foreach collection="list" item="item" separator=";">
+            delete from cd_material_info
+            <where>
+                plant_code = #{item.plantCode}
+                and material_code = #{item.materialCode,jdbcType=VARCHAR}
+            </where>
+        </foreach>
+    </delete>
 </mapper>

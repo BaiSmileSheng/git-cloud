@@ -61,6 +61,12 @@ public class RemoteProductionOrderFallbackFactory implements FallbackFactory<Rem
                 return R.error("服务拥挤请稍后再试");
             }
 
+            @Override
+            public R timeSAPGetProductOrderCode() {
+                log.error("RemoteProductionOrderService.timeSAPGetProductOrderCode错误信息：{}",throwable.getMessage());
+                return R.error("服务拥挤请稍后再试");
+            }
+
         };
     }
 }

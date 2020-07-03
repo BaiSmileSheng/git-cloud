@@ -15,7 +15,8 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
-import com.cloud.order.domain.entity.vo.OmsProductionOrderVo;
+import com.cloud.order.domain.entity.vo.OmsProductionOrderExportVo;
+import com.cloud.order.domain.entity.vo.OmsProductionOrderImportVo;
 import com.cloud.order.enums.OutSourceTypeEnum;
 import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.service.IOmsProductionOrderService;
@@ -334,28 +335,28 @@ public class OmsProductionOrderController extends BaseController {
     }
 
     /**
-     * 导出模板
+     * 排产订单导入-导出模板
      * @return
      */
     @GetMapping("exportTemplate")
-    @HasPermissions("system:productionOrder:exportTemplate")
-    @ApiOperation(value = "导出模板", response = OmsProductionOrderVo.class)
+    @HasPermissions("order:productionOrder:exportTemplate")
+    @ApiOperation(value = "排产订单导入-导出模板", response = OmsProductionOrderExportVo.class)
     public R exportTemplate(){
         String fileName = "排产订单.xlsx";
-        return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new OmsProductionOrderVo());
+        return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new OmsProductionOrderImportVo());
     }
 
     /**
-     * 导入
+     * 排产订单导入-导入
      *
      * @return
      */
     @PostMapping("importProductOrder")
-    @HasPermissions("system:productOrder:importProductOrder")
-    @ApiOperation(value = "导入", response = OmsProductionOrder.class)
+    @HasPermissions("order:productOrder:importProductOrder")
+    @ApiOperation(value = "排产订单导入-导入", response = OmsProductionOrder.class)
     public R importProductOrder(@RequestParam("file") MultipartFile file) {
         SysUser sysUser = getUserInfo(SysUser.class);
-        List<OmsProductionOrderVo> list = (List<OmsProductionOrderVo>) EasyExcelUtil.readMulExcel(file, new OmsProductionOrderVo());
+        List<OmsProductionOrderExportVo> list = (List<OmsProductionOrderExportVo>) EasyExcelUtil.readMulExcel(file, new OmsProductionOrderExportVo());
         return omsProductionOrderService.importProductOrder(list, sysUser);
     }
 
@@ -397,7 +398,12 @@ public class OmsProductionOrderController extends BaseController {
     @PostMapping("updateSave")
     @OperLog(title = "更新保存排产订单 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "更新保存排产订单 ", response = R.class)
-    public R updateSave(@RequestBody OmsProductionOrder omsProductionOrder){
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "排产订单主键", required = true,  dataType = "Long"),
+            @ApiImplicitParam(name = "productNum", value = "排产量", required = true, dataType = "BigDecimal")
+    })
+    @HasPermissions("order:productOrder:updateSave")
+    public R updateSave(@ApiIgnore OmsProductionOrder omsProductionOrder){
         SysUser sysUser = getUserInfo(SysUser.class);
         return omsProductionOrderService.updateSave(omsProductionOrder,sysUser);
     }
@@ -407,6 +413,7 @@ public class OmsProductionOrderController extends BaseController {
     @PostMapping("confirmRelease")
     @OperLog(title = "确认下达 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "确认下达 ", response = R.class)
+    @HasPermissions("order:productionOrder:confirmRelease")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "productMaterialCode", value = "专用号", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productFactoryCode", value = "工厂", required = false, paramType = "query", dataType = "String"),

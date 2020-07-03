@@ -2,11 +2,13 @@ package com.cloud.order.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Dict;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.StringUtils;
+import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.domain.entity.OmsProductionOrderAnalysis;
 import com.cloud.order.domain.entity.OmsRealOrder;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderAnalysisVo;
@@ -112,12 +114,12 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
         R productStock = queryProductStock(omsRealOrders);
         if (!productStock.isSuccess()) {
             log.error("获取生产工厂、成品专用号可用库存失败");
-            return R.error("获取生产工厂、成品专用号可用库存失败:" + productStock.get("msg"));
+            return R.error(StrUtil.toString(productStock.get("msg")));
         }
         R customerStock = queryCustomerStock(omsRealOrders);
         if (!customerStock.isSuccess()) {
             log.error("获取客户可用库存失败");
-            return R.error("获取客户可用库存失败:" + customerStock.get("msg"));
+            return R.error(StrUtil.toString(customerStock.get("msg")));
         }
         Map<String, BigDecimal> stockMap = productStock.getCollectData(new TypeReference<Map<String, BigDecimal>>() {
         });
@@ -125,13 +127,16 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
         });
         List<OmsProductionOrderAnalysis> analysisArrayList = new ArrayList<>();
         for (String key : map.keySet()) {
+            List<OmsRealOrder> omsRealOrderList = map.get(key);
             //生产工厂、成品专用号的可用总库存
             BigDecimal stockNumSum = stockMap.get(key);
             log.info("========生产工厂、成品专用号" + key + "的可用总库存量为:" + stockNumSum + "==========");
+            //判断可用总库存
+            stockNumSum = stockNumSum == null ? BigDecimal.ZERO : stockNumSum;
             // 结余量
             BigDecimal allowance = stockNumSum;
             //3、将生产共产个、成品专用号下的数据按照生产日期进行分组
-            Map<String, List<OmsRealOrder>> mapDay = omsRealOrders.stream().collect(Collectors.groupingBy(OmsRealOrder::getProductDate));
+            Map<String, List<OmsRealOrder>> mapDay = omsRealOrderList.stream().collect(Collectors.groupingBy(OmsRealOrder::getProductDate));
             //4、按照key值升序
             mapDay = mapDay.entrySet().stream().
                     sorted(Map.Entry.comparingByKey()).
@@ -158,13 +163,15 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
                     List<OmsRealOrder> list = customerMap.get(customerKey);
                     //累计客户需求量
                     BigDecimal customerOrderNums = BigDecimal.ZERO;
-                    if (BeanUtil.isNotEmpty(list)) {
+                    if (ObjectUtil.isNotEmpty(list)) {
                         customerOrderNums = list.stream().map(OmsRealOrder::getOrderNum).reduce(BigDecimal.ZERO, BigDecimal::add);
                     }
                     //获取客户库存 = 库位库存 + 在途
                     String customerStockKey = StrUtil.concat(true, omsRealOrder.getProductFactoryCode(),
                             omsRealOrder.getProductMaterialCode(), omsRealOrder.getPlace());
                     BigDecimal customerStockNum = customerStockMap.get(customerStockKey);
+                    //判断客户库存量
+                    customerStockNum = customerStockNum == null ? BigDecimal.ZERO : customerStockNum;
                     //定义成品客户可用库存库存
                     BigDecimal stockNum = customerStockNum.subtract(customerOrderNums);
                     if (stockNum.compareTo(omsRealOrder.getOrderNum()) < 0) {
@@ -212,7 +219,6 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
      * Date: 2020/6/16
      */
     @Override
-    @GlobalTransactional
     public R queryRealOrder(OmsRealOrder omsRealOrder) {
         //获取真单数据
         Example example = new Example(OmsRealOrder.class);
@@ -290,10 +296,24 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
                 .stream().collect(Collectors.groupingBy((o) -> fetchGroupKey(o)));
         list.forEach(item -> {
             String key = item.getProductFactoryCode()+item.getProductMaterialCode();
-            item.setDataList(map.get(key));
+            List<OmsProductionOrderAnalysis> omsProductionOrderAnalyses1 = map.get(key);
+            item.setStockNum(omsProductionOrderAnalyses1.get(0).getStockNum());
+            item.setDataList(omsProductionOrderAnalyses1);
         });
         return list;
     }
+    /**
+     * Description:  查询成品库存信息
+     * Param: [cdProductStock]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/30
+     */
+    @Override
+    public R getProductStock(CdProductStock cdProductStock) {
+        return remoteCdProductStockService.findOneByExample(cdProductStock);
+    }
+
     /**
      * Description:  组织key值
      * Param: [omsProductionOrderAnalysis]
@@ -456,7 +476,7 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
         R storeResult = remoteCdProductWarehouseService.queryByList(productWarehouses);
         if (!storeResult.isSuccess()) {
             log.error("IOmsProductionOrderAnalysisService.getCustomerStockNum方法，获取客户库位库存失败!");
-            return R.error("获取客户库位库存失败!");
+            return R.error(StrUtil.toString(storeResult.get("msg")));
         }
         List<CdProductWarehouse> productWarehouseList = storeResult.getCollectData(new TypeReference<List<CdProductWarehouse>>() {
         });
@@ -466,7 +486,7 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
         R passageResult = remoteCdProductPassageService.queryByList(productPassages);
         if (!passageResult.isSuccess()) {
             log.error("IOmsProductionOrderAnalysisService.getCustomerStockNum方法，获取客户在途库存失败!");
-            return R.error("获取客户在途库存失败!");
+            return R.error(StrUtil.toString(passageResult.get("msg")));
         }
         List<CdProductPassage> productPassageList = passageResult.getCollectData(new TypeReference<List<CdProductPassage>>() {
         });

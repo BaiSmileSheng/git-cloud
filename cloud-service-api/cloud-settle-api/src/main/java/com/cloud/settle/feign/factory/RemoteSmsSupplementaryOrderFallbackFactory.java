@@ -29,6 +29,18 @@ public class RemoteSmsSupplementaryOrderFallbackFactory implements FallbackFacto
             }
 
             /**
+             * 根据创建时间查询物耗申请单 列表
+             * @param createTimeStart
+             * @param endTimeStart
+             * @return
+             */
+            @Override
+            public R listByTime(String createTimeStart, String endTimeStart) {
+                log.error("RemoteSmsSupplementaryOrderService.listByTime：{}",throwable.getMessage());
+                return R.error("服务器拥挤：请稍后再试！");
+            }
+
+            /**
              * 修改保存物耗管理申请  -- 无状态校验
              * @param smsSupplementaryOrder
              * @return 错误信息

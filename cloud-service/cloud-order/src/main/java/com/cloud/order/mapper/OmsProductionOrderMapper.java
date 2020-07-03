@@ -31,6 +31,33 @@ public interface OmsProductionOrderMapper extends BaseMapper<OmsProductionOrder>
     */
 
     int updateStatusByIds(@Param(value = "list") List<String> list);
+    /**
+    * Description: 根据工厂、专用号、基本开始日期查询
+    * Param:
+    * return:
+    * Author: ltq
+    * Date: 2020/6/28
+    */
+    List<OmsProductionOrder> selectByFactoryAndMaterialAndStartDate(@Param("list") List<OmsProductionOrder> list);
+
+    /**
+    * Description:
+    * Param:
+    * return:
+    * Author: ltq
+    * Date: 2020/6/29
+    */
+    List<OmsProductionOrder> selectByOrderCode(@Param("list") List<String> list);
+    /**
+    * Description: 根据排产订单号批量更新
+    * Param:
+    * return:
+    * Author: ltq
+    * Date: 2020/7/1
+    */
+    void updateByOrderCode(@Param("list") List<OmsProductionOrder> list);
+
+
 
     /**
      * 根据排产订单号批量修改

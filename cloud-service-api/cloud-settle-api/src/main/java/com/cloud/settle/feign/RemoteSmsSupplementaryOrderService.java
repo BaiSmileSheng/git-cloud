@@ -27,6 +27,15 @@ public interface RemoteSmsSupplementaryOrderService {
     SmsSupplementaryOrder get(@RequestParam("id") Long id);
 
     /**
+     * 根据创建时间查询物耗申请单 列表
+     * @param createTimeStart
+     * @param endTimeStart
+     * @return
+     */
+    @GetMapping("supplementary/listByTime")
+    R listByTime(@RequestParam("createTimeStart") String createTimeStart,@RequestParam("endTimeStart") String endTimeStart);
+
+    /**
      * 修改保存物耗管理申请  -- 无状态校验
      * @param smsSupplementaryOrder
      * @return 是否成功

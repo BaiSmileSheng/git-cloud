@@ -39,4 +39,15 @@
         delete
         from cd_raw_material_stock;
     </delete>
+
+    <select id="selectByList" parameterType="list" resultMap="CdRawMaterialStockResult">
+        <include refid="selectCdRawMaterialStockVo"/>
+        <where>
+            <foreach collection="list" item="item" separator="or">
+                (product_factory_code = #{item.productFactoryCode,jdbcType=VARCHAR}
+                and raw_material_code = #{item.rawMaterialCode,jdbcType=VARCHAR})
+            </foreach>
+            and del_flag = '0'
+        </where>
+    </select>
 </mapper>
