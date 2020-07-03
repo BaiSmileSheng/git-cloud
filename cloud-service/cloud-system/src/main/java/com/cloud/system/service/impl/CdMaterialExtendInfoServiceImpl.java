@@ -131,7 +131,7 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
             JCoTable inputTableW = fm.getTableParameterList().getTable("MATNR");
             for (String materialCode : materialCodeList) {
                 inputTableW.appendRow();
-                inputTableW.setValue("MATNR", materialCode);
+                inputTableW.setValue("MATNR", materialCode.toUpperCase());
             }
 
             //执行函数
@@ -288,7 +288,7 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
                 continue;
             }
             String isPuttingOut = cdMaterialExtendInfo.getIsPuttingOut();
-            String isPuttingOutCode = PuttingOutEnum.getMsgByCode(isPuttingOut);
+            String isPuttingOutCode = PuttingOutEnum.getCodeByMsg(isPuttingOut);
             if (StringUtils.isBlank(isPuttingOutCode)) {
                 errObjectDto.setObject(cdMaterialExtendInfo);
                 errObjectDto.setErrMsg(StrUtil.format("可否加工方式不存在：{}", cdMaterialExtendInfo.getIsPuttingOut()));
@@ -313,7 +313,7 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
             cdMaterialExtendInfo.setIsZnAttestation(isZnAttestatioCode);
             if (null == cdMaterialExtendInfo.getEstablishDate()) {
                 errObjectDto.setObject(cdMaterialExtendInfo);
-                errObjectDto.setErrMsg(StrUtil.format("是否ZN认证不能为空：{}", cdMaterialExtendInfo.getEstablishDate()));
+                errObjectDto.setErrMsg(StrUtil.format("建立日期不能为空：{}", cdMaterialExtendInfo.getEstablishDate()));
                 errDtos.add(errObjectDto);
                 continue;
             }

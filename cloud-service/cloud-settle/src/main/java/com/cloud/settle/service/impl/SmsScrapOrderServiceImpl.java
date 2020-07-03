@@ -105,6 +105,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         Example example = new Example(SmsScrapOrder.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("productOrderCode", productOrderCode);
+        criteria.andNotEqualTo("scrapStatus", ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKBH.getCode());
         int num = selectCountByExample(example);
         if (num > 0) {
             return R.error(StrUtil.format("订单：{}已申请过报废单，请到报废管理进行修改！",productOrderCode));
@@ -133,10 +134,12 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             return rFactoryLineInfo;
         }
         CdFactoryLineInfo factoryLineInfo = rFactoryLineInfo.getData(CdFactoryLineInfo.class);
-         if (factoryLineInfo != null) {
-            smsScrapOrder.setSupplierCode(factoryLineInfo.getSupplierCode());
-            smsScrapOrder.setSupplierName(factoryLineInfo.getSupplierDesc());
+         if (factoryLineInfo == null||StrUtil.isEmpty(factoryLineInfo.getSupplierCode())) {
+             return R.error(StrUtil.format("工厂：{}，线体{}，缺少供应商信息",omsProductionOrder.getProductFactoryCode(),
+                     omsProductionOrder.getProductLineCode()));
         }
+        smsScrapOrder.setSupplierCode(factoryLineInfo.getSupplierCode());
+        smsScrapOrder.setSupplierName(factoryLineInfo.getSupplierDesc());
         smsScrapOrder.setFactoryCode(omsProductionOrder.getProductFactoryCode());
         R rFactory = remoteFactoryInfoService.selectOneByFactory(omsProductionOrder.getProductFactoryCode());
         if(!rFactory.isSuccess()){
@@ -282,7 +285,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
                     continue;
                 }
                 smsScrapOrder.setCurrency(cdSapSalePrice.getConditionsMonetary());
-                smsScrapOrder.setMaterialPrice(new BigDecimal(cdSapSalePrice.getSalePrice()));
+                smsScrapOrder.setMaterialPrice(new BigDecimal(cdSapSalePrice.getSalePrice()).divide(new BigDecimal(cdSapSalePrice.getUnitPricing()),2));
                 smsScrapOrder.setMeasureUnit(cdSapSalePrice.getMeasureUnit());
                 smsScrapOrder.setScrapPrice(smsScrapOrder.getMaterialPrice().multiply(new BigDecimal(smsScrapOrder.getScrapAmount())));
                 //索赔金额=（Sap成品物料销售价格*报废数量*报废索赔系数）+（报废数量*生产订单加工费单价）
@@ -335,7 +338,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             materialCodeComCodeList.forEach(stringStringMap -> {
                 inputTable.appendRow();
                 inputTable.setValue("VKORG", stringStringMap.get("companyCode"));
-                inputTable.setValue("MATNR", stringStringMap.get("materialCode"));
+                inputTable.setValue("MATNR", stringStringMap.get("materialCode").toUpperCase());
             });
             log.info(StrUtil.format("【SAP销售价格接口】传输参数：{}"),CollUtil.join(materialCodeComCodeList,"#"));
             //执行函数
@@ -434,7 +437,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             inputTable.setValue("BKTXT", StrUtil.concat(true,smsScrapOrder.getSupplierCode(),smsScrapOrder.getScrapNo()));//凭证抬头文本  V码+报废单号
             inputTable.setValue("WERKS", smsScrapOrder.getFactoryCode());//工厂
             inputTable.setValue("LGORT", "0088");//库存地点 成品报废库位默认0088，如果0088没有库存就选择0188
-            inputTable.setValue("MATNR", smsScrapOrder.getProductMaterialCode());//物料号
+            inputTable.setValue("MATNR", smsScrapOrder.getProductMaterialCode().toUpperCase());//物料号
             inputTable.setValue("ERFME", smsScrapOrder.getMeasureUnit());//基本计量单位
             inputTable.setValue("ERFMG", smsScrapOrder.getScrapAmount());//数量
             inputTable.setValue("AUFNR", smsScrapOrder.getProductOrderCode());//生产订单号

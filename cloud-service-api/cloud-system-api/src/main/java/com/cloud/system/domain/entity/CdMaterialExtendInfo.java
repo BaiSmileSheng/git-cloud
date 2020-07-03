@@ -59,7 +59,6 @@ public class CdMaterialExtendInfo extends BaseEntity {
     /**
      * 客户名称
      */
-    @ExcelProperty(value = "客户名称")
     @ApiModelProperty(value = "客户名称")
     private String customerName;
 
@@ -95,8 +94,8 @@ public class CdMaterialExtendInfo extends BaseEntity {
      * 建立日期
      */
     @ExcelProperty(value = "建立日期",index = 6)
-    @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat("yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone="GMT+8")
     @ApiModelProperty(value = "建立日期")
     private Date establishDate;
 

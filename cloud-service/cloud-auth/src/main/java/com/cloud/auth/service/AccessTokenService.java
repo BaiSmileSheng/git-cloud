@@ -1,6 +1,7 @@
 package com.cloud.auth.service;
 
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cloud.common.constant.Constants;
 import com.cloud.common.constant.UserConstants;
 import com.cloud.common.redis.annotation.RedisEvict;
@@ -73,7 +74,11 @@ public class AccessTokenService {
         String factoryScopes = remoteUserScopeService.selectDataScopeIdByUserIdAndType(userId, UserConstants.USER_SCOPE_TYPE_FACTORY);
         //采购组权限
         String purchaseScopes = remoteUserScopeService.selectDataScopeIdByUserIdAndType(userId, UserConstants.USER_SCOPE_TYPE_PURCHASE);
-        redis.set(ACCESS_USERID_SCOPE_FACTORY + userId, factoryScopes, AccessTokenService.EXPIRE);
-        redis.set(ACCESS_USERID_SCOPE_PURCHASE + userId, purchaseScopes, AccessTokenService.EXPIRE);
+        if (StrUtil.isNotBlank(factoryScopes)) {
+            redis.set(ACCESS_USERID_SCOPE_FACTORY + userId, factoryScopes, AccessTokenService.EXPIRE);
+        }
+        if (StrUtil.isNotBlank(purchaseScopes)) {
+            redis.set(ACCESS_USERID_SCOPE_PURCHASE + userId, purchaseScopes, AccessTokenService.EXPIRE);
+        }
     }
 }
