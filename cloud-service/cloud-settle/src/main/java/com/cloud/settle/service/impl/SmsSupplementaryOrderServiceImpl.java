@@ -184,7 +184,13 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
 //        smsSupplementaryOrder.setStuffPrice(cdMaterialPriceInfo.getNetWorth());//单价  取得materialPrice表的净价值
 //        smsSupplementaryOrder.setStuffUnit(cdMaterialPriceInfo.getUnit());
 //        smsSupplementaryOrder.setCurrency(cdMaterialPriceInfo.getCurrency());//币种
-        R rBom = remoteBomService.listByProductAndMaterial(productMaterialCode, rawMaterialCode);
+        if (StrUtil.isEmpty(omsProductionOrder.getBomVersion())) {
+            return R.error("生产订单无bom版本");
+        }
+        if (StrUtil.isEmpty(omsProductionOrder.getProductFactoryCode())) {
+            return R.error("生产订单无生产工厂");
+        }
+        R rBom = remoteBomService.listByProductAndMaterial(productMaterialCode, rawMaterialCode,omsProductionOrder.getBomVersion(),omsProductionOrder.getProductFactoryCode());
         if (!rBom.isSuccess()) {
             return rBom;
         }
@@ -437,7 +443,13 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
 //        if (!rBomNum.isSuccess()) {
 //            return rBomNum;
 //        }
-        R rBom = remoteBomService.listByProductAndMaterial(productMaterialCode, rawMaterialCode);
+        if (StrUtil.isEmpty(omsProductionOrder.getBomVersion())) {
+            return R.error("生产订单无bom版本");
+        }
+        if (StrUtil.isEmpty(omsProductionOrder.getProductFactoryCode())) {
+            return R.error("生产订单无生产工厂");
+        }
+        R rBom = remoteBomService.listByProductAndMaterial(productMaterialCode, rawMaterialCode,omsProductionOrder.getBomVersion(),omsProductionOrder.getProductFactoryCode());
         if (!rBom.isSuccess()) {
             return R.error("BOM信息为空！");
         }

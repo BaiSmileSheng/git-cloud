@@ -29,4 +29,13 @@ public interface RemoteCdProductStockService {
      */
     @PostMapping("productStock/queryOneByFactoryAndMaterial")
     R queryOneByFactoryAndMaterial(@RequestBody List<CdProductStock> list);
+    /**
+     * Description:  根据生产工厂、成品专用号查询成品库存
+     * Param: [cdProductStock]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/30
+     */
+    @PostMapping("productStock/findOneByExample")
+    R findOneByExample(@RequestBody CdProductStock cdProductStock);
 }
