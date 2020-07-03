@@ -124,5 +124,13 @@ public class CdRawMaterialStockController extends BaseController {
     public R exportRawMaterialExcel(@ApiIgnore CdRawMaterialStock cdRawMaterialStock){
         return cdRawMaterialStockService.exportRawMaterialExcel(cdRawMaterialStock);
     }
+    /**
+     * 查询原材料库存
+     */
+    @PostMapping("selectByList")
+    @ApiOperation(value = "根据对象查询原材料库存 ", response = CdRawMaterialStock.class)
+    public R selectByList(@RequestBody List<CdRawMaterialStock> list){
+        return cdRawMaterialStockService.selectByList(list);
+    }
 
 }

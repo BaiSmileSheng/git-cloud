@@ -1,5 +1,7 @@
 package com.cloud.system.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.system.domain.entity.CdRawMaterialStock;
@@ -9,6 +11,7 @@ import com.cloud.system.util.EasyExcelUtilOSS;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,5 +46,21 @@ public class CdRawMaterialStockServiceImpl extends BaseServiceImpl<CdRawMaterial
     public R deleteAll() {
         cdRawMaterialStockMapper.deleteAll();
         return R.ok();
+    }
+    /**
+     * Description:  根据List<CdRawMaterialStock>查询
+     * Param: [list]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/28
+     */
+    @Override
+    public R selectByList(List<CdRawMaterialStock> list) {
+        List<CdRawMaterialStock> cdRawMaterialStocks = cdRawMaterialStockMapper.selectByList(list);
+        if (ObjectUtil.isEmpty(cdRawMaterialStocks) && cdRawMaterialStocks.size() <= 0) {
+            cdRawMaterialStocks.add(CdRawMaterialStock.builder().build());
+            return R.data(cdRawMaterialStocks);
+        }
+        return R.data(cdRawMaterialStockMapper.selectByList(list));
     }
 }

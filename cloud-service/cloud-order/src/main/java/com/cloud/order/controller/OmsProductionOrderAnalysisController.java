@@ -1,6 +1,7 @@
 package com.cloud.order.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.controller.BaseController;
@@ -16,6 +17,7 @@ import com.cloud.order.service.IOmsProductionOrderAnalysisService;
 import com.cloud.order.service.IOmsRealOrderService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
+import com.cloud.system.domain.entity.CdProductStock;
 import com.cloud.system.domain.entity.SysUser;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +70,7 @@ public class OmsProductionOrderAnalysisController extends BaseController {
             @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = false,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "orderFrom", value = "订单来源", required = false,paramType = "query", dataType = "String")
     })
+    @HasPermissions("order:productionOrderAnalysis:list")
     public TableDataInfo list(@ApiIgnore OmsProductionOrderAnalysis omsProductionOrderAnalysis) {
         SysUser sysUser = getUserInfo(SysUser.class);
         if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
@@ -123,6 +126,7 @@ public class OmsProductionOrderAnalysisController extends BaseController {
             @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = false,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "orderFrom", value = "订单来源", required = false,paramType = "query", dataType = "String")
     })
+    @HasPermissions("order:productionOrderAnalysis:export")
     public R export(@ApiIgnore OmsProductionOrderAnalysis omsProductionOrderAnalysis){
         Example example = new Example(OmsProductionOrderAnalysis.class);
         Example.Criteria criteria = example.createCriteria();
@@ -165,6 +169,7 @@ public class OmsProductionOrderAnalysisController extends BaseController {
             @ApiImplicitParam(name = "productMaterialCode", value = "成品物料号", required = true,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productDate", value = "生产日期", required = true,paramType = "query", dataType = "String")
     })
+    @HasPermissions("order:productionOrderAnalysis:customerList")
     public R getCustomerList(@ApiIgnore OmsRealOrder omsRealOrder){
         return omsProductionOrderAnalysisService.queryRealOrder(omsRealOrder);
     }
@@ -179,5 +184,22 @@ public class OmsProductionOrderAnalysisController extends BaseController {
     @ApiOperation(value = "待排产订单分析汇总定时任务", response = OmsRealOrder.class)
     public R productionOrderAnalysisGatherJob(){
         return omsProductionOrderAnalysisService.saveAnalysisGather();
+    }
+
+    /**
+     * Description:  查询成品库存信息
+     * Param: [cdProductStock]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/30
+     */
+    @GetMapping("getProductStock")
+    @ApiOperation(value = "查询成品库存信息", response = CdProductStock.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required =true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productMaterialCode", value = "成品物料号", required = true,paramType = "query", dataType = "String")
+    })
+    public R getProductStock(@ApiIgnore CdProductStock cdProductStock){
+        return omsProductionOrderAnalysisService.getProductStock(cdProductStock);
     }
 }

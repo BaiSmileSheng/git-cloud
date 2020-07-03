@@ -36,4 +36,12 @@ public interface CdFactoryLineInfoMapper extends BaseMapper<CdFactoryLineInfo> {
     CdFactoryLineInfo selectInfoByCodeLineCode(@Param("produceLineCode") String produceLineCode, @Param("factoryCode") String factoryCode);
 
     List<CdFactoryLineInfo> selectListByMapList(@Param(value = "list") List<Dict> list);
+    /**
+    * Description: 根据生产工厂、线体批量删除
+    * Param:
+    * return:
+    * Author: ltq
+    * Date: 2020/7/1
+    */
+    void deleteBatchByFactoryLine(@Param(value = "list") List<CdFactoryLineInfo> list);
 }
