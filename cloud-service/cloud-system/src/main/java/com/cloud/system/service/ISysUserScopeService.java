@@ -1,7 +1,9 @@
 package com.cloud.system.service;
 
-import com.cloud.system.domain.entity.SysUserScope;
 import com.cloud.common.core.service.BaseService;
+import com.cloud.system.domain.entity.SysUserScope;
+
+import java.util.Set;
 
 /**
  * 用户和数据权限关联Service接口
@@ -23,4 +25,13 @@ public interface ISysUserScopeService extends BaseService<SysUserScope>{
      * @param userId
      */
     void deleteByUserId(Long userId);
+
+
+    /**
+     * 根据用户id查询权限
+     * @param userId
+     * @return
+     */
+    Set<String> selectDataScopeIdByUserId(Long userId);
+
 }

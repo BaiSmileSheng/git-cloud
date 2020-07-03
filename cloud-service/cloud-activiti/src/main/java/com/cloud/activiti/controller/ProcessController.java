@@ -1,18 +1,10 @@
 package com.cloud.activiti.controller;
 
-import java.awt.Color;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.zip.ZipInputStream;
-
-import javax.servlet.http.HttpServletResponse;
-
+import com.cloud.activiti.consts.ActivitiConstant;
+import com.cloud.activiti.cover.ICustomProcessDiagramGenerator;
+import com.cloud.common.core.domain.R;
+import com.cloud.common.exception.MvaCloudException;
+import lombok.extern.slf4j.Slf4j;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.ProcessEngineConfiguration;
@@ -28,19 +20,20 @@ import org.activiti.engine.repository.ProcessDefinition;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.cloud.activiti.consts.ActivitiConstant;
-import com.cloud.activiti.cover.ICustomProcessDiagramGenerator;
-import com.cloud.common.core.domain.R;
-import com.cloud.common.exception.MvaCloudException;
-
-import lombok.extern.slf4j.Slf4j;
+import javax.servlet.http.HttpServletResponse;
+import java.awt.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.zip.ZipInputStream;
 
 /**
  * 流程管理

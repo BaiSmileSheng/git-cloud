@@ -1,17 +1,8 @@
 package com.cloud.activiti.config;
 
-import javax.sql.DataSource;
-
-import org.activiti.engine.DynamicBpmnService;
-import org.activiti.engine.FormService;
-import org.activiti.engine.HistoryService;
-import org.activiti.engine.IdentityService;
-import org.activiti.engine.ManagementService;
-import org.activiti.engine.ProcessEngine;
-import org.activiti.engine.ProcessEngineConfiguration;
-import org.activiti.engine.RepositoryService;
-import org.activiti.engine.RuntimeService;
-import org.activiti.engine.TaskService;
+import com.cloud.activiti.cover.ICustomProcessDiagramGenerator;
+import lombok.extern.slf4j.Slf4j;
+import org.activiti.engine.*;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.spring.ProcessEngineFactoryBean;
 import org.activiti.spring.SpringProcessEngineConfiguration;
@@ -21,7 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.cloud.activiti.cover.ICustomProcessDiagramGenerator;
+import javax.sql.DataSource;
 
 /**
  * <p>File：ActivitiConfig.java</p>
@@ -34,6 +25,7 @@ import com.cloud.activiti.cover.ICustomProcessDiagramGenerator;
  * @version 1.0
  */
 @Configuration
+@Slf4j
 public class ActivitiConfig {
     @Autowired
     private ICustomProcessDiagramGenerator customProcessDiagramGenerator;

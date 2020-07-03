@@ -601,7 +601,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
                 JCoTable inputTableM = fm.getTableParameterList().getTable("MATNR");
                 for(String materialCode : materialCodeList){
                     inputTableM.appendRow();
-                    inputTableM.setValue("MATNR",materialCode);
+                    inputTableM.setValue("MATNR",materialCode.toUpperCase());
                 }
             }
             sysInterfaceLog.setContent(factoryCode + "");
