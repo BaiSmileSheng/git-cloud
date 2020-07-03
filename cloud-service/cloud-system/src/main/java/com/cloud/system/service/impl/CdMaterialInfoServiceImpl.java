@@ -59,7 +59,8 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
         R r = materialInfoInterface(list, 0, null);
         if (r.isSuccess()) {
             ObjectMapper objectMapper = new ObjectMapper();
-            list = objectMapper.convertValue(r.get("list"), new TypeReference<List<RowRisk>>() {});
+            list = objectMapper.convertValue(r.get("list"), new TypeReference<List<RowRisk>>() {
+            });
             if (ObjectUtil.isNotEmpty(list) && list.size() > 0) {
                 //更新
                 List<CdMaterialInfo> cdMaterialInfosUpdate = new ArrayList<>();
@@ -89,10 +90,14 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
                     }
 
                 });
-                //批量更新
-                cdMaterialInfoMapper.updateBatchByPrimaryKeySelective(cdMaterialInfosUpdate);
-                //批量新增
-                cdMaterialInfoMapper.insertList(cdMaterialInfosInsert);
+                if (ObjectUtil.isNotEmpty(cdMaterialInfosUpdate) && cdMaterialInfosUpdate.size() > 0) {
+                    //批量更新
+                    cdMaterialInfoMapper.updateBatchByPrimaryKeySelective(cdMaterialInfosUpdate);
+                }
+                if (ObjectUtil.isNotEmpty(cdMaterialInfosInsert) && cdMaterialInfosInsert.size() > 0) {
+                    //批量新增
+                    cdMaterialInfoMapper.insertList(cdMaterialInfosInsert);
+                }
             } else {
                 log.error("接口获取物料主数据为空！");
                 return R.error("接口获取物料主数据为空！");
@@ -185,8 +190,8 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
      * @Date: 2020/6/5
      */
     @Override
-    public int updateBatchByFactoryAndMaterial(List<CdMaterialInfo> list) {
-        return cdMaterialInfoMapper.updateBatchByFactoryAndMaterial(list);
+    public void updateBatchByFactoryAndMaterial(List<CdMaterialInfo> list) {
+        cdMaterialInfoMapper.updateBatchByFactoryAndMaterial(list);
     }
 
     /**
@@ -204,7 +209,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
     @Override
     public R updateUphBySap() {
         //1获取调SAP系统获取UPH接口的入参信息
-        List<CdMaterialInfo> list = cdMaterialInfoMapper.select(CdMaterialInfo.builder().delFlag("0").build());
+        List<CdMaterialInfo> list = cdMaterialInfoMapper.select(CdMaterialInfo.builder().materialType("HALB").delFlag("0").build());
         //2处理UPH接口的入参数据
         //工厂set
         Set<String> factorySet = new HashSet<>();
@@ -229,9 +234,12 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
             return R.error("调用SAP系统UPH接口返回数据失败，原因：" + r.get("msg"));
         }
         List<CdMaterialInfo> uphList =
-                r.getCollectData(new TypeReference<List<CdMaterialInfo>>() {});
-        //4执行更新方法
-        cdMaterialInfoMapper.updateBatchByFactoryAndMaterial(uphList);
+                r.getCollectData(new TypeReference<List<CdMaterialInfo>>() {
+                });
+        if (ObjectUtil.isNotEmpty(uphList) && uphList.size() > 0) {
+            //4执行更新方法
+            cdMaterialInfoMapper.updateBatchByFactoryAndMaterial(uphList);
+        }
         return R.ok();
     }
 
