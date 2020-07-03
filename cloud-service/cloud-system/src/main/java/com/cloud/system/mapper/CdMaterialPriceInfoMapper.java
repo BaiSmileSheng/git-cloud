@@ -32,4 +32,11 @@ public interface CdMaterialPriceInfoMapper extends BaseMapper<CdMaterialPriceInf
      * @return
      */
     int deleteAll();
+
+    /**
+     * 批量新增
+     * @param list
+     * @return
+     */
+    int batchInsertOrUpdate(List<CdMaterialPriceInfo> list);
 }

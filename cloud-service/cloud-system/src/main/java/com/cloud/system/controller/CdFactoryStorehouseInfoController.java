@@ -12,6 +12,7 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.system.domain.entity.CdFactoryStorehouseInfo;
+import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.service.ICdFactoryStorehouseInfoService;
 import com.cloud.system.util.EasyExcelUtilOSS;
 import io.swagger.annotations.*;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -150,19 +152,9 @@ public class CdFactoryStorehouseInfoController extends BaseController {
     @PostMapping("importFactoryStorehouse")
     @HasPermissions("system:factoryStorehouse:importFactoryStorehouse")
     @ApiOperation(value = "导入", response = CdFactoryStorehouseInfo.class)
-    public R importFactoryStorehouse(@RequestPart("file") MultipartFile file){
-        List<CdFactoryStorehouseInfo> list =  (List<CdFactoryStorehouseInfo>)EasyExcelUtil.readMulExcel(file,new CdFactoryStorehouseInfo());
-        if(CollectionUtils.isEmpty(list)){
-            return R.error("导入数据不存在");
-        }
-        for(CdFactoryStorehouseInfo cdFactoryStorehouseInfo : list){
-            //校验入参
-            ValidatorUtils.validateEntity(cdFactoryStorehouseInfo);
-            cdFactoryStorehouseInfo.setDelFlag(DeleteFlagConstants.NO_DELETED);
-            cdFactoryStorehouseInfo.setCreateBy(getLoginName());
-            cdFactoryStorehouseInfo.setCreateTime(new Date());
-        }
-        return cdFactoryStorehouseInfoService.batchInsertOrUpdate(list);
+    public R importFactoryStorehouse(@RequestPart("file") MultipartFile file)throws IOException {
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return cdFactoryStorehouseInfoService.importFactoryStorehouse(file,sysUser);
     }
 
     /**

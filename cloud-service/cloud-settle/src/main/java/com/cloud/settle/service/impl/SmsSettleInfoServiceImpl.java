@@ -51,14 +51,14 @@ public class SmsSettleInfoServiceImpl extends BaseServiceImpl<SmsSettleInfo> imp
         List<SmsSettleInfo> smsSettleInfoList = this.selectByExample(example);
         //2.计算加工费 (订单交货数量*sap加工费单价=生产订单加工费金额 )
         //3.修改加工费结算信息表--加工费结算金额,状态为待结算
-        for (SmsSettleInfo smsSettleInfo : smsSettleInfoList) {
+        smsSettleInfoList.forEach(smsSettleInfo ->{
             if (null != smsSettleInfo.getMachiningPrice() && null != smsSettleInfo.getConfirmAmont()) {
                 BigDecimal settlePrice = smsSettleInfo.getMachiningPrice().multiply(new BigDecimal(smsSettleInfo.getConfirmAmont()));
                 smsSettleInfo.setSettlePrice(settlePrice);
                 smsSettleInfo.setOrderStatus(SettleInfoOrderStatusEnum.ORDER_STATUS_11.getCode());
-                this.updateByPrimaryKeySelective(smsSettleInfo);
             }
-        }
+        });
+        updateBatchByPrimaryKeySelective(smsSettleInfoList);
         logger.info("加工费生成结束");
         return R.ok();
     }

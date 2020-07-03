@@ -1,13 +1,9 @@
-package com.cloud.system.domain.entity;
+package com.cloud.system.domain.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
-import com.cloud.system.converter.LifeCycleConverter;
-import com.cloud.system.converter.ProductTypeConverter;
-import com.cloud.system.converter.PuttingOutConverter;
-import com.cloud.system.converter.ZnAttestationConverter;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -21,7 +17,7 @@ import javax.persistence.Id;
 import java.util.Date;
 
 /**
- * 物料扩展信息 对象 cd_material_extend_info
+ * 导入错误 物料扩展信息 对象 cd_material_extend_info
  *
  * @author lihongia
  * @date 2020-06-15
@@ -32,7 +28,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 @ApiModel(value = "物料扩展信息 ")
-public class CdMaterialExtendInfo extends BaseEntity {
+public class CdMaterialExtendInfoImportErrorVo extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -66,28 +62,28 @@ public class CdMaterialExtendInfo extends BaseEntity {
     /**
      * 产品类别
      */
-    @ExcelProperty(value = "产品类别",index = 2,converter = ProductTypeConverter.class)
+    @ExcelProperty(value = "产品类别",index = 2)
     @ApiModelProperty(value = "产品类别")
     private String productType;
 
     /**
      * 生命周期
      */
-    @ExcelProperty(value = "生命周期",index = 3,converter = LifeCycleConverter.class)
+    @ExcelProperty(value = "生命周期",index = 3)
     @ApiModelProperty(value = "生命周期")
     private String lifeCycle;
 
     /**
      * 可否加工承揽
      */
-    @ExcelProperty(value = "可否加工承揽",index = 4,converter = PuttingOutConverter.class)
+    @ExcelProperty(value = "可否加工承揽",index = 4)
     @ApiModelProperty(value = "可否加工承揽")
     private String isPuttingOut;
 
     /**
      * 是否ZN认证
      */
-    @ExcelProperty(value = "是否ZN认证",index = 5,converter = ZnAttestationConverter.class)
+    @ExcelProperty(value = "是否ZN认证",index = 5)
     @ApiModelProperty(value = "是否ZN认证")
     private String isZnAttestation;
 
@@ -104,5 +100,12 @@ public class CdMaterialExtendInfo extends BaseEntity {
      * 是否删除0：有效，1：删除
      */
     private String delFlag;
+
+    /**
+     * 错误信息
+     */
+    @ExcelProperty(value = "错误信息",index = 7)
+    @ApiModelProperty(value = "错误信息")
+    private String errorMessage;
 
 }

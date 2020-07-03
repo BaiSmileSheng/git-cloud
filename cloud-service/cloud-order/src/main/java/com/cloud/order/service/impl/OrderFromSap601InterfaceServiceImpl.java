@@ -151,6 +151,7 @@ public class OrderFromSap601InterfaceServiceImpl implements IOrderFromSap601Inte
                     //设置指针位置
                     outTableOutput.setRow(i);
                     OmsProductionOrder omsProductionOrder = new OmsProductionOrder();
+                    omsProductionOrder.setSapFlag(outTableOutput.getString("TYPE"));
                     omsProductionOrder.setOrderCode(outTableOutput.getString("ABLAD"));//排产订单号
                     omsProductionOrder.setSapMessages(outTableOutput.getString("MESSAGE"));
                     dataList.add(omsProductionOrder);

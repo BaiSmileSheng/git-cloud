@@ -55,5 +55,10 @@ public interface CdMaterialExtendInfoMapper extends BaseMapper<CdMaterialExtendI
     */
     CdMaterialExtendInfo selectOneByMaterialCode(@Param("materialCode")String materialCode);
 
-
+    /**
+     * 增量更新
+     * @param list
+     * @return
+     */
+    int batchInsertOrUpdate(List<CdMaterialExtendInfo> list);
 }

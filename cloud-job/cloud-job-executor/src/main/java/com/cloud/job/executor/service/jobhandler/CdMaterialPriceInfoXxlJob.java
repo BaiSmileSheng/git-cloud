@@ -30,12 +30,30 @@ public class CdMaterialPriceInfoXxlJob {
      * @return 成功
      * @throws Exception
      */
-    @XxlJob("synPriceHandler")
-    public ReturnT<String> synPriceHandler(String param) throws Exception {
-        logger.info("加工费/原材料价格同步开始");
-        R r = remoteCdMaterialPriceInfoService.synPrice();
+    @XxlJob("synPriceJGFHandler")
+    public ReturnT<String> synPriceJGFHandler(String param) throws Exception {
+        logger.info("加工费价格同步开始");
+        R r = remoteCdMaterialPriceInfoService.synPriceJGF();
         if(!r.isSuccess()){
-            logger.error("加工费/原材料价格同步异常:{}", JSONObject.toJSONString(r));
+            logger.error("加工费同步异常:{}", JSONObject.toJSONString(r));
+        }
+        logger.info("加工费价格同步结束");
+        return ReturnT.SUCCESS;
+    }
+
+    /**
+     * 4加工费/原材料价格同步
+     * 每月1号执行一次  0 0 1 * * ?
+     * @param param
+     * @return 成功
+     * @throws Exception
+     */
+    @XxlJob("synPriceYCLHandler")
+    public ReturnT<String> synPriceYCLHandler(String param) throws Exception {
+        logger.info("原材料价格同步开始");
+        R r = remoteCdMaterialPriceInfoService.synPriceYCL();
+        if(!r.isSuccess()){
+            logger.error("原材料价格同步异常:{}", JSONObject.toJSONString(r));
         }
         logger.info("原材料价格同步结束");
         return ReturnT.SUCCESS;

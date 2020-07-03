@@ -125,6 +125,18 @@ public class SmsSupplementaryOrderController extends BaseController {
     }
 
     /**
+     * 根据创建时间查询物耗申请单 列表
+     */
+    @GetMapping("listByTime")
+    public R listByTime(@RequestParam("createTimeStart") String createTimeStart,@RequestParam("endTimeStart") String endTimeStart){
+        Example example = new Example(SmsSupplementaryOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andGreaterThanOrEqualTo("createTime",createTimeStart);
+        criteria.andLessThanOrEqualTo("createTime",endTimeStart);
+        List<SmsSupplementaryOrder> smsSupplementaryOrderList = smsSupplementaryOrderService.selectByExample(example);
+        return R.data(smsSupplementaryOrderList);
+    }
+    /**
      * 分页查询条件
      *
      * @param smsSupplementaryOrder
