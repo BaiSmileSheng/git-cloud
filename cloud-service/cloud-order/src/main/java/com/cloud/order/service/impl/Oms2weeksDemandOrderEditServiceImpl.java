@@ -710,7 +710,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             oms2weeksDemandOrderEditList.forEach(oms2weeksDemandOrderEdit->{
                 //附加表的最后一个新行,行指针,它指向新添加的行。
                 inputTable.appendRow();
-                inputTable.setValue("MATNR", oms2weeksDemandOrderEdit.getProductMaterialCode());
+                inputTable.setValue("MATNR", oms2weeksDemandOrderEdit.getProductMaterialCode().toUpperCase());
                 inputTable.setValue("WERKS", oms2weeksDemandOrderEdit.getProductFactoryCode());
                 inputTable.setValue("AUART", oms2weeksDemandOrderEdit.getOrderType());
 //                inputTable.setValue("GSTRP", oms2weeksDemandOrderEdit.getProductStartDate());

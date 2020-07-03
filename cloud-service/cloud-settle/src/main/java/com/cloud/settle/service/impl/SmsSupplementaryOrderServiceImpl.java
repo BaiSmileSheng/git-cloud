@@ -342,7 +342,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             inputTable.setValue("BKTXT", StrUtil.concat(true,smsSupplementaryOrder.getSupplierCode(),smsSupplementaryOrder.getStuffNo()));//凭证抬头文本  V码+物耗单号
             inputTable.setValue("WERKS", smsSupplementaryOrder.getFactoryCode());//工厂
             inputTable.setValue("LGORT", "0088");//库存地点 成品报废库位默认0088，如果0088没有库存就选择0188
-            inputTable.setValue("MATNR", smsSupplementaryOrder.getRawMaterialCode());//物料号
+            inputTable.setValue("MATNR", smsSupplementaryOrder.getRawMaterialCode().toUpperCase());//物料号
             inputTable.setValue("ERFME", smsSupplementaryOrder.getStuffUnit());//基本计量单位
             inputTable.setValue("ERFMG", smsSupplementaryOrder.getStuffAmount());//数量
             inputTable.setValue("AUFNR", smsSupplementaryOrder.getProductOrderCode());//生产订单号

@@ -735,7 +735,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 inputTable.appendRow();
                 inputTable.setValue("XQDDH",demandOrderGatherEdit.getDemandOrderCode());//唯一单号
                 inputTable.setValue("PAART", demandOrderGatherEdit.getOrderType());//订单类型
-                inputTable.setValue("MATNR", demandOrderGatherEdit.getProductMaterialCode());//物料号
+                inputTable.setValue("MATNR", demandOrderGatherEdit.getProductMaterialCode().toUpperCase());//物料号
                 inputTable.setValue("PWWRK", demandOrderGatherEdit.getProductFactoryCode());//工厂
                 inputTable.setValue("BERID", demandOrderGatherEdit.getMrpRange());//MRP 范围
                 inputTable.setValue("VERID", demandOrderGatherEdit.getBomVersion());//生产版本

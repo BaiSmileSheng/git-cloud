@@ -338,7 +338,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             materialCodeComCodeList.forEach(stringStringMap -> {
                 inputTable.appendRow();
                 inputTable.setValue("VKORG", stringStringMap.get("companyCode"));
-                inputTable.setValue("MATNR", stringStringMap.get("materialCode"));
+                inputTable.setValue("MATNR", stringStringMap.get("materialCode").toUpperCase());
             });
             log.info(StrUtil.format("【SAP销售价格接口】传输参数：{}"),CollUtil.join(materialCodeComCodeList,"#"));
             //执行函数
@@ -437,7 +437,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             inputTable.setValue("BKTXT", StrUtil.concat(true,smsScrapOrder.getSupplierCode(),smsScrapOrder.getScrapNo()));//凭证抬头文本  V码+报废单号
             inputTable.setValue("WERKS", smsScrapOrder.getFactoryCode());//工厂
             inputTable.setValue("LGORT", "0088");//库存地点 成品报废库位默认0088，如果0088没有库存就选择0188
-            inputTable.setValue("MATNR", smsScrapOrder.getProductMaterialCode());//物料号
+            inputTable.setValue("MATNR", smsScrapOrder.getProductMaterialCode().toUpperCase());//物料号
             inputTable.setValue("ERFME", smsScrapOrder.getMeasureUnit());//基本计量单位
             inputTable.setValue("ERFMG", smsScrapOrder.getScrapAmount());//数量
             inputTable.setValue("AUFNR", smsScrapOrder.getProductOrderCode());//生产订单号
