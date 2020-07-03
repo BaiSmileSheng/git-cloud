@@ -15,7 +15,7 @@ import java.util.Map;
  * @date 2020-06-01
  */
 public interface CdMaterialInfoMapper extends BaseMapper<CdMaterialInfo> {
-    int updateBatchByFactoryAndMaterial(@Param(value = "list") List<CdMaterialInfo> list);
+    void updateBatchByFactoryAndMaterial(@Param(value = "list") List<CdMaterialInfo> list);
 
     /**
      * 根据物料号集合查询物料信息

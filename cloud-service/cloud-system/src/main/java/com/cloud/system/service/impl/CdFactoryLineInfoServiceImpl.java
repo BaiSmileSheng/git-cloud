@@ -98,7 +98,6 @@ public class CdFactoryLineInfoServiceImpl extends BaseServiceImpl<CdFactoryLineI
                     }
                     cdFactoryLineInfo.setBranchOffice(factoryLineInfo.getBranchOffice());
                     cdFactoryLineInfo.setMonitor(factoryLineInfo.getMonitor());
-                    cdFactoryLineInfo.setAttribute(factoryLineInfo.getAttribute());
                     cdFactoryLineInfo.setUpdateBy("systemJob");
                     cdFactoryLineInfo.setUpdateTime(new Date());
                     updateFactoryLines.add(cdFactoryLineInfo);

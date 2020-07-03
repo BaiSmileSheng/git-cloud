@@ -190,8 +190,8 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
      * @Date: 2020/6/5
      */
     @Override
-    public int updateBatchByFactoryAndMaterial(List<CdMaterialInfo> list) {
-        return cdMaterialInfoMapper.updateBatchByFactoryAndMaterial(list);
+    public void updateBatchByFactoryAndMaterial(List<CdMaterialInfo> list) {
+        cdMaterialInfoMapper.updateBatchByFactoryAndMaterial(list);
     }
 
     /**
@@ -209,7 +209,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
     @Override
     public R updateUphBySap() {
         //1获取调SAP系统获取UPH接口的入参信息
-        List<CdMaterialInfo> list = cdMaterialInfoMapper.select(CdMaterialInfo.builder().delFlag("0").build());
+        List<CdMaterialInfo> list = cdMaterialInfoMapper.select(CdMaterialInfo.builder().materialType("HALB").delFlag("0").build());
         //2处理UPH接口的入参数据
         //工厂set
         Set<String> factorySet = new HashSet<>();
