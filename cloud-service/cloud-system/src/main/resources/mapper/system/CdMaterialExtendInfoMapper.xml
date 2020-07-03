@@ -92,4 +92,50 @@
         where material_code=#{materialCode}
         limit 1
     </select>
+    <insert id="batchInsertOrUpdate">
+        insert into cd_material_extend_info (
+        material_code,
+        material_desc,
+        customer_name,
+        product_type,
+        life_cycle,
+        is_putting_out,
+        is_zn_attestation,
+        establish_date,
+        del_flag,
+        remark,
+        create_by,
+        update_by)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.materialCode},
+            #{item.materialDesc},
+            ifnull(#{item.customerName}, ''),
+            #{item.productType},
+            #{item.lifeCycle},
+            #{item.productType},
+            #{item.isPuttingOut},
+            #{item.isZnAttestation},
+            #{item.establishDate},
+            ifnull(#{item.delFlag}, 0),
+            ifnull(#{item.remark}, ''),
+            ifnull(#{item.createBy}, ''),
+            ifnull(#{item.updateBy}, '')
+            )
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        material_code = VALUES(material_code),
+        material_desc = VALUES(material_desc),
+        customer_name = VALUES(customer_name),
+        product_type = VALUES(product_type),
+        life_cycle = VALUES(life_cycle),
+        is_putting_out = VALUES(is_putting_out),
+        is_zn_attestation = VALUES(is_zn_attestation),
+        establish_date = VALUES(establish_date),
+        del_flag = VALUES(del_flag),
+        remark = VALUES(remark),
+        create_by = VALUES(create_by),
+        update_time = now()
+    </insert>
 </mapper>

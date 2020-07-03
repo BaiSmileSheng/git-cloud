@@ -65,4 +65,47 @@
         customer_code
     </select>
 
+    <insert id="batchInsertOrUpdate">
+        insert into cd_factory_storehouse_info (
+        product_factory_code,
+        product_factory_desc,
+        customer_code,
+        customer_desc,
+        storehouse_from,
+        storehouse_to,
+        lead_time,
+        del_flag,
+        remark,
+        create_by,
+        update_by)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.productFactoryCode},
+            #{item.productFactoryDesc},
+            #{item.customerCode},
+            ifnull(#{item.customerDesc}, ''),
+            #{item.storehouseFrom},
+            #{item.storehouseTo},
+            #{item.leadTime},
+            ifnull(#{item.delFlag}, 0),
+            ifnull(#{item.remark}, ''),
+            ifnull(#{item.createBy}, ''),
+            ifnull(#{item.updateBy}, '')
+            )
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        product_factory_code = VALUES(product_factory_code),
+        product_factory_desc = VALUES(product_factory_desc),
+        customer_code = VALUES(customer_code),
+        customer_desc = VALUES(customer_desc),
+        storehouse_from = VALUES(storehouse_from),
+        storehouse_to = VALUES(storehouse_to),
+        lead_time = VALUES(lead_time),
+        del_flag = VALUES(del_flag),
+        remark = VALUES(remark),
+        create_by = VALUES(create_by),
+        update_by = VALUES(update_by),
+        update_time = now()
+    </insert>
 </mapper>

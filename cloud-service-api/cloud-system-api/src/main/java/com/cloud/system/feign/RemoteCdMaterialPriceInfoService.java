@@ -55,10 +55,17 @@ public interface RemoteCdMaterialPriceInfoService {
                                                                         @RequestParam(value = "beginDate") String beginDate,
                                                                         @RequestParam(value = "endDate") String endDate);
     /**
-     * 定时加工费/原材料价格同步
+     * 定时加工费价格同步
      * @return 成功或失败
      */
-    @PostMapping("materialPrice/synPrice")
-    R synPrice();
+    @PostMapping("materialPrice/synPriceJGF")
+    R synPriceJGF();
+
+    /**
+     * 定时原材料价格同步
+     * @return 成功或失败
+     */
+    @PostMapping("materialPrice/synPriceYCL")
+    R synPriceYCL();
 
 }

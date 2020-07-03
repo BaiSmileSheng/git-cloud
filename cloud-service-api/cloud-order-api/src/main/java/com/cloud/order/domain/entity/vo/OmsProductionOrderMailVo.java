@@ -41,7 +41,7 @@ public class OmsProductionOrderMailVo extends BaseEntity {
     /**
      * 生产产订单号
      */
-    @ExcelProperty(value = "生产订单号",index = 3)
+    @ExcelProperty(value = "订单批次号",index = 3)
     @ApiModelProperty(value = "生产订单号")
     private String productOrderCode;
 
@@ -164,7 +164,7 @@ public class OmsProductionOrderMailVo extends BaseEntity {
     /**
      * BOM版本
      */
-    @ExcelProperty(value = "BOM版本",index = 14)
+    @ExcelProperty(value = "版本",index = 14)
     @ApiModelProperty(value = "BOM版本")
     @NotBlank
     private String bomVersion;
@@ -185,14 +185,14 @@ public class OmsProductionOrderMailVo extends BaseEntity {
     /**
      * 用时
      */
-    @ExcelProperty(value = "用时",index =12 )
+    @ExcelProperty(value = "产品用时",index =12 )
     @ApiModelProperty(value = "用时")
     private BigDecimal useTime;
 
     /**
      * 节拍
      */
-    @ExcelProperty(value = "节拍",index = 11)
+    @ExcelProperty(value = "UPH",index = 11)
     @ApiModelProperty(value = "节拍")
     private BigDecimal rhythm;
 
@@ -259,14 +259,14 @@ public class OmsProductionOrderMailVo extends BaseEntity {
     /**
      * 是否卡萨帝 0：否，1：是
      */
-    @ExcelProperty(value = "顺序",index = 18)
+    @ExcelProperty(value = "是否卡萨帝",index = 18)
     @ApiModelProperty(value = "是否卡萨帝 0：否，1：是")
     private String csdFlag;
 
     /**
      * 产品状态
      */
-    @ExcelProperty(value = "顺序",index = 17)
+    @ExcelProperty(value = "产品状态",index = 17)
     @ApiModelProperty(value = "产品状态")
     private String productStatus;
 

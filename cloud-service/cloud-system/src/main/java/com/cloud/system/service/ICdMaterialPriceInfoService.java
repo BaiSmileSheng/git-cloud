@@ -33,8 +33,14 @@ public interface ICdMaterialPriceInfoService extends BaseService<CdMaterialPrice
                                                                         String beginDate,
                                                                         String endDate);
     /**
-     * 定时加工费/原材料价格同步
+     * 定时加工费价格同步
      * @return 成功或失败
      */
-    R synPrice();
+    R synPriceJGF();
+
+    /**
+     * 定时原材料价格同步
+     * @return 成功或失败
+     */
+    R synPriceYCL();
 }

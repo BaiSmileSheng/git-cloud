@@ -36,9 +36,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.mail.MessagingException;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -1211,23 +1213,21 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         branchOfficeMap.keySet().forEach(branchOffice -> {
             List<OmsProductionOrder> productionOrderList = branchOfficeMap.get(branchOffice);
             CdFactoryLineInfo branchOfficeLineInfo = branchOfficeFactoryLineMap.get(branchOffice);
-//            if(null == branchOfficeLineInfo){
-//                log.error("请维护主管邮箱 branchOffice:{}",branchOffice);
-//                throw new BusinessException("请维护主管邮箱");
-//            }
-//            String to = branchOfficeFactoryLineMap.get(branchOffice).getBranchOfficeEmail();
-            String to = "1332549662@qq.com";
+            if(null == branchOfficeLineInfo){
+                log.error("请维护主管邮箱 branchOffice:{}",branchOffice);
+                throw new BusinessException("请维护主管邮箱");
+            }
+            String to = branchOfficeFactoryLineMap.get(branchOffice).getBranchOfficeEmail();
             sendMail(productionOrderList, to);
         });
         monitorMap.keySet().forEach(monitor -> {
             List<OmsProductionOrder> productionOrderList = monitorMap.get(monitor);
             CdFactoryLineInfo monitorLineInfo = monitorFactoryLineMap.get(monitor);
-//            if(null == monitorLineInfo){
-//                log.error("请维护班长邮箱 branchOffice:{}",monitor);
-//                throw new BusinessException("请维护主管邮箱");
-//            }
-//            String to = monitorFactoryLineMap.get(monitor).getBranchOfficeEmail();
-            String to = "1332549662@qq.com";
+            if(null == monitorLineInfo){
+                log.error("请维护班长邮箱 branchOffice:{}",monitor);
+                throw new BusinessException("请维护主管邮箱");
+            }
+            String to = monitorFactoryLineMap.get(monitor).getBranchOfficeEmail();
             sendMail(productionOrderList, to);
         });
         return R.ok();
@@ -1239,7 +1239,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      * @param productionOrderList
      * @param to
      */
-    private void sendMail(List<OmsProductionOrder> productionOrderList, String to) {
+    private R sendMail(List<OmsProductionOrder> productionOrderList, String to){
         List<OmsProductionOrderMailVo> productionOrderMailVoList = productionOrderList.stream().map(omsProductionOrde ->
                 BeanUtil.copyProperties(omsProductionOrde,OmsProductionOrderMailVo.class)).collect(Collectors.toList());
         log.info("发送邮件开始");
@@ -1248,33 +1248,17 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         String content = "排产订单已下达SAP信息";
         String sheetName = "排产订单已下达SAP信息";
         List<List<String>> excelHeader = mailPushExcellHeader();
-        ByteArrayOutputStream out = null;
+        R r=EasyExcelUtil.writeExcelWithHead(productionOrderMailVoList, fileName, sheetName, new OmsProductionOrderMailVo(),excelHeader);
+        String path = r.getStr("msg");
         try {
-            out = new ByteArrayOutputStream();
-            R r=EasyExcelUtil.writeExcel(productionOrderMailVoList, fileName, sheetName, new OmsProductionOrderMailVo());
-//            EasyExcel.write(out,OmsProductionOrderMailVo.class)
-//                    .head(excelHeader)
-//                    .sheet(fileName)
-//                    .doWrite(productionOrderMailVoList);
-//            ByteArrayInputStream iss = new ByteArrayInputStream(out.toByteArray());
-//            out.close();
-//
-//            mailService.sendAttachmentsMail("1332549662@qq.com",subject,content,iss,fileName);
-            String path = r.getStr("msg");
             mailService.sendAttachmentMail("1332549662@qq.com", subject, content, new String[]{path});
-            FileUtil.del(path);
-        } catch (Exception e) {
-            StringWriter w = new StringWriter();
-            e.printStackTrace(new PrintWriter(w));
-            log.info("发送邮件异常 error:{}",w.toString());
-            throw new BusinessException("发送邮件异常");
-        }finally {
-            try {
-                out.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        }catch (MessagingException me){
+            log.error("发送邮件异常");
+        }catch (UnsupportedEncodingException ue){
+            log.error("发送邮件异常");
         }
+        FileUtil.del(path);
+        return r;
     }
 
     /**
@@ -1288,51 +1272,82 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         List<List<String>> headList = new ArrayList<>();
         // 第 n 行 的表头
         List<String> headTitle0 = new ArrayList<>();
-        List<String> headTitle1 = new ArrayList<>();
         String date = DateUtils.getDate();
         headTitle0.add(date);
         headTitle0.add("分公司");
-        headTitle0.add(date);
+        List<String> headTitle1 = new ArrayList<>();
+        headTitle1.add(date);
         headTitle1.add("班长");
-        headTitle0.add(date);
-        headTitle1.add("线号");
-        headTitle0.add(date);
-        headTitle1.add("订单批次号");
-        headTitle0.add("智能电子生产部日生产定单计划");
-        headTitle1.add("成品专用号");
-        headTitle0.add("智能电子生产部日生产定单计划");
-        headTitle1.add("成品描述");
-        headTitle0.add("智能电子生产部日生产定单计划");
-        headTitle1.add("PCB专用号");
-        headTitle0.add("智能电子生产部日生产定单计划");
-        headTitle1.add("排产订单数量");
-        headTitle0.add("智能电子生产部日生产定单计划");
-        headTitle1.add("基本开始");
-        headTitle0.add("智能电子生产部日生产定单计划");
-        headTitle1.add("顺序");
-        headTitle0.add("智能电子生产部日生产定单计划");
-        headTitle1.add("事业部T-1交货");
-        headTitle0.add("智能电子生产部日生产定单计划");
-        headTitle1.add("UPH");
-        headTitle0.add("智能电子生产部日生产定单计划");
-        headTitle1.add("产品用时");
-        headTitle0.add("智能电子生产部日生产定单计划");
-        headTitle1.add("产品定员");
-        headTitle0.add("智能电子生产部日生产定单计划");
-        headTitle1.add("版本");
-        headTitle0.add("智能电子生产部日生产定单计划");
-        headTitle1.add("版本");
-        headTitle0.add("智能电子生产部日生产定单计划");
-        headTitle1.add("发往地");
-        headTitle0.add("智能电子生产部日生产定单计划");
-        headTitle1.add("老品/新品");
-        headTitle0.add("智能电子生产部日生产定单计划");
-        headTitle1.add("产品状态");
-        headTitle0.add("智能电子生产部日生产定单计划");
-        headTitle1.add("是否卡萨帝");
-
+        List<String> headTitle2 = new ArrayList<>();
+        headTitle2.add(date);
+        headTitle2.add("线号");
+        List<String> headTitle3 = new ArrayList<>();
+        headTitle3.add(date);
+        headTitle3.add("订单批次号");
+        List<String> headTitle4 = new ArrayList<>();
+        headTitle4.add("智能电子生产部日生产定单计划");
+        headTitle4.add("成品专用号");
+        List<String> headTitle5 = new ArrayList<>();
+        headTitle5.add("智能电子生产部日生产定单计划");
+        headTitle5.add("成品描述");
+        List<String> headTitle6 = new ArrayList<>();
+        headTitle6.add("智能电子生产部日生产定单计划");
+        headTitle6.add("PCB专用号");
+        List<String> headTitle7 = new ArrayList<>();
+        headTitle7.add("智能电子生产部日生产定单计划");
+        headTitle7.add("排产订单数量");
+        List<String> headTitle8 = new ArrayList<>();
+        headTitle8.add("智能电子生产部日生产定单计划");
+        headTitle8.add("基本开始日期");
+        List<String> headTitle9 = new ArrayList<>();
+        headTitle9.add("智能电子生产部日生产定单计划");
+        headTitle9.add("顺序");
+        List<String> headTitle10 = new ArrayList<>();
+        headTitle10.add("智能电子生产部日生产定单计划");
+        headTitle10.add("事业部T-1交货");
+        List<String> headTitle11 = new ArrayList<>();
+        headTitle11.add("智能电子生产部日生产定单计划");
+        headTitle11.add("UPH");
+        List<String> headTitle12 = new ArrayList<>();
+        headTitle12.add("智能电子生产部日生产定单计划");
+        headTitle12.add("产品用时");
+        List<String> headTitle13 = new ArrayList<>();
+        headTitle13.add("智能电子生产部日生产定单计划");
+        headTitle13.add("产品定员");
+        List<String> headTitle14 = new ArrayList<>();
+        headTitle14.add("智能电子生产部日生产定单计划");
+        headTitle14.add("版本");
+        List<String> headTitle15 = new ArrayList<>();
+        headTitle15.add("智能电子生产部日生产定单计划");
+        headTitle15.add("发往地");
+        List<String> headTitle16 = new ArrayList<>();
+        headTitle16.add("智能电子生产部日生产定单计划");
+        headTitle16.add("老品/新品");
+        List<String> headTitle17 = new ArrayList<>();
+        headTitle17.add("智能电子生产部日生产定单计划");
+        headTitle17.add("产品状态");
+        List<String> headTitle18 = new ArrayList<>();
+        headTitle18.add("智能电子生产部日生产定单计划");
+        headTitle18.add("是否卡萨帝");
         headList.add(headTitle0);
         headList.add(headTitle1);
+        headList.add(headTitle2);
+        headList.add(headTitle3);
+        headList.add(headTitle4);
+        headList.add(headTitle5);
+        headList.add(headTitle6);
+        headList.add(headTitle7);
+        headList.add(headTitle8);
+        headList.add(headTitle9);
+        headList.add(headTitle10);
+        headList.add(headTitle11);
+        headList.add(headTitle12);
+        headList.add(headTitle13);
+        headList.add(headTitle14);
+        headList.add(headTitle15);
+        headList.add(headTitle16);
+        headList.add(headTitle17);
+        headList.add(headTitle18);
         return headList;
     }
 
