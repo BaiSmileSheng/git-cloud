@@ -110,7 +110,7 @@ public class CdMaterialExtendInfoController extends BaseController {
     @GetMapping("downLoadTemplate")
     @ApiOperation(value = "下载模板")
     public R downLoadTemplate(){
-        String fileName = "下载模板";
+        String fileName = "下载模板.xlsx";
         return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new CdMaterialExtendInfo());
     }
 
@@ -129,7 +129,7 @@ public class CdMaterialExtendInfoController extends BaseController {
         Example example = new Example(CdMaterialExtendInfo.class);
         Example.Criteria criteria = example.createCriteria();
         listCondition(cdMaterialExtendInfo,criteria);
-        String fileName = "成品物料信息";
+        String fileName = "成品物料信息.xlsx";
         List<CdMaterialExtendInfo> cdMaterialExtendInfoList = cdMaterialExtendInfoService.selectByExample(example);
         return EasyExcelUtilOSS.writeExcel(cdMaterialExtendInfoList,fileName,fileName,new CdMaterialExtendInfo());
     }
@@ -138,9 +138,9 @@ public class CdMaterialExtendInfoController extends BaseController {
      * 导入
      */
     @HasPermissions("sys:materialExtendInfo:importMaterialExtendInfo")
-    @GetMapping("importMaterialExtendInfo")
+    @PostMapping("importMaterialExtendInfo")
     @ApiOperation(value = "导入")
-    public R importMaterialExtendInfo(@RequestPart("file") MultipartFile file)throws IOException {
+    public R importMaterialExtendInfo(@RequestParam("file") MultipartFile file)throws IOException {
         SysUser sysUser = getUserInfo(SysUser.class);
         return cdMaterialExtendInfoService.importMaterialExtendInfo(file,sysUser);
     }

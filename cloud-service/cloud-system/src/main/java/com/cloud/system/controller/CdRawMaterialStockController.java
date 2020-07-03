@@ -4,6 +4,7 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.system.domain.entity.SysDictType;
+import com.cloud.system.util.EasyExcelUtilOSS;
 import io.swagger.annotations.*;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
@@ -61,17 +62,25 @@ public class CdRawMaterialStockController extends BaseController {
     public TableDataInfo list(@ApiIgnore CdRawMaterialStock cdRawMaterialStock) {
         Example example = new Example(CdRawMaterialStock.class);
         Example.Criteria criteria = example.createCriteria();
+        listByCondition(cdRawMaterialStock,criteria);
+        startPage();
+        List<CdRawMaterialStock> cdRawMaterialStockList = cdRawMaterialStockService.selectByExample(example);
+        return getDataTable(cdRawMaterialStockList);
+    }
+
+    /**
+     * 组装条件
+     * @param cdRawMaterialStock
+     * @param criteria
+     */
+    private void listByCondition(CdRawMaterialStock cdRawMaterialStock,Example.Criteria criteria){
         if (StringUtils.isNotBlank(cdRawMaterialStock.getProductFactoryCode())) {
             criteria.andEqualTo("productFactoryCode",cdRawMaterialStock.getProductFactoryCode());
         }
         if (StringUtils.isNotBlank(cdRawMaterialStock.getRawMaterialCode())) {
             criteria.andEqualTo("rawMaterialCode",cdRawMaterialStock.getRawMaterialCode());
         }
-        startPage();
-        List<CdRawMaterialStock> cdRawMaterialStockList = cdRawMaterialStockService.selectByExample(example);
-        return getDataTable(cdRawMaterialStockList);
     }
-
 
     /**
      * 新增保存原材料库存 
@@ -122,7 +131,13 @@ public class CdRawMaterialStockController extends BaseController {
             @ApiImplicitParam(name = "storagePoint", value = "仓储点", required = false,paramType = "query", dataType = "String")
     })
     public R exportRawMaterialExcel(@ApiIgnore CdRawMaterialStock cdRawMaterialStock){
-        return cdRawMaterialStockService.exportRawMaterialExcel(cdRawMaterialStock);
+        Example example = new Example(CdRawMaterialStock.class);
+        Example.Criteria criteria = example.createCriteria();
+        listByCondition(cdRawMaterialStock,criteria);
+        //导出时不导出可用库存为0的
+        criteria.andNotEqualTo("currentStock",0);
+        List<CdRawMaterialStock> cdRawMaterialStockList = cdRawMaterialStockService.selectByExample(example);
+        return EasyExcelUtilOSS.writeExcel(cdRawMaterialStockList, "原材料库存报表.xlsx", "sheet", new CdRawMaterialStock());
     }
     /**
      * 查询原材料库存
