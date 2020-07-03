@@ -38,11 +38,11 @@ public interface ICdMaterialInfoService extends BaseService<CdMaterialInfo> {
     /**
      * @Description: 根据工厂、物料批量更新
      * @Param: [list]
-     * @return: int
+     * @return: void
      * @Author: ltq
      * @Date: 2020/6/5
      */
-    int updateBatchByFactoryAndMaterial(List<CdMaterialInfo> list);
+    void updateBatchByFactoryAndMaterial(List<CdMaterialInfo> list);
 
     /**
      * @Description: 更新SAP获取的UPH数据

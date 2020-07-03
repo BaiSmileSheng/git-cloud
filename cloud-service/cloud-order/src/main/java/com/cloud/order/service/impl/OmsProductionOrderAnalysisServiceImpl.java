@@ -87,7 +87,10 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
                 new TypeReference<List<OmsProductionOrderAnalysis>>() {
                 });
         omsProductionOrderAnalysisMapper.deleteAll();
-        omsProductionOrderAnalysisMapper.insertList(list);
+        if (ObjectUtil.isNotEmpty(list) && list.size() > 0) {
+            //新增
+            omsProductionOrderAnalysisMapper.insertList(list);
+        }
         return R.ok();
     }
 
