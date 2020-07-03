@@ -8,7 +8,6 @@ import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
 import com.cloud.settle.enums.MaterialPriceInfoSAPEnum;
-import com.cloud.settle.enums.SupplementaryOrderStatusEnum;
 import com.cloud.settle.feign.RemoteSmsSupplementaryOrderService;
 import com.cloud.system.domain.entity.CdMaterialPriceInfo;
 import com.cloud.system.domain.entity.SysInterfaceLog;
@@ -31,7 +30,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * SAP成本价格 Service业务层处理
@@ -163,7 +161,7 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
                 JCoTable inputTable = fm.getTableParameterList().getTable("T_INPUT");
                 materialCodeList.forEach(materialCode -> {
                     inputTable.appendRow();
-                    inputTable.setValue("MATNR",materialCode);
+                    inputTable.setValue("MATNR",materialCode.toUpperCase());
                 });
             }
             //执行函数

@@ -1,11 +1,13 @@
 package com.cloud.system.service.impl;
 
+import com.cloud.common.core.service.impl.BaseServiceImpl;
+import com.cloud.system.domain.entity.SysUserScope;
+import com.cloud.system.mapper.SysUserScopeMapper;
+import com.cloud.system.service.ISysUserScopeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.cloud.system.mapper.SysUserScopeMapper;
-import com.cloud.system.domain.entity.SysUserScope;
-import com.cloud.system.service.ISysUserScopeService;
-import com.cloud.common.core.service.impl.BaseServiceImpl;
+
+import java.util.Set;
 /**
  * 用户和数据权限关联Service业务层处理
  *
@@ -35,4 +37,17 @@ public class SysUserScopeServiceImpl extends BaseServiceImpl<SysUserScope> imple
     public void deleteByUserId(Long userId) {
         sysUserScopeMapper.deleteByUserId(userId);
     }
+
+    /**
+     * 根据用户id查询权限
+     * @param userId
+     * @return
+     */
+	@Override
+	public Set<String> selectDataScopeIdByUserId(Long userId){
+		 return sysUserScopeMapper.selectDataScopeIdByUserId(userId);
+	}
+
+
+
 }

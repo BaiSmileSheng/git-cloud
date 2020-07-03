@@ -1,15 +1,13 @@
 package com.cloud.system.controller;
-import cn.hutool.core.collection.CollUtil;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.RandomUtil;
-import com.cloud.common.utils.StringUtils;
 import com.cloud.system.domain.entity.SysDataScope;
 import com.cloud.system.service.ISysDataScopeService;
-import com.cloud.system.util.DataScopeUtil;
+import com.cloud.system.service.ISysUserScopeService;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -17,7 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  *  数据权限 提供者
@@ -31,6 +31,8 @@ public class SysDataScopeController extends BaseController {
 
     @Autowired
     private ISysDataScopeService sysDataScopeService;
+    @Autowired
+    private ISysUserScopeService sysUserScopeService;
 
     /**
      * 查询数据权限
@@ -110,20 +112,21 @@ public class SysDataScopeController extends BaseController {
      */
     @GetMapping("getUserScopeIds")
     public Set<String> getUserScopeIds(Long userId) {
-        //工厂权限
-        String scopeFactory = DataScopeUtil.getUserFactoryScopes(userId);
-        //采购组权限
-        String scopePurchase = DataScopeUtil.getUserPurchaseScopes(userId);
-        if(StringUtils.isBlank(scopeFactory)&&StringUtils.isBlank(scopePurchase)){
-            return new HashSet<>();
-        }
-        Set<String> scopeSet=new HashSet<> ();
-        if(StringUtils.isNotBlank(scopeFactory)){
-            CollUtil.addAll(scopeSet, Arrays.asList(scopeFactory.split(",")));
-        }
-        if(StringUtils.isNotBlank(scopePurchase)){
-            CollUtil.addAll(scopeSet, Arrays.asList(scopePurchase.split(",")));
-        }
+//        //工厂权限
+//        String scopeFactory = DataScopeUtil.getUserFactoryScopes(userId);
+//        //采购组权限
+//        String scopePurchase = DataScopeUtil.getUserPurchaseScopes(userId);
+//        if(StringUtils.isBlank(scopeFactory)&&StringUtils.isBlank(scopePurchase)){
+//            return new HashSet<>();
+//        }
+//        Set<String> scopeSet=new HashSet<> ();
+//        if(StringUtils.isNotBlank(scopeFactory)){
+//            CollUtil.addAll(scopeSet, Arrays.asList(scopeFactory.split(",")));
+//        }
+//        if(StringUtils.isNotBlank(scopePurchase)){
+//            CollUtil.addAll(scopeSet, Arrays.asList(scopePurchase.split(",")));
+//        }
+        Set<String> scopeSet = sysUserScopeService.selectDataScopeIdByUserId(userId);
         return scopeSet;
     }
 
