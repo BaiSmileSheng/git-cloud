@@ -130,7 +130,7 @@ public class OmsRealOrderController extends BaseController {
      * @return
      */
     @HasPermissions("order:realOrder:export")
-    @PostMapping("export")
+    @GetMapping("export")
     @ApiOperation(value = "真单导出", response = OmsRealOrder.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
@@ -169,7 +169,7 @@ public class OmsRealOrderController extends BaseController {
      * @return
      */
     @HasPermissions("order:realOrder:exportExample")
-    @PostMapping("exportExample")
+    @GetMapping("exportExample")
     @ApiOperation(value = "导入模板下载", response = OmsRealOrder.class)
     public R exportExample() {
         String fileName = "真单.xlsx";

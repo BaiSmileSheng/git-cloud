@@ -102,7 +102,7 @@ public class SmsQualityOrderController extends BaseController {
      * @return TableDataInfo 质量索赔分页信息
      */
     @HasPermissions("settle:qualityOrder:export")
-    @PostMapping("export")
+    @GetMapping("export")
     @ApiOperation(value = "导出查询质量索赔列表", response = SmsQualityOrder.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "qualityNo", value = "索赔单号", required = false, paramType = "query", dataType = "String"),
