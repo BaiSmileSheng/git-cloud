@@ -134,7 +134,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             return rFactoryLineInfo;
         }
         CdFactoryLineInfo factoryLineInfo = rFactoryLineInfo.getData(CdFactoryLineInfo.class);
-         if (factoryLineInfo == null) {
+         if (factoryLineInfo == null||StrUtil.isEmpty(factoryLineInfo.getSupplierCode())) {
              return R.error(StrUtil.format("工厂：{}，线体{}，缺少供应商信息",omsProductionOrder.getProductFactoryCode(),
                      omsProductionOrder.getProductLineCode()));
         }
@@ -285,7 +285,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
                     continue;
                 }
                 smsScrapOrder.setCurrency(cdSapSalePrice.getConditionsMonetary());
-                smsScrapOrder.setMaterialPrice(new BigDecimal(cdSapSalePrice.getSalePrice()));
+                smsScrapOrder.setMaterialPrice(new BigDecimal(cdSapSalePrice.getSalePrice()).divide(new BigDecimal(cdSapSalePrice.getUnitPricing()),2));
                 smsScrapOrder.setMeasureUnit(cdSapSalePrice.getMeasureUnit());
                 smsScrapOrder.setScrapPrice(smsScrapOrder.getMaterialPrice().multiply(new BigDecimal(smsScrapOrder.getScrapAmount())));
                 //索赔金额=（Sap成品物料销售价格*报废数量*报废索赔系数）+（报废数量*生产订单加工费单价）

@@ -174,10 +174,12 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             return rFactory;
         }
         CdFactoryLineInfo factoryLineInfo = rFactory.getData(CdFactoryLineInfo.class);
-        if (factoryLineInfo != null) {
-            smsSupplementaryOrder.setSupplierCode(factoryLineInfo.getSupplierCode());
-            smsSupplementaryOrder.setSupplierName(factoryLineInfo.getSupplierDesc());
+        if (factoryLineInfo == null||StrUtil.isEmpty(factoryLineInfo.getSupplierCode())) {
+            return R.error(StrUtil.format("工厂：{}，线体{}，缺少供应商信息",omsProductionOrder.getProductFactoryCode(),
+                    omsProductionOrder.getProductLineCode()));
         }
+        smsSupplementaryOrder.setSupplierCode(factoryLineInfo.getSupplierCode());
+        smsSupplementaryOrder.setSupplierName(factoryLineInfo.getSupplierDesc());
         smsSupplementaryOrder.setFactoryCode(omsProductionOrder.getProductFactoryCode());
         R rFactoryInfo= remoteFactoryInfoService.selectOneByFactory(omsProductionOrder.getProductFactoryCode());
         if(!rFactoryInfo.isSuccess()){
@@ -288,7 +290,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
                     updateByPrimaryKeySelective(smsSupplementaryOrder);
                     continue;
                 }
-                smsSupplementaryOrder.setStuffPrice(cdMaterialPriceInfo.getNetWorth());//单价  取得materialPrice表的净价值
+                smsSupplementaryOrder.setStuffPrice(cdMaterialPriceInfo.getNetWorth().divide(new BigDecimal(cdMaterialPriceInfo.getPriceUnit()),2));//单价  取得materialPrice表的净价值
                 smsSupplementaryOrder.setStuffUnit(cdMaterialPriceInfo.getUnit());
                 smsSupplementaryOrder.setCurrency(cdMaterialPriceInfo.getCurrency());//币种
                 //索赔金额=物耗数量* 原材料单价*物耗申请系数
