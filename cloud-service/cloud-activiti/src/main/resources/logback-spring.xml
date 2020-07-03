@@ -56,11 +56,11 @@
         <rollingPolicy
                 class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 日志归档 -->
-            <fileNamePattern>${log.path}/web-debug-%d{yyyy-MM-dd}.%i.log
+            <fileNamePattern>${log.path}/web-debug-%d{yyyy-MM-dd}.%i
             </fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy
                     class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>100MB</maxFileSize>
+                <maxFileSize>5120MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
             <!--日志文档保留天数 -->
             <maxHistory>15</maxHistory>
@@ -89,11 +89,11 @@
         <rollingPolicy
                 class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 每天日志归档路径以及格式 -->
-            <fileNamePattern>${log.path}/web-info-%d{yyyy-MM-dd}.%i.log
+            <fileNamePattern>${log.path}/web-info-%d{yyyy-MM-dd}.%i
             </fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy
                     class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>100MB</maxFileSize>
+                <maxFileSize>5120MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
             <!--日志文档保留天数 -->
             <maxHistory>15</maxHistory>
@@ -121,11 +121,11 @@
         <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
         <rollingPolicy
                 class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${log.path}/web-warn-%d{yyyy-MM-dd}.%i.log
+            <fileNamePattern>${log.path}/web-warn-%d{yyyy-MM-dd}.%i
             </fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy
                     class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>100MB</maxFileSize>
+                <maxFileSize>5120MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
             <!--日志文档保留天数 -->
             <maxHistory>15</maxHistory>
@@ -153,11 +153,11 @@
         <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
         <rollingPolicy
                 class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${log.path}/web-error-%d{yyyy-MM-dd}.%i.log
+            <fileNamePattern>${log.path}/web-error-%d{yyyy-MM-dd}.%i
             </fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy
                     class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>100MB</maxFileSize>
+                <maxFileSize>5120MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
             <!--日志文档保留天数 -->
             <maxHistory>15</maxHistory>

@@ -27,7 +27,10 @@ public interface RemoteBomService {
      * @return
      */
     @GetMapping("bom/listByProductAndMaterial")
-    R listByProductAndMaterial(@RequestParam("productMaterialCode") String productMaterialCode, @RequestParam("rawMaterialCode") String rawMaterialCode);
+    R listByProductAndMaterial(@RequestParam("productMaterialCode") String productMaterialCode,
+                               @RequestParam("rawMaterialCode") String rawMaterialCode,
+                               @RequestParam("bomVersion") String bomVersion,
+                               @RequestParam("productFactoryCode") String productFactoryCode);
 
     /**
      * 校验申请数量是否是单耗的整数倍

@@ -68,7 +68,7 @@
         <include refid="selectCdMaterialExtendInfoVo"/>
         <where>
             material_code in
-            <foreach collection="list" item="item" open="(" close=")" separator="or" index="index">
+            <foreach collection="list" item="item" open="(" close=")" separator="," index="index">
                 #{item.productMaterialCode}
             </foreach>
         </where>

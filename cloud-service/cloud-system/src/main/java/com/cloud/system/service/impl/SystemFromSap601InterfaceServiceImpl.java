@@ -1,5 +1,6 @@
 package com.cloud.system.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.constant.SapConstants;
@@ -129,7 +130,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             //物料
             for (String materialCode : materials) {
                 inputTableMatnr.appendRow();
-                inputTableMatnr.setValue("MATNR", materialCode);
+                inputTableMatnr.setValue("MATNR", materialCode.toUpperCase());
             }
             //执行函数
             JCoContext.begin(destination);
@@ -203,8 +204,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                         outTableOutput.setRow(i);
                         CdFactoryLineInfo cdFactoryLineInfo = new CdFactoryLineInfo();
                         cdFactoryLineInfo.setProductFactoryCode(outTableOutput.getString("WERKS"));
-                        cdFactoryLineInfo.setProduceLineCode(outTableOutput.getString("CY_SEQNR"));
-                        cdFactoryLineInfo.setSupplierCode(outTableOutput.getString("VENDOR"));
+                        cdFactoryLineInfo.setProduceLineCode(StrUtil.toString(outTableOutput.getInt("CY_SEQNR")));
                         cdFactoryLineInfo.setBranchOffice(outTableOutput.getString("BOSS"));
                         cdFactoryLineInfo.setMonitor(outTableOutput.getString("BANZ"));
                         cdFactoryLineInfo.setAttribute(outTableOutput.getString("SHUX"));
@@ -268,7 +268,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                 JCoTable inputTableMatnr = fm.getTableParameterList().getTable("MATNR");
                 for (String materialCode : materials) {
                     inputTableMatnr.appendRow();
-                    inputTableMatnr.setValue("MATNR", materialCode);
+                    inputTableMatnr.setValue("MATNR", materialCode.toUpperCase());
                 }
             }
             //执行函数
@@ -353,7 +353,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                 //物料
                 for (String materialCode : materials) {
                     inputTableMatnr.appendRow();
-                    inputTableMatnr.setValue("MATNR", materialCode);
+                    inputTableMatnr.setValue("MATNR", materialCode.toUpperCase());
                 }
             }
             //执行函数

@@ -34,6 +34,18 @@ public class RemoteCdProductStockFallbackFactory implements FallbackFactory<Remo
                 log.error("服务拥挤，请稍后再试！原因："+throwable.getMessage());
                 return R.error("服务拥挤，请稍后再试！");
             }
+            /**
+             * Description:  根据生产工厂、成品专用号查询成品库存
+             * Param: [cdProductStock]
+             * return: com.cloud.common.core.domain.R
+             * Author: ltq
+             * Date: 2020/6/30
+             */
+            @Override
+            public R findOneByExample(CdProductStock cdProductStock) {
+                log.error("服务拥挤，请稍后再试！原因："+throwable.getMessage());
+                return R.error("服务拥挤，请稍后再试！");
+            }
         };
     }
 }

@@ -56,10 +56,10 @@
     <select id="selectBomList" parameterType="list" resultMap="CdBomResult">
         <include refid="selectCdBomVo"/>
         <where>
-            <foreach collection="list" index="index" item="item" open="(" close=")" separator="or">
-                product_material_code = #{item.productMaterialCode}
+            <foreach collection="list" index="index" item="item" separator="or">
+                (product_material_code = #{item.productMaterialCode}
                 and product_factory_code = #{item.productFactoryCode}
-                and version = #{item.bomVersion}
+                and version = #{item.bomVersion})
             </foreach>
         </where>
     </select>

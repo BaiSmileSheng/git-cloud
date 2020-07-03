@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 import tk.mybatis.mapper.annotation.KeySql;
 
@@ -66,6 +67,13 @@ public class OmsProductionOrderDetail extends BaseEntity {
     @ExcelProperty(value = "原材料描述")
     @ApiModelProperty(value = "原材料描述")
     private String materialDesc;
+
+    /**
+     * 基本开始日期
+     */
+    @ExcelProperty(value = "基本开始日期")
+    @ApiModelProperty(value = "基本开始日期")
+    private String productStartDate;
 
     /**
      * 单耗
@@ -127,5 +135,29 @@ public class OmsProductionOrderDetail extends BaseEntity {
      * 是否删除 0：有效，1：删除
      */
     private String delFlag;
+    /**
+     * 生产工厂权限，逗号隔开
+     */
+    @Transient
+    @ApiModelProperty(value = "生产工厂权限，逗号隔开")
+    private String productFactoryQuery;
+    /**
+     * 采购组权限，逗号隔开
+     */
+    @Transient
+    @ApiModelProperty(value = "采购组权限，逗号隔开")
+    private String purchaseGroupQuery;
+    /**
+     * 查询开始日期
+     */
+    @Transient
+    @ApiModelProperty(value = "查询开始日期")
+    private String checkStartDate;
+    /**
+     * 查询结束日期
+     */
+    @Transient
+    @ApiModelProperty(value = "查询结束日期")
+    private String checkEndDate;
 
 }

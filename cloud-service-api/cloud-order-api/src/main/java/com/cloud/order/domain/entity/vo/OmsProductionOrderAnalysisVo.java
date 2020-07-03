@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 /**
  * Description:  待排产订单分析Vo
@@ -53,6 +54,12 @@ public class OmsProductionOrderAnalysisVo extends BaseEntity {
     @ExcelProperty(value = "单位")
     @ApiModelProperty(value = "单位")
     private String unit;
+    /**
+     * 可用库存
+     */
+    @ExcelProperty(value = "可用库存")
+    @ApiModelProperty(value = "可用库存")
+    private BigDecimal stockNum;
     /**
      * 待排产订单分析数据List
      */

@@ -5,29 +5,65 @@
 <mapper namespace="com.cloud.order.mapper.OmsRawMaterialFeedbackMapper">
 
     <resultMap type="OmsRawMaterialFeedback" id="OmsRawMaterialFeedbackResult">
-                    <result property="id" column="id"/>
-                    <result property="productOrderCode" column="product_order_code"/>
-                    <result property="productMaterialCode" column="product_material_code"/>
-                    <result property="productMaterialDesc" column="product_material_desc"/>
-                    <result property="rawMaterialCode" column="raw_material_code"/>
-                    <result property="rawMaterialDesc" column="raw_material_desc"/>
-                    <result property="deliveryDate" column="delivery_date"/>
-                    <result property="productNum" column="product_num"/>
-                    <result property="rawMaterialNum" column="raw_material_num"/>
-                    <result property="productContentNum" column="product_content_num"/>
-                    <result property="rawMaterialContentNum" column="raw_material_content_num"/>
-                    <result property="status" column="status"/>
-                    <result property="delFlag" column="del_flag"/>
-                    <result property="remark" column="remark"/>
-                    <result property="createTime" column="create_time"/>
-                    <result property="createBy" column="create_by"/>
-                    <result property="updateTime" column="update_time"/>
-                    <result property="updateBy" column="update_by"/>
-                    </resultMap>
+        <result property="id" column="id"/>
+        <result property="productMaterialCode" column="product_material_code"/>
+        <result property="productMaterialDesc" column="product_material_desc"/>
+        <result property="productFactoryCode" column="product_factory_code"/>
+        <result property="purchaseGroup" column="purchase_group"/>
+        <result property="rawMaterialCode" column="raw_material_code"/>
+        <result property="rawMaterialDesc" column="raw_material_desc"/>
+        <result property="productStartDate" column="product_start_date"/>
+        <result property="productNum" column="product_num"/>
+        <result property="rawMaterialNum" column="raw_material_num"/>
+        <result property="productContentNum" column="product_content_num"/>
+        <result property="rawMaterialContentNum" column="raw_material_content_num"/>
+        <result property="bomVersion" column="bom_version"/>
+        <result property="status" column="status"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+    </resultMap>
 
     <sql id="selectOmsRawMaterialFeedbackVo">
-        select id, product_order_code, product_material_code, product_material_desc, raw_material_code, raw_material_desc, delivery_date, product_num, raw_material_num, product_content_num, raw_material_content_num, status, del_flag, remark, create_time, create_by, update_time, update_by from oms_raw_material_feedback
+        select id, product_material_code, product_material_desc,product_factory_code,purchase_group, raw_material_code, raw_material_desc, product_start_date, product_num, raw_material_num, product_content_num, raw_material_content_num,bom_version, status, del_flag, remark, create_time, create_by, update_time, update_by from oms_raw_material_feedback
     </sql>
-
-
+    <select id="selectByList" parameterType="list" resultMap="OmsRawMaterialFeedbackResult">
+        <include refid="selectOmsRawMaterialFeedbackVo"/>
+        <where>
+            <foreach collection="list" item="item" separator="or" >
+                (
+                <if test="item.productFactoryCode != null and item.productFactoryCode != ''">
+                    product_factory_code = #{item.productFactoryCode,jdbcType=VARCHAR}
+                </if>
+                <if test="item.productMaterialCode != null and item.productMaterialCode != ''">
+                    and product_material_code = #{item.productMaterialCode,jdbcType=VARCHAR}
+                </if>
+                <if test="item.productStartDate != null and item.productStartDate != ''">
+                    and product_start_date = #{item.productStartDate,jdbcType=VARCHAR}
+                </if>
+                <if test="item.bomVersion != null and item.bomVersion != ''">
+                    and bom_version = #{item.bomVersion,jdbcType=VARCHAR}
+                </if>
+                )
+            </foreach>
+            and status = '0'
+        </where>
+    </select>
+    <update id="updateBatchByList" parameterType="list">
+        <foreach collection="list" item="item" separator=";">
+            update oms_raw_material_feedback
+            <set>
+                status = '3'
+            </set>
+            <where>
+                product_factory_code = #{item.productFactoryCode,jdbcType=VARCHAR}
+                and raw_material_code = #{item.rawMaterialCode,jdbcType=VARCHAR}
+                and product_start_date = #{item.productStartDate,jdbcType=VARCHAR}
+                and status = #{item.status,jdbcType=VARCHAR}
+            </where>
+        </foreach>
+    </update>
 </mapper>

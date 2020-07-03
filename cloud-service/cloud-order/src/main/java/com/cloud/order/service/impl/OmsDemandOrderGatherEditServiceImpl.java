@@ -523,6 +523,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
      * @param omsDemandOrderGatherEdit
      * @return
      */
+    @Override
     public R selectDistinctMaterialCodeAndFactoryCode(OmsDemandOrderGatherEdit omsDemandOrderGatherEdit,SysUser sysUser) {
         //如果是排产员，需要加上工厂权限
         if(CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){

@@ -127,7 +127,7 @@ public class OrderFromSap601InterfaceServiceImpl implements IOrderFromSap601Inte
             JCoTable inputTable = fm.getTableParameterList().getTable("INPUT");
             for (OmsProductionOrder omsProductionOrder : list) {
                 inputTable.appendRow();
-                inputTable.setValue("MATNR", omsProductionOrder.getProductMaterialCode());
+                inputTable.setValue("MATNR", omsProductionOrder.getProductMaterialCode().toUpperCase());
                 inputTable.setValue("WERKS", omsProductionOrder.getProductFactoryCode());
                 inputTable.setValue("AUART", omsProductionOrder.getOrderType());
                 inputTable.setValue("GSTRP", omsProductionOrder.getProductStartDate());

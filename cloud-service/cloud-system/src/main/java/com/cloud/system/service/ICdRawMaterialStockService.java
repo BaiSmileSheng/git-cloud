@@ -4,6 +4,8 @@ import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.CdRawMaterialStock;
 import com.cloud.common.core.service.BaseService;
 
+import java.util.List;
+
 /**
  * 原材料库存 Service接口
  *
@@ -25,4 +27,12 @@ public interface ICdRawMaterialStockService extends BaseService<CdRawMaterialSto
      * @return
      */
     R deleteAll();
+    /**
+     * Description:  根据List<CdRawMaterialStock>查询
+     * Param: [list]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/6/28
+     */
+    R selectByList(List<CdRawMaterialStock> list);
 }

@@ -125,4 +125,5 @@ public class CdFactoryLineInfo extends BaseEntity {
      */
     private String delFlag;
 
+
 }
