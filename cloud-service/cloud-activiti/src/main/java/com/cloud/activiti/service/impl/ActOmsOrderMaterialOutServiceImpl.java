@@ -68,6 +68,7 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
 
         logger.info("根据业务key获取下市审核信息 businessKey:{}",businessKey);
         BizBusiness business = bizBusinessService.selectBizBusinessById(businessKey);
+        String procInstId = business.getProcInstId();
         if (null != business) {
             R selectResult = null;
             logger.info("根据业务key获取下市审核信息 主键id:{}",business.getTableId());
@@ -86,6 +87,8 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
                     break;
             }
             //根据主键id 获取对应的业务信息
+            selectResult.put("procInstId",procInstId);
+            selectResult.put("tableName",tableName);
             return selectResult;
         }
         return R.error("真单工作流根据业务key获取真单信息失败");

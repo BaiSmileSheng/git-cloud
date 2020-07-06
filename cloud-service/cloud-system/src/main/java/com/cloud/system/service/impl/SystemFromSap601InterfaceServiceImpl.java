@@ -525,10 +525,10 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
         int deleteFlag = 0;//删除标记
         int startInt = 0;
         int start = 1;//序列号起始值为1
-        int startNum = startInt * SAP_RAW_MATERIAL_SIZE + start;
-        int endNum = (startInt + 1) * SAP_RAW_MATERIAL_SIZE + start;
         Boolean querySapFlag = Boolean.TRUE;
         while (querySapFlag){
+            int startNum = startInt * SAP_RAW_MATERIAL_SIZE + start;
+            int endNum = (startInt + 1) * SAP_RAW_MATERIAL_SIZE;
             R result = queryRawMaterialStockFromSap601(null, null,startNum,endNum);
             startInt ++;
             if (!result.isSuccess()) {
@@ -536,12 +536,12 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             }
             if(result.isSuccess()){
                 List<CdRawMaterialStock> list = (List<CdRawMaterialStock>) result.get("data");
-                log.info("连接SAP获取原材料库存数据结束size:{}",list.size());
+                log.info("连接SAP获取原材料库存数据结束起始序号:{},结束序号:{},size:{}",startNum,endNum,list.size());
                 deleteFlag ++;
                 if(deleteFlag == 1){
                     insertRawMaterialStockDb(list, Boolean.TRUE);
                 }else{
-                    taskRawMaterialStockBomDb(list, Boolean.FALSE);
+                    insertRawMaterialStockDb(list, Boolean.FALSE);
                 }
                 //跳出循环标记 单次查询数据<SAP_RAW_MATERIAL_SIZE
                 if(list.size() < SAP_RAW_MATERIAL_SIZE){
@@ -553,28 +553,8 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                 querySapFlag = Boolean.FALSE;
             }
         }
+        log.info("获取原材料库存结束");
         return R.ok();
-    }
-
-    /**
-     * 插入原材料数据库
-     *
-     * @param list
-     * @param flag
-     */
-    private void taskRawMaterialStockBomDb(final List<CdRawMaterialStock> list, final Boolean flag) {
-        threadPoolTaskExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    insertRawMaterialStockDb(list, flag);
-                } catch (Exception e) {
-                    StringWriter w = new StringWriter();
-                    e.printStackTrace(new PrintWriter(w));
-                    log.error("插入原材料异常 e:{}", w.toString());
-                }
-            }
-        });
     }
 
     /**
