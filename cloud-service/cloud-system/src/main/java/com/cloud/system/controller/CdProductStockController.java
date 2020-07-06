@@ -115,7 +115,7 @@ public class CdProductStockController extends BaseController {
         sheetExcelDataList.add(sheetExcelDataC);
 
         SheetExcelData sheetExcelDataB = new SheetExcelData();
-        sheetExcelDataB.setDataList(cdProductStockDetail.getCdProductWarehouseListL());
+        sheetExcelDataB.setDataList(cdProductStockDetail.getCdProductWarehouseListB());
         sheetExcelDataB.setSheetName("不良库存");
         sheetExcelDataB.setTClass(CdProductWarehouse.class);
         sheetExcelDataList.add(sheetExcelDataB);
