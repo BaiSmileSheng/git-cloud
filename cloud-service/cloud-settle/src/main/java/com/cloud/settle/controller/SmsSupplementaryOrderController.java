@@ -76,19 +76,21 @@ public class SmsSupplementaryOrderController extends BaseController {
         Example.Criteria criteria = example.createCriteria();
         listCondition(smsSupplementaryOrder, criteria);
         SysUser sysUser = getUserInfo(SysUser.class);
-        if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
-            //供应商查询自己工厂下的申请单
-            criteria.andLike("supplierCode", sysUser.getSupplierCode());
-        } else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
-            //海尔内部
-            if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_JIT)) {
-                //JIT查询已提交状态自己管理工厂的申请单  采购组权限：sys_data_scope  例：8310,8410
-                criteria.andEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode());
-                criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
-            } else if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ)) {
-                //小微主查看jit审核成功的自己工厂权限下的物耗申请单
-                criteria.andEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode());
-                criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+        if (!sysUser.isAdmin()) {
+            if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
+                //供应商查询自己工厂下的申请单
+                criteria.andLike("supplierCode", sysUser.getSupplierCode());
+            } else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
+                //海尔内部
+                if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_JIT)) {
+                    //JIT查询已提交状态自己管理工厂的申请单  采购组权限：sys_data_scope  例：8310,8410
+                    criteria.andEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode());
+                    criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+                } else if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ)) {
+                    //小微主查看jit审核成功的自己工厂权限下的物耗申请单
+                    criteria.andEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode());
+                    criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+                }
             }
         }
         startPage();
@@ -259,19 +261,21 @@ public class SmsSupplementaryOrderController extends BaseController {
         Example.Criteria criteria = example.createCriteria();
         listCondition(smsSupplementaryOrder, criteria);
         SysUser sysUser = getUserInfo(SysUser.class);
-        if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
-            //供应商查询自己工厂下的申请单
-            criteria.andLike("supplierCode", sysUser.getSupplierCode());
-        } else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
-            //海尔内部
-            if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_JIT)) {
-                //JIT查询已提交状态自己管理工厂的申请单  采购组权限：sys_data_scope  例：8310,8410
-                criteria.andEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode());
-                criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
-            } else if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ)) {
-                //小微主查看jit审核成功的自己工厂权限下的物耗申请单
-                criteria.andEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode());
-                criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+        if (!sysUser.isAdmin()) {
+            if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
+                //供应商查询自己工厂下的申请单
+                criteria.andLike("supplierCode", sysUser.getSupplierCode());
+            } else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
+                //海尔内部
+                if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_JIT)) {
+                    //JIT查询已提交状态自己管理工厂的申请单  采购组权限：sys_data_scope  例：8310,8410
+                    criteria.andEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode());
+                    criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+                } else if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ)) {
+                    //小微主查看jit审核成功的自己工厂权限下的物耗申请单
+                    criteria.andEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode());
+                    criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+                }
             }
         }
         List<SmsSupplementaryOrder> smsSupplementaryOrderList = smsSupplementaryOrderService.selectByExample(example);
