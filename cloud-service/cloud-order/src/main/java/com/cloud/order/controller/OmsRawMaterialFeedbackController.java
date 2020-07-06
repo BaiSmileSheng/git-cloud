@@ -66,7 +66,6 @@ public class OmsRawMaterialFeedbackController extends BaseController {
             @ApiImplicitParam(name = "checkDateEnd", value = "查询结束日期", required = false,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "status", value = "状态", required = false,paramType = "query", dataType = "String")
     })
-    @HasPermissions("order:feedback:list")
     public TableDataInfo list(@ApiIgnore OmsRawMaterialFeedback omsRawMaterialFeedback) {
         SysUser sysUser = getUserInfo(SysUser.class);
         startPage();
