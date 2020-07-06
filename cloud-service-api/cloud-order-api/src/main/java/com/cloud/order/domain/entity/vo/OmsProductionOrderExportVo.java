@@ -172,10 +172,10 @@ public class OmsProductionOrderExportVo {
     @ApiModelProperty(value = "是否卡萨帝 0：否，1：是")
     private String csdFlag;
     /**
-     * 委外方式 0：半委外，1：全委外，2：自制
+     * 加工承揽方式 0：半委外，1：全委外，2：自制
      */
-    @ExcelProperty(value = "委外方式", index = 17, converter = OutSourceTypeConverter.class)
-    @ApiModelProperty(value = "委外方式 0：半委外，1：全委外，2：自制")
+    @ExcelProperty(value = "加工承揽方式", index = 17, converter = OutSourceTypeConverter.class)
+    @ApiModelProperty(value = "加工承揽方式 0：半成品，1：成品，2：自制")
     @NotBlank(message = "不能为空")
     private String outsourceType;
 
