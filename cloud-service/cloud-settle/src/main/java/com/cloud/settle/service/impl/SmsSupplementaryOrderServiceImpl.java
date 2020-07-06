@@ -270,7 +270,9 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         if (!rRate.isSuccess()) {
             throw new BusinessException(StrUtil.format("{}月份未维护费率", month));
         }
-        BigDecimal rate = new BigDecimal(rRate.get("data").toString());//汇率
+        CdMouthRate cdMouthRate = rRate.getData(CdMouthRate.class);
+        BigDecimal rate = cdMouthRate.getRate();//汇率
+        BigDecimal rateAmount = cdMouthRate.getAmount();//数额
         //物耗索赔系数
         CdSettleRatio cdSettleRatioWH = remoteSettleRatioService.selectByClaimType(SettleRatioEnum.SPLX_WH.getCode());
         if (cdSettleRatioWH == null) {
@@ -300,9 +302,9 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
                 BigDecimal ratio = cdSettleRatioWH.getRatio();//物耗索赔系数
                 spPrice = stuffAmount.multiply(stuffPrice.multiply(ratio));
                 if (CurrencyEnum.CURRENCY_USD.getCode().equals(smsSupplementaryOrder.getCurrency())) {
-                    //如果是美元，还要*汇率
-                    spPrice = spPrice.multiply(rate);
-                    smsSupplementaryOrder.setRate(rate);
+                    //如果是外币，还要 除以数额*汇率
+                    spPrice = spPrice.divide(rateAmount,2).multiply(rate);
+                    smsSupplementaryOrder.setRate(rate.divide(rateAmount,2));
                 }
                 smsSupplementaryOrder.setSettleFee(spPrice);
             }

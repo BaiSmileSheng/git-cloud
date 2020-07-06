@@ -70,10 +70,12 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
     public R getBizInfoByTableId(String businessKey) {
         logger.info("延期索赔工作流根据业务key获取质量索赔信息 businessKey:{}",businessKey);
         BizBusiness business = bizBusinessService.selectBizBusinessById(businessKey);
+        String procInstId = business.getProcInstId();
         if (null != business) {
             logger.info("延期索赔工作流根据业务key获取质量索赔信息 主键id:{}",business.getTableId());
             //根据主键id 获取对应的质量索赔信息
             R result  = remoteDelaysDeliveryService.selectById(Long.valueOf(business.getTableId()));
+            result.put("procInstId",procInstId);
             return result;
         }
         return R.error("延期索赔工作流根据业务key获取质量索赔信息失败");

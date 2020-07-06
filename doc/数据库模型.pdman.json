@@ -12135,6 +12135,20 @@
               "defaultValue": "''"
             },
             {
+              "name": "amount",
+              "type": "DECIMAL_2",
+              "remark": "",
+              "chnname": "数额",
+              "defaultValue": "0"
+            },
+            {
+              "name": "currency",
+              "type": "VARCHAR_32",
+              "remark": "",
+              "chnname": "币种",
+              "defaultValue": "''"
+            },
+            {
               "name": "rate",
               "type": "DECIMAL_2",
               "remark": "",
