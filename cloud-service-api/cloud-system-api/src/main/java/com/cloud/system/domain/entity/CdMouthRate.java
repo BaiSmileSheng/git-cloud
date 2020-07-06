@@ -37,6 +37,20 @@ public class CdMouthRate extends BaseEntity {
     private Long id;
 
     /**
+     * 数额
+     */
+    @ExcelProperty(value = "数额")
+    @ApiModelProperty(value = "数额")
+    private BigDecimal amount;
+
+    /**
+     * 币种
+     */
+    @ExcelProperty(value = "币种")
+    @ApiModelProperty(value = "币种")
+    private String currency;
+
+    /**
      * 年月
      */
     @ExcelProperty(value = "年月")

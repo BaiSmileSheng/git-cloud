@@ -13,12 +13,5 @@ import java.math.BigDecimal;
  */
 public interface CdMouthRateMapper extends BaseMapper<CdMouthRate>{
 
-    /**
-     * 根据月份查询汇率
-     * @param yearMouth
-     * @return rate
-     */
-    BigDecimal findRateByYearMouth(@Param("yearMouth")String yearMouth);
-
 
 }
