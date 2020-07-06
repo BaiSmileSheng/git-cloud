@@ -4,17 +4,13 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.cloud.system.mapper.CdMouthRateMapper">
 
-    <sql id="Base_Column_List">
-            id,
-            year_mouth,
-            rate,
-            del_flag
-    </sql>
     <resultMap type="CdMouthRate" id="CdMouthRateResult">
         <result property="id" column="id"/>
         <result property="yearMouth" column="year_mouth"/>
+        <result property="currency" column="currency"/>
+        <result property="amount" column="amount"/>
         <result property="rate" column="rate"/>
-        <result property="remarks" column="remarks"/>
+        <result property="remark" column="remark"/>
         <result property="delFlag" column="del_flag"/>
         <result property="createTime" column="create_time"/>
         <result property="createBy" column="create_by"/>
@@ -25,6 +21,8 @@
     <sql id="selectCdMouthRateVo">
         select id,
                year_mouth,
+               currency,
+               amount,
                rate,
                remarks,
                del_flag,
@@ -34,18 +32,6 @@
                update_by
         from cd_mouth_rate
     </sql>
-
-    <select id="findRateByYearMouth" resultType="java.math.BigDecimal">
-        select rate
-        from cd_mouth_rate
-        <where>
-            <if test="yearMouth != null and yearMouth != ''">
-                and year_mouth=#{yearMouth}
-            </if>
-                and del_flag='0'
-        </where>
-        Limit 1
-    </select>
 
 
 </mapper>
