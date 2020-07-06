@@ -72,7 +72,7 @@ public class CdProductStockController extends BaseController {
     /**
      * 导出成品库存主表列表
      */
-    @PostMapping("export")
+    @GetMapping("export")
     @HasPermissions("system:productStock:export")
     @ApiOperation(value = "导出成品库存主表列表", response = CdProductStock.class)
     @ApiImplicitParams({

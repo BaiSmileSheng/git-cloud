@@ -88,9 +88,10 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
     @Value("${spring.datasource.druid.master.password}")
     private String password;
 
+    private static final Integer MAX_SAP_RAW_MATERIAL_STOCK = 2000000;//sap原材料库存目前有78万数据,不会超过200万
     private static final double SMALL_SIZE = 100;//获取bom数据每次传输物料号最大数量
 
-    private static final int SAP_Raw_Material_SIZE = 10000;//获取原材料库存数据每次获取数量
+    private static final int SAP_RAW_MATERIAL_SIZE = 10000;//获取原材料库存数据每次获取数量
 
     /**
      * @Description: 获取uph数据
@@ -294,6 +295,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                         cdRawMaterialStock.setUnit(outTableOutput.getString("KMEIN"));
                         cdRawMaterialStock.setCreateBy("定时调用");
                         cdRawMaterialStock.setCreateTime(new Date());
+                        cdRawMaterialStock.setDelFlag(DeleteFlagConstants.NO_DELETED);
                         dataList.add(cdRawMaterialStock);
                     }
                 }
@@ -305,9 +307,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             log.error("Connect SAP fault, error msg: " + e);
             throw new BusinessException(e.getMessage());
         }
-        R r = new R();
-        r.set("data", dataList);
-        return r;
+        return R.data(dataList);
     }
 
     /**
@@ -522,32 +522,36 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
     @Override
     public R sycRawMaterialStock() {
         //1.连接SAP获取数据
-        int deleteFlag = 0; //删除原材料库存标记
+        int deleteFlag = 0;//删除标记
         int startInt = 0;
-        int startNum = startInt * SAP_Raw_Material_SIZE;
-        int endNum = (startNum + 1) * SAP_Raw_Material_SIZE;
-        R result = queryRawMaterialStockFromSap601(null, null,startNum,endNum);
-        if (!result.isSuccess()) {
-            log.error("连接SAP获取原材料库存数据异常 res:{}",JSONObject.toJSON(result));
-            throw new BusinessException(result.get("msg").toString());
-        }
-        List<CdRawMaterialStock> list = (List<CdRawMaterialStock>) result.get("data");
-        if(list.size() == SAP_Raw_Material_SIZE){
-            deleteFlag++;
-            startInt ++ ;
-            startNum = startInt * SAP_Raw_Material_SIZE;
-            endNum = (startNum + 1) * SAP_Raw_Material_SIZE;
-            result = queryRawMaterialStockFromSap601(null, null,startNum,endNum);
+        int start = 1;//序列号起始值为1
+        int startNum = startInt * SAP_RAW_MATERIAL_SIZE + start;
+        int endNum = (startInt + 1) * SAP_RAW_MATERIAL_SIZE + start;
+        Boolean querySapFlag = Boolean.TRUE;
+        while (querySapFlag){
+            R result = queryRawMaterialStockFromSap601(null, null,startNum,endNum);
+            startInt ++;
             if (!result.isSuccess()) {
-                log.error("连接SAP获取原材料库存数据异常 res:{}",JSONObject.toJSON(result));
-                throw new BusinessException(result.get("msg").toString());
+                log.error("连接SAP获取原材料库存数据异常 startNum:{},endNum:{},res:{}",startNum,endNum,JSONObject.toJSON(result));
             }
-        }
-        log.info("连接SAP获取原材料库存数据结束size:{}",list.size());
-        if (deleteFlag == 1) {
-            insertRawMaterialStockDb(list, Boolean.TRUE);
-        } else {
-            taskRawMaterialStockBomDb(list, Boolean.FALSE);
+            if(result.isSuccess()){
+                List<CdRawMaterialStock> list = (List<CdRawMaterialStock>) result.get("data");
+                log.info("连接SAP获取原材料库存数据结束size:{}",list.size());
+                deleteFlag ++;
+                if(deleteFlag == 1){
+                    insertRawMaterialStockDb(list, Boolean.TRUE);
+                }else{
+                    taskRawMaterialStockBomDb(list, Boolean.FALSE);
+                }
+                //跳出循环标记 单次查询数据<SAP_RAW_MATERIAL_SIZE
+                if(list.size() < SAP_RAW_MATERIAL_SIZE){
+                    querySapFlag = Boolean.FALSE;
+                }
+            }
+            //避免调用SAP一直没数据死循环
+            if(endNum > MAX_SAP_RAW_MATERIAL_STOCK){
+                querySapFlag = Boolean.FALSE;
+            }
         }
         return R.ok();
     }
