@@ -84,22 +84,17 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         log.info("----------------------------月度结算定时任务开始------------------------------");
         Date date = DateUtil.date();//当前时间
         String lastMonth = DateUtil.format(DateUtil.lastMonth(), "yyyyMM");//计算月份：上个月
-        //查询上个月汇率
-        R rRate = remoteCdMouthRateService.findRateByYearMouth(lastMonth);
-        if (!rRate.isSuccess()) {
-            throw new BusinessException(StrUtil.format("{}月份未维护费率", lastMonth));
-        }
-        BigDecimal rate = new BigDecimal(rRate.get("data").toString());//汇率
+
         //将加工费及索赔、历史按照供应商和付款公司分组
         /**-------------------物耗索赔  分组开始----------------------------------**/
         //物耗及历史数据分组map
-        Map<String, List<SmsSupplementaryOrder>> mapSupplement = supplementGroup(lastMonth, rate);
+        Map<String, List<SmsSupplementaryOrder>> mapSupplement = supplementGroup(lastMonth);
         Map<String, List<SmsSupplementaryOrder>> mapSupplementLS = supplementLSGroup();
         /**-------------------物耗索赔  分组结束----------------------------------**/
 
         /**-------------------报废索赔  分组开始----------------------------------**/
         //报废及历史数据分组map
-        Map<String, List<SmsScrapOrder>> mapScrap = scrapGroup(lastMonth, rate);
+        Map<String, List<SmsScrapOrder>> mapScrap = scrapGroup(lastMonth);
         Map<String, List<SmsScrapOrder>> mapScrapLS = scrapLSGroup();
         /**-------------------报废索赔  分组结束----------------------------------**/
 
@@ -273,12 +268,10 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
 
     /**
      * 物耗分组
-     *
      * @param lastMonth
-     * @param rate
      * @return
      */
-    Map<String, List<SmsSupplementaryOrder>> supplementGroup(String lastMonth, BigDecimal rate) {
+    Map<String, List<SmsSupplementaryOrder>> supplementGroup(String lastMonth) {
         String key;
         Map<String, List<SmsSupplementaryOrder>> mapSupplement = new ConcurrentHashMap<>();
         //取得计算月份、待结算的物耗申请数据
@@ -440,10 +433,9 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
      * 报废分组
      *
      * @param lastMonth
-     * @param rate
      * @return
      */
-    Map<String, List<SmsScrapOrder>> scrapGroup(String lastMonth, BigDecimal rate) {
+    Map<String, List<SmsScrapOrder>> scrapGroup(String lastMonth) {
         String key;
         Map<String, List<SmsScrapOrder>> mapScrap = new ConcurrentHashMap<>();
         //取得计算月份、待结算的报废数据

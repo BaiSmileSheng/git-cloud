@@ -99,6 +99,10 @@ public class CdMouthRateController extends BaseController {
      */
     @GetMapping(value = "findRate")
     public R findRateByYearMouth(String yearMouth){
-        return R.data(cdMouthRateService.findRateByYearMouth(yearMouth));
+        Example example = new Example(CdMouthRate.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("yearMouth", yearMouth);
+        CdMouthRate cdMouthRate = cdMouthRateService.findByExampleOne(example);
+        return R.data(cdMouthRate);
     }
 }

@@ -28,12 +28,14 @@ spring:
       discovery:
         server-addr: nacos.khaos.cosmoplat.com:80
   mail:
-    host: mail.mhaq.cn
+    host: 10.135.1.238
     port: 25
-    username: ws@mhaq.cn
-    password: Haier.123
+    username: ORW-KHAOS@haier.net
+    password:
     protocol: smtp
     defaultEncoding: utf-8
+    properties.mail.smtp.auth: false
+
 
 feign:
   hystrix:
