@@ -60,7 +60,7 @@ public class OmsProductionOrderAnalysisController extends BaseController {
      * 查询待排产订单分析 列表
      */
     @GetMapping("list")
-    @ApiOperation(value = "待排产订单分析 查询分页", response = OmsProductionOrderAnalysis.class)
+    @ApiOperation(value = "待排产订单分析-查询分页", response = OmsProductionOrderAnalysis.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required =true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true,paramType = "query", dataType = "String"),
@@ -70,7 +70,6 @@ public class OmsProductionOrderAnalysisController extends BaseController {
             @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = false,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "orderFrom", value = "订单来源", required = false,paramType = "query", dataType = "String")
     })
-    @HasPermissions("order:productionOrderAnalysis:list")
     public TableDataInfo list(@ApiIgnore OmsProductionOrderAnalysis omsProductionOrderAnalysis) {
         SysUser sysUser = getUserInfo(SysUser.class);
         if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
@@ -117,10 +116,10 @@ public class OmsProductionOrderAnalysisController extends BaseController {
         return toAjax(omsProductionOrderAnalysisService.deleteByIds(ids));
     }
     /**
-     * 排产订单分析数据导出
+     * 待排产订单分析-数据导出
      */
     @GetMapping("export")
-    @ApiOperation(value = "排产订单分析数据导出", response = OmsProductionOrderAnalysis.class)
+    @ApiOperation(value = "待排产订单分析-数据导出", response = OmsProductionOrderAnalysis.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "productMaterialCode", value = "成品专用号", required = false,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = false,paramType = "query", dataType = "String"),
@@ -163,7 +162,7 @@ public class OmsProductionOrderAnalysisController extends BaseController {
      * Date: 2020/6/16
      */
     @GetMapping("customerList")
-    @ApiOperation(value = "查询客户缺口量明细", response = OmsRealOrder.class)
+    @ApiOperation(value = "待排产订单分析-查询客户缺口量明细", response = OmsRealOrder.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required =true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productMaterialCode", value = "成品物料号", required = true,paramType = "query", dataType = "String"),

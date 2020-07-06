@@ -48,7 +48,10 @@
                     last_update = #{item.lastUpdate},
                 </if>
                 <if test="item.uph != null">
-                    uph = #{item.uph}
+                    uph = #{item.uph},
+                </if>
+                <if test="item.updateBy != null and item.updateBy != ''">
+                    update_by = #{item.updateBy}
                 </if>
             </trim>
             <where>
