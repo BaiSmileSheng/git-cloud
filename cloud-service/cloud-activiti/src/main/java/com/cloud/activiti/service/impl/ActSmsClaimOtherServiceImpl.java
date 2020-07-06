@@ -74,10 +74,12 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
     public R getBizInfoByTableId(String businessKey) {
         logger.info("其他索赔工作流根据业务key获取其他索赔信息 businessKey:{}",businessKey);
         BizBusiness business = bizBusinessService.selectBizBusinessById(businessKey);
+        String procInstId = business.getProcInstId();
         if (null != business) {
             logger.info("其他索赔工作流根据业务key获取其他索赔信息 主键id:{}",business.getTableId());
             //根据主键id 获取对应的其他索赔信息(包含文件信息)
             R selectResult = remoteClaimOtherService.selectById(Long.valueOf(business.getTableId()));
+            selectResult.put("procInstId",procInstId);
             return selectResult;
         }
         return R.error("其他索赔工作流根据业务key获取其他索赔信息失败");
