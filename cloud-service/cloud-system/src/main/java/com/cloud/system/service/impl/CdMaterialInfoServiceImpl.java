@@ -9,8 +9,12 @@ import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.common.utils.XmlUtil;
 import com.cloud.system.config.MdmConnConfig;
+import com.cloud.system.domain.entity.CdFactoryInfo;
+import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.mapper.CdMaterialInfoMapper;
+import com.cloud.system.service.ICdFactoryInfoService;
+import com.cloud.system.service.ICdMaterialExtendInfoService;
 import com.cloud.system.service.ICdMaterialInfoService;
 import com.cloud.system.service.SystemFromSap601InterfaceService;
 import com.cloud.system.webService.material.GeneralMDMDataReleaseBindingStub;
@@ -20,6 +24,7 @@ import com.cloud.system.webService.material.RowRisk;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +49,10 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
     private MdmConnConfig mdmConnConfig;
     @Autowired
     private SystemFromSap601InterfaceService systemFromSap601InterfaceService;
+    @Autowired
+    private ICdMaterialExtendInfoService cdMaterialExtendInfoService;
+    @Autowired
+    private ICdFactoryInfoService cdFactoryInfoService;
 
     /**
      * @Description: 保存MDM接口获取的物料信息数据
@@ -209,21 +218,28 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
     @Override
     public R updateUphBySap() {
         //1获取调SAP系统获取UPH接口的入参信息
-        List<CdMaterialInfo> list = cdMaterialInfoMapper.select(CdMaterialInfo.builder().materialType("HALB").delFlag("0").build());
+        //获取物料
+        List<CdMaterialExtendInfo> cdMaterialExtendInfos =
+                cdMaterialExtendInfoService.select(CdMaterialExtendInfo.builder().delFlag("0").build());
+        //获取工厂
+        List<CdFactoryInfo> cdFactoryInfos =
+                cdFactoryInfoService.select(CdFactoryInfo.builder().delFlag("0").build());
         //2处理UPH接口的入参数据
         //工厂set
         Set<String> factorySet = new HashSet<>();
         //物料set
         Set<String> materialSet = new HashSet<>();
-        if (list.size() <= 0) {
-            log.error("查询UPH接口入参数据为空！");
-            return R.error("查询UPH接口入参数据为空！");
+        if (cdMaterialExtendInfos.size() <= 0) {
+            log.error("查询UPH接口物料入参数据为空！");
+            return R.error("查询UPH接口物料入参数据为空！");
+        }
+        if (cdFactoryInfos.size() <= 0) {
+            log.error("查询UPH接口工厂入参数据为空！");
+            return R.error("查询UPH接口工厂入参数据为空！");
         }
         //遍历获取生产工厂、物料且去重
-        for (CdMaterialInfo cdMaterialInfo : list) {
-            factorySet.add(cdMaterialInfo.getPlantCode());
-            materialSet.add(cdMaterialInfo.getMaterialCode());
-        }
+        cdMaterialExtendInfos.forEach(m ->materialSet.add(m.getMaterialCode()));
+        cdFactoryInfos.forEach(f ->factorySet.add(f.getFactoryCode()));
         //set ——> List
         List<String> factorys = new ArrayList<>(factorySet);
         List<String> materials = new ArrayList<>(materialSet);
