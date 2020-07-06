@@ -10,25 +10,58 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.constant.ActProcessContants;
 import com.cloud.activiti.feign.RemoteActOmsProductionOrderService;
-import com.cloud.common.constant.*;
+import com.cloud.common.constant.DeleteFlagConstants;
+import com.cloud.common.constant.EmailConstants;
+import com.cloud.common.constant.ProductOrderConstants;
+import com.cloud.common.constant.RawMaterialFeedbackConstants;
+import com.cloud.common.constant.RoleConstants;
+import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.StringUtils;
-import com.cloud.order.domain.entity.*;
-import com.cloud.order.domain.entity.vo.OmsProductionOrderMailVo;
+import com.cloud.order.domain.entity.OmsProductionOrder;
+import com.cloud.order.domain.entity.OmsProductionOrderDel;
+import com.cloud.order.domain.entity.OmsProductionOrderDetail;
+import com.cloud.order.domain.entity.OmsProductionOrderDetailDel;
+import com.cloud.order.domain.entity.OmsRawMaterialFeedback;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderExportVo;
+import com.cloud.order.domain.entity.vo.OmsProductionOrderMailVo;
+import com.cloud.order.enums.OutSourceTypeEnum;
 import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.mail.MailService;
 import com.cloud.order.mapper.OmsProductionOrderMapper;
-import com.cloud.order.service.*;
+import com.cloud.order.service.IOmsProductionOrderDelService;
+import com.cloud.order.service.IOmsProductionOrderDetailDelService;
+import com.cloud.order.service.IOmsProductionOrderDetailService;
+import com.cloud.order.service.IOmsProductionOrderService;
+import com.cloud.order.service.IOmsRawMaterialFeedbackService;
+import com.cloud.order.service.IOrderFromSap601InterfaceService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
-import com.cloud.system.domain.entity.*;
+import com.cloud.settle.domain.entity.SmsSettleInfo;
+import com.cloud.settle.enums.SettleInfoOrderStatusEnum;
+import com.cloud.settle.feign.RemoteSettleInfoService;
+import com.cloud.system.domain.entity.CdBomInfo;
+import com.cloud.system.domain.entity.CdFactoryInfo;
+import com.cloud.system.domain.entity.CdFactoryLineInfo;
+import com.cloud.system.domain.entity.CdMaterialExtendInfo;
+import com.cloud.system.domain.entity.CdMaterialInfo;
+import com.cloud.system.domain.entity.CdMaterialPriceInfo;
+import com.cloud.system.domain.entity.CdProductOverdue;
+import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.po.SysUserRights;
-import com.cloud.system.feign.*;
+import com.cloud.system.feign.RemoteBomService;
+import com.cloud.system.feign.RemoteCdMaterialPriceInfoService;
+import com.cloud.system.feign.RemoteCdProductOverdueService;
+import com.cloud.system.feign.RemoteFactoryInfoService;
+import com.cloud.system.feign.RemoteFactoryLineInfoService;
+import com.cloud.system.feign.RemoteMaterialExtendInfoService;
+import com.cloud.system.feign.RemoteMaterialService;
+import com.cloud.system.feign.RemoteSequeceService;
+import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
@@ -39,16 +72,23 @@ import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.mail.MessagingException;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.text.ParseException;
-import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * 排产订单 Service业务层处理
@@ -124,6 +164,12 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     private RemoteCdProductOverdueService remoteCdProductOverdueService;
     @Autowired
     private IOrderFromSap601InterfaceService orderFromSap601InterfaceService;
+    @Autowired
+    private RemoteFactoryInfoService remoteFactoryInfoService;
+    @Autowired
+    private RemoteCdMaterialPriceInfoService remoteCdMaterialPriceInfoService;
+    @Autowired
+    private RemoteSettleInfoService remoteSettleInfoService;
 
     /**
      * Description:  排产订单导入
@@ -1220,13 +1266,14 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      *
      * @return
      */
+    @GlobalTransactional
     @Override
     public R timeSAPGetProductOrderCode() {
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("status", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPZ.getCode());
         List<OmsProductionOrder> list = omsProductionOrderMapper.selectByExample(example);
-        //调用SAP获取生产订单号
+        //1.调用SAP获取生产订单号
         R resultSAP = orderFromSap601InterfaceService.queryProductOrderFromSap601(list);
         if (!resultSAP.isSuccess()) {
             log.error("调用SAP获取生产订单号接口异常res:{}", JSONObject.toJSONString(resultSAP));
@@ -1235,13 +1282,111 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
         List<OmsProductionOrder> listSapRes = (List<OmsProductionOrder>) resultSAP.get("data");
         listSapRes.forEach(omsProductionOrder -> {
-            omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPZ.getCode());
+            omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode());
         });
-        //修改数据
+        //2.修改数据
         omsProductionOrderMapper.batchUpdateByOrderCode(listSapRes);
+        //3.生成加工费结算单
+        List<String> orderOrderList = listSapRes.stream().map(omsProductionOrder -> {
+            return omsProductionOrder.getOrderCode();
+        }).collect(toList());
+        List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderMapper.selectByOrderCode(orderOrderList);
+        List<SmsSettleInfo>  smsSettleInfoList = changeSmsSettleInfo(omsProductionOrderList);
+        R result = remoteSettleInfoService.batchInsert(smsSettleInfoList);
+        if(!result.isSuccess()){
+            log.error("新增加工费结算失败 res:{}",JSONObject.toJSONString(result));
+            throw new BusinessException(result.get("msg").toString());
+        }
         return R.ok();
     }
 
+    /**
+     * 转化加工费结算信息
+     * @param omsProductionOrderList
+     * @return
+     */
+    private List<SmsSettleInfo> changeSmsSettleInfo(List<OmsProductionOrder> omsProductionOrderList){
+        List<Dict> dictList = omsProductionOrderList.stream().map(omsProductionOrder -> {
+            Dict dict = new Dict();
+            dict.put(PRODUCT_FACTORY_CODE, omsProductionOrder.getProductFactoryCode());
+            dict.put(PRODUCT_LINE_CODE, omsProductionOrder.getProductLineCode());
+            return dict;
+        }).collect(toList());
+        R factoryLineInfoListR = remoteFactoryLineInfoService.selectListByMapList(dictList);
+        if(!factoryLineInfoListR.isSuccess()){
+            log.error("获取线体对应的供应商信息失败 res:{}",JSONObject.toJSONString(factoryLineInfoListR));
+        }
+        List<CdFactoryLineInfo> cdFactoryLineInfoList = factoryLineInfoListR.getCollectData(new TypeReference<List<CdFactoryLineInfo>>() {});
+        //key 工厂+线体
+        Map<String,CdFactoryLineInfo> supplierMap = cdFactoryLineInfoList.stream().collect(toMap(cdFactoryLineInfo ->
+                cdFactoryLineInfo.getProductFactoryCode()+cdFactoryLineInfo.getProduceLineCode(),cdFactoryLineInfo ->cdFactoryLineInfo,
+                (key1,key2) ->key2));
+        //获取采购组织
+        R resultFactory = remoteFactoryInfoService.listAll();
+        if(!resultFactory.isSuccess()){
+            log.error("remoteFactoryInfoService.listAll() 异常res:{}", JSONObject.toJSONString(resultFactory));
+            throw new BusinessException("获取采购组织信息异常");
+        }
+        List<CdFactoryInfo> cdFactoryInfoList = resultFactory.getCollectData(new TypeReference<List<CdFactoryInfo>>() {});
+        Map<String,String> cdFactoryInfoMap = cdFactoryInfoList.stream().collect(Collectors.toMap(CdFactoryInfo ::getFactoryCode,
+                CdFactoryInfo ::getPurchaseOrg,(key1,key2) -> key2));
+
+        List<SmsSettleInfo> smsSettleInfoList = omsProductionOrderList.stream().map(omsProductionOrder ->{
+            String outsourceType = omsProductionOrder.getOutsourceType();
+            Boolean flag = OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode().equals(outsourceType)
+                    || OutSourceTypeEnum.OUT_SOURCE_TYPE_QWW.getCode().equals(outsourceType);
+            if(flag){
+                SmsSettleInfo smsSettleInfo = new SmsSettleInfo();
+                smsSettleInfo.setLineNo(omsProductionOrder.getProductLineCode());
+                String key = omsProductionOrder.getProductFactoryCode() + omsProductionOrder.getProductLineCode();
+                CdFactoryLineInfo cdFactoryLineInfo = supplierMap.get(key);
+                if(null == cdFactoryLineInfo){
+                    throw new BusinessException("请维护工厂"+omsProductionOrder.getProductFactoryCode()
+                            +"线体"+omsProductionOrder.getProductLineCode()+"对应的供应商信息");
+                }
+                smsSettleInfo.setSupplierCode(cdFactoryLineInfo.getSupplierCode());
+                smsSettleInfo.setSupplierName(cdFactoryLineInfo.getSupplierDesc());
+                smsSettleInfo.setFactoryCode(omsProductionOrder.getProductFactoryCode());
+                smsSettleInfo.setProductOrderCode(omsProductionOrder.getProductOrderCode());
+                smsSettleInfo.setOrderStatus(SettleInfoOrderStatusEnum.ORDER_STATUS_1.getCode());
+                smsSettleInfo.setProductMaterialCode(omsProductionOrder.getProductMaterialCode());
+                smsSettleInfo.setProductMaterialName(omsProductionOrder.getProductMaterialDesc());
+                smsSettleInfo.setBomVersion(omsProductionOrder.getBomVersion());
+                smsSettleInfo.setOrderAmount(omsProductionOrder.getProductNum().intValue());
+                smsSettleInfo.setOutsourceWay(outsourceType);
+                String purchaseOrg = cdFactoryInfoMap.get(omsProductionOrder.getProductFactoryCode());
+                if(null == purchaseOrg){
+                    log.error("获取工厂对应采购组织信息失败 工厂:{}",omsProductionOrder.getProductFactoryCode());
+                    throw new BusinessException("请维护工厂"+omsProductionOrder.getProductFactoryCode()
+                            +"对应的采购组织信息");
+                }
+                //根据物料号,供应商,采购组织 查加工费
+                R maResult = remoteCdMaterialPriceInfoService.selectOneByCondition(omsProductionOrder.getProductMaterialCode(),purchaseOrg,
+                        cdFactoryLineInfo.getSupplierCode());
+                if(!maResult.isSuccess()){
+                    log.error("获取加工费失败 物料号:{},采购组织:{},供应商:{}",omsProductionOrder.getProductMaterialCode(),
+                            purchaseOrg,cdFactoryLineInfo.getSupplierCode());
+                    throw new BusinessException(maResult.get("msg").toString());
+                }
+                CdMaterialPriceInfo cdMaterialPriceInfo = maResult.getData(CdMaterialPriceInfo.class);
+                if(null == cdMaterialPriceInfo.getProcessPrice()){
+                    throw new BusinessException("请维护物料号"+omsProductionOrder.getProductMaterialCode()
+                            +"供应商"+cdFactoryLineInfo.getSupplierCode()+"采购组织"+purchaseOrg+"对应的加工费");
+                }
+                smsSettleInfo.setMachiningPrice(cdMaterialPriceInfo.getProcessPrice());
+                smsSettleInfo.setDelFlag(DeleteFlagConstants.NO_DELETED);
+                smsSettleInfo.setProductStartDate(DateUtils.dateTime(YYYY_MM_DD,omsProductionOrder.getProductStartDate()));
+                smsSettleInfo.setProductEndDate(DateUtils.dateTime(YYYY_MM_DD,omsProductionOrder.getProductEndDate()));
+                smsSettleInfo.setActualEndDate(omsProductionOrder.getActualEndDate());
+                smsSettleInfo.setConfirmAmont(0);
+                smsSettleInfo.setCreateBy("定时任务");
+                smsSettleInfo.setCreateTime(new Date());
+                return smsSettleInfo;
+            }
+            return null;
+        }).collect(toList());
+        return smsSettleInfoList;
+    }
     /**
      * 邮件推送
      *
