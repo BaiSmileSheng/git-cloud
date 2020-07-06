@@ -259,7 +259,9 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         if (!rRate.isSuccess()) {
             throw new BusinessException(StrUtil.format("{}月份未维护费率", month));
         }
-        BigDecimal rate = new BigDecimal(rRate.get("data").toString());//汇率
+        CdMouthRate cdMouthRate = rRate.getData(CdMouthRate.class);
+        BigDecimal rate = cdMouthRate.getRate();//汇率
+        BigDecimal rateAmount = cdMouthRate.getAmount();//数额
         //从SAP销售价格表取值（销售组织、物料号、有效期）
         //查询上个月、待结算的物耗申请中的物料号  用途是查询SAP成本价 更新到物耗表
         List<String> materialCodeList = smsScrapOrderMapper.selectMaterialByMonthAndStatus(month, CollUtil.newArrayList(ScrapOrderStatusEnum.BF_ORDER_STATUS_DJS.getCode()));
@@ -297,8 +299,8 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
                 BigDecimal machiningPrice = smsScrapOrder.getMachiningPrice();//加工费单价
                 scrapPrice = (materialPrice.multiply(scrapAmount.multiply(ratio))).add(scrapAmount.multiply(machiningPrice));
                 if (CurrencyEnum.CURRENCY_USD.getCode().equals(smsScrapOrder.getCurrency())) {
-                    //如果是美元，还要*汇率
-                    scrapPrice = scrapPrice.multiply(rate);
+                    //如果是外币，还要 除以数额*汇率
+                    scrapPrice = scrapPrice.divide(rateAmount,2).multiply(rate);
                 }
                 smsScrapOrder.setSettleFee(scrapPrice);
             }

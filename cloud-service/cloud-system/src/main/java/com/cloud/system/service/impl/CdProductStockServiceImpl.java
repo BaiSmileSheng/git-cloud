@@ -272,7 +272,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
         Example example = new Example(CdMaterialExtendInfo.class);
         List<CdMaterialExtendInfo> cdMaterialExtendInfoList = cdMaterialExtendInfoService.selectByExample(example);
         List<String> materialCodeList = cdMaterialExtendInfoList.stream().map(cdMaterialExtendInfo ->{
-            return cdMaterialExtendInfo.getMaterialCode();
+            return cdMaterialExtendInfo.getMaterialCode().toUpperCase();
         }).collect(Collectors.toList());
         //3.调用SAP  ZSD_INT_DDPS_02 获取SAP成品库存信息
         //4.汇总数据 插入主表数据库
@@ -303,9 +303,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
                     endCount = materialCodeList.size();
                 }
                 List<String> materials = new ArrayList<>();
-                for (int k = startCont; k< endCount; k++) {
-                    materials.add(materialCodeList.get(k));
-                }
+                materials = materialCodeList.subList(startCont,endCount);
 
                 //2.调用SAP  ZSD_INT_DDPS_02 获取SAP成品库存信息
                 logger.info("调用SAP  ZSD_INT_DDPS_02 获取SAP成品库存信息 factoryCode:{},materials:{}",factoryCode,null);
@@ -413,7 +411,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
                 BigDecimal stockWNum = productStock.getStockWNum();
                 BigDecimal stockINum = productStock.getStockINum();
                 BigDecimal stockKNum = productStock.getStockKNum();
-                BigDecimal sumNum = stockPNum.add(stockWNum).add(stockWNum).add(stockINum).multiply(stockKNum);
+                BigDecimal sumNum = stockPNum.add(stockWNum).add(stockINum).subtract(stockKNum);
                 productStock.setSumNum(sumNum);
             });
             cdProductStockMapper.insertList(productStockList);
