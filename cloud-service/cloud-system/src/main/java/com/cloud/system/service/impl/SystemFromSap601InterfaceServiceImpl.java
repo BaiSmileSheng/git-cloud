@@ -152,6 +152,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                         cdMaterialInfo.setMaterialCode(outTableOutput.getString("PLNBEZ"));
                         cdMaterialInfo.setPlantCode(outTableOutput.getString("WERKS"));
                         cdMaterialInfo.setUph(outTableOutput.getBigDecimal("UPH"));
+                        cdMaterialInfo.setUpdateBy("systemJob");
                         dataList.add(cdMaterialInfo);
                     }
                 }
@@ -381,7 +382,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                         cdBomInfo.setBomNum(outTableOutput.getBigDecimal("DANHAO"));//单耗
                         cdBomInfo.setProductUnit(outTableOutput.getString("MMEIN"));//成品单位
                         cdBomInfo.setComponentUnit(outTableOutput.getString("MEINS"));//组件单位
-                        cdBomInfo.setVersion(outTableOutput.getString("STLAL"));//BOM版本
+                        cdBomInfo.setVersion(StrUtil.toString(outTableOutput.getInt("STLAL")));//BOM版本
                         cdBomInfo.setPurchaseGroup(outTableOutput.getString("EKGRP"));//采购组
                         cdBomInfo.setCreateBy("定时任务");
                         cdBomInfo.setCreateTime(new Date());
