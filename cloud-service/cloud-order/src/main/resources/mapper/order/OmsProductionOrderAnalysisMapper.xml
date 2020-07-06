@@ -43,7 +43,8 @@
     <select id="selectListByGroup" resultMap="OmsProductionOrderAnalysisResultVo" parameterType="OmsProductionOrderAnalysis">
         select distinct product_material_code,product_factory_code,unit,order_from from oms_production_order_analysis
         <where>
-            1=1
+            product_date > DATE_FORMAT(now(),'%Y-%m-%d')
+            and product_date <![CDATA[<= ]]> DATE_FORMAT(DATE_ADD(now(),INTERVAL 14 day),'%Y-%m-%d')
             <if test="productMaterialCode != null and productMaterialCode != ''">
                 and product_material_code like concat('%',#{productMaterialCode},'%')
             </if>
