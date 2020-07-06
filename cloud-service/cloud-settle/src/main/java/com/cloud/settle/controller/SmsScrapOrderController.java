@@ -73,24 +73,25 @@ public class SmsScrapOrderController extends BaseController {
     public TableDataInfo list(@ApiIgnore() SmsScrapOrder smsScrapOrder) {
         Example example = new Example(SmsScrapOrder.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo(smsScrapOrder);
-        if(StrUtil.isNotEmpty(smsScrapOrder.getEndTime())){
-            criteria.andLessThanOrEqualTo("createTime", smsScrapOrder.getEndTime());
-        }
-        if(StrUtil.isNotEmpty(smsScrapOrder.getBeginTime())){
-            criteria.andGreaterThanOrEqualTo("createTime", smsScrapOrder.getBeginTime());
-        }
-
-        //供应商：查询本工厂的    业务科：查询
         SysUser sysUser = getUserInfo(SysUser.class);
-        if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
-            //供应商查询自己工厂下的申请单
-            criteria.andLike("supplierCode", sysUser.getSupplierCode());
-        }else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
-            if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_YWK)){
-                //业务科查询已提交状态自己管理工厂的申请单  采购组权限：sys_data_scope  例：8310,8410
-                criteria.andEqualTo("scrapStatus", ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
-                criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+        if (!sysUser.isAdmin()) {
+            criteria.andEqualTo(smsScrapOrder);
+            if(StrUtil.isNotEmpty(smsScrapOrder.getEndTime())){
+                criteria.andLessThanOrEqualTo("createTime", smsScrapOrder.getEndTime());
+            }
+            if(StrUtil.isNotEmpty(smsScrapOrder.getBeginTime())){
+                criteria.andGreaterThanOrEqualTo("createTime", smsScrapOrder.getBeginTime());
+            }
+            //供应商：查询本工厂的    业务科：查询
+            if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
+                //供应商查询自己工厂下的申请单
+                criteria.andLike("supplierCode", sysUser.getSupplierCode());
+            }else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
+                if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_YWK)){
+                    //业务科查询已提交状态自己管理工厂的申请单  采购组权限：sys_data_scope  例：8310,8410
+                    criteria.andEqualTo("scrapStatus", ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
+                    criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+                }
             }
         }
         startPage();
@@ -189,22 +190,24 @@ public class SmsScrapOrderController extends BaseController {
         Example example = new Example(SmsScrapOrder.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo(smsScrapOrder);
-        if(StrUtil.isNotEmpty(smsScrapOrder.getEndTime())){
-            criteria.andLessThanOrEqualTo("createTime", smsScrapOrder.getEndTime());
-        }
-        if(StrUtil.isNotEmpty(smsScrapOrder.getBeginTime())){
-            criteria.andGreaterThanOrEqualTo("createTime", smsScrapOrder.getBeginTime());
-        }
-        //供应商：查询本工厂的    业务科：查询
         SysUser sysUser = getUserInfo(SysUser.class);
-        if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
-            //供应商查询自己工厂下的申请单
-            criteria.andLike("supplierCode", sysUser.getSupplierCode());
-        }else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
-            if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_YWK)){
-                //业务科查询已提交状态自己管理工厂的申请单  采购组权限：sys_data_scope  例：8310,8410
-                criteria.andEqualTo("scrapStatus", ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
-                criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+        if (!sysUser.isAdmin()) {
+            if(StrUtil.isNotEmpty(smsScrapOrder.getEndTime())){
+                criteria.andLessThanOrEqualTo("createTime", smsScrapOrder.getEndTime());
+            }
+            if(StrUtil.isNotEmpty(smsScrapOrder.getBeginTime())){
+                criteria.andGreaterThanOrEqualTo("createTime", smsScrapOrder.getBeginTime());
+            }
+            //供应商：查询本工厂的    业务科：查询
+            if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
+                //供应商查询自己工厂下的申请单
+                criteria.andLike("supplierCode", sysUser.getSupplierCode());
+            }else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
+                if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_YWK)){
+                    //业务科查询已提交状态自己管理工厂的申请单  采购组权限：sys_data_scope  例：8310,8410
+                    criteria.andEqualTo("scrapStatus", ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
+                    criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+                }
             }
         }
         List<SmsScrapOrder> smsScrapOrderList = smsScrapOrderService.selectByExample(example);

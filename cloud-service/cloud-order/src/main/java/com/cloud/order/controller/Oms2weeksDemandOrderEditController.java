@@ -73,7 +73,7 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
     public TableDataInfo list(@ApiIgnore Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit) {
         Example example = listCondition(oms2weeksDemandOrderEdit);
         SysUser sysUser = getUserInfo(SysUser.class);
-        if(CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
+        if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
             example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
         }
         startPage();
@@ -202,7 +202,7 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
     public R export(@ApiIgnore() Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit) {
         Example example = listCondition(oms2weeksDemandOrderEdit);
         SysUser sysUser = getUserInfo(SysUser.class);
-        if(CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
+        if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
             example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
         }
         List<Oms2weeksDemandOrderEdit> oms2weeksDemandOrderEditList = oms2weeksDemandOrderEditService.selectByExample(example);

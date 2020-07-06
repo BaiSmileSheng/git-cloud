@@ -211,6 +211,7 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
 
             }
         }
+        log.info("========待排产订单分析汇总 结束 =======");
         return R.data(analysisArrayList);
     }
 
@@ -288,21 +289,23 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
     @Override
     public List<OmsProductionOrderAnalysisVo> selectListPage(OmsProductionOrderAnalysis omsProductionOrderAnalysis) {
         List<OmsProductionOrderAnalysisVo> list = omsProductionOrderAnalysisMapper.selectListByGroup(omsProductionOrderAnalysis);
-        List<Dict> dictList = list.stream()
-                .map(omsProductionOrderAnalysisVo -> new Dict()
-                        .set("productFactoryCode",omsProductionOrderAnalysisVo.getProductFactoryCode())
-                        .set("productMaterialCode",omsProductionOrderAnalysisVo.getProductMaterialCode()))
-                .collect(Collectors.toList());
-        List<OmsProductionOrderAnalysis> omsProductionOrderAnalyses =
-                omsProductionOrderAnalysisMapper.selectListByFactoryAndMaterial(dictList);
-        Map<String,List<OmsProductionOrderAnalysis>> map = omsProductionOrderAnalyses
-                .stream().collect(Collectors.groupingBy((o) -> fetchGroupKey(o)));
-        list.forEach(item -> {
-            String key = item.getProductFactoryCode()+item.getProductMaterialCode();
-            List<OmsProductionOrderAnalysis> omsProductionOrderAnalyses1 = map.get(key);
-            item.setStockNum(omsProductionOrderAnalyses1.get(0).getStockNum());
-            item.setDataList(omsProductionOrderAnalyses1);
-        });
+        if (ObjectUtil.isNotEmpty(list) && list.size() > 0){
+            List<Dict> dictList = list.stream()
+                    .map(omsProductionOrderAnalysisVo -> new Dict()
+                            .set("productFactoryCode",omsProductionOrderAnalysisVo.getProductFactoryCode())
+                            .set("productMaterialCode",omsProductionOrderAnalysisVo.getProductMaterialCode()))
+                    .collect(Collectors.toList());
+            List<OmsProductionOrderAnalysis> omsProductionOrderAnalyses =
+                    omsProductionOrderAnalysisMapper.selectListByFactoryAndMaterial(dictList);
+            Map<String,List<OmsProductionOrderAnalysis>> map = omsProductionOrderAnalyses
+                    .stream().collect(Collectors.groupingBy((o) -> fetchGroupKey(o)));
+            list.forEach(item -> {
+                String key = item.getProductFactoryCode()+item.getProductMaterialCode();
+                List<OmsProductionOrderAnalysis> omsProductionOrderAnalyses1 = map.get(key);
+                item.setStockNum(omsProductionOrderAnalyses1.get(0).getStockNum());
+                item.setDataList(omsProductionOrderAnalyses1);
+            });
+        }
         return list;
     }
     /**

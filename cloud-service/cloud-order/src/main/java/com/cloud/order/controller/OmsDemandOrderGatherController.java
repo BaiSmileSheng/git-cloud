@@ -65,7 +65,7 @@ public class OmsDemandOrderGatherController extends BaseController {
     public TableDataInfo list(@ApiIgnore OmsDemandOrderGather omsDemandOrderGather) {
         Example example = listCondition(omsDemandOrderGather);
         SysUser sysUser = getUserInfo(SysUser.class);
-        if(CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
+        if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
             example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
         }
         startPage();
@@ -162,7 +162,7 @@ public class OmsDemandOrderGatherController extends BaseController {
     public R export(@ApiIgnore() OmsDemandOrderGather omsDemandOrderGather) {
         Example example = listCondition(omsDemandOrderGather);
         SysUser sysUser = getUserInfo(SysUser.class);
-        if(CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
+        if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
             example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
         }
         List<OmsDemandOrderGather> omsDemandOrderGatherList = omsDemandOrderGatherService.selectByExample(example);
