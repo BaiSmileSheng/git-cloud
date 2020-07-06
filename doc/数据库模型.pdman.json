@@ -10002,6 +10002,13 @@
               "chnname": "UPH节拍"
             },
             {
+              "name": "mdm_create_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "MDM创建时间",
+              "notNull": true
+            },
+            {
               "name": "last_update",
               "type": "Date",
               "remark": "",
@@ -11027,7 +11034,7 @@
           ],
           "indexs": [
             {
-              "name": "idx_join_index",
+              "name": "cd_factory_info_factory_code_uindex",
               "isUnique": true,
               "fields": [
                 "factory_code"

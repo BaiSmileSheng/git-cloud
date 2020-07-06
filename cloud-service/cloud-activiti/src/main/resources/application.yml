@@ -3,7 +3,7 @@ server:
 # 日志配置
 logging:
   level:
-    com.cloud: debug
+    com.cloud: info
     org.springframework: warn
     com.alibaba.nacos.client.naming: error
 
