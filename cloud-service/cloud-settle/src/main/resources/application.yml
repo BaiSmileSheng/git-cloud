@@ -30,7 +30,7 @@ spring:
   mail:
     host: 10.135.1.238
     port: 25
-    username:
+    username: ORW-KHAOS@haier.net
     password:
     protocol: smtp
     defaultEncoding: utf-8
