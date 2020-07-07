@@ -82,7 +82,7 @@ public class CdBomInfoController extends BaseController {
      */
     void listCondition(CdBomInfo cdBomInfo,Example.Criteria criteria) {
         if (StringUtils.isNotBlank(cdBomInfo.getProductMaterialCode())) {
-            criteria.andLike("productMaterialCode", cdBomInfo.getProductMaterialCode());
+            criteria.andEqualTo("productMaterialCode", cdBomInfo.getProductMaterialCode());
         }
     }
 
@@ -93,10 +93,12 @@ public class CdBomInfoController extends BaseController {
      */
     @GetMapping("listByProductMaterialCode")
     @ApiOperation(value = "根据成品物料号查bom清单", response = CdBomInfo.class)
-    public R listByProductMaterialCode(String productMaterialCode){
+    public R listByProductMaterialCode(String productMaterialCode,String version,String productFactoryCode){
         Example example = new Example(CdBomInfo.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("productMaterialCode",productMaterialCode);
+        criteria.andEqualTo("version",version);
+        criteria.andEqualTo("productFactoryCode",productFactoryCode);
         List<CdBomInfo> cdBomInfoList = cdBomInfoService.selectByExample(example);
         return R.data(cdBomInfoList);
     }
