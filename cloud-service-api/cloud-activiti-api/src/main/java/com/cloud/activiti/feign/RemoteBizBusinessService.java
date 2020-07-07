@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface RemoteBizBusinessService {
 
     /**
-     * 根据procDefId和tableId查procInstId
+     * 根据procDefKey和tableId查procInstId
      * @param procDefKey
      * @param tableId
      * @return
