@@ -123,7 +123,7 @@ public class CdRawMaterialStockController extends BaseController {
      */
     @OperLog(title = "导出原材料库存报表", businessType = BusinessType.EXPORT)
     @HasPermissions("system:rawMaterialStock:exportRawMaterial")
-    @PostMapping("/exportRawMaterial")
+    @GetMapping("/exportRawMaterial")
     @ApiOperation(value = "导出原材料库存报表", response = CdRawMaterialStock.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "rawMaterialCode", value = "原材料物料号", required = false,paramType = "query", dataType = "String"),

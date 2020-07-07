@@ -31,8 +31,10 @@ spring:
     host: 10.135.1.238
     port: 25
     username: ORW-KHAOS@haier.net
+    password:
     protocol: smtp
     defaultEncoding: utf-8
+    properties.mail.smtp.auth: false
 
 feign:
   hystrix:

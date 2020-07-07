@@ -288,12 +288,12 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             if ((PUTTING_OUT_ZERO.equals(o.getOutsourceType())
                     || PUTTING_OUT_ONE.equals(o.getOutsourceType()))
                     && noMaterialList.contains(o.getProductMaterialCode())) {
-                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark()+",";
+                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark()+"，";
                 o.setExportRemark(exportRemark + NO_OUTSOURCE_REMARK);
             }
             if (o.getRhythm() == null || StringUtils.isBlank(o.getRhythm().toString())
                     || o.getRhythm().compareTo(BigDecimal.ZERO) == 0) {
-                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark()+",";
+                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark()+"，";
                 o.setExportRemark(exportRemark + NO_UPH_REMARK);
             }
             //筛选没有产品定员、分公司主管、班长的信息
@@ -301,19 +301,19 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     || o.getProductQuota() == 0)
                     || StringUtils.isBlank(o.getBranchOffice())
                     || StringUtils.isBlank(o.getMonitor())) {
-                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark()+",";
+                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark()+"，";
                 o.setExportRemark(exportRemark + NO_QUOTA_REMARK);
             }
             //筛选没有生命周期的数据
             if (StringUtils.isBlank(o.getLifeCycle())) {
-                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark()+",";
+                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark()+"，";
                 o.setExportRemark(exportRemark + NO_LIFECYCLE_REMARK);
             }
             //筛选没有bom清单的数据
             List<CdBomInfo> bomInfos =
                     bomMap.get(StrUtil.concat(true, o.getProductMaterialCode(), o.getProductFactoryCode(), o.getBomVersion()));
             if (ObjectUtil.isEmpty(bomInfos) || bomInfos.size() <= 0) {
-                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark()+",";
+                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark()+"，";
                 o.setExportRemark(exportRemark + NO_BOM_REMARK);
             }
         });
@@ -381,6 +381,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      * Date: 2020/6/22
      */
     @Override
+    @GlobalTransactional
     public R deleteByIdString(String ids, SysUser sysUser) {
         List<OmsProductionOrder> omsProductionOrders = omsProductionOrderMapper.selectByIds(ids);
         if (omsProductionOrders.size() <= 0) {
@@ -447,6 +448,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      * Date: 2020/6/22
      */
     @Override
+    @GlobalTransactional
     public R updateSave(OmsProductionOrder omsProductionOrder, SysUser sysUser) {
         //根据ID查询排产订单数据
         OmsProductionOrder productionOrder = omsProductionOrderMapper.selectByPrimaryKey(omsProductionOrder.getId());
@@ -591,6 +593,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      * Date: 2020/6/23
      */
     @Override
+    @GlobalTransactional
     public R confirmRelease(OmsProductionOrder omsProductionOrder, SysUser sysUser) {
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();

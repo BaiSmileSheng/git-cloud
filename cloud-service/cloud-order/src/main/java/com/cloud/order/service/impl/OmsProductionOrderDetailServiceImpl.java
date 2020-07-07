@@ -18,6 +18,7 @@ import com.cloud.order.domain.entity.vo.*;
 import com.cloud.order.service.IOmsProductionOrderService;
 import com.cloud.order.service.IOmsRawMaterialFeedbackService;
 import com.cloud.order.util.DataScopeUtil;
+import com.cloud.order.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.CdBomInfo;
 import com.cloud.system.domain.entity.CdRawMaterialStock;
 import com.cloud.system.domain.entity.SysUser;
@@ -204,7 +205,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
             exportVos.add(omsProductionOrderDetailExportVo);
         });
         List<List<String>> headList = headList(days);
-        return EasyExcelUtil.writeExcelWithHead(exportVos, "原材料评审表.xlsx", "sheet", new OmsProductionOrderDetailExportVo(), headList);
+        return EasyExcelUtilOSS.writeExcelWithHead(exportVos, "原材料评审表.xlsx", "sheet", new OmsProductionOrderDetailExportVo(), headList);
     }
 
     /**
