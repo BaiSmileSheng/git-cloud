@@ -129,13 +129,16 @@ public class SmsQualityOrderController extends BaseController {
         Example example = new Example(SmsQualityOrder.class);
         Example.Criteria criteria = example.createCriteria();
         if (StringUtils.isNotBlank(smsQualityOrder.getQualityNo())) {
+            criteria.andEqualTo("productOrderCode", smsQualityOrder.getProductOrderCode());
+        }
+        if (StringUtils.isNotBlank(smsQualityOrder.getQualityNo())) {
             criteria.andEqualTo("qualityNo", smsQualityOrder.getQualityNo());
         }
         if (StringUtils.isNotBlank(smsQualityOrder.getSupplierCode())) {
             criteria.andEqualTo("supplierCode", smsQualityOrder.getSupplierCode());
         }
         if (StringUtils.isNotBlank(smsQualityOrder.getSupplierName())) {
-            criteria.andLike("supplierName", smsQualityOrder.getSupplierName());
+            criteria.andLike("supplierName", "%"+smsQualityOrder.getSupplierName()+"%");
         }
         if (StringUtils.isNotBlank(smsQualityOrder.getQualityStatus())) {
             if(QualityStatusEnum.QUALITY_STATUS_1.getCode().equals(smsQualityOrder.getQualityStatus())){
@@ -152,12 +155,14 @@ public class SmsQualityOrderController extends BaseController {
         if (StringUtils.isNotBlank(smsQualityOrder.getEndTime())) {
             criteria.andLessThanOrEqualTo("createTime", smsQualityOrder.getEndTime());
         }
+        example.orderBy("createTime").desc();
         //供应商类型和海尔数据,如果是供应商则将供应商V码赋给供应商编号
         SysUser sysUser = getUserInfo(SysUser.class);
         Boolean flagUserType = UserTypeEnum.USER_TYPE_2.getCode().equals(sysUser.getUserType());
         if (flagUserType) {
             String supplierCode = sysUser.getSupplierCode();
             criteria.andEqualTo("supplierCode", supplierCode);
+            criteria.andNotEqualTo("qualityStatus",QualityStatusEnum.QUALITY_STATUS_0.getCode());
         }
         return example;
     }

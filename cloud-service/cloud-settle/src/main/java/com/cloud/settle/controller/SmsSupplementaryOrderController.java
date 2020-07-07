@@ -79,7 +79,7 @@ public class SmsSupplementaryOrderController extends BaseController {
         if (!sysUser.isAdmin()) {
             if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
                 //供应商查询自己工厂下的申请单
-                criteria.andLike("supplierCode", sysUser.getSupplierCode());
+                criteria.andEqualTo("supplierCode", sysUser.getSupplierCode());
             } else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
                 //海尔内部
                 if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_JIT)) {
@@ -146,19 +146,19 @@ public class SmsSupplementaryOrderController extends BaseController {
      */
     void listCondition(SmsSupplementaryOrder smsSupplementaryOrder, Example.Criteria criteria) {
         if (StringUtils.isNotBlank(smsSupplementaryOrder.getStuffNo())) {
-            criteria.andLike("stuffNo", smsSupplementaryOrder.getStuffNo());
+            criteria.andEqualTo("stuffNo", smsSupplementaryOrder.getStuffNo());
         }
         if (StringUtils.isNotBlank(smsSupplementaryOrder.getProductOrderCode())) {
-            criteria.andLike("productOrderCode", smsSupplementaryOrder.getProductOrderCode());
+            criteria.andEqualTo("productOrderCode", smsSupplementaryOrder.getProductOrderCode());
         }
         if (StringUtils.isNotBlank(smsSupplementaryOrder.getSupplierCode())) {
-            criteria.andLike("supplierCode", smsSupplementaryOrder.getSupplierCode());
+            criteria.andEqualTo("supplierCode", smsSupplementaryOrder.getSupplierCode());
         }
         if (StringUtils.isNotBlank(smsSupplementaryOrder.getSupplierName())) {
-            criteria.andLike("supplierName", smsSupplementaryOrder.getSupplierName());
+            criteria.andLike("supplierName", StringUtils.format("%{}%",smsSupplementaryOrder.getSupplierName()));
         }
         if (StringUtils.isNotBlank(smsSupplementaryOrder.getRawMaterialCode())) {
-            criteria.andLike("rawMaterialCode", smsSupplementaryOrder.getRawMaterialCode());
+            criteria.andEqualTo("rawMaterialCode", smsSupplementaryOrder.getRawMaterialCode());
         }
         if (StringUtils.isNotBlank(smsSupplementaryOrder.getStuffStatus())) {
             criteria.andEqualTo("stuffStatus", smsSupplementaryOrder.getStuffStatus());
@@ -264,7 +264,7 @@ public class SmsSupplementaryOrderController extends BaseController {
         if (!sysUser.isAdmin()) {
             if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
                 //供应商查询自己工厂下的申请单
-                criteria.andLike("supplierCode", sysUser.getSupplierCode());
+                criteria.andEqualTo("supplierCode", sysUser.getSupplierCode());
             } else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
                 //海尔内部
                 if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_JIT)) {

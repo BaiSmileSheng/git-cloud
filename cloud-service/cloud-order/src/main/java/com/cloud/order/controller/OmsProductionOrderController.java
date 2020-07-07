@@ -93,7 +93,7 @@ public class OmsProductionOrderController extends BaseController {
             criteria.andEqualTo("status", omsProductionOrder.getStatus());
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getProductMaterialCode())) {
-            criteria.andLike("productMaterialCode", omsProductionOrder.getProductMaterialCode());
+            criteria.andEqualTo("productMaterialCode", omsProductionOrder.getProductMaterialCode());
         }
         if (omsProductionOrder.getProductStartDate() != null) {
             criteria.andGreaterThanOrEqualTo("productStartDate", omsProductionOrder.getProductStartDate());
@@ -276,7 +276,7 @@ public class OmsProductionOrderController extends BaseController {
             criteria.andEqualTo("status", omsProductionOrder.getStatus());
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getProductMaterialCode())) {
-            criteria.andLike("productMaterialCode", omsProductionOrder.getProductMaterialCode());
+            criteria.andEqualTo("productMaterialCode", omsProductionOrder.getProductMaterialCode());
         }
         if (omsProductionOrder.getProductStartDate() != null) {
             criteria.andGreaterThanOrEqualTo("productStartDate", omsProductionOrder.getProductStartDate());
