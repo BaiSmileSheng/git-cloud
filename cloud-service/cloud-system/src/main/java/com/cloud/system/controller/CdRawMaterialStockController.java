@@ -121,8 +121,8 @@ public class CdRawMaterialStockController extends BaseController {
      * @Author: ltq
      * @Date: 2020/6/9
      */
+    @HasPermissions("system:rawMaterialStock:exportRawMaterial")
     @OperLog(title = "导出原材料库存报表", businessType = BusinessType.EXPORT)
-    @HasPermissions("monitor:operlog:export")
     @GetMapping("/exportRawMaterial")
     @ApiOperation(value = "导出原材料库存报表", response = CdRawMaterialStock.class)
     @ApiImplicitParams({
