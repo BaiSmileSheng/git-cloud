@@ -214,7 +214,8 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
         cdMaterialPriceInfo.setMaterialDesc(outTableOutput.getString("MAKTX"));
         cdMaterialPriceInfo.setMemberCode(outTableOutput.getString("LIFNR"));
         cdMaterialPriceInfo.setMemberName(outTableOutput.getString("NAME1"));
-        cdMaterialPriceInfo.setPurchasingGroup(outTableOutput.getString("EKORG"));
+        cdMaterialPriceInfo.setPurchasingGroup(outTableOutput.getString("EKGRP"));
+        cdMaterialPriceInfo.setPurchasingOrganization(outTableOutput.getString("EKORG"));
         cdMaterialPriceInfo.setTaxCode(outTableOutput.getString("MWSKZ"));
         cdMaterialPriceInfo.setNetWorth(outTableOutput.getBigDecimal("NETPR"));
         cdMaterialPriceInfo.setKbetr(outTableOutput.getString("KBETR1"));

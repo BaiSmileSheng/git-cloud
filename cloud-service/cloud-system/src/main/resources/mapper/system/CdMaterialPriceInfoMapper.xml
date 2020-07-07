@@ -12,6 +12,7 @@
         <result property="memberCode" column="member_code"/>
         <result property="memberName" column="member_name"/>
         <result property="purchasingGroup" column="purchasing_group"/>
+        <result property="purchasingOrganization" column="purchasing_organization"/>
         <result property="taxCode" column="tax_code"/>
         <result property="netWorth" column="net_worth"/>
         <result property="kbetr" column="kbetr"/>
@@ -39,6 +40,7 @@
                member_code,
                member_name,
                purchasing_group,
+               purchasing_organization,
                tax_code,
                net_worth,
                kbetr,
@@ -66,6 +68,7 @@
         member_code,
         member_name,
         purchasing_group,
+        purchasing_organization,
         tax_code,
         net_worth,
         kbetr,
@@ -106,6 +109,7 @@
         member_code,
         member_name,
         purchasing_group,
+        purchasing_organization,
         tax_code,
         net_worth,
         kbetr,
@@ -129,6 +133,7 @@
             #{item.memberCode},
             ifnull(#{item.memberName}, ''),
             #{item.purchasingGroup},
+            #{item.purchasingOrganization},
             ifnull(#{item.taxCode}, ''),
             ifnull(#{item.netWorth}, null),
             ifnull(#{item.kbetr}, ''),
@@ -152,6 +157,7 @@
         member_code = VALUES(member_code),
         member_name = VALUES(member_name),
         purchasing_group = VALUES(purchasing_group),
+        purchasing_organization = VALUES(purchasing_organization),
         tax_code = VALUES(tax_code),
         net_worth = VALUES(net_worth),
         kbetr = VALUES(kbetr),
