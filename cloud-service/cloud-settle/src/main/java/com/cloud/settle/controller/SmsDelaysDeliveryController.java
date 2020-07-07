@@ -1,5 +1,7 @@
 package com.cloud.settle.controller;
 
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
@@ -146,7 +148,7 @@ public class SmsDelaysDeliveryController extends BaseController {
             criteria.andGreaterThanOrEqualTo("createTime",smsDelaysDelivery.getBeginTime());
         }
         if(StringUtils.isNotBlank(smsDelaysDelivery.getEndTime())){
-            criteria.andLessThanOrEqualTo("createTime",smsDelaysDelivery.getEndTime());
+            criteria.andLessThanOrEqualTo("createTime", DateUtil.parse(smsDelaysDelivery.getEndTime()).offset(DateField.DAY_OF_MONTH,1));
         }
         //供应商类型和海尔数据,如果是供应商则将供应商V码赋给供应商编号
         SysUser sysUser = getUserInfo(SysUser.class);
