@@ -54,6 +54,12 @@ public class RemoteSettleInfoFallbackFactory implements FallbackFactory<RemoteSe
                 log.error("RemoteSettleInfoService.smsSettleInfoCalculate错误：{}",throwable.getMessage());
                 return R.error("服务器拥挤：请稍后再试！");
             }
+
+            @Override
+            public R batchInsert(List<SmsSettleInfo> smsSettleInfoList) {
+                log.error("RemoteSettleInfoService.batchInsert：{}",throwable.getMessage());
+                return R.error("服务器拥挤：请稍后再试！");
+            }
         };
     }
 }
