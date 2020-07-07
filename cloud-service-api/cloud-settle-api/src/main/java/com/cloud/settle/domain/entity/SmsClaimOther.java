@@ -66,6 +66,7 @@ public class SmsClaimOther extends BaseEntity {
     /**
      * 供应商名称
      */
+    @NotBlank(message = "供应商名称不能为空")
     @ExcelProperty(value = "供应商名称",index = 1)
     @ApiModelProperty(value = "供应商名称")
     private String supplierName;

@@ -68,6 +68,7 @@ public class SmsQualityOrder extends BaseEntity {
     /**
      * 供应商名称
      */
+    @NotBlank(message = "供应商名称不能为空")
     @ExcelProperty(value = "供应商名称",index = 3)
     @ApiModelProperty(value = "供应商名称")
     private String supplierName;
@@ -83,6 +84,7 @@ public class SmsQualityOrder extends BaseEntity {
     /**
      * 专用号
      */
+    @NotBlank(message = "专用号不能为空")
     @ExcelProperty(value = "专用号",index = 5)
     @ApiModelProperty(value = "专用号")
     private String productMaterialCode;
@@ -96,6 +98,7 @@ public class SmsQualityOrder extends BaseEntity {
     /**
      * 专用号名称
      */
+    @NotBlank(message = "专用号名称不能为空")
     @ExcelProperty(value = "专用号名称",index = 6)
     @ApiModelProperty(value = "专用号名称")
     private String productMaterialName;
