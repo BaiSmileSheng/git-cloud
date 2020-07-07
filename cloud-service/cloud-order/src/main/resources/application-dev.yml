@@ -15,7 +15,7 @@ spring:
   cloud:
     nacos:
       discovery:
-        namespace: hugh
+        namespace: orw-hugh
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driverClassName: com.mysql.cj.jdbc.Driver

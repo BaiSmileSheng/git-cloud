@@ -9,17 +9,12 @@ import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.service.ICdFactoryLineInfoService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 工厂线体关系  提供者
@@ -160,7 +155,7 @@ public class CdFactoryLineInfoController extends BaseController {
     @PostMapping("selectInfoByCodeLineCode")
     @ApiOperation(value = "根据线体查询信息", response = CdFactoryLineInfo.class)
     public R selectInfoByCodeLineCode(String produceLineCode,String factoryCode) {
-        return R.dataWithPrefix(cdFactoryLineInfoService.selectInfoByCodeLineCode(produceLineCode,factoryCode),"生产线");
+        return R.dataWithPrefix(cdFactoryLineInfoService.selectInfoByCodeLineCode(produceLineCode,factoryCode),"工厂线体关系");
     }
     /**
      * @Description: 获取SAP系统工厂线体关系数据，保存
