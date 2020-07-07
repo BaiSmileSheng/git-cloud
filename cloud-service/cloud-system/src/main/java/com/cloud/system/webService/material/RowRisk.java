@@ -3,6 +3,8 @@ package com.cloud.system.webService.material;
 import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "ROW")
 public class RowRisk {
+
+    private String CREATED;
     private String MATERIAL_CODE;
     private String MATERIAL_DESCRITION;
     private String MATERIAL_TYPE;
@@ -12,6 +14,14 @@ public class RowRisk {
     private String PURCHASE_GROUP_CODE;
     private String ROUNDING_QUANTITY;
     private String LAST_UPD;
+
+    public String getCREATED() {
+        return CREATED;
+    }
+
+    public void setCREATED(String CREATED) {
+        this.CREATED = CREATED;
+    }
 
     public String getMATERIAL_CODE() {
         return MATERIAL_CODE;

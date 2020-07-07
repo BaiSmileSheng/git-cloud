@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.utils.StringUtils;
@@ -71,42 +72,26 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
             list = objectMapper.convertValue(r.get("list"), new TypeReference<List<RowRisk>>() {
             });
             if (ObjectUtil.isNotEmpty(list) && list.size() > 0) {
-                //更新
-                List<CdMaterialInfo> cdMaterialInfosUpdate = new ArrayList<>();
                 //新增
-                List<CdMaterialInfo> cdMaterialInfosInsert = new ArrayList<>();
+                List<CdMaterialInfo> cdMaterialInfosInsertOrUpdate = new ArrayList<>();
                 list.forEach(rowRisk -> {
                     CdMaterialInfo cdMaterialInfo = new CdMaterialInfo();
                     cdMaterialInfo.setMaterialCode(rowRisk.getMATERIAL_CODE());
                     cdMaterialInfo.setPlantCode(rowRisk.getPLANT_CODE());
-                    CdMaterialInfo materialInfo = cdMaterialInfoMapper.selectOne(cdMaterialInfo);
                     cdMaterialInfo.setMaterialDesc(rowRisk.getMATERIAL_DESCRITION());
                     cdMaterialInfo.setMaterialType(rowRisk.getMATERIAL_TYPE());
                     cdMaterialInfo.setPrimaryUom(rowRisk.getPRIMARY_UOM());
                     cdMaterialInfo.setMtlGroupCode(rowRisk.getMTL_GROUP_CODE());
                     cdMaterialInfo.setPurchaseGroupCode(rowRisk.getPURCHASE_GROUP_CODE());
                     cdMaterialInfo.setRoundingQuantit(new BigDecimal(StringUtils.isNotBlank(rowRisk.getROUNDING_QUANTITY().trim()) ? rowRisk.getROUNDING_QUANTITY().trim() : "0"));
-                    cdMaterialInfo.setLastUpdate(DateUtil.parse(rowRisk.getLAST_UPD(), "yyyy-MM-dd HH:mm:ss"));
+                    cdMaterialInfo.setLastUpdate(StrUtil.isNotBlank(rowRisk.getLAST_UPD()) ? DateUtil.parse(rowRisk.getLAST_UPD(), "yyyy-MM-dd HH:mm:ss") : new Date());
+                    cdMaterialInfo.setMdmCreateTime(StrUtil.isNotBlank(rowRisk.getCREATED()) ? DateUtil.parse(rowRisk.getCREATED(),"yyyy-MM-dd HH:mm:ss") : new Date());
                     cdMaterialInfo.setDelFlag("0");
-                    if (ObjectUtil.isNotEmpty(materialInfo)) {
-                        cdMaterialInfo.setId(materialInfo.getId());
-                        cdMaterialInfo.setUpdateBy("systemJob");
-                        cdMaterialInfosUpdate.add(cdMaterialInfo);
-                    } else {
-                        cdMaterialInfo.setCreateTime(new Date());
-                        cdMaterialInfo.setCreateBy("systemJob");
-                        cdMaterialInfosInsert.add(cdMaterialInfo);
-                    }
+                    cdMaterialInfo.setCreateBy("systemJob");
+                    cdMaterialInfosInsertOrUpdate.add(cdMaterialInfo);
 
                 });
-                if (ObjectUtil.isNotEmpty(cdMaterialInfosUpdate) && cdMaterialInfosUpdate.size() > 0) {
-                    //批量更新
-                    cdMaterialInfoMapper.updateBatchByPrimaryKeySelective(cdMaterialInfosUpdate);
-                }
-                if (ObjectUtil.isNotEmpty(cdMaterialInfosInsert) && cdMaterialInfosInsert.size() > 0) {
-                    //批量新增
-                    cdMaterialInfoMapper.insertList(cdMaterialInfosInsert);
-                }
+                cdMaterialInfoMapper.batchInsetOrUpdate(cdMaterialInfosInsertOrUpdate);
             } else {
                 log.error("接口获取物料主数据为空！");
                 return R.error("接口获取物料主数据为空！");
@@ -147,7 +132,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
             cl.add(Calendar.DATE, -1);//减一天
             String startDateString = sft.format(cl.getTime());
             String endDateString = sft.format(endDateTime);
-            long startTime = System.currentTimeMillis(); // 获取开始时间
+
             //获取链接
             GeneralMDMDataReleaseBindingStub generalMdmDataReleaseBindingStub =
                     (GeneralMDMDataReleaseBindingStub) new Generalmdmdatarelease_client_epLocator(mdmConnConfig).getGeneralMDMDataRelease_pt();
@@ -155,8 +140,6 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
             generalMdmDataReleaseBindingStub.process(mdmConnConfig.getSysName(), mdmConnConfig.getMasterType(),
                     mdmConnConfig.getTableName(), startDateString, endDateString, String.valueOf(page), batchId,
                     outPage, outResult, outRetcode, outAllNum, outPageCon, pageAll, outRetmsg, onBatchId);
-            long endTime = System.currentTimeMillis(); // 获取结束时间
-            log.info("调接口一次往返时间： " + (endTime - startTime) + "ms");
             //判断返回的状态
             if (!"S".equals(outRetcode.value)) {
                 log.error("获取物料主数据接口调用失败:" + outRetmsg.value);
