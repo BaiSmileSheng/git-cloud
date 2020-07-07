@@ -219,7 +219,10 @@ public class SysOssController extends BaseController {
     @ApiOperation(value = "根据订单编号查询文件上传列表",response = SysOss.class)
     public R listByOrderNo(@RequestParam("orderNo") String orderNo) {
         List<SysOss> listResult = sysOssService.selectSysOssListByOrderNo(orderNo);
-        return R.data(listResult);
+        //因为索赔单查详情时可能没有,即使没有不要返回错误信息
+        R r = new R();
+        r.put("data",listResult);
+        return r;
     }
 
     /**
