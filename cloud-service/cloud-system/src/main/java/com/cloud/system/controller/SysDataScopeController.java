@@ -5,6 +5,7 @@ import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.RandomUtil;
+import com.cloud.common.utils.StringUtils;
 import com.cloud.system.domain.entity.SysDataScope;
 import com.cloud.system.service.ISysDataScopeService;
 import com.cloud.system.service.ISysUserScopeService;
@@ -59,7 +60,7 @@ public class SysDataScopeController extends BaseController {
         Example example = new Example(SysDataScope.class);
         example.and().andEqualTo(sysDataScope);
         if(sysDataScope.getMaterialDesc()!=null){
-            example.and().andLike("materialDesc",sysDataScope.getMaterialDesc());
+            example.and().andLike("materialDesc", StringUtils.format("%{}%",sysDataScope.getMaterialDesc()));
         }
         example.orderBy("orderNum").asc();
         startPage();

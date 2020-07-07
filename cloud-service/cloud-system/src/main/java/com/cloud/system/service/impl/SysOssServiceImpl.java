@@ -63,7 +63,7 @@ public class SysOssServiceImpl implements ISysOssService {
             criteria.andEqualTo("fileSuffix", sysOss.getFileSuffix());
         }
         if (StringUtils.isNotBlank(sysOss.getCreateBy())) {
-            criteria.andLike("createBy", sysOss.getCreateBy());
+            criteria.andEqualTo("createBy", sysOss.getCreateBy());
         }
         return sysOssMapper.selectByExample(example);
     }

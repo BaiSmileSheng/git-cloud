@@ -628,7 +628,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     criteria.andEqualTo("status", ProductOrderConstants.STATUS_THREE);
                 }
                 if (StrUtil.isNotBlank(omsProductionOrder.getProductMaterialCode())) {
-                    criteria.andLike("productMaterialCode", omsProductionOrder.getProductMaterialCode());
+                    criteria.andEqualTo("productMaterialCode", omsProductionOrder.getProductMaterialCode());
                 }
                 if (StrUtil.isNotBlank(omsProductionOrder.getCheckDateStart())) {
                     if (ProductOrderConstants.DATE_TYPE_ONE.equals(omsProductionOrder.getDateType())) {
@@ -682,7 +682,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             criteria.andEqualTo("status", omsProductionOrder.getStatus());
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getProductMaterialCode())) {
-            criteria.andLike("productMaterialCode", omsProductionOrder.getProductMaterialCode());
+            criteria.andEqualTo("productMaterialCode", omsProductionOrder.getProductMaterialCode());
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getCheckDateStart())) {
             if (ProductOrderConstants.DATE_TYPE_ONE.equals(omsProductionOrder.getDateType())) {
@@ -738,7 +738,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             criteria.andEqualTo("status", omsProductionOrder.getStatus());
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getProductMaterialCode())) {
-            criteria.andLike("productMaterialCode", omsProductionOrder.getProductMaterialCode());
+            criteria.andEqualTo("productMaterialCode", omsProductionOrder.getProductMaterialCode());
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getCheckDateStart())) {
             if (ProductOrderConstants.DATE_TYPE_ONE.equals(omsProductionOrder.getDateType())) {
