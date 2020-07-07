@@ -58,7 +58,6 @@ public class OmsProductionOrderDetailController extends BaseController {
             @ApiImplicitParam(name = "materialCode", value = "原材料物料", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "purchaseGroup", value = "采购组", required = false, paramType = "query", dataType = "String")
     })
-    @HasPermissions("order:productOrderDetail:list")
     public TableDataInfo list(@ApiIgnore OmsProductionOrderDetail omsProductionOrderDetail) {
         SysUser sysUser = getUserInfo(SysUser.class);
         startPage();
@@ -113,7 +112,6 @@ public class OmsProductionOrderDetailController extends BaseController {
             @ApiImplicitParam(name = "checkEndDate", value = "查询结束日期", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "status", value = "状态，0：未确认，1：已确认，2：反馈中'", required = false, paramType = "query", dataType = "String")
     })
-    @HasPermissions("order:productOrderDetail:commitListPageInfo")
     public TableDataInfo commitListPageInfo(@ApiIgnore OmsProductionOrderDetail omsProductionOrderDetail) {
         SysUser sysUser = getUserInfo(SysUser.class);
         startPage();

@@ -14,6 +14,7 @@
                     <result property="purchaseGroupCode" column="purchase_group_code"/>
                     <result property="plantCode" column="plant_code"/>
                     <result property="roundingQuantit" column="rounding_quantit"/>
+                    <result property="mdmCreateTime" column="mdm_create_time"/>
                     <result property="lastUpdate" column="last_update"/>
                     <result property="uph" column="uph"/>
                     <result property="delFlag" column="del_flag"/>
@@ -25,7 +26,7 @@
                     </resultMap>
 
     <sql id="selectCdMaterialInfoVo">
-        select id, material_code, material_desc, material_type, primary_uom, mtl_group_code, purchase_group_code, plant_code, rounding_quantit, last_update,uph, del_flag, remark, create_time, create_by, update_time, update_by from cd_material_info
+        select id, material_code, material_desc, material_type, primary_uom, mtl_group_code, purchase_group_code, plant_code, rounding_quantit,mdm_create_time, last_update,uph, del_flag, remark, create_time, create_by, update_time, update_by from cd_material_info
     </sql>
 
     <update id="updateBatchByFactoryAndMaterial" parameterType="list">
@@ -48,7 +49,10 @@
                     last_update = #{item.lastUpdate},
                 </if>
                 <if test="item.uph != null">
-                    uph = #{item.uph}
+                    uph = #{item.uph},
+                </if>
+                <if test="item.updateBy != null and item.updateBy != ''">
+                    update_by = #{item.updateBy}
                 </if>
             </trim>
             <where>
@@ -96,4 +100,55 @@
             </where>
         </foreach>
     </delete>
+    <insert id="batchInsetOrUpdate" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+      insert into cd_material_info (
+          material_code,
+          material_desc,
+          material_type,
+          primary_uom,
+          mtl_group_code,
+          purchase_group_code,
+          plant_code,
+          rounding_quantit,
+          mdm_create_time,
+          last_update,
+          del_flag,
+          remark,
+          create_time,
+          create_by
+      ) values
+        <foreach collection="list" item="item" separator=",">
+            (
+              #{item.materialCode},
+            #{item.materialDesc},
+            #{item.materialType},
+            #{item.primaryUom},
+            #{item.mtlGroupCode},
+            #{item.purchaseGroupCode},
+            #{item.plantCode},
+            #{item.roundingQuantit},
+            #{item.mdmCreateTime},
+            #{item.lastUpdate},
+            #{item.delFlag},
+            #{item.remark},
+            now(),
+            #{item.createBy}
+            )
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        material_code = values(material_code),
+        material_desc = values(material_desc),
+        material_type = values(material_type),
+        primary_uom = values(primary_uom),
+        mtl_group_code = values(mtl_group_code),
+        purchase_group_code = values(purchase_group_code),
+        plant_code = values(plant_code),
+        rounding_quantit = values(rounding_quantit),
+        mdm_create_time = values(mdm_create_time),
+        last_update = values(last_update),
+        del_flag = values(del_flag),
+        remark = values(remark),
+        update_time = now(),
+        update_by  = values(create_by)
+    </insert>
 </mapper>

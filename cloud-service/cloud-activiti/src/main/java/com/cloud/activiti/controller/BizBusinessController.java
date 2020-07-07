@@ -79,4 +79,16 @@ public class BizBusinessController extends BaseController {
     public R remove(String ids) {
         return toAjax(bizBusinessService.deleteBizBusinessLogic(ids));
     }
+
+    /**
+     * 根据procDefId和tableId查procInstId
+     * @param procDefKey
+     * @param tableId
+     * @return
+     */
+    @GetMapping("selectByKeyAndTable")
+    public R selectByKeyAndTable(@RequestParam("procDefKey") String procDefKey,@RequestParam("tableId") String tableId) {
+        String procInstId = bizBusinessService.selectByKeyAndTable(procDefKey,tableId);
+        return R.data(procInstId);
+    }
 }

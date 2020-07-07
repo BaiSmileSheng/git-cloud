@@ -15,6 +15,7 @@ import com.cloud.common.easyexcel.DTO.ExcelImportSucObjectDto;
 import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.system.domain.entity.CdMaterialExtendInfo;
+import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.CdMaterialExtendInfoImportErrorVo;
 import com.cloud.system.enums.PuttingOutEnum;
@@ -24,6 +25,7 @@ import com.cloud.system.enums.ProductTypeEnum;
 import com.cloud.system.mapper.CdMaterialExtendInfoMapper;
 import com.cloud.system.service.ICdMaterialExtendInfoExcelImportService;
 import com.cloud.system.service.ICdMaterialExtendInfoService;
+import com.cloud.system.service.ICdMaterialInfoService;
 import com.cloud.system.util.EasyExcelUtilOSS;
 import com.sap.conn.jco.JCoContext;
 import com.sap.conn.jco.JCoDestination;
@@ -61,6 +63,8 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
 
     @Autowired
     private CdMaterialExtendInfoMapper cdMaterialExtendInfoMapper;
+    @Autowired
+    private ICdMaterialInfoService cdMaterialInfoService;
 
     @Autowired
     private ICdMaterialExtendInfoExcelImportService cdMaterialExtendInfoExcelImportService;
@@ -79,12 +83,13 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
         Example example = new Example(CdMaterialExtendInfo.class);
         Example.Criteria criteria = example.createCriteria();
         List<CdMaterialExtendInfo> cdMaterialExtendInfoList = selectByExample(example);
-        List<String> materialCodeList = cdMaterialExtendInfoList.stream().map(cdMaterialExtendInfo->{
+        List<String> materialCodeList = cdMaterialExtendInfoList.stream().map(cdMaterialExtendInfo -> {
             return cdMaterialExtendInfo.getMaterialCode();
         }).collect(Collectors.toList());
         //2.传SAP
         return fromSAPDDPS03(materialCodeList);
     }
+
     /**
      * Description:  根据多个成品专用号查询
      * Param: [list]
@@ -96,6 +101,7 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
     public R selectByMaterialCodeList(List<Dict> list) {
         return R.data(cdMaterialExtendInfoMapper.selectByMaterialCodeList(list));
     }
+
     /**
      * Description:  根据物料查询一条数据
      * Param: [materialCode]
@@ -110,6 +116,7 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
 
     /**
      * 连接SAP 传输成品物料号
+     *
      * @param materialCodeList
      * @return
      */
@@ -148,11 +155,11 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
                     //设置指针位置
                     outputTable.setRow(i);
                     String flag = outputTable.getString("FLAG");
-                    if(!"S".equals(flag)){
+                    if (!"S".equals(flag)) {
                         String materialCode = outputTable.getString("MATNR");
                         String msg = outputTable.getString("MESSAGE");
                         remarkBuffer.append(materialCode + msg);
-                        logger.error("传输成品物料异常信息异常 materialCode:{},res:{}",materialCode,msg);
+                        logger.error("传输成品物料异常信息异常 materialCode:{},res:{}", materialCode, msg);
                     }
                 }
             }
@@ -168,15 +175,18 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
 
     /**
      * 根据生命周期查询物料号集合
+     *
      * @param lifeCycle
      * @return
      */
-	@Override
-	public R selectMaterialCodeByLifeCycle(String lifeCycle){
-		 return R.data(cdMaterialExtendInfoMapper.selectMaterialCodeByLifeCycle(lifeCycle));
-	}
+    @Override
+    public R selectMaterialCodeByLifeCycle(String lifeCycle) {
+        return R.data(cdMaterialExtendInfoMapper.selectMaterialCodeByLifeCycle(lifeCycle));
+    }
+
     /**
      * 根据物料号集合查询
+     *
      * @param materialCodes
      * @return
      */
@@ -192,22 +202,24 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
     public R importMaterialExtendInfo(MultipartFile file, SysUser sysUser) throws IOException {
         EasyWithErrorExcelListener easyExcelListener = new EasyWithErrorExcelListener(cdMaterialExtendInfoExcelImportService,
                 CdMaterialExtendInfo.class);
-        EasyExcel.read(file.getInputStream(),CdMaterialExtendInfo.class,easyExcelListener).sheet().doRead();
+        EasyExcel.read(file.getInputStream(), CdMaterialExtendInfo.class, easyExcelListener).sheet().doRead();
 
         //可以导入的结果集 插入
-        List<ExcelImportSucObjectDto> successList=easyExcelListener.getSuccessList();
-        if (!CollectionUtils.isEmpty(successList)){
-            List<CdMaterialExtendInfo> successResult =successList.stream().map(excelImportSucObjectDto -> {
+        List<ExcelImportSucObjectDto> successList = easyExcelListener.getSuccessList();
+        if (!CollectionUtils.isEmpty(successList)) {
+            List<CdMaterialExtendInfo> successResult = successList.stream().map(excelImportSucObjectDto -> {
                 CdMaterialExtendInfo cdMaterialExtendInfo = BeanUtil.copyProperties(excelImportSucObjectDto.getObject(),
                         CdMaterialExtendInfo.class);
                 cdMaterialExtendInfo.setCreateBy(sysUser.getLoginName());
+                cdMaterialExtendInfo.setUpdateBy(sysUser.getLoginName());
+                cdMaterialExtendInfo.setUpdateTime(new Date());
                 return cdMaterialExtendInfo;
             }).collect(Collectors.toList());
             cdMaterialExtendInfoMapper.batchInsertOrUpdate(successResult);
         }
         //错误结果集 导出
         List<ExcelImportErrObjectDto> errList = easyExcelListener.getErrList();
-        if (!CollectionUtils.isEmpty(errList)){
+        if (!CollectionUtils.isEmpty(errList)) {
             List<CdMaterialExtendInfoImportErrorVo> errorResults = errList.stream().map(excelImportErrObjectDto -> {
                 CdMaterialExtendInfoImportErrorVo cdMaterialExtendInfoImportErrorVo = BeanUtil.copyProperties(
                         excelImportErrObjectDto.getObject(),
@@ -244,6 +256,19 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
                 errObjectDto.setErrMsg(StrUtil.format("成品专用号不能为空：{}", cdMaterialExtendInfo.getMaterialCode()));
                 errDtos.add(errObjectDto);
                 continue;
+            }
+            Example example = new Example(CdMaterialInfo.class);
+            Example.Criteria criteria = example.createCriteria();
+            criteria.andEqualTo(cdMaterialExtendInfo.getMaterialCode());
+            CdMaterialInfo materialInfo =
+                    cdMaterialInfoService.findByExampleOne(example);
+            if (BeanUtil.isEmpty(materialInfo)) {
+                errObjectDto.setObject(cdMaterialExtendInfo);
+                errObjectDto.setErrMsg(StrUtil.format("成品专用号在主数据中不存在：{}", cdMaterialExtendInfo.getMaterialCode()));
+                errDtos.add(errObjectDto);
+                continue;
+            } else {
+                cdMaterialExtendInfo.setEstablishDate(materialInfo.getMdmCreateTime());
             }
             if (StringUtils.isBlank(cdMaterialExtendInfo.getMaterialDesc())) {
                 errObjectDto.setObject(cdMaterialExtendInfo);

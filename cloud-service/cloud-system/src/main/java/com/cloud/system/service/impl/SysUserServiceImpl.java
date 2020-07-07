@@ -1,5 +1,6 @@
 package com.cloud.system.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ArrayUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.annotation.DataScope;
@@ -17,6 +18,7 @@ import com.cloud.system.service.ISysConfigService;
 import com.cloud.system.service.ISysUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,7 @@ import tk.mybatis.mapper.entity.Example;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 用户 业务层处理
@@ -491,5 +494,17 @@ public class SysUserServiceImpl implements ISysUserService {
            return R.error("根据角色没有查询出用户信息！");
         }
         return R.data(userRights);
+    }
+
+    @Override
+    public List<SysUserVo> selectUserByMaterialCodeAndRoleKey(String materialCode, String roleKey) {
+        List<SysUser> list = userMapper.selectUserByMaterialCodeAndRoleKey(materialCode,roleKey);
+        List<SysUserVo> listRes = list.stream().map(sysUser -> {
+            SysUserVo sysUserVo = BeanUtil.copyProperties(sysUser,
+                    SysUserVo.class);
+            return sysUserVo;
+        }).collect(Collectors.toList());
+
+        return listRes;
     }
 }

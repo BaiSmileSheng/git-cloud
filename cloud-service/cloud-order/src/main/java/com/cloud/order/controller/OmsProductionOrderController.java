@@ -312,7 +312,7 @@ public class OmsProductionOrderController extends BaseController {
      * 查询排产订单 列表
      */
     @GetMapping("selectAllPage")
-    @ApiOperation(value = "排产订单分页查询", response = OmsProductionOrder.class)
+    @ApiOperation(value = "排产订单导入-分页查询", response = OmsProductionOrder.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
@@ -364,7 +364,7 @@ public class OmsProductionOrderController extends BaseController {
      * 查询排产订单导出 列表
      */
     @GetMapping("exportAll")
-    @ApiOperation(value = "排产订单导出功能", response = OmsProductionOrder.class)
+    @ApiOperation(value = "排产订单导入-导出功能", response = OmsProductionOrder.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "productMaterialCode", value = "专用号", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productFactoryCode", value = "工厂", required = false, paramType = "query", dataType = "String"),
@@ -375,6 +375,7 @@ public class OmsProductionOrderController extends BaseController {
             @ApiImplicitParam(name = "orderType", value = "sap订单类型", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "dateType", value = "查询日期类型", required = false, paramType = "query", dataType = "String")
     })
+    @HasPermissions("order:productionOrder:exportAll")
     public R exportAll(@ApiIgnore() OmsProductionOrder omsProductionOrder) {
         SysUser sysUser = getUserInfo(SysUser.class);
         List<OmsProductionOrder> productionOrderVos = omsProductionOrderService.exportAll(omsProductionOrder,sysUser);
@@ -388,6 +389,7 @@ public class OmsProductionOrderController extends BaseController {
     @OperLog(title = "排产订单删除 ", businessType = BusinessType.DELETE)
     @ApiOperation(value = "排产订单删除 ", response = R.class)
     @ApiParam(name = "ids", value = "需删除数据的id")
+    @HasPermissions("order:productionOrder:delete")
     public R delete(@RequestBody String ids) {
         SysUser sysUser = getUserInfo(SysUser.class);
         return omsProductionOrderService.deleteByIdString(ids,sysUser);
@@ -408,11 +410,11 @@ public class OmsProductionOrderController extends BaseController {
         return omsProductionOrderService.updateSave(omsProductionOrder,sysUser);
     }
     /**
-     * 确认下达
+     * 排产订单导入-确认下达
      */
     @PostMapping("confirmRelease")
-    @OperLog(title = "确认下达 ", businessType = BusinessType.UPDATE)
-    @ApiOperation(value = "确认下达 ", response = R.class)
+    @OperLog(title = "排产订单导入-确认下达 ", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "排产订单导入-确认下达 ", response = R.class)
     @HasPermissions("order:productionOrder:confirmRelease")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "productMaterialCode", value = "专用号", required = false, paramType = "query", dataType = "String"),
