@@ -12684,7 +12684,7 @@
             },
             {
               "name": "establish_date",
-              "type": "Date",
+              "type": "DateTime",
               "remark": "",
               "chnname": "建立日期"
             },

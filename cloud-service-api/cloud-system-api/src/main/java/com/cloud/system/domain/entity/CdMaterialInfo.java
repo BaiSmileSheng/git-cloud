@@ -96,6 +96,14 @@ public class CdMaterialInfo extends BaseEntity {
     private BigDecimal roundingQuantit;
 
     /**
+     * MDM创建时间
+     */
+    @ExcelProperty(value = "MDM创建时间")
+    @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @ApiModelProperty(value = "MDM创建时间")
+    private Date mdmCreateTime;
+    /**
      * 最后更新时间
      */
     @ExcelProperty(value = "最后更新时间")
