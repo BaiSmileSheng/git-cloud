@@ -367,10 +367,10 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
             String mailSubject = "其他索赔邮件";
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条其他索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
-            mailTextBuffer.append(smsClaimOther.getSupplierName()).append("+").append(supplierCode).append("+")
+            mailTextBuffer.append(smsClaimOther.getSupplierName()).append(supplierCode)
                     .append(sysUser.getCorporation()).append(" ").append("您有一条其他索赔订单，订单号")
                     .append(smsClaimOther.getClaimCode()).append(",请及时处理，如不处理，3天后系统自动确认，无法申诉");
-            mailService.sendTextMail(toSupplier,mailTextBuffer.toString(),mailSubject);
+            mailService.sendTextMail(toSupplier,mailSubject,mailTextBuffer.toString());
 
             //设置提交状态和时间
             smsClaimOther.setClaimOtherStatus(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_1.getCode());
@@ -479,11 +479,11 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
             String mailSubject = "其他索赔邮件";
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条其他索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
-            mailTextBuffer.append(smsClaimOther.getSupplierName()).append("+").append(supplierCode).append("+")
+            mailTextBuffer.append(smsClaimOther.getSupplierName()).append(supplierCode)
                     .append(sysUser.getCorporation()).append(" ").append("您有一条其他索赔订单，订单号")
                     .append(smsClaimOther.getClaimCode()).append(",请及时处理，如不处理，1天后系统自动确认，无法申诉");
             String toSupplier = sysUser.getEmail();
-            mailService.sendTextMail(toSupplier,mailTextBuffer.toString(),mailSubject);
+            mailService.sendTextMail(toSupplier,mailSubject,mailTextBuffer.toString());
         }
         return R.ok();
     }

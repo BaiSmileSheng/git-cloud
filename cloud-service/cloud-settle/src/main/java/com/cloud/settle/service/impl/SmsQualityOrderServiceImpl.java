@@ -400,10 +400,10 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
             String mailSubject = "质量索赔邮件";
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条质量索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
-            mailTextBuffer.append(smsQualityOrder.getSupplierName()).append("+").append(supplierCode).append("+")
+            mailTextBuffer.append(smsQualityOrder.getSupplierName()).append(supplierCode)
                     .append(sysUser.getCorporation()).append(" ").append("您有一条质量索赔订单，订单号")
                     .append(smsQualityOrder.getQualityNo()).append(",请及时处理，如不处理，3天后系统自动确认，无法申诉");
-            mailService.sendTextMail(toSupplier, mailTextBuffer.toString(), mailSubject);
+            mailService.sendTextMail(toSupplier,mailSubject,mailTextBuffer.toString());
 
             //设置提交状态
             smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_1.getCode());
@@ -513,11 +513,11 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
             String mailSubject = "质量索赔邮件";
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条质量索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
-            mailTextBuffer.append(smsQualityOrder.getSupplierName()).append("+").append(supplierCode).append("+")
+            mailTextBuffer.append(smsQualityOrder.getSupplierName()).append(supplierCode)
                     .append(sysUser.getCorporation()).append(" ").append("您有一条质量索赔订单，订单号")
                     .append(smsQualityOrder.getQualityNo()).append(",请及时处理，如不处理，1天后系统自动确认，无法申诉");
             String toSupplier = sysUser.getEmail();
-            mailService.sendTextMail(toSupplier, mailTextBuffer.toString(), mailSubject);
+            mailService.sendTextMail(toSupplier,mailSubject, mailTextBuffer.toString());
         }
         return R.ok();
     }
