@@ -78,9 +78,15 @@ public class CdMaterialPriceInfo extends BaseEntity {
     /**
      * 采购组
      */
-    @ExcelProperty(value = "采购组织")
-    @ApiModelProperty(value = "采购组织")
+    @ExcelProperty(value = "采购组")
+    @ApiModelProperty(value = "采购组")
     private String purchasingGroup;
+
+    /**
+     * 采购组织
+     */
+    @ExcelProperty(value = "采购组织")
+    private String purchasingOrganization;
 
     /**
      * 税码

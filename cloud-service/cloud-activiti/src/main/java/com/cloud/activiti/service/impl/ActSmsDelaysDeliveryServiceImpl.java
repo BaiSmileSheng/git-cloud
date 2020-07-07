@@ -9,17 +9,22 @@ import com.cloud.activiti.consts.ActivitiTableNameConstants;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
+import com.cloud.activiti.mail.MailService;
 import com.cloud.activiti.service.IActSmsDelaysDeliveryService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
+import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.domain.entity.SmsDelaysDelivery;
 import com.cloud.settle.enums.DeplayStatusEnum;
 import com.cloud.settle.feign.RemoteDelaysDeliveryService;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteOssService;
+import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
 import io.seata.spring.annotation.GlobalTransactional;
@@ -59,6 +64,12 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
 
     @Autowired
     private RepositoryService repositoryService;
+
+    @Autowired
+    private RemoteUserService remoteUserService;
+
+    @Autowired
+    private MailService mailService;
 
 
     /**
@@ -142,9 +153,9 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
             throw new  BusinessException("此延期索赔单不可再申诉");
         }
         //修改延期索赔单
-        selectSmsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_4.getCode());
-        selectSmsDelaysDelivery.setComplaintDate(new Date());
-        R updateR = remoteDelaysDeliveryService.editSave(selectSmsDelaysDelivery);
+        smsDelaysDeliveryReq.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_4.getCode());
+        smsDelaysDeliveryReq.setComplaintDate(new Date());
+        R updateR = remoteDelaysDeliveryService.editSave(smsDelaysDeliveryReq);
         if(!updateR.isSuccess()){
             logger.info("延期索赔单申诉修改延期索赔单状态 索赔单号:{}",selectSmsDelaysDelivery.getDelaysNo());
             throw new  BusinessException("延期索赔单申诉修改延期索赔单状态异常");
@@ -163,9 +174,37 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
             logger.info("延期索赔单申诉修改文件 索赔单号:{}",selectSmsDelaysDelivery.getDelaysNo());
             throw new  BusinessException("延期索赔单申诉修改文件异常");
         }
+        //4.发送邮件
+        String factoryCode = selectSmsDelaysDelivery.getFactoryCode();
+        String roleKey = RoleConstants.ROLE_KEY_ZLBBZ;
+        String delaysNo = selectSmsDelaysDelivery.getDelaysNo();
+        sendEmail(delaysNo, factoryCode, roleKey);
         return R.data(orderNo);
     }
 
+    /**
+     * 发送邮件
+     * @param delaysNo
+     * @param factoryCode
+     * @param roleKey
+     */
+    private void sendEmail(String delaysNo, String factoryCode, String roleKey) {
+        R sysUserR = remoteUserService.selectUserByMaterialCodeAndRoleKey(factoryCode,roleKey);
+        if(!sysUserR.isSuccess()){
+            logger.error("获取对应的负责人邮箱失败");
+            throw new BusinessException(sysUserR.get("msg").toString());
+        }
+        List<SysUserVo> sysUserVoList = sysUserR.getCollectData(new TypeReference<List<SysUserVo>>() {});
+        for(SysUserVo sysUserVo : sysUserVoList){
+            String email = sysUserVo.getEmail();
+            if(StringUtils.isBlank(email)){
+                throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
+            }
+            String subject = "供应商申诉";
+            String content = "延期索赔单 单号:" + delaysNo + "供应商发起申诉";
+            mailService.sendTextMail(email,subject,content);
+        }
+    }
     /**
      * Description:  根据Key查询最新版本流程
      * Param: [key]
@@ -248,13 +287,22 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
 
         //审核结果 2表示通过,3表示驳回
         Boolean flagBizResult = "2".equals(bizAudit.getResult().toString());
+        String delaysNo = smsDelaysDelivery.getDelaysNo();
+        String supplierCode = smsDelaysDelivery.getSupplierCode();
         //根据角色和延期索赔状态审批
         //订单部部长审批: 将供应商申诉4--->待小微主审核5  小微主审批: 将待小微主审核5--->待结算11
         if(flagBizResult){
             if( flagStatus4){
                 smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_5.getCode());
+                //向小微主发送邮件
+                String factoryCode = smsDelaysDelivery.getFactoryCode();
+                String roleKey = RoleConstants.ROLE_KEY_XWZ;
+                sendEmail(delaysNo, factoryCode, roleKey);
             }else if(flagStatus5){
                 smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_11.getCode());
+                //向供应商发邮件
+                String contentDetail = "申诉通过";
+                supplierSendEmail(delaysNo,supplierCode,contentDetail);
             }else{
                 logger.error ("延期索赔审批流程 此延期索赔单不可审批Req主键id:{} 状态:{}",bizBusiness.getTableId(),
                         smsDelaysDelivery.getDelaysStatus());
@@ -262,6 +310,9 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
             }
         }else{
             smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_7.getCode());
+            //向供应商发邮件
+            String contentDetail = "申诉驳回";
+            supplierSendEmail(delaysNo,supplierCode,contentDetail);
         }
         //更新延期索赔状态
         logger.info ("延期索赔审批流程 更新延期索赔主键id:{} 状态:{}",smsDelaysDelivery.getId(),smsDelaysDelivery.getDelaysStatus());
@@ -277,5 +328,29 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
             throw new BusinessException("延期索赔审批流程 审批 推进工作流失败 ");
         }
         return R.ok();
+    }
+
+    /**
+     * 向供应商发送邮件
+     * @param delaysNo
+     * @param supplierCode
+     * @param contentDetail
+     */
+    private void supplierSendEmail(String delaysNo,String supplierCode,String contentDetail) {
+        R sysUserR = remoteUserService.findUserBySupplierCode(supplierCode);
+        if(!sysUserR.isSuccess()){
+            logger.error("获取对应的负责人邮箱失败");
+            throw new BusinessException(sysUserR.get("msg").toString());
+        }
+        List<SysUserVo> sysUserVoList = sysUserR.getCollectData(new TypeReference<List<SysUserVo>>() {});
+        for(SysUserVo sysUserVo : sysUserVoList){
+            String email = sysUserVo.getEmail();
+            if(StringUtils.isBlank(email)){
+                throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
+            }
+            String subject = "供应商申诉";
+            String content = "延期索赔单 单号:" + delaysNo + "供应商发起申诉";
+            mailService.sendTextMail(email,subject,content);
+        }
     }
 }

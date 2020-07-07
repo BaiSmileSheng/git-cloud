@@ -74,7 +74,7 @@ public class RemoteCdMaterialPriceInfoFallbackFactory implements FallbackFactory
             }
 
             @Override
-            public R selectOneByCondition(String materialCode, String purchasingGroup, String memberCode) {
+            public R selectOneByCondition(String materialCode, String purchasingOrganization, String memberCode) {
                 log.error("RemoteCdMaterialPriceInfoService.selectOneByCondition ：{}",throwable.getMessage());
                 return R.error("服务器拥挤，请稍后再试！");
             }

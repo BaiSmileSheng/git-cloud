@@ -19,6 +19,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -212,5 +213,17 @@ public class SysUserController extends BaseController {
     @ApiOperation(value = "查询用户权限 ", response = R.class)
     public R selectUserRights(@RequestBody String roleKey){
         return sysUserService.selectUserRights(roleKey);
+    }
+
+    /**
+     * 根据工厂或物料号 角色查 用户信息
+     * @param materialCode
+     * @param roleKey
+     * @return
+     */
+    @GetMapping("selectUserByMaterialCodeAndRoleKey")
+    @ApiOperation(value = "根据工厂或物料号 角色查 用户信息 ", response = R.class)
+    public R selectUserByMaterialCodeAndRoleKey(@RequestParam("materialCode") String materialCode, @RequestParam("roleKey")String roleKey){
+        return R.data(sysUserService.selectUserByMaterialCodeAndRoleKey(materialCode,roleKey));
     }
 }
