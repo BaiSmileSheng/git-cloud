@@ -85,7 +85,7 @@ public class SmsScrapOrderController extends BaseController {
         if (!sysUser.isAdmin()) {
             if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
                 //供应商查询自己工厂下的申请单
-                criteria.andLike("supplierCode", sysUser.getSupplierCode());
+                criteria.andEqualTo("supplierCode", sysUser.getSupplierCode());
             }else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
                 if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_YWK)){
                     //业务科查询已提交状态自己管理工厂的申请单  采购组权限：sys_data_scope  例：8310,8410
@@ -201,7 +201,7 @@ public class SmsScrapOrderController extends BaseController {
         if (!sysUser.isAdmin()) {
             if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
                 //供应商查询自己工厂下的申请单
-                criteria.andLike("supplierCode", sysUser.getSupplierCode());
+                criteria.andEqualTo("supplierCode", sysUser.getSupplierCode());
             }else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
                 if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_YWK)){
                     //业务科查询已提交状态自己管理工厂的申请单  采购组权限：sys_data_scope  例：8310,8410
