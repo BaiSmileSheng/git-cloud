@@ -51,6 +51,8 @@ public class RedisConfig {
         } else {
             // 哨兵模式
             factory = new LettuceConnectionFactory(redisSentinelConfiguration, lettucePoolConfig);
+            factory.setValidateConnection(true);
+            //factory.setShareNativeConnection(false);//是否允许多个线程操作共用同一个缓存连接，默认true，false时每个操作都将开辟新的连接
         }
 
         return factory;
