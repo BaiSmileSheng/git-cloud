@@ -171,18 +171,19 @@ public class CdMaterialPriceInfoController extends BaseController {
     /**
      * 根据唯一索引查一条数据
      * @param materialCode
-     * @param purchasingGroup
-     * @param purchasingGroup
+     * @param purchasingOrganization
+     * @param memberCode
      * @return
      */
     @GetMapping("selectOneByCondition")
-    public R selectOneByCondition(@RequestParam("materialCode") String materialCode,@RequestParam("purchasingGroup") String purchasingGroup ,
+    public R selectOneByCondition(@RequestParam("materialCode") String materialCode,
+                                  @RequestParam("purchasingOrganization") String purchasingOrganization ,
                                   @RequestParam("memberCode") String memberCode){
         //查询CdMaterialPriceInfo
         Example example = new Example(CdMaterialPriceInfo.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("materialCode", materialCode);
-        criteria.andEqualTo("purchasingGroup", purchasingGroup);
+        criteria.andEqualTo("purchasingOrganization", purchasingOrganization);
         criteria.andEqualTo("memberCode", memberCode);
 
         CdMaterialPriceInfo cdMaterialPriceInfo = cdMaterialPriceInfoService.findByExampleOne(example);

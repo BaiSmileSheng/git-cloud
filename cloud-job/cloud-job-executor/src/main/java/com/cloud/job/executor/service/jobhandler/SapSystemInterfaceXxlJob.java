@@ -25,7 +25,7 @@ public class SapSystemInterfaceXxlJob {
     /**
      * 每天定时同步原材料库存
      * 要在传输物料号任务之后
-     * 每日凌晨执行一次  0 0 1 * * ?
+     * 每日凌晨执行一次  0 0 5 * * ?
      *
      * @param param
      * @return 成功

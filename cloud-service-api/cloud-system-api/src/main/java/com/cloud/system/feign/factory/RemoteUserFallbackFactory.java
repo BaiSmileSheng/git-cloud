@@ -71,6 +71,12 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
                 log.error("查询用户权限失败，原因{}："+throwable.getMessage());
                 return R.error("查询用户权限失败，原因{}："+throwable.getMessage());
             }
+
+            @Override
+            public R selectUserByMaterialCodeAndRoleKey(String materialCode, String roleKey) {
+                log.error("根据工厂或物料号 角色查 用户信息失败,原因{}："+throwable.getMessage());
+                return R.error("根据工厂或物料号,角色查用户信息失败,原因{}："+throwable.getMessage());
+            }
         };
     }
 }

@@ -1,6 +1,5 @@
 package com.cloud.system.mapper;
 
-import com.cloud.system.domain.entity.SysRole;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.po.SysUserRights;
 import org.apache.ibatis.annotations.Param;
@@ -149,4 +148,6 @@ public interface SysUserMapper {
     List<String> selectFactorysByUser(String userId);
 
     List<String> selectGroupCodesByUser(String userId);
+
+    List<SysUser> selectUserByMaterialCodeAndRoleKey(@Param("materialCode") String materialCode,@Param("roleKey")  String roleKey);
 }

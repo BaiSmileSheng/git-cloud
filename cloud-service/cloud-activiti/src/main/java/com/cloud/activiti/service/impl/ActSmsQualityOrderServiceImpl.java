@@ -9,17 +9,23 @@ import com.cloud.activiti.consts.ActivitiTableNameConstants;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
+import com.cloud.activiti.mail.MailService;
 import com.cloud.activiti.service.IActSmsQualityOrderService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
+import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.domain.entity.SmsQualityOrder;
 import com.cloud.settle.enums.QualityStatusEnum;
 import com.cloud.settle.feign.RemoteQualityOrderService;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteOssService;
+import com.cloud.system.feign.RemoteUserService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.activiti.engine.RepositoryService;
@@ -29,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -58,6 +65,12 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
 
     @Autowired
     private RepositoryService repositoryService;
+
+    @Autowired
+    private RemoteUserService remoteUserService;
+
+    @Autowired
+    private MailService mailService;
 
     /**
      * 索赔单所对应的申诉文件订单号后缀
@@ -146,7 +159,7 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
         smsQualityOrder.setComplaintDate(new Date());
         R result = remoteQualityOrderService.editSave(smsQualityOrder);
         if(!result.isSuccess()){
-            logger.error("质量索赔单申诉时修改索赔单异常 索赔单号:{},res:{}",smsQualityOrder.getQualityNo(),
+            logger.error("质量索赔单申诉时修改索赔单异常 索赔单号:{},res:{}",smsQualityOrderRes.getQualityNo(),
                     JSONObject.toJSONString(result));
             throw new BusinessException("质量索赔单供应商申诉时修改状态失败");
         }
@@ -164,7 +177,37 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
             logger.info("质量索赔单申诉修改文件 索赔单号:{}",smsQualityOrderRes.getQualityNo());
             throw new  BusinessException("质量索赔单申诉修改文件异常");
         }
+        //4.发送邮件
+        String factoryCode = smsQualityOrderRes.getFactoryCode();
+        String roleKey = RoleConstants.ROLE_KEY_ZLBBZ;
+        String qualityNo = smsQualityOrderRes.getQualityNo();
+        sendEmail(qualityNo, factoryCode, roleKey);
+
         return R.data(smsQualityOrderRes.getQualityNo());
+    }
+
+    /**
+     * 发送邮件
+     * @param qualityNo
+     * @param factoryCode
+     * @param roleKey
+     */
+    private void sendEmail(String qualityNo, String factoryCode, String roleKey) {
+        R sysUserR = remoteUserService.selectUserByMaterialCodeAndRoleKey(factoryCode,roleKey);
+        if(!sysUserR.isSuccess()){
+            logger.error("获取对应的负责人邮箱失败");
+            throw new BusinessException(sysUserR.get("msg").toString());
+        }
+        List<SysUserVo> sysUserVoList = sysUserR.getCollectData(new TypeReference<List<SysUserVo>>() {});
+        for(SysUserVo sysUserVo : sysUserVoList){
+            String email = sysUserVo.getEmail();
+            if(StringUtils.isBlank(email)){
+                throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
+            }
+            String subject = "供应商申诉";
+            String content = "质量索赔单 单号:" + qualityNo + "供应商发起申诉";
+            mailService.sendTextMail(email,subject,content);
+        }
     }
 
     /**
@@ -253,12 +296,20 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
 
         //审核结果 2表示通过,3表示驳回
         Boolean flagBizResult = "2".equals(bizAudit.getResult().toString());
+        String qualityNo = smsQualityOrder.getQualityNo();
+        String supplierCode = smsQualityOrder.getSupplierCode();
         //根据角色和质量索赔状态审批
         if(flagBizResult){
             //质量部部长审批: 将供应商申诉4--->待小微主审核5 //小微主审批: 将待小微主审核5--->待结算11
             smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_11.getCode());
+            //发送邮件
+            String contentDetail = "申诉通过";
+            supplierSendEmail(qualityNo,supplierCode,contentDetail);
         }else{
             smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_7.getCode());
+            //发送邮件
+            String contentDetail = "申诉驳回";
+            supplierSendEmail(qualityNo,supplierCode,contentDetail);
         }
 
         //更新质量索赔状态
@@ -275,5 +326,27 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
             throw new BusinessException("质量索赔审批流程 审批 推进工作流失败 ");
         }
         return R.ok();
+    }
+
+    /**
+     * 向供应商发送邮件
+     * @param supplierCode
+     */
+    private void supplierSendEmail(String qualityNo,String supplierCode,String contentDetail) {
+        R sysUserR = remoteUserService.findUserBySupplierCode(supplierCode);
+        if(!sysUserR.isSuccess()){
+            logger.error("获取对应的负责人邮箱失败");
+            throw new BusinessException(sysUserR.get("msg").toString());
+        }
+        List<SysUserVo> sysUserVoList = sysUserR.getCollectData(new TypeReference<List<SysUserVo>>() {});
+        for(SysUserVo sysUserVo : sysUserVoList){
+            String email = sysUserVo.getEmail();
+            if(StringUtils.isBlank(email)){
+                throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
+            }
+            String subject = "供应商申诉";
+            String content = "质量索赔单 单号:" + qualityNo + contentDetail;
+            mailService.sendTextMail(email,subject,content);
+        }
     }
 }
