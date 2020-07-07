@@ -1,6 +1,7 @@
 package com.cloud.settle.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.cloud.activiti.feign.RemoteBizBusinessService;
 import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
@@ -11,8 +12,10 @@ import com.cloud.settle.mail.MailService;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
+import com.cloud.system.feign.RemoteFactoryInfoService;
 import com.cloud.system.feign.RemoteOssService;
 import com.cloud.system.feign.RemoteSequeceService;
+import com.cloud.system.feign.RemoteSupplierInfoService;
 import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.seata.spring.annotation.GlobalTransactional;
@@ -61,6 +64,15 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
     @Autowired
     private MailService mailService;
 
+    @Autowired
+    private RemoteBizBusinessService remoteBizBusinessService;
+
+    @Autowired
+    private RemoteFactoryInfoService remoteFactoryInfoService;
+
+    @Autowired
+    private RemoteSupplierInfoService remoteSupplierInfoService;
+
     /**
      * 索赔单所对应的索赔文件订单号后缀
      */
@@ -84,6 +96,11 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
      * 生成索赔单前缀
      */
     private static final String OTHER_ORDER_PRE = "QT";
+
+    /**
+     * 其他索赔管理服务相关流程key
+     */
+    public static final String ACTIVITI_PRO_DEF_KEY_CHAIM_OTHER_TEST = "claimOther";
 
     @Override
     public R selectById(Long id) {
@@ -112,6 +129,14 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
                 }
                 List<SysOss> appealListReault = appealListR.getCollectData(new TypeReference<List<SysOss>>() {});
                 map.put("appealSysOssList",appealListReault);
+
+                R businessR = remoteBizBusinessService.selectByKeyAndTable(ACTIVITI_PRO_DEF_KEY_CHAIM_OTHER_TEST,id.toString());
+                if(!businessR.isSuccess()){
+                    logger.error("获取流程图失败 res:{}",JSONObject.toJSONString(businessR));
+                    throw new BusinessException(businessR.get("msg").toString());
+                }
+                String procInstId = businessR.getStr("data");
+                map.put("procInstId", procInstId);
             }
 
             map.put("smsClaimOther",smsClaimOtherRes);
@@ -131,6 +156,8 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
     @Override
     public R insertClaimOtherAndOss(SmsClaimOther smsClaimOther,String ossIds) {
 
+        //校验供应商,工厂存在合理性
+        verifyParameter(smsClaimOther);
         //1.生成单号 索赔单号生成规则 QT+年月日+4位顺序号，循序号每日清零
         StringBuffer qualityNoBuffer = new StringBuffer(OTHER_ORDER_PRE);
         qualityNoBuffer.append(DateUtils.getDate().replace("-",""));
@@ -178,6 +205,22 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
     }
 
     /**
+     * 校验供应商,工厂存在合理性
+     * @param smsClaimOther
+     */
+    private void verifyParameter(SmsClaimOther smsClaimOther){
+        R factoryResult = remoteFactoryInfoService.selectOneByFactory(smsClaimOther.getFactoryCode());
+        if(!factoryResult.isSuccess()){
+            logger.error("查工厂信息失败工厂:{},res:{}",smsClaimOther.getFactoryCode(),JSONObject.toJSON(factoryResult));
+            throw new BusinessException("校验工厂异常" + factoryResult.get("msg").toString());
+        }
+        R supplierResult = remoteSupplierInfoService.selectOneBySupplierCode(smsClaimOther.getSupplierCode());
+        if(!supplierResult.isSuccess()){
+            logger.error("查供应商信息失败供应商:{},res:{}",smsClaimOther.getSupplierCode(),JSONObject.toJSON(supplierResult));
+            throw new BusinessException("校验供应商异常" + supplierResult.get("msg").toString());
+        }
+    }
+    /**
      * 修改保存其他索赔(包含图片信息)
      * @param smsClaimOther  其他索赔信息
      * @param ossIds 文件信息
@@ -188,6 +231,8 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
     public R updateClaimOtherAndOss(SmsClaimOther smsClaimOther,String ossIds) {
         logger.info("修改其他索赔单信息 id:{},claimCode:{}",smsClaimOther.getId(),smsClaimOther.getClaimCode());
 
+        //校验供应商,工厂存在合理性
+        verifyParameter(smsClaimOther);
         //1.查询索赔单数据,判断状态是否是待提交,待提交可修改
         SmsClaimOther smsClaimOtherRes = smsClaimOtherMapper.selectByPrimaryKey(smsClaimOther.getId());
         if(null == smsClaimOtherRes){
@@ -322,10 +367,10 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
             String mailSubject = "其他索赔邮件";
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条其他索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
-            mailTextBuffer.append(smsClaimOther.getSupplierName()).append("+").append(supplierCode).append("+")
-                    .append(sysUser.getCorporation()).append(" ").append("您有一条索赔索赔订单，订单号")
+            mailTextBuffer.append(smsClaimOther.getSupplierName()).append(supplierCode)
+                    .append(sysUser.getCorporation()).append(" ").append("您有一条其他索赔订单，订单号")
                     .append(smsClaimOther.getClaimCode()).append(",请及时处理，如不处理，3天后系统自动确认，无法申诉");
-            mailService.sendTextMail(toSupplier,mailTextBuffer.toString(),mailSubject);
+            mailService.sendTextMail(toSupplier,mailSubject,mailTextBuffer.toString());
 
             //设置提交状态和时间
             smsClaimOther.setClaimOtherStatus(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_1.getCode());
@@ -434,11 +479,11 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
             String mailSubject = "其他索赔邮件";
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条其他索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
-            mailTextBuffer.append(smsClaimOther.getSupplierName()).append("+").append(supplierCode).append("+")
+            mailTextBuffer.append(smsClaimOther.getSupplierName()).append(supplierCode)
                     .append(sysUser.getCorporation()).append(" ").append("您有一条其他索赔订单，订单号")
                     .append(smsClaimOther.getClaimCode()).append(",请及时处理，如不处理，1天后系统自动确认，无法申诉");
             String toSupplier = sysUser.getEmail();
-            mailService.sendTextMail(toSupplier,mailTextBuffer.toString(),mailSubject);
+            mailService.sendTextMail(toSupplier,mailSubject,mailTextBuffer.toString());
         }
         return R.ok();
     }

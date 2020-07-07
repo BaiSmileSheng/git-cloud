@@ -10002,6 +10002,13 @@
               "chnname": "UPH节拍"
             },
             {
+              "name": "mdm_create_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "MDM创建时间",
+              "notNull": true
+            },
+            {
               "name": "last_update",
               "type": "Date",
               "remark": "",
@@ -11027,7 +11034,7 @@
           ],
           "indexs": [
             {
-              "name": "idx_join_index",
+              "name": "cd_factory_info_factory_code_uindex",
               "isUnique": true,
               "fields": [
                 "factory_code"
@@ -11743,6 +11750,12 @@
               "notNull": true
             },
             {
+              "name": "purchasing_organization",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "采购组织"
+            },
+            {
               "name": "tax_code",
               "type": "VARCHAR_32",
               "remark": "",
@@ -11849,17 +11862,11 @@
             },
             {
               "name": "idx_join_index",
-              "isUnique": false,
+              "isUnique": true,
               "fields": [
                 "material_code",
-                "material_desc",
                 "member_code",
-                "member_name",
-                "purchasing_group",
-                "tax_code",
-                "currency",
-                "begin_date",
-                "end_date"
+                "purchasing_organization"
               ]
             }
           ],
@@ -12684,7 +12691,7 @@
             },
             {
               "name": "establish_date",
-              "type": "Date",
+              "type": "DateTime",
               "remark": "",
               "chnname": "建立日期"
             },

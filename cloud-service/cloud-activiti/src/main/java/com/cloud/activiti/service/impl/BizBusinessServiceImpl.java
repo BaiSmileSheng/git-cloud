@@ -171,4 +171,13 @@ public class BizBusinessServiceImpl implements IBizBusinessService {
         }
         return updateBizBusiness(business);
     }
+
+    @Override
+    public String selectByKeyAndTable(String procDefKey, String tableId) {
+        BizBusiness bizBusiness = new BizBusiness();
+        bizBusiness.setProcDefKey(procDefKey);
+        bizBusiness.setTableId(tableId);
+        bizBusiness = businessMapper.selectOne(bizBusiness);
+        return bizBusiness.getProcInstId();
+    }
 }

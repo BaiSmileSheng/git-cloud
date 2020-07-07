@@ -83,6 +83,12 @@ public class CdMaterialPriceInfo extends BaseEntity {
     private String purchasingGroup;
 
     /**
+     * 采购组织
+     */
+    @ExcelProperty(value = "采购组织")
+    private String purchasingOrganization;
+
+    /**
      * 税码
      */
     @ExcelProperty(value = "税码")

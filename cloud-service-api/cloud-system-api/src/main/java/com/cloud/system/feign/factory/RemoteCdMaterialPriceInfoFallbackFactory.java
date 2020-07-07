@@ -73,6 +73,12 @@ public class RemoteCdMaterialPriceInfoFallbackFactory implements FallbackFactory
                 return R.error("服务器拥挤，请稍后再试！");
             }
 
+            @Override
+            public R selectOneByCondition(String materialCode, String purchasingOrganization, String memberCode) {
+                log.error("RemoteCdMaterialPriceInfoService.selectOneByCondition ：{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
+            }
+
         };
     }
 }

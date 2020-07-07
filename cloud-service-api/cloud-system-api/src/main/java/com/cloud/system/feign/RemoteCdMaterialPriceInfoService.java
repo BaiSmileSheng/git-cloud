@@ -68,4 +68,16 @@ public interface RemoteCdMaterialPriceInfoService {
     @PostMapping("materialPrice/synPriceYCL")
     R synPriceYCL();
 
+    /**
+     * 根据唯一索引查一条数据
+     * @param materialCode
+     * @param purchasingOrganization
+     * @param memberCode
+     * @return
+     */
+    @GetMapping("materialPrice/selectOneByCondition")
+    R selectOneByCondition(@RequestParam("materialCode") String materialCode,
+                           @RequestParam("purchasingOrganization") String purchasingOrganization ,
+                           @RequestParam("memberCode") String memberCode);
+
 }
