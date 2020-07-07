@@ -2,6 +2,7 @@ package com.cloud.settle.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.cloud.activiti.feign.RemoteBizBusinessService;
 import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
@@ -72,6 +73,9 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
     @Autowired
     private RemoteFactoryLineInfoService remoteFactoryLineInfoService;
 
+    @Autowired
+    private RemoteBizBusinessService remoteBizBusinessService;
+
     public static String YYYY_MM_DD = "yyyy-MM-dd";
 
     /**
@@ -96,6 +100,11 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
     private final static int dateBeforeOne = -1;
 
     /**
+     * 延期索赔管理服务相关流程key
+     */
+    public static final String ACTIVITI_PRO_DEF_KEY_DELAYS_TEST = "delays";
+
+    /**
      * 查询延期交付索赔详情
      * @param id 主键id
      * @return 延期交付索赔详情(包含文件信息)
@@ -118,6 +127,14 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
                 }
                 List<SysOss> sysOssList = sysOssR.getCollectData(new TypeReference<List<SysOss>>() {});
                 map.put("sysOssList",sysOssList);
+
+                R businessR = remoteBizBusinessService.selectByKeyAndTable(ACTIVITI_PRO_DEF_KEY_DELAYS_TEST,id.toString());
+                if(!businessR.isSuccess()){
+                    logger.error("获取流程图失败 res:{}",JSONObject.toJSONString(businessR));
+                    throw new BusinessException(businessR.get("msg").toString());
+                }
+                String procInstId = businessR.getStr("data");
+                map.put("procInstId", procInstId);
             }
             map.put("smsDelaysDelivery",smsDelaysDeliveryRes);
             return R.ok(map);

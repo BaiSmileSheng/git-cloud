@@ -70,6 +70,12 @@
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
 
+        <!-- 流程模块 -->
+        <dependency>
+            <groupId>com.cloud</groupId>
+            <artifactId>cloud-activiti-api</artifactId>
+            <version>${cloud.version}</version>
+        </dependency>
         <!-- 结算模块 -->
         <dependency>
             <groupId>com.cloud</groupId>

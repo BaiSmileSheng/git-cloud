@@ -98,4 +98,12 @@ public interface IBizBusinessService {
      */
     public int setAuditor(BizBusiness business, int result, long currentUserId);
 
+    /**
+     * 根据procDefId和tableId查procInstId
+     * @param procDefKey
+     * @param tableId
+     * @return
+     */
+    String selectByKeyAndTable(String procDefKey,String tableId);
+
 }

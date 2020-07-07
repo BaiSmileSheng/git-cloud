@@ -37,7 +37,7 @@ public class CdSettleProductMaterialController extends BaseController {
 
 
     @GetMapping("/export")
-    @HasPermissions("monitor:operlog:export")
+    @HasPermissions("system:settleProducMaterial:export")
     @ApiOperation(value = "导出模板", response = CdSettleProductMaterial.class)
     @OperLog(title = "操作日志", businessType = BusinessType.EXPORT)
     public R export() {
