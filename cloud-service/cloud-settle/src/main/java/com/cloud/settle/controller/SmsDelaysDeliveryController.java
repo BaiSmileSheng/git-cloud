@@ -148,6 +148,7 @@ public class SmsDelaysDeliveryController extends BaseController {
         if(StringUtils.isNotBlank(smsDelaysDelivery.getEndTime())){
             criteria.andLessThanOrEqualTo("createTime",smsDelaysDelivery.getEndTime());
         }
+        example.orderBy("createTime").desc();
         //供应商类型和海尔数据,如果是供应商则将供应商V码赋给供应商编号
         SysUser sysUser = getUserInfo(SysUser.class);
         Boolean flagUserType = UserTypeEnum.USER_TYPE_2.getCode().equals(sysUser.getUserType());

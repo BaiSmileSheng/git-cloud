@@ -56,6 +56,7 @@ public class CdFactoryLineInfoController extends BaseController {
         Example.Criteria criteria = example.createCriteria();
         listCondition(cdFactoryLineInfo, criteria);
         startPage();
+        example.orderBy("createTime").desc();
         List<CdFactoryLineInfo> cdFactoryLineInfoList = cdFactoryLineInfoService.selectByExample(example);
         return getDataTable(cdFactoryLineInfoList);
     }
@@ -70,6 +71,7 @@ public class CdFactoryLineInfoController extends BaseController {
         Example example = new Example(CdFactoryLineInfo.class);
         Example.Criteria criteria = example.createCriteria();
         listCondition(cdFactoryLineInfo, criteria);
+        example.orderBy("createTime").desc();
         List<CdFactoryLineInfo> cdFactoryLineInfoList = cdFactoryLineInfoService.selectByExample(example);
         return R.data(cdFactoryLineInfoList);
     }
@@ -81,25 +83,25 @@ public class CdFactoryLineInfoController extends BaseController {
      */
     void listCondition(CdFactoryLineInfo cdFactoryLineInfo, Example.Criteria criteria) {
         if (StringUtils.isNotBlank(cdFactoryLineInfo.getProductFactoryCode())) {
-            criteria.andLike("productFactoryCode", cdFactoryLineInfo.getProductFactoryCode());
+            criteria.andEqualTo("productFactoryCode", cdFactoryLineInfo.getProductFactoryCode());
         }
         if (StringUtils.isNotBlank(cdFactoryLineInfo.getProductFactoryDesc())) {
-            criteria.andLike("productFactoryDesc", cdFactoryLineInfo.getProductFactoryDesc());
+            criteria.andLike("productFactoryDesc", "%"+cdFactoryLineInfo.getProductFactoryDesc()+"%");
         }
         if (StringUtils.isNotBlank(cdFactoryLineInfo.getProduceLineCode())) {
-            criteria.andLike("produceLineCode", cdFactoryLineInfo.getProduceLineCode());
+            criteria.andEqualTo("produceLineCode", cdFactoryLineInfo.getProduceLineCode());
         }
         if (StringUtils.isNotBlank(cdFactoryLineInfo.getProduceLineDesc())) {
-            criteria.andLike("produceLineDesc", cdFactoryLineInfo.getProduceLineDesc());
+            criteria.andLike("produceLineDesc", "%"+cdFactoryLineInfo.getProduceLineDesc()+"%");
         }
         if (StringUtils.isNotBlank(cdFactoryLineInfo.getBranchOffice())) {
-            criteria.andLike("branchOffice", cdFactoryLineInfo.getBranchOffice());
+            criteria.andLike("branchOffice", "%"+cdFactoryLineInfo.getBranchOffice()+"%");
         }
         if (StringUtils.isNotBlank(cdFactoryLineInfo.getMonitor())) {
-            criteria.andLike("monitor", cdFactoryLineInfo.getMonitor());
+            criteria.andLike("monitor", "%"+cdFactoryLineInfo.getMonitor()+"%");
         }
         if (StringUtils.isNotBlank(cdFactoryLineInfo.getAttribute())) {
-            criteria.andLike("attribute", cdFactoryLineInfo.getAttribute());
+            criteria.andEqualTo("attribute", cdFactoryLineInfo.getAttribute());
         }
     }
 
