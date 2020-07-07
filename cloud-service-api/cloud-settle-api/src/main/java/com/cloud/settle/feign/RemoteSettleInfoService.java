@@ -44,4 +44,12 @@ public interface RemoteSettleInfoService {
      */
     @PostMapping("/smsSettleInfo/smsSettleInfoCalculate")
     R smsSettleInfoCalculate();
+
+    /**
+     * 批量新增
+     * @param smsSettleInfoList
+     * @return
+     */
+    @PostMapping("/smsSettleInfo/batchInsert")
+    R batchInsert(@RequestBody List<SmsSettleInfo> smsSettleInfoList);
 }

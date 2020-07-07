@@ -210,4 +210,12 @@ public interface ISysUserService {
     * Date: 2020/6/19
     */
     R selectUserRights(String roleKey);
+
+    /**
+     * 根据角色和权限查对应的用户信息
+     * @param materialCode
+     * @param roleKey
+     * @return
+     */
+    List<SysUserVo> selectUserByMaterialCodeAndRoleKey(String materialCode,String roleKey);
 }

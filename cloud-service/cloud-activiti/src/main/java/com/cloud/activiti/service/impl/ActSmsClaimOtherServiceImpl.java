@@ -9,17 +9,23 @@ import com.cloud.activiti.consts.ActivitiProDefKeyConstants;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
+import com.cloud.activiti.mail.MailService;
 import com.cloud.activiti.service.IActSmsClaimOtherService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
+import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.domain.entity.SmsClaimOther;
 import com.cloud.settle.enums.ClaimOtherStatusEnum;
 import com.cloud.settle.feign.RemoteClaimOtherService;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteOssService;
+import com.cloud.system.feign.RemoteUserService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.activiti.engine.RepositoryService;
@@ -58,6 +64,13 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
 
     @Autowired
     private RepositoryService repositoryService;
+
+    @Autowired
+    private RemoteUserService remoteUserService;
+
+    @Autowired
+    private MailService mailService;
+
 
     /**
      * 索赔单所对应的申诉文件订单号后缀
@@ -146,9 +159,9 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
             throw new BusinessException("此索赔单不可申诉");
         }
         //2.修改索赔单信息
-        smsClaimOtherRes.setClaimOtherStatus(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_3.getCode());
-        smsClaimOtherRes.setComplaintDate(new Date());
-        R updateResult = remoteClaimOtherService.editSave(smsClaimOtherRes);
+        smsClaimOther.setClaimOtherStatus(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_3.getCode());
+        smsClaimOther.setComplaintDate(new Date());
+        R updateResult = remoteClaimOtherService.editSave(smsClaimOther);
         if(!updateResult.isSuccess()){
             throw new BusinessException("修改索赔单信息失败");
         }
@@ -167,9 +180,37 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
             logger.info("其他索赔单申诉修改文件 索赔单号:{}",smsClaimOtherRes.getClaimCode());
             throw new  BusinessException("其他索赔单申诉修改文件异常");
         }
+        //发送邮件
+        String factoryCode = smsClaimOtherRes.getFactoryCode();
+        String roleKey = RoleConstants.ROLE_KEY_XWZ;
+        String claimCode = smsClaimOtherRes.getClaimCode();
+        sendEmail(claimCode, factoryCode, roleKey);
         return R.data(smsClaimOtherRes.getClaimCode());
     }
 
+    /**
+     * 发送邮件
+     * @param claimCode
+     * @param factoryCode
+     * @param roleKey
+     */
+    private void sendEmail(String claimCode, String factoryCode, String roleKey) {
+        R sysUserR = remoteUserService.selectUserByMaterialCodeAndRoleKey(factoryCode,roleKey);
+        if(!sysUserR.isSuccess()){
+            logger.error("获取对应的负责人邮箱失败");
+            throw new BusinessException(sysUserR.get("msg").toString());
+        }
+        List<SysUserVo> sysUserVoList = sysUserR.getCollectData(new TypeReference<List<SysUserVo>>() {});
+        for(SysUserVo sysUserVo : sysUserVoList){
+            String email = sysUserVo.getEmail();
+            if(StringUtils.isBlank(email)){
+                throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
+            }
+            String subject = "供应商申诉";
+            String content = "其他索赔单 单号:" + claimCode + "供应商发起申诉";
+            mailService.sendTextMail(email,subject,content);
+        }
+    }
     /**
      * Description:  根据Key查询最新版本流程
      * Param: [key]
@@ -257,11 +298,19 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         //3.根据结果修改其他索赔信息
         //审核结果 2表示通过,3表示驳回
         Boolean flagBizResult = "2".equals(bizAudit.getResult().toString());
+        String claimCode = smsClaimOther.getClaimCode();
+        String supplierCode = smsClaimOther.getSupplierCode();
         //小微主审批: 将待小微主审核5--->待结算11   驳回将待小微主审核5--->待供应商确认7
         if(flagBizResult){
             smsClaimOther.setClaimOtherStatus(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_11.getCode());
+            //发送邮件
+            String contentDetail = "申诉通过";
+            supplierSendEmail(claimCode,supplierCode,contentDetail);
         }else{
             smsClaimOther.setClaimOtherStatus(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_7.getCode());
+            //发送邮件
+            String contentDetail = "申诉驳回";
+            supplierSendEmail(claimCode,supplierCode,contentDetail);
         }
         //更新其他索赔状态
         logger.info ("其他索赔审批流程 更新其他索赔主键id:{} 状态:{}",smsClaimOther.getId(),smsClaimOther.getClaimOtherStatus());
@@ -277,5 +326,28 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
             throw new BusinessException("其他索赔审批流程 审批 推进工作流失败 ");
         }
         return R.ok();
+    }
+    /**
+     * 向供应商发送邮件
+     * @param claimCode
+     * @param supplierCode
+     * @param contentDetail
+     */
+    private void supplierSendEmail(String claimCode,String supplierCode,String contentDetail) {
+        R sysUserR = remoteUserService.findUserBySupplierCode(supplierCode);
+        if(!sysUserR.isSuccess()){
+            logger.error("获取对应的负责人邮箱失败");
+            throw new BusinessException(sysUserR.get("msg").toString());
+        }
+        List<SysUserVo> sysUserVoList = sysUserR.getCollectData(new TypeReference<List<SysUserVo>>() {});
+        for(SysUserVo sysUserVo : sysUserVoList){
+            String email = sysUserVo.getEmail();
+            if(StringUtils.isBlank(email)){
+                throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
+            }
+            String subject = "供应商申诉";
+            String content = "其他索赔单 单号:" + claimCode + contentDetail;
+            mailService.sendTextMail(email,subject,content);
+        }
     }
 }

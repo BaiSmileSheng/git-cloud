@@ -88,13 +88,38 @@
         <result property="email" column="email"/>
     </resultMap>
     <sql id="selectUserVo">
-        select  u.user_id, u.dept_id, u.login_name, u.user_name, u.email, u.phonenumber, u.sex, u.avatar, u.password, u.salt, u.status, u.user_type, u.del_flag, u.login_ip, u.login_date, u.create_time, u.remark,
-       		    d.dept_id, d.parent_id, d.dept_name, d.order_num, d.status as dept_status,
-       		    r.role_id, r.role_name, r.role_key, r.role_sort, r.data_scope, r.status as role_status
-		from sys_user u
-			 left join sys_dept d on u.dept_id = d.dept_id
-			 left join sys_user_role ur on u.user_id = ur.user_id
-			 left join sys_role r on r.role_id = ur.role_id
+        select u.user_id,
+               u.dept_id,
+               u.login_name,
+               u.user_name,
+               u.email,
+               u.phonenumber,
+               u.sex,
+               u.avatar,
+               u.password,
+               u.salt,
+               u.status,
+               u.user_type,
+               u.del_flag,
+               u.login_ip,
+               u.login_date,
+               u.create_time,
+               u.remark,
+               d.dept_id,
+               d.parent_id,
+               d.dept_name,
+               d.order_num,
+               d.status as dept_status,
+               r.role_id,
+               r.role_name,
+               r.role_key,
+               r.role_sort,
+               r.data_scope,
+               r.status as role_status
+        from sys_user u
+                 left join sys_dept d on u.dept_id = d.dept_id
+                 left join sys_user_role ur on u.user_id = ur.user_id
+                 left join sys_role r on r.role_id = ur.role_id
     </sql>
 
     <select id="selectUserList" parameterType="SysUser" resultMap="SysUserResult">
@@ -183,16 +208,22 @@
     </select>
 
     <select id="checkLoginNameUnique" parameterType="String" resultType="int">
-		select count(1) from sys_user where login_name=#{loginName}
-	</select>
+        select count(1)
+        from sys_user
+        where login_name = #{loginName}
+    </select>
 
     <select id="checkPhoneUnique" parameterType="String" resultType="SysUser">
-		select user_id, phonenumber from sys_user where phonenumber=#{phonenumber}
-	</select>
+        select user_id, phonenumber
+        from sys_user
+        where phonenumber = #{phonenumber}
+    </select>
 
     <select id="checkEmailUnique" parameterType="String" resultType="SysUser">
-		select user_id, email from sys_user where email=#{email}
-	</select>
+        select user_id, email
+        from sys_user
+        where email = #{email}
+    </select>
 
     <select id="selectUserById" parameterType="Long" resultMap="SysUserResultVO">
         <include refid="selectUserVo"/>
@@ -220,8 +251,10 @@
     </select>
 
     <delete id="deleteUserById" parameterType="Long">
- 		delete from sys_user where user_id = #{userId}
- 	</delete>
+        delete
+        from sys_user
+        where user_id = #{userId}
+    </delete>
 
     <delete id="deleteUserByIds" parameterType="Long">
         update sys_user set del_flag = '2' where user_id in
@@ -289,39 +322,69 @@
 
     <select id="selectListByRoleKey" parameterType="String" resultMap="SysUserRightsVo">
         SELECT
-            u.user_id as id,
+            u.user_id   as id,
             u.user_name as user_name,
-            u.email as email
+            u.email     as email
         FROM
             sys_user u,
             sys_user_role ur,
             sys_role r
         WHERE
             u.user_id = ur.user_id
-            AND ur.role_id = r.role_id
-            AND r.role_key = #{roleKey,jdbcType=VARCHAR}
+          AND ur.role_id = r.role_id
+          AND r.role_key = #{roleKey,jdbcType=VARCHAR}
     </select>
 
     <select id="selectFactorysByUser" resultType="String" parameterType="String">
-        SELECT
-            DISTINCT ds.material_code
+        SELECT DISTINCT ds.material_code
         FROM
             sys_data_scope ds,
             sys_user_scope us
         WHERE
             ds.id = us.data_scope_id
-            AND ds.type = '1'
-            AND us.user_id = #{userId,jdbcType=VARCHAR}
+          AND ds.type = '1'
+          AND us.user_id = #{userId,jdbcType=VARCHAR}
     </select>
     <select id="selectGroupCodesByUser" resultType="String" parameterType="String">
-        SELECT
-            DISTINCT ds.material_code
+        SELECT DISTINCT ds.material_code
         FROM
             sys_data_scope ds,
             sys_user_scope us
         WHERE
             ds.id = us.data_scope_id
-            AND ds.type = '2'
-            AND us.user_id = #{userId,jdbcType=VARCHAR}
+          AND ds.type = '2'
+          AND us.user_id = #{userId,jdbcType=VARCHAR}
+    </select>
+    <select id="selectUserByMaterialCodeAndRoleKey" resultType="SysUser">
+        SELECT DISTINCT
+            su.user_id,
+            su.dept_id,
+            su.login_name,
+            su.user_name,
+            su.user_type,
+            su.email,
+            su.phonenumber,
+            su.sex,
+            su.avatar,
+            su.password,
+            su.salt,
+            su.status,
+            su.del_flag,
+            su.login_ip,
+            su.login_date,
+            su.create_by,
+            su.create_time,
+            su.update_by,
+            su.update_time
+        FROM
+            sys_user su
+                LEFT JOIN sys_user_scope suc ON su.user_id = suc.user_id
+                LEFT JOIN sys_data_scope sdc ON suc.data_scope_id = sdc.id
+                LEFT JOIN sys_user_role sur ON su.user_id = sur.user_id
+                LEFT JOIN sys_role sr ON sur.role_id = sr.role_id
+        WHERE
+            sdc.material_code = #{materialCode}
+          AND sr.role_key
+            = #{roleKey}
     </select>
 </mapper>

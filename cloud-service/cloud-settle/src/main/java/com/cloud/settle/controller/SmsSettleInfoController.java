@@ -242,4 +242,14 @@ public class SmsSettleInfoController extends BaseController {
     public R selectInfoForPrint(@ApiIgnore SmsSettleInfo smsSettleInfo) {
         return smsSettleInfoService.selectInfoForPrint(smsSettleInfo);
     }
+
+    /**
+     * 批量新增
+     * @param smsSettleInfoList
+     * @return
+     */
+    @PostMapping("batchInsert")
+    public R batchInsert(@RequestBody List<SmsSettleInfo> smsSettleInfoList){
+        return toAjax(smsSettleInfoService.insertList(smsSettleInfoList));
+    }
 }

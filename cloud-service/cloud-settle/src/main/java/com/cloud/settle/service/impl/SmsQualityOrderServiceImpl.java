@@ -1,6 +1,7 @@
 package com.cloud.settle.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.cloud.activiti.feign.RemoteBizBusinessService;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
@@ -13,8 +14,11 @@ import com.cloud.settle.mapper.SmsQualityOrderMapper;
 import com.cloud.settle.service.ISmsQualityOrderService;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.vo.SysUserVo;
+import com.cloud.system.feign.RemoteFactoryInfoService;
+import com.cloud.system.feign.RemoteMaterialService;
 import com.cloud.system.feign.RemoteOssService;
 import com.cloud.system.feign.RemoteSequeceService;
+import com.cloud.system.feign.RemoteSupplierInfoService;
 import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.seata.spring.annotation.GlobalTransactional;
@@ -53,6 +57,18 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
     @Autowired
     private MailService mailService;
 
+    @Autowired
+    private RemoteBizBusinessService remoteBizBusinessService;
+
+    @Autowired
+    private RemoteMaterialService remoteMaterialService;
+
+    @Autowired
+    private RemoteFactoryInfoService remoteFactoryInfoService;
+
+    @Autowired
+    private RemoteSupplierInfoService remoteSupplierInfoService;
+
     /**
      * 索赔单所对应的索赔文件订单号后缀
      */
@@ -76,6 +92,11 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
      * 生成索赔单前缀
      */
     private static final String QUALITY_ORDER_PRE = "ZL";
+
+    /**
+     * 质量索赔管理服务相关流程key
+     */
+    public static final String ACTIVITI_PRO_DEF_KEY_QUALITY_TEST = "quality";
 
     /**
      * 查询质量索赔详情
@@ -111,6 +132,13 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
                 List<SysOss> appealListReault = appealListR.getCollectData(new TypeReference<List<SysOss>>() {});
                 map.put("appealSysOssList", appealListReault);
 
+                R businessR = remoteBizBusinessService.selectByKeyAndTable(ACTIVITI_PRO_DEF_KEY_QUALITY_TEST,id.toString());
+                if(!businessR.isSuccess()){
+                    logger.error("获取流程图失败 res:{}",JSONObject.toJSONString(businessR));
+                    throw new BusinessException(businessR.get("msg").toString());
+                }
+                String procInstId = businessR.getStr("data");
+                map.put("procInstId", procInstId);
             }
             map.put("smsQualityOrder", smsQualityOrderRes);
             map.put("claimSysOssList", claimListReault);
@@ -132,7 +160,8 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
     @Override
     public R addSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder,String ossIds) {
 
-
+        //校验供应商,专用号,工厂存在合理性
+        verifyParameter(smsQualityOrder);
         //1.索赔单号生成规则 ZL+年月日+4位顺序号，循序号每日清零
         StringBuffer qualityNoBuffer = new StringBuffer(QUALITY_ORDER_PRE);
         qualityNoBuffer.append(DateUtils.getDate().replace("-", ""));
@@ -169,6 +198,27 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
     }
 
     /**
+     * 校验校验供应商,专用号,工厂存在合理性
+     * @param smsQualityOrder
+     */
+    private void verifyParameter(SmsQualityOrder smsQualityOrder){
+        R materialResult = remoteMaterialService.getByMaterialCode(smsQualityOrder.getProductMaterialCode());
+        if(!materialResult.isSuccess()){
+            logger.error("查专用号信息失败专用号:{},res:{}",smsQualityOrder.getProductMaterialCode(),JSONObject.toJSON(materialResult));
+            throw new BusinessException("校验专用号异常" + materialResult.get("msg").toString());
+        }
+        R factoryResult = remoteFactoryInfoService.selectOneByFactory(smsQualityOrder.getFactoryCode());
+        if(!factoryResult.isSuccess()){
+            logger.error("查工厂信息失败工厂:{},res:{}",smsQualityOrder.getFactoryCode(),JSONObject.toJSON(factoryResult));
+            throw new BusinessException("校验工厂异常" + factoryResult.get("msg").toString());
+        }
+        R supplierResult = remoteSupplierInfoService.selectOneBySupplierCode(smsQualityOrder.getSupplierCode());
+        if(!supplierResult.isSuccess()){
+            logger.error("查供应商信息失败供应商:{},res:{}",smsQualityOrder.getSupplierCode(),JSONObject.toJSON(supplierResult));
+            throw new BusinessException("校验供应商异常" + supplierResult.get("msg").toString());
+        }
+    }
+    /**
      * 修改质量索赔信息
      *
      * @param smsQualityOrder 质量索赔信息
@@ -180,6 +230,8 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
     public R updateSmsQualityOrderAndSysOss(SmsQualityOrder smsQualityOrder, String ossIds) {
         logger.info("修改质量索赔单信息 id:{},qualityNo:{}", smsQualityOrder.getId(), smsQualityOrder.getQualityNo());
 
+        //校验供应商,专用号,工厂存在合理性
+        verifyParameter(smsQualityOrder);
         //1.查询索赔单数据,判断状态是否是待提交,待提交可修改
         SmsQualityOrder smsQualityOrderRes = smsQualityOrderMapper.selectByPrimaryKey(smsQualityOrder.getId());
         if (null == smsQualityOrderRes) {
@@ -222,6 +274,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
      * @param ossIds           质量索赔对应的文件信息
      * @return
      */
+    @GlobalTransactional
     @Override
     public R insertOrupdateSubmit(SmsQualityOrder smsQualityOrder, String ossIds) {
 
@@ -347,10 +400,10 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
             String mailSubject = "质量索赔邮件";
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条质量索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
-            mailTextBuffer.append(smsQualityOrder.getSupplierName()).append("+").append(supplierCode).append("+")
+            mailTextBuffer.append(smsQualityOrder.getSupplierName()).append(supplierCode)
                     .append(sysUser.getCorporation()).append(" ").append("您有一条质量索赔订单，订单号")
                     .append(smsQualityOrder.getQualityNo()).append(",请及时处理，如不处理，3天后系统自动确认，无法申诉");
-            mailService.sendTextMail(toSupplier, mailTextBuffer.toString(), mailSubject);
+            mailService.sendTextMail(toSupplier,mailSubject,mailTextBuffer.toString());
 
             //设置提交状态
             smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_1.getCode());
@@ -460,11 +513,11 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
             String mailSubject = "质量索赔邮件";
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条质量索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
-            mailTextBuffer.append(smsQualityOrder.getSupplierName()).append("+").append(supplierCode).append("+")
+            mailTextBuffer.append(smsQualityOrder.getSupplierName()).append(supplierCode)
                     .append(sysUser.getCorporation()).append(" ").append("您有一条质量索赔订单，订单号")
                     .append(smsQualityOrder.getQualityNo()).append(",请及时处理，如不处理，1天后系统自动确认，无法申诉");
             String toSupplier = sysUser.getEmail();
-            mailService.sendTextMail(toSupplier, mailTextBuffer.toString(), mailSubject);
+            mailService.sendTextMail(toSupplier,mailSubject, mailTextBuffer.toString());
         }
         return R.ok();
     }

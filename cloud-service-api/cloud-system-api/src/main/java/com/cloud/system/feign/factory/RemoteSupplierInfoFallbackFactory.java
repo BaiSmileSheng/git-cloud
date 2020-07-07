@@ -1,5 +1,6 @@
 package com.cloud.system.feign.factory;
 
+import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.CdSupplierInfo;
 import com.cloud.system.feign.RemoteSupplierInfoService;
 import feign.hystrix.FallbackFactory;
@@ -24,6 +25,12 @@ public class RemoteSupplierInfoFallbackFactory implements FallbackFactory<Remote
             public CdSupplierInfo getByNick(String loginName) {
                 log.error("RemoteSupplierInfoService.getByNick错误信息：{}",throwable.getMessage());
                 return null;
+            }
+
+            @Override
+            public R selectOneBySupplierCode(String supplierCode) {
+                log.error("RemoteSupplierInfoService.selectOneBySupplierCode：{}",throwable.getMessage());
+                return R.error("服务拥挤,请稍后再试!");
             }
         };
     }

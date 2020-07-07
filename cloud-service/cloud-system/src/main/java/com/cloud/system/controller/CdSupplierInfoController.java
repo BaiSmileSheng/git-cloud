@@ -106,4 +106,19 @@ public class CdSupplierInfoController extends BaseController {
         return cdSupplierInfoService.findByExampleOne(example);
 
     }
+
+    /**
+     * 根据供应商编号查供应商信息
+     * @param supplierCode
+     * @return
+     */
+    @GetMapping("selectOneBySupplierCode")
+    @ApiOperation(value = "根据供应商编号查供应商信息 ", response = R .class)
+    public R selectOneBySupplierCode(@RequestParam("supplierCode") String supplierCode){
+        Example example = new Example(CdSupplierInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("supplierCode",supplierCode);
+        CdSupplierInfo cdSupplierInfo = cdSupplierInfoService.findByExampleOne(example);
+        return R.data(cdSupplierInfo);
+    }
 }
