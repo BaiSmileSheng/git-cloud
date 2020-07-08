@@ -35,7 +35,7 @@ public interface IOmsDemandOrderGatherEditService extends BaseService<OmsDemandO
      * @param ids
      * @return
      */
-    R confirmRelease(String ids);
+    R confirmRelease(String ids,OmsDemandOrderGatherEdit omsDemandOrderGatherEdit);
 
 
     /**
