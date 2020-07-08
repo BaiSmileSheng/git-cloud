@@ -77,7 +77,9 @@ public class SmsMouthSettleController extends BaseController {
             @ApiImplicitParam(name = "settleNo", value = "结算单号", required = false,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "dataMoth", value = "结算月份", required = false,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "supplierCode", value = "供应商编码", required = false,paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "supplierName", value = "供应商名称", required = false,paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "supplierName", value = "供应商名称", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "companyCode", value = "付款公司", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "kmsNo", value = "KEMS单据号", required = false,paramType = "query", dataType = "String")
     })
     public TableDataInfo list(@ApiIgnore() SmsMouthSettle smsMouthSettle) {
         Example example = new Example(SmsMouthSettle.class);

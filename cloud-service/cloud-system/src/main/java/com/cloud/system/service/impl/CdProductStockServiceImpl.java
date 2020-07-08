@@ -552,7 +552,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
                 //将更新 不良数量
                 CdProductStock cdProductStockRes = cdProductStockMap.get(code);
                 BigDecimal rejectsNum = cdProductStockRes.getRejectsNum();
-                BigDecimal rejectsNumX = cdProductStock.getStockWNum();
+                BigDecimal rejectsNumX = cdProductStock.getRejectsNum();
                 BigDecimal rejectsNumZ = rejectsNum.add(rejectsNumX);
                 cdProductStockRes.setRejectsNum(rejectsNumZ);
             }else {

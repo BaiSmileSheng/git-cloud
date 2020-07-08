@@ -1,5 +1,7 @@
 package com.cloud.settle.controller;
 
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
@@ -128,7 +130,7 @@ public class SmsQualityOrderController extends BaseController {
     private Example assemblyConditions(SmsQualityOrder smsQualityOrder) {
         Example example = new Example(SmsQualityOrder.class);
         Example.Criteria criteria = example.createCriteria();
-        if (StringUtils.isNotBlank(smsQualityOrder.getQualityNo())) {
+        if (StringUtils.isNotBlank(smsQualityOrder.getProductOrderCode())) {
             criteria.andEqualTo("productOrderCode", smsQualityOrder.getProductOrderCode());
         }
         if (StringUtils.isNotBlank(smsQualityOrder.getQualityNo())) {
@@ -153,7 +155,7 @@ public class SmsQualityOrderController extends BaseController {
             criteria.andGreaterThanOrEqualTo("createTime", smsQualityOrder.getBeginTime());
         }
         if (StringUtils.isNotBlank(smsQualityOrder.getEndTime())) {
-            criteria.andLessThanOrEqualTo("createTime", smsQualityOrder.getEndTime());
+            criteria.andLessThanOrEqualTo("createTime", DateUtil.parse(smsQualityOrder.getEndTime()).offset(DateField.DAY_OF_MONTH,1));
         }
         example.orderBy("createTime").desc();
         //供应商类型和海尔数据,如果是供应商则将供应商V码赋给供应商编号
