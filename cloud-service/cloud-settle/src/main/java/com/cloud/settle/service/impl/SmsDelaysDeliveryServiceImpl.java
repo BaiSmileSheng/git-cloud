@@ -92,7 +92,7 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
      */
     private static final String DELAYS_ORDER_PRE = "ZL";
 
-    private final static BigDecimal DELAYS_AMOUNT = new BigDecimal(-2000);//延期索赔金额
+    private final static BigDecimal DELAYS_AMOUNT = new BigDecimal(2000);//延期索赔金额
 
     /**
      * 用于获取一天前的时间
