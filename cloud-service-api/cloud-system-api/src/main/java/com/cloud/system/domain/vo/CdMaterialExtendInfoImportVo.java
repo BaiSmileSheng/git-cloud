@@ -16,8 +16,8 @@ import javax.persistence.Id;
 import java.util.Date;
 
 /**
- * 导入错误 物料扩展信息 对象 cd_material_extend_info
- *
+ * 物料扩展信息 对象 cd_material_extend_info
+ * 导入模板
  * @author lihongia
  * @date 2020-06-15
  */
@@ -27,7 +27,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 @ApiModel(value = "物料扩展信息 ")
-public class CdMaterialExtendInfoImportErrorVo{
+public class CdMaterialExtendInfoImportVo {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -88,7 +88,7 @@ public class CdMaterialExtendInfoImportErrorVo{
      * 建立日期
      */
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     @ApiModelProperty(value = "建立日期")
     private Date establishDate;
 
@@ -96,12 +96,5 @@ public class CdMaterialExtendInfoImportErrorVo{
      * 是否删除0：有效，1：删除
      */
     private String delFlag;
-
-    /**
-     * 错误信息
-     */
-    @ExcelProperty(value = "错误信息",index = 5)
-    @ApiModelProperty(value = "错误信息")
-    private String errorMessage;
 
 }
