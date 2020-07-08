@@ -3,6 +3,7 @@ package com.cloud.order.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.NumberUtil;
@@ -143,7 +144,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
      * @return
      */
     @Override
-    public R confirmRelease(String ids) {
+    public R confirmRelease(String ids,OmsDemandOrderGatherEdit omsDemandOrderGatherEditParam) {
         Example example = new Example(OmsDemandOrderGatherEdit.class);
         Example.Criteria criteria = example.createCriteria();
         //允许下达的审核状态
@@ -151,8 +152,23 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 ,DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHWC.getCode());
         if (StrUtil.isEmpty(ids)) {
             //如果参数为空，则查询初始状态,无需审核、审核完成的数据
-            criteria.andEqualTo("status", DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
-            criteria.andIn("auditStatus", auditStatusList);
+            if (StrUtil.isNotEmpty(omsDemandOrderGatherEditParam.getStatus())) {
+                if (StrUtil.equals(omsDemandOrderGatherEditParam.getStatus(), DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode())) {
+                    criteria.andEqualTo("status", DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
+                } else {
+                    return R.error(StrUtil.format("只允许状态为{}的数据下达!",DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getMsg()));
+                }
+            }
+            if (StrUtil.isNotEmpty(omsDemandOrderGatherEditParam.getAuditStatus())) {
+                if (CollUtil.contains(auditStatusList, omsDemandOrderGatherEditParam.getAuditStatus())) {
+                    criteria.andEqualTo("auditStatus", omsDemandOrderGatherEditParam.getAuditStatus());
+                }else{
+                    return R.error(StrUtil.format("[{}]审核状态数据不允许下达！",DemandOrderGatherEditStatusEnum.getMsgByCode(omsDemandOrderGatherEditParam.getAuditStatus())));
+                }
+            } else {
+                criteria.andIn("auditStatus", auditStatusList);
+            }
+            listCondition(omsDemandOrderGatherEditParam,criteria);
         }else{
             //查询参数id的数据
             List<String> list = CollUtil.newArrayList(ids.split(StrUtil.COMMA));
@@ -176,6 +192,37 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         return R.ok();
     }
 
+    /**
+     * Example查询时的条件
+     * @param omsDemandOrderGatherEdit
+     * @return
+     */
+    void listCondition(OmsDemandOrderGatherEdit omsDemandOrderGatherEdit,Example.Criteria criteria){
+        if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getProductMaterialCode())) {
+            criteria.andEqualTo("productMaterialCode",omsDemandOrderGatherEdit.getProductMaterialCode() );
+        }
+        if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getProductFactoryCode())) {
+            criteria.andEqualTo("productFactoryCode",omsDemandOrderGatherEdit.getProductFactoryCode() );
+        }
+        if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getCustomerCode())) {
+            criteria.andEqualTo("customerCode",omsDemandOrderGatherEdit.getCustomerCode() );
+        }
+        if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getOrderFrom())) {
+            criteria.andEqualTo("orderFrom",omsDemandOrderGatherEdit.getOrderFrom() );
+        }
+        if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getProductType())) {
+            criteria.andEqualTo("productType",omsDemandOrderGatherEdit.getProductType() );
+        }
+        if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getLifeCycle())) {
+            criteria.andEqualTo("lifeCycle",omsDemandOrderGatherEdit.getLifeCycle() );
+        }
+        if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getBeginTime())) {
+            criteria.andGreaterThanOrEqualTo("deliveryDate",omsDemandOrderGatherEdit.getBeginTime() );
+        }
+        if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getEndTime())) {
+            criteria.andLessThanOrEqualTo("deliveryDate", DateUtil.parse(omsDemandOrderGatherEdit.getEndTime()).offset(DateField.DAY_OF_MONTH,1) );
+        }
+    }
 
     @Override
     public <T> ExcelImportResult checkImportExcel(List<T> objects) {
