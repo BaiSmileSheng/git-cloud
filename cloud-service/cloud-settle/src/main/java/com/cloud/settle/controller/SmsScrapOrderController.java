@@ -1,5 +1,7 @@
 package com.cloud.settle.controller;
 
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.RoleConstants;
@@ -76,7 +78,7 @@ public class SmsScrapOrderController extends BaseController {
         SysUser sysUser = getUserInfo(SysUser.class);
         criteria.andEqualTo(smsScrapOrder);
         if(StrUtil.isNotEmpty(smsScrapOrder.getEndTime())){
-            criteria.andLessThanOrEqualTo("createTime", smsScrapOrder.getEndTime());
+            criteria.andLessThanOrEqualTo("createTime", DateUtil.parse(smsScrapOrder.getEndTime()).offset(DateField.DAY_OF_MONTH,1));
         }
         if(StrUtil.isNotEmpty(smsScrapOrder.getBeginTime())){
             criteria.andGreaterThanOrEqualTo("createTime", smsScrapOrder.getBeginTime());
@@ -192,7 +194,7 @@ public class SmsScrapOrderController extends BaseController {
         criteria.andEqualTo(smsScrapOrder);
         SysUser sysUser = getUserInfo(SysUser.class);
         if(StrUtil.isNotEmpty(smsScrapOrder.getEndTime())){
-            criteria.andLessThanOrEqualTo("createTime", smsScrapOrder.getEndTime());
+            criteria.andLessThanOrEqualTo("createTime", DateUtil.parse(smsScrapOrder.getEndTime()).offset(DateField.DAY_OF_MONTH,1));
         }
         if(StrUtil.isNotEmpty(smsScrapOrder.getBeginTime())){
             criteria.andGreaterThanOrEqualTo("createTime", smsScrapOrder.getBeginTime());

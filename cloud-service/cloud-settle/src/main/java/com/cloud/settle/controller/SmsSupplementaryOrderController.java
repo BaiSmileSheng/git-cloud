@@ -1,6 +1,8 @@
 package com.cloud.settle.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.UserConstants;
@@ -167,7 +169,7 @@ public class SmsSupplementaryOrderController extends BaseController {
             criteria.andGreaterThanOrEqualTo("createTime", smsSupplementaryOrder.getBeginTime());
         }
         if (StringUtils.isNotBlank(smsSupplementaryOrder.getEndTime())) {
-            criteria.andLessThanOrEqualTo("createTime", smsSupplementaryOrder.getEndTime());
+            criteria.andLessThanOrEqualTo("createTime", DateUtil.parse(smsSupplementaryOrder.getEndTime()).offset(DateField.DAY_OF_MONTH,1));
         }
     }
 
