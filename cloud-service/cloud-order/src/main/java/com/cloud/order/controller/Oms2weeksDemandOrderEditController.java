@@ -1,6 +1,8 @@
 package com.cloud.order.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.RoleConstants;
@@ -10,6 +12,7 @@ import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.order.domain.entity.Oms2weeksDemandOrderEdit;
+import com.cloud.order.domain.entity.vo.OmsDemandOrderGatherEditImportTemplete;
 import com.cloud.order.service.IOms2weeksDemandOrderEditService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
@@ -117,7 +120,7 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
             criteria.andGreaterThanOrEqualTo("deliveryDate",oms2weeksDemandOrderEdit.getBeginTime() );
         }
         if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getEndTime())) {
-            criteria.andLessThanOrEqualTo("deliveryDate",oms2weeksDemandOrderEdit.getEndTime() );
+            criteria.andLessThanOrEqualTo("deliveryDate", DateUtil.parse(oms2weeksDemandOrderEdit.getEndTime()).offset(DateField.DAY_OF_MONTH,1) );
         }
         return example;
     }
@@ -132,6 +135,16 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
     @HasPermissions("order:oms2weeksDemandOrderEdit:importExcel")
     public R importExcel(MultipartFile file) {
         return oms2weeksDemandOrderEditService.import2weeksDemandEdit(file,getUserInfo(SysUser.class));
+    }
+
+    /**
+     * T+1、T+2草稿计划导入模板
+     */
+    @GetMapping("importTemplete")
+    @ApiOperation(value = "T+1、T+2草稿计划导入模板")
+    @HasPermissions("order:oms2weeksDemandOrderEdit:importTemplete")
+    public R importTemplete() {
+        return EasyExcelUtilOSS.writeExcel(new ArrayList<>(), "T+1-T+2周需求导入.xlsx", "sheet", new OmsDemandOrderGatherEditImportTemplete());
     }
 
     /**

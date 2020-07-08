@@ -1,6 +1,8 @@
 package com.cloud.order.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.RoleConstants;
@@ -11,6 +13,7 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.order.domain.entity.OmsDemandOrderGather;
 import com.cloud.order.domain.entity.OmsDemandOrderGatherEdit;
+import com.cloud.order.domain.entity.vo.OmsDemandOrderGatherEditImportTemplete;
 import com.cloud.order.service.IOmsDemandOrderGatherEditService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
@@ -123,7 +126,7 @@ public class OmsDemandOrderGatherEditController extends BaseController {
             criteria.andGreaterThanOrEqualTo("deliveryDate",omsDemandOrderGatherEdit.getBeginTime() );
         }
         if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getEndTime())) {
-            criteria.andLessThanOrEqualTo("deliveryDate",omsDemandOrderGatherEdit.getEndTime() );
+            criteria.andLessThanOrEqualTo("deliveryDate", DateUtil.parse(omsDemandOrderGatherEdit.getEndTime()).offset(DateField.DAY_OF_MONTH,1) );
         }
         return example;
     }
@@ -194,6 +197,16 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     @HasPermissions("order:demandOrderGatherEdit:importExcel")
     public R importExcel(MultipartFile file) {
         return omsDemandOrderGatherEditService.importDemandGatherEdit(file,getUserInfo(SysUser.class));
+    }
+
+    /**
+     * 计划需求导入-导入模板
+     */
+    @GetMapping("importTemplete")
+    @ApiOperation(value = "计划需求导入-导入模板")
+    @HasPermissions("order:demandOrderGatherEdit:importTemplete")
+    public R importTemplete() {
+        return EasyExcelUtilOSS.writeExcel(new ArrayList<>(), "需求导入.xlsx", "sheet", new OmsDemandOrderGatherEditImportTemplete());
     }
 
     /**
