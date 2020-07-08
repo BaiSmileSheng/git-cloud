@@ -92,7 +92,7 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
      */
     private static final String DELAYS_ORDER_PRE = "ZL";
 
-    private final static BigDecimal DELAYS_AMOUNT = new BigDecimal(-2000);//延期索赔金额
+    private final static BigDecimal DELAYS_AMOUNT = new BigDecimal(2000);//延期索赔金额
 
     /**
      * 用于获取一天前的时间
@@ -155,7 +155,9 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
         Set<String> supplierSet = new HashSet<>();
         //1.获取延期索赔信息
         List<SmsDelaysDelivery> smsDelaysDeliveryList = changeOmsProductionOrder(supplierSet);
-
+        if(CollectionUtils.isEmpty(smsDelaysDeliveryList)){
+            return R.ok();
+        }
         //2.插入延期索赔信息
         int count = smsDelaysDeliveryMapper.insertList(smsDelaysDeliveryList);
         //供应商V码对应的供应商信息
@@ -201,9 +203,13 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
         List<SmsDelaysDelivery> smsDelaysDeliveryList = new ArrayList<>();
         R rRes = remoteProductionOrderService.listForDelays(date,date,DateUtils.getDate());
         if (!rRes.isSuccess()) {
+            logger.error("获取排产订单信息失败res:{}",JSONObject.toJSONString(rRes));
+            throw new BusinessException("获取排产订单信息失败" + rRes.get("msg").toString());
+        }
+        List<OmsProductionOrder> listRes = rRes.getCollectData(new TypeReference<List<OmsProductionOrder>>() {});
+        if(CollectionUtils.isEmpty(listRes)){
             return null;
         }
-        List<OmsProductionOrder> listRes=rRes.getCollectData(new TypeReference<List<OmsProductionOrder>>() {});
         for(OmsProductionOrder omsProductionOrderRes : listRes){
             SmsDelaysDelivery smsDelaysDelivery = new SmsDelaysDelivery();
             smsDelaysDelivery.setDelaysAmount(DELAYS_AMOUNT);

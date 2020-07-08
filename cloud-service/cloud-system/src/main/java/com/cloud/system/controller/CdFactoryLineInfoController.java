@@ -12,6 +12,7 @@ import com.cloud.system.service.ICdFactoryLineInfoService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
@@ -49,9 +50,15 @@ public class CdFactoryLineInfoController extends BaseController {
             @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂编码", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "supplierCode", value = "加工承揽商", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "produceLineCode", value = "线体", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "branchOffice", value = "主管", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "monitor", value = "班长", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "attribute", value = "属性", required = false, paramType = "query", dataType = "String")
     })
-    public TableDataInfo list(CdFactoryLineInfo cdFactoryLineInfo) {
+    public TableDataInfo list(@ApiIgnore CdFactoryLineInfo cdFactoryLineInfo) {
         Example example = new Example(CdFactoryLineInfo.class);
         Example.Criteria criteria = example.createCriteria();
         listCondition(cdFactoryLineInfo, criteria);
@@ -87,6 +94,12 @@ public class CdFactoryLineInfoController extends BaseController {
         }
         if (StringUtils.isNotBlank(cdFactoryLineInfo.getProductFactoryDesc())) {
             criteria.andLike("productFactoryDesc", "%"+cdFactoryLineInfo.getProductFactoryDesc()+"%");
+        }
+        if (StringUtils.isNotBlank(cdFactoryLineInfo.getSupplierCode())) {
+            criteria.andEqualTo("supplierCode", cdFactoryLineInfo.getSupplierCode());
+        }
+        if (StringUtils.isNotBlank(cdFactoryLineInfo.getSupplierDesc())) {
+            criteria.andLike("supplierDesc", "%"+cdFactoryLineInfo.getSupplierDesc()+"%");
         }
         if (StringUtils.isNotBlank(cdFactoryLineInfo.getProduceLineCode())) {
             criteria.andEqualTo("produceLineCode", cdFactoryLineInfo.getProduceLineCode());

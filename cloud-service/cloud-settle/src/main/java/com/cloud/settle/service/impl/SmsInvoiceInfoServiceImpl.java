@@ -66,6 +66,7 @@ public class SmsInvoiceInfoServiceImpl extends BaseServiceImpl<SmsInvoiceInfo> i
         BigDecimal invoiceFeeAll = BigDecimal.ZERO;
         for(SmsInvoiceInfo smsInvoiceInfo : smsInvoiceInfoList){
             smsInvoiceInfo.setMouthSettleId(mouthSettleId);
+            smsInvoiceInfo.setDelFlag(DeleteFlagConstants.NO_DELETED);
             invoiceFeeAll = invoiceFeeAll.add(smsInvoiceInfo.getInvoiceAmount());
         }
         smsInvoiceInfoMapper.insertList(smsInvoiceInfoList);

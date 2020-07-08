@@ -5,6 +5,7 @@ import com.cloud.activiti.service.IActSmsQualityOrderService;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
+import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.domain.entity.SmsQualityOrder;
 import com.cloud.system.domain.entity.SysUser;
 import io.swagger.annotations.Api;
@@ -55,6 +56,15 @@ public class ActSmsQualityOrderController extends BaseController {
     @ApiOperation(value = "供应商申诉时质量索赔开启流程",response = SmsQualityOrder.class)
     public R addSave(@RequestParam("id") Long id, @RequestParam("complaintDescription") String complaintDescription,
                      @RequestParam("ossIds") String ossIds) {
+        if(null == id){
+            return R.error("id不存在");
+        }
+        if(StringUtils.isBlank(complaintDescription)){
+            return R.error("请填写申诉描述");
+        }
+        if(StringUtils.isBlank(ossIds)){
+            return R.error("请上传图片");
+        }
         //获取当前用户登录信息
         SysUser sysUser = getUserInfo(SysUser.class);
         return actSmsQualityOrderService.addSave(id,complaintDescription,ossIds,sysUser);
