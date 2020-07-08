@@ -97,10 +97,10 @@ public class OmsProductionOrderController extends BaseController {
         if (StrUtil.isNotBlank(omsProductionOrder.getProductMaterialCode())) {
             criteria.andEqualTo("productMaterialCode", omsProductionOrder.getProductMaterialCode());
         }
-        if (omsProductionOrder.getProductStartDate() != null) {
+        if (StrUtil.isNotEmpty(omsProductionOrder.getProductStartDate())) {
             criteria.andGreaterThanOrEqualTo("productStartDate", omsProductionOrder.getProductStartDate());
         }
-        if (omsProductionOrder.getProductEndDate() != null) {
+        if (StrUtil.isNotEmpty(omsProductionOrder.getProductEndDate())) {
             criteria.andLessThanOrEqualTo("productEndDate", DateUtil.parse(omsProductionOrder.getProductEndDate()).offset(DateField.DAY_OF_MONTH,1));
         }
         //查询订单状态已下达和已关单的两个状态的订单
@@ -280,10 +280,10 @@ public class OmsProductionOrderController extends BaseController {
         if (StrUtil.isNotBlank(omsProductionOrder.getProductMaterialCode())) {
             criteria.andEqualTo("productMaterialCode", omsProductionOrder.getProductMaterialCode());
         }
-        if (omsProductionOrder.getProductStartDate() != null) {
+        if (StrUtil.isNotEmpty(omsProductionOrder.getProductStartDate())) {
             criteria.andGreaterThanOrEqualTo("productStartDate", omsProductionOrder.getProductStartDate());
         }
-        if (omsProductionOrder.getProductEndDate() != null) {
+        if (StrUtil.isNotEmpty(omsProductionOrder.getProductEndDate())) {
             criteria.andLessThanOrEqualTo("productEndDate", DateUtil.parse(omsProductionOrder.getProductEndDate()).offset(DateField.DAY_OF_MONTH,1));
         }
         //查询订单状态已下达和已关单的两个状态的订单
