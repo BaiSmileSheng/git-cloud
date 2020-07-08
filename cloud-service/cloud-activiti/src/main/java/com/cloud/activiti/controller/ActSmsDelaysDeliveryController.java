@@ -5,6 +5,7 @@ import com.cloud.activiti.service.IActSmsDelaysDeliveryService;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
+import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.domain.entity.SmsDelaysDelivery;
 import com.cloud.system.domain.entity.SysUser;
 import io.swagger.annotations.Api;
@@ -54,6 +55,15 @@ public class ActSmsDelaysDeliveryController extends BaseController {
     @ApiOperation(value = "供应商申诉延期索赔开启流程",response = SmsDelaysDelivery.class)
     public R addSave(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription,
                      @RequestParam("ossIds") String ossIds) {
+        if(null == id){
+            return R.error("id不存在");
+        }
+        if(StringUtils.isBlank(complaintDescription)){
+            return R.error("请填写申诉描述");
+        }
+        if(StringUtils.isBlank(ossIds)){
+            return R.error("请上传图片");
+        }
         //获取当前用户登录信息
         SysUser sysUser = getUserInfo(SysUser.class);
         return actSmsDelaysDeliveryService.addSave(id,complaintDescription,ossIds,sysUser);
