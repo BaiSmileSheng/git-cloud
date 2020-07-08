@@ -164,7 +164,10 @@ public class OmsProductionOrderController extends BaseController {
         outsourceTypeList.add(OutSourceTypeEnum.OUT_SOURCE_TYPE_QWW.getCode());
         criteria.andIn("outsourceType",outsourceTypeList);
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderService.selectByExample(example);
-        return R.data(omsProductionOrderList);
+        //避免没有数据报错
+        R result = new R();
+        result.put("data",omsProductionOrderList);
+        return result;
     }
 
     /**
