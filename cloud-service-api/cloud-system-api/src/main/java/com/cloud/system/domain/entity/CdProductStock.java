@@ -63,7 +63,6 @@ public class CdProductStock extends BaseEntity {
     /**
      * 生产工厂描述
      */
-    @ExcelProperty(value = "生产工厂描述")
     @ApiModelProperty(value = "生产工厂描述")
     private String productFactoryDesc;
 
