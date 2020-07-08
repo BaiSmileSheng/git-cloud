@@ -12,6 +12,7 @@ import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.order.domain.entity.Oms2weeksDemandOrderEdit;
+import com.cloud.order.domain.entity.vo.OmsDemandOrderGatherEditImportTemplete;
 import com.cloud.order.service.IOms2weeksDemandOrderEditService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
@@ -134,6 +135,16 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
     @HasPermissions("order:oms2weeksDemandOrderEdit:importExcel")
     public R importExcel(MultipartFile file) {
         return oms2weeksDemandOrderEditService.import2weeksDemandEdit(file,getUserInfo(SysUser.class));
+    }
+
+    /**
+     * T+1、T+2草稿计划导入模板
+     */
+    @GetMapping("importTemplete")
+    @ApiOperation(value = "T+1、T+2草稿计划导入模板")
+    @HasPermissions("order:oms2weeksDemandOrderEdit:importTemplete")
+    public R importTemplete() {
+        return EasyExcelUtilOSS.writeExcel(new ArrayList<>(), "T+1-T+2周需求导入.xlsx", "sheet", new OmsDemandOrderGatherEditImportTemplete());
     }
 
     /**

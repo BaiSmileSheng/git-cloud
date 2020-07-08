@@ -13,6 +13,7 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.order.domain.entity.OmsDemandOrderGather;
 import com.cloud.order.domain.entity.OmsDemandOrderGatherEdit;
+import com.cloud.order.domain.entity.vo.OmsDemandOrderGatherEditImportTemplete;
 import com.cloud.order.service.IOmsDemandOrderGatherEditService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
@@ -196,6 +197,16 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     @HasPermissions("order:demandOrderGatherEdit:importExcel")
     public R importExcel(MultipartFile file) {
         return omsDemandOrderGatherEditService.importDemandGatherEdit(file,getUserInfo(SysUser.class));
+    }
+
+    /**
+     * 计划需求导入-导入模板
+     */
+    @GetMapping("importTemplete")
+    @ApiOperation(value = "计划需求导入-导入模板")
+    @HasPermissions("order:demandOrderGatherEdit:importTemplete")
+    public R importTemplete() {
+        return EasyExcelUtilOSS.writeExcel(new ArrayList<>(), "需求导入.xlsx", "sheet", new OmsDemandOrderGatherEditImportTemplete());
     }
 
     /**
