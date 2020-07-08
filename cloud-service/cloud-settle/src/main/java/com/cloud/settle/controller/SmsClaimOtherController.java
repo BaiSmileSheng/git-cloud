@@ -117,6 +117,9 @@ public class SmsClaimOtherController extends BaseController {
     private Example assemblyConditions(SmsClaimOther smsClaimOther){
         Example example = new Example(SmsClaimOther.class);
         Example.Criteria criteria = example.createCriteria();
+        if(StringUtils.isNotBlank(smsClaimOther.getProductOrderCode())){
+            criteria.andEqualTo("productOrderCode",smsClaimOther.getProductOrderCode());
+        }
         if(StringUtils.isNotBlank(smsClaimOther.getClaimCode())){
             criteria.andEqualTo("claimCode",smsClaimOther.getClaimCode());
         }

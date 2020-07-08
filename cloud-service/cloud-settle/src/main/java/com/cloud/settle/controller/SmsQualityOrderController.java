@@ -130,7 +130,7 @@ public class SmsQualityOrderController extends BaseController {
     private Example assemblyConditions(SmsQualityOrder smsQualityOrder) {
         Example example = new Example(SmsQualityOrder.class);
         Example.Criteria criteria = example.createCriteria();
-        if (StringUtils.isNotBlank(smsQualityOrder.getQualityNo())) {
+        if (StringUtils.isNotBlank(smsQualityOrder.getProductOrderCode())) {
             criteria.andEqualTo("productOrderCode", smsQualityOrder.getProductOrderCode());
         }
         if (StringUtils.isNotBlank(smsQualityOrder.getQualityNo())) {
