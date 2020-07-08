@@ -58,43 +58,19 @@ public class SmsInvoiceInfoServiceImpl extends BaseServiceImpl<SmsInvoiceInfo> i
             throw new BusinessException("月度结算单已确认,不允许修改发票");
         }
         List<SmsInvoiceInfo> smsInvoiceInfoList = smsInvoiceInfoS.getSmsInvoiceInfoList();
-        //新增的
-        List<SmsInvoiceInfo> smsInvoiceInfoAddList = new ArrayList<>();
-        //修改的
-        List<SmsInvoiceInfo> smsInvoiceInfoUpdateList = new ArrayList<>();
-        for(SmsInvoiceInfo smsInvoiceInfoReq : smsInvoiceInfoList){
-            if(null != smsInvoiceInfoReq.getId()){
-                smsInvoiceInfoUpdateList.add(smsInvoiceInfoReq);
-            }else{
-                smsInvoiceInfoReq.setMouthSettleId(mouthSettleId);
-                smsInvoiceInfoReq.setDelFlag(DeleteFlagConstants.NO_DELETED);
-                smsInvoiceInfoReq.setCreateTime(new Date());
-                smsInvoiceInfoAddList.add(smsInvoiceInfoReq);
-            }
-        }
-        //2.新增或修改
-        if(!CollectionUtils.isEmpty(smsInvoiceInfoAddList)){
-           int countAdd = smsInvoiceInfoMapper.insertList(smsInvoiceInfoAddList);
-           if(countAdd == 0){
-               logger.error("批量新增或修改保存发票信息时异常 smsInvoiceInfoAddList:{}", JSONObject.toJSONString(smsInvoiceInfoAddList));
-               throw new BusinessException("批量新增或修改保存发票信息时异常");
-           }
-        }
-        if(!CollectionUtils.isEmpty(smsInvoiceInfoUpdateList)){
-            int countUpdate = smsInvoiceInfoMapper.updateBatchByPrimaryKeySelective(smsInvoiceInfoUpdateList);
-            if(countUpdate == 0){
-                logger.error("批量新增或修改保存发票信息时异常 smsInvoiceInfoUpdateList:{}", JSONObject.toJSONString(smsInvoiceInfoUpdateList));
-                throw new BusinessException("批量新增或修改保存发票信息时异常");
-            }
-        }
-        //3.修改月度结算单发票金额
+        //2.按结算单号先删除后增加
+        Example exampleInvoiceInfo = new Example(SmsInvoiceInfo.class);
+        Example.Criteria criteriaInvoiceInfo = exampleInvoiceInfo.createCriteria();
+        criteriaInvoiceInfo.andEqualTo("mouthSettleId",mouthSettleId);
+        smsInvoiceInfoMapper.deleteByExample(exampleInvoiceInfo);
         BigDecimal invoiceFeeAll = BigDecimal.ZERO;
-        for(SmsInvoiceInfo smsInvoiceInfoAdd : smsInvoiceInfoAddList){
-            invoiceFeeAll = invoiceFeeAll.add(smsInvoiceInfoAdd.getInvoiceAmount());
+        for(SmsInvoiceInfo smsInvoiceInfo : smsInvoiceInfoList){
+            smsInvoiceInfo.setMouthSettleId(mouthSettleId);
+            invoiceFeeAll = invoiceFeeAll.add(smsInvoiceInfo.getInvoiceAmount());
         }
-        for(SmsInvoiceInfo smsInvoiceInfoUpdate : smsInvoiceInfoUpdateList){
-            invoiceFeeAll = invoiceFeeAll.add(smsInvoiceInfoUpdate.getInvoiceAmount());
-        }
+        smsInvoiceInfoMapper.insertList(smsInvoiceInfoList);
+
+        //3.修改月度结算单发票金额
         SmsMouthSettle smsMouthSettleReq = new SmsMouthSettle();
         smsMouthSettleReq.setId(smsMouthSettle.getId());
         smsMouthSettleReq.setInvoiceFee(invoiceFeeAll);
