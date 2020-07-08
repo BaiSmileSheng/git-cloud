@@ -25,4 +25,18 @@ public interface ISmsMouthSettleService extends BaseService<SmsMouthSettle>{
      * @return
      */
     R confirm(Long id,String settleStatus);
+
+    /**
+     * 打印结算
+     * @param settleNo
+     * @return
+     */
+    R settlePrint(String settleNo);
+
+    /**
+     * 打印索赔单
+     * @param settleNo
+     * @return
+     */
+    R spPrint(String settleNo);
 }

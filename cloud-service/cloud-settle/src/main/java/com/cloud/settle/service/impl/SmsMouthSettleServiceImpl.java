@@ -3,6 +3,7 @@ package com.cloud.settle.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.core.domain.R;
@@ -1127,6 +1128,120 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         }
         return R.ok();
 
+    }
+
+    /**
+     * 打印结算
+     * @param settleNo
+     * @return
+     */
+    @Override
+    public R settlePrint(String settleNo) {
+        //加工承揽加工费
+        Example example = new Example(SmsMouthSettle.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("settleNo", settleNo);
+        SmsMouthSettle smsMouthSettle = findByExampleOne(example);
+        if (smsMouthSettle==null) {
+            return R.error("月度结算数据为空！");
+        }
+        BigDecimal supplementMoney;//物耗金额
+        BigDecimal scrapMoney;//报废金额
+        BigDecimal qualityMoney;//质量索赔金额
+        BigDecimal otherMoney;//其他索赔金额
+        BigDecimal delayMoney;//延期索赔金额
+
+        //兑换明细
+        Example exampleDetail = new Example(SmsClaimCashDetail.class);
+        Example.Criteria criteriaDetail = exampleDetail.createCriteria();
+        criteriaDetail.andEqualTo("settleNo",settleNo);
+        List<SmsClaimCashDetail> details = smsClaimCashDetailService.selectByExample(exampleDetail);
+        if (CollUtil.isEmpty(details)) {
+            supplementMoney = BigDecimal.ZERO;
+            scrapMoney = BigDecimal.ZERO;
+            qualityMoney = BigDecimal.ZERO;
+            otherMoney = BigDecimal.ZERO;
+            delayMoney = BigDecimal.ZERO;
+        }else{
+            supplementMoney=details.stream()
+                    .filter(d -> StrUtil.equals(SettleRatioEnum.SPLX_WH.getCode(),d.getClaimType()))
+                    .map(SmsClaimCashDetail::getCashAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+            scrapMoney=details.stream()
+                    .filter(d -> StrUtil.equals(SettleRatioEnum.SPLX_BF.getCode(),d.getClaimType()))
+                    .map(SmsClaimCashDetail::getCashAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+            qualityMoney=details.stream()
+                    .filter(d -> StrUtil.equals(SettleRatioEnum.SPLX_ZL.getCode(),d.getClaimType()))
+                    .map(SmsClaimCashDetail::getCashAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+            delayMoney=details.stream()
+                    .filter(d -> StrUtil.equals(SettleRatioEnum.SPLX_YQ.getCode(),d.getClaimType()))
+                    .map(SmsClaimCashDetail::getCashAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+            otherMoney=details.stream()
+                    .filter(d -> StrUtil.equals(SettleRatioEnum.SPLX_QT.getCode(),d.getClaimType()))
+                    .map(SmsClaimCashDetail::getCashAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        }
+        //结算加工费
+        BigDecimal machiningAmount = smsMouthSettle.getMachiningAmount();
+        //汇总金额（不含税）结算-索赔
+        BigDecimal excludingFee = NumberUtil.sub(machiningAmount,supplementMoney,scrapMoney,qualityMoney,delayMoney,otherMoney);
+        //税率	 0.13
+        //汇总金额（含税） 汇总金额（不含税）*1.13
+        BigDecimal includeTaxeFee = NumberUtil.mul(excludingFee, 1.13);
+        Map<String, BigDecimal> map = MapUtil.newConcurrentHashMap();
+        map.put("machiningAmount",machiningAmount);
+        map.put("supplementMoney",supplementMoney);
+        map.put("scrapMoney",scrapMoney);
+        map.put("qualityMoney",qualityMoney);
+        map.put("delayMoney",delayMoney);
+        map.put("otherMoney",otherMoney);
+        map.put("excludingFee",excludingFee);
+        map.put("rate",new BigDecimal(0.13));
+        map.put("includeTaxeFee",includeTaxeFee);
+        return R.data(map);
+    }
+
+    /**
+     * 打印索赔单
+     * @param settleNo
+     * @return
+     */
+    @Override
+    public R spPrint(String settleNo) {
+        //物耗单
+        Example exampleWH = new Example(SmsSupplementaryOrder.class);
+        Example.Criteria criteriaWH = exampleWH.createCriteria();
+        criteriaWH.andEqualTo("settleNo", settleNo);
+        List<SmsSupplementaryOrder> listWH = smsSupplementaryOrderService.selectByExample(exampleWH);
+
+        //报废单
+        Example exampleBF = new Example(SmsScrapOrder.class);
+        Example.Criteria criteriaBF = exampleBF.createCriteria();
+        criteriaBF.andEqualTo("settleNo", settleNo);
+        List<SmsScrapOrder> listBF = smsScrapOrderService.selectByExample(exampleWH);
+
+        //质量索赔单
+        Example exampleZL = new Example(SmsQualityOrder.class);
+        Example.Criteria criteriaZL = exampleZL.createCriteria();
+        criteriaZL.andEqualTo("settleNo", settleNo);
+        List<SmsQualityOrder> listZL = smsQualityOrderMapper.selectByExample(exampleWH);
+
+        //延期索赔单
+        Example exampleYQ = new Example(SmsDelaysDelivery.class);
+        Example.Criteria criteriaYQ = exampleYQ.createCriteria();
+        criteriaYQ.andEqualTo("settleNo", settleNo);
+        List<SmsDelaysDelivery> listYQ = smsDelaysDeliveryMapper.selectByExample(exampleWH);
+
+        //其他索赔单
+        Example exampleQT = new Example(SmsClaimOther.class);
+        Example.Criteria criteriaQT = exampleQT.createCriteria();
+        criteriaQT.andEqualTo("settleNo", settleNo);
+        List<SmsClaimOther> listQT = smsClaimOtherMapper.selectByExample(exampleWH);
+        Map<String, Object> map = MapUtil.newConcurrentHashMap();
+        map.put("listWH",listWH);
+        map.put("listBF",listBF);
+        map.put("listZL",listZL);
+        map.put("listYQ",listYQ);
+        map.put("listQT",listQT);
+        return R.data(map);
     }
 
     /**

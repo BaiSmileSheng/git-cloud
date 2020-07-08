@@ -221,4 +221,30 @@ public class SmsMouthSettleController extends BaseController {
         List<SmsMouthSettle> smsMouthSettleList = smsMouthSettleService.selectByExample(example);
         return EasyExcelUtilOSS.writeExcel(smsMouthSettleList, "月度结算.xlsx", "sheet", new SmsMouthSettle());
     }
+
+    /**
+     * 打印结算
+     */
+    @GetMapping("settlePrint")
+    @ApiOperation(value = "打印结算")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "settleNo", value = "结算单号", required = false,paramType = "query", dataType = "String")
+    })
+    @HasPermissions("settle:mouthSettle:settlePrint")
+    public R settlePrint(String settleNo) {
+        return smsMouthSettleService.settlePrint(settleNo);
+    }
+
+    /**
+     * 打印索赔单
+     */
+    @GetMapping("spPrint")
+    @ApiOperation(value = "打印索赔单")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "settleNo", value = "结算单号", required = false,paramType = "query", dataType = "String")
+    })
+    @HasPermissions("settle:mouthSettle:spPrint")
+    public R spPrint(String settleNo) {
+        return smsMouthSettleService.spPrint(settleNo);
+    }
 }
