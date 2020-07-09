@@ -74,7 +74,7 @@ public class CdFactoryLineInfoController extends BaseController {
      */
     @PostMapping("listByExample")
     @ApiOperation(value = "工厂线体关系", response = CdFactoryLineInfo.class)
-    public R listByExample(CdFactoryLineInfo cdFactoryLineInfo) {
+    public R listByExample(@RequestBody CdFactoryLineInfo cdFactoryLineInfo) {
         Example example = new Example(CdFactoryLineInfo.class);
         Example.Criteria criteria = example.createCriteria();
         listCondition(cdFactoryLineInfo, criteria);
