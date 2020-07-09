@@ -108,8 +108,7 @@ public class SmsInvoiceInfoController extends BaseController {
     @OperLog(title = "批量新增或修改保存发票信息 ", businessType = BusinessType.INSERT)
     @ApiOperation(value = "批量新增或修改保存发票信息 ", response = R.class)
     public R batchAddSaveOrUpdate(@RequestBody SmsInvoiceInfoS smsInvoiceInfoS) {
-        if(null == smsInvoiceInfoS || CollectionUtils.isEmpty(smsInvoiceInfoS.getSmsInvoiceInfoList())
-                || StringUtils.isBlank(smsInvoiceInfoS.getMouthSettleId())){
+        if(null == smsInvoiceInfoS || StringUtils.isBlank(smsInvoiceInfoS.getMouthSettleId())){
             return R.error("批量新增发票信息入参为空");
         }
         return smsInvoiceInfoService.batchAddSaveOrUpdate(smsInvoiceInfoS);
