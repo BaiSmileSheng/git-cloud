@@ -11,6 +11,7 @@ import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
+import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.feign.RemoteProductionOrderService;
 import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
 import com.cloud.settle.enums.CurrencyEnum;
@@ -154,6 +155,10 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             throw new BusinessException(omsProductionOrderResult.get("msg").toString());
         }
         OmsProductionOrder omsProductionOrder = omsProductionOrderResult.getData(OmsProductionOrder.class);
+        if (!StrUtil.equals(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode()
+                , omsProductionOrder.getProductStatus())) {
+            return R.error(StrUtil.format("只允许{}状态申请物耗单！", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getMsg()));
+        }
         String productMaterialCode = omsProductionOrder.getProductMaterialCode();
         String rawMaterialCode = smsSupplementaryOrder.getRawMaterialCode();
 

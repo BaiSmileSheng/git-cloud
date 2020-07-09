@@ -11,6 +11,7 @@ import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
+import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.feign.RemoteProductionOrderService;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
 import com.cloud.settle.enums.CurrencyEnum;
@@ -102,6 +103,10 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             throw new BusinessException(omsProductionOrderResult.get("msg").toString());
         }
         OmsProductionOrder omsProductionOrder = omsProductionOrderResult.getData(OmsProductionOrder.class);
+        if (!StrUtil.equals(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode()
+                , omsProductionOrder.getProductStatus())) {
+            return R.error(StrUtil.format("只允许{}状态申请报废单！", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getMsg()));
+        }
         Example example = new Example(SmsScrapOrder.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("productOrderCode", productOrderCode);
