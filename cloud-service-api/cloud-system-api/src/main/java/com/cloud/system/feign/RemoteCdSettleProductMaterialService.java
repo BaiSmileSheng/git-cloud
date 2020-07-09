@@ -1,6 +1,7 @@
 package com.cloud.system.feign;
 
 import com.cloud.common.constant.ServiceNameConstants;
+import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.CdSettleProductMaterial;
 import com.cloud.system.feign.factory.RemoteCdSettleProductMaterialFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -25,6 +26,16 @@ public interface RemoteCdSettleProductMaterialService {
      * @return 物料号和加工费号对应关系列表
      */
     @GetMapping("settleProducMaterial/listByCode")
-    List<CdSettleProductMaterial> listByCode(@RequestParam(value = "productMaterialCode") String productMaterialCode,
-                                                    @RequestParam(value = "rawMaterialCode",required = false) String rawMaterialCode);
+    R listByCode(@RequestParam(value = "productMaterialCode") String productMaterialCode,
+                 @RequestParam(value = "rawMaterialCode",required = false) String rawMaterialCode);
+
+    /**
+     * 根据成品专用号和委外方式查加工费号
+     * @param productMaterialCode
+     * @param outsourceWay
+     * @return
+     */
+    @GetMapping("settleProducMaterial/selectOne")
+    R selectOne(@RequestParam(value = "productMaterialCode") String productMaterialCode,
+                @RequestParam("outsourceWay") String outsourceWay);
 }

@@ -1,5 +1,6 @@
 package com.cloud.system.feign.factory;
 
+import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.CdSettleProductMaterial;
 import com.cloud.system.feign.RemoteCdSettleProductMaterialService;
 import feign.hystrix.FallbackFactory;
@@ -25,8 +26,15 @@ public class RemoteCdSettleProductMaterialFallbackFactory implements FallbackFac
              * @return 物料号和加工费号对应关系列表
              */
             @Override
-            public List<CdSettleProductMaterial> listByCode(String productMaterialCode, String rawMaterialCode) {
-                return null;
+            public R listByCode(String productMaterialCode, String rawMaterialCode) {
+                log.error("RemoteCdSettleProductMaterialService.listByCode错误信息：{}",throwable.getMessage());
+                return R.error("服务拥挤,请稍后再试!");
+            }
+
+            @Override
+            public R selectOne(String productMaterialCode, String outsourceWay) {
+                log.error("RemoteCdSettleProductMaterialService.selectOne错误信息：{}",throwable.getMessage());
+                return R.error("服务拥挤,请稍后再试!");
             }
         };
     }
