@@ -407,11 +407,16 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
             List<CdProductStock> productStockList = cdProductStockDetail.getCdProductStockList();
             logger.info("成品库存主数据 插入数据库开始");
             productStockList.forEach(productStock ->{
+                BigDecimal sumNum;
                 BigDecimal stockPNum = productStock.getStockPNum();
                 BigDecimal stockWNum = productStock.getStockWNum();
                 BigDecimal stockINum = productStock.getStockINum();
                 BigDecimal stockKNum = productStock.getStockKNum();
-                BigDecimal sumNum = stockPNum.add(stockWNum).add(stockINum).subtract(stockKNum);
+                if(stockKNum.compareTo(BigDecimal.ZERO) == -1){
+                    sumNum = stockPNum.add(stockWNum).add(stockINum).add(stockKNum);
+                }else {
+                    sumNum = stockPNum.add(stockWNum).add(stockINum);
+                }
                 productStock.setSumNum(sumNum);
             });
             cdProductStockMapper.insertList(productStockList);
