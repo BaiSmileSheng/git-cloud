@@ -68,7 +68,7 @@ public class CdSettleProductMaterialController extends BaseController {
      */
     @GetMapping("listByCode")
     @ApiOperation(value = "物料号和加工费号对应关系 查询分页", response = CdSettleProductMaterial.class)
-    public List<CdSettleProductMaterial> listByCode(@RequestParam(value = "productMaterialCode") String productMaterialCode,
+    public R listByCode(@RequestParam(value = "productMaterialCode") String productMaterialCode,
                                                     @RequestParam(value = "rawMaterialCode",required = false) String rawMaterialCode){
         Example example = new Example(CdSettleProductMaterial.class);
         Example.Criteria criteria = example.createCriteria();
@@ -77,7 +77,7 @@ public class CdSettleProductMaterialController extends BaseController {
             criteria.andEqualTo("rawMaterialCode",rawMaterialCode);
         }
         List<CdSettleProductMaterial> cdSettleProductMaterialList = cdSettleProductMaterialService.selectByExample(example);
-        return cdSettleProductMaterialList;
+        return R.data(cdSettleProductMaterialList);
     }
     /**
      * 查询物料号和加工费号对应关系
@@ -147,6 +147,22 @@ public class CdSettleProductMaterialController extends BaseController {
     @ApiParam(name = "ids", value = "需删除数据的id")
     public R remove(@RequestBody String ids) {
         return toAjax(cdSettleProductMaterialService.deleteByIds(ids));
+    }
+
+    /**
+     * 查询物料号和委外方式查加工费号
+     */
+    @GetMapping("selectOne")
+    @ApiOperation(value = "根据id查询物料号和加工费号对应关系 ", response = CdSettleProductMaterial.class)
+    public R selectOne(@RequestParam(value = "productMaterialCode") String productMaterialCode,
+                                             @RequestParam("outsourceWay") String outsourceWay ) {
+        Example example = new Example(CdSettleProductMaterial.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("productMaterialCode",productMaterialCode);
+        criteria.andEqualTo("outsourceWay",outsourceWay);
+        CdSettleProductMaterial cdSettleProductMaterial = cdSettleProductMaterialService.findByExampleOne(example);
+        return R.data(cdSettleProductMaterial);
+
     }
 
 }

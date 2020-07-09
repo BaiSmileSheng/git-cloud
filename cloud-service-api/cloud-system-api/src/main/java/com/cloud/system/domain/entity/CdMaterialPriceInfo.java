@@ -4,6 +4,7 @@ import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -143,6 +144,7 @@ public class CdMaterialPriceInfo extends BaseEntity {
     @ExcelProperty(value = "有效期开始日期")
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "有效期开始日期")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date beginDate;
 
     /**
@@ -151,6 +153,7 @@ public class CdMaterialPriceInfo extends BaseEntity {
     @ExcelProperty(value = "有效期结束日期")
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "有效期结束日期")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date endDate;
 
     /**
@@ -159,6 +162,7 @@ public class CdMaterialPriceInfo extends BaseEntity {
     @ExcelProperty(value = "SAP创建日期")
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "SAP创建日期")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date sapCreatedDate;
 
     /**
