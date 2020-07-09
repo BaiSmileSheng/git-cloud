@@ -1111,7 +1111,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
             //内控确认
             BigDecimal includeTaxeFee = smsMouthSettle.getIncludeTaxeFee();
             BigDecimal invoiceFee = smsMouthSettle.getInvoiceFee();
-            if (includeTaxeFee.compareTo(invoiceFee) != 0) {
+            if ((includeTaxeFee.subtract(invoiceFee).abs()).compareTo(BigDecimal.ONE)>0) {
                 return R.error("含税金额与发票金额不等，不允许提交！");
             }
             smsMouthSettle.setSettleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_NKQR.getCode());
