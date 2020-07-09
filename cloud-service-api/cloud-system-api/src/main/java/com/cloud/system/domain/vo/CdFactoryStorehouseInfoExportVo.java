@@ -1,4 +1,4 @@
-package com.cloud.system.domain.entity;
+package com.cloud.system.domain.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -27,7 +27,7 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 @Builder
 @ApiModel(value = "工厂库位 ")
-public class CdFactoryStorehouseInfo extends BaseEntity {
+public class CdFactoryStorehouseInfoExportVo {
     private static final long serialVersionUID = 1L;
 
     /**
