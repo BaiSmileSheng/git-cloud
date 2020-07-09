@@ -25,7 +25,7 @@ public class CdMaterialPriceInfoXxlJob {
 
     /**
      * 4加工费/原材料价格同步
-     * 每日凌晨执行一次  0 0 0 * * ?
+     * 每日凌晨1点执行一次  0 0 1 * * ?
      * @param param
      * @return 成功
      * @throws Exception
@@ -43,7 +43,7 @@ public class CdMaterialPriceInfoXxlJob {
 
     /**
      * 4加工费/原材料价格同步
-     * 每月1号执行一次  0 0 1 * * ?
+     * 每月1号执行一次  0 0 0 1 * ?
      * @param param
      * @return 成功
      * @throws Exception

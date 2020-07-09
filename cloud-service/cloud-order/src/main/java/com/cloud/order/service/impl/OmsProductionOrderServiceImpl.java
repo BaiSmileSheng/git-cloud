@@ -51,11 +51,13 @@ import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.domain.entity.CdMaterialPriceInfo;
 import com.cloud.system.domain.entity.CdProductOverdue;
+import com.cloud.system.domain.entity.CdSettleProductMaterial;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.po.SysUserRights;
 import com.cloud.system.feign.RemoteBomService;
 import com.cloud.system.feign.RemoteCdMaterialPriceInfoService;
 import com.cloud.system.feign.RemoteCdProductOverdueService;
+import com.cloud.system.feign.RemoteCdSettleProductMaterialService;
 import com.cloud.system.feign.RemoteFactoryInfoService;
 import com.cloud.system.feign.RemoteFactoryLineInfoService;
 import com.cloud.system.feign.RemoteMaterialExtendInfoService;
@@ -170,6 +172,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     private RemoteCdMaterialPriceInfoService remoteCdMaterialPriceInfoService;
     @Autowired
     private RemoteSettleInfoService remoteSettleInfoService;
+    @Autowired
+    private RemoteCdSettleProductMaterialService remoteCdSettleProductMaterialService;
 
     /**
      * Description:  排产订单导入
@@ -1318,6 +1322,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         R factoryLineInfoListR = remoteFactoryLineInfoService.selectListByMapList(dictList);
         if(!factoryLineInfoListR.isSuccess()){
             log.error("获取线体对应的供应商信息失败 res:{}",JSONObject.toJSONString(factoryLineInfoListR));
+            throw new BusinessException("获取线体对应的供应商信息失败");
         }
         List<CdFactoryLineInfo> cdFactoryLineInfoList = factoryLineInfoListR.getCollectData(new TypeReference<List<CdFactoryLineInfo>>() {});
         //key 工厂+线体
@@ -1343,7 +1348,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 smsSettleInfo.setLineNo(omsProductionOrder.getProductLineCode());
                 String key = omsProductionOrder.getProductFactoryCode() + omsProductionOrder.getProductLineCode();
                 CdFactoryLineInfo cdFactoryLineInfo = supplierMap.get(key);
-                if(null == cdFactoryLineInfo){
+                if(null == cdFactoryLineInfo || StringUtils.isBlank(cdFactoryLineInfo.getSupplierCode())){
                     throw new BusinessException("请维护工厂"+omsProductionOrder.getProductFactoryCode()
                             +"线体"+omsProductionOrder.getProductLineCode()+"对应的供应商信息");
                 }
@@ -1363,13 +1368,23 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     throw new BusinessException("请维护工厂"+omsProductionOrder.getProductFactoryCode()
                             +"对应的采购组织信息");
                 }
-                //根据物料号,供应商,采购组织 查加工费
-                R maResult = remoteCdMaterialPriceInfoService.selectOneByCondition(omsProductionOrder.getProductMaterialCode(),purchaseOrg,
+                //根据物料号和委外方式cd_settle_product_material查加工费号
+                R settleProductMaterialR = remoteCdSettleProductMaterialService.selectOne(omsProductionOrder.getProductMaterialCode(),outsourceType);
+                if(!settleProductMaterialR.isSuccess()){
+                    log.error("根据物料号和委外方式查加工费号异常 专用号:{},委外方式:{},res:{}",omsProductionOrder.getProductMaterialCode(),
+                            outsourceType,JSONObject.toJSON(settleProductMaterialR));
+                    throw new BusinessException("根据物料号和委外方式查加工费号异常" + settleProductMaterialR.get("msg").toString());
+                }
+                CdSettleProductMaterial cdSettleProductMaterial = settleProductMaterialR.getData(CdSettleProductMaterial.class);
+                //加工费号
+                String rawMaterialCode = cdSettleProductMaterial.getRawMaterialCode();
+                //根据加工费号,供应商,采购组织 查加工费
+                R maResult = remoteCdMaterialPriceInfoService.selectOneByCondition(rawMaterialCode,purchaseOrg,
                         cdFactoryLineInfo.getSupplierCode());
                 if(!maResult.isSuccess()){
-                    log.error("获取加工费失败 物料号:{},采购组织:{},供应商:{}",omsProductionOrder.getProductMaterialCode(),
+                    log.error("获取加工费失败 物料号:{},采购组织:{},供应商:{}",rawMaterialCode,
                             purchaseOrg,cdFactoryLineInfo.getSupplierCode());
-                    throw new BusinessException(maResult.get("msg").toString());
+                    throw new BusinessException("获取加工费失败" + maResult.get("msg").toString());
                 }
                 CdMaterialPriceInfo cdMaterialPriceInfo = maResult.getData(CdMaterialPriceInfo.class);
                 if(null == cdMaterialPriceInfo.getProcessPrice()){
