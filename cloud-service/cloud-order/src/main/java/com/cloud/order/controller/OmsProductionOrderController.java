@@ -27,6 +27,7 @@ import com.cloud.order.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteFactoryLineInfoService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -106,17 +107,30 @@ public class OmsProductionOrderController extends BaseController {
 
         SysUser sysUser = getUserInfo(SysUser.class);
         if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
-            R r = remoteFactoryLineInfoService.selectLineCodeBySupplierCode(sysUser.getSupplierCode());
-            if (r.get("data") == null || StrUtil.isBlank(r.get("data").toString())) {
-                return getDataTable(CollectionUtil.newArrayList());
-            }
-            String lineCodes = r.get("data").toString();
-            criteria.andIn("productLineCode",CollectionUtil.toList(lineCodes.split(",")));
-            criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+
+//            String lineCodes = r.get("data").toString();
+//            criteria.andIn("productLineCode",CollectionUtil.toList(lineCodes.split(",")));
+//            criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+//
             //查询订单状态已下达和已关单的两个状态的订单
             List<String> statusList = CollectionUtil.toList(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode(),
                     ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
             criteria.andIn("status", statusList);
+
+            CdFactoryLineInfo cdFactoryLineInfo = new CdFactoryLineInfo().builder()
+                    .supplierCode(sysUser.getSupplierCode()).build();
+            //根据登录用户V码查询工厂及生产线
+            R r = remoteFactoryLineInfoService.listByExample(cdFactoryLineInfo);
+            if (!r.isSuccess()) {
+                return getDataTable(CollectionUtil.newArrayList());
+            }
+            List<CdFactoryLineInfo> factoryLineInfos=r.getCollectData(new TypeReference<List<CdFactoryLineInfo>>() {});
+            Example.Criteria cLine = example.createCriteria();
+            factoryLineInfos.forEach(factoryLineInfo->{
+                cLine.orEqualTo("productFactoryCode", factoryLineInfo.getProductFactoryCode());
+                cLine.andEqualTo("productLineCode", factoryLineInfo.getProduceLineCode());
+            });
+            example.and(cLine);
         }else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
             //班长、分主管查询工厂下的数据
             if (CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_BZ)
