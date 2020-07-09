@@ -1248,6 +1248,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             criteria.andEqualTo("status", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_DCSAP.getCode());
             list = omsProductionOrderMapper.selectByExample(example);
         }
+        if(CollectionUtils.isEmpty(list)){
+            return R.ok("没有需要下达SAP的数据");
+        }
         //2.下达SAP
         R resultSAP = orderFromSap601InterfaceService.createProductOrderFromSap601(list);
         if (!resultSAP.isSuccess()) {
@@ -1298,11 +1301,13 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             return omsProductionOrder.getOrderCode();
         }).collect(toList());
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderMapper.selectByOrderCode(orderOrderList);
-        List<SmsSettleInfo>  smsSettleInfoList = changeSmsSettleInfo(omsProductionOrderList);
-        R result = remoteSettleInfoService.batchInsert(smsSettleInfoList);
-        if(!result.isSuccess()){
-            log.error("新增加工费结算失败 res:{}",JSONObject.toJSONString(result));
-            throw new BusinessException(result.get("msg").toString());
+        if(!CollectionUtils.isEmpty(omsProductionOrderList)){
+            List<SmsSettleInfo>  smsSettleInfoList = changeSmsSettleInfo(omsProductionOrderList);
+            R result = remoteSettleInfoService.batchInsert(smsSettleInfoList);
+            if(!result.isSuccess()){
+                log.error("新增加工费结算失败 res:{}",JSONObject.toJSONString(result));
+                throw new BusinessException(result.get("msg").toString());
+            }
         }
         return R.ok();
     }
