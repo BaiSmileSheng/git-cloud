@@ -18,6 +18,7 @@ import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.CdMaterialExtendInfoImportErrorVo;
+import com.cloud.system.domain.vo.CdMaterialExtendInfoImportVo;
 import com.cloud.system.enums.PuttingOutEnum;
 import com.cloud.system.enums.ZnAttestationEnum;
 import com.cloud.system.enums.LifeCycleEnum;
@@ -36,6 +37,7 @@ import com.sap.conn.jco.JCoTable;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -201,8 +203,8 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
     @Override
     public R importMaterialExtendInfo(MultipartFile file, SysUser sysUser) throws IOException {
         EasyWithErrorExcelListener easyExcelListener = new EasyWithErrorExcelListener(cdMaterialExtendInfoExcelImportService,
-                CdMaterialExtendInfo.class);
-        EasyExcel.read(file.getInputStream(), CdMaterialExtendInfo.class, easyExcelListener).sheet().doRead();
+                CdMaterialExtendInfoImportVo.class);
+        EasyExcel.read(file.getInputStream(), CdMaterialExtendInfoImportVo.class, easyExcelListener).sheet().doRead();
 
         //可以导入的结果集 插入
         List<ExcelImportSucObjectDto> successList = easyExcelListener.getSuccessList();
@@ -245,12 +247,14 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
         List<ExcelImportSucObjectDto> successDtos = new ArrayList<>();
         List<ExcelImportOtherObjectDto> otherDtos = new ArrayList<>();
 
-        List<CdMaterialExtendInfo> listImport = (List<CdMaterialExtendInfo>) objects;
+        List<CdMaterialExtendInfoImportVo> listImport = (List<CdMaterialExtendInfoImportVo>) objects;
 
-        for (CdMaterialExtendInfo cdMaterialExtendInfo : listImport) {
+        for (CdMaterialExtendInfoImportVo cdMaterialExtendInfo : listImport) {
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
 
+            CdMaterialExtendInfo cdMaterialExtendInfoReq = new CdMaterialExtendInfo();
+            BeanUtils.copyProperties(cdMaterialExtendInfo,cdMaterialExtendInfoReq);
             if (StringUtils.isBlank(cdMaterialExtendInfo.getMaterialCode())) {
                 errObjectDto.setObject(cdMaterialExtendInfo);
                 errObjectDto.setErrMsg(StrUtil.format("成品专用号不能为空：{}", cdMaterialExtendInfo.getMaterialCode()));
@@ -259,7 +263,7 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
             }
             Example example = new Example(CdMaterialInfo.class);
             Example.Criteria criteria = example.createCriteria();
-            criteria.andEqualTo(cdMaterialExtendInfo.getMaterialCode());
+            criteria.andEqualTo("materialCode",cdMaterialExtendInfo.getMaterialCode());
             CdMaterialInfo materialInfo =
                     cdMaterialInfoService.findByExampleOne(example);
             if (BeanUtil.isEmpty(materialInfo)) {
@@ -268,13 +272,8 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
                 errDtos.add(errObjectDto);
                 continue;
             } else {
-                cdMaterialExtendInfo.setEstablishDate(materialInfo.getMdmCreateTime());
-            }
-            if (StringUtils.isBlank(cdMaterialExtendInfo.getMaterialDesc())) {
-                errObjectDto.setObject(cdMaterialExtendInfo);
-                errObjectDto.setErrMsg(StrUtil.format("成品描述不能为空：{}", cdMaterialExtendInfo.getMaterialDesc()));
-                errDtos.add(errObjectDto);
-                continue;
+                cdMaterialExtendInfoReq.setEstablishDate(materialInfo.getMdmCreateTime());
+                cdMaterialExtendInfoReq.setMaterialDesc(materialInfo.getMaterialDesc());
             }
             if (StringUtils.isBlank(cdMaterialExtendInfo.getProductType())) {
                 errObjectDto.setObject(cdMaterialExtendInfo);
@@ -290,7 +289,7 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
                 errDtos.add(errObjectDto);
                 continue;
             }
-            cdMaterialExtendInfo.setProductType(productTypeCode);
+            cdMaterialExtendInfoReq.setProductType(productTypeCode);
             if (StringUtils.isBlank(cdMaterialExtendInfo.getLifeCycle())) {
                 errObjectDto.setObject(cdMaterialExtendInfo);
                 errObjectDto.setErrMsg(StrUtil.format("生命周期不能为空：{}", cdMaterialExtendInfo.getLifeCycle()));
@@ -305,7 +304,7 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
                 errDtos.add(errObjectDto);
                 continue;
             }
-            cdMaterialExtendInfo.setLifeCycle(lifeCycleCode);
+            cdMaterialExtendInfoReq.setLifeCycle(lifeCycleCode);
             if (StringUtils.isBlank(cdMaterialExtendInfo.getIsPuttingOut())) {
                 errObjectDto.setObject(cdMaterialExtendInfo);
                 errObjectDto.setErrMsg(StrUtil.format("可否加工承揽不能为空：{}", cdMaterialExtendInfo.getIsPuttingOut()));
@@ -320,7 +319,7 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
                 errDtos.add(errObjectDto);
                 continue;
             }
-            cdMaterialExtendInfo.setIsPuttingOut(isPuttingOutCode);
+            cdMaterialExtendInfoReq.setIsPuttingOut(isPuttingOutCode);
             if (StringUtils.isBlank(cdMaterialExtendInfo.getIsZnAttestation())) {
                 errObjectDto.setObject(cdMaterialExtendInfo);
                 errObjectDto.setErrMsg(StrUtil.format("是否ZN认证不能为空：{}", cdMaterialExtendInfo.getIsZnAttestation()));
@@ -335,16 +334,10 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
                 errDtos.add(errObjectDto);
                 continue;
             }
-            cdMaterialExtendInfo.setIsZnAttestation(isZnAttestatioCode);
-            if (null == cdMaterialExtendInfo.getEstablishDate()) {
-                errObjectDto.setObject(cdMaterialExtendInfo);
-                errObjectDto.setErrMsg(StrUtil.format("建立日期不能为空：{}", cdMaterialExtendInfo.getEstablishDate()));
-                errDtos.add(errObjectDto);
-                continue;
-            }
-            cdMaterialExtendInfo.setCreateTime(new Date());
-            cdMaterialExtendInfo.setDelFlag("0");
-            sucObjectDto.setObject(cdMaterialExtendInfo);
+            cdMaterialExtendInfoReq.setIsZnAttestation(isZnAttestatioCode);
+            cdMaterialExtendInfoReq.setCreateTime(new Date());
+            cdMaterialExtendInfoReq.setDelFlag("0");
+            sucObjectDto.setObject(cdMaterialExtendInfoReq);
             successDtos.add(sucObjectDto);
         }
         return new ExcelImportResult(successDtos, errDtos, otherDtos);

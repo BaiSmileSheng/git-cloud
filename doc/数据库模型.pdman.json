@@ -11712,7 +11712,7 @@
             },
             {
               "name": "material_desc",
-              "type": "VARCHAR_32",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "物料描述"
             },
