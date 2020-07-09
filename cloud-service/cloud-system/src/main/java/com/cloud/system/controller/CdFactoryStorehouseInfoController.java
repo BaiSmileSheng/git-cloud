@@ -13,6 +13,7 @@ import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.system.domain.entity.CdFactoryStorehouseInfo;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.CdFactoryStorehouseInfoExportVo;
 import com.cloud.system.service.ICdFactoryStorehouseInfoService;
 import com.cloud.system.util.EasyExcelUtilOSS;
 import io.swagger.annotations.*;
@@ -118,7 +119,7 @@ public class CdFactoryStorehouseInfoController extends BaseController {
     @ApiOperation(value = "导出模板", response = CdFactoryStorehouseInfo.class)
     public R exportTemplate(){
         String fileName = "交货提前量模板.xlsx";
-        return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new CdFactoryStorehouseInfo());
+        return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new CdFactoryStorehouseInfoExportVo());
     }
 
     /**

@@ -3,6 +3,10 @@ package com.cloud.system.domain.vo;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
+import com.cloud.system.converter.LifeCycleConverter;
+import com.cloud.system.converter.ProductTypeConverter;
+import com.cloud.system.converter.PuttingOutConverter;
+import com.cloud.system.converter.ZnAttestationConverter;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -16,8 +20,8 @@ import javax.persistence.Id;
 import java.util.Date;
 
 /**
- * 导入错误 物料扩展信息 对象 cd_material_extend_info
- *
+ * 物料扩展信息 对象 cd_material_extend_info
+ * 导出
  * @author lihongia
  * @date 2020-06-15
  */
@@ -27,7 +31,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 @ApiModel(value = "物料扩展信息 ")
-public class CdMaterialExtendInfoImportErrorVo{
+public class CdMaterialExtendInfoExportVo {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -47,6 +51,7 @@ public class CdMaterialExtendInfoImportErrorVo{
     /**
      * 物料描述
      */
+    @ExcelProperty(value = "成品描述",index = 1)
     @ApiModelProperty(value = "物料描述")
     private String materialDesc;
 
@@ -59,28 +64,28 @@ public class CdMaterialExtendInfoImportErrorVo{
     /**
      * 产品类别
      */
-    @ExcelProperty(value = "产品类别",index = 1)
+    @ExcelProperty(value = "产品类别",index = 2,converter = ProductTypeConverter.class)
     @ApiModelProperty(value = "产品类别")
     private String productType;
 
     /**
      * 生命周期
      */
-    @ExcelProperty(value = "生命周期",index = 2)
+    @ExcelProperty(value = "生命周期",index = 3,converter = LifeCycleConverter.class)
     @ApiModelProperty(value = "生命周期")
     private String lifeCycle;
 
     /**
      * 可否加工承揽
      */
-    @ExcelProperty(value = "可否加工承揽",index = 3)
+    @ExcelProperty(value = "可否加工承揽",index = 4,converter = PuttingOutConverter.class)
     @ApiModelProperty(value = "可否加工承揽")
     private String isPuttingOut;
 
     /**
      * 是否ZN认证
      */
-    @ExcelProperty(value = "是否ZN认证",index = 4)
+    @ExcelProperty(value = "是否ZN认证",index = 5,converter = ZnAttestationConverter.class)
     @ApiModelProperty(value = "是否ZN认证")
     private String isZnAttestation;
 
@@ -88,7 +93,7 @@ public class CdMaterialExtendInfoImportErrorVo{
      * 建立日期
      */
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     @ApiModelProperty(value = "建立日期")
     private Date establishDate;
 
@@ -98,10 +103,16 @@ public class CdMaterialExtendInfoImportErrorVo{
     private String delFlag;
 
     /**
-     * 错误信息
+     * 创建者
      */
-    @ExcelProperty(value = "错误信息",index = 5)
-    @ApiModelProperty(value = "错误信息")
-    private String errorMessage;
+    @ExcelProperty(value = "操作人",index = 6)
+    private String createBy;
+
+    /**
+     * 创建时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @ExcelProperty(value = "操作时间",index = 7)
+    private Date createTime;
 
 }

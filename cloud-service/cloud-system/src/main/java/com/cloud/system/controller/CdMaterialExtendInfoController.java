@@ -8,6 +8,8 @@ import cn.hutool.core.lang.Dict;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.CdMaterialExtendInfoExportVo;
+import com.cloud.system.domain.vo.CdMaterialExtendInfoImportVo;
 import com.cloud.system.util.EasyExcelUtilOSS;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -111,7 +113,7 @@ public class CdMaterialExtendInfoController extends BaseController {
     @ApiOperation(value = "下载模板")
     public R downLoadTemplate(){
         String fileName = "下载模板.xlsx";
-        return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new CdMaterialExtendInfo());
+        return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new CdMaterialExtendInfoImportVo());
     }
 
     /**
@@ -131,7 +133,7 @@ public class CdMaterialExtendInfoController extends BaseController {
         listCondition(cdMaterialExtendInfo,criteria);
         String fileName = "成品物料信息.xlsx";
         List<CdMaterialExtendInfo> cdMaterialExtendInfoList = cdMaterialExtendInfoService.selectByExample(example);
-        return EasyExcelUtilOSS.writeExcel(cdMaterialExtendInfoList,fileName,fileName,new CdMaterialExtendInfo());
+        return EasyExcelUtilOSS.writeExcel(cdMaterialExtendInfoList,fileName,fileName,new CdMaterialExtendInfoExportVo());
     }
 
     /**
