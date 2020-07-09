@@ -1336,8 +1336,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             throw new BusinessException("获取采购组织信息异常");
         }
         List<CdFactoryInfo> cdFactoryInfoList = resultFactory.getCollectData(new TypeReference<List<CdFactoryInfo>>() {});
-        Map<String,String> cdFactoryInfoMap = cdFactoryInfoList.stream().collect(Collectors.toMap(CdFactoryInfo ::getFactoryCode,
-                CdFactoryInfo ::getPurchaseOrg,(key1,key2) -> key2));
+        Map<String,CdFactoryInfo> cdFactoryInfoMap = cdFactoryInfoList.stream().collect(Collectors.toMap(cdFactoryInfo ->cdFactoryInfo.getFactoryCode(),
+                cdFactoryInfo -> cdFactoryInfo,(key1,key2) -> key2));
 
         List<SmsSettleInfo> smsSettleInfoList = omsProductionOrderList.stream().map(omsProductionOrder ->{
             String outsourceType = omsProductionOrder.getOutsourceType();
@@ -1362,12 +1362,25 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 smsSettleInfo.setBomVersion(omsProductionOrder.getBomVersion());
                 smsSettleInfo.setOrderAmount(omsProductionOrder.getProductNum().intValue());
                 smsSettleInfo.setOutsourceWay(outsourceType);
-                String purchaseOrg = cdFactoryInfoMap.get(omsProductionOrder.getProductFactoryCode());
-                if(null == purchaseOrg){
+                CdFactoryInfo cdFactoryInfo = cdFactoryInfoMap.get(omsProductionOrder.getProductFactoryCode());
+                if(null == cdFactoryInfo){
+                    log.error("获取工厂信息失败 工厂:{}",omsProductionOrder.getProductFactoryCode());
+                    throw new BusinessException("请维护工厂"+omsProductionOrder.getProductFactoryCode()
+                            +"信息");
+                }
+                String purchaseOrg = cdFactoryInfo.getPurchaseOrg();
+                if(StringUtils.isBlank(purchaseOrg)){
                     log.error("获取工厂对应采购组织信息失败 工厂:{}",omsProductionOrder.getProductFactoryCode());
                     throw new BusinessException("请维护工厂"+omsProductionOrder.getProductFactoryCode()
                             +"对应的采购组织信息");
                 }
+                String companyCode = cdFactoryInfo.getCompanyCode();
+                if(StringUtils.isBlank(companyCode)){
+                    log.error("获取工厂对应公司信息失败 工厂:{}",omsProductionOrder.getProductFactoryCode());
+                    throw new BusinessException("请维护工厂"+omsProductionOrder.getProductFactoryCode()
+                            +"对应的公司信息");
+                }
+                smsSettleInfo.setCompanyCode(companyCode);
                 //根据物料号和委外方式cd_settle_product_material查加工费号
                 R settleProductMaterialR = remoteCdSettleProductMaterialService.selectOne(omsProductionOrder.getProductMaterialCode(),outsourceType);
                 if(!settleProductMaterialR.isSuccess()){
