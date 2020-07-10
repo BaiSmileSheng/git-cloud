@@ -85,6 +85,9 @@ public class SmsScrapOrderController extends BaseController {
         if(StrUtil.isNotEmpty(smsScrapOrder.getBeginTime())){
             criteria.andGreaterThanOrEqualTo("createTime", smsScrapOrder.getBeginTime());
         }
+        if(StrUtil.isNotEmpty(smsScrapOrder.getSupplierName())){
+            criteria.andLike("supplierName", StrUtil.format("%{}%",smsScrapOrder.getSupplierName()));
+        }
         //供应商：查询本工厂的    业务科：查询
         if (!sysUser.isAdmin()) {
             if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {

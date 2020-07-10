@@ -16,8 +16,6 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
 
-import java.util.Map;
-
 /**
  * 物料信息  提供者
  *
@@ -129,10 +127,11 @@ public class CdMaterialInfoController extends BaseController {
      */
     @GetMapping("getByMaterialCode")
     @ApiOperation(value = "根据物料号查询物料信息 ", response = CdMaterialInfo.class)
-    public R getByMaterialCode(String materialCode) {
+    public R getByMaterialCode(@RequestParam("materialCode") String materialCode,@RequestParam("factoryCode") String factoryCode) {
         Example example = new Example(CdMaterialInfo.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("materialCode", materialCode);
+        criteria.andEqualTo("plantCode", factoryCode);
         List<CdMaterialInfo> cdMaterialInfoList = cdMaterialInfoService.selectByExample(example);
         if(CollectionUtils.isEmpty(cdMaterialInfoList)){
             return R.error("物料信息不存在,请检查数据");
