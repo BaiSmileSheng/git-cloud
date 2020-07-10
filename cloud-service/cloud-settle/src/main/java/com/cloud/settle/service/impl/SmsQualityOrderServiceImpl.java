@@ -202,7 +202,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
      * @param smsQualityOrder
      */
     private void verifyParameter(SmsQualityOrder smsQualityOrder){
-        R materialResult = remoteMaterialService.getByMaterialCode(smsQualityOrder.getProductMaterialCode());
+        R materialResult = remoteMaterialService.getByMaterialCode(smsQualityOrder.getProductMaterialCode(),smsQualityOrder.getFactoryCode());
         if(!materialResult.isSuccess()){
             logger.error("查专用号信息失败专用号:{},res:{}",smsQualityOrder.getProductMaterialCode(),JSONObject.toJSON(materialResult));
             throw new BusinessException("校验专用号异常" + materialResult.get("msg").toString());

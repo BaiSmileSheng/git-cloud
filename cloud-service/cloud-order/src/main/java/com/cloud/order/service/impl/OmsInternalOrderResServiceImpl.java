@@ -191,7 +191,7 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
                 throw new BusinessException("根据供应商v码获取 工厂编号 异常");
             }
             omsInternalOrderRes.setProductFactoryCode(factoryCode);
-            R cdMaterialInfoResult = remoteMaterialService.getByMaterialCode(omsInternalOrderRes.getProductMaterialCode());
+            R cdMaterialInfoResult = remoteMaterialService.getByMaterialCode(omsInternalOrderRes.getProductMaterialCode(),factoryCode);
             if (!cdMaterialInfoResult.isSuccess()) {
                 logger.error(StrUtil.format("查物料信息异常 productMaterialCode:{},res:{}", omsInternalOrderRes.getProductMaterialCode(),JSONObject.toJSON(cdMaterialInfoResult)));
                 throw new BusinessException("物料信息表未维护物料信息");
