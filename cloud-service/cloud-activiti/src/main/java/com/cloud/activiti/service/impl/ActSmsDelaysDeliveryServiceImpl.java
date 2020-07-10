@@ -192,7 +192,7 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
         R sysUserR = remoteUserService.selectUserByMaterialCodeAndRoleKey(factoryCode,roleKey);
         if(!sysUserR.isSuccess()){
             logger.error("获取对应的负责人邮箱失败");
-            throw new BusinessException(sysUserR.get("msg").toString());
+            throw new BusinessException("获取对应的负责人邮箱失败" + sysUserR.get("msg").toString());
         }
         List<SysUserVo> sysUserVoList = sysUserR.getCollectData(new TypeReference<List<SysUserVo>>() {});
         //校验邮件
