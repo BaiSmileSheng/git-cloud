@@ -171,6 +171,7 @@
         remark = VALUES(remark),
         del_flag = VALUES(del_flag),
         create_by = VALUES(create_by),
-        update_by = VALUES(update_by)
+        update_by = VALUES(update_by),
+        update_time = now()
     </insert>
 </mapper>
