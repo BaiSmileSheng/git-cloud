@@ -299,7 +299,7 @@ public class OmsProductionOrderController extends BaseController {
             criteria.andGreaterThanOrEqualTo("productStartDate", omsProductionOrder.getProductStartDate());
         }
         if (StrUtil.isNotEmpty(omsProductionOrder.getProductEndDate())) {
-            criteria.andLessThanOrEqualTo("productEndDate", omsProductionOrder.getProductEndDate());
+            criteria.andLessThanOrEqualTo("productStartDate", omsProductionOrder.getProductEndDate());
         }
         //查询订单状态已下达和已关单的两个状态的订单
         List<String> statusList = CollectionUtil.toList(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode(),
