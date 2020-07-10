@@ -193,6 +193,7 @@ public class SmsScrapOrderController extends BaseController {
     public R export(@ApiIgnore() SmsScrapOrder smsScrapOrder) {
         Example example = new Example(SmsScrapOrder.class);
         Example.Criteria criteria = example.createCriteria();
+        BeanUtils.nullifyStrings(smsScrapOrder);
         criteria.andEqualTo(smsScrapOrder);
         SysUser sysUser = getUserInfo(SysUser.class);
         if(StrUtil.isNotEmpty(smsScrapOrder.getEndTime())){

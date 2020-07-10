@@ -1,8 +1,6 @@
 package com.cloud.order.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.date.DateField;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
@@ -102,7 +100,7 @@ public class OmsProductionOrderController extends BaseController {
             criteria.andGreaterThanOrEqualTo("productStartDate", omsProductionOrder.getProductStartDate());
         }
         if (StrUtil.isNotEmpty(omsProductionOrder.getProductEndDate())) {
-            criteria.andLessThanOrEqualTo("productEndDate", DateUtil.parse(omsProductionOrder.getProductEndDate()).offset(DateField.DAY_OF_MONTH,1));
+            criteria.andLessThanOrEqualTo("productEndDate", omsProductionOrder.getProductEndDate());
         }
 
         SysUser sysUser = getUserInfo(SysUser.class);
@@ -301,7 +299,7 @@ public class OmsProductionOrderController extends BaseController {
             criteria.andGreaterThanOrEqualTo("productStartDate", omsProductionOrder.getProductStartDate());
         }
         if (StrUtil.isNotEmpty(omsProductionOrder.getProductEndDate())) {
-            criteria.andLessThanOrEqualTo("productEndDate", DateUtil.parse(omsProductionOrder.getProductEndDate()).offset(DateField.DAY_OF_MONTH,1));
+            criteria.andLessThanOrEqualTo("productEndDate", omsProductionOrder.getProductEndDate());
         }
         //查询订单状态已下达和已关单的两个状态的订单
         List<String> statusList = CollectionUtil.toList(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode(),
