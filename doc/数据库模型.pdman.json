@@ -7748,7 +7748,7 @@
               "type": "DECIMAL_2",
               "remark": "",
               "chnname": "索赔金额",
-              "defaultValue": "''"
+              "defaultValue": "0"
             },
             {
               "name": "cash_amount",
@@ -8054,7 +8054,7 @@
               "type": "DECIMAL_2",
               "remark": "",
               "chnname": "索赔金额",
-              "defaultValue": "''"
+              "defaultValue": "0"
             },
             {
               "name": "currency",
@@ -8365,19 +8365,21 @@
               "type": "DECIMAL_2",
               "remark": "",
               "chnname": "结算金额",
-              "defaultValue": "''"
+              "defaultValue": "0"
             },
             {
               "name": "cash_amount",
               "type": "DECIMAL_2",
               "remark": "",
-              "chnname": "兑现金额"
+              "chnname": "兑现金额",
+              "defaultValue": "0"
             },
             {
               "name": "uncash_amount",
               "type": "DECIMAL_2",
               "remark": "",
-              "chnname": "未兑现金额"
+              "chnname": "未兑现金额",
+              "defaultValue": "0"
             },
             {
               "name": "del_flag",
@@ -8632,19 +8634,21 @@
               "type": "DECIMAL_2",
               "remark": "",
               "chnname": "结算金额",
-              "defaultValue": "''"
+              "defaultValue": "0"
             },
             {
               "name": "cash_amount",
               "type": "DECIMAL_2",
               "remark": "",
-              "chnname": "兑现金额"
+              "chnname": "兑现金额",
+              "defaultValue": "0"
             },
             {
               "name": "uncash_amount",
               "type": "DECIMAL_2",
               "remark": "",
-              "chnname": "未兑现金额"
+              "chnname": "未兑现金额",
+              "defaultValue": "0"
             },
             {
               "name": "del_flag",
@@ -8894,19 +8898,21 @@
               "type": "DECIMAL_2",
               "remark": "",
               "chnname": "结算金额",
-              "defaultValue": "''"
+              "defaultValue": "0"
             },
             {
               "name": "cash_amount",
               "type": "DECIMAL_2",
               "remark": "",
-              "chnname": "兑现金额"
+              "chnname": "兑现金额",
+              "defaultValue": "0"
             },
             {
               "name": "uncash_amount",
               "type": "DECIMAL_2",
               "remark": "",
-              "chnname": "未兑现金额"
+              "chnname": "未兑现金额",
+              "defaultValue": "0"
             },
             {
               "name": "del_flag",

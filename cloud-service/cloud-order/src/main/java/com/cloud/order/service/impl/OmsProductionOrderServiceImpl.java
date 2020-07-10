@@ -1248,6 +1248,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             criteria.andEqualTo("status", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_DCSAP.getCode());
             list = omsProductionOrderMapper.selectByExample(example);
         }
+        if(CollectionUtils.isEmpty(list)){
+            return R.ok("没有需要下达SAP的数据");
+        }
         //2.下达SAP
         R resultSAP = orderFromSap601InterfaceService.createProductOrderFromSap601(list);
         if (!resultSAP.isSuccess()) {
@@ -1298,11 +1301,13 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             return omsProductionOrder.getOrderCode();
         }).collect(toList());
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderMapper.selectByOrderCode(orderOrderList);
-        List<SmsSettleInfo>  smsSettleInfoList = changeSmsSettleInfo(omsProductionOrderList);
-        R result = remoteSettleInfoService.batchInsert(smsSettleInfoList);
-        if(!result.isSuccess()){
-            log.error("新增加工费结算失败 res:{}",JSONObject.toJSONString(result));
-            throw new BusinessException(result.get("msg").toString());
+        if(!CollectionUtils.isEmpty(omsProductionOrderList)){
+            List<SmsSettleInfo>  smsSettleInfoList = changeSmsSettleInfo(omsProductionOrderList);
+            R result = remoteSettleInfoService.batchInsert(smsSettleInfoList);
+            if(!result.isSuccess()){
+                log.error("新增加工费结算失败 res:{}",JSONObject.toJSONString(result));
+                throw new BusinessException(result.get("msg").toString());
+            }
         }
         return R.ok();
     }
@@ -1336,8 +1341,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             throw new BusinessException("获取采购组织信息异常");
         }
         List<CdFactoryInfo> cdFactoryInfoList = resultFactory.getCollectData(new TypeReference<List<CdFactoryInfo>>() {});
-        Map<String,String> cdFactoryInfoMap = cdFactoryInfoList.stream().collect(Collectors.toMap(CdFactoryInfo ::getFactoryCode,
-                CdFactoryInfo ::getPurchaseOrg,(key1,key2) -> key2));
+        Map<String,CdFactoryInfo> cdFactoryInfoMap = cdFactoryInfoList.stream().collect(Collectors.toMap(cdFactoryInfo ->cdFactoryInfo.getFactoryCode(),
+                cdFactoryInfo -> cdFactoryInfo,(key1,key2) -> key2));
 
         List<SmsSettleInfo> smsSettleInfoList = omsProductionOrderList.stream().map(omsProductionOrder ->{
             String outsourceType = omsProductionOrder.getOutsourceType();
@@ -1362,12 +1367,25 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 smsSettleInfo.setBomVersion(omsProductionOrder.getBomVersion());
                 smsSettleInfo.setOrderAmount(omsProductionOrder.getProductNum().intValue());
                 smsSettleInfo.setOutsourceWay(outsourceType);
-                String purchaseOrg = cdFactoryInfoMap.get(omsProductionOrder.getProductFactoryCode());
-                if(null == purchaseOrg){
+                CdFactoryInfo cdFactoryInfo = cdFactoryInfoMap.get(omsProductionOrder.getProductFactoryCode());
+                if(null == cdFactoryInfo){
+                    log.error("获取工厂信息失败 工厂:{}",omsProductionOrder.getProductFactoryCode());
+                    throw new BusinessException("请维护工厂"+omsProductionOrder.getProductFactoryCode()
+                            +"信息");
+                }
+                String purchaseOrg = cdFactoryInfo.getPurchaseOrg();
+                if(StringUtils.isBlank(purchaseOrg)){
                     log.error("获取工厂对应采购组织信息失败 工厂:{}",omsProductionOrder.getProductFactoryCode());
                     throw new BusinessException("请维护工厂"+omsProductionOrder.getProductFactoryCode()
                             +"对应的采购组织信息");
                 }
+                String companyCode = cdFactoryInfo.getCompanyCode();
+                if(StringUtils.isBlank(companyCode)){
+                    log.error("获取工厂对应公司信息失败 工厂:{}",omsProductionOrder.getProductFactoryCode());
+                    throw new BusinessException("请维护工厂"+omsProductionOrder.getProductFactoryCode()
+                            +"对应的公司信息");
+                }
+                smsSettleInfo.setCompanyCode(companyCode);
                 //根据物料号和委外方式cd_settle_product_material查加工费号
                 R settleProductMaterialR = remoteCdSettleProductMaterialService.selectOne(omsProductionOrder.getProductMaterialCode(),outsourceType);
                 if(!settleProductMaterialR.isSuccess()){
@@ -1382,7 +1400,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 R maResult = remoteCdMaterialPriceInfoService.selectOneByCondition(rawMaterialCode,purchaseOrg,
                         cdFactoryLineInfo.getSupplierCode());
                 if(!maResult.isSuccess()){
-                    log.error("获取加工费失败 物料号:{},采购组织:{},供应商:{}",rawMaterialCode,
+                    log.error("获取加工费失败 加工费号:{},采购组织:{},供应商:{}",rawMaterialCode,
                             purchaseOrg,cdFactoryLineInfo.getSupplierCode());
                     throw new BusinessException("获取加工费失败" + maResult.get("msg").toString());
                 }

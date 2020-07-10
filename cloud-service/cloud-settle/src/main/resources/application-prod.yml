@@ -26,7 +26,7 @@ spring:
     druid:
       # 主库数据源
       master:
-        url: jdbc:mysql://10.202.89.21:5730/orw?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+        url: jdbc:mysql://10.202.89.21:5730/orw?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&allowMultiQueries=true
         username: appadmin
         password: OI%TPkmL
       # 从库数据源

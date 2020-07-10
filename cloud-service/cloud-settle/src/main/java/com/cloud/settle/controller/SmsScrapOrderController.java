@@ -11,6 +11,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.common.utils.bean.BeanUtils;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
 import com.cloud.settle.enums.ScrapOrderStatusEnum;
 import com.cloud.settle.service.ISmsScrapOrderService;
@@ -76,6 +77,7 @@ public class SmsScrapOrderController extends BaseController {
         Example example = new Example(SmsScrapOrder.class);
         Example.Criteria criteria = example.createCriteria();
         SysUser sysUser = getUserInfo(SysUser.class);
+        BeanUtils.nullifyStrings(smsScrapOrder);
         criteria.andEqualTo(smsScrapOrder);
         if(StrUtil.isNotEmpty(smsScrapOrder.getEndTime())){
             criteria.andLessThanOrEqualTo("createTime", DateUtil.parse(smsScrapOrder.getEndTime()).offset(DateField.DAY_OF_MONTH,1));
@@ -191,6 +193,7 @@ public class SmsScrapOrderController extends BaseController {
     public R export(@ApiIgnore() SmsScrapOrder smsScrapOrder) {
         Example example = new Example(SmsScrapOrder.class);
         Example.Criteria criteria = example.createCriteria();
+        BeanUtils.nullifyStrings(smsScrapOrder);
         criteria.andEqualTo(smsScrapOrder);
         SysUser sysUser = getUserInfo(SysUser.class);
         if(StrUtil.isNotEmpty(smsScrapOrder.getEndTime())){

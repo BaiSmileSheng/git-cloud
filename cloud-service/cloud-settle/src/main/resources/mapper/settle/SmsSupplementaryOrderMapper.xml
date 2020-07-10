@@ -27,6 +27,7 @@
         <result property="settleNo" column="settle_no"/>
         <result property="settleFee" column="settle_fee"/>
         <result property="cashAmount" column="cash_amount"/>
+        <result property="uncashAmount" column="uncash_amount"/>
         <result property="rate" column="rate"/>
         <result property="currency" column="currency"/>
         <result property="purchaseGroupCode" column="purchase_group_code"/>
