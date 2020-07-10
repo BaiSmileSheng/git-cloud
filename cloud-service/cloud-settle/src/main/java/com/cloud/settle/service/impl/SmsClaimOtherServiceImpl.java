@@ -267,9 +267,9 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
             throw new BusinessException("此索赔单已提交不可再编辑");
         }
         //2.修改索赔单信息
-        smsClaimOtherMapper.updateByPrimaryKeySelective(smsClaimOther);
         //填写付款公司
         setCompanyCode(smsClaimOther);
+        smsClaimOtherMapper.updateByPrimaryKeySelective(smsClaimOther);
         //3.根据索赔单号对所对应的文件修改(先删后增)
         if(StringUtils.isNotBlank(ossIds)){
             String[] ossIdsString = ossIds.split(",");
