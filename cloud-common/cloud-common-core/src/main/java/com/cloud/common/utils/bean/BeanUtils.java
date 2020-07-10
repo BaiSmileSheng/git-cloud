@@ -1,5 +1,6 @@
 package com.cloud.common.utils.bean;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -100,5 +101,27 @@ public class BeanUtils extends org.springframework.beans.BeanUtils {
 
     public static boolean isMethodPropEquals(String m1, String m2) {
         return m1.substring(BEAN_METHOD_PROP_INDEX).equals(m2.substring(BEAN_METHOD_PROP_INDEX));
+    }
+
+    /**
+     * 将属性为空的设置为null
+     * @param o
+     */
+    public static void nullifyStrings( Object o ) {
+
+        for ( Field f : o.getClass().getDeclaredFields() ) {
+            f.setAccessible(true);
+            try {
+                if ( f.getType().equals( String.class ) ) {
+                    String value = (String) f.get( o );
+                    if ( value != null && value.trim().isEmpty() ) {
+                        f.set( o , null);
+                    }
+                }
+            } catch ( Exception e ) {
+                throw new RuntimeException(e);
+            }
+        }
+
     }
 }
