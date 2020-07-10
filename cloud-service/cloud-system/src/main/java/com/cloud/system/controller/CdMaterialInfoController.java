@@ -140,20 +140,6 @@ public class CdMaterialInfoController extends BaseController {
         return R.data(cdMaterialInfo);
     }
 
-    /**
-     * 根据物料号查询一条物料信息(多条取一条)
-     * @param materialCode
-     * @return
-     */
-    @GetMapping("getByMaterialCodeOnlyOne")
-    @ApiOperation(value = "根据物料号查询一条物料信息(多条取一条) ", response = CdMaterialInfo.class)
-    public R getByMaterialCodeOnlyOne(@RequestParam("materialCode") String materialCode) {
-        Example example = new Example(CdMaterialInfo.class);
-        Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("materialCode", materialCode);
-        CdMaterialInfo  cdMaterialInfo = cdMaterialInfoService.findByExampleOne(example);
-        return R.data(cdMaterialInfo);
-    }
 
     /**
      * 更新SAP获取的UPH数据
