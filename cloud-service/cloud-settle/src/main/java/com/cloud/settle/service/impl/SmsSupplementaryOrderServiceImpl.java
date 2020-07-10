@@ -26,7 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -134,16 +133,16 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         log.info(StrUtil.format("物耗申请新增保存开始：参数为{}", smsSupplementaryOrder.toString()));
         String productOrderCode = smsSupplementaryOrder.getProductOrderCode();
 
-        Example example = new Example(SmsSupplementaryOrder.class);
-        Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("productOrderCode", productOrderCode);
-        criteria.andNotIn("stuffStatus", CollUtil.newArrayList(
-                SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITBH.getCode()
-                ,SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZBH.getCode()));
-        int num = selectCountByExample(example);
-        if (num > 0) {
-            return R.error(StrUtil.format("订单：{}已申请过物耗单，请到物耗管理进行修改！",productOrderCode));
-        }
+//        Example example = new Example(SmsSupplementaryOrder.class);
+//        Example.Criteria criteria = example.createCriteria();
+//        criteria.andEqualTo("productOrderCode", productOrderCode);
+//        criteria.andNotIn("stuffStatus", CollUtil.newArrayList(
+//                SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITBH.getCode()
+//                ,SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZBH.getCode()));
+//        int num = selectCountByExample(example);
+//        if (num > 0) {
+//            return R.error(StrUtil.format("订单：{}已申请过物耗单，请到物耗管理进行修改！",productOrderCode));
+//        }
         //生产单号获取排产订单信息
         R omsProductionOrderResult = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
         if(!omsProductionOrderResult.isSuccess()){
