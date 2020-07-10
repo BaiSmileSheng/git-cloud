@@ -80,7 +80,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         R rCheckStatus = checkCondition(id);
         SmsSupplementaryOrder smsSupplementaryOrderCheck = (SmsSupplementaryOrder) rCheckStatus.get("data");
         //校验
-        R rCheck = checkSmsSupplementaryOrderCondition(smsSupplementaryOrder, smsSupplementaryOrderCheck.getProductOrderCode());
+        R rCheck = checkSmsSupplementaryOrderCondition(smsSupplementaryOrder, smsSupplementaryOrderCheck.getProductOrderCode(),smsSupplementaryOrderCheck.getFactoryCode());
         if (!rCheck.isSuccess()) {
             return rCheck;
         }
@@ -133,11 +133,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
     public R addSave(SmsSupplementaryOrder smsSupplementaryOrder) {
         log.info(StrUtil.format("物耗申请新增保存开始：参数为{}", smsSupplementaryOrder.toString()));
         String productOrderCode = smsSupplementaryOrder.getProductOrderCode();
-        //校验
-        R rCheck = checkSmsSupplementaryOrderCondition(smsSupplementaryOrder, productOrderCode);
-        if (!rCheck.isSuccess()) {
-            return rCheck;
-        }
+
         Example example = new Example(SmsSupplementaryOrder.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("productOrderCode", productOrderCode);
@@ -158,6 +154,11 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         if (!StrUtil.equals(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode()
                 , omsProductionOrder.getProductStatus())) {
             return R.error(StrUtil.format("只允许{}状态申请物耗单！", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getMsg()));
+        }
+        //校验
+        R rCheck = checkSmsSupplementaryOrderCondition(smsSupplementaryOrder, productOrderCode,omsProductionOrder.getProductFactoryCode());
+        if (!rCheck.isSuccess()) {
+            return rCheck;
         }
         String productMaterialCode = omsProductionOrder.getProductMaterialCode();
         String rawMaterialCode = smsSupplementaryOrder.getRawMaterialCode();
@@ -421,7 +422,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
      * @param productOrderCode
      * @return
      */
-    R checkSmsSupplementaryOrderCondition(SmsSupplementaryOrder smsSupplementaryOrder, String productOrderCode) {
+    R checkSmsSupplementaryOrderCondition(SmsSupplementaryOrder smsSupplementaryOrder, String productOrderCode,String factoryCode) {
         if (smsSupplementaryOrder.getStuffAmount() == null) {
             return R.error("申请数量为空！");
         }
@@ -440,7 +441,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         //将返回值Map转为CdMaterialPriceInfo
 //        CdMaterialPriceInfo cdMaterialPriceInfo = BeanUtil.mapToBean((Map<?, ?>) r.get("data"), CdMaterialPriceInfo.class, true);
         //2、校验修改申请数量是否是最小包装量的整数倍 CdMaterialInfo cdMaterialInfo
-        R cdMaterialInfoResult = remoteMaterialService.getByMaterialCode(smsSupplementaryOrder.getRawMaterialCode());
+        R cdMaterialInfoResult = remoteMaterialService.getByMaterialCode(smsSupplementaryOrder.getRawMaterialCode(),factoryCode);
         if (!cdMaterialInfoResult.isSuccess()) {
             log.error(StrUtil.format("(物耗)未维护物料信息{}", smsSupplementaryOrder.getRawMaterialCode()));
             return R.error("未维护物料信息！");

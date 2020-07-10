@@ -34,7 +34,7 @@ public class RemoteMaterialFactory implements FallbackFactory<RemoteMaterialServ
              * @return
              */
             @Override
-            public R getByMaterialCode(String materialCode) {
+            public R getByMaterialCode(String materialCode,String factoryCode) {
                 log.error("RemoteMaterialService.getByMaterialCode错误信息：{}",throwable.getMessage());
                 return R.error("服务拥挤请稍后再试");
             }
