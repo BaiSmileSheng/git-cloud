@@ -3,6 +3,7 @@ package com.cloud.settle.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.feign.RemoteBizBusinessService;
 import com.cloud.common.constant.DeleteFlagConstants;
+import com.cloud.common.constant.EmailConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
@@ -404,7 +405,8 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
             // 供应商名称 +V码+公司  您有一条其他索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
             mailTextBuffer.append(smsClaimOther.getSupplierName()).append(smsClaimOther.getSupplierCode())
                     .append(sysUserVo.getCorporation()).append(" ").append("您有一条其他索赔订单，索赔单号")
-                    .append(smsClaimOther.getClaimCode()).append(",请及时处理，如不处理，3天后系统自动确认，无法申诉");
+                    .append(smsClaimOther.getClaimCode()).append(",请及时处理，如不处理，3天后系统自动确认，无法申诉!")
+                    .append(EmailConstants.ORW_URL);
             mailService.sendTextMail(sysUserVo.getEmail(),mailSubject,mailTextBuffer.toString());
         }
         return R.data(count);
@@ -510,7 +512,8 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
             // 供应商名称 +V码+公司  您有一条其他索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
             mailTextBuffer.append(smsClaimOther.getSupplierName()).append(supplierCode)
                     .append(sysUser.getCorporation()).append(" ").append("您有一条其他索赔订单，订单号")
-                    .append(smsClaimOther.getClaimCode()).append(",请及时处理，如不处理，1天后系统自动确认，无法申诉");
+                    .append(smsClaimOther.getClaimCode()).append(",请及时处理，如不处理，1天后系统自动确认，无法申诉!")
+                    .append(EmailConstants.ORW_URL);
             String toSupplier = sysUser.getEmail();
             mailService.sendTextMail(toSupplier,mailSubject,mailTextBuffer.toString());
         }

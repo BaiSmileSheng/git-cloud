@@ -13,6 +13,7 @@ import com.cloud.activiti.mail.MailService;
 import com.cloud.activiti.service.IActSmsDelaysDeliveryService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
+import com.cloud.common.constant.EmailConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
@@ -206,7 +207,7 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
         for(SysUserVo sysUserVo : sysUserVoList){
             String email = sysUserVo.getEmail();
             String subject = "供应商申诉";
-            String content = "延期索赔单 单号:" + delaysNo + "供应商发起申诉";
+            String content = "您有一条待办消息要处理!" + "延期索赔单 单号:" + delaysNo + "供应商发起申诉" + EmailConstants.ORW_URL;
             mailService.sendTextMail(email,subject,content);
         }
     }
@@ -353,7 +354,7 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
             throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
         }
         String subject = "供应商申诉";
-        String content = "延期索赔单 单号:" + delaysNo + "供应商发起申诉";
+        String content = "您有一条通知:" + "延期索赔单 单号:" + delaysNo + EmailConstants.ORW_URL;
         mailService.sendTextMail(email,subject,content);
     }
 }

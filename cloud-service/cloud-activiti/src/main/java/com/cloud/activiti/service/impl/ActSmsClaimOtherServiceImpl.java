@@ -13,6 +13,7 @@ import com.cloud.activiti.mail.MailService;
 import com.cloud.activiti.service.IActSmsClaimOtherService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
+import com.cloud.common.constant.EmailConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
@@ -212,7 +213,7 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         for(SysUserVo sysUserVo : sysUserVoList){
             String email = sysUserVo.getEmail();
             String subject = "供应商申诉";
-            String content = "其他索赔单 单号:" + claimCode + "供应商发起申诉";
+            String content = "您有一条待办消息要处理!" + "其他索赔单 单号:" + claimCode + "供应商发起申诉" + EmailConstants.ORW_URL;
             mailService.sendTextMail(email,subject,content);
         }
     }
@@ -350,7 +351,7 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
             throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
         }
         String subject = "供应商申诉";
-        String content = "其他索赔单 单号:" + claimCode + contentDetail;
+        String content = "您有一条通知:" + "其他索赔单 单号:" + claimCode + contentDetail + EmailConstants.ORW_URL;
         mailService.sendTextMail(email,subject,content);
     }
 }
