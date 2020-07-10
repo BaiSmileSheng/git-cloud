@@ -496,7 +496,6 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             if (sub.compareTo(new BigDecimal(minUnit)) > 0) {
                 R.error(StrUtil.format("{}申请量大于订单量*单耗({})时，超出部分不得大于最小包装量！",productOrderCode,bomNum));
             }
-            return R.error(StrUtil.format("{}申请量不得大于订单量*单耗({})",productOrderCode,bomNum));
         }
         return R.ok();
     }
