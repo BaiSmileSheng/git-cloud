@@ -455,7 +455,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         }
         if (applyNum % minUnit != 0) {
             log.error(StrUtil.format("(物耗)申请量必须是最小包装量的整数倍参数为{},{}", applyNum,minUnit));
-            return R.error(StrUtil.format("{}申请量必须是最小包装量的整数倍！",smsSupplementaryOrder.getRawMaterialCode()));
+            return R.error(StrUtil.format("{}申请量必须是最小包装量({})的整数倍！",smsSupplementaryOrder.getRawMaterialCode(),minUnit));
         }
         //3、校验申请数量是否是单耗的整数倍
         //生产单号获取排产订单信息
@@ -489,13 +489,13 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         //5、校验申请量是否大于订单量*单耗,如果大于单耗，则判断超出部分是否大于最小包装量，大于则返回错误
         BigDecimal productNum = omsProductionOrder.getProductNum();
         BigDecimal applyNumBig = new BigDecimal(applyNum);
-        if (applyNumBig.compareTo(productNum.multiply(cdBom.getBomNum())) >= 0) {
+        BigDecimal bomNum = cdBom.getBomNum().divide(cdBom.getBasicNum());
+        if (applyNumBig.compareTo(productNum.multiply(bomNum)) >= 0) {
             //差值
-            BigDecimal sub = applyNumBig.subtract(productNum.multiply(cdBom.getBomNum()));
+            BigDecimal sub = applyNumBig.subtract(productNum.multiply(bomNum));
             if (sub.compareTo(new BigDecimal(minUnit)) > 0) {
-                R.error(StrUtil.format("{}申请量大于订单量*单耗时，超出部分不得大于最小包装量！",productOrderCode));
+                R.error(StrUtil.format("{}申请量大于订单量*单耗({})时，超出部分不得大于最小包装量！",productOrderCode,bomNum));
             }
-            return R.error(StrUtil.format("{}申请量不得大于订单量*单耗",productOrderCode));
         }
         return R.ok();
     }
