@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.feign.RemoteBizBusinessService;
 import com.cloud.common.constant.DeleteFlagConstants;
+import com.cloud.common.constant.EmailConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
@@ -194,7 +195,8 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
             // 供应商名称 +V码+公司  您有一条延期交付订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
             mailTextBuffer.append(smsDelaysDeliveryMail.getSupplierName()).append(supplierCode)
                     .append(sysUser.getCorporation()).append(" ").append("您有一条延期交付订单，订单号")
-                    .append(smsDelaysDeliveryMail.getDelaysNo()).append(",请及时处理，如不处理，3天后系统自动确认，无法申诉");
+                    .append(smsDelaysDeliveryMail.getDelaysNo()).append(",请及时处理，如不处理，3天后系统自动确认，无法申诉!")
+                    .append(EmailConstants.ORW_URL);
             String toSupplier = sysUser.getEmail();
             mailService.sendTextMail(toSupplier,mailSubject,mailTextBuffer.toString());
         }
@@ -375,7 +377,8 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
             // 供应商名称 +V码+公司  您有一条延期索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
             mailTextBuffer.append(smsDelaysDelivery.getSupplierName()).append(supplierCode)
                     .append(sysUser.getCorporation()).append(" ").append("您有一条延期索赔订单，索赔单号")
-                    .append(smsDelaysDelivery.getDelaysNo()).append(",请及时处理，如不处理，1天后系统自动确认，无法申诉");
+                    .append(smsDelaysDelivery.getDelaysNo()).append(",请及时处理，如不处理，1天后系统自动确认，无法申诉!")
+                    .append(EmailConstants.ORW_URL);
             String toSupplier = sysUser.getEmail();
             mailService.sendTextMail(toSupplier,mailSubject,mailTextBuffer.toString());
         }

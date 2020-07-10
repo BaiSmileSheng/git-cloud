@@ -5,6 +5,8 @@
  */
 package com.cloud.activiti.service.impl;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -174,10 +176,13 @@ public class BizBusinessServiceImpl implements IBizBusinessService {
 
     @Override
     public String selectByKeyAndTable(String procDefKey, String tableId) {
-        BizBusiness bizBusiness = new BizBusiness();
-        bizBusiness.setProcDefKey(procDefKey);
-        bizBusiness.setTableId(tableId);
-        bizBusiness = businessMapper.selectOne(bizBusiness);
+        Example example = new Example(BizBusiness.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("tableId",tableId);
+        criteria.andEqualTo("procDefKey",procDefKey);
+        List<BizBusiness> bizBusinessList = businessMapper.selectByExample(example);
+        Collections.sort(bizBusinessList, Comparator.comparing(BizBusiness::getId).reversed());
+        BizBusiness bizBusiness = bizBusinessList.get(0);
         return bizBusiness.getProcInstId();
     }
 }
