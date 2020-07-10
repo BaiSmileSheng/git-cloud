@@ -152,7 +152,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         }
         OmsProductionOrder omsProductionOrder = omsProductionOrderResult.getData(OmsProductionOrder.class);
         if (!StrUtil.equals(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode()
-                , omsProductionOrder.getProductStatus())) {
+                , omsProductionOrder.getStatus())) {
             return R.error(StrUtil.format("只允许{}状态申请物耗单！", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getMsg()));
         }
         //校验
