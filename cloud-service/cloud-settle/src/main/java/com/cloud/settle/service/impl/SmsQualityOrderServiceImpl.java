@@ -12,6 +12,7 @@ import com.cloud.settle.enums.QualityStatusEnum;
 import com.cloud.settle.mail.MailService;
 import com.cloud.settle.mapper.SmsQualityOrderMapper;
 import com.cloud.settle.service.ISmsQualityOrderService;
+import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteFactoryInfoService;
@@ -173,6 +174,8 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
         logger.info("新增质量索赔信息时获取序列号seq:{}", seq);
         qualityNoBuffer.append(seq);
         smsQualityOrder.setQualityNo(qualityNoBuffer.toString());
+        //赋值付款公司
+        setCompanyCode(smsQualityOrder);
         smsQualityOrderMapper.insertSelective(smsQualityOrder);
         logger.info("新增质量索赔信息时成功后 主键id:{},索赔单号:{}", smsQualityOrder.getId(), smsQualityOrder.getQualityNo());
 
@@ -218,6 +221,25 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
             throw new BusinessException("校验供应商异常" + supplierResult.get("msg").toString());
         }
     }
+
+    /**
+     * 赋值付款公司
+     * @param smsQualityOrder
+     */
+    private void setCompanyCode(SmsQualityOrder smsQualityOrder) {
+        //查付款公司
+        R factoryInfoResult = remoteFactoryInfoService.selectOneByFactory(smsQualityOrder.getFactoryCode());
+        if(!factoryInfoResult.isSuccess()){
+            logger.error("获取付款公司异常 工厂:{},res:{}",smsQualityOrder.getFactoryCode(), JSONObject.toJSON(factoryInfoResult));
+            throw new BusinessException("请维护工厂"+ smsQualityOrder.getFactoryCode() +"对应的付款公司");
+        }
+        CdFactoryInfo cdFactoryInfo = factoryInfoResult.getData(CdFactoryInfo.class);
+        if(StringUtils.isBlank(cdFactoryInfo.getCompanyCode())){
+            logger.error("获取付款公司异常 工厂:{}",smsQualityOrder.getFactoryCode());
+            throw new BusinessException("请维护工厂"+ smsQualityOrder.getFactoryCode() +"对应的付款公司");
+        }
+        smsQualityOrder.setCompanyCode(cdFactoryInfo.getCompanyCode());
+    }
     /**
      * 修改质量索赔信息
      *
@@ -244,6 +266,8 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
             throw new BusinessException("此索赔单已提交不可再编辑");
         }
         //2.修改索赔单信息
+        //赋值付款公司
+        setCompanyCode(smsQualityOrder);
         smsQualityOrderMapper.updateByPrimaryKeySelective(smsQualityOrder);
         //3.根据索赔单号所对应的索赔文件订单号查文件
         if(StringUtils.isNotBlank(ossIds)){
@@ -414,7 +438,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条质量索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
             mailTextBuffer.append(smsQualityOrder.getSupplierName()).append(smsQualityOrder.getSupplierCode())
-                    .append(sysUserVo.getCorporation()).append(" ").append("您有一条质量索赔订单，订单号")
+                    .append(sysUserVo.getCorporation()).append(" ").append("您有一条质量索赔订单，索赔单号")
                     .append(smsQualityOrder.getQualityNo()).append(",请及时处理，如不处理，3天后系统自动确认，无法申诉");
             mailService.sendTextMail(sysUserVo.getEmail(),mailSubject,mailTextBuffer.toString());
         }
