@@ -9,6 +9,7 @@ import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.enums.ClaimOtherStatusEnum;
 import com.cloud.settle.mail.MailService;
+import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
@@ -170,6 +171,8 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         qualityNoBuffer.append(seq);
         smsClaimOther.setClaimCode(qualityNoBuffer.toString());
         smsClaimOther.setClaimOtherStatus(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_0.getCode());
+        //填写付款公司
+        setCompanyCode(smsClaimOther);
         //2.插入其他索赔信息
         smsClaimOtherMapper.insertSelective(smsClaimOther);
         logger.info("新增其他索赔信息时成功后 主键id:{},索赔单号:{}",smsClaimOther.getId(),smsClaimOther.getClaimCode());
@@ -202,6 +205,25 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
             }
         }
         return R.data(smsClaimOther.getId());
+    }
+
+    /**
+     * 赋值付款公司
+     * @param smsClaimOther
+     */
+    private void setCompanyCode(SmsClaimOther smsClaimOther) {
+        //查付款公司
+        R factoryInfoResult = remoteFactoryInfoService.selectOneByFactory(smsClaimOther.getFactoryCode());
+        if(!factoryInfoResult.isSuccess()){
+            logger.error("获取付款公司异常 工厂:{},res:{}",smsClaimOther.getFactoryCode(), JSONObject.toJSON(factoryInfoResult));
+            throw new BusinessException("请维护工厂"+ smsClaimOther.getFactoryCode() +"对应的付款公司");
+        }
+        CdFactoryInfo cdFactoryInfo = factoryInfoResult.getData(CdFactoryInfo.class);
+        if(StringUtils.isBlank(cdFactoryInfo.getCompanyCode())){
+            logger.error("获取付款公司异常 工厂:{}",smsClaimOther.getFactoryCode());
+            throw new BusinessException("请维护工厂"+ smsClaimOther.getFactoryCode() +"对应的付款公司");
+        }
+        smsClaimOther.setCompanyCode(cdFactoryInfo.getCompanyCode());
     }
 
     /**
@@ -246,7 +268,8 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         }
         //2.修改索赔单信息
         smsClaimOtherMapper.updateByPrimaryKeySelective(smsClaimOther);
-
+        //填写付款公司
+        setCompanyCode(smsClaimOther);
         //3.根据索赔单号对所对应的文件修改(先删后增)
         if(StringUtils.isNotBlank(ossIds)){
             String[] ossIdsString = ossIds.split(",");
@@ -380,7 +403,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条其他索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
             mailTextBuffer.append(smsClaimOther.getSupplierName()).append(smsClaimOther.getSupplierCode())
-                    .append(sysUserVo.getCorporation()).append(" ").append("您有一条其他索赔订单，订单号")
+                    .append(sysUserVo.getCorporation()).append(" ").append("您有一条其他索赔订单，索赔单号")
                     .append(smsClaimOther.getClaimCode()).append(",请及时处理，如不处理，3天后系统自动确认，无法申诉");
             mailService.sendTextMail(sysUserVo.getEmail(),mailSubject,mailTextBuffer.toString());
         }
