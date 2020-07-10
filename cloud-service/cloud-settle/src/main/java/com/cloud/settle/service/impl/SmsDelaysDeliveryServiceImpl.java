@@ -171,6 +171,12 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
                 throw new BusinessException("新增保存延期交付索赔 供应商信息不存在");
             }
             SysUserVo sysUser = sysUserR.getData(SysUserVo.class);
+            String toSupplier = sysUser.getEmail();
+            String userName = sysUser.getUserName();
+            if(StringUtils.isBlank(toSupplier)){
+                logger.error("提交延期索赔时查询供应商信息邮箱不存在 供应商编号 supplierCode:{}", supplierCode);
+                throw new BusinessException("提交延期索赔时查询供应商"+userName+"信息邮箱不存在,请维护");
+            }
             mapSysUser.put(supplierCode,sysUser);
         }
         //3.发送邮件

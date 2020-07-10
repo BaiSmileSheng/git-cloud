@@ -38,6 +38,7 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -182,7 +183,6 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
         String roleKey = RoleConstants.ROLE_KEY_ZLBBZ;
         String qualityNo = smsQualityOrderRes.getQualityNo();
         sendEmail(qualityNo, factoryCode, roleKey);
-
         return R.data(smsQualityOrderRes.getQualityNo());
     }
 
@@ -199,11 +199,16 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
             throw new BusinessException(sysUserR.get("msg").toString());
         }
         List<SysUserVo> sysUserVoList = sysUserR.getCollectData(new TypeReference<List<SysUserVo>>() {});
+        //校验邮箱
         for(SysUserVo sysUserVo : sysUserVoList){
             String email = sysUserVo.getEmail();
             if(StringUtils.isBlank(email)){
                 throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
             }
+        }
+        //发送邮件
+        for(SysUserVo sysUserVo : sysUserVoList){
+            String email = sysUserVo.getEmail();
             String subject = "供应商申诉";
             String content = "质量索赔单 单号:" + qualityNo + "供应商发起申诉";
             mailService.sendTextMail(email,subject,content);
