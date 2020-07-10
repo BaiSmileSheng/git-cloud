@@ -201,11 +201,16 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
             throw new BusinessException(sysUserR.get("msg").toString());
         }
         List<SysUserVo> sysUserVoList = sysUserR.getCollectData(new TypeReference<List<SysUserVo>>() {});
+        //校验邮箱
         for(SysUserVo sysUserVo : sysUserVoList){
             String email = sysUserVo.getEmail();
             if(StringUtils.isBlank(email)){
                 throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
             }
+        }
+        //发送邮件
+        for(SysUserVo sysUserVo : sysUserVoList){
+            String email = sysUserVo.getEmail();
             String subject = "供应商申诉";
             String content = "其他索赔单 单号:" + claimCode + "供应商发起申诉";
             mailService.sendTextMail(email,subject,content);

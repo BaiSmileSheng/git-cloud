@@ -12,6 +12,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.common.utils.bean.BeanUtils;
 import com.cloud.settle.domain.entity.PO.SmsClaimCashDetailDTO;
 import com.cloud.settle.domain.entity.SmsClaimCashDetail;
 import com.cloud.settle.domain.entity.SmsInvoiceInfo;
@@ -88,6 +89,7 @@ public class SmsMouthSettleController extends BaseController {
     public TableDataInfo list(@ApiIgnore() SmsMouthSettle smsMouthSettle) {
         Example example = new Example(SmsMouthSettle.class);
         Example.Criteria criteria = example.createCriteria();
+        BeanUtils.nullifyStrings(smsMouthSettle);
         criteria.andEqualTo(smsMouthSettle);
         SysUser sysUser = getUserInfo(SysUser.class);
         if (!sysUser.isAdmin()) {
@@ -233,6 +235,7 @@ public class SmsMouthSettleController extends BaseController {
 
         Example example = new Example(SmsMouthSettle.class);
         Example.Criteria criteria = example.createCriteria();
+        BeanUtils.nullifyStrings(smsMouthSettle);
         criteria.andEqualTo(smsMouthSettle);
         startPage();
         List<SmsMouthSettle> smsMouthSettleList = smsMouthSettleService.selectByExample(example);
