@@ -21,7 +21,6 @@ import com.cloud.settle.mapper.SmsMouthSettleMapper;
 import com.cloud.settle.mapper.SmsQualityOrderMapper;
 import com.cloud.settle.service.*;
 import com.cloud.system.enums.SettleRatioEnum;
-import com.cloud.system.feign.RemoteCdMouthRateService;
 import com.cloud.system.feign.RemoteSequeceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,8 +54,6 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
     private ISmsSupplementaryOrderService smsSupplementaryOrderService;
     @Autowired
     private ISmsScrapOrderService smsScrapOrderService;
-    @Autowired
-    private RemoteCdMouthRateService remoteCdMouthRateService;
     @Autowired
     private SmsQualityOrderMapper smsQualityOrderMapper;
     @Autowired
@@ -202,14 +199,8 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
             //如果加工费大于等于（应扣款+历史未兑现）：本月兑现金额=应扣款+历史未兑现 不含税金额=加工费-应扣款-历史未兑现
             //如果加工费小于（应扣款+历史未兑现）：本月兑现金额=加工费 不含税金额=0
             BigDecimal noCashAmount = unCashPrice;//历史未兑现金额
-            BigDecimal cashAmount;//本月兑现金额
-            BigDecimal excludingFee = settlePriceTotal.subtract(claimPrice).subtract(noCashAmount);//不含税金额
-            if (excludingFee.compareTo(BigDecimal.ZERO) > 0) {
-                cashAmount = claimPrice.add(noCashAmount);
-            } else {
-                cashAmount = settlePrice;
-                excludingFee = BigDecimal.ZERO;
-            }
+            BigDecimal cashAmount = settlePriceTotal.subtract(settlePrice);//本月兑现金额
+            BigDecimal excludingFee = settlePrice;//不含税金额
 
             //每次循环增加一条月度结算
             SmsMouthSettle smsMouthSettle = new SmsMouthSettle().builder().settleNo(monthSettleNo.toString()).dataMoth(lastMonth)
@@ -235,6 +226,8 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
                 }
             }
         });
+        //更新状态还是11待结算的索赔数据为15未兑现
+        smsMouthSettleMapper.updateMouthSettleToUpdateStatus15();
         return R.ok();
     }
 
@@ -393,7 +386,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         if (MapUtil.isNotEmpty(mapSupplementLS) && CollUtil.isNotEmpty(mapSupplementLS.get(keyCode))) {
             for (SmsSupplementaryOrder supplement : mapSupplementLS.get(keyCode)) {
                 //如果加工费还剩余，继续扣除历史未兑现和部分兑现的数据
-                if (settlePrice.compareTo(BigDecimal.ZERO) > 0) {
+                if (settlePrice.compareTo(BigDecimal.ZERO) < 0) {
                     break;
                 }
 //                supplement.setSettleNo(monthSettleNo);//结算单号
@@ -556,7 +549,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         //报废索赔历史
         if (MapUtil.isNotEmpty(mapScrapLS) && CollUtil.isNotEmpty(mapScrapLS.get(keyCode))) {
             for (SmsScrapOrder smsScrapOrder : mapScrapLS.get(keyCode)) {
-                if (settlePrice.compareTo(BigDecimal.ZERO) > 0) {
+                if (settlePrice.compareTo(BigDecimal.ZERO) < 0) {
                     break;
                 }
 //                smsScrapOrder.setSettleNo(monthSettleNo);//结算单号
@@ -720,7 +713,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         //质量索赔历史
         if (MapUtil.isNotEmpty(mapQualityLS) && CollUtil.isNotEmpty(mapQualityLS.get(keyCode))) {
             for (SmsQualityOrder smsQualityOrder : mapQualityLS.get(keyCode)) {
-                if (settlePrice.compareTo(BigDecimal.ZERO) > 0) {
+                if (settlePrice.compareTo(BigDecimal.ZERO) < 0) {
                     break;
                 }
 //                smsQualityOrder.setSettleNo(monthSettleNo);//结算单号
@@ -886,7 +879,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         //延期索赔历史
         if (MapUtil.isNotEmpty(mapDelaysLS) && CollUtil.isNotEmpty(mapDelaysLS.get(keyCode))) {
             for (SmsDelaysDelivery smsDelaysDelivery : mapDelaysLS.get(keyCode)) {
-                if (settlePrice.compareTo(BigDecimal.ZERO) > 0) {
+                if (settlePrice.compareTo(BigDecimal.ZERO) < 0) {
                     break;
                 }
 //                smsDelaysDelivery.setSettleNo(monthSettleNo);//结算单号
@@ -1050,7 +1043,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         //其他索赔历史
         if (MapUtil.isNotEmpty(mapOtherLS) && CollUtil.isNotEmpty(mapOtherLS.get(keyCode))) {
             for (SmsClaimOther smsClaimOther : mapOtherLS.get(keyCode)) {
-                if (settlePrice.compareTo(BigDecimal.ZERO) > 0) {
+                if (settlePrice.compareTo(BigDecimal.ZERO) < 0) {
                     break;
                 }
 //                smsClaimOther.setSettleNo(monthSettleNo);//结算单号
