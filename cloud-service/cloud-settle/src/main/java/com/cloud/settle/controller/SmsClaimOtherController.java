@@ -1,5 +1,7 @@
 package com.cloud.settle.controller;
 
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
@@ -141,7 +143,7 @@ public class SmsClaimOtherController extends BaseController {
             criteria.andGreaterThanOrEqualTo("createTime",smsClaimOther.getBeginTime());
         }
         if(StringUtils.isNotBlank(smsClaimOther.getEndTime())){
-            criteria.andLessThanOrEqualTo("createTime",smsClaimOther.getEndTime());
+            criteria.andLessThanOrEqualTo("createTime", DateUtil.parse(smsClaimOther.getEndTime()).offset(DateField.DAY_OF_MONTH,1));
         }
         example.orderBy("createTime").desc();
         //供应商类型和海尔数据,如果是供应商则将供应商V码赋给供应商编号
