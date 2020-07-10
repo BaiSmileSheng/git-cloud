@@ -582,7 +582,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             //发送邮件
             sysUsers.forEach(u -> {
                 String email = u.getEmail();
-                String context = u.getUserName() + EmailConstants.RAW_MATERIAL_REVIEW_CONTEXT;
+                String context = u.getUserName() + EmailConstants.RAW_MATERIAL_REVIEW_CONTEXT+EmailConstants.ORW_URL;
                 mailService.sendTextMail(email, EmailConstants.TITLE_RAW_MATERIAL_REVIEW, context);
             });
         }
@@ -883,7 +883,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 }
             });
             String email = sysUser.getEmail();
-            String context = sysUser.getUserName() + EmailConstants.THREE_VERSION_REVIEW_CONTEXT;
+            String context = sysUser.getUserName() + EmailConstants.THREE_VERSION_REVIEW_CONTEXT+EmailConstants.ORW_URL;
             mailService.sendTextMail(email, EmailConstants.TITLE_THREE_VERSION_REVIEW, context);
         }
         return list;
@@ -938,7 +938,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             //发送邮件
             sysUsers.forEach(u -> {
                 String email = u.getEmail();
-                String context = u.getUserName() + EmailConstants.OVERDUE_NOT_CLOSE_ORDER_REVIEW_CONTEXT;
+                String context = u.getUserName() + EmailConstants.OVERDUE_NOT_CLOSE_ORDER_REVIEW_CONTEXT+EmailConstants.ORW_URL;
                 mailService.sendTextMail(email, EmailConstants.TITLE_OVERDUE_NOT_CLOSE_ORDER_REVIEW, context);
             });
         }
@@ -997,7 +997,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             //发送邮件
             sysUsers.forEach(u -> {
                 String email = u.getEmail();
-                String context = u.getUserName() + EmailConstants.OVER_STOCK_CONTEXT;
+                String context = u.getUserName() + EmailConstants.OVER_STOCK_CONTEXT+EmailConstants.ORW_URL;
                 mailService.sendTextMail(email, EmailConstants.TITLE_OVER_STOCK, context);
             });
         }
@@ -1080,7 +1080,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         //3-2、发送邮件
         sysUsers.forEach(u -> {
             String email = u.getEmail();
-            String contexts = u.getUserName() + EmailConstants.RAW_MATERIAL_REVIEW_CONTEXT;
+            String contexts = u.getUserName() + EmailConstants.RAW_MATERIAL_REVIEW_CONTEXT+EmailConstants.ORW_URL;
             mailService.sendTextMail(email, EmailConstants.TITLE_RAW_MATERIAL_REVIEW, contexts);
         });
         return R.ok();
@@ -1183,7 +1183,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             //发送邮件
             sysUserRightsJitGcList.forEach(u -> {
                 String email = u.getEmail();
-                String contexts = u.getUserName() + EmailConstants.ADD_ORDER_REVIEW_CONTEXT;
+                String contexts = u.getUserName() + EmailConstants.ADD_ORDER_REVIEW_CONTEXT+EmailConstants.ORW_URL;
                 mailService.sendTextMail(email, EmailConstants.TITLE_ADD_ORDER_REVIEW, contexts);
             });
         }
@@ -1209,7 +1209,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             //发送邮件
             sysUserRightsList.forEach(u -> {
                 String email = u.getEmail();
-                String contexts = u.getUserName() + EmailConstants.ZN_REVIEW_CONTEXT;
+                String contexts = u.getUserName() + EmailConstants.ZN_REVIEW_CONTEXT+EmailConstants.ORW_URL;
                 mailService.sendTextMail(email, EmailConstants.TITLE_ZN_REVIEW, contexts);
             });
         }
