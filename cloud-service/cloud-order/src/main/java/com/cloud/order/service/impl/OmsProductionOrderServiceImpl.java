@@ -1400,7 +1400,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 R maResult = remoteCdMaterialPriceInfoService.selectOneByCondition(rawMaterialCode,purchaseOrg,
                         cdFactoryLineInfo.getSupplierCode());
                 if(!maResult.isSuccess()){
-                    log.error("获取加工费失败 物料号:{},采购组织:{},供应商:{}",rawMaterialCode,
+                    log.error("获取加工费失败 加工费号:{},采购组织:{},供应商:{}",rawMaterialCode,
                             purchaseOrg,cdFactoryLineInfo.getSupplierCode());
                     throw new BusinessException("获取加工费失败" + maResult.get("msg").toString());
                 }
