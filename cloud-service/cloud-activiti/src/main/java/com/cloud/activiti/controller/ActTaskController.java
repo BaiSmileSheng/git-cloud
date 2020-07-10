@@ -5,6 +5,7 @@
  */
 package com.cloud.activiti.controller;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.consts.ActivitiConstant;
 import com.cloud.activiti.domain.BizAudit;
@@ -36,6 +37,7 @@ import springfox.documentation.annotations.ApiIgnore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>File：ActTaskController.java</p>
@@ -121,16 +123,15 @@ public class ActTaskController extends BaseController {
             });
         }
         Map<String, Object> map = Maps.newHashMap();
-        map.put("rows", list);
-        map.put("total", count);
         //如果有业务订单号的查询条件
-//        if (StrUtil.isNotBlank(ruTask.getOrderNo())) {
-//            List<RuTask> listNew=list.stream().filter(e -> StrUtil.equals(e.getOrderNo(), ruTask.getOrderNo())).collect(Collectors.toList());
-//            map.put("rows", listNew);
-//            map.put("total", CollUtil.isEmpty(listNew)?0:listNew.size() );
-//        }else {
-//
-//        }
+        if (StrUtil.isNotBlank(ruTask.getOrderNo())) {
+            List<RuTask> listNew=list.stream().filter(e -> StrUtil.equals(e.getOrderNo(), ruTask.getOrderNo())).collect(Collectors.toList());
+            map.put("rows", listNew);
+            map.put("total", CollUtil.isEmpty(listNew)?0:listNew.size() );
+        }else {
+            map.put("rows", list);
+            map.put("total", count);
+        }
         map.put("pageNum", page.getPageNum());
         return R.ok(map);
     }
