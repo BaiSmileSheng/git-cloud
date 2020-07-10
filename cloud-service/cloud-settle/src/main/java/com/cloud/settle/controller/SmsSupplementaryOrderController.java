@@ -117,7 +117,8 @@ public class SmsSupplementaryOrderController extends BaseController {
             @ApiImplicitParam(name = "stuffStatus", value = "订单状态 0 待提交、1jit待审核、2jit驳回、3小微主待审核、4小微主审核通过、5小微主驳回、 6 SAP成功、7 SAP创单失败、 11待结算、 12结算完成", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "rawMaterialCode", value = "原材料物料号", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "beginTime", value = "申请日期开始", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "endTime", value = "申请日期结束", required = false, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "endTime", value = "申请日期结束", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productOrderCode", value = "生产订单号", required = false, paramType = "query", dataType = "String")
     })
     public TableDataInfo listGeneral(@ApiIgnore() SmsSupplementaryOrder smsSupplementaryOrder) {
         Example example = new Example(SmsSupplementaryOrder.class);
@@ -126,6 +127,22 @@ public class SmsSupplementaryOrderController extends BaseController {
         startPage();
         List<SmsSupplementaryOrder> smsSupplementaryOrderList = smsSupplementaryOrderService.selectByExample(example);
         return getDataTable(smsSupplementaryOrderList);
+    }
+
+    /**
+     * 根据条件查询列表
+     */
+    @GetMapping("listByCondition")
+    @ApiOperation(value = "根据条件查询列表", response = SmsSupplementaryOrder.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "productOrderCode", value = "生产订单号", required = false, paramType = "query", dataType = "String")
+    })
+    public R listByCondition(SmsSupplementaryOrder smsSupplementaryOrder){
+        Example example = new Example(SmsSupplementaryOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        listCondition(smsSupplementaryOrder, criteria);
+        List<SmsSupplementaryOrder> smsSupplementaryOrderList = smsSupplementaryOrderService.selectByExample(example);
+        return R.data(smsSupplementaryOrderList);
     }
 
     /**
