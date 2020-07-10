@@ -16,9 +16,11 @@ import com.cloud.settle.enums.DeplayStatusEnum;
 import com.cloud.settle.mail.MailService;
 import com.cloud.settle.mapper.SmsDelaysDeliveryMapper;
 import com.cloud.settle.service.ISmsDelaysDeliveryService;
+import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.vo.SysUserVo;
+import com.cloud.system.feign.RemoteFactoryInfoService;
 import com.cloud.system.feign.RemoteFactoryLineInfoService;
 import com.cloud.system.feign.RemoteOssService;
 import com.cloud.system.feign.RemoteSequeceService;
@@ -40,6 +42,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 延期交付索赔 Service业务层处理
@@ -75,6 +78,9 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
 
     @Autowired
     private RemoteBizBusinessService remoteBizBusinessService;
+
+    @Autowired
+    private RemoteFactoryInfoService remoteFactoryInfoService;
 
     public static String YYYY_MM_DD = "yyyy-MM-dd";
 
@@ -216,6 +222,16 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
         if(CollectionUtils.isEmpty(listRes)){
             return null;
         }
+        //获取付款公司
+        R resultFactory = remoteFactoryInfoService.listAll();
+        if(!resultFactory.isSuccess()){
+            logger.error("remoteFactoryInfoService.listAll() 异常res:{}", JSONObject.toJSONString(resultFactory));
+            throw new BusinessException("获取付款公司信息异常");
+        }
+        List<CdFactoryInfo> cdFactoryInfoList = resultFactory.getCollectData(new TypeReference<List<CdFactoryInfo>>() {});
+        Map<String,CdFactoryInfo> cdFactoryInfoMap = cdFactoryInfoList.stream().collect(Collectors.toMap(cdFactoryInfo ->cdFactoryInfo.getFactoryCode(),
+                cdFactoryInfo -> cdFactoryInfo,(key1,key2) -> key2));
+
         for(OmsProductionOrder omsProductionOrderRes : listRes){
             SmsDelaysDelivery smsDelaysDelivery = new SmsDelaysDelivery();
             smsDelaysDelivery.setDelaysAmount(DELAYS_AMOUNT);
@@ -259,6 +275,13 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
                 smsDelaysDelivery.setSupplierCode(cdFactoryLineInfo.getSupplierCode());
                 smsDelaysDelivery.setSupplierName(cdFactoryLineInfo.getSupplierDesc());
             }
+            //根据工厂获取付款公司
+            CdFactoryInfo cdFactoryInfo = cdFactoryInfoMap.get(omsProductionOrderRes.getProductFactoryCode());
+            if(null == cdFactoryInfo || StringUtils.isBlank(cdFactoryInfo.getCompanyCode())){
+                logger.error("根据工厂获取付款公司异常 工厂:{}",omsProductionOrderRes.getProductFactoryCode());
+                throw new BusinessException("请维护工厂"+ cdFactoryInfo.getCompanyCode() +"对应的付款公司");
+            }
+            smsDelaysDelivery.setCompanyCode(cdFactoryInfo.getCompanyCode());
             smsDelaysDeliveryList.add(smsDelaysDelivery);
             supplierSet.add(smsDelaysDelivery.getSupplierCode());
         }
@@ -351,7 +374,7 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条延期索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
             mailTextBuffer.append(smsDelaysDelivery.getSupplierName()).append(supplierCode)
-                    .append(sysUser.getCorporation()).append(" ").append("您有一条延期索赔订单，订单号")
+                    .append(sysUser.getCorporation()).append(" ").append("您有一条延期索赔订单，索赔单号")
                     .append(smsDelaysDelivery.getDelaysNo()).append(",请及时处理，如不处理，1天后系统自动确认，无法申诉");
             String toSupplier = sysUser.getEmail();
             mailService.sendTextMail(toSupplier,mailSubject,mailTextBuffer.toString());
