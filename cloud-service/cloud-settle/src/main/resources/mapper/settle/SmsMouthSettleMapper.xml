@@ -58,4 +58,12 @@
     </sql>
 
 
+    <update id="updateMouthSettleToUpdateStatus15">
+        UPDATE sms_supplementary_order set stuff_status = '15' WHERE stuff_status='11' and del_flag='0';
+        UPDATE sms_scrap_order set scrap_status = '15' WHERE scrap_status='11' and del_flag='0';
+        UPDATE sms_delays_delivery set delays_status = '15' WHERE delays_status='11' and del_flag='0';
+        UPDATE sms_claim_other set claim_other_status = '15' WHERE claim_other_status='11' and del_flag='0';
+        UPDATE sms_quality_order set quality_status = '15' WHERE quality_status='11' and del_flag='0';
+    </update>
+
 </mapper>

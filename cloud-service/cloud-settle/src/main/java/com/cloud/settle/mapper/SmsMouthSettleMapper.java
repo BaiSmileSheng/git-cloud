@@ -10,4 +10,9 @@ import com.cloud.common.core.dao.BaseMapper;
  */
 public interface SmsMouthSettleMapper extends BaseMapper<SmsMouthSettle>{
 
+    /**
+     * 月度结算  更新剩下的5个状态是11待结算索赔表状态为15
+     * @return
+     */
+    int updateMouthSettleToUpdateStatus15();
 }
