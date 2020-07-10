@@ -129,6 +129,22 @@ public class SmsSupplementaryOrderController extends BaseController {
     }
 
     /**
+     * 根据条件查询列表
+     */
+    @GetMapping("listByCondition")
+    @ApiOperation(value = "根据条件查询列表", response = SmsSupplementaryOrder.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "productOrderCode", value = "生产订单号", required = false, paramType = "query", dataType = "String")
+    })
+    public R listByCondition(SmsSupplementaryOrder smsSupplementaryOrder){
+        Example example = new Example(SmsSupplementaryOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        listCondition(smsSupplementaryOrder, criteria);
+        List<SmsSupplementaryOrder> smsSupplementaryOrderList = smsSupplementaryOrderService.selectByExample(example);
+        return R.data(smsSupplementaryOrderList);
+    }
+
+    /**
      * 根据创建时间查询物耗申请单 列表
      */
     @GetMapping("listByTime")
