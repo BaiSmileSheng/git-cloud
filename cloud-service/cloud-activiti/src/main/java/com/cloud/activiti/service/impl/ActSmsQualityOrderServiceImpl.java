@@ -306,8 +306,8 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
         String supplierCode = smsQualityOrder.getSupplierCode();
         //根据角色和质量索赔状态审批
         if(flagBizResult){
-            //质量部部长审批: 将供应商申诉4--->待小微主审核5 //小微主审批: 将待小微主审核5--->待结算11
-            smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_11.getCode());
+            //质量部部长审批: 将供应商申诉4--->待小微主审核5 //小微主审批: 将待小微主审核5--->已结算12
+            smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_12.getCode());
             //发送邮件
             String contentDetail = "申诉通过";
             supplierSendEmail(qualityNo,supplierCode,contentDetail);

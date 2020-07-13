@@ -306,9 +306,9 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         Boolean flagBizResult = "2".equals(bizAudit.getResult().toString());
         String claimCode = smsClaimOther.getClaimCode();
         String supplierCode = smsClaimOther.getSupplierCode();
-        //小微主审批: 将待小微主审核5--->待结算11   驳回将待小微主审核5--->待供应商确认7
+        //小微主审批: 将待小微主审核5--->已结算12   驳回将待小微主审核5--->待供应商确认7
         if(flagBizResult){
-            smsClaimOther.setClaimOtherStatus(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_11.getCode());
+            smsClaimOther.setClaimOtherStatus(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_12.getCode());
             //发送邮件
             String contentDetail = "申诉通过";
             supplierSendEmail(claimCode,supplierCode,contentDetail);
