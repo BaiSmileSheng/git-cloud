@@ -296,7 +296,7 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
         String delaysNo = smsDelaysDelivery.getDelaysNo();
         String supplierCode = smsDelaysDelivery.getSupplierCode();
         //根据角色和延期索赔状态审批
-        //订单部部长审批: 将供应商申诉4--->待小微主审核5  小微主审批: 将待小微主审核5--->待结算11
+        //订单部部长审批: 将供应商申诉4--->待小微主审核5  小微主审批: 将待小微主审核5--->已结算12
         if(flagBizResult){
             if( flagStatus4){
                 smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_5.getCode());
@@ -305,7 +305,7 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
                 String roleKey = RoleConstants.ROLE_KEY_XWZ;
                 sendEmail(delaysNo, factoryCode, roleKey);
             }else if(flagStatus5){
-                smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_11.getCode());
+                smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_12.getCode());
                 //向供应商发邮件
                 String contentDetail = "申诉通过";
                 supplierSendEmail(delaysNo,supplierCode,contentDetail);
