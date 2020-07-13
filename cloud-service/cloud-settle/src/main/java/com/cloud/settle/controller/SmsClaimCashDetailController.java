@@ -1,5 +1,6 @@
 package com.cloud.settle.controller;
 
+import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -13,6 +14,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
@@ -49,11 +51,15 @@ public class SmsClaimCashDetailController extends BaseController {
             @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "settleNo", value = "索赔单号", required = false, paramType = "query", dataType = "String")
     })
-    public TableDataInfo list(SmsClaimCashDetail smsClaimCashDetail) {
+    public TableDataInfo list(@ApiIgnore SmsClaimCashDetail smsClaimCashDetail) {
         Example example = new Example(SmsClaimCashDetail.class);
         Example.Criteria criteria = example.createCriteria();
+        if (StrUtil.isNotEmpty(smsClaimCashDetail.getSettleNo())) {
+            criteria.andEqualTo("settleNo", smsClaimCashDetail.getSettleNo());
+        }
         startPage();
         List<SmsClaimCashDetail> smsClaimCashDetailList = smsClaimCashDetailService.selectByExample(example);
         return getDataTable(smsClaimCashDetailList);

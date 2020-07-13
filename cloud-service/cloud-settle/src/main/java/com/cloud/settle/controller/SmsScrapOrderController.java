@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -94,6 +95,9 @@ public class SmsScrapOrderController extends BaseController {
                 //供应商查询自己工厂下的申请单
                 criteria.andEqualTo("supplierCode", sysUser.getSupplierCode());
             }else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
+                if (StrUtil.isEmpty(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()))) {
+                    return getDataTable(new ArrayList<SmsScrapOrder>());
+                }
                 if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_YWK)){
                     //业务科查询已提交状态自己管理工厂的申请单  采购组权限：sys_data_scope  例：8310,8410
                     criteria.andEqualTo("scrapStatus", ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
@@ -211,6 +215,9 @@ public class SmsScrapOrderController extends BaseController {
                 //供应商查询自己工厂下的申请单
                 criteria.andEqualTo("supplierCode", sysUser.getSupplierCode());
             }else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
+                if (StrUtil.isEmpty(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()))) {
+                    return EasyExcelUtilOSS.writeExcel(new ArrayList<SmsScrapOrder>(),"报废申请.xlsx","sheet",new SmsScrapOrder());
+                }
                 if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_YWK)){
                     //业务科查询已提交状态自己管理工厂的申请单  采购组权限：sys_data_scope  例：8310,8410
                     criteria.andEqualTo("scrapStatus", ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
