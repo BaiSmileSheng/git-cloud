@@ -69,6 +69,8 @@ spring:
                 timeout:
                   #指定接口超时处理
                   test-hell: 6000
+                  #本地导出78万数据用了510s
+                  rawMaterialStock-exportRawMaterial: 600000
         #order 模块
         - id: cloud-order
           uri: lb://cloud-order
