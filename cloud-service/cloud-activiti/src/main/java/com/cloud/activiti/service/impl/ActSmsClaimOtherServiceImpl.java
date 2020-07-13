@@ -153,7 +153,7 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         }
         SmsClaimOther smsClaimOtherRes = smsClaimOtherResR.getData(SmsClaimOther.class);
         Boolean flagResult = ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_1.getCode().equals(smsClaimOtherRes.getClaimOtherStatus())
-                ||ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_7.equals(smsClaimOtherRes.getClaimOtherStatus());
+                ||ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_7.getCode().equals(smsClaimOtherRes.getClaimOtherStatus());
         if(!flagResult){
             logger.error("供应商申诉的其他索赔单 状态异常 id:{},claimOtherStatus:{}",
                     smsClaimOther.getId(),smsClaimOtherRes.getClaimOtherStatus());
