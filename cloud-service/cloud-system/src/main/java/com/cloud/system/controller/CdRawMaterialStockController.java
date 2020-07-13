@@ -1,16 +1,16 @@
 package com.cloud.system.controller;
 import com.cloud.common.auth.annotation.HasPermissions;
+import com.cloud.common.easyexcel.SheetExcelData;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
-import com.cloud.system.domain.entity.SysDictType;
 import com.cloud.system.util.EasyExcelUtilOSS;
+import com.github.pagehelper.PageHelper;
 import io.swagger.annotations.*;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +20,8 @@ import com.cloud.common.core.controller.BaseController;
 import com.cloud.system.domain.entity.CdRawMaterialStock;
 import com.cloud.system.service.ICdRawMaterialStockService;
 import com.cloud.common.core.page.TableDataInfo;
+
+import java.util.ArrayList;
 import java.util.List;
 /**
  * 原材料库存  提供者
@@ -34,6 +36,8 @@ public class CdRawMaterialStockController extends BaseController {
 
     @Autowired
     private ICdRawMaterialStockService cdRawMaterialStockService;
+
+    private final static double MAX_SIZE_EXPORT = 50000;//单个sheet导出最大值;
 
     /**
      * 查询原材料库存 
@@ -136,8 +140,24 @@ public class CdRawMaterialStockController extends BaseController {
         listByCondition(cdRawMaterialStock,criteria);
         //导出时不导出可用库存为0的
         criteria.andNotEqualTo("currentStock",0);
-        List<CdRawMaterialStock> cdRawMaterialStockList = cdRawMaterialStockService.selectByExample(example);
-        return EasyExcelUtilOSS.writeExcel(cdRawMaterialStockList, "原材料库存报表.xlsx", "sheet", new CdRawMaterialStock());
+        double count = cdRawMaterialStockService.selectCountByExample(example);
+        double size = 0;
+        size = Math.ceil(count/MAX_SIZE_EXPORT);
+        List<SheetExcelData> sheetExcelDataList = new ArrayList<>();
+        for(int i=0; i < size; i++){
+            Example exampleSize = new Example(CdRawMaterialStock.class);
+            Example.Criteria criteriaSize = exampleSize.createCriteria();
+            listByCondition(cdRawMaterialStock,criteriaSize);
+            int pageNum = (int)i + 1;
+            PageHelper.startPage(pageNum, (int)MAX_SIZE_EXPORT);
+            List<CdRawMaterialStock> cdRawMaterialStockList = cdRawMaterialStockService.selectByExample(exampleSize);
+            SheetExcelData sheetExcelData = new SheetExcelData();
+            sheetExcelData.setDataList(cdRawMaterialStockList);
+            sheetExcelData.setTClass(CdRawMaterialStock.class);
+            sheetExcelData.setSheetName("原材料库存报表sheet"+pageNum);
+            sheetExcelDataList.add(sheetExcelData);
+        }
+        return EasyExcelUtilOSS.writeMultiExcel("原材料库存报表.xlsx",sheetExcelDataList);
     }
     /**
      * 查询原材料库存
