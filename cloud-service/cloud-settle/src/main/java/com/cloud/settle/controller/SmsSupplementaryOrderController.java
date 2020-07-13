@@ -3,6 +3,7 @@ package com.cloud.settle.controller;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.UserConstants;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -84,15 +86,21 @@ public class SmsSupplementaryOrderController extends BaseController {
                 criteria.andEqualTo("supplierCode", sysUser.getSupplierCode());
             } else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
                 //海尔内部
+                Example.Criteria criteriaRole = example.createCriteria();
+                if (StrUtil.isEmpty(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()))) {
+                    return getDataTable(new ArrayList<SmsSupplementaryOrder>());
+                }
                 if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_JIT)) {
                     //JIT查询已提交状态自己管理工厂的申请单  采购组权限：sys_data_scope  例：8310,8410
-                    criteria.andEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode());
-                    criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
-                } else if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ)) {
-                    //小微主查看jit审核成功的自己工厂权限下的物耗申请单
-                    criteria.andEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode());
-                    criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+                    criteriaRole.orEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode());
+                    criteriaRole.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
                 }
+                if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ)) {
+                    //小微主查看jit审核成功的自己工厂权限下的物耗申请单
+                    criteriaRole.orEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode());
+                    criteriaRole.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+                }
+                example.and(criteriaRole);
             }
         }
         startPage();
@@ -286,15 +294,21 @@ public class SmsSupplementaryOrderController extends BaseController {
                 criteria.andEqualTo("supplierCode", sysUser.getSupplierCode());
             } else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
                 //海尔内部
+                Example.Criteria criteriaRole = example.createCriteria();
+                if (StrUtil.isEmpty(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()))) {
+                    return EasyExcelUtilOSS.writeExcel(new ArrayList<SmsSupplementaryOrder>(), "物耗申请.xlsx", "sheet", new SmsSupplementaryOrder());
+                }
                 if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_JIT)) {
                     //JIT查询已提交状态自己管理工厂的申请单  采购组权限：sys_data_scope  例：8310,8410
-                    criteria.andEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode());
-                    criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
-                } else if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ)) {
-                    //小微主查看jit审核成功的自己工厂权限下的物耗申请单
-                    criteria.andEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode());
-                    criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+                    criteriaRole.orEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode());
+                    criteriaRole.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
                 }
+                if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ)) {
+                    //小微主查看jit审核成功的自己工厂权限下的物耗申请单
+                    criteriaRole.orEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode());
+                    criteriaRole.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+                }
+                example.and(criteriaRole);
             }
         }
         List<SmsSupplementaryOrder> smsSupplementaryOrderList = smsSupplementaryOrderService.selectByExample(example);
