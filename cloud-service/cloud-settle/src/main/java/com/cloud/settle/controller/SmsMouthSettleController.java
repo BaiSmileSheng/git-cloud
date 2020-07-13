@@ -1,6 +1,7 @@
 package com.cloud.settle.controller;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
@@ -100,7 +101,10 @@ public class SmsMouthSettleController extends BaseController {
                 //海尔内部
                  if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ)) {
                     //小微主查看内控确认数据
-                    criteria.andEqualTo("settleStatus", MonthSettleStatusEnum.YD_SETTLE_STATUS_NKQR.getCode());
+                     List<String> statusXWZ = CollectionUtil.newArrayList(MonthSettleStatusEnum.YD_SETTLE_STATUS_XWZQR.getCode(),
+                             MonthSettleStatusEnum.YD_SETTLE_STATUS_DFK.getCode(),
+                             MonthSettleStatusEnum.YD_SETTLE_STATUS_JSWC.getCode());
+                    criteria.andIn("settleStatus", statusXWZ);
                 }
             }
         }
@@ -237,6 +241,22 @@ public class SmsMouthSettleController extends BaseController {
         Example.Criteria criteria = example.createCriteria();
         BeanUtils.nullifyStrings(smsMouthSettle);
         criteria.andEqualTo(smsMouthSettle);
+        SysUser sysUser = getUserInfo(SysUser.class);
+        if (!sysUser.isAdmin()) {
+            if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
+                //供应商查询自己工厂下的申请单
+                criteria.andEqualTo("supplierCode", sysUser.getSupplierCode());
+            } else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
+                //海尔内部
+                if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ)) {
+                    //小微主查看内控确认数据
+                    List<String> statusXWZ = CollectionUtil.newArrayList(MonthSettleStatusEnum.YD_SETTLE_STATUS_XWZQR.getCode(),
+                            MonthSettleStatusEnum.YD_SETTLE_STATUS_DFK.getCode(),
+                            MonthSettleStatusEnum.YD_SETTLE_STATUS_JSWC.getCode());
+                    criteria.andIn("settleStatus", statusXWZ);
+                }
+            }
+        }
         startPage();
         List<SmsMouthSettle> smsMouthSettleList = smsMouthSettleService.selectByExample(example);
         return EasyExcelUtilOSS.writeExcel(smsMouthSettleList, "月度结算.xlsx", "sheet", new SmsMouthSettle());
