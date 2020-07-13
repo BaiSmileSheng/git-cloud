@@ -3,7 +3,6 @@ package com.cloud.settle.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.map.MapUtil;
-import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.core.domain.R;
@@ -1174,11 +1173,11 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         }
         //结算加工费
         BigDecimal machiningAmount = smsMouthSettle.getMachiningAmount();
-        //汇总金额（不含税）结算-索赔
-        BigDecimal excludingFee = NumberUtil.sub(machiningAmount,supplementMoney,scrapMoney,qualityMoney,delayMoney,otherMoney);
+        //汇总金额（不含税）
+        BigDecimal excludingFee = smsMouthSettle.getExcludingFee();
         //税率	 0.13
-        //汇总金额（含税） 汇总金额（不含税）*1.13
-        BigDecimal includeTaxeFee = NumberUtil.mul(excludingFee, 1.13);
+        //汇总金额（含税）
+        BigDecimal includeTaxeFee = smsMouthSettle.getIncludeTaxeFee();
         Map<String, BigDecimal> map = MapUtil.newConcurrentHashMap();
         map.put("machiningAmount",machiningAmount);
         map.put("supplementMoney",supplementMoney);
