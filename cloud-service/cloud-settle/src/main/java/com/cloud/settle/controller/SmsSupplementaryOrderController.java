@@ -1,6 +1,7 @@
 package com.cloud.settle.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
@@ -92,12 +93,21 @@ public class SmsSupplementaryOrderController extends BaseController {
                 }
                 if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_JIT)) {
                     //JIT查询已提交状态自己管理工厂的申请单  采购组权限：sys_data_scope  例：8310,8410
-                    criteriaRole.orEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode());
+                    criteriaRole.orNotEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DTJ.getCode());
                     criteriaRole.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
                 }
                 if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ)) {
+                    List<String> statusXWZ = CollectionUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode(),
+                            SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZBH.getCode(),
+                            SupplementaryOrderStatusEnum.WH_ORDER_STATUS_SAPSUCCESS.getCode(),
+                            SupplementaryOrderStatusEnum.WH_ORDER_STATUS_SAPFAIL.getCode(),
+                            SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode(),
+                            SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JSWC.getCode(),
+                            SupplementaryOrderStatusEnum.WH_ORDER_STATUS_YDX.getCode(),
+                            SupplementaryOrderStatusEnum.WH_ORDER_STATUS_BFDX.getCode(),
+                            SupplementaryOrderStatusEnum.WH_ORDER_STATUS_WDX.getCode());
+                    criteriaRole.orIn("stuffStatus", statusXWZ);
                     //小微主查看jit审核成功的自己工厂权限下的物耗申请单
-                    criteriaRole.orEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode());
                     criteriaRole.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
                 }
                 example.and(criteriaRole);
@@ -300,12 +310,21 @@ public class SmsSupplementaryOrderController extends BaseController {
                 }
                 if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_JIT)) {
                     //JIT查询已提交状态自己管理工厂的申请单  采购组权限：sys_data_scope  例：8310,8410
-                    criteriaRole.orEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode());
+                    criteriaRole.andNotEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DTJ.getCode());
                     criteriaRole.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
                 }
                 if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ)) {
                     //小微主查看jit审核成功的自己工厂权限下的物耗申请单
-                    criteriaRole.orEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode());
+                    List<String> statusXWZ = CollectionUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode(),
+                            SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZBH.getCode(),
+                            SupplementaryOrderStatusEnum.WH_ORDER_STATUS_SAPSUCCESS.getCode(),
+                            SupplementaryOrderStatusEnum.WH_ORDER_STATUS_SAPFAIL.getCode(),
+                            SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode(),
+                            SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JSWC.getCode(),
+                            SupplementaryOrderStatusEnum.WH_ORDER_STATUS_YDX.getCode(),
+                            SupplementaryOrderStatusEnum.WH_ORDER_STATUS_BFDX.getCode(),
+                            SupplementaryOrderStatusEnum.WH_ORDER_STATUS_WDX.getCode());
+                    criteriaRole.orIn("stuffStatus", statusXWZ);
                     criteriaRole.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
                 }
                 example.and(criteriaRole);

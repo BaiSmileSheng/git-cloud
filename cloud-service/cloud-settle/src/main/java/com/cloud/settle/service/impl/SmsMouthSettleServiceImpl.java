@@ -353,7 +353,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
                 //插入索赔明细
                 SmsClaimCashDetail smsClaimCashDetail = new SmsClaimCashDetail().builder()
                         .claimNo(supplement.getStuffNo()).claimType(SettleRatioEnum.SPLX_WH.getCode())
-                        .cashAmount(supplement.getCashAmount()).settleNo(monthSettleNo)
+                        .cashAmount(supplement.getCashAmount()).settleNo(monthSettleNo).delFlag("0")
                         .shouldCashMounth(lastMonth).actualCashMounth(lastMonth).build();
                 smsClaimCashDetail.setCreateTime(DateUtil.date());
                 claimCashDetailList.add(smsClaimCashDetail);
@@ -409,7 +409,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
                 //索赔明细
                 SmsClaimCashDetail smsClaimCashDetail = new SmsClaimCashDetail().builder()
                         .claimNo(supplement.getStuffNo()).claimType(SettleRatioEnum.SPLX_WH.getCode())
-                        .cashAmount(cashAmount).settleNo(monthSettleNo)
+                        .cashAmount(cashAmount).settleNo(monthSettleNo).delFlag("0")
                         .shouldCashMounth(DateUtil.format(supplement.getSapDate(), "yyyyMM")).actualCashMounth(lastMonth).build();
                 smsClaimCashDetail.setCreateTime(DateUtil.date());
                 claimCashDetailList.add(smsClaimCashDetail);
@@ -516,7 +516,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
                 if (smsScrapOrder.getCashAmount().compareTo(BigDecimal.ZERO)>0) {
                     SmsClaimCashDetail smsClaimCashDetail = new SmsClaimCashDetail().builder()
                             .claimNo(smsScrapOrder.getScrapNo()).claimType(SettleRatioEnum.SPLX_BF.getCode())
-                            .cashAmount(smsScrapOrder.getCashAmount()).settleNo(monthSettleNo)
+                            .cashAmount(smsScrapOrder.getCashAmount()).settleNo(monthSettleNo).delFlag("0")
                             .shouldCashMounth(lastMonth).actualCashMounth(lastMonth).build();
                     smsClaimCashDetail.setCreateTime(DateUtil.date());
                     claimCashDetailList.add(smsClaimCashDetail);
@@ -573,7 +573,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
                 if (cashAmount.compareTo(BigDecimal.ZERO)>0) {
                     SmsClaimCashDetail smsClaimCashDetail = new SmsClaimCashDetail().builder()
                             .claimNo(smsScrapOrder.getScrapNo()).claimType(SettleRatioEnum.SPLX_BF.getCode())
-                            .cashAmount(cashAmount).settleNo(monthSettleNo)
+                            .cashAmount(cashAmount).settleNo(monthSettleNo).delFlag("0")
                             .shouldCashMounth(DateUtil.format(smsScrapOrder.getSapTransDate(), "yyyyMM")).actualCashMounth(lastMonth).build();
                     smsClaimCashDetail.setCreateTime(DateUtil.date());
                     claimCashDetailList.add(smsClaimCashDetail);
@@ -679,7 +679,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
                 if (smsQualityOrder.getCashAmount().compareTo(BigDecimal.ZERO)>0) {
                     SmsClaimCashDetail smsClaimCashDetail = new SmsClaimCashDetail().builder()
                             .claimNo(smsQualityOrder.getQualityNo()).claimType(SettleRatioEnum.SPLX_ZL.getCode())
-                            .cashAmount(smsQualityOrder.getCashAmount()).settleNo(monthSettleNo)
+                            .cashAmount(smsQualityOrder.getCashAmount()).settleNo(monthSettleNo).delFlag("0")
                             .shouldCashMounth(lastMonth).actualCashMounth(lastMonth).build();
                     smsClaimCashDetail.setCreateTime(DateUtil.date());
                     claimCashDetailList.add(smsClaimCashDetail);
@@ -737,7 +737,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
                 if (cashAmount.compareTo(BigDecimal.ZERO)>0) {
                     SmsClaimCashDetail smsClaimCashDetail = new SmsClaimCashDetail().builder()
                             .claimNo(smsQualityOrder.getQualityNo()).claimType(SettleRatioEnum.SPLX_ZL.getCode())
-                            .cashAmount(cashAmount).settleNo(monthSettleNo)
+                            .cashAmount(cashAmount).settleNo(monthSettleNo).delFlag("0")
                             .shouldCashMounth(DateUtil.format(smsQualityOrder.getSupplierConfirmDate(), "yyyyMM")).actualCashMounth(lastMonth).build();
                     smsClaimCashDetail.setCreateTime(DateUtil.date());
                     claimCashDetailList.add(smsClaimCashDetail);
@@ -844,7 +844,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
                 if (smsDelaysDelivery.getCashAmount().compareTo(BigDecimal.ZERO)>0) {
                     SmsClaimCashDetail smsClaimCashDetail = new SmsClaimCashDetail().builder()
                             .claimNo(smsDelaysDelivery.getDelaysNo()).claimType(SettleRatioEnum.SPLX_YQ.getCode())
-                            .cashAmount(smsDelaysDelivery.getCashAmount()).settleNo(monthSettleNo)
+                            .cashAmount(smsDelaysDelivery.getCashAmount()).settleNo(monthSettleNo).delFlag("0")
                             .shouldCashMounth(lastMonth).actualCashMounth(lastMonth).build();
                     smsClaimCashDetail.setCreateTime(DateUtil.date());
                     claimCashDetailList.add(smsClaimCashDetail);
@@ -903,7 +903,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
                 if (cashAmount.compareTo(BigDecimal.ZERO)>0) {
                     SmsClaimCashDetail smsClaimCashDetail = new SmsClaimCashDetail().builder()
                             .claimNo(smsDelaysDelivery.getDelaysNo()).claimType(SettleRatioEnum.SPLX_YQ.getCode())
-                            .cashAmount(cashAmount).settleNo(monthSettleNo)
+                            .cashAmount(cashAmount).settleNo(monthSettleNo).delFlag("0")
                             .shouldCashMounth(DateUtil.format(smsDelaysDelivery.getSupplierConfirmDate(), "yyyyMM")).actualCashMounth(lastMonth).build();
                     smsClaimCashDetail.setCreateTime(DateUtil.date());
                     claimCashDetailList.add(smsClaimCashDetail);
@@ -1009,7 +1009,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
                 if (smsClaimOther.getCashAmount().compareTo(BigDecimal.ZERO)>0) {
                     SmsClaimCashDetail smsClaimCashDetail = new SmsClaimCashDetail().builder()
                             .claimNo(smsClaimOther.getClaimCode()).claimType(SettleRatioEnum.SPLX_QT.getCode())
-                            .cashAmount(smsClaimOther.getCashAmount()).settleNo(monthSettleNo)
+                            .cashAmount(smsClaimOther.getCashAmount()).settleNo(monthSettleNo).delFlag("0")
                             .shouldCashMounth(lastMonth).actualCashMounth(lastMonth).build();
                     smsClaimCashDetail.setCreateTime(DateUtil.date());
                     claimCashDetailList.add(smsClaimCashDetail);
@@ -1067,7 +1067,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
                 if (cashAmount.compareTo(BigDecimal.ZERO)>0) {
                     SmsClaimCashDetail smsClaimCashDetail = new SmsClaimCashDetail().builder()
                             .claimNo(smsClaimOther.getClaimCode()).claimType(SettleRatioEnum.SPLX_QT.getCode())
-                            .cashAmount(cashAmount).settleNo(monthSettleNo)
+                            .cashAmount(cashAmount).settleNo(monthSettleNo).delFlag("0")
                             .shouldCashMounth(DateUtil.format(smsClaimOther.getSupplierConfirmDate(), "yyyyMM")).actualCashMounth(lastMonth).build();
                     smsClaimCashDetail.setCreateTime(DateUtil.date());
                     claimCashDetailList.add(smsClaimCashDetail);
