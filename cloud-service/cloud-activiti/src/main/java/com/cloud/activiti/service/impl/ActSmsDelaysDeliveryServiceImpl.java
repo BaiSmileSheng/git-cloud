@@ -13,6 +13,7 @@ import com.cloud.activiti.mail.MailService;
 import com.cloud.activiti.service.IActSmsDelaysDeliveryService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
+import com.cloud.common.constant.EmailConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
@@ -192,7 +193,7 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
         R sysUserR = remoteUserService.selectUserByMaterialCodeAndRoleKey(factoryCode,roleKey);
         if(!sysUserR.isSuccess()){
             logger.error("获取对应的负责人邮箱失败");
-            throw new BusinessException(sysUserR.get("msg").toString());
+            throw new BusinessException("获取对应的负责人邮箱失败" + sysUserR.get("msg").toString());
         }
         List<SysUserVo> sysUserVoList = sysUserR.getCollectData(new TypeReference<List<SysUserVo>>() {});
         //校验邮件
@@ -206,7 +207,7 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
         for(SysUserVo sysUserVo : sysUserVoList){
             String email = sysUserVo.getEmail();
             String subject = "供应商申诉";
-            String content = "延期索赔单 单号:" + delaysNo + "供应商发起申诉";
+            String content = "您有一条待办消息要处理!" + "延期索赔单 单号:" + delaysNo + "供应商发起申诉" + EmailConstants.ORW_URL;
             mailService.sendTextMail(email,subject,content);
         }
     }
@@ -295,7 +296,7 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
         String delaysNo = smsDelaysDelivery.getDelaysNo();
         String supplierCode = smsDelaysDelivery.getSupplierCode();
         //根据角色和延期索赔状态审批
-        //订单部部长审批: 将供应商申诉4--->待小微主审核5  小微主审批: 将待小微主审核5--->待结算11
+        //订单部部长审批: 将供应商申诉4--->待小微主审核5  小微主审批: 将待小微主审核5--->已结算12
         if(flagBizResult){
             if( flagStatus4){
                 smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_5.getCode());
@@ -304,7 +305,7 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
                 String roleKey = RoleConstants.ROLE_KEY_XWZ;
                 sendEmail(delaysNo, factoryCode, roleKey);
             }else if(flagStatus5){
-                smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_11.getCode());
+                smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_12.getCode());
                 //向供应商发邮件
                 String contentDetail = "申诉通过";
                 supplierSendEmail(delaysNo,supplierCode,contentDetail);
@@ -347,15 +348,13 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
             logger.error("获取对应的负责人邮箱失败");
             throw new BusinessException(sysUserR.get("msg").toString());
         }
-        List<SysUserVo> sysUserVoList = sysUserR.getCollectData(new TypeReference<List<SysUserVo>>() {});
-        for(SysUserVo sysUserVo : sysUserVoList){
-            String email = sysUserVo.getEmail();
-            if(StringUtils.isBlank(email)){
-                throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
-            }
-            String subject = "供应商申诉";
-            String content = "延期索赔单 单号:" + delaysNo + "供应商发起申诉";
-            mailService.sendTextMail(email,subject,content);
+        SysUserVo  sysUserVo = sysUserR.getData(SysUserVo.class);
+        String email = sysUserVo.getEmail();
+        if(StringUtils.isBlank(email)){
+            throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
         }
+        String subject = "供应商申诉";
+        String content = "您有一条通知:" + "延期索赔单 单号:" + delaysNo + EmailConstants.ORW_URL;
+        mailService.sendTextMail(email,subject,content);
     }
 }

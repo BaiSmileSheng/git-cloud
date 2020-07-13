@@ -36,4 +36,8 @@ public class EmailConstants {
     public static final String OVER_STOCK_CONTEXT = "，您好！\n 订单评审系统有新的超期库存订单待审批，请及时审批！";
 
 
+    public static final String ORW_URL = "\n外网地址：http://orw-khaos.cosmoplat.com/\n" +
+            "内网地址：http://orw.khaos.cosmoplat.com/";
+
+
 }

@@ -13,6 +13,7 @@ import com.cloud.activiti.mail.MailService;
 import com.cloud.activiti.service.IActSmsClaimOtherService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
+import com.cloud.common.constant.EmailConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
@@ -198,7 +199,7 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         R sysUserR = remoteUserService.selectUserByMaterialCodeAndRoleKey(factoryCode,roleKey);
         if(!sysUserR.isSuccess()){
             logger.error("获取对应的负责人邮箱失败");
-            throw new BusinessException(sysUserR.get("msg").toString());
+            throw new BusinessException("获取对应的负责人邮箱失败" + sysUserR.get("msg").toString());
         }
         List<SysUserVo> sysUserVoList = sysUserR.getCollectData(new TypeReference<List<SysUserVo>>() {});
         //校验邮箱
@@ -212,7 +213,7 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         for(SysUserVo sysUserVo : sysUserVoList){
             String email = sysUserVo.getEmail();
             String subject = "供应商申诉";
-            String content = "其他索赔单 单号:" + claimCode + "供应商发起申诉";
+            String content = "您有一条待办消息要处理!" + "其他索赔单 单号:" + claimCode + "供应商发起申诉" + EmailConstants.ORW_URL;
             mailService.sendTextMail(email,subject,content);
         }
     }
@@ -305,9 +306,9 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         Boolean flagBizResult = "2".equals(bizAudit.getResult().toString());
         String claimCode = smsClaimOther.getClaimCode();
         String supplierCode = smsClaimOther.getSupplierCode();
-        //小微主审批: 将待小微主审核5--->待结算11   驳回将待小微主审核5--->待供应商确认7
+        //小微主审批: 将待小微主审核5--->已结算12   驳回将待小微主审核5--->待供应商确认7
         if(flagBizResult){
-            smsClaimOther.setClaimOtherStatus(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_11.getCode());
+            smsClaimOther.setClaimOtherStatus(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_12.getCode());
             //发送邮件
             String contentDetail = "申诉通过";
             supplierSendEmail(claimCode,supplierCode,contentDetail);
@@ -344,15 +345,13 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
             logger.error("获取对应的负责人邮箱失败");
             throw new BusinessException(sysUserR.get("msg").toString());
         }
-        List<SysUserVo> sysUserVoList = sysUserR.getCollectData(new TypeReference<List<SysUserVo>>() {});
-        for(SysUserVo sysUserVo : sysUserVoList){
-            String email = sysUserVo.getEmail();
-            if(StringUtils.isBlank(email)){
-                throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
-            }
-            String subject = "供应商申诉";
-            String content = "其他索赔单 单号:" + claimCode + contentDetail;
-            mailService.sendTextMail(email,subject,content);
+        SysUserVo sysUserVo = sysUserR.getData(SysUserVo.class);
+        String email = sysUserVo.getEmail();
+        if(StringUtils.isBlank(email)){
+            throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
         }
+        String subject = "供应商申诉";
+        String content = "您有一条通知:" + "其他索赔单 单号:" + claimCode + contentDetail + EmailConstants.ORW_URL;
+        mailService.sendTextMail(email,subject,content);
     }
 }
