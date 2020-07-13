@@ -231,7 +231,10 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
         if (null != business) {
             //根据流程业务表 tableId 查询业务表信息
             SmsSupplementaryOrder smsSupplementaryOrder = remoteSmsSupplementaryOrderService.get(Long.valueOf(business.getTableId()));
-            return R.data(smsSupplementaryOrder);
+            R result = new R();
+            result.put("procInstId",business.getProcInstId());
+            result.put("data", smsSupplementaryOrder);
+            return result;
         }
         return R.error("no record");
     }

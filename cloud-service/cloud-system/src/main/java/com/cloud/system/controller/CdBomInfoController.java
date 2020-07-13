@@ -100,7 +100,7 @@ public class CdBomInfoController extends BaseController {
         criteria.andEqualTo("version",version);
         criteria.andEqualTo("productFactoryCode",productFactoryCode);
         List<CdBomInfo> cdBomInfoList = cdBomInfoService.selectByExample(example);
-        return R.data(cdBomInfoList);
+        return R.dataWithPrefix(cdBomInfoList,"专用号对应原材料");
     }
 
 

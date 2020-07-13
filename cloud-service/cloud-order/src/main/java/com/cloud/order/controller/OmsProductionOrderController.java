@@ -79,7 +79,8 @@ public class OmsProductionOrderController extends BaseController {
             @ApiImplicitParam(name = "productLineCode", value = "线体", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "status", value = "状态", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productStartDate", value = "基本开始日期", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "productEndDate", value = "到", required = false, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "productEndDate", value = "到", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productOrderCode", value = "生产单号", required = false, paramType = "query", dataType = "String")
     })
     public TableDataInfo list(@ApiIgnore() OmsProductionOrder omsProductionOrder) {
         Example example = new Example(OmsProductionOrder.class);
@@ -101,6 +102,9 @@ public class OmsProductionOrderController extends BaseController {
         }
         if (StrUtil.isNotEmpty(omsProductionOrder.getProductEndDate())) {
             criteria.andLessThanOrEqualTo("productEndDate", omsProductionOrder.getProductEndDate());
+        }
+        if (StrUtil.isNotEmpty(omsProductionOrder.getProductOrderCode())) {
+            criteria.andEqualTo("productOrderCode", omsProductionOrder.getProductOrderCode());
         }
 
         SysUser sysUser = getUserInfo(SysUser.class);
