@@ -7,11 +7,10 @@ package com.cloud.settle.enums;
  */
 public enum MonthSettleStatusEnum {
 
-    //11待结算、13内控确认、14小微主确认、15待付款、12结算完成
-    YD_SETTLE_STATUS_DJS("11","待结算"),
+    YD_SETTLE_STATUS_DJS("11","待发票录入"),
     YD_SETTLE_STATUS_JSWC("12","结算完成"),
-    YD_SETTLE_STATUS_NKQR("13","内控确认"),
-    YD_SETTLE_STATUS_XWZQR("14","小微主确认"),
+    YD_SETTLE_STATUS_NKQR("13","内控待确认"),
+    YD_SETTLE_STATUS_XWZQR("14","小微主待确认"),
     YD_SETTLE_STATUS_DFK("15","待付款");
 
 
