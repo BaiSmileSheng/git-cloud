@@ -206,8 +206,8 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
         //发送邮件
         for(SysUserVo sysUserVo : sysUserVoList){
             String email = sysUserVo.getEmail();
-            String subject = "供应商申诉";
-            String content = "您有一条待办消息要处理!" + "延期索赔单 单号:" + delaysNo + "供应商发起申诉" + EmailConstants.ORW_URL;
+            String subject = "延期索赔单供应商申诉";
+            String content = "您有一条待办消息要处理!" + "延期索赔单 单号:" + delaysNo + "供应商发起申诉。" + EmailConstants.ORW_URL;
             mailService.sendTextMail(email,subject,content);
         }
     }
@@ -353,8 +353,8 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
         if(StringUtils.isBlank(email)){
             throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
         }
-        String subject = "供应商申诉";
-        String content = "您有一条通知:" + "延期索赔单 单号:" + delaysNo + EmailConstants.ORW_URL;
+        String subject = "延期索赔单申诉审批结果";
+        String content = "您有一条通知：" + "延期索赔单 单号：" + delaysNo + contentDetail + "。"+ EmailConstants.ORW_URL;
         mailService.sendTextMail(email,subject,content);
     }
 }
