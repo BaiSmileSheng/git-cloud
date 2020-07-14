@@ -100,7 +100,7 @@ public class SmsScrapOrderController extends BaseController {
                 }
                 if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_YWK)){
                     //业务科查询已提交状态自己管理工厂的申请单  采购组权限：sys_data_scope  例：8310,8410
-                    criteria.andEqualTo("scrapStatus", ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
+                    criteria.andNotEqualTo("scrapStatus", ScrapOrderStatusEnum.BF_ORDER_STATUS_DTJ.getCode());
                     criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
                 }
             }
@@ -220,7 +220,7 @@ public class SmsScrapOrderController extends BaseController {
                 }
                 if(sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_YWK)){
                     //业务科查询已提交状态自己管理工厂的申请单  采购组权限：sys_data_scope  例：8310,8410
-                    criteria.andEqualTo("scrapStatus", ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
+                    criteria.andNotEqualTo("scrapStatus", ScrapOrderStatusEnum.BF_ORDER_STATUS_DTJ.getCode());
                     criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
                 }
             }
