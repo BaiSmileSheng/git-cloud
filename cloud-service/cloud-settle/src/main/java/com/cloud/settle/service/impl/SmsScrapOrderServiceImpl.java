@@ -104,7 +104,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         }
         OmsProductionOrder omsProductionOrder = omsProductionOrderResult.getData(OmsProductionOrder.class);
         if (!StrUtil.equals(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode()
-                , omsProductionOrder.getProductStatus())) {
+                , omsProductionOrder.getStatus())) {
             return R.error(StrUtil.format("只允许{}状态申请报废单！", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getMsg()));
         }
         Example example = new Example(SmsScrapOrder.class);

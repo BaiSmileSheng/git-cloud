@@ -26,7 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -134,16 +133,16 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         log.info(StrUtil.format("物耗申请新增保存开始：参数为{}", smsSupplementaryOrder.toString()));
         String productOrderCode = smsSupplementaryOrder.getProductOrderCode();
 
-        Example example = new Example(SmsSupplementaryOrder.class);
-        Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("productOrderCode", productOrderCode);
-        criteria.andNotIn("stuffStatus", CollUtil.newArrayList(
-                SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITBH.getCode()
-                ,SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZBH.getCode()));
-        int num = selectCountByExample(example);
-        if (num > 0) {
-            return R.error(StrUtil.format("订单：{}已申请过物耗单，请到物耗管理进行修改！",productOrderCode));
-        }
+//        Example example = new Example(SmsSupplementaryOrder.class);
+//        Example.Criteria criteria = example.createCriteria();
+//        criteria.andEqualTo("productOrderCode", productOrderCode);
+//        criteria.andNotIn("stuffStatus", CollUtil.newArrayList(
+//                SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITBH.getCode()
+//                ,SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZBH.getCode()));
+//        int num = selectCountByExample(example);
+//        if (num > 0) {
+//            return R.error(StrUtil.format("订单：{}已申请过物耗单，请到物耗管理进行修改！",productOrderCode));
+//        }
         //生产单号获取排产订单信息
         R omsProductionOrderResult = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
         if(!omsProductionOrderResult.isSuccess()){
@@ -152,7 +151,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         }
         OmsProductionOrder omsProductionOrder = omsProductionOrderResult.getData(OmsProductionOrder.class);
         if (!StrUtil.equals(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode()
-                , omsProductionOrder.getProductStatus())) {
+                , omsProductionOrder.getStatus())) {
             return R.error(StrUtil.format("只允许{}状态申请物耗单！", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getMsg()));
         }
         //校验
@@ -455,7 +454,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         }
         if (applyNum % minUnit != 0) {
             log.error(StrUtil.format("(物耗)申请量必须是最小包装量的整数倍参数为{},{}", applyNum,minUnit));
-            return R.error(StrUtil.format("{}申请量必须是最小包装量的整数倍！",smsSupplementaryOrder.getRawMaterialCode()));
+            return R.error(StrUtil.format("{}申请量必须是最小包装量({})的整数倍！",smsSupplementaryOrder.getRawMaterialCode(),minUnit));
         }
         //3、校验申请数量是否是单耗的整数倍
         //生产单号获取排产订单信息
@@ -489,13 +488,13 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         //5、校验申请量是否大于订单量*单耗,如果大于单耗，则判断超出部分是否大于最小包装量，大于则返回错误
         BigDecimal productNum = omsProductionOrder.getProductNum();
         BigDecimal applyNumBig = new BigDecimal(applyNum);
-        if (applyNumBig.compareTo(productNum.multiply(cdBom.getBomNum())) >= 0) {
+        BigDecimal bomNum = cdBom.getBomNum().divide(cdBom.getBasicNum());
+        if (applyNumBig.compareTo(productNum.multiply(bomNum)) >= 0) {
             //差值
-            BigDecimal sub = applyNumBig.subtract(productNum.multiply(cdBom.getBomNum()));
+            BigDecimal sub = applyNumBig.subtract(productNum.multiply(bomNum));
             if (sub.compareTo(new BigDecimal(minUnit)) > 0) {
-                R.error(StrUtil.format("{}申请量大于订单量*单耗时，超出部分不得大于最小包装量！",productOrderCode));
+                R.error(StrUtil.format("{}申请量大于订单量*单耗({})时，超出部分不得大于最小包装量！",productOrderCode,bomNum));
             }
-            return R.error(StrUtil.format("{}申请量不得大于订单量*单耗",productOrderCode));
         }
         return R.ok();
     }

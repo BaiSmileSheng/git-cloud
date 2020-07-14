@@ -283,7 +283,7 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
             }
             String productType = cdMaterialExtendInfo.getProductType();
             String productTypeCode = ProductTypeEnum.getCodeByMsg(productType);
-            if (StringUtils.isBlank(productTypeCode)) {
+            if (StringUtils.isBlank(productTypeCode) || productTypeCode.equals(productType)) {
                 errObjectDto.setObject(cdMaterialExtendInfo);
                 errObjectDto.setErrMsg(StrUtil.format("产品类别不存在", cdMaterialExtendInfo.getProductType()));
                 errDtos.add(errObjectDto);
@@ -298,7 +298,7 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
             }
             String lifeCycle = cdMaterialExtendInfo.getLifeCycle();
             String lifeCycleCode = LifeCycleEnum.getCodeByMsg(lifeCycle);
-            if (StringUtils.isBlank(lifeCycleCode)) {
+            if (StringUtils.isBlank(lifeCycleCode) || lifeCycleCode.equals(lifeCycle)) {
                 errObjectDto.setObject(cdMaterialExtendInfo);
                 errObjectDto.setErrMsg(StrUtil.format("生命周期存在：{}", cdMaterialExtendInfo.getLifeCycle()));
                 errDtos.add(errObjectDto);
@@ -313,7 +313,7 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
             }
             String isPuttingOut = cdMaterialExtendInfo.getIsPuttingOut();
             String isPuttingOutCode = PuttingOutEnum.getCodeByMsg(isPuttingOut);
-            if (StringUtils.isBlank(isPuttingOutCode)) {
+            if (StringUtils.isBlank(isPuttingOutCode) || isPuttingOutCode.equals(isPuttingOut)) {
                 errObjectDto.setObject(cdMaterialExtendInfo);
                 errObjectDto.setErrMsg(StrUtil.format("可否加工方式不存在：{}", cdMaterialExtendInfo.getIsPuttingOut()));
                 errDtos.add(errObjectDto);
@@ -328,7 +328,7 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
             }
             String isZnAttestation = cdMaterialExtendInfo.getIsZnAttestation();
             String isZnAttestatioCode = ZnAttestationEnum.getCodeByMsg(isZnAttestation);
-            if (StringUtils.isBlank(isZnAttestatioCode)) {
+            if (StringUtils.isBlank(isZnAttestatioCode) || isZnAttestatioCode.equals(isZnAttestation)) {
                 errObjectDto.setObject(cdMaterialExtendInfo);
                 errObjectDto.setErrMsg(StrUtil.format("是否ZN认证方式不存在：{}", cdMaterialExtendInfo.getIsZnAttestation()));
                 errDtos.add(errObjectDto);

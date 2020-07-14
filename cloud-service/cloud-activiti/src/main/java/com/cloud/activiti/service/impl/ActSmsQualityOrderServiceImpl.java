@@ -13,6 +13,7 @@ import com.cloud.activiti.mail.MailService;
 import com.cloud.activiti.service.IActSmsQualityOrderService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
+import com.cloud.common.constant.EmailConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
@@ -196,7 +197,7 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
         R sysUserR = remoteUserService.selectUserByMaterialCodeAndRoleKey(factoryCode,roleKey);
         if(!sysUserR.isSuccess()){
             logger.error("获取对应的负责人邮箱失败");
-            throw new BusinessException(sysUserR.get("msg").toString());
+            throw new BusinessException("获取对应的负责人邮箱失败" + sysUserR.get("msg").toString());
         }
         List<SysUserVo> sysUserVoList = sysUserR.getCollectData(new TypeReference<List<SysUserVo>>() {});
         //校验邮箱
@@ -210,7 +211,7 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
         for(SysUserVo sysUserVo : sysUserVoList){
             String email = sysUserVo.getEmail();
             String subject = "供应商申诉";
-            String content = "质量索赔单 单号:" + qualityNo + "供应商发起申诉";
+            String content = "您有一条待办消息要处理!" + "质量索赔单 单号:" + qualityNo + "供应商发起申诉" + EmailConstants.ORW_URL;
             mailService.sendTextMail(email,subject,content);
         }
     }
@@ -305,8 +306,8 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
         String supplierCode = smsQualityOrder.getSupplierCode();
         //根据角色和质量索赔状态审批
         if(flagBizResult){
-            //质量部部长审批: 将供应商申诉4--->待小微主审核5 //小微主审批: 将待小微主审核5--->待结算11
-            smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_11.getCode());
+            //质量部部长审批: 将供应商申诉4--->待小微主审核5 //小微主审批: 将待小微主审核5--->已结算12
+            smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_12.getCode());
             //发送邮件
             String contentDetail = "申诉通过";
             supplierSendEmail(qualityNo,supplierCode,contentDetail);
@@ -343,15 +344,13 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
             logger.error("获取对应的负责人邮箱失败");
             throw new BusinessException(sysUserR.get("msg").toString());
         }
-        List<SysUserVo> sysUserVoList = sysUserR.getCollectData(new TypeReference<List<SysUserVo>>() {});
-        for(SysUserVo sysUserVo : sysUserVoList){
-            String email = sysUserVo.getEmail();
-            if(StringUtils.isBlank(email)){
-                throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
-            }
-            String subject = "供应商申诉";
-            String content = "质量索赔单 单号:" + qualityNo + contentDetail;
-            mailService.sendTextMail(email,subject,content);
+        SysUserVo  sysUserVo = sysUserR.getData(SysUserVo.class);
+        String email = sysUserVo.getEmail();
+        if(StringUtils.isBlank(email)){
+            throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
         }
+        String subject = "供应商申诉";
+        String content = "您有一条通知:" + "质量索赔单 单号:" + qualityNo + contentDetail + EmailConstants.ORW_URL;
+        mailService.sendTextMail(email,subject,content);
     }
 }

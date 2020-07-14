@@ -199,7 +199,10 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         if (null != business) {
             //根据流程业务表 tableId 查询业务表信息
             SmsScrapOrder smsScrapOrder = remoteSmsScrapOrderService.get(Long.valueOf(business.getTableId()));
-            return R.data(smsScrapOrder);
+            R result = new R();
+            result.put("procInstId",business.getProcInstId());
+            result.put("data", smsScrapOrder);
+            return result;
         }
         return R.error("no record");
     }
