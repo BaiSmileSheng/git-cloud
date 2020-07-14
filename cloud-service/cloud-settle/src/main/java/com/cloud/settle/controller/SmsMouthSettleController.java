@@ -118,6 +118,13 @@ public class SmsMouthSettleController extends BaseController {
      */
     @GetMapping("listDetail")
     @ApiOperation(value = "月度结算查询详情")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "id", value = "月度结算id", required = false, paramType = "query", dataType = "String")
+    })
     @HasPermissions("settle:mouthSettle:listDetail")
     public R listDetail(Long id) {
         SmsMouthSettle smsMouthSettle = smsMouthSettleService.selectByPrimaryKey(id);
@@ -133,6 +140,7 @@ public class SmsMouthSettleController extends BaseController {
         criteriaSettle.andEqualTo("supplierCode", smsMouthSettle.getSupplierCode())
                 .andEqualTo("companyCode", smsMouthSettle.getCompanyCode())
                 .andCondition("DATE_FORMAT(product_start_date, '%Y%m')='"+lastMonth+"'");
+        startPage();
         List<SmsSettleInfo> settleInfos=smsSettleInfoService.selectByExample(exampleSettle);
         dict.put("settleInfos", settleInfos);
 
