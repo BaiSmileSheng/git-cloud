@@ -11,6 +11,7 @@ import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.settle.domain.entity.SmsDelaysDelivery;
+import com.cloud.settle.domain.entity.vo.SmsDelaysDeliveryExportVo;
 import com.cloud.settle.enums.DeplayStatusEnum;
 import com.cloud.settle.service.ISmsDelaysDeliveryService;
 import com.cloud.settle.util.EasyExcelUtilOSS;
@@ -111,7 +112,7 @@ public class SmsDelaysDeliveryController extends BaseController {
         Example example = assemblyConditions(smsDelaysDelivery);
         List<SmsDelaysDelivery> smsDelaysDeliveryList = smsDelaysDeliveryService.selectByExample(example);
         String fileName = "延期交付索赔.xlsx";
-        return EasyExcelUtilOSS.writeExcel(smsDelaysDeliveryList,fileName,fileName,new SmsDelaysDelivery());
+        return EasyExcelUtilOSS.writeExcel(smsDelaysDeliveryList,fileName,fileName,new SmsDelaysDeliveryExportVo());
     }
 
     /**
