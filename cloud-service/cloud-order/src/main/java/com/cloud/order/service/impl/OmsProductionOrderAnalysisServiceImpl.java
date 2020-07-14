@@ -417,40 +417,10 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
         Map<String, BigDecimal> stockMap = new HashMap<>();
         cdProductStock.forEach(item -> {
             String key = StrUtil.concat(true, item.getProductFactoryCode(), item.getProductMaterialCode());
-            BigDecimal stockNumSum = getStockNum(item);
+            BigDecimal stockNumSum = item.getSumNum();
             stockMap.put(key, stockNumSum);
         });
         return R.data(stockMap);
-    }
-
-    /**
-     * Description:  根据库存信息计算可用库存
-     * Param: [cdProductStock]
-     * return: java.math.BigDecimal
-     * Author: ltq
-     * Date: 2020/6/17
-     */
-    private BigDecimal getStockNum(CdProductStock cdProductStock) {
-        //在产库存
-        BigDecimal stockZc = BigDecimal.ZERO;
-        //在库库存
-        BigDecimal stockZk = BigDecimal.ZERO;
-        //在途库存
-        BigDecimal stockZt = BigDecimal.ZERO;
-        //寄售不足
-        BigDecimal stockJs = BigDecimal.ZERO;
-        if (BeanUtil.isNotEmpty(cdProductStock)) {
-            //在产库存
-            stockZc = cdProductStock.getStockPNum() == null ? BigDecimal.ZERO : cdProductStock.getStockPNum();
-            //在库库存
-            stockZk = cdProductStock.getStockWNum() == null ? BigDecimal.ZERO : cdProductStock.getStockWNum();
-            //在途库存
-            stockZt = cdProductStock.getStockINum() == null ? BigDecimal.ZERO : cdProductStock.getStockINum();
-            //寄售不足
-            stockJs = cdProductStock.getStockKNum() == null ? BigDecimal.ZERO : cdProductStock.getStockKNum();
-        }
-        //计算可用库存 = 在库 + 在产 + 在途 -寄售不足
-        return stockZc.add(stockZk).add(stockZt).subtract(stockJs);
     }
 
     private R queryCustomerStock(List<OmsRealOrder> list) {
