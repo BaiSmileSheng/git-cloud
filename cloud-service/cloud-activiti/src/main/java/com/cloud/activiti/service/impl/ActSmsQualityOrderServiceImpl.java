@@ -210,8 +210,8 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
         //发送邮件
         for(SysUserVo sysUserVo : sysUserVoList){
             String email = sysUserVo.getEmail();
-            String subject = "供应商申诉";
-            String content = "您有一条待办消息要处理!" + "质量索赔单 单号:" + qualityNo + "供应商发起申诉" + EmailConstants.ORW_URL;
+            String subject = "质量索赔单供应商申诉";
+            String content = "您有一条待办消息要处理！" + "质量索赔单 单号：" + qualityNo + "供应商发起申诉。" + EmailConstants.ORW_URL;
             mailService.sendTextMail(email,subject,content);
         }
     }
@@ -349,8 +349,8 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
         if(StringUtils.isBlank(email)){
             throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
         }
-        String subject = "供应商申诉";
-        String content = "您有一条通知:" + "质量索赔单 单号:" + qualityNo + contentDetail + EmailConstants.ORW_URL;
+        String subject = "质量索赔单申诉审批结果";
+        String content = "您有一条通知：" + "质量索赔单 单号：" + qualityNo + contentDetail + "。" + EmailConstants.ORW_URL;
         mailService.sendTextMail(email,subject,content);
     }
 }

@@ -438,9 +438,10 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
             String mailSubject = "质量索赔邮件";
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条质量索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
-            mailTextBuffer.append(smsQualityOrder.getSupplierName()).append(smsQualityOrder.getSupplierCode())
-                    .append(sysUserVo.getCorporation()).append(" ").append("您有一条质量索赔订单，索赔单号")
-                    .append(smsQualityOrder.getQualityNo()).append(",请及时处理，如不处理，3天后系统自动确认，无法申诉!")
+            mailTextBuffer.append(sysUserVo.getCorporation()).append(smsQualityOrder.getSupplierCode())
+                    .append("：").append("您有一条质量索赔单，单号")
+                    .append(smsQualityOrder.getQualityNo()).append("，请及时处理，72小时不处理，系统将自动确认，无法申诉!")
+                    .append("\n系统登录地址：\n")
                     .append(EmailConstants.ORW_URL);
             mailService.sendTextMail(sysUserVo.getEmail(),mailSubject,mailTextBuffer.toString());
         }
@@ -545,9 +546,10 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
             String mailSubject = "质量索赔邮件";
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条质量索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
-            mailTextBuffer.append(smsQualityOrder.getSupplierName()).append(supplierCode)
-                    .append(sysUser.getCorporation()).append(" ").append("您有一条质量索赔订单，订单号")
-                    .append(smsQualityOrder.getQualityNo()).append(",请及时处理，如不处理，1天后系统自动确认，无法申诉!")
+            mailTextBuffer.append(sysUser.getCorporation()).append(supplierCode)
+                    .append("：").append("您有一条质量索赔单，单号")
+                    .append(smsQualityOrder.getQualityNo()).append("，请及时处理，24小时不处理，系统将自动确认，无法申诉!")
+                    .append("\n系统登录地址：\n")
                     .append(EmailConstants.ORW_URL);
             String toSupplier = sysUser.getEmail();
             mailService.sendTextMail(toSupplier,mailSubject, mailTextBuffer.toString());
