@@ -212,8 +212,8 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         //发送邮件
         for(SysUserVo sysUserVo : sysUserVoList){
             String email = sysUserVo.getEmail();
-            String subject = "供应商申诉";
-            String content = "您有一条待办消息要处理!" + "其他索赔单 单号:" + claimCode + "供应商发起申诉" + EmailConstants.ORW_URL;
+            String subject = "其他索赔单供应商申诉";
+            String content = "您有一条待办消息要处理！" + "其他索赔单 单号：" + claimCode + "供应商发起申诉。" + EmailConstants.ORW_URL;
             mailService.sendTextMail(email,subject,content);
         }
     }
@@ -350,8 +350,8 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         if(StringUtils.isBlank(email)){
             throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
         }
-        String subject = "供应商申诉";
-        String content = "您有一条通知:" + "其他索赔单 单号:" + claimCode + contentDetail + EmailConstants.ORW_URL;
+        String subject = "其他索赔单申诉审批结果";
+        String content = "您有一条通知：" + "其他索赔单 单号：" + claimCode + contentDetail + "。" + EmailConstants.ORW_URL;
         mailService.sendTextMail(email,subject,content);
     }
 }
