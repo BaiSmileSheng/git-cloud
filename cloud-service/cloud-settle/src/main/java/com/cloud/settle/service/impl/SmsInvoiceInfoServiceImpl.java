@@ -1,11 +1,10 @@
 package com.cloud.settle.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
-import com.cloud.settle.domain.entity.PO.SmsInvoiceInfoS;
+import com.cloud.settle.domain.entity.vo.SmsInvoiceInfoSVo;
 import com.cloud.settle.domain.entity.SmsInvoiceInfo;
 import com.cloud.settle.domain.entity.SmsMouthSettle;
 import com.cloud.settle.enums.MonthSettleStatusEnum;
@@ -20,8 +19,6 @@ import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -46,7 +43,7 @@ public class SmsInvoiceInfoServiceImpl extends BaseServiceImpl<SmsInvoiceInfo> i
      * @param smsInvoiceInfoS 发票信息集合
      */
     @Override
-    public R batchAddSaveOrUpdate(SmsInvoiceInfoS smsInvoiceInfoS) {
+    public R batchAddSaveOrUpdate(SmsInvoiceInfoSVo smsInvoiceInfoS) {
         String mouthSettleId = smsInvoiceInfoS.getMouthSettleId();
         logger.info("批量新增或修改保存发票信息 结算单号:{}",mouthSettleId);
         //1.校验状态,只有待结算才可以录入发票

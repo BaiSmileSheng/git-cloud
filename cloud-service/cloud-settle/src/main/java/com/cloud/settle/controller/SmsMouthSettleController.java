@@ -14,7 +14,7 @@ import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.bean.BeanUtils;
-import com.cloud.settle.domain.entity.PO.SmsClaimCashDetailDTO;
+import com.cloud.settle.domain.entity.vo.SmsClaimCashDetailVo;
 import com.cloud.settle.domain.entity.SmsClaimCashDetail;
 import com.cloud.settle.domain.entity.SmsInvoiceInfo;
 import com.cloud.settle.domain.entity.SmsMouthSettle;
@@ -148,12 +148,12 @@ public class SmsMouthSettleController extends BaseController {
         Map<String, SmsClaimCashDetail> mapActual = smsClaimCashDetailService.selectSumCashGroupByClaimTypeActual(smsMouthSettle.getSettleNo());
         Map<String, SmsClaimCashDetail> mapHistory = smsClaimCashDetailService.selectSumCashGroupByClaimTypeHistory(smsMouthSettle.getSettleNo());
 
-        List<SmsClaimCashDetailDTO> list = new ArrayList<>();
+        List<SmsClaimCashDetailVo> list = new ArrayList<>();
         List<String> typeList = CollUtil.newArrayList(SettleRatioEnum.SPLX_BF.getCode()
         ,SettleRatioEnum.SPLX_WH.getCode(),SettleRatioEnum.SPLX_YQ.getCode()
         ,SettleRatioEnum.SPLX_ZL.getCode(),SettleRatioEnum.SPLX_QT.getCode());
         typeList.forEach(type->{
-            SmsClaimCashDetailDTO dto = new SmsClaimCashDetailDTO();
+            SmsClaimCashDetailVo dto = new SmsClaimCashDetailVo();
             dto.setClaimType(type);
             if (MapUtil.isNotEmpty(mapActual)&&mapActual.get(type) != null) {
                 dto.setActualCashAmount(mapActual.get(type).getCashAmount());
