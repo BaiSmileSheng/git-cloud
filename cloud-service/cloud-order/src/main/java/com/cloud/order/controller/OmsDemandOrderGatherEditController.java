@@ -256,14 +256,16 @@ public class OmsDemandOrderGatherEditController extends BaseController {
         SysUser sysUser = getUserInfo(SysUser.class);
         startPage();
         //先分页查询去重的物料号和工厂
-        R r = omsDemandOrderGatherEditService.selectDistinctMaterialCodeAndFactoryCode(omsDemandOrderGatherEdit,sysUser);
-        if (r.isSuccess()) {
-            List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList=r.getCollectData(new TypeReference<List<OmsDemandOrderGatherEdit>>() {});
+        List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList = omsDemandOrderGatherEditService.selectDistinctMaterialCodeAndFactoryCode(omsDemandOrderGatherEdit,sysUser);
+        if (CollectionUtil.isNotEmpty(omsDemandOrderGatherEditList)) {
+            TableDataInfo info=getDataTable(omsDemandOrderGatherEditList);
             //根据前面分页查询的物料号和工厂查询出相关信息并组织数据结构
             R rReturn = omsDemandOrderGatherEditService.week13DemandGatherList(omsDemandOrderGatherEditList);
             if (rReturn.isSuccess()) {
-                List<OmsDemandOrderGatherEdit> listReturn=rReturn.getCollectData(new TypeReference<List<OmsDemandOrderGatherEdit>>() {});
-                return getDataTable(listReturn);
+                List<OmsDemandOrderGatherEdit> listReturn = rReturn.getCollectData(new TypeReference<List<OmsDemandOrderGatherEdit>>() {
+                });
+                info.setRows(listReturn);
+                return info;
             }
         }
         return getDataTable(new ArrayList<>());
