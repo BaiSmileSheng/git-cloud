@@ -1,5 +1,6 @@
 package com.cloud.system.controller;
 
+import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -13,6 +14,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
@@ -49,11 +51,19 @@ public class CdMouthRateController extends BaseController {
             @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "yearMouth", value = "年月", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "currency", value = "币种", required = false, paramType = "query", dataType = "String")
     })
-    public TableDataInfo list(CdMouthRate cdMouthRate) {
+    public TableDataInfo list(@ApiIgnore CdMouthRate cdMouthRate) {
         Example example = new Example(CdMouthRate.class);
         Example.Criteria criteria = example.createCriteria();
+        if (StrUtil.isNotEmpty(cdMouthRate.getYearMouth())) {
+            criteria.andEqualTo("yearMouth", cdMouthRate.getYearMouth());
+        }
+        if (StrUtil.isNotEmpty(cdMouthRate.getCurrency())) {
+            criteria.andEqualTo("currency", cdMouthRate.getCurrency());
+        }
         startPage();
         List<CdMouthRate> cdMouthRateList = cdMouthRateService.selectByExample(example);
         return getDataTable(cdMouthRateList);

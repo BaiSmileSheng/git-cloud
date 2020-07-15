@@ -76,7 +76,7 @@ public interface IOmsDemandOrderGatherEditService extends BaseService<OmsDemandO
      * @param omsDemandOrderGatherEdit
      * @return
      */
-    R selectDistinctMaterialCodeAndFactoryCode(OmsDemandOrderGatherEdit omsDemandOrderGatherEdit,SysUser sysUser);
+    List<OmsDemandOrderGatherEdit> selectDistinctMaterialCodeAndFactoryCode(OmsDemandOrderGatherEdit omsDemandOrderGatherEdit,SysUser sysUser);
 
     /**
      * 13周滚动需求汇总 导出

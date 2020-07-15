@@ -491,7 +491,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
      * @param oms2weeksDemandOrderEdit
      * @return
      */
-    public R selectDistinctMaterialCodeAndFactoryCode(Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit, SysUser sysUser) {
+    public List<Oms2weeksDemandOrderEdit> selectDistinctMaterialCodeAndFactoryCode(Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit, SysUser sysUser) {
         //如果是排产员，需要加上工厂权限
         if(CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
             List<String> factoryList=Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(","));
@@ -500,7 +500,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             }
         }
         List<Oms2weeksDemandOrderEdit> list = oms2weeksDemandOrderEditMapper.selectDistinctMaterialCodeAndFactoryCode(oms2weeksDemandOrderEdit);
-        return R.data(list);
+        return list;
     }
 
     /**
@@ -674,20 +674,24 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
     @Override
     @Transactional
     public R toSAP(List<Long> ids,SysUser sysUser) {
-        if (CollUtil.isEmpty(ids)) {
-            return R.error("参数为空！");
-        }
-        Example example = new Example(Oms2weeksDemandOrderEdit.class);
-        example.and().andIn("id", ids);
-        List<Oms2weeksDemandOrderEdit> oms2weeksDemandOrderEditList=selectByExample(example);
+        List<Oms2weeksDemandOrderEdit> oms2weeksDemandOrderEditList = new ArrayList<>();
         //只能下达待传SAP和传SAP异常的数据
         List<String> statusList = CollUtil.newArrayList(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getCode()
                 ,Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());
-        boolean checkBo = oms2weeksDemandOrderEditList.stream().allMatch(oms2weeksDemandOrderEdit -> statusList.contains(oms2weeksDemandOrderEdit.getStatus()));
-        if (!checkBo) {
-            return R.error(StrUtil.format("只允许下达状态为：{}或{}的数据",
-                    Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getMsg(),
-                    Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getMsg()));
+        Example example = new Example(Oms2weeksDemandOrderEdit.class);
+        if (CollUtil.isEmpty(ids)) {
+            example.and().andIn("status", statusList);
+            oms2weeksDemandOrderEditList=selectByExample(example);
+            ids = oms2weeksDemandOrderEditList.stream().map(wo -> wo.getId()).collect(Collectors.toList());
+        }else{
+            example.and().andIn("id", ids);
+            oms2weeksDemandOrderEditList=selectByExample(example);
+            boolean checkBo = oms2weeksDemandOrderEditList.stream().allMatch(oms2weeksDemandOrderEdit -> statusList.contains(oms2weeksDemandOrderEdit.getStatus()));
+            if (!checkBo) {
+                return R.error(StrUtil.format("只允许下达状态为：{}或{}的数据",
+                        Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getMsg(),
+                        Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getMsg()));
+            }
         }
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog().builder()
                 .appId("SAP").interfaceName(SapConstants.ZPP_INT_DDPS_02)

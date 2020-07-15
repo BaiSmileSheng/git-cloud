@@ -571,7 +571,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
      * @return
      */
     @Override
-    public R selectDistinctMaterialCodeAndFactoryCode(OmsDemandOrderGatherEdit omsDemandOrderGatherEdit,SysUser sysUser) {
+    public List<OmsDemandOrderGatherEdit> selectDistinctMaterialCodeAndFactoryCode(OmsDemandOrderGatherEdit omsDemandOrderGatherEdit,SysUser sysUser) {
         //如果是排产员，需要加上工厂权限
         if(CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
             List<String> factoryList=Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(","));
@@ -580,7 +580,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             }
         }
         List<OmsDemandOrderGatherEdit> list = omsDemandOrderGatherEditMapper.selectDistinctMaterialCodeAndFactoryCode(omsDemandOrderGatherEdit);
-        return R.data(list);
+        return list;
     }
 
     /**
