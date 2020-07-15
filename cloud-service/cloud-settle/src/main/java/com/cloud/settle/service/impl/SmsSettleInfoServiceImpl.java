@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
@@ -49,6 +50,10 @@ public class SmsSettleInfoServiceImpl extends BaseServiceImpl<SmsSettleInfo> imp
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("orderStatus", smsSettleInfoReq.getOrderStatus());
         List<SmsSettleInfo> smsSettleInfoList = this.selectByExample(example);
+        if(!CollectionUtils.isEmpty(smsSettleInfoList)){
+            logger.info("加工费生成,无需要生成加工费的数据");
+            return R.ok();
+        }
         //2.计算加工费 (订单交货数量*sap加工费单价=生产订单加工费金额 )
         //3.修改加工费结算信息表--加工费结算金额,状态为待结算
         smsSettleInfoList.forEach(smsSettleInfo ->{

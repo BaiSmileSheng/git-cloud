@@ -1,5 +1,7 @@
 package com.cloud.job.executor.service.jobhandler;
 
+import com.alibaba.fastjson.JSONObject;
+import com.cloud.common.core.domain.R;
 import com.cloud.settle.feign.RemoteSettleInfoService;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.XxlJob;
@@ -31,7 +33,10 @@ public class SmsSettleInfoCalculateXxlJob {
     @XxlJob("smsSettleInfoCalculateHandler")
     public ReturnT<String> smsSettleInfoCalculateHandler(String param) throws Exception {
         logger.info("加工费生成开始");
-        remoteSettleInfoService.smsSettleInfoCalculate();
+        R r = remoteSettleInfoService.smsSettleInfoCalculate();
+        if(!r.isSuccess()){
+            logger.error("加工费生成异常:{}", JSONObject.toJSONString(r));
+        }
         logger.info("加工费生成结束");
         return ReturnT.SUCCESS;
     }
