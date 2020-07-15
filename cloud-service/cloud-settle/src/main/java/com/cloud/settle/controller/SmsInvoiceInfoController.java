@@ -4,14 +4,13 @@ import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.ValidatorUtils;
-import com.cloud.settle.domain.entity.PO.SmsInvoiceInfoS;
+import com.cloud.settle.domain.entity.vo.SmsInvoiceInfoSVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 import tk.mybatis.mapper.entity.Example;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,7 +106,7 @@ public class SmsInvoiceInfoController extends BaseController {
     @PostMapping("batchAddSaveOrUpdate")
     @OperLog(title = "批量新增或修改保存发票信息 ", businessType = BusinessType.INSERT)
     @ApiOperation(value = "批量新增或修改保存发票信息 ", response = R.class)
-    public R batchAddSaveOrUpdate(@RequestBody SmsInvoiceInfoS smsInvoiceInfoS) {
+    public R batchAddSaveOrUpdate(@RequestBody SmsInvoiceInfoSVo smsInvoiceInfoS) {
         if(null == smsInvoiceInfoS || StringUtils.isBlank(smsInvoiceInfoS.getMouthSettleId())){
             return R.error("批量新增发票信息入参为空");
         }

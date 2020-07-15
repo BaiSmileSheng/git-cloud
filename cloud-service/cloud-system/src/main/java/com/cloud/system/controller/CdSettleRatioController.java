@@ -34,6 +34,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("settleRatio")
+@Api(tags = "结算索赔系数  提供者")
 public class CdSettleRatioController extends BaseController {
 
     @Autowired
@@ -101,8 +102,8 @@ public class CdSettleRatioController extends BaseController {
         if(StringUtils.isBlank(cdSettleRatio.getClaimType())){
             return R.error("新增保存结算索赔系数时索赔类型为空");
         }
-        cdSettleRatioService.addSaveVerifyClaimType(cdSettleRatio);
-        return R.data(cdSettleRatio.getId());
+        R r = cdSettleRatioService.addSaveVerifyClaimType(cdSettleRatio);
+        return r;
     }
 
     /**

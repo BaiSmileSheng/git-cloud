@@ -75,7 +75,7 @@ public interface IOms2weeksDemandOrderEditService extends BaseService<Oms2weeksD
      * @param oms2weeksDemandOrderEdit
      * @return
      */
-    R selectDistinctMaterialCodeAndFactoryCode(Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit, SysUser sysUser);
+    List<Oms2weeksDemandOrderEdit> selectDistinctMaterialCodeAndFactoryCode(Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit, SysUser sysUser);
     /**
      * T+1、T+2草稿计划对比分析分页查询
      * @param listDistant 不重复的物料和工厂

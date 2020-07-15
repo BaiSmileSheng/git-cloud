@@ -1240,12 +1240,31 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         List<OmsProductionOrder> list = new ArrayList<>();
         if (StringUtils.isNotBlank(ids)) {
             list = omsProductionOrderMapper.selectByIds(ids);
+            //状态不是待传SAP或传SAP异常返回错误信息
+            StringBuffer stringBuffer = new StringBuffer();
+            list.forEach(omsProductionOrder -> {
+                String status = omsProductionOrder.getStatus();
+                Boolean statusFlag = ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_DCSAP.getCode().equals(status)
+                        || ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPYC.getCode().equals(status);
+                if(!statusFlag){
+                    stringBuffer.append("排产订单号")
+                            .append(omsProductionOrder.getOrderCode())
+                            .append("不允许下达SAP");
+                    log.error("此排产订单不允许下达SAP 排产订单号:{},状态:{}",omsProductionOrder.getOrderCode(),status);
+                }
+            });
+            if(stringBuffer.length() > 0){
+                return R.error(stringBuffer.toString());
+            }
         }
         //1.获取list
         if (CollectionUtils.isEmpty(list)) {
             Example example = new Example(OmsProductionOrder.class);
             Example.Criteria criteria = example.createCriteria();
-            criteria.andEqualTo("status", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_DCSAP.getCode());
+            List<String> statusList = new ArrayList<>();
+            statusList.add(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_DCSAP.getCode());
+            statusList.add(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPYC.getCode());
+            criteria.andIn("status",statusList);
             list = omsProductionOrderMapper.selectByExample(example);
         }
         if(CollectionUtils.isEmpty(list)){

@@ -1,4 +1,4 @@
-package com.cloud.settle.domain.entity.PO;
+package com.cloud.settle.domain.entity.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -31,7 +31,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @ApiModel(value = "发票信息集合")
-public class SmsInvoiceInfoS extends BaseEntity {
+public class SmsInvoiceInfoSVo extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /**
