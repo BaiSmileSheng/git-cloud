@@ -1,5 +1,6 @@
 package com.cloud.system.controller;
 
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -63,6 +64,7 @@ public class CdMouthRateController extends BaseController {
     /**
      * 新增保存 汇率
      */
+    @HasPermissions("system:mouthRate:save")
     @PostMapping("save")
     @OperLog(title = "新增保存 汇率", businessType = BusinessType.INSERT)
     @ApiOperation(value = "新增保存 汇率", response = R.class)
@@ -74,6 +76,7 @@ public class CdMouthRateController extends BaseController {
     /**
      * 修改保存 汇率
      */
+    @HasPermissions("system:mouthRate:update")
     @PostMapping("update")
     @OperLog(title = "修改保存 汇率", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存 汇率", response = R.class)
@@ -84,6 +87,7 @@ public class CdMouthRateController extends BaseController {
     /**
      * 删除 汇率
      */
+    @HasPermissions("system:mouthRate:remove")
     @PostMapping("remove")
     @OperLog(title = "删除 汇率", businessType = BusinessType.DELETE)
     @ApiOperation(value = "删除 汇率", response = R.class)

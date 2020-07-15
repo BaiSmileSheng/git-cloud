@@ -1,6 +1,7 @@
 package com.cloud.system.controller;
 
 import cn.hutool.core.lang.Dict;
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -132,6 +133,7 @@ public class CdFactoryLineInfoController extends BaseController {
     /**
      * 修改保存工厂线体关系
      */
+    @HasPermissions("system:factoryLine:update")
     @PostMapping("update")
     @OperLog(title = "修改保存工厂线体关系 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存工厂线体关系 ", response = R.class)
@@ -142,6 +144,7 @@ public class CdFactoryLineInfoController extends BaseController {
     /**
      * 删除工厂线体关系
      */
+    @HasPermissions("system:factoryLine:remove")
     @PostMapping("remove")
     @OperLog(title = "删除工厂线体关系 ", businessType = BusinessType.DELETE)
     @ApiOperation(value = "删除工厂线体关系 ", response = R.class)

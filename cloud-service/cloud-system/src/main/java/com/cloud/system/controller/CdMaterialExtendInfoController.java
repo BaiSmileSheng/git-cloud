@@ -161,6 +161,7 @@ public class CdMaterialExtendInfoController extends BaseController {
     /**
      * 修改保存物料扩展信息
      */
+    @HasPermissions("sys:materialExtendInfo:update")
     @PostMapping("update")
     @OperLog(title = "修改保存物料扩展信息 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存物料扩展信息 ", response = R.class)
@@ -171,6 +172,7 @@ public class CdMaterialExtendInfoController extends BaseController {
     /**
      * 删除物料扩展信息
      */
+    @HasPermissions("sys:materialExtendInfo:remove")
     @PostMapping("remove")
     @OperLog(title = "删除物料扩展信息 ", businessType = BusinessType.DELETE)
     @ApiOperation(value = "删除物料扩展信息 ", response = R.class)
