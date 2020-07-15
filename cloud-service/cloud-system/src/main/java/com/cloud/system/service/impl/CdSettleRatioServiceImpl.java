@@ -45,7 +45,7 @@ public class CdSettleRatioServiceImpl extends BaseServiceImpl<CdSettleRatio> imp
             }
         }
         int count = cdSettleRatioMapper.insertSelective(cdSettleRatio);
-        return R.data(count);
+        return R.data(cdSettleRatio.getId());
     }
 
     /**
@@ -67,7 +67,7 @@ public class CdSettleRatioServiceImpl extends BaseServiceImpl<CdSettleRatio> imp
                 }
             }
         }
-        cdSettleRatioMapper.updateByPrimaryKey(cdSettleRatio);
+        cdSettleRatioMapper.updateByPrimaryKeySelective(cdSettleRatio);
         return R.ok();
     }
 
