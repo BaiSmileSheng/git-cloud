@@ -253,14 +253,15 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
         SysUser sysUser = getUserInfo(SysUser.class);
         startPage();
         //先分页查询去重的物料号和工厂
-        R r = oms2weeksDemandOrderEditService.selectDistinctMaterialCodeAndFactoryCode(oms2weeksDemandOrderEdit,sysUser);
-        if (r.isSuccess()) {
-            List<Oms2weeksDemandOrderEdit> oms2weeksDemandOrderEditList=r.getCollectData(new TypeReference<List<Oms2weeksDemandOrderEdit>>() {});
+        List<Oms2weeksDemandOrderEdit> oms2weeksDemandOrderEditList = oms2weeksDemandOrderEditService.selectDistinctMaterialCodeAndFactoryCode(oms2weeksDemandOrderEdit,sysUser);
+        if (CollectionUtil.isNotEmpty(oms2weeksDemandOrderEditList)) {
+            TableDataInfo info=getDataTable(oms2weeksDemandOrderEditList);
             //根据前面分页查询的物料号和工厂查询出相关信息并组织数据结构
             R rReturn = oms2weeksDemandOrderEditService.t1t2GatherList(oms2weeksDemandOrderEditList);
             if (rReturn.isSuccess()) {
                 List<Oms2weeksDemandOrderEdit> listReturn=rReturn.getCollectData(new TypeReference<List<Oms2weeksDemandOrderEdit>>() {});
-                return getDataTable(listReturn);
+                info.setRows(listReturn);
+                return info;
             }
         }
         return getDataTable(new ArrayList<>());
