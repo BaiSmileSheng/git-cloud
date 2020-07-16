@@ -4,7 +4,7 @@ import cn.hutool.core.lang.Dict;
 import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.CdProductStock;
-import com.cloud.system.feign.factory.RemoteSapSystemInterfaceFallbackFactory;
+import com.cloud.system.feign.factory.RemoteProductStockFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +17,7 @@ import java.util.List;
  * @author lihongxia
  * @date 2020-06-13
  */
-@FeignClient(name = ServiceNameConstants.SYSTEM_SERVICE, fallbackFactory = RemoteSapSystemInterfaceFallbackFactory.class)
+@FeignClient(name = ServiceNameConstants.SYSTEM_SERVICE, fallbackFactory = RemoteProductStockFallbackFactory.class)
 public interface RemoteProductStockService {
     /**
      * 定时任务同步成品库存
