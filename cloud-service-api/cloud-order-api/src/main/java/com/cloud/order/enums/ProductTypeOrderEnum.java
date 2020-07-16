@@ -6,7 +6,7 @@ package com.cloud.order.enums;
  * @Author lihongxia
  * @Date 2020-07-02
  */
-public enum ProductTypeEnum {
+public enum ProductTypeOrderEnum {
     //1.电热2.空调3.波轮4.商空5.外单6.冰箱7.滚筒8.冰箱 9.厨电10.辅料 11.半成品
     PRODUCT_TYPE_1("1", "电热"),
     PRODUCT_TYPE_2("2", "空调"),
@@ -24,7 +24,7 @@ public enum ProductTypeEnum {
     private String code;
     private String msg;
 
-    ProductTypeEnum(String code, String msg) {
+    ProductTypeOrderEnum(String code, String msg) {
         this.code = code;
         this.msg = msg;
     }
@@ -38,7 +38,7 @@ public enum ProductTypeEnum {
     }
 
     public static String getMsgByCode(String code) {
-        for (ProductTypeEnum enums : ProductTypeEnum.values()) {
+        for (ProductTypeOrderEnum enums : ProductTypeOrderEnum.values()) {
             if (enums.getCode().equals(code)) {
                 return enums.getMsg();
             }
@@ -46,7 +46,7 @@ public enum ProductTypeEnum {
         return "";
     }
     public static String getCodeByMsg(String msg) {
-        for (ProductTypeEnum bt : values()) {
+        for (ProductTypeOrderEnum bt : values()) {
             if (bt.msg .equals(msg) ) {
                 return bt.getCode();
             }

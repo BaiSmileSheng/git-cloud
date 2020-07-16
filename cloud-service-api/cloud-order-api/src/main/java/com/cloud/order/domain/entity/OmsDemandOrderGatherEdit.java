@@ -162,14 +162,14 @@ public class OmsDemandOrderGatherEdit extends BaseEntity {
     /**
      * 产品类别
      */
-    @ExcelProperty(value = "产品类别",index = 12,converter = ProductTypeConverter.class)
+    @ExcelProperty(value = "产品类别",index = 12,converter = ProductTypeOrderConverter.class)
     @ApiModelProperty(value = "产品类别")
     private String productType;
 
     /**
      * 生命周期
      */
-    @ExcelProperty(value = "生命周期",index = 13,converter = LifeCycleConverter.class)
+    @ExcelProperty(value = "生命周期",index = 13,converter = LifeCycleOrderConverter.class)
     @ApiModelProperty(value = "生命周期")
     private String lifeCycle;
 
