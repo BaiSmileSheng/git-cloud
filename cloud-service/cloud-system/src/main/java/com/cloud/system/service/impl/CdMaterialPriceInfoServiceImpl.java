@@ -11,6 +11,7 @@ import com.cloud.settle.enums.MaterialPriceInfoSAPEnum;
 import com.cloud.settle.feign.RemoteSmsSupplementaryOrderService;
 import com.cloud.system.domain.entity.CdMaterialPriceInfo;
 import com.cloud.system.domain.entity.SysInterfaceLog;
+import com.cloud.system.enums.PriceTypeEnum;
 import com.cloud.system.mapper.CdMaterialPriceInfoMapper;
 import com.cloud.system.service.ICdMaterialPriceInfoService;
 import com.cloud.system.service.ISysInterfaceLogService;
@@ -101,6 +102,7 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
         cdMaterialPriceInfoListJ.forEach(cdMaterialPriceInfo ->{
             //净价值即加工费
             cdMaterialPriceInfo.setProcessPrice(cdMaterialPriceInfo.getNetWorth());
+            cdMaterialPriceInfo.setPriceType(PriceTypeEnum.PRICE_TYPE_1.getCode());
         });
         //3.新增 cd_material_price_info
         cdMaterialPriceInfoMapper.batchInsertOrUpdate(cdMaterialPriceInfoListJ);
@@ -127,6 +129,9 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
             }
         });
         List<CdMaterialPriceInfo> cdMaterialPriceInfoListY = selectSapCharges("YCL",materialCodeList);
+        cdMaterialPriceInfoListY.forEach(cdMaterialPriceInfo -> {
+            cdMaterialPriceInfo.setPriceType(PriceTypeEnum.PRICE_TYPE_0.getCode());
+        });
         cdMaterialPriceInfoMapper.batchInsertOrUpdate(cdMaterialPriceInfoListY);
         return R.ok();
     }

@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 物料扩展信息  提供者
@@ -89,6 +90,18 @@ public class CdMaterialExtendInfoController extends BaseController {
         return getDataTable(cdMaterialExtendInfoList);
     }
 
+    /**
+     * 查询所有的专用号
+     */
+    @GetMapping("listCode")
+    @ApiOperation(value = "查询所有的专用号", response = CdMaterialExtendInfo.class)
+    public R listCode(){
+        Example example = new Example(CdMaterialExtendInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        List<CdMaterialExtendInfo> cdMaterialExtendInfoList = cdMaterialExtendInfoService.selectByExample(example);
+        List<String> list = cdMaterialExtendInfoList.stream().map(m ->m.getMaterialCode()).collect(Collectors.toList());
+        return R.data(list);
+    }
     /**
      * 组装条件
      * @param cdMaterialExtendInfo

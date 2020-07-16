@@ -87,6 +87,7 @@ public class CdMaterialPriceInfo extends BaseEntity {
      * 采购组织
      */
     @ExcelProperty(value = "采购组织")
+    @ApiModelProperty(value = "采购组织")
     private String purchasingOrganization;
 
     /**
@@ -165,6 +166,11 @@ public class CdMaterialPriceInfo extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date sapCreatedDate;
 
+    /**
+     * 价格类型
+     */
+    @ApiModelProperty(value = "价格类型",notes ="0原材料价格,1加工费号加工费价格")
+    private String priceType;
     /**
      * 删除状态
      */
