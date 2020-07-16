@@ -5,7 +5,7 @@ package com.cloud.order.enums;
  * @Author cs
  * @Date 2020-06-16
  */
-public enum LifeCycleEnum {
+public enum LifeCycleOrderEnum {
 //1、量产2、备件3、下市4、新品5、售后6、老品
     SMZQ_LC("1","量产"),
     SMZQ_BJ("2","备件"),
@@ -19,7 +19,7 @@ public enum LifeCycleEnum {
     private String code;
     private String msg;
 
-    LifeCycleEnum(String code, String msg) {
+    LifeCycleOrderEnum(String code, String msg) {
         this.code = code;
         this.msg = msg;
     }
@@ -33,7 +33,7 @@ public enum LifeCycleEnum {
     }
 
     public static String getMsgByCode(String code) {
-        for (LifeCycleEnum enums : LifeCycleEnum.values()) {
+        for (LifeCycleOrderEnum enums : LifeCycleOrderEnum.values()) {
             if (enums.getCode().equals(code)) {
                 return enums.getMsg();
             }
@@ -41,7 +41,7 @@ public enum LifeCycleEnum {
         return "";
     }
     public static String getCodeByMsg(String msg) {
-        for (LifeCycleEnum bt : values()) {
+        for (LifeCycleOrderEnum bt : values()) {
             if (bt.msg .equals(msg) ) {
                 return bt.getCode();
             }

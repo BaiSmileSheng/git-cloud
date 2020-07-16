@@ -5,13 +5,13 @@ import com.alibaba.excel.enums.CellDataTypeEnum;
 import com.alibaba.excel.metadata.CellData;
 import com.alibaba.excel.metadata.GlobalConfiguration;
 import com.alibaba.excel.metadata.property.ExcelContentProperty;
-import com.cloud.order.enums.ProductTypeEnum;
+import com.cloud.order.enums.LifeCycleOrderEnum;
 
 /**
- * 产品类型
+ * 生命周期
  * @author lihongxia
  */
-public class ProductTypeConverter implements Converter<String> {
+public class LifeCycleOrderConverter implements Converter<String> {
 
 
         @Override
@@ -27,11 +27,11 @@ public class ProductTypeConverter implements Converter<String> {
         @Override
         public String convertToJavaData(CellData cellData, ExcelContentProperty excelContentProperty, GlobalConfiguration globalConfiguration)  {
             String stringValue = cellData.getStringValue();
-            return ProductTypeEnum.getCodeByMsg(stringValue);
+            return LifeCycleOrderEnum.getCodeByMsg(stringValue);
         }
 
         @Override
         public CellData convertToExcelData(String string, ExcelContentProperty excelContentProperty, GlobalConfiguration globalConfiguration) {
-            return new CellData(ProductTypeEnum.getMsgByCode(string));
+            return new CellData(LifeCycleOrderEnum.getMsgByCode(string));
         }
 }
