@@ -2,7 +2,7 @@ package com.cloud.system.feign;
 
 import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.system.domain.entity.CdSettleRatio;
-import com.cloud.system.feign.factory.RemoteUserFallbackFactory;
+import com.cloud.system.feign.factory.RemoteSettleRatioFallbackFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author Lihongxia
  * @date 2020-06-04
  */
-@FeignClient(name = ServiceNameConstants.SYSTEM_SERVICE, fallbackFactory = RemoteUserFallbackFactory.class)
+@FeignClient(name = ServiceNameConstants.SYSTEM_SERVICE, fallbackFactory = RemoteSettleRatioFallbackFactory.class)
 public interface RemoteSettleRatioService {
 
     /**
