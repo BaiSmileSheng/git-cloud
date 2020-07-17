@@ -109,13 +109,15 @@ public class CdMouthRateController extends BaseController {
     /**
      * 根据月份查询汇率
      * @param yearMouth
+     * @param currency
      * @return rate
      */
     @GetMapping(value = "findRate")
-    public R findRateByYearMouth(String yearMouth){
+    public R findRateByYearMouth(String yearMouth,String currency){
         Example example = new Example(CdMouthRate.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("yearMouth", yearMouth);
+        criteria.andEqualTo("currency", currency);
         CdMouthRate cdMouthRate = cdMouthRateService.findByExampleOne(example);
         return R.data(cdMouthRate);
     }

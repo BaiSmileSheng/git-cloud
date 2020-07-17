@@ -20,7 +20,7 @@ public class RemoteCdMouthRateFallbackFactory implements FallbackFactory<RemoteC
              * @return rate
              */
             @Override
-            public R findRateByYearMouth(String yearMouth) {
+            public R findRateByYearMouth(String yearMouth,String currency) {
                 return R.error("服务器拥挤，请稍后再试！");
             }
         };
