@@ -259,14 +259,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             log.error("(月度结算定时任务)报废索赔系数未维护！");
             throw new BusinessException("报废索赔系数未维护！");
         }
-        //查询指定月汇率
-        R rRate = remoteCdMouthRateService.findRateByYearMouth(month);
-        if (!rRate.isSuccess()) {
-            throw new BusinessException(StrUtil.format("{}月份未维护费率", month));
-        }
-        CdMouthRate cdMouthRate = rRate.getData(CdMouthRate.class);
-        BigDecimal rate = cdMouthRate.getRate();//汇率
-        BigDecimal rateAmount = cdMouthRate.getAmount();//数额
+
         //从SAP销售价格表取值（销售组织、物料号、有效期）
         //查询上个月、待结算的物耗申请中的物料号  用途是查询SAP成本价 更新到物耗表
         List<String> materialCodeList = smsScrapOrderMapper.selectMaterialByMonthAndStatus(month, CollUtil.newArrayList(ScrapOrderStatusEnum.BF_ORDER_STATUS_DJS.getCode()));
@@ -303,8 +296,19 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
                 BigDecimal ratio = cdSettleRatioBF.getRatio();//报废索赔系数
                 BigDecimal machiningPrice = smsScrapOrder.getMachiningPrice();//加工费单价
                 scrapPrice = (materialPrice.multiply(scrapAmount.multiply(ratio))).add(scrapAmount.multiply(machiningPrice));
-                if (CurrencyEnum.CURRENCY_USD.getCode().equals(smsScrapOrder.getCurrency())) {
-                    //如果是外币，还要 除以数额*汇率
+                //如果是外币，还要 除以数额*汇率
+                if (StrUtil.isEmpty(smsScrapOrder.getCurrency())) {
+                    throw new BusinessException(StrUtil.format("{}报废单未维护币种", smsScrapOrder.getScrapNo()));
+                }
+                if (!StrUtil.equals(CurrencyEnum.CURRENCY_CNY.getCode(), smsScrapOrder.getCurrency())) {
+                    //查询指定月汇率
+                    R rRate = remoteCdMouthRateService.findRateByYearMouth(month,smsScrapOrder.getCurrency());
+                    if (!rRate.isSuccess()) {
+                        throw new BusinessException(StrUtil.format("{}月份未维护{}币种费率", month,smsScrapOrder.getCurrency()));
+                    }
+                    CdMouthRate cdMouthRate = rRate.getData(CdMouthRate.class);
+                    BigDecimal rate = cdMouthRate.getRate();//汇率
+                    BigDecimal rateAmount = cdMouthRate.getAmount();//数额
                     scrapPrice = scrapPrice.divide(rateAmount,2).multiply(rate);
                 }
                 smsScrapOrder.setSettleFee(scrapPrice);

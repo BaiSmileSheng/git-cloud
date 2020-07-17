@@ -1,8 +1,6 @@
 package com.cloud.order.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.date.DateField;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.RoleConstants;
@@ -120,7 +118,7 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
             criteria.andGreaterThanOrEqualTo("deliveryDate",oms2weeksDemandOrderEdit.getBeginTime() );
         }
         if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getEndTime())) {
-            criteria.andLessThanOrEqualTo("deliveryDate", DateUtil.parse(oms2weeksDemandOrderEdit.getEndTime()).offset(DateField.DAY_OF_MONTH,1) );
+            criteria.andLessThanOrEqualTo("deliveryDate", oms2weeksDemandOrderEdit.getEndTime() );
         }
         return example;
     }

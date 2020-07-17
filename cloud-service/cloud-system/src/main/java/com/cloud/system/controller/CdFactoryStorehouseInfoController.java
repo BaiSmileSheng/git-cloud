@@ -194,6 +194,7 @@ public class CdFactoryStorehouseInfoController extends BaseController {
     /**
      * 修改保存工厂库位
      */
+    @HasPermissions("system:factoryStorehouse:update")
     @PostMapping("update")
     @OperLog(title = "修改保存工厂库位 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存工厂库位 ", response = R.class)
@@ -204,6 +205,7 @@ public class CdFactoryStorehouseInfoController extends BaseController {
     /**
      * 删除工厂库位
      */
+    @HasPermissions("system:factoryStorehouse:remove")
     @PostMapping("remove")
     @OperLog(title = "删除工厂库位 ", businessType = BusinessType.DELETE)
     @ApiOperation(value = "删除工厂库位 ", response = R.class)

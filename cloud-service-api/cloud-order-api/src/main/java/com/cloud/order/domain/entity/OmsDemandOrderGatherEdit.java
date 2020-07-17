@@ -4,9 +4,7 @@ import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
-import com.cloud.order.converter.DemandOrderGatherEditAuditStatusConverter;
-import com.cloud.order.converter.DemandOrderGatherEditStatusConverter;
-import com.cloud.order.converter.OrderFromConverter;
+import com.cloud.order.converter.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -164,14 +162,14 @@ public class OmsDemandOrderGatherEdit extends BaseEntity {
     /**
      * 产品类别
      */
-    @ExcelProperty(value = "产品类别",index = 12)
+    @ExcelProperty(value = "产品类别",index = 12,converter = ProductTypeOrderConverter.class)
     @ApiModelProperty(value = "产品类别")
     private String productType;
 
     /**
      * 生命周期
      */
-    @ExcelProperty(value = "生命周期",index = 13)
+    @ExcelProperty(value = "生命周期",index = 13,converter = LifeCycleOrderConverter.class)
     @ApiModelProperty(value = "生命周期")
     private String lifeCycle;
 

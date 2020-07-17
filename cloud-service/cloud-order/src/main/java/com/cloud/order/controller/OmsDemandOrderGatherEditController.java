@@ -1,8 +1,6 @@
 package com.cloud.order.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.date.DateField;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.RoleConstants;
@@ -126,7 +124,7 @@ public class OmsDemandOrderGatherEditController extends BaseController {
             criteria.andGreaterThanOrEqualTo("deliveryDate",omsDemandOrderGatherEdit.getBeginTime() );
         }
         if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getEndTime())) {
-            criteria.andLessThanOrEqualTo("deliveryDate", DateUtil.parse(omsDemandOrderGatherEdit.getEndTime()).offset(DateField.DAY_OF_MONTH,1) );
+            criteria.andLessThanOrEqualTo("deliveryDate", omsDemandOrderGatherEdit.getEndTime() );
         }
         return example;
     }
@@ -234,7 +232,7 @@ public class OmsDemandOrderGatherEditController extends BaseController {
             example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
         }
         List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList = omsDemandOrderGatherEditService.selectByExample(example);
-        return EasyExcelUtilOSS.writeExcel(omsDemandOrderGatherEditList, "需求导入.xlsx", "sheet", new OmsDemandOrderGatherEdit());
+        return EasyExcelUtilOSS.writeExcel(omsDemandOrderGatherEditList, "13滚动需求-导入.xlsx", "sheet", new OmsDemandOrderGatherEdit());
     }
 
     /**
