@@ -1,15 +1,8 @@
 package com.cloud.common.utils.file;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
 import javax.servlet.http.HttpServletRequest;
+import java.io.*;
+import java.net.URLEncoder;
 
 /**
  * 文件处理工具类
@@ -106,7 +99,7 @@ public class FileUtils {
             filename = new String(fileName.getBytes(), "ISO8859-1");
         } else if (agent.contains("Chrome")) {
             // google浏览器
-            filename = URLEncoder.encode(filename, "utf-8");
+            filename = URLEncoder.encode(filename, "utf-8").replaceAll("%2B","+");
         } else {
             // 其它浏览器
             filename = URLEncoder.encode(filename, "utf-8");
