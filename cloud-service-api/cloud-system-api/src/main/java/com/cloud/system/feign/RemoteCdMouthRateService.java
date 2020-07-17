@@ -22,5 +22,5 @@ public interface RemoteCdMouthRateService {
      * @return rate
      */
     @GetMapping(value = "mouthRate/findRate")
-    R findRateByYearMouth(@RequestParam(value = "yearMouth") String yearMouth);
+    R findRateByYearMouth(@RequestParam(value = "yearMouth") String yearMouth,@RequestParam(value = "currency") String currency);
 }
