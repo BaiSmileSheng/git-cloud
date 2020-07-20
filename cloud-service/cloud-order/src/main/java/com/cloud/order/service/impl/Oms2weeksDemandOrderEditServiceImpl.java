@@ -415,7 +415,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
         for (String id : list) {
             Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit = selectByPrimaryKey(Long.valueOf(id));
             if (!StrUtil.equals(oms2weeksDemandOrderEdit.getStatus()
-                    , DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode())||
+                    , DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode())||
             StrUtil.equals(oms2weeksDemandOrderEdit.getAuditStatus()
                     , DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHZ.getCode())) {
                 return R.error(StrUtil.format("此状态数据不允许删除！需求订单号：{}",oms2weeksDemandOrderEdit.getDemandOrderCode()));
