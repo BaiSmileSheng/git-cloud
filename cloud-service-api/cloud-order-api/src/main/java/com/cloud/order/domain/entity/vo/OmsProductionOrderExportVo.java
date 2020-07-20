@@ -3,24 +3,18 @@ package com.cloud.order.domain.entity.vo;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
-import com.cloud.common.core.domain.BaseEntity;
-import com.cloud.order.converter.OutSourceTypeConverter;
 import com.cloud.order.converter.ProductionOrderClassConverter;
-import com.cloud.order.converter.ProductionOrderStatusConverter;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.cloud.system.converter.OutSourceTypeConverter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tk.mybatis.mapper.annotation.KeySql;
 
-import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.util.Date;
 
 /**
  * 排产订单 对象 oms_production_order
