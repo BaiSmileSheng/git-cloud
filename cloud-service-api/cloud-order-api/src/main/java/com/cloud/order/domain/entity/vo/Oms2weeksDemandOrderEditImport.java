@@ -91,7 +91,6 @@ public class Oms2weeksDemandOrderEditImport {
      * 采购组
      */
     @ExcelProperty(value = "采购组")
-    @NotBlank
     private String purchaseGroupCode;
 
     /**
