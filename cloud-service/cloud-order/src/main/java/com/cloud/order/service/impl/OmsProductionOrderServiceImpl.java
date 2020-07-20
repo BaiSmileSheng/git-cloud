@@ -1505,7 +1505,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         R r=EasyExcelUtil.writeExcelWithHead(productionOrderMailVoList, fileName, sheetName, new OmsProductionOrderMailVo(),excelHeader);
         String path = r.getStr("msg");
         try {
-            mailService.sendAttachmentMail("1332549662@qq.com", subject, content, new String[]{path});
+            mailService.sendAttachmentMail(to, subject, content, new String[]{path});
         }catch (MessagingException me){
             log.error("发送邮件异常");
         }catch (UnsupportedEncodingException ue){
