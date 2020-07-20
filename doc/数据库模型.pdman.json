@@ -12704,19 +12704,19 @@
             {
               "name": "product_type",
               "type": "DefaultString",
-              "remark": "",
+              "remark": "1.主控板,2.内板,3.电源驱动,4.显示,5.外板,6.模块,7.半成品,8外单,9.外卖,10.海达维,11.冰箱,12滚筒,13.波轮,14.商空,15.空调",
               "chnname": "产品类别"
             },
             {
               "name": "life_cycle",
               "type": "DefaultString",
-              "remark": "",
+              "remark": "1、量产2、备件3、下市4、新品5、售后6、老品",
               "chnname": "生命周期"
             },
             {
               "name": "is_putting_out",
               "type": "Char",
-              "remark": "",
+              "remark": "0：否，1：是",
               "chnname": "可否加工承揽"
             },
             {
