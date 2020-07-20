@@ -69,6 +69,16 @@ public class SapConstants {
      */
     public static final String ZSD_INT_DDPS_01= "ZSD_INT_DDPS_01";
 
+    /**
+     * 实时取SAP成品库存
+     */
+    public static final String  ZSD_INT_DDPS_05 = "ZSD_INT_DDPS_05";
+
+    /**
+     * 实时取原材料库存接口
+     */
+    public static final String  ZPP_INT_DDPS_07 = "ZPP_INT_DDPS_07";
+
     //TODO ================卡奥斯SAP系统连接  end=====================
 
     /**
