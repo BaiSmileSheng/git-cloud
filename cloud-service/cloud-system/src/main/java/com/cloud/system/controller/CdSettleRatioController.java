@@ -3,6 +3,7 @@ package com.cloud.system.controller;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.system.domain.entity.SysUser;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -30,7 +31,7 @@ import java.util.List;
 /**
  * 结算索赔系数  提供者
  *
- * @author cs
+ * @author lihongxia
  * @date 2020-06-04
  */
 @RestController
@@ -104,6 +105,8 @@ public class CdSettleRatioController extends BaseController {
         if(StringUtils.isBlank(cdSettleRatio.getClaimType())){
             return R.error("新增保存结算索赔系数时索赔类型为空");
         }
+        SysUser sysUser = getUserInfo(SysUser.class);
+        cdSettleRatio.setCreateBy(sysUser.getLoginName());
         R r = cdSettleRatioService.addSaveVerifyClaimType(cdSettleRatio);
         return r;
     }
@@ -118,6 +121,8 @@ public class CdSettleRatioController extends BaseController {
     @OperLog(title = "修改保存结算索赔系数 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存结算索赔系数 ", response = R.class)
     public R editSave(@RequestBody CdSettleRatio cdSettleRatio) {
+        SysUser sysUser = getUserInfo(SysUser.class);
+        cdSettleRatio.setUpdateBy(sysUser.getLoginName());
         return cdSettleRatioService.updateVerifyClaimType(cdSettleRatio);
     }
 

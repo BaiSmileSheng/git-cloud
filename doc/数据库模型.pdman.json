@@ -11507,10 +11507,22 @@
               "chnname": "成品物料编码"
             },
             {
+              "name": "product_material_desc",
+              "type": "VARCHAR_64",
+              "remark": "",
+              "chnname": "成品物料描述"
+            },
+            {
               "name": "raw_material_code",
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "加工费号"
+            },
+            {
+              "name": "raw_material_desc",
+              "type": "VARCHAR_64",
+              "remark": "",
+              "chnname": "加工费号描述"
             },
             {
               "name": "outsource_way",
@@ -11555,7 +11567,16 @@
               "chnname": "更新时间"
             }
           ],
-          "indexs": [],
+          "indexs": [
+            {
+              "name": "idx_join_index",
+              "isUnique": true,
+              "fields": [
+                "product_material_code",
+                "outsource_way"
+              ]
+            }
+          ],
           "headers": [
             {
               "fieldName": "chnname",
@@ -11830,6 +11851,12 @@
               "type": "DATETIME",
               "remark": "",
               "chnname": "SAP创建日期"
+            },
+            {
+              "name": "price_type",
+              "type": "CHAR_1",
+              "remark": "价格类型:0原材料价格,1加工费号加工费价格",
+              "chnname": "价格类型"
             },
             {
               "name": "remark",

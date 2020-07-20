@@ -4,10 +4,13 @@ import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.system.domain.entity.CdSettleProductMaterial;
+import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.CdSettleProductMaterialExcelImportVo;
+import com.cloud.system.domain.vo.CdSettleProductMaterialExportVo;
 import com.cloud.system.service.ICdSettleProductMaterialService;
 import com.cloud.system.util.EasyExcelUtilOSS;
 import io.swagger.annotations.*;
@@ -36,28 +39,28 @@ public class CdSettleProductMaterialController extends BaseController {
     private ICdSettleProductMaterialService cdSettleProductMaterialService;
 
 
-    @GetMapping("/export")
-    @HasPermissions("system:settleProducMaterial:export")
-    @ApiOperation(value = "导出模板", response = CdSettleProductMaterial.class)
+    @GetMapping("/exportMul")
+    @HasPermissions("system:settleProducMaterial:exportMul")
+    @ApiOperation(value = "导入模板", response = CdSettleProductMaterial.class)
     @OperLog(title = "操作日志", businessType = BusinessType.EXPORT)
-    public R export() {
+    public R exportMul() {
         String fileName = "物料号和加工费号对应关系数据.xlsx";
-        return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new CdSettleProductMaterial());
+        return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new CdSettleProductMaterialExcelImportVo());
     }
 
     /**
-     * 多sheet文件导入
+     * 导入
      * @param file
      * @return
      */
     @PostMapping("/importMul")
+    @HasPermissions("system:settleProducMaterial:importMul")
     @ResponseBody
-    @ApiOperation(value = "多sheet文件导入")
-    public R mulImport(@RequestPart("file") MultipartFile file) {
-        List<CdSettleProductMaterial> cdSettleProductMaterialList = (List<CdSettleProductMaterial>) EasyExcelUtil
-                .readMulExcel(file,new CdSettleProductMaterial());
-        cdSettleProductMaterialService.batchInsertOrUpdate(cdSettleProductMaterialList);
-        return R.ok();
+    @ApiOperation(value = "导入")
+    public R importMul(@RequestPart("file") MultipartFile file) throws Exception{
+        SysUser sysUser = getUserInfo(SysUser.class);
+        R r = cdSettleProductMaterialService.importMul(sysUser,file);
+        return r;
     }
 
     /**
@@ -67,7 +70,7 @@ public class CdSettleProductMaterialController extends BaseController {
      * @return 物料号和加工费号对应关系列表
      */
     @GetMapping("listByCode")
-    @ApiOperation(value = "物料号和加工费号对应关系 查询分页", response = CdSettleProductMaterial.class)
+    @ApiOperation(value = "查询物料号和加工费号对应关系", response = CdSettleProductMaterial.class)
     public R listByCode(@RequestParam(value = "productMaterialCode") String productMaterialCode,
                                                     @RequestParam(value = "rawMaterialCode",required = false) String rawMaterialCode){
         Example example = new Example(CdSettleProductMaterial.class);
@@ -100,53 +103,98 @@ public class CdSettleProductMaterialController extends BaseController {
             @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productMaterialCode", value = "成品物料编码", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "rawMaterialCode", value = "加工费号", required = false, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "rawMaterialCode", value = "加工费号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "outsourceWay", value = "加工委外方式", required = false, paramType = "query", dataType = "String")
     })
     public TableDataInfo list(@ApiIgnore CdSettleProductMaterial cdSettleProductMaterial) {
         Example example = new Example(CdSettleProductMaterial.class);
         Example.Criteria criteria = example.createCriteria();
-        if(StringUtils.isNotBlank(cdSettleProductMaterial.getProductMaterialCode())){
-            criteria.andEqualTo("productMaterialCode",cdSettleProductMaterial.getProductMaterialCode());
-        }
-        if(StringUtils.isNotBlank(cdSettleProductMaterial.getRawMaterialCode())){
-            criteria.andEqualTo("rawMaterialCode",cdSettleProductMaterial.getRawMaterialCode());
-        }
+        assemblyConditions(cdSettleProductMaterial, criteria);
         startPage();
         List<CdSettleProductMaterial> cdSettleProductMaterialList = cdSettleProductMaterialService.selectByExample(example);
         return getDataTable(cdSettleProductMaterialList);
     }
 
+    /**
+     * 组装查询参数
+     * @param cdSettleProductMaterial
+     * @param criteria
+     */
+    private void assemblyConditions(@ApiIgnore CdSettleProductMaterial cdSettleProductMaterial, Example.Criteria criteria) {
+        if(StringUtils.isNotBlank(cdSettleProductMaterial.getProductMaterialCode())){
+            criteria.andEqualTo("productMaterialCode",cdSettleProductMaterial.getProductMaterialCode());
+        }
+        if(StringUtils.isNotBlank(cdSettleProductMaterial.getOutsourceWay())){
+            criteria.andEqualTo("outsourceWay",cdSettleProductMaterial.getOutsourceWay());
+        }
+        if(StringUtils.isNotBlank(cdSettleProductMaterial.getRawMaterialCode())){
+            criteria.andEqualTo("rawMaterialCode",cdSettleProductMaterial.getRawMaterialCode());
+        }
+    }
+
+    /**
+     * 导出
+     * @param cdSettleProductMaterial
+     * @return
+     */
+    @HasPermissions("system:settleProducMaterial:export")
+    @GetMapping("export")
+    @ApiOperation(value = "物料号和加工费号对应关系 导出", response = CdSettleProductMaterial.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productMaterialCode", value = "成品物料编码", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "rawMaterialCode", value = "加工费号", required = false, paramType = "query", dataType = "String")
+    })
+    public R export(@ApiIgnore CdSettleProductMaterial cdSettleProductMaterial) {
+        Example example = new Example(CdSettleProductMaterial.class);
+        Example.Criteria criteria = example.createCriteria();
+        assemblyConditions(cdSettleProductMaterial, criteria);
+        List<CdSettleProductMaterial> cdSettleProductMaterialList = cdSettleProductMaterialService.selectByExample(example);
+        String fileName = "物料号和加工费号维护.xlsx";
+        return EasyExcelUtilOSS.writeExcel(cdSettleProductMaterialList,fileName,fileName,new CdSettleProductMaterialExportVo());
+    }
 
     /**
      * 新增保存物料号和加工费号对应关系
      */
+    @HasPermissions("system:settleProducMaterial:save")
     @PostMapping("save")
     @OperLog(title = "新增保存物料号和加工费号对应关系 ", businessType = BusinessType.INSERT)
     @ApiOperation(value = "新增保存物料号和加工费号对应关系 ", response = R.class)
     public R addSave(@RequestBody CdSettleProductMaterial cdSettleProductMaterial) {
-        cdSettleProductMaterialService.insertSelective(cdSettleProductMaterial);
-        return R.data(cdSettleProductMaterial.getId());
+        //校验入参
+        ValidatorUtils.validateEntity(cdSettleProductMaterial);
+        R r = cdSettleProductMaterialService.insertProductMaterial(cdSettleProductMaterial);
+        return r ;
     }
 
     /**
      * 修改保存物料号和加工费号对应关系
      */
+    @HasPermissions("system:settleProducMaterial:update")
     @PostMapping("update")
     @OperLog(title = "修改保存物料号和加工费号对应关系 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存物料号和加工费号对应关系 ", response = R.class)
     public R editSave(@RequestBody CdSettleProductMaterial cdSettleProductMaterial) {
-        return toAjax(cdSettleProductMaterialService.updateByPrimaryKeySelective(cdSettleProductMaterial));
+        //校验入参
+        ValidatorUtils.validateEntity(cdSettleProductMaterial);
+        R r = cdSettleProductMaterialService.updateProductMaterial(cdSettleProductMaterial);
+        return r;
     }
 
     /**
      * 删除物料号和加工费号对应关系
      */
+    @HasPermissions("system:settleProducMaterial:remove")
     @PostMapping("remove")
     @OperLog(title = "删除物料号和加工费号对应关系 ", businessType = BusinessType.DELETE)
     @ApiOperation(value = "删除物料号和加工费号对应关系 ", response = R.class)
     @ApiParam(name = "ids", value = "需删除数据的id")
     public R remove(@RequestBody String ids) {
-        return toAjax(cdSettleProductMaterialService.deleteByIds(ids));
+        return toAjax(cdSettleProductMaterialService.deleteByIdsWL(ids));
     }
 
     /**
