@@ -134,7 +134,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             }
         }
 
-        omsRealOrderMapper.updateByPrimaryKey(omsRealOrder);
+        omsRealOrderMapper.updateByPrimaryKeySelective(omsRealOrder);
         return R.ok();
     }
 

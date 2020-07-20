@@ -1,5 +1,6 @@
 package com.cloud.system.controller;
 
+import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -131,6 +132,7 @@ public class CdProductWarehouseController extends BaseController {
         criteria.andEqualTo("productMaterialCode",cdProductWarehouse.getProductMaterialCode());
         criteria.andEqualTo("storehouse",cdProductWarehouse.getStorehouse());
         criteria.andEqualTo("productFactoryCode",cdProductWarehouse.getProductFactoryCode());
+        criteria.andEqualTo("delFlag", DeleteFlagConstants.NO_DELETED);
         return R.data(cdProductWarehouseService.selectOneByExample(example));
     }
 
