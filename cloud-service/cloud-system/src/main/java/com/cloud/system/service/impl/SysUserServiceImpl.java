@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ArrayUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.annotation.DataScope;
+import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.text.Convert;
@@ -453,6 +454,7 @@ public class SysUserServiceImpl implements ISysUserService {
         Example exampleCdSupplierInfo = new Example(CdSupplierInfo.class);
         Example.Criteria criteriaCdSupplierInfo = exampleCdSupplierInfo.createCriteria();
         criteriaCdSupplierInfo.andEqualTo("supplierCode", supplierCode);
+        criteriaCdSupplierInfo.andEqualTo("delFlag", DeleteFlagConstants.NO_DELETED);
         CdSupplierInfo cdSupplierInfo = cdSupplierInfoMapper.selectOneByExample(exampleCdSupplierInfo);
         if(null != cdSupplierInfo){
             String userName = cdSupplierInfo.getNick();

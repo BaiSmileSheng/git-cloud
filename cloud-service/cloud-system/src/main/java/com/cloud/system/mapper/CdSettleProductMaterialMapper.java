@@ -20,4 +20,11 @@ public interface CdSettleProductMaterialMapper extends BaseMapper<CdSettleProduc
      */
     List<CdSettleProductMaterial> batchSelect(List<CdSettleProductMaterial> list);
 
+    /**
+     * 批量新增
+     * @param list
+     * @return
+     */
+    int batchInsertOrUpdate(List<CdSettleProductMaterial> list);
+
 }

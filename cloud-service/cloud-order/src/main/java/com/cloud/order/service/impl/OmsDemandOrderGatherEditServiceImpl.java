@@ -227,7 +227,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
     @Override
     public <T> ExcelImportResult checkImportExcel(List<T> objects) {
         if (CollUtil.isEmpty(objects)) {
-            throw new BusinessException("无导入数据！");
+            return new ExcelImportResult(new ArrayList<>());
         }
 
         //错误数据

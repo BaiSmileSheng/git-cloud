@@ -102,7 +102,7 @@ public class CdProductOverdueServiceImpl extends BaseServiceImpl<CdProductOverdu
     @Override
     public <T> ExcelImportResult checkImportExcel(List<T> objects) {
         if (CollUtil.isEmpty(objects)) {
-            throw new BusinessException("无导入数据！");
+            return new ExcelImportResult(new ArrayList<>());
         }
 
         //获取工厂编号信息

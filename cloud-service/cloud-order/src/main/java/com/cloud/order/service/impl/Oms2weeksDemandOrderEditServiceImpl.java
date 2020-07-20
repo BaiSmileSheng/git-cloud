@@ -237,7 +237,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
     @Override
     public <T> ExcelImportResult checkImportExcel(List<T> objects) {
         if (CollUtil.isEmpty(objects)) {
-            throw new BusinessException("无导入数据！");
+            return new ExcelImportResult(new ArrayList<>());
         }
 
         //错误数据
@@ -415,7 +415,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
         for (String id : list) {
             Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit = selectByPrimaryKey(Long.valueOf(id));
             if (!StrUtil.equals(oms2weeksDemandOrderEdit.getStatus()
-                    , DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode())||
+                    , DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode())||
             StrUtil.equals(oms2weeksDemandOrderEdit.getAuditStatus()
                     , DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHZ.getCode())) {
                 return R.error(StrUtil.format("此状态数据不允许删除！需求订单号：{}",oms2weeksDemandOrderEdit.getDemandOrderCode()));
@@ -548,13 +548,19 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             //key为交付日期 value为订单量
             Map<String,Long> mapNumArtificial=listArtificial.stream().collect(Collectors.groupingBy(
                     Oms2weeksDemandOrderEdit::getDeliveryDateStr,Collectors.summingLong(Oms2weeksDemandOrderEdit::getOrderNum)));
-            Map<String,Long> mapNumInterface=listInterface.stream().collect(Collectors.groupingBy(
-                    Oms2weeksDemandOrder::getDeliveryDateStr,Collectors.summingLong(Oms2weeksDemandOrder::getOrderNum)));
+            Map<String, Long> mapNumInterface = null;
+            if (CollectionUtil.isNotEmpty(listInterface)) {
+                mapNumInterface=listInterface.stream().collect(Collectors.groupingBy(
+                        Oms2weeksDemandOrder::getDeliveryDateStr,Collectors.summingLong(Oms2weeksDemandOrder::getOrderNum)));
+            }
             //11周数据
             for (Date day : listDate) {
                 String dayStr = DateUtil.formatDate(day);
-                Long interfaceNum = mapNumInterface.get(dayStr)==null?0L:mapNumInterface.get(dayStr);
-                Long artificialNum = mapNumArtificial.get(dayStr)==null?0L:mapNumInterface.get(dayStr);
+                Long interfaceNum = 0L;
+                if (mapNumInterface != null) {
+                    interfaceNum = mapNumInterface.get(dayStr)==null?0L:mapNumInterface.get(dayStr);
+                }
+                Long artificialNum = mapNumArtificial.get(dayStr)==null?0L:mapNumArtificial.get(dayStr);
                 Long differenceNum = Math.abs((interfaceNum.longValue()-artificialNum.longValue()));
                 DayAndNumsGatherVO numInfo = new DayAndNumsGatherVO().builder()
                         .day(dayStr).interfaceNum(interfaceNum)
@@ -625,12 +631,18 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             //key为交付日期 value为订单量
             Map<String,Long> mapNumArtificial=listArtificial.stream().collect(Collectors.groupingBy(
                     Oms2weeksDemandOrderEdit::getDeliveryDateStr,Collectors.summingLong(Oms2weeksDemandOrderEdit::getOrderNum)));
-            Map<String,Long> mapNumInterface=listInterface.stream().collect(Collectors.groupingBy(
-                    Oms2weeksDemandOrder::getDeliveryDateStr,Collectors.summingLong(Oms2weeksDemandOrder::getOrderNum)));
+            Map<String, Long> mapNumInterface = null;
+            if (CollectionUtil.isNotEmpty(listInterface)) {
+                mapNumInterface=listInterface.stream().collect(Collectors.groupingBy(
+                        Oms2weeksDemandOrder::getDeliveryDateStr,Collectors.summingLong(Oms2weeksDemandOrder::getOrderNum)));
+            }
             //11周数据
             for (Date day : listDate) {
                 String dayStr = DateUtil.formatDate(day);
-                Long interfaceNum = mapNumInterface.get(dayStr)==null?0L:mapNumInterface.get(dayStr);
+                Long interfaceNum = 0L;
+                if (mapNumInterface != null) {
+                    interfaceNum = mapNumInterface.get(dayStr)==null?0L:mapNumInterface.get(dayStr);
+                }
                 Long artificialNum = mapNumArtificial.get(dayStr)==null?0L:mapNumArtificial.get(dayStr);
                 Long differenceNum = Math.abs((interfaceNum.longValue()-artificialNum.longValue()));
                 Oms2weeksDemandOrderEditExportVO info = new Oms2weeksDemandOrderEditExportVO().builder()

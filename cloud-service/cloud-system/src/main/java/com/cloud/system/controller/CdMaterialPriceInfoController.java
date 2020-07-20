@@ -8,6 +8,7 @@ import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.CdMaterialPriceInfo;
+import com.cloud.system.enums.PriceTypeEnum;
 import com.cloud.system.service.ICdMaterialPriceInfoService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * SAP成本价格
@@ -60,6 +62,19 @@ public class CdMaterialPriceInfoController extends BaseController {
         return getDataTable(cdMaterialPriceInfoList);
     }
 
+    /**
+     * 查所有的加工费号
+     */
+    @GetMapping("listJGF")
+    @ApiOperation(value = "查所有的加工费号", response = CdMaterialPriceInfo.class)
+    public R listJGF(){
+        Example example = new Example(CdMaterialPriceInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("priceType", PriceTypeEnum.PRICE_TYPE_1.getCode());
+        List<CdMaterialPriceInfo> cdMaterialPriceInfoList = cdMaterialPriceInfoService.selectByExample(example);
+        List<String> list = cdMaterialPriceInfoList.stream().map(m -> m.getMaterialCode()).collect(Collectors.toList());
+        return R.data(list);
+    }
 
     /**
      * 新增保存SAP成本价格
