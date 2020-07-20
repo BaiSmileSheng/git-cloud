@@ -101,9 +101,9 @@ sap:
     passwd: liuyisi,04
     lang: ZH
   client601:
-    ashost: 10.133.28.69
+    ashost: 10.133.53.23
     sysnr: 00
-    client: 200
+    client: 600
     user: 19046341
     passwd: 123123
     lang: ZH
