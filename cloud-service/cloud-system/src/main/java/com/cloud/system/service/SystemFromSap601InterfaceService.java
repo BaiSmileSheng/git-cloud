@@ -1,6 +1,8 @@
 package com.cloud.system.service;
 
 import com.cloud.common.core.domain.R;
+import com.cloud.system.domain.entity.CdRawMaterialStock;
+import com.cloud.system.domain.entity.SysUser;
 
 import java.util.List;
 
@@ -44,6 +46,13 @@ public interface SystemFromSap601InterfaceService {
      * @Date: 2020/6/5
      */
     R queryBomInfoFromSap601(List<String> factorys, List<String> materials);
+
+    /**
+     * 实时获取原材料库存信息
+     * @param list
+     * @return
+     */
+    R currentqueryRawMaterialStockFromSap601(List<CdRawMaterialStock> list, SysUser sysUser);
 
     /**
      * 定时获取BOM清单数据

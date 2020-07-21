@@ -1,6 +1,8 @@
 package com.cloud.order.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.controller.BaseController;
@@ -70,7 +72,9 @@ public class OmsRealOrderController extends BaseController {
             @ApiImplicitParam(name = "orderType", value = "订单分类", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "orderClass", value = "订单类型", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "customerCode", value = "客户编号", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "auditStatus", value = "审核状态", required = false, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "auditStatus", value = "审核状态", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "beginTime", value = "交付日期起始值", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "endTime", value = "交付日期结束值", required = false, paramType = "query", dataType = "String"),
     })
     public TableDataInfo list(@ApiIgnore OmsRealOrder omsRealOrder) {
 
@@ -121,6 +125,12 @@ public class OmsRealOrderController extends BaseController {
             criteria.andEqualTo("auditStatus", omsRealOrder.getAuditStatus());
         }
 
+        if(StringUtils.isNotBlank(omsRealOrder.getBeginTime())){
+            criteria.andGreaterThanOrEqualTo("deliveryDate",omsRealOrder.getBeginTime());
+        }
+        if(StringUtils.isNotBlank(omsRealOrder.getEndTime())){
+            criteria.andLessThanOrEqualTo("deliveryDate", DateUtil.parse(omsRealOrder.getEndTime()).offset(DateField.DAY_OF_MONTH,1));
+        }
         return example;
     }
 

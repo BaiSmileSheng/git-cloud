@@ -1,9 +1,11 @@
 package com.cloud.system.controller;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.easyexcel.SheetExcelData;
+import com.cloud.common.exception.BusinessException;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
+import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.util.EasyExcelUtilOSS;
 import com.github.pagehelper.PageHelper;
 import io.swagger.annotations.*;
@@ -168,4 +170,23 @@ public class CdRawMaterialStockController extends BaseController {
         return cdRawMaterialStockService.selectByList(list);
     }
 
+    /**
+     * 实时获取原材料库存信息
+     * @param list
+     * @return
+     */
+    @HasPermissions("system:rawMaterialStock:currentqueryRawMaterialStock")
+    @PostMapping("currentqueryRawMaterialStock")
+    @OperLog(title = "实时获取原材料库存信息 ", businessType = BusinessType.INSERT)
+    @ApiOperation(value = "实时获取原材料库存信息 ", response = R.class)
+    public R currentqueryRawMaterialStock(@RequestBody List<CdRawMaterialStock> list){
+        SysUser sysUser = getUserInfo(SysUser.class);
+        list.forEach(cdRawMaterialStock -> {
+            if(StringUtils.isBlank(cdRawMaterialStock.getProductFactoryCode())
+                    || StringUtils.isBlank(cdRawMaterialStock.getRawMaterialCode())){
+                throw new BusinessException("入参工厂号和物料号不能为空");
+            }
+        });
+        return cdRawMaterialStockService.currentqueryRawMaterialStock(list,sysUser);
+    }
 }

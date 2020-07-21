@@ -7,12 +7,14 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.easyexcel.SheetExcelData;
+import com.cloud.common.exception.BusinessException;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.CdProductInProduction;
 import com.cloud.system.domain.entity.CdProductPassage;
 import com.cloud.system.domain.entity.CdProductStock;
 import com.cloud.system.domain.entity.CdProductWarehouse;
+import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.CdProductStockDetailVo;
 import com.cloud.system.service.ICdProductStockService;
 import com.cloud.system.util.EasyExcelUtilOSS;
@@ -176,18 +178,23 @@ public class CdProductStockController extends BaseController {
     }
 
     /**
-     * 同步成品库存
-     *
-     * @param factoryCode  工厂编号
-     * @param materialCode 物料编号
+     * 实时同步成品库存
+     * @param cdProductStockList
      * @return
      */
+    @HasPermissions("system:productStock:sycProductStock")
     @PostMapping("sycProductStock")
-    @OperLog(title = "同步成品库存 ", businessType = BusinessType.UPDATE)
-    @ApiOperation(value = "同步成品库存 ", response = R.class)
-    public R sycProductStock(@RequestParam("factoryCode") String factoryCode, @RequestParam("materialCode") String materialCode) {
-
-        return cdProductStockService.sycProductStock(factoryCode, materialCode);
+    @OperLog(title = "实时同步成品库存 ", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "实时同步成品库存 ", response = R.class)
+    public R sycProductStock(@RequestBody List<CdProductStock> cdProductStockList) {
+        SysUser sysUser = getUserInfo(SysUser.class);
+        cdProductStockList.forEach(cdProductStock -> {
+            if(StringUtils.isBlank(cdProductStock.getProductFactoryCode())
+                    || StringUtils.isBlank(cdProductStock.getProductMaterialCode())){
+                throw new BusinessException("入参工厂号和专用号不能为空");
+            }
+        });
+        return cdProductStockService.sycProductStock(cdProductStockList,sysUser);
     }
 
     /**
