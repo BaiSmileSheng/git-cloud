@@ -83,6 +83,7 @@ public class SmsSettleInfoController extends BaseController {
     @HasPermissions("settle:smsSettleInfo:export")
     @GetMapping("export")
     @ApiOperation(value = "加工费结算导出", response = SmsSettleInfo.class)
+    @OperLog(title = "加工费结算导出 ", businessType = BusinessType.EXPORT)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),

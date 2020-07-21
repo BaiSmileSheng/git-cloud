@@ -117,6 +117,7 @@ public class CdFactoryStorehouseInfoController extends BaseController {
     @GetMapping("exportTemplate")
     @HasPermissions("system:factoryStorehouse:exportTemplate")
     @ApiOperation(value = "导出模板", response = CdFactoryStorehouseInfo.class)
+    @OperLog(title = "导出模板", businessType = BusinessType.EXPORT)
     public R exportTemplate(){
         String fileName = "交货提前量模板.xlsx";
         return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new CdFactoryStorehouseInfoExportVo());
@@ -129,6 +130,7 @@ public class CdFactoryStorehouseInfoController extends BaseController {
     @GetMapping("export")
     @HasPermissions("system:factoryStorehouse:export")
     @ApiOperation(value = "导出", response = CdFactoryStorehouseInfo.class)
+    @OperLog(title = "导出", businessType = BusinessType.EXPORT)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required =true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true,paramType = "query", dataType = "String"),

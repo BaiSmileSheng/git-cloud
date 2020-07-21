@@ -5,6 +5,8 @@ import com.cloud.activiti.service.IActSmsQualityOrderService;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
+import com.cloud.common.log.annotation.OperLog;
+import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.domain.entity.SmsQualityOrder;
 import com.cloud.system.domain.entity.SysUser;
@@ -54,6 +56,7 @@ public class ActSmsQualityOrderController extends BaseController {
     @HasPermissions("activiti:actSmsQuality:save")
     @PostMapping("save")
     @ApiOperation(value = "供应商申诉时质量索赔开启流程",response = SmsQualityOrder.class)
+    @OperLog(title = "供应商申诉时质量索赔开启流程", businessType = BusinessType.UPDATE)
     public R addSave(@RequestParam("id") Long id, @RequestParam("complaintDescription") String complaintDescription,
                      @RequestParam("ossIds") String ossIds) {
         if(null == id){
@@ -78,6 +81,7 @@ public class ActSmsQualityOrderController extends BaseController {
     @HasPermissions("activiti:actSmsQuality:audit")
     @PostMapping("audit")
     @ApiOperation(value = "索赔流程审批",response = SmsQualityOrder.class)
+    @OperLog(title = "质量索赔流程审批", businessType = BusinessType.UPDATE)
     public R audit(@RequestBody BizAudit bizAudit) {
         //获取当前用户登录信息
         SysUser sysUser = getUserInfo(SysUser.class);
