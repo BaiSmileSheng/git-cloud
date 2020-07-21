@@ -19,7 +19,6 @@ import com.cloud.settle.mapper.SmsDelaysDeliveryMapper;
 import com.cloud.settle.service.ISmsDelaysDeliveryService;
 import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
-import com.cloud.system.domain.entity.CdSupplierInfo;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
@@ -27,7 +26,6 @@ import com.cloud.system.feign.RemoteFactoryInfoService;
 import com.cloud.system.feign.RemoteFactoryLineInfoService;
 import com.cloud.system.feign.RemoteOssService;
 import com.cloud.system.feign.RemoteSequeceService;
-import com.cloud.system.feign.RemoteSupplierInfoService;
 import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.seata.spring.annotation.GlobalTransactional;
@@ -85,9 +83,6 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
 
     @Autowired
     private RemoteFactoryInfoService remoteFactoryInfoService;
-
-    @Autowired
-    private RemoteSupplierInfoService remoteSupplierInfoService;
 
     public static String YYYY_MM_DD = "yyyy-MM-dd";
 
