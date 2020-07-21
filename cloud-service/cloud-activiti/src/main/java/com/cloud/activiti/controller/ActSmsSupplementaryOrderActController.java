@@ -48,7 +48,7 @@ public class ActSmsSupplementaryOrderActController extends BaseController {
      * @return
      */
     @PostMapping("open")
-    @OperLog(title = "物耗审核开启流程(新增、编辑)", businessType = BusinessType.UPDATE)
+    @OperLog(title = "物耗审核开启流程(新增、编辑)", businessType = BusinessType.INSERT)
     @ApiOperation(value = "开启流程(新增、编辑) ", response = R.class)
     @HasPermissions("settle:supplementary:commit")
     public R addSave(@RequestBody List<SmsSupplementaryOrder> smsSupplementaryOrders) {
