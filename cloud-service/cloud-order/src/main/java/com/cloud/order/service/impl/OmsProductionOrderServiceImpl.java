@@ -524,7 +524,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         R bomMap = remoteBomService.selectBomList(dicts);
         if (!bomMap.isSuccess()) {
             log.error("获取bom清单数据失败：" + bomMap.get("msg"));
-            return R.error("获取bom清单数据失败!");
+            return R.error("获取bom清单数据失败:" + bomMap.get("msg"));
         }
         List<CdBomInfo> bomInfos = bomMap.getCollectData(new TypeReference<List<CdBomInfo>>() {
         });
