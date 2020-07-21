@@ -459,16 +459,10 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
     @Override
     public R supplierConfirm(String ids, SysUser sysUser) {
         logger.info("供应商确认索赔单 ids:{}", ids);
-        String loginName = sysUser.getLoginName();
-        if(StringUtils.isBlank(loginName)){
-            return R.error("获取登录名异常,请重试");
+        String supplierCodeLogin = sysUser.getSupplierCode();
+        if(StringUtils.isBlank(supplierCodeLogin)){
+            return R.error("非供应商用户,请勿操作");
         }
-        //根据登录名获取供应商编号
-        CdSupplierInfo cdSupplierInfo = remoteSupplierInfoService.getByNick(loginName);
-        if(null == cdSupplierInfo){
-            return R.error("没有查到登录用户的供应商信息,请维护");
-        }
-        String supplierCodeLogin = cdSupplierInfo.getSupplierCode();
         List<SmsQualityOrder> selectListResult = smsQualityOrderMapper.selectByIds(ids);
         if (CollectionUtils.isEmpty(selectListResult)) {
             logger.error("供应商确认质量索赔单失败,质量索赔单不存在 ids:{}", ids);
