@@ -4,6 +4,7 @@ import cn.hutool.core.lang.Dict;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.system.domain.entity.CdProductStock;
+import com.cloud.system.domain.entity.SysUser;
 
 import java.util.List;
 
@@ -20,13 +21,14 @@ public interface ICdProductStockService extends BaseService<CdProductStock> {
      * @return
      */
     R deleteAll();
+
     /**
-     * 同步成品库存
-     * @param factoryCode 工厂编号
-     * @param materialCode 物料编号
+     * 实时单条同步成品库存
+     * @param cdProductStockList
+     * @param sysUser
      * @return
      */
-    R sycProductStock(String factoryCode,String materialCode);
+    R sycProductStock(List<CdProductStock> cdProductStockList, SysUser sysUser);
 
     /**
      * 定时任务同步成品库存
