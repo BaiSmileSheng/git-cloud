@@ -402,7 +402,9 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 List<String> customerList = demandOrderGatherEditOlds.stream()
                         .filter(dto -> StrUtil.equals(sysUser.getLoginName(), dto.getCreateBy()))
                         .map(dtoMap-> dtoMap.getCustomerCode()).distinct().collect(Collectors.toList());
-                deleteByCreateByAndCustomerCode(demandOrderGatherEditOld.getCreateBy(), customerList);
+                if (CollectionUtil.isNotEmpty(customerList)) {
+                    deleteByCreateByAndCustomerCode(demandOrderGatherEditOld.getCreateBy(), customerList);
+                }
             }else{
                 //上周：全部插入历史表，删除原有的，插入新的
                 List<OmsDemandOrderGatherEditHis> listHis= demandOrderGatherEditOlds.stream().map(demandOrderGatherEdit ->
