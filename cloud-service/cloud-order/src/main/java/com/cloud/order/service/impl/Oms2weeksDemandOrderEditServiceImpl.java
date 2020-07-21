@@ -176,7 +176,9 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 List<String> customerList = oms2weeksDemandOrderEdits.stream()
                         .filter(dto -> StrUtil.equals(sysUser.getLoginName(), dto.getCreateBy()))
                         .map(dtoMap-> dtoMap.getCustomerCode()).distinct().collect(Collectors.toList());
-                deleteByCreateByAndCustomerCode(weeksDemandOrderEditOld.getCreateBy(), customerList);
+                if (CollectionUtil.isNotEmpty(customerList)) {
+                    deleteByCreateByAndCustomerCode(weeksDemandOrderEditOld.getCreateBy(), customerList);
+                }
             }else{
                 //上周：全部插入历史表，删除原有的，插入新的
                 List<Oms2weeksDemandOrderEditHis> listHis= oms2weeksDemandOrderEdits.stream().map(weeksDemandOrderEdit ->
