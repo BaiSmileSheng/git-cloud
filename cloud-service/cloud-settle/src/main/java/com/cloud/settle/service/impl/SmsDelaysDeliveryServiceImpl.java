@@ -19,12 +19,15 @@ import com.cloud.settle.mapper.SmsDelaysDeliveryMapper;
 import com.cloud.settle.service.ISmsDelaysDeliveryService;
 import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
+import com.cloud.system.domain.entity.CdSupplierInfo;
 import com.cloud.system.domain.entity.SysOss;
+import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteFactoryInfoService;
 import com.cloud.system.feign.RemoteFactoryLineInfoService;
 import com.cloud.system.feign.RemoteOssService;
 import com.cloud.system.feign.RemoteSequeceService;
+import com.cloud.system.feign.RemoteSupplierInfoService;
 import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.seata.spring.annotation.GlobalTransactional;
@@ -82,6 +85,9 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
 
     @Autowired
     private RemoteFactoryInfoService remoteFactoryInfoService;
+
+    @Autowired
+    private RemoteSupplierInfoService remoteSupplierInfoService;
 
     public static String YYYY_MM_DD = "yyyy-MM-dd";
 
@@ -334,13 +340,29 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
     }
 
     @Override
-    public R supplierConfirm(String ids) {
+    public R supplierConfirm(String ids, SysUser sysUser) {
+        logger.info("供应商确认索赔单 ids:{}",ids);
+        String loginName = sysUser.getLoginName();
+        if(StringUtils.isBlank(loginName)){
+            return R.error("获取登录名异常,请重试");
+        }
+        //根据登录名获取供应商编号
+        CdSupplierInfo cdSupplierInfo = remoteSupplierInfoService.getByNick(loginName);
+        if(null == cdSupplierInfo){
+            return R.error("没有查到登录用户的供应商信息,请维护");
+        }
+        String supplierCodeLogin = cdSupplierInfo.getSupplierCode();
         List<SmsDelaysDelivery> selectListResult =  smsDelaysDeliveryMapper.selectByIds(ids);
         for(SmsDelaysDelivery smsDelaysDelivery : selectListResult){
             Boolean flagResult = DeplayStatusEnum.DELAYS_STATUS_1.getCode().equals(smsDelaysDelivery.getDelaysStatus())
                     ||DeplayStatusEnum.DELAYS_STATUS_7.getCode().equals(smsDelaysDelivery.getDelaysStatus());
             if(!flagResult){
                 throw new BusinessException("请确认延期索赔单状态是否为待供应商确认");
+            }
+            if(!smsDelaysDelivery.getSupplierCode().equals(supplierCodeLogin)){
+                logger.error("供应商确认延期索赔单失败,供应商信息异常 supplierCode:{},supplierCodeLogin:{}",
+                        smsDelaysDelivery.getSupplierCode(), supplierCodeLogin);
+                throw new BusinessException("请勿操作其他供应商的数据");
             }
             smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_11.getCode());
             smsDelaysDelivery.setSettleFee(smsDelaysDelivery.getDelaysAmount());

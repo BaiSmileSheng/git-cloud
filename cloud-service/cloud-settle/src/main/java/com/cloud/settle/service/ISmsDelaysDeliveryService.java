@@ -3,6 +3,7 @@ package com.cloud.settle.service;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.settle.domain.entity.SmsDelaysDelivery;
+import com.cloud.system.domain.entity.SysUser;
 
 /**
  * 延期交付索赔 Service接口
@@ -39,7 +40,7 @@ public interface ISmsDelaysDeliveryService extends BaseService<SmsDelaysDelivery
      * @param ids 主键id
      * @return 供应商确认成功或失败
      */
-    R supplierConfirm(String ids);
+    R supplierConfirm(String ids, SysUser sysUser);
 
     /**
      * 超时发送邮件
