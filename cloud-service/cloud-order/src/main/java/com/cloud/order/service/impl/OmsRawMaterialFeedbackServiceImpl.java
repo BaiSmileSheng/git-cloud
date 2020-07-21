@@ -213,12 +213,12 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             });
         }
         //更新排产订单明细状态
-        omsProductionOrderDetailService.updateBatchByProductOrderCode(omsProductionOrderDetails);
+        if(omsProductionOrderDetails.size() > 0){
+            omsProductionOrderDetailService.updateBatchByProductOrderCode(omsProductionOrderDetails);
+        }
         //更新排产订单状态
-        int orderUpdateCount = omsProductionOrderService.updateBatchByPrimaryKeySelective(productionOrders);
-        if (orderUpdateCount <= 0) {
-            log.error("更新排产订单状态失败！");
-            return R.error("更新排产订单状态失败!");
+        if (productionOrders.size() > 0) {
+            omsProductionOrderService.updateBatchByPrimaryKeySelective(productionOrders);
         }
         int feedbackUpdateCount = omsRawMaterialFeedbackMapper.updateBatchByPrimaryKeySelective(omsRawMaterialFeedbacks);
         if (feedbackUpdateCount <= 0) {
