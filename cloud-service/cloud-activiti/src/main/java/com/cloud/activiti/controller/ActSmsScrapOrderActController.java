@@ -47,7 +47,7 @@ public class ActSmsScrapOrderActController extends BaseController {
      * @return R 成功/失败
      */
     @PostMapping("open")
-    @OperLog(title = "报废审核开启流程(编辑、新增提交)", businessType = BusinessType.UPDATE)
+    @OperLog(title = "报废审核开启流程(编辑、新增提交)", businessType = BusinessType.INSERT)
     @ApiOperation(value = "报废审核开启流程(编辑、新增提交)", response = R.class)
     @HasPermissions("settle:scrapOrder:commit")
     public R addSave(@RequestBody SmsScrapOrder smsScrapOrder) {

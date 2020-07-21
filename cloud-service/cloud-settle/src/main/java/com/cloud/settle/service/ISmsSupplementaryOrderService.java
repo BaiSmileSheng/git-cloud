@@ -3,6 +3,7 @@ package com.cloud.settle.service;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
+import com.cloud.system.domain.entity.SysUser;
 
 import java.util.List;
 
@@ -40,14 +41,14 @@ public interface ISmsSupplementaryOrderService extends BaseService<SmsSupplement
      * @param smsSupplementaryOrder
      * @return id
      */
-    R addSave(SmsSupplementaryOrder smsSupplementaryOrder);
+    R addSave(SmsSupplementaryOrder smsSupplementaryOrder, SysUser sysUser);
 
     /**
      * 新增保存物耗申请单(多条)
      * @param smsSupplementaryOrders
      * @return id
      */
-    R addSaveList(List<SmsSupplementaryOrder> smsSupplementaryOrders);
+    R addSaveList(List<SmsSupplementaryOrder> smsSupplementaryOrders, SysUser sysUser);
 
     /**
      * 根据月份和状态查询

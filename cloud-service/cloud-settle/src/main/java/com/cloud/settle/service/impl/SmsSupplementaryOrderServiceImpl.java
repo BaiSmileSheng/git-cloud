@@ -129,7 +129,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
      */
     @Override
     @Transactional
-    public R addSave(SmsSupplementaryOrder smsSupplementaryOrder) {
+    public R addSave(SmsSupplementaryOrder smsSupplementaryOrder,SysUser sysUser) {
         log.info(StrUtil.format("物耗申请新增保存开始：参数为{}", smsSupplementaryOrder.toString()));
         String productOrderCode = smsSupplementaryOrder.getProductOrderCode();
 
@@ -217,6 +217,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         smsSupplementaryOrder.setPurchaseGroupCode(cdBom.getPurchaseGroup());
         smsSupplementaryOrder.setDelFlag("0");
         smsSupplementaryOrder.setCreateTime(DateUtils.getNowDate());
+        smsSupplementaryOrder.setCreateBy(sysUser.getLoginName());
         int rows = insertSelective(smsSupplementaryOrder);
         if (rows > 0) {
             return R.data(smsSupplementaryOrder.getId());
@@ -232,9 +233,9 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
      */
     @Override
     @Transactional
-    public R addSaveList(List<SmsSupplementaryOrder> smsSupplementaryOrders) {
+    public R addSaveList(List<SmsSupplementaryOrder> smsSupplementaryOrders, SysUser sysUser) {
         smsSupplementaryOrders.forEach(smsSupplementaryOrder ->{
-            R r = addSave(smsSupplementaryOrder);
+            R r = addSave(smsSupplementaryOrder,sysUser);
             if(!r.isSuccess()){
                 throw new BusinessException(r.getStr("msg"));
             }
