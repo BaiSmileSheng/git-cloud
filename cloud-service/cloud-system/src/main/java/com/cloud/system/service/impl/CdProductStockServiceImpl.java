@@ -561,20 +561,20 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
             if(!CollectionUtils.isEmpty(productInProductionList)){
                 cdProductInProductionService.insertList(productInProductionList);
             }
-            logger.info("在产成品库存 插入数据库结束");
+            logger.info("在产成品库存 插入数据库结束 数量:{}",productInProductionList.size());
             List<CdProductPassage> productPassagesList = cdProductStockDetail.getCdProductPassageList();
             logger.info("在途成品库存 插入数据库开始");
             if(!CollectionUtils.isEmpty(productPassagesList)){
                 cdProductPassageService.insertList(productPassagesList);
             }
-            logger.info("在途成品库存 插入数据库结束");
+            logger.info("在途成品库存 插入数据库结束 数量:{}",productPassagesList.size());
 
             List<CdProductWarehouse>  productWarehousesList = cdProductStockDetail.getCdProductWarehouseList();
             logger.info("在库成品库存 插入数据库开始");
             if(!CollectionUtils.isEmpty(productWarehousesList)){
                 cdProductWarehouseService.insertList(productWarehousesList);
             }
-            logger.info("在库成品库存 插入数据库结束");
+            logger.info("在库成品库存 插入数据库结束 数量:{}",productWarehousesList.size());
             List<CdProductStock> productStockList = cdProductStockDetail.getCdProductStockList();
             logger.info("成品库存主数据 插入数据库开始");
             if(!CollectionUtils.isEmpty(productStockList)){
@@ -583,8 +583,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
                  */
                 setSumNum(productStockList);
                 cdProductStockMapper.insertList(productStockList);
-                logger.info("成品库存主数据 插入数据库结束");
             }
+            logger.info("成品库存主数据 插入数据库结束 数量:{}",productStockList.size());
             dstManager.commit(transaction);
         }catch (Exception e){
             StringWriter w = new StringWriter();
