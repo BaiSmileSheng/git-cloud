@@ -76,7 +76,7 @@ public class OmsRawMaterialFeedbackController extends BaseController {
      * 反馈信息处理-快捷修改查询
      */
     @GetMapping("queryProductOrder")
-    @ApiOperation(value = "反馈信息处理-快捷修改查询", response = OmsRawMaterialFeedback.class)
+    @ApiOperation(value = "反馈信息处理-快捷修改查询", response = OmsProductionOrder.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "productMaterialCode", value = "成品专用号", required = true,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = true,paramType = "query", dataType = "String"),

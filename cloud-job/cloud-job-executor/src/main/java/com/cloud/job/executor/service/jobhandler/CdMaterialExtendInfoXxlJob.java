@@ -25,7 +25,7 @@ public class CdMaterialExtendInfoXxlJob {
     /**
      * 定时任务传输成品物料接口
      * 要在定时同步原材料库存之前
-     * 每日凌晨执行一次  0 0 0 * * ?
+     * 每30分钟执行一次  0 0/30 * * * ?
      *
      * @param param
      * @return 成功

@@ -185,7 +185,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
 
         }
         if(StringUtils.isNotBlank(cdProductStock.getProductMaterialCode())){
-            criteria.andEqualTo("productMaterialCode", cdProductStock.getProductMaterialCode());
+            List<String> productMaterialCodeList = Arrays.asList(cdProductStock.getProductMaterialCode().split(","));
+            criteria.andIn("productMaterialCode", productMaterialCodeList);
         }
         List<CdProductStock> cdProductStockList = selectByExample(example);
         return cdProductStockList;
@@ -204,7 +205,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
 
         }
         if(StringUtils.isNotBlank(cdProductStock.getProductMaterialCode())){
-            criteria.andEqualTo("productMaterialCode", cdProductStock.getProductMaterialCode());
+            List<String> productMaterialCodeList = Arrays.asList(cdProductStock.getProductMaterialCode().split(","));
+            criteria.andIn("productMaterialCode", productMaterialCodeList);
         }
         List<CdProductInProduction> cdProductInProductionList = cdProductInProductionService.selectByExample(example);
         return cdProductInProductionList;
@@ -223,7 +225,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
 
         }
         if(StringUtils.isNotBlank(cdProductStock.getProductMaterialCode())){
-            criteria.andEqualTo("productMaterialCode", cdProductStock.getProductMaterialCode());
+            List<String> productMaterialCodeList = Arrays.asList(cdProductStock.getProductMaterialCode().split(","));
+            criteria.andIn("productMaterialCode", productMaterialCodeList);
         }
         List<CdProductPassage> productPassageList = cdProductPassageService.selectByExample(example);
         return productPassageList;
@@ -243,7 +246,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
 
         }
         if(StringUtils.isNotBlank(cdProductStock.getProductMaterialCode())){
-            criteria.andEqualTo("productMaterialCode", cdProductStock.getProductMaterialCode());
+            List<String> productMaterialCodeList = Arrays.asList(cdProductStock.getProductMaterialCode().split(","));
+            criteria.andIn("productMaterialCode", productMaterialCodeList);
         }
         criteria.andEqualTo("stockType",stockType);
         List<CdProductWarehouse> cdProductWarehouseList = cdProductWarehouseService.selectByExample(example);
@@ -366,7 +370,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
      * @param sysUser
      * @return
      */
-    private CdProductStockDetailVo currentSAPProductStock(List<CdProductStock> cdProductStockList,Map<String,List<String>> storehouseMap, SysUser sysUser) {
+    private CdProductStockDetailVo currentSAPProductStock(List<CdProductStock> cdProductStockList,Map<String,List<String>> storehouseMap,
+                                                          SysUser sysUser) {
         JCoDestination destination;
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog();
         sysInterfaceLog.setAppId("SAP");
