@@ -3,6 +3,7 @@ package com.cloud.settle.service;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.settle.domain.entity.SmsQualityOrder;
+import com.cloud.system.domain.entity.SysUser;
 
 import java.util.List;
 
@@ -72,7 +73,7 @@ public interface ISmsQualityOrderService extends BaseService<SmsQualityOrder> {
      * @param ids 主键id
      * @return 供应商确认成功或失败
      */
-    R supplierConfirm(String ids);
+    R supplierConfirm(String ids, SysUser sysUser);
 
     /**
      * 索赔单供应商申诉(包含文件信息)

@@ -243,7 +243,8 @@ public class SmsClaimOtherController extends BaseController {
     @OperLog(title = "供应商确认索赔单 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "供应商确认索赔单 ", response = R.class)
     public R supplierConfirm(String ids){
-        return smsClaimOtherService.supplierConfirm(ids);
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return smsClaimOtherService.supplierConfirm(ids,sysUser);
     }
 
     /**

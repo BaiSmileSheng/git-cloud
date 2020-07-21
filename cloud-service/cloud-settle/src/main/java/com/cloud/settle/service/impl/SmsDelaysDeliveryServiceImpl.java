@@ -20,6 +20,7 @@ import com.cloud.settle.service.ISmsDelaysDeliveryService;
 import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.SysOss;
+import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteFactoryInfoService;
 import com.cloud.system.feign.RemoteFactoryLineInfoService;
@@ -334,13 +335,23 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
     }
 
     @Override
-    public R supplierConfirm(String ids) {
+    public R supplierConfirm(String ids, SysUser sysUser) {
+        logger.info("供应商确认索赔单 ids:{}",ids);
+        String supplierCodeLogin = sysUser.getSupplierCode();
+        if(StringUtils.isBlank(supplierCodeLogin)){
+            return R.error("非供应商用户,请勿操作");
+        }
         List<SmsDelaysDelivery> selectListResult =  smsDelaysDeliveryMapper.selectByIds(ids);
         for(SmsDelaysDelivery smsDelaysDelivery : selectListResult){
             Boolean flagResult = DeplayStatusEnum.DELAYS_STATUS_1.getCode().equals(smsDelaysDelivery.getDelaysStatus())
                     ||DeplayStatusEnum.DELAYS_STATUS_7.getCode().equals(smsDelaysDelivery.getDelaysStatus());
             if(!flagResult){
                 throw new BusinessException("请确认延期索赔单状态是否为待供应商确认");
+            }
+            if(!smsDelaysDelivery.getSupplierCode().equals(supplierCodeLogin)){
+                logger.error("供应商确认延期索赔单失败,供应商信息异常 supplierCode:{},supplierCodeLogin:{}",
+                        smsDelaysDelivery.getSupplierCode(), supplierCodeLogin);
+                throw new BusinessException("请勿操作其他供应商的数据");
             }
             smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_11.getCode());
             smsDelaysDelivery.setSettleFee(smsDelaysDelivery.getDelaysAmount());

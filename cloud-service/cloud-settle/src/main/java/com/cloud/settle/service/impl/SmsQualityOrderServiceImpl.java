@@ -14,7 +14,9 @@ import com.cloud.settle.mail.MailService;
 import com.cloud.settle.mapper.SmsQualityOrderMapper;
 import com.cloud.settle.service.ISmsQualityOrderService;
 import com.cloud.system.domain.entity.CdFactoryInfo;
+import com.cloud.system.domain.entity.CdSupplierInfo;
 import com.cloud.system.domain.entity.SysOss;
+import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteFactoryInfoService;
 import com.cloud.system.feign.RemoteMaterialService;
@@ -455,8 +457,12 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
      * @return 供应商确认成功或失败
      */
     @Override
-    public R supplierConfirm(String ids) {
+    public R supplierConfirm(String ids, SysUser sysUser) {
         logger.info("供应商确认索赔单 ids:{}", ids);
+        String supplierCodeLogin = sysUser.getSupplierCode();
+        if(StringUtils.isBlank(supplierCodeLogin)){
+            return R.error("非供应商用户,请勿操作");
+        }
         List<SmsQualityOrder> selectListResult = smsQualityOrderMapper.selectByIds(ids);
         if (CollectionUtils.isEmpty(selectListResult)) {
             logger.error("供应商确认质量索赔单失败,质量索赔单不存在 ids:{}", ids);
@@ -470,6 +476,11 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
                 logger.error("供应商确认质量索赔单失败,状态异常 id:{},qualityStatus:{}",
                         smsQualityOrder.getId(), smsQualityOrder.getQualityStatus());
                 throw new BusinessException("请确认索赔单状态是否为待供应商确认");
+            }
+            if(!smsQualityOrder.getSupplierCode().equals(supplierCodeLogin)){
+                logger.error("供应商确认质量索赔单失败,供应商信息异常 supplierCode:{},supplierCodeLogin:{}",
+                        smsQualityOrder.getSupplierCode(), supplierCodeLogin);
+                throw new BusinessException("请勿操作其他供应商的数据");
             }
             smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_11.getCode());
             smsQualityOrder.setSettleFee(smsQualityOrder.getClaimAmount());
