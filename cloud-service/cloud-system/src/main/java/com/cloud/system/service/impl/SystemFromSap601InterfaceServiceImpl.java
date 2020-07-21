@@ -384,7 +384,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                         cdBomInfo.setProductUnit(outTableOutput.getString("MMEIN"));//成品单位
                         cdBomInfo.setComponentUnit(outTableOutput.getString("MEINS"));//组件单位
                         String stlal = outTableOutput.getString("STLAL");
-                        String version = stlal.replaceAll("^(0+)", "");//BOM版本去掉前面的0
+                        String version = (stlal == null) ? null : stlal.replaceAll("^(0+)", "");//BOM版本去掉前面的0
                         cdBomInfo.setVersion(version);//BOM版本
                         cdBomInfo.setPurchaseGroup(outTableOutput.getString("EKGRP"));//采购组
                         cdBomInfo.setCreateBy("定时任务");
