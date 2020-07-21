@@ -18,8 +18,10 @@ public class FeignConfig implements RequestInterceptor {
     @Override
     public void apply(RequestTemplate requestTemplate) {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        HttpServletRequest request = attributes.getRequest();
-        //添加token
-        requestTemplate.header(Constants.CURRENT_ID, request.getHeader(Constants.CURRENT_ID));
+        if (attributes != null) {
+            HttpServletRequest request = attributes.getRequest();
+            //添加token
+            requestTemplate.header(Constants.CURRENT_ID, request.getHeader(Constants.CURRENT_ID));
+        }
     }
 }
