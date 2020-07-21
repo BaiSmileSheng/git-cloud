@@ -113,7 +113,7 @@
             <if test="createBy != null and createBy != ''">
                 and create_by=#{createBy}
             </if>
-            <if test="customerCodes != null">
+            <if test="customerCodes != null and customerCodes.size > 0">
                 and customer_code in
                 <foreach collection="customerCodes" item="item" open="(" close=")" separator=",">
                     #{item}
@@ -135,7 +135,7 @@
             <if test="dto.orderFrom != null and dto.orderFrom != ''">
                 and order_from=#{dto.orderFrom}
             </if>
-            <if test="dto.productFactoryList != null ">
+            <if test="dto.productFactoryList != null and dto.productFactoryList.size > 0">
                 and product_factory_code in
                 <foreach collection="dto.productFactoryList" item="item" open="(" close=")" separator=",">
                     #{item}
