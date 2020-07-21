@@ -274,7 +274,8 @@ public class SmsQualityOrderController extends BaseController {
     @OperLog(title = "供应商确认索赔单 ", businessType = BusinessType.DELETE)
     @ApiOperation(value = "供应商确认索赔单 ", response = R.class)
     public R supplierConfirm(String ids) {
-        return smsQualityOrderService.supplierConfirm(ids);
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return smsQualityOrderService.supplierConfirm(ids,sysUser);
     }
 
     /**

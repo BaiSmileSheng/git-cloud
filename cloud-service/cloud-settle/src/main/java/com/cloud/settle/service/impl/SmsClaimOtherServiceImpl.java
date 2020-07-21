@@ -11,6 +11,7 @@ import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.enums.ClaimOtherStatusEnum;
 import com.cloud.settle.mail.MailService;
 import com.cloud.system.domain.entity.CdFactoryInfo;
+import com.cloud.system.domain.entity.CdSupplierInfo;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
@@ -419,8 +420,12 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
      * @return 供应商确认成功或失败
      */
     @Override
-    public R supplierConfirm(String ids) {
+    public R supplierConfirm(String ids,SysUser sysUser) {
         logger.info("供应商确认索赔单 ids:{}",ids);
+        String supplierCodeLogin = sysUser.getSupplierCode();
+        if(StringUtils.isBlank(supplierCodeLogin)){
+            return R.error("非供应商用户,请勿操作");
+        }
         List<SmsClaimOther> selectListResult =  smsClaimOtherMapper.selectByIds(ids);
         if(CollectionUtils.isEmpty(selectListResult)){
             logger.error("供应商确认其他索赔单失败,其他索赔单不存在 ids:{}",ids);
@@ -434,6 +439,11 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
                 logger.error("供应商确认其他索赔单失败,状态异常 id:{},claimOtherStatus:{}",
                         smsClaimOther.getId(),smsClaimOther.getClaimOtherStatus());
                 throw new BusinessException("请确认其他索赔单状态是否为待供应商确认");
+            }
+            if(!smsClaimOther.getSupplierCode().equals(supplierCodeLogin)){
+                logger.error("供应商确认其他索赔单失败,供应商信息异常 supplierCode:{},supplierCodeLogin:{}",
+                        smsClaimOther.getSupplierCode(), supplierCodeLogin);
+                throw new BusinessException("请勿操作其他供应商的数据");
             }
             smsClaimOther.setClaimOtherStatus(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_11.getCode());
             smsClaimOther.setSettleFee(smsClaimOther.getClaimPrice());
