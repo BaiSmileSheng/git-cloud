@@ -14,7 +14,7 @@ import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.bean.BeanUtils;
-import com.cloud.settle.domain.entity.PO.SmsClaimCashDetailDTO;
+import com.cloud.settle.domain.entity.vo.SmsClaimCashDetailVo;
 import com.cloud.settle.domain.entity.SmsClaimCashDetail;
 import com.cloud.settle.domain.entity.SmsInvoiceInfo;
 import com.cloud.settle.domain.entity.SmsMouthSettle;
@@ -118,6 +118,13 @@ public class SmsMouthSettleController extends BaseController {
      */
     @GetMapping("listDetail")
     @ApiOperation(value = "月度结算查询详情")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "id", value = "月度结算id", required = false, paramType = "query", dataType = "String")
+    })
     @HasPermissions("settle:mouthSettle:listDetail")
     public R listDetail(Long id) {
         SmsMouthSettle smsMouthSettle = smsMouthSettleService.selectByPrimaryKey(id);
@@ -133,6 +140,7 @@ public class SmsMouthSettleController extends BaseController {
         criteriaSettle.andEqualTo("supplierCode", smsMouthSettle.getSupplierCode())
                 .andEqualTo("companyCode", smsMouthSettle.getCompanyCode())
                 .andCondition("DATE_FORMAT(product_start_date, '%Y%m')='"+lastMonth+"'");
+        startPage();
         List<SmsSettleInfo> settleInfos=smsSettleInfoService.selectByExample(exampleSettle);
         dict.put("settleInfos", settleInfos);
 
@@ -140,12 +148,12 @@ public class SmsMouthSettleController extends BaseController {
         Map<String, SmsClaimCashDetail> mapActual = smsClaimCashDetailService.selectSumCashGroupByClaimTypeActual(smsMouthSettle.getSettleNo());
         Map<String, SmsClaimCashDetail> mapHistory = smsClaimCashDetailService.selectSumCashGroupByClaimTypeHistory(smsMouthSettle.getSettleNo());
 
-        List<SmsClaimCashDetailDTO> list = new ArrayList<>();
+        List<SmsClaimCashDetailVo> list = new ArrayList<>();
         List<String> typeList = CollUtil.newArrayList(SettleRatioEnum.SPLX_BF.getCode()
         ,SettleRatioEnum.SPLX_WH.getCode(),SettleRatioEnum.SPLX_YQ.getCode()
         ,SettleRatioEnum.SPLX_ZL.getCode(),SettleRatioEnum.SPLX_QT.getCode());
         typeList.forEach(type->{
-            SmsClaimCashDetailDTO dto = new SmsClaimCashDetailDTO();
+            SmsClaimCashDetailVo dto = new SmsClaimCashDetailVo();
             dto.setClaimType(type);
             if (MapUtil.isNotEmpty(mapActual)&&mapActual.get(type) != null) {
                 dto.setActualCashAmount(mapActual.get(type).getCashAmount());

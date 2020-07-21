@@ -5,13 +5,13 @@ import com.alibaba.excel.enums.CellDataTypeEnum;
 import com.alibaba.excel.metadata.CellData;
 import com.alibaba.excel.metadata.GlobalConfiguration;
 import com.alibaba.excel.metadata.property.ExcelContentProperty;
-import com.cloud.order.enums.OutSourceTypeEnum;
+import com.cloud.order.enums.ProductTypeOrderEnum;
 
 /**
- * 委外方式转化器
- * @author cs
+ * 产品类型
+ * @author lihongxia
  */
-public class OutSourceTypeConverter implements Converter<String> {
+public class ProductTypeOrderConverter implements Converter<String> {
 
 
         @Override
@@ -27,11 +27,11 @@ public class OutSourceTypeConverter implements Converter<String> {
         @Override
         public String convertToJavaData(CellData cellData, ExcelContentProperty excelContentProperty, GlobalConfiguration globalConfiguration)  {
             String stringValue = cellData.getStringValue();
-            return OutSourceTypeEnum.getCodeByMsg(stringValue);
+            return ProductTypeOrderEnum.getCodeByMsg(stringValue);
         }
 
         @Override
         public CellData convertToExcelData(String string, ExcelContentProperty excelContentProperty, GlobalConfiguration globalConfiguration) {
-            return new CellData(OutSourceTypeEnum.getMsgByCode(string));
+            return new CellData(ProductTypeOrderEnum.getMsgByCode(string));
         }
 }

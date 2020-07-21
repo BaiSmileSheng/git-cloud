@@ -23,6 +23,7 @@
         <result property="beginDate" column="begin_date"/>
         <result property="endDate" column="end_date"/>
         <result property="sapCreatedDate" column="sap_created_date"/>
+        <result property="priceType" column="price_type"/>
         <result property="remark" column="remark"/>
         <result property="delFlag" column="del_flag"/>
         <result property="createBy" column="create_by"/>
@@ -51,6 +52,7 @@
                begin_date,
                end_date,
                sap_created_date,
+               price_type,
                remark,
                del_flag,
                create_by,
@@ -79,6 +81,7 @@
         begin_date,
         end_date,
         sap_created_date,
+        price_type,
         remark,
         del_flag,
         create_by,
@@ -120,6 +123,7 @@
         begin_date,
         end_date,
         sap_created_date,
+        price_type,
         remark,
         del_flag,
         create_by,
@@ -144,6 +148,7 @@
             ifnull(#{item.beginDate}, null),
             ifnull(#{item.endDate}, null),
             ifnull(#{item.sapCreatedDate}, ''),
+            #{item.priceType},
             ifnull(#{item.remark}, ''),
             ifnull(#{item.delFlag}, 0),
             ifnull(#{item.createBy}, ''),
@@ -169,6 +174,7 @@
         end_date = VALUES(end_date),
         sap_created_date = VALUES(sap_created_date),
         remark = VALUES(remark),
+        price_type = VALUES(price_type),
         del_flag = VALUES(del_flag),
         create_by = VALUES(create_by),
         update_by = VALUES(update_by),

@@ -1,4 +1,4 @@
-package com.cloud.settle.domain.entity.PO;
+package com.cloud.settle.domain.entity.vo;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SmsClaimCashDetailDTO {
+public class SmsClaimCashDetailVo {
     private static final long serialVersionUID = 1L;
 
     /**

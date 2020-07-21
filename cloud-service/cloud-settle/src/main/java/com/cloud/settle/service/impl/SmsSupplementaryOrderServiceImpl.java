@@ -270,14 +270,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             //根据前面查出的物料号查询SAP成本价 map key:物料号  value:CdMaterialPriceInfo
             mapMaterialPrice = remoteCdMaterialPriceInfoService.selectPriceByInMaterialCodeAndDate(materialCodeStr, now, now);
         }
-        //查询指定月汇率
-        R rRate = remoteCdMouthRateService.findRateByYearMouth(month);
-        if (!rRate.isSuccess()) {
-            throw new BusinessException(StrUtil.format("{}月份未维护费率", month));
-        }
-        CdMouthRate cdMouthRate = rRate.getData(CdMouthRate.class);
-        BigDecimal rate = cdMouthRate.getRate();//汇率
-        BigDecimal rateAmount = cdMouthRate.getAmount();//数额
+
         //物耗索赔系数
         CdSettleRatio cdSettleRatioWH = remoteSettleRatioService.selectByClaimType(SettleRatioEnum.SPLX_WH.getCode());
         if (cdSettleRatioWH == null) {
@@ -314,7 +307,19 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
                 BigDecimal stuffPrice = smsSupplementaryOrder.getStuffPrice();//原材料单价
                 BigDecimal ratio = cdSettleRatioWH.getRatio();//物耗索赔系数
                 spPrice = stuffAmount.multiply(stuffPrice.multiply(ratio));
-                if (CurrencyEnum.CURRENCY_USD.getCode().equals(smsSupplementaryOrder.getCurrency())) {
+                //如果是外币，还要 除以数额*汇率
+                if (StrUtil.isEmpty(smsSupplementaryOrder.getCurrency())) {
+                    throw new BusinessException(StrUtil.format("{}物耗单未维护币种", smsSupplementaryOrder.getStuffNo()));
+                }
+                if (!StrUtil.equals(CurrencyEnum.CURRENCY_CNY.getCode(), smsSupplementaryOrder.getCurrency())) {
+                    //查询指定月汇率
+                    R rRate = remoteCdMouthRateService.findRateByYearMouth(month,smsSupplementaryOrder.getCurrency());
+                    if (!rRate.isSuccess()) {
+                        throw new BusinessException(StrUtil.format("{}月份未维护{}币种费率", month,smsSupplementaryOrder.getCurrency()));
+                    }
+                    CdMouthRate cdMouthRate = rRate.getData(CdMouthRate.class);
+                    BigDecimal rate = cdMouthRate.getRate();//汇率
+                    BigDecimal rateAmount = cdMouthRate.getAmount();//数额
                     //如果是外币，还要 除以数额*汇率
                     spPrice = spPrice.divide(rateAmount,2).multiply(rate);
                     smsSupplementaryOrder.setRate(rate.divide(rateAmount,2));

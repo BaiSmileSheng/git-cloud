@@ -5,29 +5,74 @@
 <mapper namespace="com.cloud.system.mapper.CdSettleProductMaterialMapper">
 
     <resultMap type="CdSettleProductMaterial" id="CdSettleProductMaterialResult">
-                    <result property="id" column="id"/>
-                    <result property="productMaterialCode" column="product_material_code"/>
-                    <result property="rawMaterialCode" column="raw_material_code"/>
-                    <result property="outsourceWay" column="outsource_way"/>
-                    <result property="remark" column="remark"/>
-                    <result property="delFlag" column="del_flag"/>
-                    <result property="createBy" column="create_by"/>
-                    <result property="createTime" column="create_time"/>
-                    <result property="updateBy" column="update_by"/>
-                    <result property="updateTime" column="update_time"/>
-                    </resultMap>
+        <result property="id" column="id"/>
+        <result property="productMaterialCode" column="product_material_code"/>
+        <result property="productMaterialDesc" column="product_material_desc"/>
+        <result property="rawMaterialCode" column="raw_material_code"/>
+        <result property="rawMaterialDesc" column="raw_material_desc"/>
+        <result property="outsourceWay" column="outsource_way"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
 
     <sql id="selectCdSettleProductMaterialVo">
-        select id, product_material_code, raw_material_code, outsource_way, remark, del_flag, create_by, create_time, update_by, update_time from cd_settle_product_material
+        select id,
+               product_material_code,
+               product_material_desc,
+               raw_material_code,
+               raw_material_desc,
+               outsource_way,
+               remark,
+               del_flag,
+               create_by,
+               create_time,
+               update_by,
+               update_time
+        from cd_settle_product_material
     </sql>
 
     <select id="batchSelect" parameterType="java.util.List" resultMap="CdSettleProductMaterialResult">
         <include refid="selectCdSettleProductMaterialVo"/>
         WHERE
-        <foreach collection="list" item="item"  separator="or">
-            (product_material_code = #{item.productMaterialCode} and raw_material_code = #{item.rawMaterialCode} and del_flag = 0)
+        <foreach collection="list" item="item" separator="or">
+            (product_material_code = #{item.productMaterialCode} and raw_material_code = #{item.rawMaterialCode} and
+            del_flag = 0)
         </foreach>
     </select>
 
+    <insert id="batchInsertOrUpdate" parameterType="java.util.List">
+        insert into cd_settle_product_material (
+        product_material_code, product_material_desc,raw_material_code, raw_material_desc,outsource_way, remark,
+        del_flag, create_by, update_by)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.productMaterialCode},
+            #{item.productMaterialDesc},
+            #{item.rawMaterialCode},
+            #{item.rawMaterialDesc},
+            #{item.outsourceWay},
+            ifnull(#{item.remark}, ''),
+            ifnull(#{item.delFlag}, 0),
+            ifnull(#{item.createBy}, ''),
+            ifnull(#{item.updateBy}, '')
+            )
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        product_material_code = VALUES(product_material_code),
+        product_material_desc = VALUES(product_material_desc),
+        raw_material_code = VALUES(raw_material_code),
+        raw_material_desc = VALUES(raw_material_desc),
+        outsource_way = VALUES(outsource_way),
+        remark = VALUES(remark),
+        del_flag = VALUES(del_flag),
+        create_by = VALUES(create_by),
+        update_by = VALUES(update_by),
+        update_time = now()
+    </insert>
 
 </mapper>

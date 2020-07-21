@@ -12,6 +12,7 @@ import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.domain.entity.CdRawMaterialStock;
+import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.service.ICdBomInfoService;
 import com.cloud.system.service.ICdFactoryInfoService;
 import com.cloud.system.service.ICdMaterialExtendInfoService;
@@ -382,7 +383,9 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                         cdBomInfo.setBomNum(outTableOutput.getBigDecimal("DANHAO"));//单耗
                         cdBomInfo.setProductUnit(outTableOutput.getString("MMEIN"));//成品单位
                         cdBomInfo.setComponentUnit(outTableOutput.getString("MEINS"));//组件单位
-                        cdBomInfo.setVersion(StrUtil.toString(outTableOutput.getInt("STLAL")));//BOM版本
+                        String stlal = outTableOutput.getString("STLAL");
+                        String version = (stlal == null) ? null : stlal.replaceAll("^(0+)", "");//BOM版本去掉前面的0
+                        cdBomInfo.setVersion(version);//BOM版本
                         cdBomInfo.setPurchaseGroup(outTableOutput.getString("EKGRP"));//采购组
                         cdBomInfo.setCreateBy("定时任务");
                         cdBomInfo.setCreateTime(new Date());
@@ -398,9 +401,70 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             log.error("Connect SAP fault, error msg: " + e);
             throw new BusinessException(e.getMessage());
         }
-        R result = new R();
-        result.set("data", dataList);
-        return result;
+        return R.data(dataList);
+    }
+
+    @Override
+    public R currentqueryRawMaterialStockFromSap601(List<CdRawMaterialStock> list, SysUser sysUser) {
+        JCoDestination destination = null;
+        //定义返回的data体
+        List<CdRawMaterialStock> dataList = new ArrayList<>();
+        try {
+
+            //创建与SAP的连接
+            destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP601);
+            //获取repository
+            JCoRepository repository = destination.getRepository();
+            //获取函数信息
+            JCoFunction fm = repository.getFunction(SapConstants.ZPP_INT_DDPS_07);
+            if (fm == null) {
+                log.error("==============实时获取原材料库存接口函数失败!================");
+                return R.error("实时获取原材料库存接口函数失败!");
+            }
+            //获取输入参数
+            JCoTable inputTableWerks = fm.getTableParameterList().getTable("WERKS");
+            JCoTable inputTableMatnr = fm.getTableParameterList().getTable("MATNR");
+            list.forEach(cdRawMaterialStock ->{
+                inputTableWerks.appendRow();
+                inputTableWerks.setValue("WERKS", cdRawMaterialStock.getProductFactoryCode());
+                inputTableMatnr.appendRow();
+                inputTableMatnr.setValue("MATNR",cdRawMaterialStock.getRawMaterialCode().toUpperCase());
+            });
+            //执行函数
+            JCoContext.begin(destination);
+            fm.execute(destination);
+            JCoContext.end(destination);
+            //获取返回的参数
+            JCoParameterList jCoFields = fm.getExportParameterList();
+            if (SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(jCoFields.getString("ZTYPE"))) {
+                //获取返回的Table
+                JCoTable outTableOutput = fm.getTableParameterList().getTable("OUTPUT");
+                //从输出table中获取每一行数据
+                if (outTableOutput != null && outTableOutput.getNumRows() > 0) {
+                    //循环取table行数据
+                    for (int i = 0; i < outTableOutput.getNumRows(); i++) {
+                        //设置指针位置
+                        outTableOutput.setRow(i);
+                        CdRawMaterialStock cdRawMaterialStock = new CdRawMaterialStock();
+                        cdRawMaterialStock.setProductFactoryCode(outTableOutput.getString("WERKS"));
+                        cdRawMaterialStock.setRawMaterialCode(outTableOutput.getString("MATNR"));
+                        cdRawMaterialStock.setRawMaterialDesc(outTableOutput.getString("MAKTX"));
+                        cdRawMaterialStock.setCurrentStock(outTableOutput.getBigDecimal("LABST"));
+                        cdRawMaterialStock.setUnit(outTableOutput.getString("KMEIN"));
+                        cdRawMaterialStock.setUpdateBy(sysUser.getLoginName());
+                        cdRawMaterialStock.setDelFlag(DeleteFlagConstants.NO_DELETED);
+                        dataList.add(cdRawMaterialStock);
+                    }
+                }
+            } else {
+                log.error("实时获取原材料库存数据失败：" + jCoFields.getString("MESSAGE"));
+                return R.error(jCoFields.getString("MESSAGE"));
+            }
+        } catch (Exception e) {
+            log.error("Connect SAP fault, error msg: " + e);
+            throw new BusinessException(e.getMessage());
+        }
+        return R.data(dataList);
     }
 
     /**

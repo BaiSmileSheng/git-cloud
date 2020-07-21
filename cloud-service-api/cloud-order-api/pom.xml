@@ -23,5 +23,10 @@
             <artifactId>cloud-common-swagger</artifactId>
             <version>${cloud.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.cloud</groupId>
+            <artifactId>cloud-system-api</artifactId>
+            <version>${cloud.version}</version>
+        </dependency>
     </dependencies>
 </project>

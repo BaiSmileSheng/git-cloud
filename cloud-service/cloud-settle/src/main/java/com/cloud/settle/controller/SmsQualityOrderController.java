@@ -12,6 +12,7 @@ import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.settle.domain.entity.SmsQualityOrder;
+import com.cloud.settle.domain.entity.vo.SmsQualityOrderExportVo;
 import com.cloud.settle.enums.QualityStatusEnum;
 import com.cloud.settle.service.ISmsQualityOrderService;
 import com.cloud.settle.util.EasyExcelUtilOSS;
@@ -118,7 +119,7 @@ public class SmsQualityOrderController extends BaseController {
         Example example = assemblyConditions(smsQualityOrder);
         List<SmsQualityOrder> smsQualityOrderList = smsQualityOrderService.selectByExample(example);
         String fileName = "质量索赔.xlsx";
-        return EasyExcelUtilOSS.writeExcel(smsQualityOrderList, fileName, fileName, new SmsQualityOrder());
+        return EasyExcelUtilOSS.writeExcel(smsQualityOrderList, fileName, fileName, new SmsQualityOrderExportVo());
     }
 
     /**

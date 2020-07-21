@@ -1,7 +1,9 @@
 package com.cloud.system.controller;
 
+import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.system.domain.entity.SysUser;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -29,11 +31,12 @@ import java.util.List;
 /**
  * 结算索赔系数  提供者
  *
- * @author cs
+ * @author lihongxia
  * @date 2020-06-04
  */
 @RestController
 @RequestMapping("settleRatio")
+@Api(tags = "结算索赔系数  提供者")
 public class CdSettleRatioController extends BaseController {
 
     @Autowired
@@ -94,6 +97,7 @@ public class CdSettleRatioController extends BaseController {
      * @param cdSettleRatio 结算索赔系数
      * @return 新增主键id
      */
+    @HasPermissions("system:settleRatio:save")
     @PostMapping("save")
     @OperLog(title = "新增保存结算索赔系数 ", businessType = BusinessType.INSERT)
     @ApiOperation(value = "新增结算索赔系数(先校验此索赔类型是否存在) ", response = R.class)
@@ -101,8 +105,10 @@ public class CdSettleRatioController extends BaseController {
         if(StringUtils.isBlank(cdSettleRatio.getClaimType())){
             return R.error("新增保存结算索赔系数时索赔类型为空");
         }
-        cdSettleRatioService.addSaveVerifyClaimType(cdSettleRatio);
-        return R.data(cdSettleRatio.getId());
+        SysUser sysUser = getUserInfo(SysUser.class);
+        cdSettleRatio.setCreateBy(sysUser.getLoginName());
+        R r = cdSettleRatioService.addSaveVerifyClaimType(cdSettleRatio);
+        return r;
     }
 
     /**
@@ -110,10 +116,13 @@ public class CdSettleRatioController extends BaseController {
      * @param cdSettleRatio 结算索赔系数信息
      * @return 修改结果成功或失败
      */
+    @HasPermissions("system:settleRatio:update")
     @PostMapping("update")
     @OperLog(title = "修改保存结算索赔系数 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存结算索赔系数 ", response = R.class)
     public R editSave(@RequestBody CdSettleRatio cdSettleRatio) {
+        SysUser sysUser = getUserInfo(SysUser.class);
+        cdSettleRatio.setUpdateBy(sysUser.getLoginName());
         return cdSettleRatioService.updateVerifyClaimType(cdSettleRatio);
     }
 
@@ -122,6 +131,7 @@ public class CdSettleRatioController extends BaseController {
      * @param ids 主键
      * @return 删除成功或失败
      */
+    @HasPermissions("system:settleRatio:remove")
     @PostMapping("remove")
     @OperLog(title = "删除结算索赔系数 ", businessType = BusinessType.DELETE)
     @ApiOperation(value = "删除结算索赔系数 ", response = R.class)

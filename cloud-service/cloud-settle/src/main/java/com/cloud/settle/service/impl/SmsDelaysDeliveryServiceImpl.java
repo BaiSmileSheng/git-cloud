@@ -193,9 +193,10 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
             SysUserVo sysUser = mapSysUser.get(supplierCode);
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条延期交付订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
-            mailTextBuffer.append(smsDelaysDeliveryMail.getSupplierName()).append(supplierCode)
-                    .append(sysUser.getCorporation()).append(" ").append("您有一条延期交付订单，订单号")
-                    .append(smsDelaysDeliveryMail.getDelaysNo()).append(",请及时处理，如不处理，3天后系统自动确认，无法申诉!")
+            mailTextBuffer.append(sysUser.getCorporation()).append(supplierCode)
+                    .append("：").append("您有一条延期索赔单，单号")
+                    .append(smsDelaysDeliveryMail.getDelaysNo()).append("，请及时处理，72小时不处理，系统将自动确认，无法申诉!")
+                    .append("\n系统登录地址：\n")
                     .append(EmailConstants.ORW_URL);
             String toSupplier = sysUser.getEmail();
             mailService.sendTextMail(toSupplier,mailSubject,mailTextBuffer.toString());
@@ -374,10 +375,11 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
             SysUserVo sysUser = sysUserR.getData(SysUserVo.class);
             String mailSubject = "延期索赔邮件";
             StringBuffer mailTextBuffer = new StringBuffer();
-            // 供应商名称 +V码+公司  您有一条延期索赔订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
-            mailTextBuffer.append(smsDelaysDelivery.getSupplierName()).append(supplierCode)
-                    .append(sysUser.getCorporation()).append(" ").append("您有一条延期索赔订单，索赔单号")
-                    .append(smsDelaysDelivery.getDelaysNo()).append(",请及时处理，如不处理，1天后系统自动确认，无法申诉!")
+            // 供应商名称 +V码+公司  您有一条延期索赔订单，订单号XXXXX，请及时处理，如不处理，1天后系统自动确认，无法申诉
+            mailTextBuffer.append(sysUser.getCorporation()).append(supplierCode)
+                    .append("：").append("您有一条延期索赔单，单号")
+                    .append(smsDelaysDelivery.getDelaysNo()).append("，请及时处理，24小时不处理，系统将自动确认，无法申诉!")
+                    .append("\n系统登录地址：\n")
                     .append(EmailConstants.ORW_URL);
             String toSupplier = sysUser.getEmail();
             mailService.sendTextMail(toSupplier,mailSubject,mailTextBuffer.toString());

@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Id;
+import javax.validation.constraints.NotBlank;
 
 import tk.mybatis.mapper.annotation.KeySql;
 
@@ -42,20 +43,37 @@ public class CdSettleProductMaterial extends BaseEntity {
      */
     @ExcelProperty(value = "成品物料编码")
     @ApiModelProperty(value = "成品物料编码")
+    @NotBlank(message = "成品物料编码不能为空")
     private String productMaterialCode;
+
+    /**
+     * 成品物料描述
+     */
+    @ExcelProperty(value = "成品物料描述")
+    @ApiModelProperty(value = "成品物料描述")
+    private String productMaterialDesc;
 
     /**
      * 加工费号
      */
     @ExcelProperty(value = "加工费号")
     @ApiModelProperty(value = "加工费号")
+    @NotBlank(message = "加工费号不能为空")
     private String rawMaterialCode;
+
+    /**
+     * 加工费号描述
+     */
+    @ExcelProperty(value = "加工费号描述")
+    @ApiModelProperty(value = "加工费号描述")
+    private String rawMaterialDesc;
 
     /**
      * 委外方式
      */
     @ExcelProperty(value = "委外方式")
     @ApiModelProperty(value = "委外方式")
+    @NotBlank(message = "委外方式不能为空")
     private String outsourceWay;
 
     /**

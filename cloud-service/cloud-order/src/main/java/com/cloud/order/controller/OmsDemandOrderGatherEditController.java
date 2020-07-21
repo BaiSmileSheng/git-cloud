@@ -1,8 +1,6 @@
 package com.cloud.order.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.date.DateField;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.RoleConstants;
@@ -126,7 +124,7 @@ public class OmsDemandOrderGatherEditController extends BaseController {
             criteria.andGreaterThanOrEqualTo("deliveryDate",omsDemandOrderGatherEdit.getBeginTime() );
         }
         if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getEndTime())) {
-            criteria.andLessThanOrEqualTo("deliveryDate", DateUtil.parse(omsDemandOrderGatherEdit.getEndTime()).offset(DateField.DAY_OF_MONTH,1) );
+            criteria.andLessThanOrEqualTo("deliveryDate", omsDemandOrderGatherEdit.getEndTime() );
         }
         return example;
     }
@@ -234,7 +232,7 @@ public class OmsDemandOrderGatherEditController extends BaseController {
             example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
         }
         List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList = omsDemandOrderGatherEditService.selectByExample(example);
-        return EasyExcelUtilOSS.writeExcel(omsDemandOrderGatherEditList, "需求导入.xlsx", "sheet", new OmsDemandOrderGatherEdit());
+        return EasyExcelUtilOSS.writeExcel(omsDemandOrderGatherEditList, "13滚动需求-导入.xlsx", "sheet", new OmsDemandOrderGatherEdit());
     }
 
     /**
@@ -256,14 +254,16 @@ public class OmsDemandOrderGatherEditController extends BaseController {
         SysUser sysUser = getUserInfo(SysUser.class);
         startPage();
         //先分页查询去重的物料号和工厂
-        R r = omsDemandOrderGatherEditService.selectDistinctMaterialCodeAndFactoryCode(omsDemandOrderGatherEdit,sysUser);
-        if (r.isSuccess()) {
-            List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList=r.getCollectData(new TypeReference<List<OmsDemandOrderGatherEdit>>() {});
+        List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList = omsDemandOrderGatherEditService.selectDistinctMaterialCodeAndFactoryCode(omsDemandOrderGatherEdit,sysUser);
+        if (CollectionUtil.isNotEmpty(omsDemandOrderGatherEditList)) {
+            TableDataInfo info=getDataTable(omsDemandOrderGatherEditList);
             //根据前面分页查询的物料号和工厂查询出相关信息并组织数据结构
             R rReturn = omsDemandOrderGatherEditService.week13DemandGatherList(omsDemandOrderGatherEditList);
             if (rReturn.isSuccess()) {
-                List<OmsDemandOrderGatherEdit> listReturn=rReturn.getCollectData(new TypeReference<List<OmsDemandOrderGatherEdit>>() {});
-                return getDataTable(listReturn);
+                List<OmsDemandOrderGatherEdit> listReturn = rReturn.getCollectData(new TypeReference<List<OmsDemandOrderGatherEdit>>() {
+                });
+                info.setRows(listReturn);
+                return info;
             }
         }
         return getDataTable(new ArrayList<>());

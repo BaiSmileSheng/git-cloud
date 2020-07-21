@@ -1,4 +1,4 @@
-package com.cloud.order.enums;
+package com.cloud.system.enums;
 
 /**
  * 委外方式枚举

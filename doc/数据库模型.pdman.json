@@ -9767,7 +9767,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "''"
@@ -10191,16 +10191,18 @@
               "notNull": true
             },
             {
-              "name": "sum_num",
-              "type": "Money",
-              "remark": "库存总量(在产+在途+在库-寄售不足)",
-              "chnname": "库存总量"
-            },
-            {
               "name": "rejects_num",
               "type": "Money",
               "remark": "",
-              "chnname": "不良品库存"
+              "chnname": "不良品库存",
+              "notNull": true
+            },
+            {
+              "name": "sum_num",
+              "type": "Money",
+              "remark": "库存总量(在产+在途+在库-寄售不足)",
+              "chnname": "库存总量",
+              "notNull": true
             },
             {
               "name": "unit",
@@ -11494,7 +11496,9 @@
               "name": "id",
               "type": "BIGINT_19",
               "remark": "",
-              "chnname": "主键id"
+              "chnname": "主键id",
+              "pk": true,
+              "notNull": true
             },
             {
               "name": "product_material_code",
@@ -11503,16 +11507,34 @@
               "chnname": "成品物料编码"
             },
             {
+              "name": "product_material_desc",
+              "type": "VARCHAR_64",
+              "remark": "",
+              "chnname": "成品物料描述"
+            },
+            {
               "name": "raw_material_code",
               "type": "VARCHAR_32",
               "remark": "",
               "chnname": "加工费号"
             },
             {
+              "name": "raw_material_desc",
+              "type": "VARCHAR_64",
+              "remark": "",
+              "chnname": "加工费号描述"
+            },
+            {
               "name": "outsource_way",
               "type": "CHAR_1",
               "remark": "",
               "chnname": "委外方式"
+            },
+            {
+              "name": "remark",
+              "type": "VARCHAR_1000",
+              "remark": "",
+              "chnname": "备注"
             },
             {
               "name": "del_flag",
@@ -11545,7 +11567,16 @@
               "chnname": "更新时间"
             }
           ],
-          "indexs": [],
+          "indexs": [
+            {
+              "name": "idx_join_index",
+              "isUnique": true,
+              "fields": [
+                "product_material_code",
+                "outsource_way"
+              ]
+            }
+          ],
           "headers": [
             {
               "fieldName": "chnname",
@@ -11820,6 +11851,12 @@
               "type": "DATETIME",
               "remark": "",
               "chnname": "SAP创建日期"
+            },
+            {
+              "name": "price_type",
+              "type": "CHAR_1",
+              "remark": "价格类型:0原材料价格,1加工费号加工费价格",
+              "chnname": "价格类型"
             },
             {
               "name": "remark",
@@ -12362,13 +12399,6 @@
               "defaultValue": "''"
             },
             {
-              "name": "pricing_record_no",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "定价记录号",
-              "defaultValue": "''"
-            },
-            {
               "name": "remarks",
               "type": "VARCHAR_200",
               "remark": "",
@@ -12674,19 +12704,19 @@
             {
               "name": "product_type",
               "type": "DefaultString",
-              "remark": "",
+              "remark": "1.主控板,2.内板,3.电源驱动,4.显示,5.外板,6.模块,7.半成品,8外单,9.外卖,10.海达维,11.冰箱,12滚筒,13.波轮,14.商空,15.空调",
               "chnname": "产品类别"
             },
             {
               "name": "life_cycle",
               "type": "DefaultString",
-              "remark": "",
+              "remark": "1、量产2、备件3、下市4、新品5、售后6、老品",
               "chnname": "生命周期"
             },
             {
               "name": "is_putting_out",
               "type": "Char",
-              "remark": "",
+              "remark": "0：否，1：是",
               "chnname": "可否加工承揽"
             },
             {
@@ -12962,6 +12992,125 @@
             }
           ],
           "chnname": "工厂库位表"
+        },
+        {
+          "title": "cd_product_overdue",
+          "fields": [
+            {
+              "name": "id",
+              "type": "BigInt",
+              "remark": "",
+              "chnname": "主键",
+              "pk": true,
+              "notNull": true,
+              "relationNoShow": false,
+              "autoIncrement": true
+            },
+            {
+              "name": "product_material_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "超期物料号",
+              "notNull": true
+            },
+            {
+              "name": "product_material_desc",
+              "type": "VARCHAR_64",
+              "remark": "''",
+              "chnname": "超期物料描述"
+            },
+            {
+              "name": "product_factory_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "生产工厂编码"
+            },
+            {
+              "name": "del_flag",
+              "type": "CHAR_1",
+              "remark": "'0'",
+              "chnname": "是否删除0：有效，1：删除"
+            },
+            {
+              "name": "remark",
+              "type": "VARCHAR_1000",
+              "remark": "''",
+              "chnname": "备注"
+            },
+            {
+              "name": "create_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "创建时间"
+            },
+            {
+              "name": "create_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "创建人"
+            },
+            {
+              "name": "update_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "更新时间"
+            },
+            {
+              "name": "update_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "更新人"
+            }
+          ],
+          "indexs": [],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
+            }
+          ],
+          "chnname": "超期库存表",
+          "remark": "超期库存表"
         }
       ],
       "graphCanvas": {

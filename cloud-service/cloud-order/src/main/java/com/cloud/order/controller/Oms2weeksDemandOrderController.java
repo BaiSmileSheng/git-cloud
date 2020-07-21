@@ -1,9 +1,9 @@
 package com.cloud.order.controller;
 
-import cn.hutool.core.date.DateField;
-import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
+import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -11,13 +11,16 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.order.domain.entity.Oms2weeksDemandOrder;
 import com.cloud.order.service.IOms2weeksDemandOrderService;
+import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
+import com.cloud.system.domain.entity.SysUser;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -62,6 +65,10 @@ public class Oms2weeksDemandOrderController extends BaseController {
     })
     public TableDataInfo list(Oms2weeksDemandOrder oms2weeksDemandOrder) {
         Example example = listCondition(oms2weeksDemandOrder);
+        SysUser sysUser = getUserInfo(SysUser.class);
+        if(!sysUser.isAdmin()&& CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
+            example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+        }
         startPage();
         List<Oms2weeksDemandOrder> oms2weeksDemandOrderList = oms2weeksDemandOrderService.selectByExample(example);
         return getDataTable(oms2weeksDemandOrderList);
@@ -91,7 +98,7 @@ public class Oms2weeksDemandOrderController extends BaseController {
             criteria.andGreaterThanOrEqualTo("deliveryDate",oms2weeksDemandOrder.getBeginTime() );
         }
         if (StrUtil.isNotEmpty(oms2weeksDemandOrder.getEndTime())) {
-            criteria.andLessThanOrEqualTo("deliveryDate", DateUtil.parse(oms2weeksDemandOrder.getEndTime()).offset(DateField.DAY_OF_MONTH,1) );
+            criteria.andLessThanOrEqualTo("deliveryDate", oms2weeksDemandOrder.getEndTime() );
         }
         return example;
     }

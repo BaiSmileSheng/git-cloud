@@ -127,7 +127,7 @@ public class SmsClaimOther extends BaseEntity {
     @ExcelProperty(value = "申诉时间",index = 9)
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "申诉时间")
-    @JsonFormat(pattern="yyyy-MM-dd",timezone="GMT+8")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date complaintDate;
 
     /**

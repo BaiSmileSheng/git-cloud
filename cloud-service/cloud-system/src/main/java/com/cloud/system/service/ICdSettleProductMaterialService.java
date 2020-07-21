@@ -3,6 +3,8 @@ package com.cloud.system.service;
 import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.CdSettleProductMaterial;
 import com.cloud.common.core.service.BaseService;
+import com.cloud.system.domain.entity.SysUser;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -15,10 +17,23 @@ import java.util.List;
 public interface ICdSettleProductMaterialService extends BaseService<CdSettleProductMaterial> {
 
     /**
-     * 批量新增或修改(根据 product_material_code+raw_material_code唯一性修改)
-     * @param list 物料号和加工费号对应关系集合
+     * 导入
      * @return 成功或失败
      */
-    R batchInsertOrUpdate(List<CdSettleProductMaterial> list);
+    R importMul(SysUser sysUser,MultipartFile file) throws Exception;
+
+    /**
+     * 新增
+     * @param cdSettleProductMaterial
+     * @return
+     */
+    R insertProductMaterial(CdSettleProductMaterial cdSettleProductMaterial);
+
+    /**
+     * 修改
+     * @param cdSettleProductMaterial
+     * @return
+     */
+    R updateProductMaterial(CdSettleProductMaterial cdSettleProductMaterial);
 
 }

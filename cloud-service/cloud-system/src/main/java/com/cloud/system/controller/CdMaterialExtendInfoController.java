@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 物料扩展信息  提供者
@@ -89,6 +90,18 @@ public class CdMaterialExtendInfoController extends BaseController {
         return getDataTable(cdMaterialExtendInfoList);
     }
 
+    /**
+     * 查询所有的专用号
+     */
+    @GetMapping("listCode")
+    @ApiOperation(value = "查询所有的专用号", response = CdMaterialExtendInfo.class)
+    public R listCode(){
+        Example example = new Example(CdMaterialExtendInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        List<CdMaterialExtendInfo> cdMaterialExtendInfoList = cdMaterialExtendInfoService.selectByExample(example);
+        List<String> list = cdMaterialExtendInfoList.stream().map(m ->m.getMaterialCode()).collect(Collectors.toList());
+        return R.data(list);
+    }
     /**
      * 组装条件
      * @param cdMaterialExtendInfo
@@ -161,6 +174,7 @@ public class CdMaterialExtendInfoController extends BaseController {
     /**
      * 修改保存物料扩展信息
      */
+    @HasPermissions("sys:materialExtendInfo:update")
     @PostMapping("update")
     @OperLog(title = "修改保存物料扩展信息 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存物料扩展信息 ", response = R.class)
@@ -171,6 +185,7 @@ public class CdMaterialExtendInfoController extends BaseController {
     /**
      * 删除物料扩展信息
      */
+    @HasPermissions("sys:materialExtendInfo:remove")
     @PostMapping("remove")
     @OperLog(title = "删除物料扩展信息 ", businessType = BusinessType.DELETE)
     @ApiOperation(value = "删除物料扩展信息 ", response = R.class)

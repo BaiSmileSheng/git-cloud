@@ -227,7 +227,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
     @Override
     public <T> ExcelImportResult checkImportExcel(List<T> objects) {
         if (CollUtil.isEmpty(objects)) {
-            throw new BusinessException("无导入数据！");
+            return new ExcelImportResult(new ArrayList<>());
         }
 
         //错误数据
@@ -402,7 +402,9 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 List<String> customerList = demandOrderGatherEditOlds.stream()
                         .filter(dto -> StrUtil.equals(sysUser.getLoginName(), dto.getCreateBy()))
                         .map(dtoMap-> dtoMap.getCustomerCode()).distinct().collect(Collectors.toList());
-                deleteByCreateByAndCustomerCode(demandOrderGatherEditOld.getCreateBy(), customerList);
+                if (CollectionUtil.isNotEmpty(customerList)) {
+                    deleteByCreateByAndCustomerCode(demandOrderGatherEditOld.getCreateBy(), customerList);
+                }
             }else{
                 //上周：全部插入历史表，删除原有的，插入新的
                 List<OmsDemandOrderGatherEditHis> listHis= demandOrderGatherEditOlds.stream().map(demandOrderGatherEdit ->
@@ -571,7 +573,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
      * @return
      */
     @Override
-    public R selectDistinctMaterialCodeAndFactoryCode(OmsDemandOrderGatherEdit omsDemandOrderGatherEdit,SysUser sysUser) {
+    public List<OmsDemandOrderGatherEdit> selectDistinctMaterialCodeAndFactoryCode(OmsDemandOrderGatherEdit omsDemandOrderGatherEdit,SysUser sysUser) {
         //如果是排产员，需要加上工厂权限
         if(CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
             List<String> factoryList=Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(","));
@@ -580,7 +582,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             }
         }
         List<OmsDemandOrderGatherEdit> list = omsDemandOrderGatherEditMapper.selectDistinctMaterialCodeAndFactoryCode(omsDemandOrderGatherEdit);
-        return R.data(list);
+        return list;
     }
 
     /**
