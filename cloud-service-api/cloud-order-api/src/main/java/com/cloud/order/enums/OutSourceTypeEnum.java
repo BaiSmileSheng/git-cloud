@@ -1,13 +1,10 @@
-package com.cloud.system.enums;
-
-import org.apache.ibatis.type.Alias;
+package com.cloud.order.enums;
 
 /**
  * 委外方式枚举
  * @Author cs
  * @Date 2020-06-01
  */
-@Alias("sys_outSourceTypeEnum")
 public enum OutSourceTypeEnum {
 
     OUT_SOURCE_TYPE_BWW("0","半成品"),

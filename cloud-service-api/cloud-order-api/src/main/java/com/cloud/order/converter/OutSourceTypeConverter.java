@@ -1,18 +1,16 @@
-package com.cloud.system.converter;
+package com.cloud.order.converter;
 
 import com.alibaba.excel.converters.Converter;
 import com.alibaba.excel.enums.CellDataTypeEnum;
 import com.alibaba.excel.metadata.CellData;
 import com.alibaba.excel.metadata.GlobalConfiguration;
 import com.alibaba.excel.metadata.property.ExcelContentProperty;
-import com.cloud.system.enums.OutSourceTypeEnum;
-import org.apache.ibatis.type.Alias;
+import com.cloud.order.enums.OutSourceTypeEnum;
 
 /**
  * 委外方式转化器
  * @author cs
  */
-@Alias("sys_outSourceTypeConverter")
 public class OutSourceTypeConverter implements Converter<String> {
 
 
