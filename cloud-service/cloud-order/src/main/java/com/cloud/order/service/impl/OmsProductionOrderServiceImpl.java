@@ -30,7 +30,7 @@ import com.cloud.settle.domain.entity.SmsSettleInfo;
 import com.cloud.settle.enums.SettleInfoOrderStatusEnum;
 import com.cloud.settle.feign.RemoteSettleInfoService;
 import com.cloud.system.domain.entity.*;
-import com.cloud.system.domain.po.SysUserRights;
+import com.cloud.system.domain.vo.SysUserRights;
 import com.cloud.system.enums.OutSourceTypeEnum;
 import com.cloud.system.feign.*;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -39,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
@@ -412,7 +413,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      * Date: 2020/6/22
      */
     @Override
-    @GlobalTransactional
+    @Transactional
     public R updateSave(OmsProductionOrder omsProductionOrder, SysUser sysUser) {
         //根据ID查询排产订单数据
         OmsProductionOrder productionOrder = omsProductionOrderMapper.selectByPrimaryKey(omsProductionOrder.getId());
@@ -458,6 +459,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             for (OmsRawMaterialFeedback omsRawMaterialFeedback : omsRawMaterialFeedbacks) {
                 if (orderSum.compareTo(omsRawMaterialFeedback.getProductContentNum()) < 0) {
                     omsRawMaterialFeedback.setStatus(RawMaterialFeedbackConstants.STATUS_ONE);
+                    omsRawMaterialFeedbackService.updateByPrimaryKeySelective(omsRawMaterialFeedback);
                     checkCount++;
                 }
             }
@@ -519,6 +521,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             omsProductionOrderDetail.setCreateBy(sysUser.getLoginName());
             omsProductionOrderDetails.add(omsProductionOrderDetail);
         });
+        omsProductionOrderDetailService.delectByProductOrderCode(productionOrder.getOrderCode());
         omsProductionOrderDetailService.insertList(omsProductionOrderDetails);
         if (omsProductionOrder.getStatus().equals(ProductOrderConstants.STATUS_ZERO)) {
             //获取权限用户列表
@@ -534,7 +537,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             sysUserRightsList.forEach(u ->
                     omsProductionOrderDetails.forEach(o -> {
                         if (u.getProductFactorys().contains(o.getProductFactoryCode())
-                                && u.getPurchaseGroups().contains(o.getPurchaseGroup())) {
+                                && u.getPurchaseGroups().contains(o.getPurchaseGroup())
+                                && StrUtil.isNotBlank(u.getEmail())) {
                             sysUsers.add(SysUser.builder().userName(u.getUserName()).email(u.getEmail()).build());
                         }
                     })
@@ -890,7 +894,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             Set<SysUser> sysUsers = new HashSet<>();
             sysUserRightsList.forEach(u ->
                     checkOrders.forEach(o -> {
-                        if (u.getProductFactorys().contains(o.getProductFactoryCode())) {
+                        if (u.getProductFactorys().contains(o.getProductFactoryCode()) && StrUtil.isNotBlank(u.getEmail())) {
                             sysUsers.add(SysUser.builder().userName(u.getUserName()).email(u.getEmail()).build());
                         }
                     })
@@ -949,7 +953,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             Set<SysUser> sysUsers = new HashSet<>();
             sysUserRightsList.forEach(u ->
                     omsProductionOrders.forEach(o -> {
-                        if (u.getProductFactorys().contains(o.getProductFactoryCode())) {
+                        if (u.getProductFactorys().contains(o.getProductFactoryCode()) && StrUtil.isNotBlank(u.getEmail())) {
                             sysUsers.add(SysUser.builder().userName(u.getUserName()).email(u.getEmail()).build());
                         }
                     })
@@ -1032,7 +1036,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         sysUserRightsList.forEach(u ->
                 detailList.forEach(o -> {
                     if (u.getProductFactorys().contains(o.getProductFactoryCode())
-                            && u.getPurchaseGroups().contains(o.getPurchaseGroup())) {
+                            && u.getPurchaseGroups().contains(o.getPurchaseGroup())
+                            && StrUtil.isNotBlank(u.getEmail())) {
                         sysUsers.add(SysUser.builder().userName(u.getUserName()).email(u.getEmail()).build());
                     }
                 })

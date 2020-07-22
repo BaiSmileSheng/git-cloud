@@ -237,7 +237,6 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
      * Date: 2020/6/28
      */
     @Override
-    @GlobalTransactional
     public R updateProductOrder(List<OmsProductionOrder> list, SysUser sysUser) {
         log.info("============快捷修改排产订单量方法  start============");
         if (ObjectUtil.isEmpty(list) || list.size() <= 0) {
@@ -249,7 +248,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             R updateOrderMap = omsProductionOrderService.updateSave(omsProductionOrder, sysUser);
             if (!updateOrderMap.isSuccess()) {
                 log.error("快捷修改排产订单量失败,原因：" + updateOrderMap.get("msg"));
-                return R.error("快捷修改排产订单量失败!");
+                return R.error("快捷修改排产订单量失败，原因："+updateOrderMap.get("msg"));
             }
         }
         log.info("============快捷修改排产订单量方法  end============");
