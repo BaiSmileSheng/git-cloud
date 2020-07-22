@@ -255,86 +255,79 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
 
             CdMaterialExtendInfo cdMaterialExtendInfoReq = new CdMaterialExtendInfo();
             BeanUtils.copyProperties(cdMaterialExtendInfo,cdMaterialExtendInfoReq);
+            StringBuffer errMsgBuffer = new StringBuffer();
             if (StringUtils.isBlank(cdMaterialExtendInfo.getMaterialCode())) {
-                errObjectDto.setObject(cdMaterialExtendInfo);
-                errObjectDto.setErrMsg(StrUtil.format("成品专用号不能为空：{}", cdMaterialExtendInfo.getMaterialCode()));
-                errDtos.add(errObjectDto);
-                continue;
+                errMsgBuffer.append("成品专用号不能为空;");
             }
-            Example example = new Example(CdMaterialInfo.class);
-            Example.Criteria criteria = example.createCriteria();
-            criteria.andEqualTo("materialCode",cdMaterialExtendInfo.getMaterialCode());
-            CdMaterialInfo materialInfo =
-                    cdMaterialInfoService.findByExampleOne(example);
-            if (BeanUtil.isEmpty(materialInfo)) {
-                errObjectDto.setObject(cdMaterialExtendInfo);
-                errObjectDto.setErrMsg(StrUtil.format("成品专用号在主数据中不存在：{}", cdMaterialExtendInfo.getMaterialCode()));
-                errDtos.add(errObjectDto);
-                continue;
-            } else {
-                cdMaterialExtendInfoReq.setEstablishDate(materialInfo.getMdmCreateTime());
-                cdMaterialExtendInfoReq.setMaterialDesc(materialInfo.getMaterialDesc());
+            if(StringUtils.isNotBlank(cdMaterialExtendInfo.getMaterialCode())){
+                Example example = new Example(CdMaterialInfo.class);
+                Example.Criteria criteria = example.createCriteria();
+                criteria.andEqualTo("materialCode",cdMaterialExtendInfo.getMaterialCode());
+                CdMaterialInfo materialInfo =
+                        cdMaterialInfoService.findByExampleOne(example);
+                if (BeanUtil.isEmpty(materialInfo)) {
+                    errMsgBuffer.append("成品专用号在主数据中不存在,请维护;");
+                } else {
+                    cdMaterialExtendInfoReq.setEstablishDate(materialInfo.getMdmCreateTime());
+                    cdMaterialExtendInfoReq.setMaterialDesc(materialInfo.getMaterialDesc());
+                }
             }
+
             if (StringUtils.isBlank(cdMaterialExtendInfo.getProductType())) {
-                errObjectDto.setObject(cdMaterialExtendInfo);
-                errObjectDto.setErrMsg(StrUtil.format("产品类别不能为空：{}", cdMaterialExtendInfo.getProductType()));
-                errDtos.add(errObjectDto);
-                continue;
+                errMsgBuffer.append("产品类别不能为空;");
             }
-            String productType = cdMaterialExtendInfo.getProductType();
-            String productTypeCode = ProductTypeEnum.getCodeByMsg(productType);
-            if (StringUtils.isBlank(productTypeCode) || productTypeCode.equals(productType)) {
-                errObjectDto.setObject(cdMaterialExtendInfo);
-                errObjectDto.setErrMsg(StrUtil.format("产品类别不存在", cdMaterialExtendInfo.getProductType()));
-                errDtos.add(errObjectDto);
-                continue;
+            if(StringUtils.isNotBlank(cdMaterialExtendInfo.getProductType())){
+                String productType = cdMaterialExtendInfo.getProductType();
+                String productTypeCode = ProductTypeEnum.getCodeByMsg(productType);
+                if (StringUtils.isBlank(productTypeCode) || productTypeCode.equals(productType)) {
+                    errMsgBuffer.append("产品类别不存在;");
+                }
+                cdMaterialExtendInfoReq.setProductType(productTypeCode);
             }
-            cdMaterialExtendInfoReq.setProductType(productTypeCode);
+
             if (StringUtils.isBlank(cdMaterialExtendInfo.getLifeCycle())) {
-                errObjectDto.setObject(cdMaterialExtendInfo);
-                errObjectDto.setErrMsg(StrUtil.format("生命周期不能为空：{}", cdMaterialExtendInfo.getLifeCycle()));
-                errDtos.add(errObjectDto);
-                continue;
+                errMsgBuffer.append("生命周期不能为空;");
             }
-            String lifeCycle = cdMaterialExtendInfo.getLifeCycle();
-            String lifeCycleCode = LifeCycleEnum.getCodeByMsg(lifeCycle);
-            if (StringUtils.isBlank(lifeCycleCode) || lifeCycleCode.equals(lifeCycle)) {
-                errObjectDto.setObject(cdMaterialExtendInfo);
-                errObjectDto.setErrMsg(StrUtil.format("生命周期存在：{}", cdMaterialExtendInfo.getLifeCycle()));
-                errDtos.add(errObjectDto);
-                continue;
+            if(StringUtils.isNotBlank(cdMaterialExtendInfo.getLifeCycle())){
+                String lifeCycle = cdMaterialExtendInfo.getLifeCycle();
+                String lifeCycleCode = LifeCycleEnum.getCodeByMsg(lifeCycle);
+                if (StringUtils.isBlank(lifeCycleCode) || lifeCycleCode.equals(lifeCycle)) {
+                    errMsgBuffer.append("生命周期不存在;");
+                }
+                cdMaterialExtendInfoReq.setLifeCycle(lifeCycleCode);
             }
-            cdMaterialExtendInfoReq.setLifeCycle(lifeCycleCode);
+
             if (StringUtils.isBlank(cdMaterialExtendInfo.getIsPuttingOut())) {
-                errObjectDto.setObject(cdMaterialExtendInfo);
-                errObjectDto.setErrMsg(StrUtil.format("可否加工承揽不能为空：{}", cdMaterialExtendInfo.getIsPuttingOut()));
-                errDtos.add(errObjectDto);
-                continue;
+                errMsgBuffer.append("可否加工承揽不能为空;");
             }
-            String isPuttingOut = cdMaterialExtendInfo.getIsPuttingOut();
-            String isPuttingOutCode = PuttingOutEnum.getCodeByMsg(isPuttingOut);
-            if (StringUtils.isBlank(isPuttingOutCode) || isPuttingOutCode.equals(isPuttingOut)) {
-                errObjectDto.setObject(cdMaterialExtendInfo);
-                errObjectDto.setErrMsg(StrUtil.format("可否加工方式不存在：{}", cdMaterialExtendInfo.getIsPuttingOut()));
-                errDtos.add(errObjectDto);
-                continue;
+            if(StringUtils.isNotBlank(cdMaterialExtendInfo.getIsPuttingOut())){
+                String isPuttingOut = cdMaterialExtendInfo.getIsPuttingOut();
+                String isPuttingOutCode = PuttingOutEnum.getCodeByMsg(isPuttingOut);
+                if (StringUtils.isBlank(isPuttingOutCode) || isPuttingOutCode.equals(isPuttingOut)) {
+                    errMsgBuffer.append("可否加工承揽方式不存在;");
+                }
+                cdMaterialExtendInfoReq.setIsPuttingOut(isPuttingOutCode);
             }
-            cdMaterialExtendInfoReq.setIsPuttingOut(isPuttingOutCode);
+
             if (StringUtils.isBlank(cdMaterialExtendInfo.getIsZnAttestation())) {
+                errMsgBuffer.append("是否ZN认证不能为空;");
+            }
+            if(StringUtils.isNotBlank(cdMaterialExtendInfo.getIsZnAttestation())){
+                String isZnAttestation = cdMaterialExtendInfo.getIsZnAttestation();
+                String isZnAttestatioCode = ZnAttestationEnum.getCodeByMsg(isZnAttestation);
+                if (StringUtils.isBlank(isZnAttestatioCode) || isZnAttestatioCode.equals(isZnAttestation)) {
+                    errMsgBuffer.append("是否ZN认证方式不存在;");
+                }
+                cdMaterialExtendInfoReq.setIsZnAttestation(isZnAttestatioCode);
+            }
+
+            String errMsgBufferString = errMsgBuffer.toString();
+            if(StringUtils.isNotBlank(errMsgBufferString)){
                 errObjectDto.setObject(cdMaterialExtendInfo);
-                errObjectDto.setErrMsg(StrUtil.format("是否ZN认证不能为空：{}", cdMaterialExtendInfo.getIsZnAttestation()));
+                errObjectDto.setErrMsg(errMsgBufferString);
                 errDtos.add(errObjectDto);
                 continue;
             }
-            String isZnAttestation = cdMaterialExtendInfo.getIsZnAttestation();
-            String isZnAttestatioCode = ZnAttestationEnum.getCodeByMsg(isZnAttestation);
-            if (StringUtils.isBlank(isZnAttestatioCode) || isZnAttestatioCode.equals(isZnAttestation)) {
-                errObjectDto.setObject(cdMaterialExtendInfo);
-                errObjectDto.setErrMsg(StrUtil.format("是否ZN认证方式不存在：{}", cdMaterialExtendInfo.getIsZnAttestation()));
-                errDtos.add(errObjectDto);
-                continue;
-            }
-            cdMaterialExtendInfoReq.setIsZnAttestation(isZnAttestatioCode);
             cdMaterialExtendInfoReq.setCreateTime(new Date());
             cdMaterialExtendInfoReq.setDelFlag("0");
             sucObjectDto.setObject(cdMaterialExtendInfoReq);

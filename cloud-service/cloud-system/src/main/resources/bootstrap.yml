@@ -1,15 +1,14 @@
 server:
-  port: 8004
+  port: 8001
 # 日志配置
 logging:
   level:
     com.cloud: info
     org.springframework: warn
     com.alibaba.nacos.client.naming: error
-
 spring:
   application:
-    name: cloud-activiti
+    name: cloud-system
   profiles:
     active: dev
   devtools:
@@ -17,21 +16,21 @@ spring:
       enabled: true
   main:
     allow-bean-definition-overriding: true
-  # 模板引擎
-  thymeleaf:
-    mode: HTML
-    encoding: utf-8
-    # 禁用缓存
-    cache: false
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
+  servlet:
+    multipart:
+      maxFileSize: 5MB  #单位必须大写MB或不写(即为B)
+      maxRequestSize: 10MB
   cloud:
     nacos:
+      config:
+        server-addr: nacos.khaos.cosmoplat.com:80
+        namespace: orw-prod
+        file-extension: yml
       discovery:
         server-addr: nacos.khaos.cosmoplat.com:80
-  activiti:
-    check-process-definitions: false
   mail:
     host: 10.135.1.238
     port: 25
@@ -40,7 +39,6 @@ spring:
     protocol: smtp
     defaultEncoding: utf-8
     properties.mail.smtp.auth: false
-
 
 feign:
   hystrix:
@@ -51,11 +49,17 @@ feign:
     enabled: false
   okhttp:
     enabled: true
+# 暴露监控端点
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
 
 ribbon:
   OkToRetryOnAllOperations: false #对所有操作请求都进行重试,默认false
-  ReadTimeout: 10000   #负载均衡超时时间，默认值5000
-  ConnectTimeout: 3000 #ribbon请求连接的超时时间，默认值2000
+  ReadTimeout: 5000   #负载均衡超时时间，默认值5000
+  ConnectTimeout: 2000 #ribbon请求连接的超时时间，默认值2000
   MaxAutoRetries: 0     #对当前实例的重试次数，默认0
   MaxAutoRetriesNextServer: 1 #对切换实例的重试次数，默认1
 
@@ -96,7 +100,7 @@ seata:
   use-jdk-proxy: true
   service:
     vgroup-mapping:
-      cloud-activiti-group: cloud-tx # seata  server段的cluster
+      cloud-system-group: cloud-tx # seata  server段的cluster
     enable-degrade: false # 是否启用降级
     disable-global-transaction: false # 是否禁用全局事务
   registry:

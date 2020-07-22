@@ -1,16 +1,20 @@
 server:
   port: 8082
 spring:
-  cloud:
-    nacos:
-      discovery:
-        server-addr: nacos.khaos.cosmoplat.com:80
   application:
     name: cloud-job-executor
   main:
     allow-bean-definition-overriding: true
   profiles:
     active: dev
+  cloud:
+    nacos:
+      config:
+        server-addr: nacos.khaos.cosmoplat.com:80
+        namespace: orw-prod
+        file-extension: yml
+      discovery:
+        server-addr: nacos.khaos.cosmoplat.com:80
 
   # log config
 logging:

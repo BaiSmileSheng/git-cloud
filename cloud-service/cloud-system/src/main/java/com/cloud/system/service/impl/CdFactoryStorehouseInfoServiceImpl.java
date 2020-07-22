@@ -15,18 +15,23 @@ import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.system.domain.entity.CdFactoryStorehouseInfo;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.CdFactoryStorehouseInfoExportVo;
 import com.cloud.system.domain.vo.CdFactoryStorehouseInfoImportErrorVo;
 import com.cloud.system.mapper.CdFactoryStorehouseInfoMapper;
+import com.cloud.system.service.ICdFactoryInfoService;
 import com.cloud.system.service.ICdFactoryStorehouseInfoExcelImportService;
 import com.cloud.system.service.ICdFactoryStorehouseInfoService;
 import com.cloud.system.util.EasyExcelUtilOSS;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -44,6 +49,8 @@ public class CdFactoryStorehouseInfoServiceImpl extends BaseServiceImpl<CdFactor
     private CdFactoryStorehouseInfoMapper cdFactoryStorehouseInfoMapper;
     @Autowired
     private ICdFactoryStorehouseInfoExcelImportService cdFactoryStorehouseInfoExcelImportService;
+    @Autowired
+    private ICdFactoryInfoService cdFactoryInfoService;
 
     /**
      * 根据工厂，客户编码分组取接收库位
@@ -59,8 +66,8 @@ public class CdFactoryStorehouseInfoServiceImpl extends BaseServiceImpl<CdFactor
     @Override
     public R importFactoryStorehouse(MultipartFile file, SysUser sysUser)throws IOException {
         EasyWithErrorExcelListener easyExcelListener = new EasyWithErrorExcelListener(cdFactoryStorehouseInfoExcelImportService,
-                CdFactoryStorehouseInfo.class);
-        EasyExcel.read(file.getInputStream(),CdFactoryStorehouseInfo.class,easyExcelListener).sheet().doRead();
+                CdFactoryStorehouseInfoExportVo.class);
+        EasyExcel.read(file.getInputStream(),CdFactoryStorehouseInfoExportVo.class,easyExcelListener).sheet().doRead();
 
         //可以导入的结果集 插入
         List<ExcelImportSucObjectDto> successList=easyExcelListener.getSuccessList();
@@ -102,49 +109,57 @@ public class CdFactoryStorehouseInfoServiceImpl extends BaseServiceImpl<CdFactor
         List<ExcelImportSucObjectDto> successDtos = new ArrayList<>();
         List<ExcelImportOtherObjectDto> otherDtos = new ArrayList<>();
 
-        List<CdFactoryStorehouseInfo> listImport = (List<CdFactoryStorehouseInfo>) objects;
+        List<CdFactoryStorehouseInfoExportVo> listImport = (List<CdFactoryStorehouseInfoExportVo>) objects;
 
-        for (CdFactoryStorehouseInfo cdFactoryStorehouseInfo: listImport) {
+        R  factoryInfoListR = cdFactoryInfoService.selectAllCompanyCode();
+        if(!factoryInfoListR.isSuccess()){
+            throw new BusinessException("查工厂信息失败" + factoryInfoListR.get("msg").toString());
+        }
+        List<String> factoryInfoList= factoryInfoListR.getCollectData(new TypeReference<List<String>>() {});
+        for (CdFactoryStorehouseInfoExportVo cdFactoryStorehouseInfo: listImport) {
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
 
+            CdFactoryStorehouseInfo cdFactoryStorehouseInfoReq = new CdFactoryStorehouseInfo();
+            BeanUtils.copyProperties(cdFactoryStorehouseInfo,cdFactoryStorehouseInfoReq);
+            StringBuffer errMsgBuffer = new StringBuffer();
             if (StringUtils.isBlank(cdFactoryStorehouseInfo.getProductFactoryCode())) {
-                errObjectDto.setObject(cdFactoryStorehouseInfo);
-                errObjectDto.setErrMsg(StrUtil.format("生产工厂编码不能为空：{}", cdFactoryStorehouseInfo.getProductFactoryCode()));
-                errDtos.add(errObjectDto);
-                continue;
+                errMsgBuffer.append("生产工厂编码不能为空;");
             }
-
+            String productFactoryCode = cdFactoryStorehouseInfo.getProductFactoryCode();
+            if(StringUtils.isNotBlank(productFactoryCode) && !factoryInfoList.contains(productFactoryCode)){
+                errMsgBuffer.append("生产工厂编码不存在,请维护;");
+            }
             if (StringUtils.isBlank(cdFactoryStorehouseInfo.getCustomerCode())) {
-                errObjectDto.setObject(cdFactoryStorehouseInfo);
-                errObjectDto.setErrMsg(StrUtil.format("客户编码不能为空：{}", cdFactoryStorehouseInfo.getCustomerCode()));
-                errDtos.add(errObjectDto);
-                continue;
+                errMsgBuffer.append("客户编码不能为空;");
             }
 
             if (StringUtils.isBlank(cdFactoryStorehouseInfo.getStorehouseFrom())) {
-                errObjectDto.setObject(cdFactoryStorehouseInfo);
-                errObjectDto.setErrMsg(StrUtil.format("发货库位不能为空：{}", cdFactoryStorehouseInfo.getStorehouseFrom()));
-                errDtos.add(errObjectDto);
-                continue;
+                errMsgBuffer.append("发货库位不能为空;");
             }
             if (StringUtils.isBlank(cdFactoryStorehouseInfo.getStorehouseTo())) {
-                errObjectDto.setObject(cdFactoryStorehouseInfo);
-                errObjectDto.setErrMsg(StrUtil.format("接收库位不能为空：{}", cdFactoryStorehouseInfo.getStorehouseTo()));
-                errDtos.add(errObjectDto);
-                continue;
+                errMsgBuffer.append("接收库位不能为空;");
             }
 
             if (StringUtils.isBlank(cdFactoryStorehouseInfo.getLeadTime())) {
+                errMsgBuffer.append("提前量不能为空;");
+            }
+            if(StringUtils.isNotBlank(cdFactoryStorehouseInfo.getLeadTime())){
+                String leadTime = cdFactoryStorehouseInfo.getLeadTime();
+                if(!leadTime.matches("^[0-9]+$")){
+                    errMsgBuffer.append("提前量请只填写数字;");
+                }
+            }
+            String errMsgBufferString = errMsgBuffer.toString();
+            if(StringUtils.isNotBlank(errMsgBufferString)){
                 errObjectDto.setObject(cdFactoryStorehouseInfo);
-                errObjectDto.setErrMsg(StrUtil.format("提前量不能为空：{}", cdFactoryStorehouseInfo.getLeadTime()));
+                errObjectDto.setErrMsg(errMsgBufferString);
                 errDtos.add(errObjectDto);
                 continue;
             }
-
-            cdFactoryStorehouseInfo.setCreateTime(new Date());
-            cdFactoryStorehouseInfo.setDelFlag("0");
-            sucObjectDto.setObject(cdFactoryStorehouseInfo);
+            cdFactoryStorehouseInfoReq.setCreateTime(new Date());
+            cdFactoryStorehouseInfoReq.setDelFlag("0");
+            sucObjectDto.setObject(cdFactoryStorehouseInfoReq);
             successDtos.add(sucObjectDto);
         }
         return new ExcelImportResult(successDtos, errDtos, otherDtos);
