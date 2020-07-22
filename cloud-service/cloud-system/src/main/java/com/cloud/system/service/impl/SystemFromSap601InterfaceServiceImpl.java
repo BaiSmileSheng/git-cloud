@@ -451,6 +451,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                         cdRawMaterialStock.setRawMaterialDesc(outTableOutput.getString("MAKTX"));
                         cdRawMaterialStock.setCurrentStock(outTableOutput.getBigDecimal("LABST"));
                         cdRawMaterialStock.setUnit(outTableOutput.getString("KMEIN"));
+                        cdRawMaterialStock.setUpdateTime(new Date());
                         cdRawMaterialStock.setUpdateBy(sysUser.getLoginName());
                         cdRawMaterialStock.setDelFlag(DeleteFlagConstants.NO_DELETED);
                         dataList.add(cdRawMaterialStock);

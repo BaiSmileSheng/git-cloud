@@ -3,31 +3,36 @@ package com.cloud.system.controller;
 import cn.hutool.core.lang.Dict;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.auth.annotation.HasPermissions;
-import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
-import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.system.domain.entity.CdFactoryStorehouseInfo;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.CdFactoryStorehouseInfoExportVo;
 import com.cloud.system.service.ICdFactoryStorehouseInfoService;
 import com.cloud.system.util.EasyExcelUtilOSS;
-import io.swagger.annotations.*;
+import com.cloud.system.util.FactoryStorehouseInfoWriteHandler;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -119,7 +124,8 @@ public class CdFactoryStorehouseInfoController extends BaseController {
     @ApiOperation(value = "导出模板", response = CdFactoryStorehouseInfo.class)
     public R exportTemplate(){
         String fileName = "交货提前量模板.xlsx";
-        return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new CdFactoryStorehouseInfoExportVo());
+        return EasyExcelUtilOSS.writePostilExcel(Arrays.asList(),fileName,fileName,new CdFactoryStorehouseInfoExportVo(),
+                new FactoryStorehouseInfoWriteHandler());
     }
 
     /**

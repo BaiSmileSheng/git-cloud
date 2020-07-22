@@ -5,6 +5,7 @@ import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
 import cn.hutool.core.lang.Dict;
+import com.cloud.system.util.MaterialExtendInfoWriteHandler;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.SysUser;
@@ -17,30 +18,22 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.validator.constraints.pl.REGON;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.cloud.common.core.domain.R;
-import com.cloud.common.core.controller.BaseController;
 import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.system.service.ICdMaterialExtendInfoService;
-import io.swagger.annotations.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import tk.mybatis.mapper.entity.Example;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -126,7 +119,7 @@ public class CdMaterialExtendInfoController extends BaseController {
     @ApiOperation(value = "下载模板")
     public R downLoadTemplate(){
         String fileName = "下载模板.xlsx";
-        return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new CdMaterialExtendInfoImportVo());
+        return EasyExcelUtilOSS.writePostilExcel(Arrays.asList(),fileName,fileName,new CdMaterialExtendInfoImportVo(),new MaterialExtendInfoWriteHandler());
     }
 
     /**
