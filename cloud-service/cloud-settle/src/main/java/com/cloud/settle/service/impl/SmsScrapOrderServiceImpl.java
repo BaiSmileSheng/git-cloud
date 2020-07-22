@@ -62,6 +62,9 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
     private RemoteCdMouthRateService remoteCdMouthRateService;
     @Autowired
     private RemoteInterfaceLogService remoteInterfaceLogService;
+    @Autowired
+    private RemoteCdProductWarehouseService remoteCdProductWarehouseService;
+
 
 
     /**
@@ -426,6 +429,22 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         Date date = DateUtil.date();
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog().builder()
                 .appId("SAP").interfaceName(SapConstants.ZESP_IM_001).build();
+        //成品报废库位默认0088，如果0088没有库存就选择0188
+        String lgort = "0088";
+        CdProductWarehouse cdProductWarehouse = new CdProductWarehouse().builder()
+                .productMaterialCode(smsScrapOrder.getProductMaterialCode())
+                .productFactoryCode(smsScrapOrder.getFactoryCode())
+                .storehouse(lgort).build();
+        R rWare = remoteCdProductWarehouseService.queryOneByExample(cdProductWarehouse);
+        if (rWare.isSuccess()) {
+            cdProductWarehouse = rWare.getData(CdProductWarehouse.class);
+            if (cdProductWarehouse.getWarehouseNum() == null || cdProductWarehouse.getWarehouseNum().compareTo(BigDecimal.ZERO) <= 0) {
+                lgort = "0188";
+            }
+        }else{
+            lgort = "0188";
+        }
+
         //发送SAP
         JCoDestination destination =null;
         try {
@@ -447,7 +466,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             inputTable.setValue("BWARTWA","261");//移动类型（库存管理）  261/Y61
             inputTable.setValue("BKTXT", StrUtil.concat(true,smsScrapOrder.getSupplierCode(),smsScrapOrder.getScrapNo()));//凭证抬头文本  V码+报废单号
             inputTable.setValue("WERKS", smsScrapOrder.getFactoryCode());//工厂
-            inputTable.setValue("LGORT", "0088");//库存地点 成品报废库位默认0088，如果0088没有库存就选择0188
+            inputTable.setValue("LGORT", lgort);//库存地点
             inputTable.setValue("MATNR", smsScrapOrder.getProductMaterialCode().toUpperCase());//物料号
             inputTable.setValue("ERFME", smsScrapOrder.getMeasureUnit());//基本计量单位
             inputTable.setValue("ERFMG", smsScrapOrder.getScrapAmount());//数量
@@ -455,7 +474,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             String content = StrUtil.format("BWARTWA:{},BKTXT:{},WERKS:{},LGORT:{},MATNR:{}" +
                     ",ERFME:{},ERFMG:{},AUFNR:{}","261",
                     StrUtil.concat(true,smsScrapOrder.getSupplierCode(),smsScrapOrder.getScrapNo()),
-                    smsScrapOrder.getFactoryCode(),"0088",smsScrapOrder.getProductMaterialCode(),
+                    smsScrapOrder.getFactoryCode(),lgort,smsScrapOrder.getProductMaterialCode(),
                     smsScrapOrder.getMeasureUnit(),smsScrapOrder.getScrapAmount(),smsScrapOrder.getProductOrderCode());
             sysInterfaceLog.setContent(content);
             //执行函数
