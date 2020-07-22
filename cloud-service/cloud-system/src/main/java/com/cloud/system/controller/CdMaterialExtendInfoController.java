@@ -124,7 +124,6 @@ public class CdMaterialExtendInfoController extends BaseController {
     @HasPermissions("sys:materialExtendInfo:downLoadTemplate")
     @GetMapping("downLoadTemplate")
     @ApiOperation(value = "下载模板")
-    @OperLog(title = "下载模板", businessType = BusinessType.EXPORT)
     public R downLoadTemplate(){
         String fileName = "下载模板.xlsx";
         return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new CdMaterialExtendInfoImportVo());
@@ -136,7 +135,6 @@ public class CdMaterialExtendInfoController extends BaseController {
     @HasPermissions("sys:materialExtendInfo:export")
     @GetMapping("export")
     @ApiOperation(value = "导出")
-    @OperLog(title = "export", businessType = BusinessType.EXPORT)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "materialCode", value = "专用号", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productType", value = "产品类别", required = false, paramType = "query", dataType = "String"),

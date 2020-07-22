@@ -142,7 +142,6 @@ public class OmsRealOrderController extends BaseController {
     @HasPermissions("order:realOrder:export")
     @GetMapping("export")
     @ApiOperation(value = "真单导出", response = OmsRealOrder.class)
-    @OperLog(title = "真单导出", businessType = BusinessType.EXPORT)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
@@ -182,7 +181,6 @@ public class OmsRealOrderController extends BaseController {
     @HasPermissions("order:realOrder:exportExample")
     @GetMapping("exportExample")
     @ApiOperation(value = "导入模板下载", response = OmsRealOrder.class)
-    @OperLog(title = "导入模板下载", businessType = BusinessType.EXPORT)
     public R exportExample() {
         String fileName = "真单.xlsx";
         return EasyExcelUtilOSS.writeExcel(Arrays.asList(), fileName, fileName, new OmsRealOrderExcelImportVo());
