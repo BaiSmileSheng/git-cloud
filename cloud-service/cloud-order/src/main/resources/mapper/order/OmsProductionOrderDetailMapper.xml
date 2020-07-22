@@ -109,7 +109,9 @@
         sum(IFNULL(raw_material_product_num,0)) as product_num
         from oms_production_order_detail
         <where>
-            product_factory_code = #{productFactoryCode,jdbcType=VARCHAR}
+            product_start_date > DATE_FORMAT(now(),'%Y-%m-%d')
+            and product_start_date <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(now(),INTERVAL 14 day),'%Y-%m-%d')
+            and product_factory_code = #{productFactoryCode,jdbcType=VARCHAR}
             and material_code = #{materialCode,jdbcType=VARCHAR}
             and purchase_group = #{purchaseGroup,jdbcType=VARCHAR}
         </where>
