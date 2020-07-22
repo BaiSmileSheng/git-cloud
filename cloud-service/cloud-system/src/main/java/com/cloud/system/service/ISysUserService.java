@@ -1,10 +1,8 @@
 package com.cloud.system.service;
 
 import com.cloud.common.core.domain.R;
-import com.cloud.system.domain.entity.SysRole;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
-import com.cloud.system.domain.po.SysUserRights;
 
 import java.util.List;
 import java.util.Set;
@@ -181,7 +179,7 @@ public interface ISysUserService {
     /**
      * 查询拥有当前角色的所有用户
      *
-     * @param roleId
+     * @param roleIds
      * @return
      * @author zmr
      */
