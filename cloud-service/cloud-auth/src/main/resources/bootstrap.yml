@@ -18,6 +18,10 @@ spring:
     time-zone: GMT+8
   cloud:
     nacos:
+      config:
+        server-addr: nacos.khaos.cosmoplat.com:80
+        namespace: orw-prod
+        file-extension: yml
       discovery:
         server-addr: nacos.khaos.cosmoplat.com:80
   profiles:
