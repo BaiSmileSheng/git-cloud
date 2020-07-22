@@ -155,6 +155,7 @@ public class SmsScrapOrderController extends BaseController {
     @OperLog(title = "删除报废申请 ", businessType = BusinessType.DELETE)
     @ApiOperation(value = "删除报废申请 ", response = R.class)
     @ApiParam(name = "ids", value = "需删除数据的id")
+    @HasPermissions("settle:scrapOrder:remove")
     public R remove(@RequestBody String ids) {
         return smsScrapOrderService.remove(ids);
     }
