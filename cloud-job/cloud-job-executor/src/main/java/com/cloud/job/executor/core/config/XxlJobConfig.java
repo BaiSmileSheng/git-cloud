@@ -19,16 +19,16 @@ public class XxlJobConfig {
     @Value("${cloud.job.admin.addresses}")
     private String adminAddresses;
 
-    @Value("${cloud.job.accessToken}")
+    @Value("${cloud.job.accessToken:}")
     private String accessToken;
 
     @Value("${cloud.job.executor.appname}")
     private String appname;
 
-    @Value("${cloud.job.executor.address}")
+    @Value("${cloud.job.executor.address:}")
     private String address;
 
-    @Value("${cloud.job.executor.ip}")
+    @Value("${cloud.job.executor.ip:}")
     private String ip;
 
     @Value("${cloud.job.executor.port}")
