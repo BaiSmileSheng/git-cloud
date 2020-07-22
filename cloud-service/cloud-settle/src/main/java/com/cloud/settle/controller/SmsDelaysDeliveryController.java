@@ -246,7 +246,8 @@ public class SmsDelaysDeliveryController extends BaseController {
     @OperLog(title = "供应商确认延期索赔单 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "供应商确认延期索赔单", response = SmsDelaysDelivery.class)
     public R supplierConfirm(String ids){
-        return smsDelaysDeliveryService.supplierConfirm(ids);
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return smsDelaysDeliveryService.supplierConfirm(ids,sysUser);
     }
 
     /**

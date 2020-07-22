@@ -179,6 +179,7 @@ public class SmsQualityOrderController extends BaseController {
     @HasPermissions("settle:qualityOrder:save")
     @PostMapping("save")
     @ApiOperation(value = "新增保存质量索赔(包含文件)", response = R.class)
+    @OperLog(title = "新增保存质量索赔(包含文件)", businessType = BusinessType.INSERT)
     public R addSave(@RequestParam("smsQualityOrderReq") String smsQualityOrderReq, @RequestParam(value = "ossIds",required = false) String ossIds) {
         SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq, SmsQualityOrder.class);
         //校验入参
@@ -211,6 +212,7 @@ public class SmsQualityOrderController extends BaseController {
     @HasPermissions("settle:qualityOrder:update")
     @PostMapping("update")
     @ApiOperation(value = "修改保存质量索赔(包含文件信息)", response = R.class)
+    @OperLog(title = "修改保存质量索赔(包含文件信息)", businessType = BusinessType.UPDATE)
     public R updateQuality(@RequestParam("smsQualityOrder") String smsQualityOrderReq, @RequestParam(value = "ossIds",required = false) String ossIds) {
         SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq, SmsQualityOrder.class);
         //校验入参
@@ -228,6 +230,7 @@ public class SmsQualityOrderController extends BaseController {
     @HasPermissions("settle:qualityOrder:insertOrupdateSubmit")
     @PostMapping("insertOrupdateSubmit")
     @ApiOperation(value = "新增或修改时提交", response = R.class)
+    @OperLog(title = "新增或修改时提交", businessType = BusinessType.UPDATE)
     public R insertOrupdateSubmit(@RequestParam("smsQualityOrder") String smsQualityOrderReq,@RequestParam(value = "ossIds",required = false) String ossIds) {
         SmsQualityOrder smsQualityOrder = JSONObject.parseObject(smsQualityOrderReq, SmsQualityOrder.class);
         //校验入参
@@ -245,6 +248,7 @@ public class SmsQualityOrderController extends BaseController {
     @PostMapping("remove")
     @HasPermissions("settle:qualityOrder:remove")
     @ApiOperation(value = "删除质量索赔 ", response = R.class)
+    @OperLog(title = "提交索赔单 ", businessType = BusinessType.DELETE)
     public R remove(String ids) {
         return smsQualityOrderService.deleteSmsQualityOrderAndSysOss(ids);
     }
@@ -257,7 +261,7 @@ public class SmsQualityOrderController extends BaseController {
      */
     @HasPermissions("settle:qualityOrder:submit")
     @PostMapping("submit")
-    @OperLog(title = "提交索赔单 ", businessType = BusinessType.DELETE)
+    @OperLog(title = "提交索赔单 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "提交索赔单 ", response = R.class)
     public R submit(String ids) {
         return smsQualityOrderService.submit(ids);
@@ -271,10 +275,11 @@ public class SmsQualityOrderController extends BaseController {
      */
     @HasPermissions("settle:qualityOrder:supplierConfirm")
     @PostMapping("supplierConfirm")
-    @OperLog(title = "供应商确认索赔单 ", businessType = BusinessType.DELETE)
+    @OperLog(title = "供应商确认索赔单 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "供应商确认索赔单 ", response = R.class)
     public R supplierConfirm(String ids) {
-        return smsQualityOrderService.supplierConfirm(ids);
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return smsQualityOrderService.supplierConfirm(ids,sysUser);
     }
 
     /**
