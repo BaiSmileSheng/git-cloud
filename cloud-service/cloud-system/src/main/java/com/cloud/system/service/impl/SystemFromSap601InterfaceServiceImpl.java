@@ -375,10 +375,10 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                         outTableOutput.setRow(i);
                         CdBomInfo cdBomInfo = new CdBomInfo();
                         cdBomInfo.setProductMaterialCode(outTableOutput.getString("MATNR"));//成品物料
-                        cdBomInfo.setProductMaterialDesc(outTableOutput.getString("MAKTX"));//成品物料描述
+                        cdBomInfo.setProductMaterialDesc(outTableOutput.getString("BCPMS"));//成品物料描述
                         cdBomInfo.setProductFactoryCode(outTableOutput.getString("WERKS"));//工厂编码
                         cdBomInfo.setRawMaterialCode(outTableOutput.getString("IDNRK"));//原材料物料
-                        cdBomInfo.setRawMaterialDesc(outTableOutput.getString("BCPMS"));//原材料物料描述
+                        cdBomInfo.setRawMaterialDesc(outTableOutput.getString("MAKTX"));//原材料物料描述
                         cdBomInfo.setBasicNum(outTableOutput.getBigDecimal("BMENG"));//基本数量
                         cdBomInfo.setBomNum(outTableOutput.getBigDecimal("DANHAO"));//单耗
                         cdBomInfo.setProductUnit(outTableOutput.getString("MMEIN"));//成品单位
