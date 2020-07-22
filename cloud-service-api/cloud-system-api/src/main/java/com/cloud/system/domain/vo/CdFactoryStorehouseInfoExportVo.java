@@ -86,7 +86,7 @@ public class CdFactoryStorehouseInfoExportVo {
      * 提前量
      */
     @ColumnWidth(20)
-    @ExcelProperty(value = "提前量",index = 4)
+    @ExcelProperty(value = "提前量(天)",index = 4)
     @ApiModelProperty(value = "提前量")
     private String leadTime;
 
