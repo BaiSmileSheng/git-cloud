@@ -255,6 +255,7 @@ public class OmsRealOrderController extends BaseController {
     /**
      * 删除真单
      */
+    @HasPermissions("order:realOrder:remove")
     @PostMapping("remove")
     @OperLog(title = "删除真单", businessType = BusinessType.DELETE)
     @ApiOperation(value = "删除真单", response = R.class)

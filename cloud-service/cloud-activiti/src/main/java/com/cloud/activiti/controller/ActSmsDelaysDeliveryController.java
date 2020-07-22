@@ -5,6 +5,8 @@ import com.cloud.activiti.service.IActSmsDelaysDeliveryService;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
+import com.cloud.common.log.annotation.OperLog;
+import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.domain.entity.SmsDelaysDelivery;
 import com.cloud.system.domain.entity.SysUser;
@@ -53,6 +55,7 @@ public class ActSmsDelaysDeliveryController extends BaseController {
     @HasPermissions("activiti:actSmsDelaysDelivery:save")
     @PostMapping("save")
     @ApiOperation(value = "供应商申诉延期索赔开启流程",response = SmsDelaysDelivery.class)
+    @OperLog(title = "供应商申诉延期索赔开启流程 ", businessType = BusinessType.UPDATE)
     public R addSave(@RequestParam("id") Long id,@RequestParam("complaintDescription")String complaintDescription,
                      @RequestParam("ossIds") String ossIds) {
         if(null == id){
@@ -77,6 +80,7 @@ public class ActSmsDelaysDeliveryController extends BaseController {
     @HasPermissions("activiti:actSmsDelaysDelivery:audit")
     @PostMapping("audit")
     @ApiOperation(value = "延期索赔流程审批",response = SmsDelaysDelivery.class)
+    @OperLog(title = "延期索赔流程审批 ", businessType = BusinessType.UPDATE)
     public R audit(@RequestBody BizAudit bizAudit) {
         //获取当前用户登录信息
         SysUser sysUser = getUserInfo(SysUser.class);

@@ -128,7 +128,6 @@ public class CdRawMaterialStockController extends BaseController {
      * @Date: 2020/6/9
      */
     @HasPermissions("system:rawMaterialStock:exportRawMaterial")
-    @OperLog(title = "导出原材料库存报表", businessType = BusinessType.EXPORT)
     @GetMapping("/exportRawMaterial")
     @ApiOperation(value = "导出原材料库存报表", response = CdRawMaterialStock.class)
     @ApiImplicitParams({

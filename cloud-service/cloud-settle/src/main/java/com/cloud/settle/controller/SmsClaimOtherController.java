@@ -166,6 +166,7 @@ public class SmsClaimOtherController extends BaseController {
     @HasPermissions("settle:claimOther:save")
     @PostMapping("save")
     @ApiOperation(value = "新增其他索赔信息(包含文件信息)", response = R.class)
+    @OperLog(title = "新增其他索赔信息(包含文件信息) ", businessType = BusinessType.INSERT)
     public R addSave(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestParam(value = "ossIds",required = false)String ossIds) {
         SmsClaimOther smsClaimOther = JSONObject.parseObject(smsClaimOtherReq,SmsClaimOther.class);
         //校验入参
@@ -184,6 +185,7 @@ public class SmsClaimOtherController extends BaseController {
     @HasPermissions("settle:claimOther:updateClaimOther")
     @PostMapping("updateClaimOther")
     @ApiOperation(value = "修改保存其他索赔(包含图片信息)", response = R.class)
+    @OperLog(title = "修改保存其他索赔(包含图片信息) ", businessType = BusinessType.UPDATE)
     public R updateClaimOtherAndOss(@RequestParam("smsClaimOther") String smsClaimOtherReq,@RequestParam(value = "ossIds",required = false)String ossIds) {
         SmsClaimOther smsClaimOther = JSONObject.parseObject(smsClaimOtherReq,SmsClaimOther.class);
         //校验入参
