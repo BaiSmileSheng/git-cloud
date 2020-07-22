@@ -215,7 +215,8 @@ public class SmsSupplementaryOrderController extends BaseController {
     @ApiOperation(value = "新增保存物耗申请单参数为List", response = R.class)
     @HasPermissions("settle:supplementary:save")
     public R addSave(@RequestBody List<SmsSupplementaryOrder> smsSupplementaryOrders) {
-        return smsSupplementaryOrderService.addSaveList(smsSupplementaryOrders);
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return smsSupplementaryOrderService.addSaveList(smsSupplementaryOrders,sysUser);
     }
 
     /**
@@ -223,7 +224,8 @@ public class SmsSupplementaryOrderController extends BaseController {
      */
     @PostMapping("save")
     public R addSave(@RequestBody SmsSupplementaryOrder smsSupplementaryOrder) {
-        return smsSupplementaryOrderService.addSave(smsSupplementaryOrder);
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return smsSupplementaryOrderService.addSave(smsSupplementaryOrder,sysUser);
     }
 
     /**

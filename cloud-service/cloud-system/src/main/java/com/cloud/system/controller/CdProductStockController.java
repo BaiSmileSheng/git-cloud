@@ -26,6 +26,7 @@ import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -63,7 +64,7 @@ public class CdProductStockController extends BaseController {
             @ApiImplicitParam(name = "sortField", value = "排序列", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "productFactoryCode", value = "专用号", required = false, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "productMaterialCode", value = "专用号", required = false, paramType = "query", dataType = "String")
     })
     public TableDataInfo list(@ApiIgnore CdProductStock cdProductStock) {
         startPage();
@@ -139,7 +140,8 @@ public class CdProductStockController extends BaseController {
 
         }
         if(StringUtils.isNotBlank(cdProductStock.getProductMaterialCode())){
-            criteria.andEqualTo("productMaterialCode", cdProductStock.getProductMaterialCode());
+            List<String> productMaterialCodeList = Arrays.asList(cdProductStock.getProductMaterialCode().split(","));
+            criteria.andIn("productMaterialCode", productMaterialCodeList);
         }
         List<CdProductStock> cdProductStockList = cdProductStockService.selectByExample(example);
         return cdProductStockList;

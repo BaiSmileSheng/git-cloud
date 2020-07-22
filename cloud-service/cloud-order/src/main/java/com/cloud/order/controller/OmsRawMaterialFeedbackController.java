@@ -84,11 +84,11 @@ public class OmsRawMaterialFeedbackController extends BaseController {
             @ApiImplicitParam(name = "bomVersion", value = "bom版本", required = true,paramType = "query", dataType = "String")
     })
     @HasPermissions("order:feedback:queryProductOrder")
-    public R queryProductOrder(@ApiIgnore OmsProductionOrder omsProductionOrder) {
+    public TableDataInfo queryProductOrder(@ApiIgnore OmsProductionOrder omsProductionOrder) {
         SysUser sysUser = getUserInfo(SysUser.class);
         startPage();
         List<OmsProductionOrder> omsProductionOrders = omsProductionOrderService.queryProductOrder(omsProductionOrder,sysUser);
-        return R.data(omsProductionOrders);
+        return getDataTable(omsProductionOrders);
     }
 
     /**

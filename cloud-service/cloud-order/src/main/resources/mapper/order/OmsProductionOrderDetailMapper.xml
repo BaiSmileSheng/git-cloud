@@ -120,9 +120,10 @@
     <select id="selectCommitListPageInfo" parameterType="OmsProductionOrderDetail"
             resultMap="OmsProductionOrderDetailResult">
         select
+        (@i:= @i+1) as id,
         product_factory_code,material_code,material_desc,product_start_date,purchase_group,unit,status,
         sum(IFNULL(raw_material_product_num,0)) as raw_material_product_num
-        from oms_production_order_detail
+        from oms_production_order_detail,(SELECT @i:=0) as i
         <where>
             product_start_date > DATE_FORMAT(now(),'%Y-%m-%d')
             and product_start_date <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(now(),INTERVAL 14 day),'%Y-%m-%d')
