@@ -2,8 +2,6 @@ package com.cloud.system.domain.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
-import com.cloud.common.core.domain.BaseEntity;
-import com.cloud.system.converter.OutSourceTypeConverter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
