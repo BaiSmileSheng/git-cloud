@@ -42,7 +42,6 @@ public class CdSettleProductMaterialController extends BaseController {
     @GetMapping("/exportMul")
     @HasPermissions("system:settleProducMaterial:exportMul")
     @ApiOperation(value = "导入模板", response = CdSettleProductMaterial.class)
-    @OperLog(title = "操作日志", businessType = BusinessType.EXPORT)
     public R exportMul() {
         String fileName = "物料号和加工费号对应关系数据.xlsx";
         return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new CdSettleProductMaterialExcelImportVo());
