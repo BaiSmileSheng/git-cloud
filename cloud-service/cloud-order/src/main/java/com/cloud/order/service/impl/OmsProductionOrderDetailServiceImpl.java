@@ -150,7 +150,6 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
                     .materialCode(o.getMaterialCode())
                     .purchaseGroup(o.getPurchaseGroup())
                     .build());
-            rawMaterialReviewDetailVos.forEach(r -> r.setProductStartDate(r.getProductStartDate().substring(5)));
             List<String> detailDays = rawMaterialReviewDetailVos.stream().map(RawMaterialReviewDetailVo::getProductStartDate).collect(Collectors.toList());
             List<String> addDays = dayList.stream().filter(day -> !detailDays.contains(day)).collect(Collectors.toList());
             addDays.forEach(day ->
@@ -418,7 +417,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
     private String[] getDays() {
         int[] days = NumberUtil.range(1, 14);
         String[] dates = new String[14];
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM-dd");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         for (int i : days) {
             String day = dateTimeFormatter.format(LocalDate.now().plusDays(i));
             dates[i - 1] = day;
