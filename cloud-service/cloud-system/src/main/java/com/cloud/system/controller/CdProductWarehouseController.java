@@ -1,6 +1,5 @@
 package com.cloud.system.controller;
 
-import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -8,11 +7,7 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.CdProductWarehouse;
 import com.cloud.system.service.ICdProductWarehouseService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -132,8 +127,7 @@ public class CdProductWarehouseController extends BaseController {
         criteria.andEqualTo("productMaterialCode",cdProductWarehouse.getProductMaterialCode());
         criteria.andEqualTo("storehouse",cdProductWarehouse.getStorehouse());
         criteria.andEqualTo("productFactoryCode",cdProductWarehouse.getProductFactoryCode());
-        criteria.andEqualTo("delFlag", DeleteFlagConstants.NO_DELETED);
-        return R.data(cdProductWarehouseService.selectOneByExample(example));
+        return R.data(cdProductWarehouseService.findByExampleOne(example));
     }
 
     /**
