@@ -1,7 +1,7 @@
 package com.cloud.system.mapper;
 
 import com.cloud.system.domain.entity.SysUser;
-import com.cloud.system.domain.po.SysUserRights;
+import com.cloud.system.domain.vo.SysUserRights;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

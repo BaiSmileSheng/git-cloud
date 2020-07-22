@@ -30,7 +30,7 @@ import com.cloud.settle.domain.entity.SmsSettleInfo;
 import com.cloud.settle.enums.SettleInfoOrderStatusEnum;
 import com.cloud.settle.feign.RemoteSettleInfoService;
 import com.cloud.system.domain.entity.*;
-import com.cloud.system.domain.po.SysUserRights;
+import com.cloud.system.domain.vo.SysUserRights;
 import com.cloud.system.enums.OutSourceTypeEnum;
 import com.cloud.system.feign.*;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -537,7 +537,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             sysUserRightsList.forEach(u ->
                     omsProductionOrderDetails.forEach(o -> {
                         if (u.getProductFactorys().contains(o.getProductFactoryCode())
-                                && u.getPurchaseGroups().contains(o.getPurchaseGroup())) {
+                                && u.getPurchaseGroups().contains(o.getPurchaseGroup())
+                                && StrUtil.isNotBlank(u.getEmail())) {
                             sysUsers.add(SysUser.builder().userName(u.getUserName()).email(u.getEmail()).build());
                         }
                     })
@@ -893,7 +894,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             Set<SysUser> sysUsers = new HashSet<>();
             sysUserRightsList.forEach(u ->
                     checkOrders.forEach(o -> {
-                        if (u.getProductFactorys().contains(o.getProductFactoryCode())) {
+                        if (u.getProductFactorys().contains(o.getProductFactoryCode()) && StrUtil.isNotBlank(u.getEmail())) {
                             sysUsers.add(SysUser.builder().userName(u.getUserName()).email(u.getEmail()).build());
                         }
                     })
@@ -952,7 +953,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             Set<SysUser> sysUsers = new HashSet<>();
             sysUserRightsList.forEach(u ->
                     omsProductionOrders.forEach(o -> {
-                        if (u.getProductFactorys().contains(o.getProductFactoryCode())) {
+                        if (u.getProductFactorys().contains(o.getProductFactoryCode()) && StrUtil.isNotBlank(u.getEmail())) {
                             sysUsers.add(SysUser.builder().userName(u.getUserName()).email(u.getEmail()).build());
                         }
                     })
@@ -1035,7 +1036,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         sysUserRightsList.forEach(u ->
                 detailList.forEach(o -> {
                     if (u.getProductFactorys().contains(o.getProductFactoryCode())
-                            && u.getPurchaseGroups().contains(o.getPurchaseGroup())) {
+                            && u.getPurchaseGroups().contains(o.getPurchaseGroup())
+                            && StrUtil.isNotBlank(u.getEmail())) {
                         sysUsers.add(SysUser.builder().userName(u.getUserName()).email(u.getEmail()).build());
                     }
                 })
