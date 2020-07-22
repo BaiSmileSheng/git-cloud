@@ -6,6 +6,8 @@ logging:
     com.cloud: info
     org.springframework: warn
     com.alibaba.nacos.client.naming: error
+    com.cloud.settle.mapper: debug
+
 spring:
   application:
     name: cloud-settle
@@ -25,6 +27,10 @@ spring:
       maxRequestSize: 10MB
   cloud:
     nacos:
+      config:
+        server-addr: nacos.khaos.cosmoplat.com:80
+        namespace: orw-prod
+        file-extension: yml
       discovery:
         server-addr: nacos.khaos.cosmoplat.com:80
   mail:
@@ -97,7 +103,7 @@ seata:
   use-jdk-proxy: true
   service:
     vgroup-mapping:
-      cloud-settle-group: cloud-tx # seata  server段的cluster
+      cloud-settle-group: default # seata  server段的cluster
     enable-degrade: false # 是否启用降级
     disable-global-transaction: false # 是否禁用全局事务
   registry:
