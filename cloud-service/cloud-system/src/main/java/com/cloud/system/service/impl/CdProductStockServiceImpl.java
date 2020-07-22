@@ -299,8 +299,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
        //主库存
         List<CdProductStock> productStockList = cdProductStockDetailVo.getCdProductStockList();
         if(productStockList.size() == 0){
-            logger.info("在SAP获取数据异常,productStockListSize:{}",productStockList.size());
-            throw new BusinessException("在SAP获取数据异常");
+            logger.info("在SAP没有获取到数据,productStockListSize:{}",productStockList.size());
+            throw new BusinessException("在SAP没有获取到数据");
         }
         //计算成品主库存中可用库存
         setSumNum(productStockList);

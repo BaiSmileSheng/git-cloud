@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 import tk.mybatis.mapper.annotation.KeySql;
 
 import javax.persistence.Id;
-import javax.validation.constraints.NotBlank;
 
 
 /**
@@ -42,7 +41,6 @@ public class CdFactoryStorehouseInfo extends BaseEntity {
      */
     @ExcelProperty(value = "生产工厂",index = 0)
     @ApiModelProperty(value = "生产工厂编码")
-    @NotBlank(message = "生产工厂编码不能为空")
     private String productFactoryCode;
 
     /**
@@ -56,7 +54,6 @@ public class CdFactoryStorehouseInfo extends BaseEntity {
      */
     @ExcelProperty(value = "客户编码",index = 1)
     @ApiModelProperty(value = "客户编码")
-    @NotBlank(message = "客户编码不能为空")
     private String customerCode;
 
     /**
@@ -70,7 +67,6 @@ public class CdFactoryStorehouseInfo extends BaseEntity {
      */
     @ExcelProperty(value = "发货库位",index = 2)
     @ApiModelProperty(value = "发货库位")
-    @NotBlank(message = "发货库位不能为空")
     private String storehouseFrom;
 
     /**
@@ -78,15 +74,13 @@ public class CdFactoryStorehouseInfo extends BaseEntity {
      */
     @ExcelProperty(value = "接收库位",index = 3)
     @ApiModelProperty(value = "接收库位")
-    @NotBlank(message = "接收库位不能为空")
     private String storehouseTo;
 
     /**
      * 提前量
      */
-    @ExcelProperty(value = "提前量",index = 4)
+    @ExcelProperty(value = "提前量(天)",index = 4)
     @ApiModelProperty(value = "提前量")
-    @NotBlank(message = "提前量不能为空")
     private String leadTime;
 
     /**

@@ -2,7 +2,6 @@ package com.cloud.system.domain.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
-import com.cloud.common.core.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -12,7 +11,6 @@ import lombok.NoArgsConstructor;
 import tk.mybatis.mapper.annotation.KeySql;
 
 import javax.persistence.Id;
-import javax.validation.constraints.NotBlank;
 
 
 /**
@@ -27,7 +25,7 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 @Builder
 @ApiModel(value = "工厂库位")
-public class CdFactoryStorehouseInfoImportErrorVo extends BaseEntity {
+public class CdFactoryStorehouseInfoImportErrorVo{
     private static final long serialVersionUID = 1L;
 
     /**
@@ -42,7 +40,6 @@ public class CdFactoryStorehouseInfoImportErrorVo extends BaseEntity {
      */
     @ExcelProperty(value = "生产工厂编码",index = 0)
     @ApiModelProperty(value = "生产工厂编码")
-    @NotBlank(message = "生产工厂编码不能为空")
     private String productFactoryCode;
 
     /**
@@ -56,7 +53,6 @@ public class CdFactoryStorehouseInfoImportErrorVo extends BaseEntity {
      */
     @ExcelProperty(value = "客户编码",index = 1)
     @ApiModelProperty(value = "客户编码")
-    @NotBlank(message = "客户编码不能为空")
     private String customerCode;
 
     /**
@@ -70,7 +66,6 @@ public class CdFactoryStorehouseInfoImportErrorVo extends BaseEntity {
      */
     @ExcelProperty(value = "发货库位",index = 2)
     @ApiModelProperty(value = "发货库位")
-    @NotBlank(message = "发货库位不能为空")
     private String storehouseFrom;
 
     /**
@@ -78,7 +73,6 @@ public class CdFactoryStorehouseInfoImportErrorVo extends BaseEntity {
      */
     @ExcelProperty(value = "接收库位",index = 3)
     @ApiModelProperty(value = "接收库位")
-    @NotBlank(message = "接收库位不能为空")
     private String storehouseTo;
 
     /**
@@ -86,7 +80,6 @@ public class CdFactoryStorehouseInfoImportErrorVo extends BaseEntity {
      */
     @ExcelProperty(value = "提前量",index = 4)
     @ApiModelProperty(value = "提前量")
-    @NotBlank(message = "提前量不能为空")
     private String leadTime;
 
     /**

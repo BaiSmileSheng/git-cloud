@@ -3,6 +3,9 @@ package com.cloud.system.domain.vo;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
+import com.alibaba.excel.annotation.write.style.ColumnWidth;
+import com.alibaba.excel.annotation.write.style.ContentRowHeight;
+import com.alibaba.excel.annotation.write.style.HeadRowHeight;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -27,6 +30,8 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 @ApiModel(value = "物料扩展信息 ")
+@HeadRowHeight(35)
+@ContentRowHeight(20)
 public class CdMaterialExtendInfoImportVo {
     private static final long serialVersionUID = 1L;
 
@@ -40,6 +45,7 @@ public class CdMaterialExtendInfoImportVo {
     /**
      * 物料号
      */
+    @ColumnWidth(50)
     @ExcelProperty(value = "成品专用号",index = 0)
     @ApiModelProperty(value = "物料号")
     private String materialCode;
@@ -59,6 +65,7 @@ public class CdMaterialExtendInfoImportVo {
     /**
      * 产品类别
      */
+    @ColumnWidth(50)
     @ExcelProperty(value = "产品类别",index = 1)
     @ApiModelProperty(value = "产品类别")
     private String productType;
@@ -66,6 +73,7 @@ public class CdMaterialExtendInfoImportVo {
     /**
      * 生命周期
      */
+    @ColumnWidth(25)
     @ExcelProperty(value = "生命周期",index = 2)
     @ApiModelProperty(value = "生命周期")
     private String lifeCycle;
@@ -73,6 +81,7 @@ public class CdMaterialExtendInfoImportVo {
     /**
      * 可否加工承揽
      */
+    @ColumnWidth(25)
     @ExcelProperty(value = "可否加工承揽",index = 3)
     @ApiModelProperty(value = "可否加工承揽")
     private String isPuttingOut;
@@ -80,6 +89,7 @@ public class CdMaterialExtendInfoImportVo {
     /**
      * 是否ZN认证
      */
+    @ColumnWidth(25)
     @ExcelProperty(value = "是否ZN认证",index = 4)
     @ApiModelProperty(value = "是否ZN认证")
     private String isZnAttestation;
