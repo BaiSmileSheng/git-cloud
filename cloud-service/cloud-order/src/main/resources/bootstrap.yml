@@ -6,7 +6,6 @@ logging:
     com.cloud: info
     org.springframework: warn
     com.alibaba.nacos.client.naming: error
-    com.cloud.order.mapper: debug
 spring:
   application:
     name: cloud-order
@@ -101,7 +100,7 @@ seata:
   use-jdk-proxy: true
   service:
     vgroup-mapping:
-      cloud-order-group: default # seata  server段的cluster
+      cloud-order-group: cloud-tx # seata  server段的cluster
     enable-degrade: false # 是否启用降级
     disable-global-transaction: false # 是否禁用全局事务
   registry:
