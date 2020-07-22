@@ -2,13 +2,13 @@ package com.cloud.order.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Dict;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.StringUtils;
-import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.domain.entity.OmsProductionOrderAnalysis;
 import com.cloud.order.domain.entity.OmsRealOrder;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderAnalysisVo;
@@ -31,6 +31,8 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -299,14 +301,63 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
                     omsProductionOrderAnalysisMapper.selectListByFactoryAndMaterial(dictList);
             Map<String,List<OmsProductionOrderAnalysis>> map = omsProductionOrderAnalyses
                     .stream().collect(Collectors.groupingBy((o) -> fetchGroupKey(o)));
+            String[] days = getDays();
+            List<String> dayList = Arrays.asList(days);
             list.forEach(item -> {
                 String key = item.getProductFactoryCode()+item.getProductMaterialCode();
                 List<OmsProductionOrderAnalysis> omsProductionOrderAnalyses1 = map.get(key);
-                item.setStockNum(omsProductionOrderAnalyses1.get(0).getStockNum());
+                List<String> detailDays = omsProductionOrderAnalyses1.stream().map(OmsProductionOrderAnalysis::getProductDate).collect(Collectors.toList());
+                List<String> addDays = dayList.stream().filter(day -> !detailDays.contains(day)).collect(Collectors.toList());
+                OmsProductionOrderAnalysis orderAnalysis = omsProductionOrderAnalyses1.get(0);
+                addDays.forEach(day ->
+                    omsProductionOrderAnalyses1.add(OmsProductionOrderAnalysis.builder()
+                            .orderFrom(orderAnalysis.getOrderFrom())
+                            .productFactoryCode(orderAnalysis.getProductFactoryCode())
+                            .productDate(day)
+                            .productMaterialCode(orderAnalysis.getProductMaterialCode())
+                            .productMaterialDesc(orderAnalysis.getProductMaterialDesc())
+                            .stockNum(orderAnalysis.getStockNum())
+                            .customerBreachNum(BigDecimal.ZERO)
+                            .demandOrderNum(BigDecimal.ZERO)
+                            .gapCustomer(0L)
+                            .totalCustomer(0L)
+                            .surplusNum(null)
+                            .build())
+                );
+                //按照生产日期升序排序
+                omsProductionOrderAnalyses1.sort(Comparator.comparing(OmsProductionOrderAnalysis::getProductDate));
+                BigDecimal surplusNum = null;
+                for (OmsProductionOrderAnalysis analysis : omsProductionOrderAnalyses1) {
+                    if (analysis.getSurplusNum() == null && surplusNum == null) {
+                        analysis.setSurplusNum(analysis.getStockNum());
+                    } else if (analysis.getSurplusNum() == null && surplusNum != null){
+                        analysis.setSurplusNum(surplusNum);
+                    }
+                    surplusNum = analysis.getSurplusNum();
+                }
+                item.setStockNum(orderAnalysis.getStockNum());
                 item.setDataList(omsProductionOrderAnalyses1);
             });
         }
         return list;
+    }
+
+    /**
+     * Description:  获取14天日期数组
+     * Param: []
+     * return: java.lang.String[]
+     * Author: ltq
+     * Date: 2020/6/29
+     */
+    private String[] getDays() {
+        int[] days = NumberUtil.range(1, 14);
+        String[] dates = new String[14];
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        for (int i : days) {
+            String day = dateTimeFormatter.format(LocalDate.now().plusDays(i));
+            dates[i - 1] = day;
+        }
+        return dates;
     }
     /**
      * Description:  查询成品库存信息

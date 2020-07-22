@@ -111,6 +111,10 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
             }
         }
         List<OmsProductionOrderDetailVo> list = omsProductionOrderDetailMapper.selectListPageInfo(omsProductionOrderDetail);
+        if (ObjectUtil.isEmpty(list) || list.size() <= 0) {
+            log.info("原材料评审分页查询数据为空！");
+            return list;
+        }
         //查询库存
         List<CdRawMaterialStock> cdRawMaterialStocks = list.stream().map(o -> {
             CdRawMaterialStock cdRawMaterialStock = new CdRawMaterialStock();
