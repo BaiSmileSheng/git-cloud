@@ -8,6 +8,7 @@ import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.CdMouthRate;
+import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.service.ICdMouthRateService;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -79,7 +81,10 @@ public class CdMouthRateController extends BaseController {
     @OperLog(title = "新增保存 汇率", businessType = BusinessType.INSERT)
     @ApiOperation(value = "新增保存 汇率", response = R.class)
     public R addSave(@RequestBody CdMouthRate cdMouthRate) {
-        cdMouthRateService.insertSelective(cdMouthRate);
+        SysUser sysUser = getUserInfo(SysUser.class);
+        cdMouthRate.setCreateBy(sysUser.getLoginName());
+        cdMouthRate.setCreateTime(new Date());
+        cdMouthRateService.insertUseGeneratedKeys(cdMouthRate);
         return R.data(cdMouthRate.getId());
     }
 
@@ -91,6 +96,9 @@ public class CdMouthRateController extends BaseController {
     @OperLog(title = "修改保存 汇率", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存 汇率", response = R.class)
     public R editSave(@RequestBody CdMouthRate cdMouthRate) {
+        SysUser sysUser = getUserInfo(SysUser.class);
+        cdMouthRate.setUpdateBy(sysUser.getLoginName());
+        cdMouthRate.setUpdateTime(new Date());
         return toAjax(cdMouthRateService.updateByPrimaryKeySelective(cdMouthRate));
     }
 
