@@ -205,6 +205,8 @@ public class CdFactoryStorehouseInfoController extends BaseController {
     @OperLog(title = "修改保存工厂库位 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存工厂库位 ", response = R.class)
     public R editSave(@RequestBody CdFactoryStorehouseInfo cdFactoryStorehouseInfo) {
+        SysUser sysUser = getUserInfo(SysUser.class);
+        cdFactoryStorehouseInfo.setUpdateBy(sysUser.getLoginName());
         return toAjax(cdFactoryStorehouseInfoService.updateByPrimaryKeySelective(cdFactoryStorehouseInfo));
     }
 

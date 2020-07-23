@@ -373,12 +373,6 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
     private CdProductStockDetailVo currentSAPProductStock(List<CdProductStock> cdProductStockList,Map<String,List<String>> storehouseMap,
                                                           SysUser sysUser) {
         JCoDestination destination;
-        SysInterfaceLog sysInterfaceLog = new SysInterfaceLog();
-        sysInterfaceLog.setAppId("SAP");
-        sysInterfaceLog.setInterfaceName(SapConstants.ZSD_INT_DDPS_05);
-        sysInterfaceLog.setCreateBy(sysUser.getLoginName());
-        sysInterfaceLog.setCreateTime(new Date());
-
         try {
             //创建与SAP的连接
             destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP601);
@@ -413,10 +407,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
             e.printStackTrace(new PrintWriter(w));
             logger.error(
                     "单条获取sap成品库存信息异常: {}", w.toString());
-            sysInterfaceLog.setRemark("获取sap成品库存信息异常");
             throw new BusinessException(e.getMessage());
-        }finally {
-            sysInterfaceLogService.insertSelectiveNoTransactional(sysInterfaceLog);
         }
     }
 
@@ -773,12 +764,6 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
      */
     private CdProductStockDetailVo sycSAPProductStock(String factoryCode, List<String> materialCodeList,Map<String,List<String>> storehouseMap) {
         JCoDestination destination;
-        SysInterfaceLog sysInterfaceLog = new SysInterfaceLog();
-        sysInterfaceLog.setAppId("SAP");
-        sysInterfaceLog.setInterfaceName(SapConstants.ZSD_INT_DDPS_02);
-        sysInterfaceLog.setCreateBy("定时任务");
-        sysInterfaceLog.setCreateTime(new Date());
-
         try {
             //创建与SAP的连接
             destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP601);
@@ -801,8 +786,6 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
                     inputTableM.setValue("MATNR",materialCode.toUpperCase());
                 }
             }
-            sysInterfaceLog.setContent(factoryCode + "");
-
             //执行函数
             JCoContext.begin(destination);
             fm.execute(destination);
@@ -815,10 +798,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
             e.printStackTrace(new PrintWriter(w));
             logger.error(
                     "获取sap成品库存信息异常: {}", w.toString());
-            sysInterfaceLog.setRemark("获取sap成品库存信息异常");
             throw new BusinessException(e.getMessage());
-        }finally {
-            sysInterfaceLogService.insertSelectiveNoTransactional(sysInterfaceLog);
         }
     }
 
@@ -887,6 +867,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
         cdProductInProduction.setUnit(outputZC.getString("ERFME"));
         cdProductInProduction.setCreateBy("定时任务");
         cdProductInProduction.setCreateTime(new Date());
+        cdProductInProduction.setUpdateBy("定时任务");
+        cdProductInProduction.setUpdateTime(new Date());
         cdProductInProduction.setDelFlag(DeleteFlagConstants.NO_DELETED);
         return cdProductInProduction;
     }
@@ -928,6 +910,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
         cdProductPassage.setPassageNum(outputZT.getBigDecimal("MENGE"));
         cdProductPassage.setCreateBy("定时任务");
         cdProductPassage.setCreateTime(new Date());
+        cdProductPassage.setUpdateBy("定时任务");
+        cdProductPassage.setUpdateTime(new Date());
         cdProductPassage.setDelFlag(DeleteFlagConstants.NO_DELETED);
         return cdProductPassage;
     }
@@ -969,6 +953,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
         cdProductWarehouse.setUnit(outputZK.getString("ERFME"));
         cdProductWarehouse.setCreateBy("定时任务");
         cdProductWarehouse.setCreateTime(new Date());
+        cdProductWarehouse.setUpdateBy("定时任务");
+        cdProductWarehouse.setUpdateTime(new Date());
         cdProductWarehouse.setDelFlag(DeleteFlagConstants.NO_DELETED);
         //根据工厂在字典表里获取不良成品 库位
         //根据工厂查所对应的不良货位,如果库存地点是不良货位则设置类型为1
@@ -1017,6 +1003,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
         cdProductStock.setUnit(outputJS.getString("ERFME"));
         cdProductStock.setCreateBy("定时任务");
         cdProductStock.setCreateTime(new Date());
+        cdProductStock.setUpdateBy("定时任务");
+        cdProductStock.setUpdateTime(new Date());
         cdProductStock.setDelFlag(DeleteFlagConstants.NO_DELETED);
         return cdProductStock;
     }
