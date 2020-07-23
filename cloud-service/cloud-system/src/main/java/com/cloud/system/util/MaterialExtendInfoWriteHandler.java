@@ -33,7 +33,7 @@ public class MaterialExtendInfoWriteHandler extends AbstractRowWriteHandler {
             }
             String productTypeString =  productTypeBuffer.toString();
             String productType = productTypeString.substring(0,productTypeString.length()-1);
-            XSSFClientAnchor xssfClientAnchor = new XSSFClientAnchor(0, 0, 0, 0, (short)1, 0, (short)2, 1);
+            XSSFClientAnchor xssfClientAnchor = new XSSFClientAnchor(0, 0, 0, 0, (short)1, 0, (short)5, 2);
             Comment comment = drawingPatriarch.createCellComment(xssfClientAnchor);
             // 输入批注信息
             comment.setString(new XSSFRichTextString(productType));
@@ -46,7 +46,7 @@ public class MaterialExtendInfoWriteHandler extends AbstractRowWriteHandler {
             }
             String lifeCycleString = lifeCycleBuffer.toString();
             String lifeCycle = lifeCycleString.substring(0,lifeCycleString.length()-1);
-            XSSFClientAnchor xssfClientAnchor1 = new XSSFClientAnchor(0, 0, 0, 0, (short)2, 0, (short)3, 1);
+            XSSFClientAnchor xssfClientAnchor1 = new XSSFClientAnchor(0, 0, 0, 0, (short)2, 0, (short)4, 2);
             Comment comment1 = drawingPatriarch.createCellComment(xssfClientAnchor1);
             // 输入批注信息
             comment1.setString(new XSSFRichTextString(lifeCycle));
@@ -60,7 +60,7 @@ public class MaterialExtendInfoWriteHandler extends AbstractRowWriteHandler {
             }
             String puttingOutString = puttingOutBuffer.toString();
             String puttingOut = puttingOutString.substring(0,puttingOutString.length()-1);
-            XSSFClientAnchor xssfClientAnchor2 = new XSSFClientAnchor(0, 0, 0, 0, (short)3, 0, (short)4, 1);
+            XSSFClientAnchor xssfClientAnchor2 = new XSSFClientAnchor(0, 0, 0, 0, (short)3, 0, (short)5, 2);
             Comment comment2 = drawingPatriarch.createCellComment(xssfClientAnchor2);
             // 输入批注信息
             comment2.setString(new XSSFRichTextString(puttingOut));
@@ -74,7 +74,7 @@ public class MaterialExtendInfoWriteHandler extends AbstractRowWriteHandler {
             }
             String znAttestationString = (null == znAttestationBuffer) ? " " : znAttestationBuffer.toString();
             String znAttestation = znAttestationString.substring(0,znAttestationString.length()-1);
-            XSSFClientAnchor xssfClientAnchor3 = new XSSFClientAnchor(0, 0, 0, 0, (short)4, 0, (short)5, 1);
+            XSSFClientAnchor xssfClientAnchor3 = new XSSFClientAnchor(0, 0, 0, 0, (short)4, 0, (short)6, 2);
             Comment comment3 = drawingPatriarch.createCellComment(xssfClientAnchor3);
             // 输入批注信息
             comment3.setString(new XSSFRichTextString(znAttestation));

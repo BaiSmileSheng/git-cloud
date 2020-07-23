@@ -373,12 +373,6 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
     private CdProductStockDetailVo currentSAPProductStock(List<CdProductStock> cdProductStockList,Map<String,List<String>> storehouseMap,
                                                           SysUser sysUser) {
         JCoDestination destination;
-        SysInterfaceLog sysInterfaceLog = new SysInterfaceLog();
-        sysInterfaceLog.setAppId("SAP");
-        sysInterfaceLog.setInterfaceName(SapConstants.ZSD_INT_DDPS_05);
-        sysInterfaceLog.setCreateBy(sysUser.getLoginName());
-        sysInterfaceLog.setCreateTime(new Date());
-
         try {
             //创建与SAP的连接
             destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP601);
@@ -413,10 +407,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
             e.printStackTrace(new PrintWriter(w));
             logger.error(
                     "单条获取sap成品库存信息异常: {}", w.toString());
-            sysInterfaceLog.setRemark("获取sap成品库存信息异常");
             throw new BusinessException(e.getMessage());
-        }finally {
-            sysInterfaceLogService.insertSelectiveNoTransactional(sysInterfaceLog);
         }
     }
 
@@ -773,12 +764,6 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
      */
     private CdProductStockDetailVo sycSAPProductStock(String factoryCode, List<String> materialCodeList,Map<String,List<String>> storehouseMap) {
         JCoDestination destination;
-        SysInterfaceLog sysInterfaceLog = new SysInterfaceLog();
-        sysInterfaceLog.setAppId("SAP");
-        sysInterfaceLog.setInterfaceName(SapConstants.ZSD_INT_DDPS_02);
-        sysInterfaceLog.setCreateBy("定时任务");
-        sysInterfaceLog.setCreateTime(new Date());
-
         try {
             //创建与SAP的连接
             destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP601);
@@ -801,8 +786,6 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
                     inputTableM.setValue("MATNR",materialCode.toUpperCase());
                 }
             }
-            sysInterfaceLog.setContent(factoryCode + "");
-
             //执行函数
             JCoContext.begin(destination);
             fm.execute(destination);
@@ -815,10 +798,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
             e.printStackTrace(new PrintWriter(w));
             logger.error(
                     "获取sap成品库存信息异常: {}", w.toString());
-            sysInterfaceLog.setRemark("获取sap成品库存信息异常");
             throw new BusinessException(e.getMessage());
-        }finally {
-            sysInterfaceLogService.insertSelectiveNoTransactional(sysInterfaceLog);
         }
     }
 

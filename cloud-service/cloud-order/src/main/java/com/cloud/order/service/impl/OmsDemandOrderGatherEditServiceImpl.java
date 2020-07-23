@@ -271,6 +271,37 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
             ExcelImportOtherObjectDto othObjectDto = new ExcelImportOtherObjectDto();
+
+            //交付日期
+            Date dateDelivery = demandOrderGatherEdit.getDeliveryDate();
+            //判断交付日期是否是T+1和T+2周
+            if (dateDelivery.compareTo(date) > 0) {
+                int nowWeekNum = DateUtil.weekOfYear(date);
+                int deliveryWeekNum = DateUtil.weekOfYear(dateDelivery);
+                if (DateUtil.dayOfWeek(dateDelivery)==1) {
+                    deliveryWeekNum += 1;
+                }
+                if (DateUtil.dayOfWeek(date)==1) {
+                    nowWeekNum += 1;
+                }
+                int subNum=deliveryWeekNum - nowWeekNum;
+                Boolean bo = false;
+                if (subNum < 3) {
+                    bo = true;
+                }
+                if (bo) {
+                    errObjectDto.setObject(demandOrderGatherEdit);
+                    errObjectDto.setErrMsg("不能导入T+1、T+2周数据");
+                    errDtos.add(errObjectDto);
+                    continue;
+                }
+            } else {
+                errObjectDto.setObject(demandOrderGatherEdit);
+                errObjectDto.setErrMsg("交付日期不能是当前或历史周");
+                errDtos.add(errObjectDto);
+                continue;
+            }
+
             String factoryCode = demandOrderGatherEdit.getProductFactoryCode();
             if (!CollUtil.contains(companyCodeList, factoryCode)) {
                 errObjectDto.setObject(demandOrderGatherEdit);
@@ -747,22 +778,50 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
      */
     @Override
     @Transactional
-    public R toSAP(List<Long> ids,SysUser sysUser) {
-        if (CollUtil.isEmpty(ids)) {
-            return R.error("参数为空！");
-        }
-        Example example = new Example(OmsDemandOrderGatherEdit.class);
-        example.and().andIn("id", ids);
-        List<OmsDemandOrderGatherEdit> demandOrderGatherEdits=selectByExample(example);
+    public R toSAP(List<Long> ids,SysUser sysUser,OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
         //只能下达待传SAP和传SAP异常的数据
         List<String> statusList = CollUtil.newArrayList(DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getCode()
-        ,DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());
+                ,DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());
+        Example example = new Example(OmsDemandOrderGatherEdit.class);
+        if (CollUtil.isEmpty(ids)) {
+            Example.Criteria criteria = example.createCriteria();
+            if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getProductMaterialCode())) {
+                criteria.andEqualTo("productMaterialCode",omsDemandOrderGatherEdit.getProductMaterialCode() );
+            }
+            if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getProductFactoryCode())) {
+                criteria.andEqualTo("productFactoryCode",omsDemandOrderGatherEdit.getProductFactoryCode() );
+            }
+            if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getStatus())) {
+                if (CollectionUtil.contains(statusList, omsDemandOrderGatherEdit.getStatus())) {
+                    criteria.andEqualTo("status", omsDemandOrderGatherEdit.getStatus());
+                } else {
+                    return R.error(StrUtil.format("只允许状态为{}与{}的数据下达SAP"
+                            ,DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getMsg()
+                            ,DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getMsg()));
+                }
+            }else{
+                criteria.andIn("status",statusList );
+            }
+            if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getBeginTime())) {
+                criteria.andGreaterThanOrEqualTo("deliveryDate",omsDemandOrderGatherEdit.getBeginTime() );
+            }
+            if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getEndTime())) {
+                criteria.andLessThanOrEqualTo("deliveryDate", omsDemandOrderGatherEdit.getEndTime() );
+            }
+        }else{
+            example.and().andIn("id", ids);
+        }
+        List<OmsDemandOrderGatherEdit> demandOrderGatherEdits=selectByExample(example);
+        if (CollectionUtil.isEmpty(demandOrderGatherEdits)) {
+            return R.error("无符合条件下达SAP的数据！");
+        }
         boolean checkBo = demandOrderGatherEdits.stream().allMatch(demandOrderGatherEdit -> statusList.contains(demandOrderGatherEdit.getStatus()));
         if (!checkBo) {
             return R.error(StrUtil.format("只允许下达状态为：{}或{}的数据",
                     DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getMsg(),
                     DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getMsg()));
         }
+        ids = demandOrderGatherEdits.stream().map(wo -> wo.getId()).collect(Collectors.toList());
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog().builder()
                 .appId("SAP").interfaceName(SapConstants.ZPP_INT_DDPS_04)
                 .content(StrUtil.format("参数为oms_demand_order_gather_edit表id：{}",CollUtil.join(ids, "#"))).build();

@@ -11,6 +11,7 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.order.domain.entity.Oms2weeksDemandOrderEdit;
 import com.cloud.order.domain.entity.vo.OmsDemandOrderGatherEditImportTemplete;
+import com.cloud.order.easyexcel.DemandOrderGatherEditWriteHandler;
 import com.cloud.order.service.IOms2weeksDemandOrderEditService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
@@ -142,7 +143,8 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
     @ApiOperation(value = "T+1、T+2草稿计划导入模板")
     @HasPermissions("order:oms2weeksDemandOrderEdit:importTemplete")
     public R importTemplete() {
-        return EasyExcelUtilOSS.writeExcel(new ArrayList<>(), "T+1-T+2周需求导入.xlsx", "sheet", new OmsDemandOrderGatherEditImportTemplete());
+        return EasyExcelUtilOSS.writePostilExcel(new ArrayList<>(), "T+1-T+2周需求导入模板.xlsx",
+                "sheet", new OmsDemandOrderGatherEditImportTemplete(),new DemandOrderGatherEditWriteHandler());
     }
 
     /**
@@ -311,9 +313,9 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
     @PostMapping("toSAP")
     @ApiOperation(value = "下达SAP")
     @HasPermissions("order:oms2weeksDemandOrderEdit:toSAP")
-    public R toSAP(@RequestParam("ids") List<Long> ids){
+    public R toSAP(@RequestParam("ids") List<Long> ids,@ApiIgnore Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit){
         SysUser sysUser = getUserInfo(SysUser.class);
-        return oms2weeksDemandOrderEditService.toSAP(ids,sysUser);
+        return oms2weeksDemandOrderEditService.toSAP(ids,sysUser,oms2weeksDemandOrderEdit);
     }
 
 

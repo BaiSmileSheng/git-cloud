@@ -24,7 +24,7 @@ public class FactoryStorehouseInfoWriteHandler extends AbstractRowWriteHandler {
             Drawing<?> drawingPatriarch = sheet.createDrawingPatriarch();
             // 在第一行 第5列创建一个批注
             String s = "请仅填写数字例如:1";
-            XSSFClientAnchor xssfClientAnchor = new XSSFClientAnchor(0, 0, 0, 0, (short)4, 0, (short)5, 1);
+            XSSFClientAnchor xssfClientAnchor = new XSSFClientAnchor(0, 0, 0, 0, (short)4, 0, (short)6, 2);
             Comment comment = drawingPatriarch.createCellComment(xssfClientAnchor);
             // 输入批注信息
             comment.setString(new XSSFRichTextString(s));

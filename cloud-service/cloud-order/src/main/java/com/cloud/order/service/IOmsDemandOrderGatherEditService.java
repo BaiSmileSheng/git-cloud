@@ -92,7 +92,7 @@ public interface IOmsDemandOrderGatherEditService extends BaseService<OmsDemandO
      * @param ids
      * @return
      */
-    R toSAP(List<Long> ids,SysUser sysUser);
+    R toSAP(List<Long> ids,SysUser sysUser,OmsDemandOrderGatherEdit omsDemandOrderGatherEdit);
 
 
     /**

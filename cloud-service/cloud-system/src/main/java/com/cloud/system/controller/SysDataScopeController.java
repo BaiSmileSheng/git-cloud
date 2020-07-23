@@ -1,4 +1,5 @@
 package com.cloud.system.controller;
+import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -58,9 +59,14 @@ public class SysDataScopeController extends BaseController {
     })
     public TableDataInfo list(SysDataScope sysDataScope) {
         Example example = new Example(SysDataScope.class);
-        example.and().andEqualTo(sysDataScope);
-        if(sysDataScope.getMaterialDesc()!=null){
+        if(StrUtil.isNotEmpty(sysDataScope.getMaterialCode())){
+            example.and().andEqualTo("materialCode",sysDataScope.getMaterialCode());
+        }
+        if(StrUtil.isNotEmpty(sysDataScope.getMaterialDesc())){
             example.and().andLike("materialDesc", StringUtils.format("%{}%",sysDataScope.getMaterialDesc()));
+        }
+        if(StrUtil.isNotEmpty(sysDataScope.getStatus())){
+            example.and().andEqualTo("status",sysDataScope.getStatus());
         }
         example.orderBy("orderNum").asc();
         startPage();
