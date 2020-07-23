@@ -3,6 +3,7 @@ package com.cloud.system.domain.vo;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.cloud.common.core.domain.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
 import tk.mybatis.mapper.annotation.KeySql;
 
 import javax.persistence.Id;
+import java.util.Date;
 
 
 /**
@@ -26,7 +28,7 @@ import javax.persistence.Id;
 @NoArgsConstructor
 @Builder
 @ApiModel(value = "超期库存 ")
-public class CdProductOverdueExcelImportErrorVo{
+public class CdProductOverdueExportVo extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -46,13 +48,14 @@ public class CdProductOverdueExcelImportErrorVo{
     /**
      * 超期物料描述
      */
+    @ExcelProperty(value = "超期物料描述",index = 1)
     @ApiModelProperty(value = "超期物料描述")
     private String productMaterialDesc;
 
     /**
      * 生产工厂编码
      */
-    @ExcelProperty(value = "生产工厂编码",index = 1)
+    @ExcelProperty(value = "生产工厂编码",index = 2)
     @ApiModelProperty(value = "生产工厂编码")
     private String productFactoryCode;
 
@@ -64,13 +67,35 @@ public class CdProductOverdueExcelImportErrorVo{
     /**
      * 备注
      */
-    @ExcelProperty(value = "备注(选填)",index = 2)
+    @ExcelProperty(value = "备注",index = 3)
     private String remark;
+
     /**
-     * 错误信息
+     * 创建者
      */
-    @ExcelProperty(value = "错误信息",index = 3)
-    @ApiModelProperty(value = "错误信息")
-    private String errorMessage;
+    @ExcelProperty(value = "创建人",index = 4)
+    private String createBy;
+
+    /**
+     * 创建时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @ExcelProperty(value = "创建时间",index = 5)
+    private Date createTime;
+
+    /**
+     * 更新者
+     */
+    @ExcelProperty(value = "更新人",index = 6)
+    private String updateBy;
+
+    /**
+     * 更新时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @ExcelProperty(value = "更新时间",index = 7)
+    private Date updateTime;
+
+
 
 }
