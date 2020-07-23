@@ -297,6 +297,8 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                         cdRawMaterialStock.setUnit(outTableOutput.getString("KMEIN"));
                         cdRawMaterialStock.setCreateBy("定时调用");
                         cdRawMaterialStock.setCreateTime(new Date());
+                        cdRawMaterialStock.setUpdateBy("定时调用");
+                        cdRawMaterialStock.setUpdateTime(new Date());
                         cdRawMaterialStock.setDelFlag(DeleteFlagConstants.NO_DELETED);
                         dataList.add(cdRawMaterialStock);
                     }
@@ -451,6 +453,8 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                         cdRawMaterialStock.setRawMaterialDesc(outTableOutput.getString("MAKTX"));
                         cdRawMaterialStock.setCurrentStock(outTableOutput.getBigDecimal("LABST"));
                         cdRawMaterialStock.setUnit(outTableOutput.getString("KMEIN"));
+                        cdRawMaterialStock.setCreateTime(new Date());
+                        cdRawMaterialStock.setCreateBy(sysUser.getLoginName());
                         cdRawMaterialStock.setUpdateTime(new Date());
                         cdRawMaterialStock.setUpdateBy(sysUser.getLoginName());
                         cdRawMaterialStock.setDelFlag(DeleteFlagConstants.NO_DELETED);

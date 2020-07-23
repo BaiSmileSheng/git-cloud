@@ -9,6 +9,7 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
+import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.service.ICdFactoryLineInfoService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,6 +139,8 @@ public class CdFactoryLineInfoController extends BaseController {
     @OperLog(title = "修改保存工厂线体关系 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存工厂线体关系 ", response = R.class)
     public R editSave(@RequestBody CdFactoryLineInfo cdFactoryLineInfo) {
+        SysUser sysUser = getUserInfo(SysUser.class);
+        cdFactoryLineInfo.setUpdateBy(sysUser.getLoginName());
         return toAjax(cdFactoryLineInfoService.updateByPrimaryKeySelective(cdFactoryLineInfo));
     }
 
