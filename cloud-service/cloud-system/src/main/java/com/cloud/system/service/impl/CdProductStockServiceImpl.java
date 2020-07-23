@@ -887,6 +887,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
         cdProductInProduction.setUnit(outputZC.getString("ERFME"));
         cdProductInProduction.setCreateBy("定时任务");
         cdProductInProduction.setCreateTime(new Date());
+        cdProductInProduction.setUpdateBy("定时任务");
+        cdProductInProduction.setUpdateTime(new Date());
         cdProductInProduction.setDelFlag(DeleteFlagConstants.NO_DELETED);
         return cdProductInProduction;
     }
@@ -928,6 +930,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
         cdProductPassage.setPassageNum(outputZT.getBigDecimal("MENGE"));
         cdProductPassage.setCreateBy("定时任务");
         cdProductPassage.setCreateTime(new Date());
+        cdProductPassage.setUpdateBy("定时任务");
+        cdProductPassage.setUpdateTime(new Date());
         cdProductPassage.setDelFlag(DeleteFlagConstants.NO_DELETED);
         return cdProductPassage;
     }
@@ -969,6 +973,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
         cdProductWarehouse.setUnit(outputZK.getString("ERFME"));
         cdProductWarehouse.setCreateBy("定时任务");
         cdProductWarehouse.setCreateTime(new Date());
+        cdProductWarehouse.setUpdateBy("定时任务");
+        cdProductWarehouse.setUpdateTime(new Date());
         cdProductWarehouse.setDelFlag(DeleteFlagConstants.NO_DELETED);
         //根据工厂在字典表里获取不良成品 库位
         //根据工厂查所对应的不良货位,如果库存地点是不良货位则设置类型为1
@@ -1017,6 +1023,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
         cdProductStock.setUnit(outputJS.getString("ERFME"));
         cdProductStock.setCreateBy("定时任务");
         cdProductStock.setCreateTime(new Date());
+        cdProductStock.setUpdateBy("定时任务");
+        cdProductStock.setUpdateTime(new Date());
         cdProductStock.setDelFlag(DeleteFlagConstants.NO_DELETED);
         return cdProductStock;
     }
