@@ -2,6 +2,7 @@ package com.cloud.order.util;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.http.ContentType;
+import com.alibaba.excel.write.handler.AbstractRowWriteHandler;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.easyexcel.SheetExcelData;
@@ -30,6 +31,24 @@ public class EasyExcelUtilOSS {
      */
     public static R writeExcel(List<?> list, String fileName, String sheetName, Object object) {
         R r = EasyExcelUtil.writeExcel(list, fileName, sheetName, object);
+        if (!r.isSuccess()) {
+            return r;
+        }
+        String path = r.getStr("msg");
+        return uplloadExcel(path,fileName);
+    }
+
+    /**
+     * 导出 Excel ：一个 sheet，带表头,表头含有批注
+     *
+     * @param list      数据 list，要导出的实体
+     * @param fileName  导出的文件名，需要加后缀
+     * @param sheetName 导入文件的 sheet 名
+     * @param object    映射对象
+     * @param rowWriteHandler    批注
+     */
+    public static R writePostilExcel(List<?> list, String fileName, String sheetName, Object object, AbstractRowWriteHandler rowWriteHandler) {
+        R r = EasyExcelUtil.writePostilExcel(list, fileName, sheetName, object,rowWriteHandler);
         if (!r.isSuccess()) {
             return r;
         }

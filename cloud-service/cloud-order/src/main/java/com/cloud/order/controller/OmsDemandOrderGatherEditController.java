@@ -12,6 +12,7 @@ import com.cloud.common.log.enums.BusinessType;
 import com.cloud.order.domain.entity.OmsDemandOrderGather;
 import com.cloud.order.domain.entity.OmsDemandOrderGatherEdit;
 import com.cloud.order.domain.entity.vo.OmsDemandOrderGatherEditImportTemplete;
+import com.cloud.order.easyexcel.DemandOrderGatherEditWriteHandler;
 import com.cloud.order.service.IOmsDemandOrderGatherEditService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
@@ -204,7 +205,8 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     @ApiOperation(value = "计划需求导入-导入模板")
     @HasPermissions("order:demandOrderGatherEdit:importTemplete")
     public R importTemplete() {
-        return EasyExcelUtilOSS.writeExcel(new ArrayList<>(), "需求导入.xlsx", "sheet", new OmsDemandOrderGatherEditImportTemplete());
+        return EasyExcelUtilOSS.writePostilExcel(new ArrayList<>(), "13周需求导入模板.xlsx",
+                "sheet", new OmsDemandOrderGatherEditImportTemplete(),new DemandOrderGatherEditWriteHandler());
     }
 
     /**
@@ -317,9 +319,9 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     @PostMapping("toSAP")
     @ApiOperation(value = "下达SAP")
     @HasPermissions("order:demandOrderGatherEdit:toSAP")
-    public R toSAP(@RequestParam("ids") List<Long> ids){
+    public R toSAP(@RequestParam("ids") List<Long> ids,@ApiIgnore OmsDemandOrderGatherEdit omsDemandOrderGatherEdit){
         SysUser sysUser = getUserInfo(SysUser.class);
-        return omsDemandOrderGatherEditService.toSAP(ids,sysUser);
+        return omsDemandOrderGatherEditService.toSAP(ids,sysUser,omsDemandOrderGatherEdit);
     }
 
 }

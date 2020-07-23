@@ -32,7 +32,7 @@ public class Oms2weeksDemandOrderEditImport {
     /**
      * 订单类型
      */
-    @ExcelProperty(value = "订单类型")
+    @ExcelProperty(value = "SAP订单类型")
     @NotBlank
     private String orderType;
 

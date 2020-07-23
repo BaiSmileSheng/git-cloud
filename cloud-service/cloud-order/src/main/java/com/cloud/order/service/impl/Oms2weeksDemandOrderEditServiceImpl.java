@@ -283,6 +283,37 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
             ExcelImportOtherObjectDto othObjectDto = new ExcelImportOtherObjectDto();
+
+            //交付日期
+            Date dateDelivery = weeksDemandOrderEdit.getDeliveryDate();
+            //判断是否是T+1，T+2之外的数据
+            if (dateDelivery.compareTo(date) > 0) {
+                int nowWeekNum = DateUtil.weekOfYear(date);
+                int deliveryWeekNum = DateUtil.weekOfYear(dateDelivery);
+                if (DateUtil.dayOfWeek(dateDelivery)==1) {
+                    deliveryWeekNum += 1;
+                }
+                if (DateUtil.dayOfWeek(date)==1) {
+                    nowWeekNum += 1;
+                }
+                int subNum=deliveryWeekNum - nowWeekNum;
+                Boolean bo = false;
+                if (subNum >= 3) {
+                    bo = true;
+                }
+                if (bo) {
+                    errObjectDto.setObject(weeksDemandOrderEdit);
+                    errObjectDto.setErrMsg("不能导入T+1、T+2周之外的数据");
+                    errDtos.add(errObjectDto);
+                    continue;
+                }
+            } else {
+                errObjectDto.setObject(weeksDemandOrderEdit);
+                errObjectDto.setErrMsg("交付日期不能是当前或历史周");
+                errDtos.add(errObjectDto);
+                continue;
+            }
+
             String factoryCode = weeksDemandOrderEdit.getProductFactoryCode();
             if (!CollUtil.contains(companyCodeList, factoryCode)) {
                 errObjectDto.setObject(weeksDemandOrderEdit);
@@ -563,7 +594,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                     interfaceNum = mapNumInterface.get(dayStr)==null?0L:mapNumInterface.get(dayStr);
                 }
                 Long artificialNum = mapNumArtificial.get(dayStr)==null?0L:mapNumArtificial.get(dayStr);
-                Long differenceNum = Math.abs((interfaceNum.longValue()-artificialNum.longValue()));
+                Long differenceNum = interfaceNum.longValue()-artificialNum.longValue();
                 DayAndNumsGatherVO numInfo = new DayAndNumsGatherVO().builder()
                         .day(dayStr).interfaceNum(interfaceNum)
                         .artificialNum(artificialNum)
@@ -687,26 +718,50 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
      */
     @Override
     @Transactional
-    public R toSAP(List<Long> ids,SysUser sysUser) {
-        List<Oms2weeksDemandOrderEdit> oms2weeksDemandOrderEditList = new ArrayList<>();
+    public R toSAP(List<Long> ids,SysUser sysUser,Oms2weeksDemandOrderEdit weeksDemandOrderEdit) {
         //只能下达待传SAP和传SAP异常的数据
         List<String> statusList = CollUtil.newArrayList(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getCode()
                 ,Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());
         Example example = new Example(Oms2weeksDemandOrderEdit.class);
         if (CollUtil.isEmpty(ids)) {
-            example.and().andIn("status", statusList);
-            oms2weeksDemandOrderEditList=selectByExample(example);
-            ids = oms2weeksDemandOrderEditList.stream().map(wo -> wo.getId()).collect(Collectors.toList());
+            Example.Criteria criteria = example.createCriteria();
+            if (StrUtil.isNotEmpty(weeksDemandOrderEdit.getProductMaterialCode())) {
+                criteria.andEqualTo("productMaterialCode",weeksDemandOrderEdit.getProductMaterialCode() );
+            }
+            if (StrUtil.isNotEmpty(weeksDemandOrderEdit.getProductFactoryCode())) {
+                criteria.andEqualTo("productFactoryCode",weeksDemandOrderEdit.getProductFactoryCode() );
+            }
+            if (StrUtil.isNotEmpty(weeksDemandOrderEdit.getStatus())) {
+                if (CollectionUtil.contains(statusList, weeksDemandOrderEdit.getStatus())) {
+                    criteria.andEqualTo("status", weeksDemandOrderEdit.getStatus());
+                } else {
+                    return R.error(StrUtil.format("只允许状态为{}与{}的数据下达SAP"
+                            ,Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getMsg()
+                            ,Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getMsg()));
+                }
+            }else{
+                criteria.andIn("status",statusList );
+            }
+            if (StrUtil.isNotEmpty(weeksDemandOrderEdit.getBeginTime())) {
+                criteria.andGreaterThanOrEqualTo("deliveryDate",weeksDemandOrderEdit.getBeginTime() );
+            }
+            if (StrUtil.isNotEmpty(weeksDemandOrderEdit.getEndTime())) {
+                criteria.andLessThanOrEqualTo("deliveryDate", weeksDemandOrderEdit.getEndTime() );
+            }
         }else{
             example.and().andIn("id", ids);
-            oms2weeksDemandOrderEditList=selectByExample(example);
-            boolean checkBo = oms2weeksDemandOrderEditList.stream().allMatch(oms2weeksDemandOrderEdit -> statusList.contains(oms2weeksDemandOrderEdit.getStatus()));
-            if (!checkBo) {
-                return R.error(StrUtil.format("只允许下达状态为：{}或{}的数据",
-                        Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getMsg(),
-                        Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getMsg()));
-            }
         }
+        List<Oms2weeksDemandOrderEdit> oms2weeksDemandOrderEditList=selectByExample(example);
+        boolean checkBo = oms2weeksDemandOrderEditList.stream().allMatch(oms2weeksDemandOrderEdit -> statusList.contains(oms2weeksDemandOrderEdit.getStatus()));
+        if (!checkBo) {
+            return R.error(StrUtil.format("只允许下达状态为：{}或{}的数据",
+                    Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getMsg(),
+                    Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getMsg()));
+        }
+        if (CollectionUtil.isEmpty(oms2weeksDemandOrderEditList)) {
+            return R.error("无符合条件下达SAP的数据！");
+        }
+        ids = oms2weeksDemandOrderEditList.stream().map(wo -> wo.getId()).collect(Collectors.toList());
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog().builder()
                 .appId("SAP").interfaceName(SapConstants.ZPP_INT_DDPS_02)
                 .content(StrUtil.format("参数为oms2weeks_demand_order_edit表id：{}",CollUtil.join(ids, "#"))).build();
