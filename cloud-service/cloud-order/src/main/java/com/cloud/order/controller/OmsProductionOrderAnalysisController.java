@@ -30,6 +30,8 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * 待排产订单分析  提供者
  *
@@ -75,7 +77,9 @@ public class OmsProductionOrderAnalysisController extends BaseController {
         if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
             //排产员查询工厂下的数据
             if(CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
-                omsProductionOrderAnalysis.setProductFactoryCodeList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()));
+                List<String> facoryList = Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(","));
+                String factorys = facoryList.stream().map(f -> "\'" + f +"\'").collect(Collectors.joining(","));
+                omsProductionOrderAnalysis.setProductFactoryCodeList(factorys);
             }
         }
         startPage();
