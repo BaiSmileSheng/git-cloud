@@ -249,6 +249,7 @@ public class CdMaterialExtendInfoController extends BaseController {
         Example example = new Example(CdMaterialExtendInfo.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andLike("materialCode",materialCode + "%");
+        startPage();
         List<CdMaterialExtendInfo> cdMaterialExtendInfoList = cdMaterialExtendInfoService.selectByExample(example);
         List<String> list = cdMaterialExtendInfoList.stream().map(m ->m.getMaterialCode()).collect(Collectors.toList());
         return R.data(list);
