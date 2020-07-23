@@ -57,7 +57,15 @@ public class DemandOrderGatherEditWriteHandler extends AbstractRowWriteHandler {
             // 将批注添加到单元格对象中 从0开始计算 第1行第2列
             sheet.getRow(0).getCell(2).setCellComment(commentOrderType);
 
-            // 在第一行 第二列 SAP订单类型 批注
+            // 在第一行 第10列 交付日期 批注
+            XSSFClientAnchor xssfClientAnchorDate = new XSSFClientAnchor(0, 0, 0, 0, (short)9, 0, (short)12, 1);
+            Comment commentDate = drawingPatriarch.createCellComment(xssfClientAnchorDate);
+            // 输入批注信息
+            commentDate.setString(new XSSFRichTextString("例如：2020-07-07"));
+            // 将批注添加到单元格对象中 从0开始计算 第1行第2列
+            sheet.getRow(0).getCell(10).setCellComment(commentDate);
+
+            // 在第一行 第11列 SAP订单类型 批注
             List<SysDictData> listRelation = remoteDictDataService.getType("factory_rejectstore_relation");
             String relationStr=list.stream()
                     .map(t -> t.getDictLabel())

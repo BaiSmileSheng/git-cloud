@@ -283,6 +283,37 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
             ExcelImportOtherObjectDto othObjectDto = new ExcelImportOtherObjectDto();
+
+            //交付日期
+            Date dateDelivery = weeksDemandOrderEdit.getDeliveryDate();
+            //判断是否是T+1，T+2之外的数据
+            if (dateDelivery.compareTo(date) > 0) {
+                int nowWeekNum = DateUtil.weekOfYear(date);
+                int deliveryWeekNum = DateUtil.weekOfYear(dateDelivery);
+                if (DateUtil.dayOfWeek(dateDelivery)==1) {
+                    deliveryWeekNum += 1;
+                }
+                if (DateUtil.dayOfWeek(date)==1) {
+                    nowWeekNum += 1;
+                }
+                int subNum=deliveryWeekNum - nowWeekNum;
+                Boolean bo = false;
+                if (subNum >= 3) {
+                    bo = true;
+                }
+                if (bo) {
+                    errObjectDto.setObject(weeksDemandOrderEdit);
+                    errObjectDto.setErrMsg("不能导入T+1、T+2周之外的数据");
+                    errDtos.add(errObjectDto);
+                    continue;
+                }
+            } else {
+                errObjectDto.setObject(weeksDemandOrderEdit);
+                errObjectDto.setErrMsg("交付日期不能是当前或历史周");
+                errDtos.add(errObjectDto);
+                continue;
+            }
+
             String factoryCode = weeksDemandOrderEdit.getProductFactoryCode();
             if (!CollUtil.contains(companyCodeList, factoryCode)) {
                 errObjectDto.setObject(weeksDemandOrderEdit);
@@ -563,7 +594,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                     interfaceNum = mapNumInterface.get(dayStr)==null?0L:mapNumInterface.get(dayStr);
                 }
                 Long artificialNum = mapNumArtificial.get(dayStr)==null?0L:mapNumArtificial.get(dayStr);
-                Long differenceNum = Math.abs((interfaceNum.longValue()-artificialNum.longValue()));
+                Long differenceNum = interfaceNum.longValue()-artificialNum.longValue();
                 DayAndNumsGatherVO numInfo = new DayAndNumsGatherVO().builder()
                         .day(dayStr).interfaceNum(interfaceNum)
                         .artificialNum(artificialNum)

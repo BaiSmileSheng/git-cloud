@@ -271,6 +271,37 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
             ExcelImportOtherObjectDto othObjectDto = new ExcelImportOtherObjectDto();
+
+            //交付日期
+            Date dateDelivery = demandOrderGatherEdit.getDeliveryDate();
+            //判断交付日期是否是T+1和T+2周
+            if (dateDelivery.compareTo(date) > 0) {
+                int nowWeekNum = DateUtil.weekOfYear(date);
+                int deliveryWeekNum = DateUtil.weekOfYear(dateDelivery);
+                if (DateUtil.dayOfWeek(dateDelivery)==1) {
+                    deliveryWeekNum += 1;
+                }
+                if (DateUtil.dayOfWeek(date)==1) {
+                    nowWeekNum += 1;
+                }
+                int subNum=deliveryWeekNum - nowWeekNum;
+                Boolean bo = false;
+                if (subNum < 3) {
+                    bo = true;
+                }
+                if (bo) {
+                    errObjectDto.setObject(demandOrderGatherEdit);
+                    errObjectDto.setErrMsg("不能导入T+1、T+2周数据");
+                    errDtos.add(errObjectDto);
+                    continue;
+                }
+            } else {
+                errObjectDto.setObject(demandOrderGatherEdit);
+                errObjectDto.setErrMsg("交付日期不能是当前或历史周");
+                errDtos.add(errObjectDto);
+                continue;
+            }
+
             String factoryCode = demandOrderGatherEdit.getProductFactoryCode();
             if (!CollUtil.contains(companyCodeList, factoryCode)) {
                 errObjectDto.setObject(demandOrderGatherEdit);
