@@ -127,7 +127,6 @@ public class CdProductOverdueServiceImpl extends BaseServiceImpl<CdProductOverdu
 
         List<CdProductOverdueImportVo> listImport = (List<CdProductOverdueImportVo>) objects;
 
-        StringBuffer errMsgBuffer = new StringBuffer();
         for(CdProductOverdueImportVo cdProductOverdue:listImport){
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
@@ -135,6 +134,7 @@ public class CdProductOverdueServiceImpl extends BaseServiceImpl<CdProductOverdu
             CdProductOverdue cdProductOverdueReq = new CdProductOverdue();
             BeanUtil.copyProperties(cdProductOverdue,cdProductOverdueReq);
 
+            StringBuffer errMsgBuffer = new StringBuffer();
             String productMaterialCode = cdProductOverdue.getProductMaterialCode();
             if(StringUtils.isBlank(productMaterialCode)){
                 errMsgBuffer.append("超期物料号不能为空;");
@@ -157,7 +157,7 @@ public class CdProductOverdueServiceImpl extends BaseServiceImpl<CdProductOverdu
                     cdProductOverdueReq.setProductMaterialDesc(cdMaterialInfoList.get(0).getMaterialDesc());
                 }
             }
-            if (StringUtils.isNotBlank(factoryCode) && !CollUtil.contains(companyCodeList, factoryCode)) {
+            if (StringUtils.isNotBlank(factoryCode) && !companyCodeList.contains(factoryCode)) {
                 errMsgBuffer.append("工厂编号不存在请维护;");
             }
 
