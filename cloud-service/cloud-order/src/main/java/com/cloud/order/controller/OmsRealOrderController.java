@@ -129,7 +129,7 @@ public class OmsRealOrderController extends BaseController {
             criteria.andGreaterThanOrEqualTo("deliveryDate",omsRealOrder.getBeginTime());
         }
         if(StringUtils.isNotBlank(omsRealOrder.getEndTime())){
-            criteria.andLessThanOrEqualTo("deliveryDate", DateUtil.parse(omsRealOrder.getEndTime()).offset(DateField.DAY_OF_MONTH,1));
+            criteria.andLessThanOrEqualTo("deliveryDate", omsRealOrder.getEndTime());
         }
         return example;
     }
@@ -237,6 +237,10 @@ public class OmsRealOrderController extends BaseController {
         //排产员查对应工厂的数据,业务经理查自己导入的
         SysUser sysUser = getUserInfo(SysUser.class);
         long userId = getCurrentUserId();
+        //修改交付日期时必须加备注
+        if(StringUtils.isNotBlank(omsRealOrder.getDeliveryDate()) && StringUtils.isBlank(omsRealOrder.getRemark())){
+            return R.error("请填写备注");
+        }
         R result = omsRealOrderService.editSaveOmsRealOrder(omsRealOrder, sysUser, userId);
         return result;
     }

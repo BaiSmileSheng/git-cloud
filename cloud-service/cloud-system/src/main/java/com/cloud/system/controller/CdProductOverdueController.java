@@ -8,6 +8,8 @@ import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.CdProductOverdue;
+import com.cloud.system.domain.vo.CdProductOverdueExportVo;
+import com.cloud.system.domain.vo.CdProductOverdueImportVo;
 import com.cloud.system.service.ICdProductOverdueService;
 import com.cloud.system.util.EasyExcelUtilOSS;
 import io.swagger.annotations.*;
@@ -95,7 +97,7 @@ public class CdProductOverdueController extends BaseController {
     @ApiOperation(value = "导入模板下载", response = CdProductOverdue.class)
     public R exportTemplate(){
         String fileName = "超期库存模板.xlsx";
-        return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new CdProductOverdue());
+        return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new CdProductOverdueImportVo());
     }
 
     @GetMapping("export")
@@ -114,7 +116,7 @@ public class CdProductOverdueController extends BaseController {
         String fileName = "超期库存.xlsx";
         Example example = assemblyConditions(cdProductOverdue);
         List<CdProductOverdue> cdProductOverdueList = cdProductOverdueService.selectByExample(example);
-        return EasyExcelUtilOSS.writeExcel(cdProductOverdueList,fileName,fileName,new CdProductOverdue());
+        return EasyExcelUtilOSS.writeExcel(cdProductOverdueList,fileName,fileName,new CdProductOverdueExportVo());
     }
     /**
      * 导入
