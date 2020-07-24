@@ -442,16 +442,25 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
     @Override
     public R deleteWithLimit(String ids) {
         if (StrUtil.isEmpty(ids)) {
-            return R.error("参数为空！");
-        }
-        List<String> list = CollUtil.newArrayList(ids.split(StrUtil.COMMA));
-        for (String id : list) {
-            Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit = selectByPrimaryKey(Long.valueOf(id));
-            if (!StrUtil.equals(oms2weeksDemandOrderEdit.getStatus()
-                    , DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode())||
-            StrUtil.equals(oms2weeksDemandOrderEdit.getAuditStatus()
-                    , DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHZ.getCode())) {
-                return R.error(StrUtil.format("此状态数据不允许删除！需求订单号：{}",oms2weeksDemandOrderEdit.getDemandOrderCode()));
+            Example example = new Example(Oms2weeksDemandOrderEdit.class);
+            example.and().andEqualTo("status", DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode())
+                    .andNotEqualTo("auditStatus", DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHZ.getCode());
+            List<Oms2weeksDemandOrderEdit> oms2weeksDemandOrderEditList = selectByExample(example);
+            if (CollectionUtil.isEmpty(oms2weeksDemandOrderEditList)) {
+                return R.error("无可删除数据！");
+            }
+            List idList = oms2weeksDemandOrderEditList.stream().map(Oms2weeksDemandOrderEdit::getId).collect(Collectors.toList());
+            ids = CollectionUtil.join(idList, StrUtil.COMMA);
+        }else{
+            List<String> list = CollUtil.newArrayList(ids.split(StrUtil.COMMA));
+            for (String id : list) {
+                Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit = selectByPrimaryKey(Long.valueOf(id));
+                if (!StrUtil.equals(oms2weeksDemandOrderEdit.getStatus()
+                        , DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode())||
+                        StrUtil.equals(oms2weeksDemandOrderEdit.getAuditStatus()
+                                , DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHZ.getCode())) {
+                    return R.error(StrUtil.format("此状态数据不允许删除！需求订单号：{}",oms2weeksDemandOrderEdit.getDemandOrderCode()));
+                }
             }
         }
         deleteByIds(ids);

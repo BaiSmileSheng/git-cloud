@@ -36,7 +36,7 @@ public class DemandOrderGatherEditWriteHandler extends AbstractRowWriteHandler {
             String orderFromStr=Arrays.stream(OrderFromEnum.values())
                     .map(t -> t.getMsg())
                     .collect(Collectors.joining(StrUtil.COMMA));
-            XSSFClientAnchor xssfClientAnchorOrderFrom = new XSSFClientAnchor(0, 0, 0, 0, (short)1, 0, (short)2, 1);
+            XSSFClientAnchor xssfClientAnchorOrderFrom = new XSSFClientAnchor(0, 0, 0, 0, (short)0, 0, (short)1, 1);
             Comment commentOrderFrom = drawingPatriarch.createCellComment(xssfClientAnchorOrderFrom);
             // 输入批注信息
             commentOrderFrom.setString(new XSSFRichTextString(orderFromStr));
@@ -50,7 +50,7 @@ public class DemandOrderGatherEditWriteHandler extends AbstractRowWriteHandler {
             String orderTypeStr=list.stream()
                     .map(t -> t.getDictLabel())
                     .collect(Collectors.joining(StrUtil.COMMA));
-            XSSFClientAnchor xssfClientAnchorOrderType = new XSSFClientAnchor(0, 0, 0, 0, (short)2, 0, (short)7, 4);
+            XSSFClientAnchor xssfClientAnchorOrderType = new XSSFClientAnchor(0, 0, 0, 0, (short)1, 0, (short)6, 4);
             Comment commentOrderType = drawingPatriarch.createCellComment(xssfClientAnchorOrderType);
             // 输入批注信息
             commentOrderType.setString(new XSSFRichTextString(orderTypeStr));
@@ -61,19 +61,15 @@ public class DemandOrderGatherEditWriteHandler extends AbstractRowWriteHandler {
             XSSFClientAnchor xssfClientAnchorDate = new XSSFClientAnchor(0, 0, 0, 0, (short)9, 0, (short)12, 1);
             Comment commentDate = drawingPatriarch.createCellComment(xssfClientAnchorDate);
             // 输入批注信息
-            commentDate.setString(new XSSFRichTextString("例如：2020-07-07"));
+            commentDate.setString(new XSSFRichTextString("例：2020-07-07"));
             // 将批注添加到单元格对象中 从0开始计算 第1行第2列
             sheet.getRow(0).getCell(10).setCellComment(commentDate);
 
-            // 在第一行 第11列 SAP订单类型 批注
-            List<SysDictData> listRelation = remoteDictDataService.getType("factory_rejectstore_relation");
-            String relationStr=list.stream()
-                    .map(t -> t.getDictLabel())
-                    .collect(Collectors.joining(StrUtil.COMMA));
-            XSSFClientAnchor xssfClientAnchorRelation = new XSSFClientAnchor(0, 0, 0, 0, (short)10, 0, (short)16, 3);
+            // 在第一行 第11列 地点 批注
+            XSSFClientAnchor xssfClientAnchorRelation = new XSSFClientAnchor(0, 0, 0, 0, (short)10, 0, (short)12, 1);
             Comment commentRelation = drawingPatriarch.createCellComment(xssfClientAnchorRelation);
             // 输入批注信息
-            commentRelation.setString(new XSSFRichTextString(relationStr));
+            commentRelation.setString(new XSSFRichTextString("交货库位"));
             // 将批注添加到单元格对象中 从0开始计算 第1行第2列
             sheet.getRow(0).getCell(11).setCellComment(commentRelation);
         }
