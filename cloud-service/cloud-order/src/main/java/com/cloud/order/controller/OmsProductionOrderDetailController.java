@@ -125,14 +125,14 @@ public class OmsProductionOrderDetailController extends BaseController {
     @PostMapping("commitProductOrderDetail")
     @ApiOperation(value = "原材料确认-确认按钮", response = R.class)
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "list",value = "实体List",dataType = "OmsProductionOrderDetail",required = true ),
-            @ApiImplicitParam(name = "flag", value = "传参标识(query:未选中记录，传入查询条件，record:传入选中记录)"
-                    , required = true, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "list",value = "选中记录List",dataType = "OmsProductionOrderDetail",required = false ),
+            @ApiImplicitParam(name = "omsProductionOrderDetail", value = "查询条件对象"
+                    , required = false, dataType = "OmsProductionOrderDetail")
     })
     @HasPermissions("order:productOrderDetail:commitProductOrderDetail")
-    public R commitProductOrderDetail(@RequestBody List<OmsProductionOrderDetail> list, String  flag){
+    public R commitProductOrderDetail(@RequestBody List<OmsProductionOrderDetail> list, @ApiIgnore OmsProductionOrderDetail omsProductionOrderDetail){
         SysUser sysUser = getUserInfo(SysUser.class);
-        return omsProductionOrderDetailService.commitProductOrderDetail(list,flag,sysUser);
+        return omsProductionOrderDetailService.commitProductOrderDetail(list,omsProductionOrderDetail,sysUser);
     }
     /**
      * 新增保存排产订单明细

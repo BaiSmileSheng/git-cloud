@@ -12,10 +12,14 @@ import com.cloud.common.easyexcel.DTO.ExcelImportResult;
 import com.cloud.common.easyexcel.DTO.ExcelImportSucObjectDto;
 import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.domain.entity.CdProductOverdue;
 import com.cloud.system.domain.vo.CdProductOverdueExcelImportErrorVo;
+import com.cloud.system.domain.vo.CdProductOverdueImportVo;
 import com.cloud.system.feign.RemoteFactoryInfoService;
 import com.cloud.system.mapper.CdProductOverdueMapper;
+import com.cloud.system.service.ICdFactoryInfoService;
+import com.cloud.system.service.ICdMaterialInfoService;
 import com.cloud.system.service.ICdProductOverdueExcelImportService;
 import com.cloud.system.service.ICdProductOverdueService;
 import com.cloud.system.util.EasyExcelUtilOSS;
@@ -54,7 +58,10 @@ public class CdProductOverdueServiceImpl extends BaseServiceImpl<CdProductOverdu
     private ICdProductOverdueExcelImportService cdProductOverdueExcelImportService;
 
     @Autowired
-    private RemoteFactoryInfoService remoteFactoryInfoService;
+    private ICdFactoryInfoService cdFactoryInfoService;
+
+    @Autowired
+    private ICdMaterialInfoService cdMaterialInfoService;
 
     /**
      * 导入数据 先根据创建人删除再新增
@@ -65,8 +72,8 @@ public class CdProductOverdueServiceImpl extends BaseServiceImpl<CdProductOverdu
     @Override
     public R importFactoryStorehouse(MultipartFile file, String loginName) throws IOException {
 
-        EasyWithErrorExcelListener easyExcelListener = new EasyWithErrorExcelListener(cdProductOverdueExcelImportService, CdProductOverdue.class);
-        EasyExcel.read(file.getInputStream(),CdProductOverdue.class,easyExcelListener).sheet().doRead();
+        EasyWithErrorExcelListener easyExcelListener = new EasyWithErrorExcelListener(cdProductOverdueExcelImportService, CdProductOverdueImportVo.class);
+        EasyExcel.read(file.getInputStream(),CdProductOverdueImportVo.class,easyExcelListener).sheet().doRead();
 
         //可以导入的结果集 插入
         List<ExcelImportSucObjectDto> successList=easyExcelListener.getSuccessList();
@@ -74,6 +81,7 @@ public class CdProductOverdueServiceImpl extends BaseServiceImpl<CdProductOverdu
             List<CdProductOverdue> successResult =successList.stream().map(excelImportSucObjectDto -> {
                 CdProductOverdue cdProductOverdue = BeanUtil.copyProperties(excelImportSucObjectDto.getObject(), CdProductOverdue.class);
                 cdProductOverdue.setCreateBy(loginName);
+                cdProductOverdue.setUpdateBy(loginName);
                 return cdProductOverdue;
             }).collect(Collectors.toList());
             if(!CollectionUtils.isEmpty(successResult)){
@@ -106,7 +114,7 @@ public class CdProductOverdueServiceImpl extends BaseServiceImpl<CdProductOverdu
         }
 
         //获取工厂编号信息
-        R rCompanyList=remoteFactoryInfoService.getAllCompanyCode();
+        R rCompanyList = cdFactoryInfoService.selectAllCompanyCode();
         if (!rCompanyList.isSuccess()) {
             throw new BusinessException("无工厂信息，请到基础信息维护！");
         }
@@ -117,37 +125,53 @@ public class CdProductOverdueServiceImpl extends BaseServiceImpl<CdProductOverdu
         List<ExcelImportSucObjectDto> successDtos = new ArrayList<>();
         List<ExcelImportOtherObjectDto> otherDtos = new ArrayList<>();
 
-        List<CdProductOverdue> listImport = (List<CdProductOverdue>) objects;
-        List<CdProductOverdue> list= listImport.stream().map(cdProductOverdue ->
-                BeanUtil.copyProperties(cdProductOverdue,CdProductOverdue.class)).collect(Collectors.toList());
+        List<CdProductOverdueImportVo> listImport = (List<CdProductOverdueImportVo>) objects;
 
-        for(CdProductOverdue cdProductOverdue:list){
+        for(CdProductOverdueImportVo cdProductOverdue:listImport){
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
 
-            if(StringUtils.isBlank(cdProductOverdue.getProductMaterialCode())){
-                errObjectDto.setObject(cdProductOverdue);
-                errObjectDto.setErrMsg(StrUtil.format("超期物料号不能为空：{}", cdProductOverdue.getProductMaterialCode()));
-                errDtos.add(errObjectDto);
-                continue;
+            CdProductOverdue cdProductOverdueReq = new CdProductOverdue();
+            BeanUtil.copyProperties(cdProductOverdue,cdProductOverdueReq);
+
+            StringBuffer errMsgBuffer = new StringBuffer();
+            String productMaterialCode = cdProductOverdue.getProductMaterialCode();
+            if(StringUtils.isBlank(productMaterialCode)){
+                errMsgBuffer.append("超期物料号不能为空;");
             }
-            if(StringUtils.isBlank(cdProductOverdue.getProductMaterialDesc())){
-                errObjectDto.setObject(cdProductOverdue);
-                errObjectDto.setErrMsg(StrUtil.format("超期物料号描述不能为空：{}", cdProductOverdue.getProductMaterialDesc()));
-                errDtos.add(errObjectDto);
-                continue;
+            String factoryCode = cdProductOverdue.getProductFactoryCode();
+            if(StringUtils.isBlank(factoryCode)){
+                errMsgBuffer.append("工厂编号不能为空;");
+            }
+            if(StringUtils.isNotBlank(productMaterialCode) && StringUtils.isNotBlank(factoryCode)){
+                Example example = new Example(CdMaterialInfo.class);
+                Example.Criteria criteria = example.createCriteria();
+                criteria.andEqualTo("materialCode", productMaterialCode);
+                criteria.andEqualTo("plantCode", factoryCode);
+                List<CdMaterialInfo> cdMaterialInfoList = cdMaterialInfoService.selectByExample(example);
+                if(CollectionUtils.isEmpty(cdMaterialInfoList)
+                        || null == cdMaterialInfoList.get(0)
+                        || StringUtils.isBlank(cdMaterialInfoList.get(0).getMaterialDesc())){
+                    errMsgBuffer.append("超期物料号描述不存在,请维护;");
+                }else{
+                    cdProductOverdueReq.setProductMaterialDesc(cdMaterialInfoList.get(0).getMaterialDesc());
+                }
+            }
+            if (StringUtils.isNotBlank(factoryCode) && !companyCodeList.contains(factoryCode)) {
+                errMsgBuffer.append("工厂编号不存在请维护;");
             }
 
-            String factoryCode = cdProductOverdue.getProductFactoryCode();
-            if (!CollUtil.contains(companyCodeList, factoryCode)) {
+            String errMsgBufferString = errMsgBuffer.toString();
+            if(StringUtils.isNotBlank(errMsgBufferString)){
                 errObjectDto.setObject(cdProductOverdue);
-                errObjectDto.setErrMsg(StrUtil.format("不存在此工厂：{}", factoryCode));
+                errObjectDto.setErrMsg(errMsgBufferString);
                 errDtos.add(errObjectDto);
                 continue;
             }
-            cdProductOverdue.setCreateTime(new Date());
-            cdProductOverdue.setDelFlag("0");
-            sucObjectDto.setObject(cdProductOverdue);
+            cdProductOverdueReq.setCreateTime(new Date());
+            cdProductOverdueReq.setUpdateTime(new Date());
+            cdProductOverdueReq.setDelFlag("0");
+            sucObjectDto.setObject(cdProductOverdueReq);
             successDtos.add(sucObjectDto);
         }
         return new ExcelImportResult(successDtos,errDtos,otherDtos);

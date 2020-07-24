@@ -82,7 +82,7 @@ public interface IOmsProductionOrderDetailService extends BaseService<OmsProduct
      * Author: ltq
      * Date: 2020/6/29
      */
-    R commitProductOrderDetail(List<OmsProductionOrderDetail> list,String  flag, SysUser sysUser);
+    R commitProductOrderDetail(List<OmsProductionOrderDetail> list,OmsProductionOrderDetail omsProductionOrderDetail, SysUser sysUser);
     /**
      * Description:  根据排产订单号批量更新状态
      * Param: [list]
