@@ -96,7 +96,7 @@ public interface IOms2weeksDemandOrderEditService extends BaseService<Oms2weeksD
      * @param ids
      * @return
      */
-    R toSAP(List<Long> ids,SysUser sysUser);
+    R toSAP(List<Long> ids,SysUser sysUser,Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit);
 
     /**
      * 根据需求订单号批量更新

@@ -13,6 +13,8 @@ import com.cloud.settle.service.IQryPaysSoapService;
 import com.cloud.settle.service.ISmsMouthSettleService;
 import com.cloud.settle.webService.fm.ErpPayoutReceiveServiceServiceLocator;
 import com.cloud.settle.webService.fm.QryPaysSoapBindingStub;
+import com.cloud.system.domain.entity.SysInterfaceLog;
+import com.cloud.system.feign.RemoteInterfaceLogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +46,9 @@ public class QryPaysSoapServiceImpl implements IQryPaysSoapService {
 
     @Autowired
     private ISmsMouthSettleService smsMouthSettleService;
+
+    @Autowired
+    private RemoteInterfaceLogService remoteInterfaceLogService;
 
     @Value("${webService.qryPaysSoap.urlClaim}")
     private String urlClaim;
@@ -122,6 +127,11 @@ public class QryPaysSoapServiceImpl implements IQryPaysSoapService {
     public QryPaysSoapResponse queryBill(QryPaysSoapRequest qryPaysSoapRequest) {
         String inXml = XmlUtil.convertToXml(qryPaysSoapRequest);
         QryPaysSoapResponse qryPaysSoapResponse = null;
+
+        SysInterfaceLog sysInterfaceLog = new SysInterfaceLog();
+        sysInterfaceLog.setAppId("KMS");
+        sysInterfaceLog.setInterfaceName("getQryPays");
+        sysInterfaceLog.setContent("查询付款结果");
         try{
             QName qName = new QName(namespaceURL, localPart);
             QryPaysSoapBindingStub generalMDMDataReleaseBindingStub =
@@ -136,11 +146,14 @@ public class QryPaysSoapServiceImpl implements IQryPaysSoapService {
             //冗余kms单号
             qryPaysSoapResponse.setKmsNo(qryPaysSoapRequest.getDOC_NO());
         }catch (Exception e){
+            sysInterfaceLog.setResults("调用付款接口异常");
             StringWriter w = new StringWriter();
             e.printStackTrace(new PrintWriter(w));
             logger.error(
                     "调用付款接口异常: {}", w.toString());
             throw new BusinessException("调用付款接口异常");
+        }finally {
+            remoteInterfaceLogService.saveInterfaceLog(sysInterfaceLog);
         }
         return qryPaysSoapResponse;
     }

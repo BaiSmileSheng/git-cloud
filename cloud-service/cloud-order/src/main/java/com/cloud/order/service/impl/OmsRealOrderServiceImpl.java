@@ -44,6 +44,7 @@ import io.seata.spring.annotation.GlobalTransactional;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -119,7 +120,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             factoryScopesList = Arrays.asList(DataScopeUtil.getUserFactoryScopes(userId).split(","));
         }
         OmsRealOrder omsRealOrderRes = omsRealOrderMapper.selectByPrimaryKey(omsRealOrder);
-        if(!RealOrderStatusEnum.STATUS_2.getCode().equals(omsRealOrderRes.getDataSource())){
+        if(!RealOrderDataSourceEnum.DATA_SOURCE_1.getCode().equals(omsRealOrderRes.getDataSource())){
             logger.error("修改保存真单异常 id:{},res:{}",omsRealOrder.getId(),JSONObject.toJSON(omsRealOrderRes));
             throw new BusinessException("非人工导入数据不可修改");
         }
@@ -133,7 +134,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 throw new BusinessException("业务仅可修改自己导入的数据");
             }
         }
-
+        omsRealOrder.setStatus(RealOrderStatusEnum.STATUS_1.getCode());
         omsRealOrderMapper.updateByPrimaryKeySelective(omsRealOrder);
         return R.ok();
     }
@@ -408,8 +409,6 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         List<ExcelImportOtherObjectDto> otherDtos = new ArrayList<>();
 
         List<OmsRealOrderExcelImportVo> listImport = (List<OmsRealOrderExcelImportVo>) objects;
-        List<OmsRealOrder> list= listImport.stream().map(omsRealOrderExcelImportVo ->
-                BeanUtil.copyProperties(omsRealOrderExcelImportVo,OmsRealOrder.class)).collect(Collectors.toList());
 
         //获取工厂库位基础表
         R listFactoryStorehouseInfoResult = remoteFactoryStorehouseInfoService.listFactoryStorehouseInfo(JSONObject.toJSONString(new CdFactoryStorehouseInfo()));
@@ -430,7 +429,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         }
         List<String> companyCodeList = rCompanyList.getCollectData(new TypeReference<List<String>>() {});
         //取导入数据的所有物料号
-        List<String> materialCodeList=list.stream().map(omsRealOrder->{
+        List<String> materialCodeList=listImport.stream().map(omsRealOrder->{
             return omsRealOrder.getProductMaterialCode();
         }).distinct().collect(Collectors.toList());
         //key:物料号 value：物料信息
@@ -442,115 +441,112 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         Map<String, CdMaterialExtendInfo> materialExtendInfoMap = rMateiralExt.getCollectData(new TypeReference<Map<String, CdMaterialExtendInfo>>() {});
         Date date = DateUtil.date();
 
-        for(OmsRealOrder omsRealOrder:list){
+        for(OmsRealOrderExcelImportVo omsRealOrder : listImport){
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
             ExcelImportOtherObjectDto othObjectDto = new ExcelImportOtherObjectDto();
 
+            OmsRealOrder omsRealOrderReq = new OmsRealOrder();
+            BeanUtils.copyProperties(omsRealOrder,omsRealOrderReq);
+            StringBuffer errMsgBuffer = new StringBuffer();
             if(StringUtils.isBlank(omsRealOrder.getOrderType())){
-                errObjectDto.setObject(omsRealOrder);
-                errObjectDto.setErrMsg(StrUtil.format("订单类型不能为空：{}", omsRealOrder.getOrderType()));
-                errDtos.add(errObjectDto);
-                continue;
+                errMsgBuffer.append("订单类型不能为空;");
             }
-            String orderClass = omsRealOrder.getOrderClass();
-            if(StringUtils.isBlank(orderClass) || StringUtils.isBlank(RealOrderClassEnum.getCodeByMsg(orderClass))){
-                errObjectDto.setObject(omsRealOrder);
-                errObjectDto.setErrMsg(StrUtil.format("不存在此订单种类：{}", orderClass));
-                errDtos.add(errObjectDto);
-                continue;
+            String orderClassReq = omsRealOrder.getOrderClass();
+            if(StringUtils.isNotBlank(orderClassReq)){
+                String orderClass = RealOrderClassEnum.getCodeByMsg(orderClassReq);
+                if(StringUtils.isBlank(orderClass) || orderClassReq.equals(orderClass)){
+                    errMsgBuffer.append("不存在此订单种类;");
+                }else{
+                    omsRealOrderReq.setOrderClass(orderClass);
+                }
             }
-            omsRealOrder.setOrderClass(RealOrderClassEnum.getCodeByMsg(orderClass));
 
             String factoryCode = omsRealOrder.getProductFactoryCode();
-            if (!CollUtil.contains(companyCodeList, factoryCode)) {
-                errObjectDto.setObject(omsRealOrder);
-                errObjectDto.setErrMsg(StrUtil.format("不存在此工厂：{}", factoryCode));
-                errDtos.add(errObjectDto);
-                continue;
+            if(StringUtils.isBlank(factoryCode)){
+                errMsgBuffer.append("工厂编号不能为空;");
             }
-            //物料描述赋值
-            CdMaterialExtendInfo cdMaterialExtendInfo = materialExtendInfoMap.get(omsRealOrder.getProductMaterialCode());
-            if (null == cdMaterialExtendInfo) {
-                errObjectDto.setObject(omsRealOrder);
-                errObjectDto.setErrMsg(StrUtil.format("不存在物料信息：{}", omsRealOrder.getProductMaterialCode()));
-                errDtos.add(errObjectDto);
-                continue;
+            if(StringUtils.isNotBlank(factoryCode) && !companyCodeList.contains(factoryCode)){
+                errMsgBuffer.append("不存在此工厂,请维护;");
             }
-            omsRealOrder.setProductMaterialDesc(cdMaterialExtendInfo.getMaterialDesc());
-            String lifeCyle = cdMaterialExtendInfo.getLifeCycle();
-            if (StrUtil.equals(LifeCycleEnum.SMZQ_XS.getCode(),lifeCyle)) {
-                //已下市
-                omsRealOrder.setAuditStatus(RealOrderAduitStatusEnum.AUDIT_STATUS_SHZ.getCode());
-                othObjectDto.setObject(omsRealOrder);
-                otherDtos.add(othObjectDto);
-            }else{
-                omsRealOrder.setAuditStatus(RealOrderAduitStatusEnum.AUDIT_STATUS_WXSH.getCode());
+
+            String productMaterialCode = omsRealOrder.getProductMaterialCode();
+            if(StringUtils.isBlank(productMaterialCode)){
+                errMsgBuffer.append("成品物料号不能为空;");
             }
+            if(StringUtils.isNotBlank(productMaterialCode)){
+                //物料描述赋值
+                CdMaterialExtendInfo cdMaterialExtendInfo = materialExtendInfoMap.get(omsRealOrder.getProductMaterialCode());
+                if (null == cdMaterialExtendInfo || StringUtils.isBlank(cdMaterialExtendInfo.getMaterialDesc())) {
+                    errMsgBuffer.append("成品物料描述不存在,请维护;");
+                } else {
+                    omsRealOrderReq.setProductMaterialDesc(cdMaterialExtendInfo.getMaterialDesc());
+                    String lifeCyle = cdMaterialExtendInfo.getLifeCycle();
+                    if (StrUtil.equals(LifeCycleEnum.SMZQ_XS.getCode(),lifeCyle)) {
+                        //已下市
+                        omsRealOrderReq.setAuditStatus(RealOrderAduitStatusEnum.AUDIT_STATUS_SHZ.getCode());
+                    }else{
+                        omsRealOrderReq.setAuditStatus(RealOrderAduitStatusEnum.AUDIT_STATUS_WXSH.getCode());
+                    }
+                }
+            }
+
             //客户编码
             String customerCode = omsRealOrder.getCustomerCode();
-            if (!CollUtil.contains(customerCodeList, customerCode)) {
-                errObjectDto.setObject(omsRealOrder);
-                errObjectDto.setErrMsg(StrUtil.format("不存在此客户：{}", customerCode));
-                errDtos.add(errObjectDto);
-                continue;
+            if(StringUtils.isBlank(customerCode)){
+                errMsgBuffer.append("客户编码不存在,请维护;");
+            }
+            if(StringUtils.isNotBlank(customerCode) && !customerCodeList.contains(customerCode)){
+                errMsgBuffer.append("不存在此客户,请维护;");
             }
             if(StringUtils.isBlank(omsRealOrder.getCustomerDesc())){
-                errObjectDto.setObject(omsRealOrder);
-                errObjectDto.setErrMsg(StrUtil.format("客户名称不能为空：{}", omsRealOrder.getCustomerDesc()));
-                errDtos.add(errObjectDto);
-                continue;
+                errMsgBuffer.append("客户名称不能为空;");
             }
             if(StringUtils.isBlank(omsRealOrder.getMrpRange())){
-                errObjectDto.setObject(omsRealOrder);
-                errObjectDto.setErrMsg(StrUtil.format("MRP范围不能为空：{}", omsRealOrder.getMrpRange()));
-                errDtos.add(errObjectDto);
-                continue;
+                errMsgBuffer.append("MRP范围不能为空;");
             }
             if(StringUtils.isBlank(omsRealOrder.getBomVersion())){
-                errObjectDto.setObject(omsRealOrder);
-                errObjectDto.setErrMsg(StrUtil.format("版本不能为空：{}", omsRealOrder.getBomVersion()));
-                errDtos.add(errObjectDto);
-                continue;
+                errMsgBuffer.append("版本不能为空;");
             }
             if(StringUtils.isBlank(omsRealOrder.getDeliveryDate())){
-                errObjectDto.setObject(omsRealOrder);
-                errObjectDto.setErrMsg(StrUtil.format("交付日期不能为空：{}", omsRealOrder.getMrpRange()));
-                errDtos.add(errObjectDto);
-                continue;
+                errMsgBuffer.append("交付日期不能为空;");
             }
 
             if(null == omsRealOrder.getOrderNum()){
-                errObjectDto.setObject(omsRealOrder);
-                errObjectDto.setErrMsg(StrUtil.format("订单不能为空：{}", omsRealOrder.getOrderNum()));
-                errDtos.add(errObjectDto);
-                continue;
+                errMsgBuffer.append("订单不能为空;");
             }
             //地点
             String place = omsRealOrder.getPlace();
-            CdFactoryStorehouseInfo cdFactoryStorehouseInfo = factoryStorehouseInfoMap.get(omsRealOrder.getCustomerCode()
-                    + omsRealOrder.getProductFactoryCode());
-            if (null == cdFactoryStorehouseInfo) {
+            if(StringUtils.isBlank(place)){
+                errMsgBuffer.append("地点不能为空;");
+            }
+            if(StringUtils.isNotBlank(place)){
+                CdFactoryStorehouseInfo cdFactoryStorehouseInfo = factoryStorehouseInfoMap.get(omsRealOrder.getCustomerCode()
+                        + omsRealOrder.getProductFactoryCode());
+                if (null == cdFactoryStorehouseInfo) {
+                    errMsgBuffer.append("客户和生产工厂不对应此库位;");
+                }else{
+                    //计算生产日期，根据生产工厂、客户编码去工厂库位基础表（cd_factory_storehouse_info）中获取提前量，交货日期 - 提前量 = 生产日期；
+                    String productDate = DateUtils.dayOffset(omsRealOrder.getDeliveryDate(), -Integer.parseInt(cdFactoryStorehouseInfo.getLeadTime()), YYYY_MM_DD);
+                    omsRealOrderReq.setProductDate(productDate);
+                }
+            }
+            String errMsgBufferString = errMsgBuffer.toString();
+            if(StringUtils.isNotBlank(errMsgBufferString)){
                 errObjectDto.setObject(omsRealOrder);
-                errObjectDto.setErrMsg(StrUtil.format("客户和生产工厂不对应此库位:{}", place));
+                errObjectDto.setErrMsg(errMsgBufferString);
                 errDtos.add(errObjectDto);
                 continue;
             }
-            //计算生产日期，根据生产工厂、客户编码去工厂库位基础表（cd_factory_storehouse_info）中获取提前量，交货日期 - 提前量 = 生产日期；
-            String productDate = DateUtils.dayOffset(omsRealOrder.getDeliveryDate(), Integer.parseInt(cdFactoryStorehouseInfo.getLeadTime()), YYYY_MM_DD);
-            omsRealOrder.setProductDate(productDate);
-
-            if(StringUtils.isBlank(omsRealOrder.getRemark())){
-                errObjectDto.setObject(omsRealOrder);
-                errObjectDto.setErrMsg(StrUtil.format("备注不能为空：{}", omsRealOrder.getRemark()));
-                errDtos.add(errObjectDto);
-                continue;
+            omsRealOrderReq.setStatus(RealOrderStatusEnum.STATUS_0.getCode());
+            omsRealOrderReq.setCreateTime(date);
+            omsRealOrderReq.setDelFlag("0");
+            //下市需要审批的集合
+            if(RealOrderAduitStatusEnum.AUDIT_STATUS_SHZ.getCode().equals(omsRealOrderReq.getAuditStatus())){
+                othObjectDto.setObject(omsRealOrderReq);
+                otherDtos.add(othObjectDto);
             }
-
-
-            omsRealOrder.setCreateTime(date);
-            omsRealOrder.setDelFlag("0");
-            sucObjectDto.setObject(omsRealOrder);
+            sucObjectDto.setObject(omsRealOrderReq);
             successDtos.add(sucObjectDto);
         }
         return new ExcelImportResult(successDtos,errDtos,otherDtos);

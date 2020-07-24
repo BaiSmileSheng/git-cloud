@@ -2,7 +2,6 @@ package com.cloud.system.domain.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
-import com.cloud.common.core.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -26,7 +25,7 @@ import javax.persistence.Id;
 @NoArgsConstructor
 @Builder
 @ApiModel(value = "超期库存 ")
-public class CdProductOverdueExcelImportErrorVo{
+public class CdProductOverdueImportVo {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -66,11 +65,5 @@ public class CdProductOverdueExcelImportErrorVo{
      */
     @ExcelProperty(value = "备注(选填)",index = 2)
     private String remark;
-    /**
-     * 错误信息
-     */
-    @ExcelProperty(value = "错误信息",index = 3)
-    @ApiModelProperty(value = "错误信息")
-    private String errorMessage;
 
 }

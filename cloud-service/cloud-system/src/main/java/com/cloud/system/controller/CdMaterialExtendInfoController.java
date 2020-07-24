@@ -172,6 +172,8 @@ public class CdMaterialExtendInfoController extends BaseController {
     @OperLog(title = "修改保存物料扩展信息 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存物料扩展信息 ", response = R.class)
     public R editSave(@RequestBody CdMaterialExtendInfo cdMaterialExtendInfo) {
+        SysUser sysUser = getUserInfo(SysUser.class);
+        cdMaterialExtendInfo.setUpdateBy(sysUser.getLoginName());
         return toAjax(cdMaterialExtendInfoService.updateByPrimaryKeySelective(cdMaterialExtendInfo));
     }
 
@@ -236,5 +238,20 @@ public class CdMaterialExtendInfoController extends BaseController {
     @PostMapping("selectOneByMaterialCode")
     public R selectOneByMaterialCode(@RequestParam("materialCode") String materialCode){
         return cdMaterialExtendInfoService.selectOneByMaterialCode(materialCode);
+    }
+
+    /**
+     * 模糊查询专用号
+     */
+    @GetMapping("selectByLikeCode")
+    @ApiOperation(value = "模糊查询专用号", response = CdMaterialExtendInfo.class)
+    public R selectByLikeCode(String materialCode){
+        Example example = new Example(CdMaterialExtendInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andLike("materialCode",materialCode + "%");
+        startPage();
+        List<CdMaterialExtendInfo> cdMaterialExtendInfoList = cdMaterialExtendInfoService.selectByExample(example);
+        List<String> list = cdMaterialExtendInfoList.stream().map(m ->m.getMaterialCode()).collect(Collectors.toList());
+        return R.data(list);
     }
 }
