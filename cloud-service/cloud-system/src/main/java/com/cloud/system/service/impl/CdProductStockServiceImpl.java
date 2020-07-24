@@ -641,6 +641,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
                     cdProductStock.setUnit(cdProductWarehouse.getUnit());
                     cdProductStock.setCreateBy("定时任务");
                     cdProductStock.setCreateTime(new Date());
+                    cdProductStock.setUpdateBy("定时任务");
+                    cdProductStock.setUpdateTime(new Date());
                     cdProductStock.setDelFlag(DeleteFlagConstants.NO_DELETED);
                     cdProductStockMapB.put(code,cdProductStock);
                 }
@@ -661,6 +663,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
                     cdProductStock.setUnit(cdProductWarehouse.getUnit());
                     cdProductStock.setCreateBy("定时任务");
                     cdProductStock.setCreateTime(new Date());
+                    cdProductStock.setUpdateBy("定时任务");
+                    cdProductStock.setUpdateTime(new Date());
                     cdProductStock.setDelFlag(DeleteFlagConstants.NO_DELETED);
                     cdProductStockMapL.put(code,cdProductStock);
                 }
@@ -695,6 +699,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
                 cdProductStock.setUnit(cdProductInProduction.getUnit());
                 cdProductStock.setCreateBy("定时任务");
                 cdProductStock.setCreateTime(new Date());
+                cdProductStock.setUpdateBy("定时任务");
+                cdProductStock.setUpdateTime(new Date());
                 cdProductStock.setDelFlag(DeleteFlagConstants.NO_DELETED);
                 cdProductStockMap.put(code,cdProductStock);
             }
@@ -717,6 +723,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
                 cdProductStock.setUnit(cdProductPassage.getUnit());
                 cdProductStock.setCreateBy("定时任务");
                 cdProductStock.setCreateTime(new Date());
+                cdProductStock.setUpdateBy("定时任务");
+                cdProductStock.setUpdateTime(new Date());
                 cdProductStock.setDelFlag(DeleteFlagConstants.NO_DELETED);
                 cdProductStockMap.put(code,cdProductStock);
             }
