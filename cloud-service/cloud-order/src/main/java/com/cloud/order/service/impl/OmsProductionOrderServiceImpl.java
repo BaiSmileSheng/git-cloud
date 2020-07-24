@@ -346,7 +346,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      * Date: 2020/6/22
      */
     @Override
-    @GlobalTransactional
+    @Transactional
     public R deleteByIdString(String ids, SysUser sysUser) {
         List<OmsProductionOrder> omsProductionOrders = omsProductionOrderMapper.selectByIds(ids);
         if (omsProductionOrders.size() <= 0) {
@@ -382,26 +382,29 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 detailMap.getCollectData(new TypeReference<List<OmsProductionOrderDetail>>() {
                 });
         StringBuffer detailIdBuffer = new StringBuffer();
-        //转类型
-        List<OmsProductionOrderDetailDel> omsProductionOrderDetailDels = omsProductionOrderDetails
-                .stream().map(d -> {
-                    detailIdBuffer.append("\'").append(d.getId()).append("\',");
-                    OmsProductionOrderDetailDel omsProductionOrderDetailDel = new OmsProductionOrderDetailDel();
-                    BeanUtils.copyProperties(d, omsProductionOrderDetailDel);
-                    omsProductionOrderDetailDel.setId(null);
-                    omsProductionOrderDetailDel.setCreateBy(sysUser.getLoginName());
-                    omsProductionOrderDetailDel.setCreateTime(new Date());
-                    return omsProductionOrderDetailDel;
-                }).collect(toList());
-        String detailIds = detailIdBuffer.substring(0, detailIdBuffer.length() - 1);
-        //排产订单明细转存删除表
-        omsProductionOrderDetailDelService.insertList(omsProductionOrderDetailDels);
+        if (ObjectUtil.isNotEmpty(omsProductionOrderDetails) &&  omsProductionOrderDetails.size() > 0) {
+            //转类型
+            List<OmsProductionOrderDetailDel> omsProductionOrderDetailDels = omsProductionOrderDetails
+                    .stream().map(d -> {
+                        detailIdBuffer.append("\'").append(d.getId()).append("\',");
+                        OmsProductionOrderDetailDel omsProductionOrderDetailDel = new OmsProductionOrderDetailDel();
+                        BeanUtils.copyProperties(d, omsProductionOrderDetailDel);
+                        omsProductionOrderDetailDel.setId(null);
+                        omsProductionOrderDetailDel.setCreateBy(sysUser.getLoginName());
+                        omsProductionOrderDetailDel.setCreateTime(new Date());
+                        return omsProductionOrderDetailDel;
+                    }).collect(toList());
+            String detailIds = detailIdBuffer.substring(0, detailIdBuffer.length() - 1);
+            //排产订单明细转存删除表
+            omsProductionOrderDetailDelService.insertList(omsProductionOrderDetailDels);
+            //删除排产订单明细数据
+            omsProductionOrderDetailService.deleteByIds(detailIds);
+        }
         //将删除的排产订单存到删除表中
         omsProductionOrderDelService.insertList(omsProductionOrderDels);
         //删除排产订单表数据
         omsProductionOrderMapper.deleteByIds(ids);
-        //删除排产订单明细数据
-        omsProductionOrderDetailService.deleteByIds(detailIds);
+
         return R.ok();
     }
 
@@ -425,6 +428,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         omsProductionOrder.setProductMaterialCode(productionOrder.getProductMaterialCode());
         omsProductionOrder.setProductFactoryCode(productionOrder.getProductFactoryCode());
         omsProductionOrder.setBomVersion(productionOrder.getBomVersion());
+        omsProductionOrder.setStatus(productionOrder.getStatus());
+        omsProductionOrder.setProductStartDate(productionOrder.getProductStartDate());
         //待传SAP，传SAP中，已传SAP状态的数据不可修改
         if (ProductOrderConstants.STATUS_FOUR.equals(productionOrder.getStatus())
                 || ProductOrderConstants.STATUS_FIVE.equals(productionOrder.getStatus())
@@ -474,6 +479,12 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             if (omsProductionOrder.getProductNum().compareTo(productionOrder.getProductNum()) > 0) {
                 omsProductionOrder.setStatus(ProductOrderConstants.STATUS_ZERO);
             }
+        }
+        //更新排产订单
+        int updateCount = omsProductionOrderMapper.updateByPrimaryKeySelective(omsProductionOrder);
+        if (updateCount <= 0) {
+            log.error("更新排产订单失败！");
+            return R.error("更新排产订单失败！");
         }
         //bom拆解
         //查询bom清单，根据生产工厂、成品专用号、bom版本

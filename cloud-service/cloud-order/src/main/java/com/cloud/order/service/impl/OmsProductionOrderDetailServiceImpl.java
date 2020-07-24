@@ -33,6 +33,7 @@ import com.cloud.order.domain.entity.OmsProductionOrderDetail;
 import com.cloud.order.service.IOmsProductionOrderDetailService;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.swing.plaf.basic.BasicIconFactory;
@@ -55,12 +56,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProductionOrderDetail> implements IOmsProductionOrderDetailService {
-    //传参标识
-    //query:未选择记录，传入查询条件
-    private static final String COMMIT_QUERY = "query";
-    //record:传入选中的记录数据
-    private static final String COMMIT_RECORD = "record";
-
     @Autowired
     private OmsProductionOrderDetailMapper omsProductionOrderDetailMapper;
     @Autowired
@@ -79,7 +74,11 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
      */
     @Override
     public R selectListByOrderCodes(String orderCodes) {
-        return R.data(omsProductionOrderDetailMapper.selectListByOrderCodes(orderCodes));
+        List<OmsProductionOrderDetail> list = omsProductionOrderDetailMapper.selectListByOrderCodes(orderCodes);
+        R r = new R();
+        r.put("code",0);
+        r.put("data",list);
+        return r;
     }
 
     /**
@@ -312,22 +311,29 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
      * Date: 2020/6/29
      */
     @Override
-    @GlobalTransactional
-    public R commitProductOrderDetail(List<OmsProductionOrderDetail> list, String flag, SysUser sysUser) {
-        if (COMMIT_QUERY.equals(flag)) {
-            OmsProductionOrderDetail omsProductionOrderDetail = list.get(0);
-            if (ProductOrderConstants.DETAIL_STATUS_ONE.equals(omsProductionOrderDetail.getStatus())
-                    || ProductOrderConstants.DETAIL_STATUS_TWO.equals(omsProductionOrderDetail.getStatus())
-                    || ProductOrderConstants.DETAIL_STATUS_THREE.equals(omsProductionOrderDetail.getStatus())) {
-                return R.error("只能确认未确认的数据！");
+    @Transactional
+    public R commitProductOrderDetail(List<OmsProductionOrderDetail> list, OmsProductionOrderDetail omsProductionOrderDetail, SysUser sysUser) {
+        if (ObjectUtil.isEmpty(list) || list.size() <= 0) {
+            if (BeanUtil.isNotEmpty(omsProductionOrderDetail)) {
+                if (StrUtil.isNotBlank(omsProductionOrderDetail.getStatus())
+                        && (ProductOrderConstants.DETAIL_STATUS_ONE.equals(omsProductionOrderDetail.getStatus())
+                        || ProductOrderConstants.DETAIL_STATUS_TWO.equals(omsProductionOrderDetail.getStatus())
+                        || ProductOrderConstants.DETAIL_STATUS_THREE.equals(omsProductionOrderDetail.getStatus()))) {
+                    return R.error("只能确认未确认的数据！");
+                }
             }
             if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
                 //JIT根据生产工厂、采购组权限查询
                 if (CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_JIT)) {
-                    list.forEach(o -> {
-                        o.setProductFactoryQuery(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()));
-                        o.setPurchaseGroupQuery(DataScopeUtil.getUserPurchaseScopes(sysUser.getUserId()));
-                    });
+                    List<String> factoryList = Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(","));
+                    List<String> purchaseList = Arrays.asList(DataScopeUtil.getUserPurchaseScopes(sysUser.getUserId()).split(","));
+                    String factorys = factoryList.stream().map(f -> "\'" + f +"\'").collect(Collectors.joining(","));
+                    String purchases = purchaseList.stream().map(p -> "\'" + p +"\'").collect(Collectors.joining(","));
+                    OmsProductionOrderDetail orderDetail = new OmsProductionOrderDetail();
+                    orderDetail.setProductFactoryQuery(factorys);
+                    orderDetail.setPurchaseGroupQuery(purchases);
+                    orderDetail.setStatus(ProductOrderConstants.DETAIL_STATUS_ZERO);
+                    list.add(orderDetail);
                 }
             }
         }
