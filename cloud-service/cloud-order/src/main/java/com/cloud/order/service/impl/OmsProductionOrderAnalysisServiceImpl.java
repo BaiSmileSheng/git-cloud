@@ -10,6 +10,7 @@ import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.OmsProductionOrderAnalysis;
+import com.cloud.order.domain.entity.OmsRawMaterialFeedback;
 import com.cloud.order.domain.entity.OmsRealOrder;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderAnalysisVo;
 import com.cloud.order.domain.entity.vo.OmsRealOrderVo;
@@ -80,7 +81,18 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
         criteria.andGreaterThan("productDate", sft.format(new Date()));
         criteria.andLessThanOrEqualTo("productDate", sft.format(date.getTime()));
         List<OmsRealOrder> omsRealOrders = omsRealOrderMapper.selectByExample(example);
-        R r = analysisGather(omsRealOrders);
+        //增加数据空判断  2020-07-23 by ltq
+        if (ObjectUtil.isEmpty(omsRealOrders) && omsRealOrders.size() <= 0) {
+            log.error("待排产订单分析汇总查询真单记录为空！");
+            return R.ok();
+        }
+        //提取修改生产日期但没有填写备注的真单数据 2020-07-23 by ltq
+        List<OmsRealOrder> omsRealOrderList = omsRealOrders.stream()
+                .filter(o ->"1".equals(o.getStatus()) && StrUtil.isBlank(o.getRemark())).collect(Collectors.toList());
+        //过滤掉修改生产日期但没有填写备注的真单数据，该类数据不允许后续流程 2020-07-23 by ltq
+        List<OmsRealOrder> realOrders = omsRealOrders.stream()
+                .filter(o -> !omsRealOrderList.contains(o)).collect(Collectors.toList());
+        R r = analysisGather(realOrders);
         if (!r.isSuccess()) {
             log.error("待排产订单分析汇总失败，原因：" + r.get("msg"));
             return R.error("待排产订单分析汇总失败，原因：" + r.get("msg"));
