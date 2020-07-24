@@ -57,7 +57,6 @@ public class ActOmsProductionOrderController extends BaseController {
      */
     @PostMapping("startActProcess")
     @ApiOperation(value = "排产订单开启审批流程", response = OmsProductionOrder.class)
-    @HasPermissions("order:productOrder:commit")
     public R startActProcess(String key, String orderId, String orderCode, Long userId,String title) {
         return actOmsProductionOrderService.startActProcess(key, orderId, orderCode, userId,title);
     }
