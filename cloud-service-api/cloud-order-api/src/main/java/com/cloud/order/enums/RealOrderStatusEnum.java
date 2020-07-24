@@ -8,8 +8,8 @@ package com.cloud.order.enums;
 public enum RealOrderStatusEnum {
 
     //状态
-    STATUS_1("0","初始"),
-    STATUS_2("1","人工导入"),
+    STATUS_0("0","初始"),
+    STATUS_1("1","已调整"),
 
     ;
     private String code;
