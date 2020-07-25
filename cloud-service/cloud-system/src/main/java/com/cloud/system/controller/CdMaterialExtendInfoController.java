@@ -245,7 +245,12 @@ public class CdMaterialExtendInfoController extends BaseController {
      */
     @GetMapping("selectByLikeCode")
     @ApiOperation(value = "模糊查询专用号", response = CdMaterialExtendInfo.class)
-    public R selectByLikeCode(String materialCode){
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "materialCode", value = "专用号", required = false, paramType = "query", dataType = "String")
+    })
+    public R selectByLikeCode(@RequestParam("materialCode") String materialCode){
         Example example = new Example(CdMaterialExtendInfo.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andLike("materialCode",materialCode + "%");
