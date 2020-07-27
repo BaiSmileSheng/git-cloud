@@ -190,6 +190,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
      * @param orderFrom  内单或外单
      * @return
      */
+    @GlobalTransactional
     @Override
     public R importOmsRealOrder(List<OmsRealOrder> successResult, List<OmsRealOrder> auditResult, SysUser sysUser,String orderFrom) {
         if(CollectionUtils.isEmpty(successResult)){
