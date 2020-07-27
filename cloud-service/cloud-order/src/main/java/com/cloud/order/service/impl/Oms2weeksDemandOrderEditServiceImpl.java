@@ -496,7 +496,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
      * @return
      */
     @Override
-    public R confirmRelease(String ids) {
+    public R confirmRelease(String ids,Oms2weeksDemandOrderEdit oms2weeksDemandOrderEditVo) {
         Example example = new Example(Oms2weeksDemandOrderEdit.class);
         Example.Criteria criteria = example.createCriteria();
         //允许下达的审核状态
@@ -511,6 +511,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             List<String> list = CollUtil.newArrayList(ids.split(StrUtil.COMMA));
             criteria.andIn("id", list);
         }
+        listCondition(oms2weeksDemandOrderEditVo,criteria);
         List<Oms2weeksDemandOrderEdit> list = selectByExample(example);
         if (CollUtil.isEmpty(list)) {
             return R.error("无数据需要下达！");
@@ -527,6 +528,44 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
         }
         updateBatchByPrimaryKeySelective(list);
         return R.ok();
+    }
+
+    /**
+     * Example查询时的条件
+     * @param oms2weeksDemandOrderEdit
+     * @return
+     */
+    void listCondition(Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit,Example.Criteria criteria){
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getProductMaterialCode())) {
+            criteria.andEqualTo("productMaterialCode",oms2weeksDemandOrderEdit.getProductMaterialCode() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getProductFactoryCode())) {
+            criteria.andEqualTo("productFactoryCode",oms2weeksDemandOrderEdit.getProductFactoryCode() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getCustomerCode())) {
+            criteria.andEqualTo("customerCode",oms2weeksDemandOrderEdit.getCustomerCode() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getOrderFrom())) {
+            criteria.andEqualTo("orderFrom",oms2weeksDemandOrderEdit.getOrderFrom() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getAuditStatus())) {
+            criteria.andEqualTo("auditStatus",oms2weeksDemandOrderEdit.getAuditStatus() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getStatus())) {
+            criteria.andEqualTo("status",oms2weeksDemandOrderEdit.getStatus() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getProductType())) {
+            criteria.andEqualTo("productType",oms2weeksDemandOrderEdit.getProductType() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getLifeCycle())) {
+            criteria.andEqualTo("lifeCycle",oms2weeksDemandOrderEdit.getLifeCycle() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getBeginTime())) {
+            criteria.andGreaterThanOrEqualTo("deliveryDate",oms2weeksDemandOrderEdit.getBeginTime() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getEndTime())) {
+            criteria.andLessThanOrEqualTo("deliveryDate", oms2weeksDemandOrderEdit.getEndTime() );
+        }
     }
 
     /**
@@ -796,8 +835,8 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 inputTable.setValue("MATNR", oms2weeksDemandOrderEdit.getProductMaterialCode().toUpperCase());
                 inputTable.setValue("WERKS", oms2weeksDemandOrderEdit.getProductFactoryCode());
                 inputTable.setValue("AUART", oms2weeksDemandOrderEdit.getOrderType());
-//                inputTable.setValue("GSTRP", oms2weeksDemandOrderEdit.getProductStartDate());
-//                inputTable.setValue("GLTRP", oms2weeksDemandOrderEdit.getProductEndDate());
+                inputTable.setValue("GSTRP", oms2weeksDemandOrderEdit.getDeliveryDate());
+                inputTable.setValue("GLTRP", oms2weeksDemandOrderEdit.getDeliveryDate());
                 inputTable.setValue("GAMNG", oms2weeksDemandOrderEdit.getOrderNum());
                 inputTable.setValue("LGORT", oms2weeksDemandOrderEdit.getPlace());
                 inputTable.setValue("ABLAD", oms2weeksDemandOrderEdit.getDemandOrderCode());
@@ -814,13 +853,20 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             if (outTableOutput != null && outTableOutput.getNumRows() > 0) {
                 //循环取table行数据
                 StringBuffer sapBuffer = new StringBuffer();
+                List<String> sucMsg = CollectionUtil.newArrayList("已安排作业",
+                        "订单已创建，请勿重复传输！");
                 for (int i = 0; i < outTableOutput.getNumRows(); i++) {
                     //设置指针位置
                     outTableOutput.setRow(i);
                     Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit = new Oms2weeksDemandOrderEdit();
                     oms2weeksDemandOrderEdit.setDemandOrderCode(outTableOutput.getString("ABLAD"));//排产订单号
                     oms2weeksDemandOrderEdit.setSapMessages(outTableOutput.getString("MESSAGE"));
-                    oms2weeksDemandOrderEdit.setStatus(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPZ.getCode());
+                    //无其他返回值，只能通过MESSAGE确认是否成功
+                    if (sucMsg.contains(outTableOutput.getString("MESSAGE"))) {
+                        oms2weeksDemandOrderEdit.setStatus(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPZ.getCode());
+                    }else{
+                        oms2weeksDemandOrderEdit.setStatus(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());
+                    }
                     successList.add(oms2weeksDemandOrderEdit);
                     String messageOne = StrUtil.format("ABLAD:{},MESSAGE:{};"
                             ,outTableOutput.getString("ABLAD"),outTableOutput.getString("MESSAGE"));
@@ -916,6 +962,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                             ,outTableOutput.getString("ABLAD"),outTableOutput.getString("AUFNR"));
                     sapBuffer.append(messageOne);
                 }
+                updateBatchByDemandOrderCode(dataList);
             } else {
                 sysInterfaceLog.setResults("返回数据为空！");
                 log.error("获取生产订单数据为空！");

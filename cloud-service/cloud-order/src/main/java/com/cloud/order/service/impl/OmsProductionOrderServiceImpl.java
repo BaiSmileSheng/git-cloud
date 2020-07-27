@@ -859,6 +859,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }).collect(toList());
             ActBusinessVo actBusinessVo = ActBusinessVo.builder().key(ActProcessContants.ACTIVITI_THREE_VERSION_REVIEW)
                     .userId(sysUser.getUserId())
+                    .userName(sysUser.getUserName())
                     .title(ActProcessContants.ACTIVITI_PRO_TITLE_THREE_VERSION)
                     .processVoList(processVos).build();
             R r = remoteActOmsProductionOrderService.startActProcess(actBusinessVo);
@@ -906,6 +907,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }).collect(toList());
             ActBusinessVo actBusinessVo = ActBusinessVo.builder().key(ActProcessContants.ACTIVITI_OVERDUE_NOT_CLOSE_ORDER_REVIEW)
                     .userId(sysUser.getUserId())
+                    .userName(sysUser.getUserName())
                     .title(ActProcessContants.ACTIVITI_PRO_TITLE_OVERDUE_NOT_CLOSE)
                     .processVoList(processVos).build();
             R r = remoteActOmsProductionOrderService.startActProcess(actBusinessVo);
@@ -973,6 +975,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }).collect(toList());
             ActBusinessVo actBusinessVo = ActBusinessVo.builder().key(ActProcessContants.ACTIVITI_OVERDUE_STOCK_ORDER_REVIEW)
                     .userId(sysUser.getUserId())
+                    .userName(sysUser.getUserName())
                     .title(ActProcessContants.ACTIVITI_PRO_TITLE_OVERDUE_STOCK)
                     .processVoList(processVos).build();
             R r = remoteActOmsProductionOrderService.startActProcess(actBusinessVo);
@@ -1167,6 +1170,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }).collect(toList());
             ActBusinessVo actBusinessVo = ActBusinessVo.builder().key(ActProcessContants.ACTIVITI_ADD_REVIEW)
                     .userId(sysUser.getUserId())
+                    .userName(sysUser.getUserName())
                     .title(ActProcessContants.ACTIVITI_PRO_TITLE_ADD)
                     .processVoList(processVos).build();
             R r = remoteActOmsProductionOrderService.startActProcess(actBusinessVo);
@@ -1212,6 +1216,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }).collect(toList());
             ActBusinessVo actBusinessVo = ActBusinessVo.builder().key(ActProcessContants.ACTIVITI_ZN_REVIEW)
                     .userId(sysUser.getUserId())
+                    .userName(sysUser.getUserName())
                     .title(ActProcessContants.ACTIVITI_PRO_TITLE_ZN)
                     .processVoList(processVos).build();
             R r = remoteActOmsProductionOrderService.startActProcess(actBusinessVo);

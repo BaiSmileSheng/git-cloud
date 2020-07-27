@@ -69,7 +69,9 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
             //插入流程物业表  并开启流程
             list.forEach(a ->{
                 BizBusiness business =
-                        initBusiness(processDefinitionAct.getId(),processDefinitionAct.getName(),a.getOrderId(),a.getOrderCode(), actBusinessVo.getUserId(),actBusinessVo.getTitle());
+                        initBusiness(processDefinitionAct.getId()
+                                ,processDefinitionAct.getName(),a.getOrderId(),a.getOrderCode()
+                                , actBusinessVo.getUserId(),actBusinessVo.getTitle(),actBusinessVo.getUserName());
                 bizBusinessService.insertBizBusiness(business);
                 Map<String, Object> variables = Maps.newHashMap();
                 bizBusinessService.startProcess(business, variables);
@@ -173,7 +175,7 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
      * Author: ltq
      * Date: 2020/6/24
      */
-    private BizBusiness initBusiness(String procDefId,String procName,String orderId,String orderCode, long userId,String title) {
+    private BizBusiness initBusiness(String procDefId,String procName,String orderId,String orderCode, long userId,String title,String userName) {
 
         BizBusiness business = new BizBusiness();
         business.setOrderNo(orderCode);
@@ -182,8 +184,7 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
         business.setTitle(title);
         business.setProcName(procName);
         business.setUserId(userId);
-        SysUser user = remoteUserService.selectSysUserByUserId(userId);
-        business.setApplyer(user.getUserName());
+        business.setApplyer(userName);
         business.setStatus(ActivitiConstant.STATUS_DEALING);
         business.setResult(ActivitiConstant.RESULT_DEALING);
         business.setApplyTime(new Date());
