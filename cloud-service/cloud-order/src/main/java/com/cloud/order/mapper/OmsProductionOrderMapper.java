@@ -65,4 +65,11 @@ public interface OmsProductionOrderMapper extends BaseMapper<OmsProductionOrder>
      * @return
      */
     int batchUpdateByOrderCode(List<OmsProductionOrder> list);
+
+    /**
+     * 根据生产订单号批量修改
+     * @param list
+     * @return
+     */
+    int batchUpdateByProductOrderCode(List<OmsProductionOrder> list);
 }

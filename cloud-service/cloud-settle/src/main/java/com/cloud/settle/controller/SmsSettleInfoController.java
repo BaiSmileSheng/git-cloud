@@ -257,4 +257,14 @@ public class SmsSettleInfoController extends BaseController {
     public R batchInsert(@RequestBody List<SmsSettleInfo> smsSettleInfoList){
         return toAjax(smsSettleInfoService.insertList(smsSettleInfoList));
     }
+
+    /**
+     * 根据生产订单号批量修改
+     * @param smsSettleInfoList
+     * @return
+     */
+    @PostMapping("batchUpdateByProductOrderCode")
+    public R batchUpdateByProductOrderCode(@RequestBody List<SmsSettleInfo> smsSettleInfoList){
+        return smsSettleInfoService.batchUpdateByProductOrderCode(smsSettleInfoList);
+    }
 }

@@ -1647,6 +1647,52 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         return R.ok();
     }
 
+    @GlobalTransactional
+    @Override
+    public R timeGetConfirmAmont() {
+        //1.查已传SAP的排产订单
+        Example example = new Example(OmsProductionOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("status",ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode());
+        List<OmsProductionOrder> omsProductionOrderListReq = omsProductionOrderMapper.selectByExample(example);
+        if(CollectionUtils.isEmpty(omsProductionOrderListReq)){
+            return R.ok("无需要更新入库量的数据");
+        }
+        //2.TODO 获取入库数量
+        List<OmsProductionOrder> omsProductionOrderListGet = new ArrayList<>();
+        //3.更新排产订单和加工费结算表(如果订单数量与交货数量一致则更新订单状态为已关单,更新实际结束时间actual_end_date)
+        //key是生产订单号
+        Map<String,OmsProductionOrder> omsProductionOrderMap = omsProductionOrderListReq.stream().collect(Collectors.toMap(
+                omsProductionOrder ->omsProductionOrder.getProductOrderCode(),
+                omsProductionOrder -> omsProductionOrder,(key1,key2) -> key2));
+        List<SmsSettleInfo> smsSettleInfoList = new ArrayList<>();
+        omsProductionOrderListGet.forEach(omsProductionOrder -> {
+            SmsSettleInfo smsSettleInfo = new SmsSettleInfo();
+            smsSettleInfo.setProductOrderCode(omsProductionOrder.getProductOrderCode());
+            int confirmAmont = (omsProductionOrder.getDeliveryNum() == null) ? 0 : omsProductionOrder.getDeliveryNum().intValueExact();
+            smsSettleInfo.setConfirmAmont(confirmAmont);
+            smsSettleInfo.setUpdateBy("定时任务");
+
+            omsProductionOrder.setUpdateBy("定时任务");
+            OmsProductionOrder omsProductionOrderRes = omsProductionOrderMap.get(omsProductionOrder.getProductOrderCode());
+            //交货数量与订单数量相等
+            if(omsProductionOrder.getDeliveryNum().compareTo(omsProductionOrderRes.getProductNum()) == 0){
+                smsSettleInfo.setActualEndDate(omsProductionOrder.getActualEndDate());
+                smsSettleInfo.setOrderStatus(SettleInfoOrderStatusEnum.ORDER_STATUS_2.getCode());
+                smsSettleInfoList.add(smsSettleInfo);
+                omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
+            }
+        });
+        //根据生产订单号更新排产订单和加工费结算
+        R result = remoteSettleInfoService.batchUpdateByProductOrderCode(smsSettleInfoList);
+        if(!result.isSuccess()){
+            log.error("定时任务更新加工费结算入库量异常 res:{}",JSONObject.toJSONString(result));
+            throw new BusinessException(result.get("msg").toString());
+        }
+        omsProductionOrderMapper.batchUpdateByProductOrderCode(omsProductionOrderListGet);
+        return R.ok();
+    }
+
     private String getBomGroupKey(CdBomInfo cdBomInfo) {
         return StrUtil.concat(true, cdBomInfo.getProductMaterialCode(), cdBomInfo.getProductFactoryCode(), cdBomInfo.getVersion());
     }

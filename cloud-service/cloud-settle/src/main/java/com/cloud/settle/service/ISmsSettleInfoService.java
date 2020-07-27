@@ -48,6 +48,11 @@ public interface ISmsSettleInfoService extends BaseService<SmsSettleInfo> {
      */
     R selectInfoForPrint(SmsSettleInfo smsSettleInfo);
 
-
+    /**
+     * 根据生产订单号批量修改
+     * @param list
+     * @return
+     */
+    R batchUpdateByProductOrderCode(List<SmsSettleInfo> list);
 
 }
