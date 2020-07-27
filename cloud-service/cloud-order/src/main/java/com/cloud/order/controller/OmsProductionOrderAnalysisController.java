@@ -214,7 +214,7 @@ public class OmsProductionOrderAnalysisController extends BaseController {
      * Date: 2020/7/27
      */
     @GetMapping("getDemandList")
-    @ApiOperation(value = "待排产订单分析-查询客户缺口量明细", response = OmsRealOrder.class)
+    @ApiOperation(value = "待排产订单分析-查询需求量明细", response = OmsRealOrder.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required =true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productMaterialCode", value = "成品物料号", required = true,paramType = "query", dataType = "String"),
