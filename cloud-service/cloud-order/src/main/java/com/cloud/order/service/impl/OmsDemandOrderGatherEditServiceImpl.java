@@ -460,6 +460,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                     omsOrderMaterialOutVo.setOrderCode(omsDemandOrderGatherEdit.getDemandOrderCode());
                     omsOrderMaterialOutVo.setId(omsDemandOrderGatherEdit.getId());
                     omsOrderMaterialOutVo.setTableName(TABLE_NAME);
+                    omsOrderMaterialOutVo.setFactoryCode(omsDemandOrderGatherEdit.getProductFactoryCode());
                     omsOrderMaterialOutVoList.add(omsOrderMaterialOutVo);
                 }
             });
