@@ -3,6 +3,8 @@ package com.cloud.activiti.controller;
 import cn.hutool.core.bean.BeanUtil;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
+import com.cloud.activiti.domain.entity.vo.ActBusinessVo;
+import com.cloud.activiti.domain.entity.vo.ActStartProcessVo;
 import com.cloud.activiti.service.IActOmsProductionOrderService;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
@@ -57,8 +59,8 @@ public class ActOmsProductionOrderController extends BaseController {
      */
     @PostMapping("startActProcess")
     @ApiOperation(value = "排产订单开启审批流程", response = OmsProductionOrder.class)
-    public R startActProcess(String key, String orderId, String orderCode, Long userId,String title) {
-        return actOmsProductionOrderService.startActProcess(key, orderId, orderCode, userId,title);
+    public R startActProcess(@RequestBody ActBusinessVo actBusinessVo) {
+        return actOmsProductionOrderService.startActProcess(actBusinessVo);
     }
 
 

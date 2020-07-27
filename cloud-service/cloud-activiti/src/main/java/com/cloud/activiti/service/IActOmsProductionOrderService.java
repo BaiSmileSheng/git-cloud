@@ -1,7 +1,11 @@
 package com.cloud.activiti.service;
 
 import com.cloud.activiti.domain.BizAudit;
+import com.cloud.activiti.domain.entity.vo.ActBusinessVo;
+import com.cloud.activiti.domain.entity.vo.ActStartProcessVo;
 import com.cloud.common.core.domain.R;
+
+import java.util.List;
 
 /**
  * Description:  排产订单审批流程
@@ -35,6 +39,6 @@ public interface IActOmsProductionOrderService {
      * Author: ltq
      * Date: 2020/6/24
      */
-    R startActProcess(String key,String orderId,String orderCode,Long userId,String title);
+    R startActProcess(ActBusinessVo actBusinessVo);
 
 }

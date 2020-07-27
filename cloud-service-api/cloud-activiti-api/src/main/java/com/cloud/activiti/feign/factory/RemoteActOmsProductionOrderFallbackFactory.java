@@ -1,5 +1,7 @@
 package com.cloud.activiti.feign.factory;
 
+import com.cloud.activiti.domain.entity.vo.ActBusinessVo;
+import com.cloud.activiti.domain.entity.vo.ActStartProcessVo;
 import com.cloud.activiti.feign.RemoteActOmsProductionOrderService;
 import com.cloud.common.core.domain.R;
 import feign.hystrix.FallbackFactory;
@@ -24,7 +26,7 @@ public class RemoteActOmsProductionOrderFallbackFactory implements FallbackFacto
              * Date: 2020/6/24
              */
             @Override
-            public R startActProcess(String key, String orderId, String orderCode, Long userId, String title) {
+            public R startActProcess(ActBusinessVo actBusinessVo) {
                 log.error("开启排产订单审批流程失败，原因{}：" + throwable.getMessage());
                 return R.error("服务拥挤，请稍后再试！");
             }
