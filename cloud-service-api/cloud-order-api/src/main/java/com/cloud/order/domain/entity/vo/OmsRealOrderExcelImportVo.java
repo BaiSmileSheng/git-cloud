@@ -30,7 +30,7 @@ public class OmsRealOrderExcelImportVo{
     /**
      * 订单类型
      */
-    @ExcelProperty(value = "订单类型",index = 0)
+    @ExcelProperty(value = "SAP订单类型",index = 0)
     @ApiModelProperty(value = "订单类型")
     private String orderType;
 
