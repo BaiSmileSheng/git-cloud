@@ -1,13 +1,13 @@
 package com.cloud.activiti.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.consts.ActivitiConstant;
-import com.cloud.activiti.consts.ActivitiProTitleConstants;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
+import com.cloud.activiti.domain.entity.vo.ActBusinessVo;
+import com.cloud.activiti.domain.entity.vo.ActStartProcessVo;
 import com.cloud.activiti.service.IActOmsProductionOrderService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
@@ -16,8 +16,6 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.feign.RemoteProductionOrderService;
-import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
-import com.cloud.settle.enums.SupplementaryOrderStatusEnum;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteUserService;
 import com.google.common.collect.Maps;
@@ -26,7 +24,6 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Date;
 import java.util.List;
@@ -60,20 +57,27 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
      * Date: 2020/6/24
      */
     @Override
-    public R startActProcess(String key, String orderId, String orderCode, Long userId,String title) {
-
-        R keyMap = getByKey(key);
-        if (!keyMap.isSuccess()) {
-            log.error("根据Key获取最新版流程实例失败："+keyMap.get("msg"));
-            throw new BusinessException("根据Key获取最新版流程实例失败!");
+    public R startActProcess(ActBusinessVo actBusinessVo) {
+        if (BeanUtil.isNotEmpty(actBusinessVo)) {
+            R keyMap = getByKey(actBusinessVo.getKey());
+            if (!keyMap.isSuccess()) {
+                log.error("根据Key获取最新版流程实例失败："+keyMap.get("msg"));
+                throw new BusinessException("根据Key获取最新版流程实例失败!");
+            }
+            ProcessDefinitionAct processDefinitionAct = keyMap.getData(ProcessDefinitionAct.class);
+            List<ActStartProcessVo> list = actBusinessVo.getProcessVoList();
+            //插入流程物业表  并开启流程
+            list.forEach(a ->{
+                BizBusiness business =
+                        initBusiness(processDefinitionAct.getId(),processDefinitionAct.getName(),a.getOrderId(),a.getOrderCode(), actBusinessVo.getUserId(),actBusinessVo.getTitle());
+                bizBusinessService.insertBizBusiness(business);
+                Map<String, Object> variables = Maps.newHashMap();
+                bizBusinessService.startProcess(business, variables);
+            });
+        } else {
+            log.error("开启审批流失败，传入参数为空！");
+            throw new BusinessException("开启审批流失败，传入参数为空！");
         }
-        ProcessDefinitionAct processDefinitionAct = keyMap.getData(ProcessDefinitionAct.class);
-        //插入流程物业表  并开启流程
-        BizBusiness business =
-                initBusiness(processDefinitionAct.getId(),processDefinitionAct.getName(),orderId,orderCode, userId,title);
-        bizBusinessService.insertBizBusiness(business);
-        Map<String, Object> variables = Maps.newHashMap();
-        bizBusinessService.startProcess(business, variables);
         return R.ok("提交成功！");
     }
 
