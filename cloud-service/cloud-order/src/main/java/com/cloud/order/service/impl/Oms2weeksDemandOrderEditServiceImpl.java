@@ -203,6 +203,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                     omsOrderMaterialOutVo.setOrderCode(omsDemandOrderGatherEdit.getDemandOrderCode());
                     omsOrderMaterialOutVo.setId(omsDemandOrderGatherEdit.getId());
                     omsOrderMaterialOutVo.setTableName(TABLE_NAME);
+                    omsOrderMaterialOutVo.setFactoryCode(omsDemandOrderGatherEdit.getProductFactoryCode());
                     omsOrderMaterialOutVoList.add(omsOrderMaterialOutVo);
                 }
             });

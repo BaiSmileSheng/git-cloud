@@ -232,6 +232,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 omsOrderMaterialOutVo.setOrderCode(omsRealOrder.getOrderCode());
                 omsOrderMaterialOutVo.setId(omsRealOrder.getId());
                 omsOrderMaterialOutVo.setTableName(TABLE_NAME);
+                omsOrderMaterialOutVo.setFactoryCode(omsRealOrder.getProductFactoryCode());
                 omsOrderMaterialOutVoList.add(omsOrderMaterialOutVo);
             });
             auditResultReq.setOmsOrderMaterialOutVoList(omsOrderMaterialOutVoList);
