@@ -56,4 +56,11 @@ public interface RemoteProductionOrderService {
      */
     @PostMapping("productionOrder/timeSAPGetProductOrderCode")
     R timeSAPGetProductOrderCode();
+
+    /**
+     * 定时获取入库量
+     * @return
+     */
+    @PostMapping("productionOrder/timeGetConfirmAmont")
+    R timeGetConfirmAmont();
 }

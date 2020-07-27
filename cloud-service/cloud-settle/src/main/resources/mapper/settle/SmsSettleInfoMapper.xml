@@ -196,4 +196,26 @@
     </update>
 
 
+    <update id="batchUpdateByProductOrderCode" parameterType="list">
+        <foreach collection="list" separator=";" item="item">
+            update sms_settle_info
+            <trim prefix="set" suffixOverrides=",">
+                <if test="item.confirmAmont != null and item.confirmAmont != ''">
+                    confirm_amont = #{item.confirmAmont},
+                </if>
+                <if test="item.orderStatus != null and item.orderStatus != ''">
+                    order_status = #{item.orderStatus},
+                </if>
+                <if test="item.actualEndDate != null and item.actualEndDate != ''">
+                    actual_end_date = #{item.actualEndDate},
+                </if>
+                <if test="item.updateBy != null and item.updateBy != ''">
+                    update_by = #{item.updateBy},
+                </if>
+            </trim>
+            where product_order_code=#{item.productOrderCode}
+        </foreach>
+    </update>
+
+
 </mapper>
