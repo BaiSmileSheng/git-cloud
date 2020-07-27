@@ -495,7 +495,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
      * @return
      */
     @Override
-    public R confirmRelease(String ids) {
+    public R confirmRelease(String ids,Oms2weeksDemandOrderEdit oms2weeksDemandOrderEditVo) {
         Example example = new Example(Oms2weeksDemandOrderEdit.class);
         Example.Criteria criteria = example.createCriteria();
         //允许下达的审核状态
@@ -510,6 +510,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             List<String> list = CollUtil.newArrayList(ids.split(StrUtil.COMMA));
             criteria.andIn("id", list);
         }
+        listCondition(oms2weeksDemandOrderEditVo,criteria);
         List<Oms2weeksDemandOrderEdit> list = selectByExample(example);
         if (CollUtil.isEmpty(list)) {
             return R.error("无数据需要下达！");
@@ -526,6 +527,44 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
         }
         updateBatchByPrimaryKeySelective(list);
         return R.ok();
+    }
+
+    /**
+     * Example查询时的条件
+     * @param oms2weeksDemandOrderEdit
+     * @return
+     */
+    void listCondition(Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit,Example.Criteria criteria){
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getProductMaterialCode())) {
+            criteria.andEqualTo("productMaterialCode",oms2weeksDemandOrderEdit.getProductMaterialCode() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getProductFactoryCode())) {
+            criteria.andEqualTo("productFactoryCode",oms2weeksDemandOrderEdit.getProductFactoryCode() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getCustomerCode())) {
+            criteria.andEqualTo("customerCode",oms2weeksDemandOrderEdit.getCustomerCode() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getOrderFrom())) {
+            criteria.andEqualTo("orderFrom",oms2weeksDemandOrderEdit.getOrderFrom() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getAuditStatus())) {
+            criteria.andEqualTo("auditStatus",oms2weeksDemandOrderEdit.getAuditStatus() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getStatus())) {
+            criteria.andEqualTo("status",oms2weeksDemandOrderEdit.getStatus() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getProductType())) {
+            criteria.andEqualTo("productType",oms2weeksDemandOrderEdit.getProductType() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getLifeCycle())) {
+            criteria.andEqualTo("lifeCycle",oms2weeksDemandOrderEdit.getLifeCycle() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getBeginTime())) {
+            criteria.andGreaterThanOrEqualTo("deliveryDate",oms2weeksDemandOrderEdit.getBeginTime() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getEndTime())) {
+            criteria.andLessThanOrEqualTo("deliveryDate", oms2weeksDemandOrderEdit.getEndTime() );
+        }
     }
 
     /**
