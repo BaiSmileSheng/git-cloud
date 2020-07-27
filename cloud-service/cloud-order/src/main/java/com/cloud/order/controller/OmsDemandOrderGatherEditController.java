@@ -182,8 +182,8 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     @ApiOperation(value = "确认下达 ", response = R.class)
     @ApiParam(name = "ids", value = "需确认下达数据的id")
     @HasPermissions("order:demandOrderGatherEdit:confirmRelease")
-    public R confirmRelease(String ids,@ApiIgnore OmsDemandOrderGatherEdit omsDemandOrderGatherEdit){
-        return omsDemandOrderGatherEditService.confirmRelease(ids,omsDemandOrderGatherEdit);
+    public R confirmRelease(@RequestBody @ApiIgnore OmsDemandOrderGatherEdit omsDemandOrderGatherEdit){
+        return omsDemandOrderGatherEditService.confirmRelease(omsDemandOrderGatherEdit.getIds(),omsDemandOrderGatherEdit);
     }
 
     /**
