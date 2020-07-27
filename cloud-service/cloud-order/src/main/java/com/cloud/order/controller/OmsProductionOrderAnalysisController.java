@@ -13,6 +13,7 @@ import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.OmsProductionOrderAnalysis;
 import com.cloud.order.domain.entity.OmsRealOrder;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderAnalysisVo;
+import com.cloud.order.domain.entity.vo.OmsRealOrderVo;
 import com.cloud.order.service.IOmsProductionOrderAnalysisService;
 import com.cloud.order.service.IOmsRealOrderService;
 import com.cloud.order.util.DataScopeUtil;
@@ -166,13 +167,12 @@ public class OmsProductionOrderAnalysisController extends BaseController {
      * Date: 2020/6/16
      */
     @GetMapping("customerList")
-    @ApiOperation(value = "待排产订单分析-查询客户缺口量明细", response = OmsRealOrder.class)
+    @ApiOperation(value = "待排产订单分析-查询客户缺口量明细", response = OmsRealOrderVo.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required =true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productMaterialCode", value = "成品物料号", required = true,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productDate", value = "生产日期", required = true,paramType = "query", dataType = "String")
     })
-    @HasPermissions("order:productionOrderAnalysis:customerList")
     public R getCustomerList(@ApiIgnore OmsRealOrder omsRealOrder){
         return omsProductionOrderAnalysisService.queryRealOrder(omsRealOrder);
     }
@@ -204,5 +204,23 @@ public class OmsProductionOrderAnalysisController extends BaseController {
     })
     public R getProductStock(@ApiIgnore CdProductStock cdProductStock){
         return omsProductionOrderAnalysisService.getProductStock(cdProductStock);
+    }
+
+    /**
+     * Description:  查询需求量明细
+     * Param: [omsRealOrder]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/7/27
+     */
+    @GetMapping("getDemandList")
+    @ApiOperation(value = "待排产订单分析-查询客户缺口量明细", response = OmsRealOrder.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required =true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productMaterialCode", value = "成品物料号", required = true,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productDate", value = "生产日期", required = true,paramType = "query", dataType = "String")
+    })
+    public R getDemandList(@ApiIgnore OmsRealOrder omsRealOrder){
+        return omsProductionOrderAnalysisService.getDemandList(omsRealOrder);
     }
 }
