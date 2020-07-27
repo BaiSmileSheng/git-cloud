@@ -221,4 +221,10 @@ public class OmsDemandOrderGatherEdit extends BaseEntity {
      */
     @Transient
     List<String> productFactoryList;
+
+    /**
+     * id逗号分隔
+     */
+    @Transient
+    private String ids;
 }

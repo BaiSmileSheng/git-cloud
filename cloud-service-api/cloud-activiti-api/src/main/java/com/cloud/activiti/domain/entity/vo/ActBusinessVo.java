@@ -22,6 +22,8 @@ public class ActBusinessVo {
     private String key;
     @ApiModelProperty(value = "用户ID")
     private Long userId;
+    @ApiModelProperty(value = "用户名")
+    private String userName;
     @ApiModelProperty(value = "审批流标题")
     private String title;
     @ApiModelProperty(value = "审批流业务数据List")

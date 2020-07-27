@@ -117,4 +117,15 @@ public class SmsSettleInfoServiceImpl extends BaseServiceImpl<SmsSettleInfo> imp
         }
         return R.data(smsSettleInfoList);
     }
+
+    /**
+     * 根据生产订单号批量修改
+     * @param list
+     * @return
+     */
+    @Override
+    public R batchUpdateByProductOrderCode(List<SmsSettleInfo> list){
+        int count = smsSettleInfoMapper.batchUpdateByProductOrderCode(list);
+        return R.data(count);
+    }
 }

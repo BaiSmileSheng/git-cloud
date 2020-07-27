@@ -52,4 +52,12 @@ public interface RemoteSettleInfoService {
      */
     @PostMapping("/smsSettleInfo/batchInsert")
     R batchInsert(@RequestBody List<SmsSettleInfo> smsSettleInfoList);
+
+    /**
+     * 根据生产订单号批量修改
+     * @param smsSettleInfoList
+     * @return
+     */
+    @PostMapping("/smsSettleInfo/batchUpdateByProductOrderCode")
+    R batchUpdateByProductOrderCode(@RequestBody List<SmsSettleInfo> smsSettleInfoList);
 }

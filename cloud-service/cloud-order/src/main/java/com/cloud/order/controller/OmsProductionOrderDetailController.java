@@ -8,6 +8,7 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.domain.entity.OmsProductionOrderDetail;
+import com.cloud.order.domain.entity.OmsRawMaterialFeedback;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderDetailExportVo;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderDetailVo;
 import com.cloud.order.service.IOmsProductionOrderDetailService;
@@ -85,7 +86,7 @@ public class OmsProductionOrderDetailController extends BaseController {
      * 原材料评审-反馈按钮，排产信息查询
      */
     @GetMapping("selectProductOrder")
-    @ApiOperation(value = "原材料评审-反馈按钮，排产信息查询", response = OmsProductionOrderDetail.class)
+    @ApiOperation(value = "原材料评审-反馈按钮，排产信息查询", response = OmsRawMaterialFeedback.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "materialCode", value = "原材料物料", required = false, paramType = "query", dataType = "String"),

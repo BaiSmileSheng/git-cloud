@@ -54,28 +54,28 @@ public class OmsDemandOrderGather extends BaseEntity {
     /**
      * 订单来源 1：内单，2：外单
      */
-    @ExcelProperty(value = "订单来源",index = 11,converter = OrderFromConverter.class)
+    @ExcelProperty(value = "订单来源",index = 0,converter = OrderFromConverter.class)
     @ApiModelProperty(value = "订单来源 1：内单，2：外单")
     private String orderFrom;
 
     /**
      * 成品物料号
      */
-    @ExcelProperty(value = "成品物料号",index = 0)
+    @ExcelProperty(value = "成品物料",index = 1)
     @ApiModelProperty(value = "成品物料号")
     private String productMaterialCode;
 
     /**
      * 成品物料描述
      */
-    @ExcelProperty(value = "成品物料描述",index = 1)
+    @ExcelProperty(value = "成品物料描述",index = 2)
     @ApiModelProperty(value = "成品物料描述")
     private String productMaterialDesc;
 
     /**
      * 生产工厂编码
      */
-    @ExcelProperty(value = "生产工厂编码",index = 2)
+    @ExcelProperty(value = "工厂",index = 3)
     @ApiModelProperty(value = "生产工厂编码")
     private String productFactoryCode;
 
@@ -95,21 +95,21 @@ public class OmsDemandOrderGather extends BaseEntity {
     /**
      * 客户描述
      */
-    @ExcelProperty(value = "客户描述",index = 3)
+    @ExcelProperty(value = "客户名称",index = 5)
     @ApiModelProperty(value = "客户描述")
     private String customerDesc;
 
     /**
      * MRP范围
      */
-    @ExcelProperty(value = "MRP范围",index = 8)
+    @ExcelProperty(value = "MRP范围",index = 6)
     @ApiModelProperty(value = "MRP范围")
     private String mrpRange;
 
     /**
      * BOM版本
      */
-    @ExcelProperty(value = "BOM版本",index = 10)
+    @ExcelProperty(value = "版本",index = 7)
     @ApiModelProperty(value = "BOM版本")
     private String bomVersion;
 
@@ -122,14 +122,14 @@ public class OmsDemandOrderGather extends BaseEntity {
     /**
      * 地点
      */
-    @ExcelProperty(value = "地点",index = 9)
+    @ExcelProperty(value = "地点",index = 10)
     @ApiModelProperty(value = "地点")
     private String place;
 
     /**
      * 交付日期
      */
-    @ExcelProperty(value = "交付日期",index = 5)
+    @ExcelProperty(value = "交付日期",index = 9)
     @DateTimeFormat("yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "交付日期")
@@ -144,14 +144,14 @@ public class OmsDemandOrderGather extends BaseEntity {
     /**
      * 周数 交货日期周数
      */
-    @ExcelProperty(value = "周数",index = 6)
+    @ExcelProperty(value = "周数",index = 11)
     @ApiModelProperty(value = "周数 交货日期周数")
     private String weeks;
 
     /**
      * 订单数量
      */
-    @ExcelProperty(value = "订单数量",index = 7)
+    @ExcelProperty(value = "数量",index = 8)
     @ApiModelProperty(value = "订单数量")
     private Long orderNum;
 

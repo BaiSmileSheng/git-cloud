@@ -500,4 +500,16 @@ public class OmsProductionOrderController extends BaseController {
         R result = omsProductionOrderService.orderRefresh(ids);
         return result;
     }
+
+    /**
+     * 定时获取入库量
+     * @return
+     */
+    @PostMapping("timeGetConfirmAmont")
+    @OperLog(title = "定时获取入库量", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "定时获取入库量 ", response = R.class)
+    public R timeGetConfirmAmont(){
+        R result = omsProductionOrderService.timeGetConfirmAmont();
+        return result;
+    }
 }

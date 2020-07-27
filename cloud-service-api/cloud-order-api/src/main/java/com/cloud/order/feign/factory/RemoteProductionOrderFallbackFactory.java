@@ -67,6 +67,12 @@ public class RemoteProductionOrderFallbackFactory implements FallbackFactory<Rem
                 return R.error("服务拥挤请稍后再试");
             }
 
+            @Override
+            public R timeGetConfirmAmont() {
+                log.error("RemoteProductionOrderService.timeGetConfirmAmont：{}",throwable.getMessage());
+                return R.error("服务拥挤请稍后再试");
+            }
+
         };
     }
 }
