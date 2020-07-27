@@ -47,4 +47,12 @@ public interface IOmsRealOrderService extends BaseService<OmsRealOrder> {
      * @return
      */
     R timeCollectToOmsRealOrder();
+
+    /**
+     * 删除
+     * @param ids
+     * @param omsRealOrder
+     * @return
+     */
+    R deleteOmsRealOrder(String ids,OmsRealOrder omsRealOrder,SysUser sysUser,long currentUserId);
 }

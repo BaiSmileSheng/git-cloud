@@ -225,8 +225,32 @@
                 <if test="item.newVersion != null and item.newVersion != ''">
                     new_version = #{item.newVersion},
                 </if>
+                <if test="item.updateBy != null and item.updateBy != ''">
+                    update_by = #{item.updateBy},
+                </if>
             </trim>
             where order_code=#{item.orderCode}
+        </foreach>
+    </update>
+
+    <update id="batchUpdateByProductOrderCode" parameterType="list">
+        <foreach collection="list" separator=";" item="item">
+            update oms_production_order
+            <trim prefix="set" suffixOverrides=",">
+                <if test="item.deliveryNum != null and item.deliveryNum != ''">
+                    delivery_num = #{item.deliveryNum},
+                </if>
+                <if test="item.status != null and item.status != ''">
+                    status = #{item.status},
+                </if>
+                <if test="item.actualEndDate != null and item.actualEndDate != ''">
+                    actual_end_date = #{item.actualEndDate},
+                </if>
+                <if test="item.updateBy != null and item.updateBy != ''">
+                    update_by = #{item.updateBy},
+                </if>
+            </trim>
+            where product_order_code=#{item.productOrderCode}
         </foreach>
     </update>
 

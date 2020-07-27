@@ -204,4 +204,24 @@ public class CdMaterialPriceInfoController extends BaseController {
         CdMaterialPriceInfo cdMaterialPriceInfo = cdMaterialPriceInfoService.findByExampleOne(example);
         return R.data(cdMaterialPriceInfo);
     }
+
+    /**
+     * 按加工费号模糊查询
+     */
+    @GetMapping("selectByLikeByMaterialCode")
+    @ApiOperation(value = "按加工费号模糊查询", response = CdMaterialPriceInfo.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "materialCode", value = "专用号", required = false, paramType = "query", dataType = "String")
+    })
+    public R selectByLikeByMaterialCode(@RequestParam(value = "materialCode") String materialCode){
+        Example example = new Example(CdMaterialPriceInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("priceType", PriceTypeEnum.PRICE_TYPE_1.getCode());
+        criteria.andLike("materialCode",materialCode + "%");
+        startPage();
+        List<CdMaterialPriceInfo> cdMaterialPriceInfoList = cdMaterialPriceInfoService.selectByExample(example);
+        return R.data(cdMaterialPriceInfoList);
+    }
 }

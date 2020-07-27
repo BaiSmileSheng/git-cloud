@@ -44,4 +44,22 @@ public class OmsProductionOrderXxlJob {
         }
     }
 
+    /**
+     * 定时任务获取入库量
+     * TODO
+     */
+    @XxlJob("timeGetConfirmAmont")
+    public ReturnT<String> timeGetConfirmAmont(String param) {
+        log.info("--------------定时任务获取入库量开始----------");
+        R r=remoteProductionOrderService.timeGetConfirmAmont();
+        XxlJobLogger.log(StrUtil.format("定时任务获取入库量结果：{}",r.toString()));
+        log.info(StrUtil.format("定时任务获取入库量结果：{}",r.toString()));
+        log.info("--------------定时任务获取入库量结束------------");
+        if (r.isSuccess()) {
+            return ReturnT.SUCCESS;
+        }else{
+            return ReturnT.FAIL;
+        }
+    }
+
 }

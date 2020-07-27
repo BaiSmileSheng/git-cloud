@@ -121,4 +121,10 @@ public interface IOmsProductionOrderService extends BaseService<OmsProductionOrd
      * @return
      */
     R orderRefresh(String ids);
+
+    /**
+     * 定时获取入库量
+     * @return
+     */
+    R timeGetConfirmAmont();
 }

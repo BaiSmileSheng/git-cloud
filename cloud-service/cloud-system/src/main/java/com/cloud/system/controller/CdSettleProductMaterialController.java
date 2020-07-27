@@ -166,6 +166,8 @@ public class CdSettleProductMaterialController extends BaseController {
     public R addSave(@RequestBody CdSettleProductMaterial cdSettleProductMaterial) {
         //校验入参
         ValidatorUtils.validateEntity(cdSettleProductMaterial);
+        SysUser sysUser = getUserInfo(SysUser.class);
+        cdSettleProductMaterial.setCreateBy(sysUser.getLoginName());
         R r = cdSettleProductMaterialService.insertProductMaterial(cdSettleProductMaterial);
         return r ;
     }
@@ -180,6 +182,8 @@ public class CdSettleProductMaterialController extends BaseController {
     public R editSave(@RequestBody CdSettleProductMaterial cdSettleProductMaterial) {
         //校验入参
         ValidatorUtils.validateEntity(cdSettleProductMaterial);
+        SysUser sysUser = getUserInfo(SysUser.class);
+        cdSettleProductMaterial.setCreateBy(sysUser.getLoginName());
         R r = cdSettleProductMaterialService.updateProductMaterial(cdSettleProductMaterial);
         return r;
     }

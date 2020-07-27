@@ -49,4 +49,13 @@ public interface IOmsProductionOrderAnalysisService extends BaseService<OmsProdu
      * Date: 2020/6/30
      */
     R getProductStock(CdProductStock cdProductStock);
+
+    /**
+     * Description:  查询需求量明细
+     * Param: [omsRealOrder]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/7/27
+     */
+    R getDemandList(OmsRealOrder omsRealOrder);
 }
