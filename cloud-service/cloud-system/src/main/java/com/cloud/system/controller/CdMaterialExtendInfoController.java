@@ -262,7 +262,7 @@ public class CdMaterialExtendInfoController extends BaseController {
     /**
      * 按专用号模糊查询,返回对象集合
      */
-    @GetMapping("selectByLikeCode")
+    @GetMapping("objectSelectByLikeCode")
     @ApiOperation(value = "按专用号模糊查询,返回对象集合", response = CdMaterialExtendInfo.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
