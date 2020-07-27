@@ -309,6 +309,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         } else if(CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
             example.and().andEqualTo("createBy", sysUser.getLoginName());
         }
+        example.and().andEqualTo("dataSource",RealOrderDataSourceEnum.DATA_SOURCE_1.getCode());
         int count = omsRealOrderMapper.deleteByExample(example);
         return R.data(count);
     }
