@@ -1,5 +1,7 @@
 package com.cloud.activiti.feign;
 
+import com.cloud.activiti.domain.entity.vo.ActBusinessVo;
+import com.cloud.activiti.domain.entity.vo.ActStartProcessVo;
 import com.cloud.activiti.feign.factory.RemoteActOmsProductionOrderFallbackFactory;
 import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.common.core.domain.R;
@@ -31,6 +33,5 @@ public interface RemoteActOmsProductionOrderService {
      * Date: 2020/6/24
      */
     @PostMapping("actOmsProductionOrder/startActProcess")
-    R startActProcess(@RequestParam("key") String key,@RequestParam("orderId") String orderId
-            , @RequestParam("orderCode") String orderCode,@RequestParam("userId") Long userId,@RequestParam("title")String title);
+    R startActProcess(@RequestBody ActBusinessVo actBusinessVo);
 }
