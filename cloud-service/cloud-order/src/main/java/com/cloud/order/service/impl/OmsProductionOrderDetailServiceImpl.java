@@ -245,12 +245,13 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
         //根据排产订单号查询排产订单表，根据成品专用号进行汇总
         //获取排产订单号List
         List<String> orderCodeList = omsProductionOrderDetails.stream()
-                .map(OmsProductionOrderDetail::getProductOrderCode).collect(Collectors.toList());
+                .map(OmsProductionOrderDetail::getProductOrderCode).distinct().collect(Collectors.toList());
         List<OmsProductionOrder> productionOrders = omsProductionOrderService.selectByOrderCode(orderCodeList);
         //按照成品专用号、bom版本进行分组
         Map<String, List<OmsProductionOrder>> map = productionOrders
                 .stream().collect(Collectors.groupingBy((o) -> fetchGroupKey(o)));
         List<OmsRawMaterialFeedback> omsRawMaterialFeedbacks = new ArrayList<>();
+        int id = 0;
         map.forEach((key, value) -> {
             //成品排产量
             BigDecimal productNum = value.stream()
@@ -264,6 +265,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
             BigDecimal rawMaterialNum = list.stream()
                     .map(OmsProductionOrderDetail::getRawMaterialProductNum).reduce(BigDecimal.ZERO, BigDecimal::add);
             omsRawMaterialFeedbacks.add(OmsRawMaterialFeedback.builder()
+                    .id(Long.valueOf(id+1))
                     .productMaterialCode(omsProductionOrder.getProductMaterialCode())
                     .productMaterialDesc(omsProductionOrder.getProductMaterialDesc())
                     .bomVersion(omsProductionOrder.getBomVersion())
