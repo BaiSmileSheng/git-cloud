@@ -17,6 +17,7 @@ import com.cloud.order.domain.entity.vo.OmsRealOrderVo;
 import com.cloud.order.mapper.OmsProductionOrderAnalysisMapper;
 import com.cloud.order.mapper.OmsRealOrderMapper;
 import com.cloud.order.service.IOmsProductionOrderAnalysisService;
+import com.cloud.order.service.IOmsRealOrderService;
 import com.cloud.system.domain.entity.CdProductPassage;
 import com.cloud.system.domain.entity.CdProductStock;
 import com.cloud.system.domain.entity.CdProductWarehouse;
@@ -53,7 +54,7 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
     @Autowired
     private OmsProductionOrderAnalysisMapper omsProductionOrderAnalysisMapper;
     @Autowired
-    private OmsRealOrderMapper omsRealOrderMapper;
+    private IOmsRealOrderService omsRealOrderService;
     @Autowired
     private RemoteCdProductWarehouseService remoteCdProductWarehouseService;
     @Autowired
@@ -80,7 +81,7 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
         date.add(Calendar.DATE, DAYS);
         criteria.andGreaterThan("productDate", sft.format(new Date()));
         criteria.andLessThanOrEqualTo("productDate", sft.format(date.getTime()));
-        List<OmsRealOrder> omsRealOrders = omsRealOrderMapper.selectByExample(example);
+        List<OmsRealOrder> omsRealOrders = omsRealOrderService.selectByExample(example);
         //增加数据空判断  2020-07-23 by ltq
         if (ObjectUtil.isEmpty(omsRealOrders) && omsRealOrders.size() <= 0) {
             log.error("待排产订单分析汇总查询真单记录为空！");
@@ -252,7 +253,7 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
         }
         SimpleDateFormat sft = new SimpleDateFormat("yyyy-MM-dd");
         criteria.andGreaterThan("productDate", sft.format(new Date()));
-        List<OmsRealOrder> omsRealOrders = omsRealOrderMapper.selectByExample(example);
+        List<OmsRealOrder> omsRealOrders = omsRealOrderService.selectByExample(example);
         Map<String, List<OmsRealOrder>> mapFactory = new HashMap<>();
         omsRealOrders.forEach(ros -> {
             String key = StrUtil.concat(true, ros.getProductFactoryCode(), ros.getProductMaterialCode(), ros.getCustomerCode());
@@ -381,6 +382,30 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
     @Override
     public R getProductStock(CdProductStock cdProductStock) {
         return remoteCdProductStockService.findOneByExample(cdProductStock);
+    }
+    /**
+     * Description:  查询需求量明细
+     * Param: [omsRealOrder]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/7/27
+     */
+    @Override
+    public R getDemandList(OmsRealOrder omsRealOrder) {
+        //获取真单数据
+        Example example = new Example(OmsRealOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        if (StringUtils.isNotBlank(omsRealOrder.getProductFactoryCode())) {
+            criteria.andEqualTo("productFactoryCode", omsRealOrder.getProductFactoryCode());
+        }
+        if (StringUtils.isNotBlank(omsRealOrder.getProductMaterialCode())) {
+            criteria.andEqualTo("productMaterialCode", omsRealOrder.getProductMaterialCode());
+        }
+        if (StringUtils.isNotBlank(omsRealOrder.getProductDate())) {
+            criteria.andEqualTo("productDate", omsRealOrder.getProductDate());
+        }
+        List<OmsRealOrder> omsRealOrderList = omsRealOrderService.selectByExample(example);
+        return R.data(omsRealOrderList);
     }
 
     /**
