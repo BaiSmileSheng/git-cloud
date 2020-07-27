@@ -66,7 +66,7 @@ public class OmsInternalOrderResXxlJob {
 
     /**
      * 定时任务获取PO数据
-     * 每周一点  0 0  1 * * ?
+     * 每天一点  0 0 1 * * ?
      *
      * @return
      */
