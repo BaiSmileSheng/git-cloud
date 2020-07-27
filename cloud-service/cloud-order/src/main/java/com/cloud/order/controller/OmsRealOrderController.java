@@ -13,6 +13,7 @@ import com.cloud.common.log.enums.BusinessType;
 import com.cloud.order.domain.entity.OmsRealOrder;
 import com.cloud.order.domain.entity.vo.OmsRealOrderExcelExportVo;
 import com.cloud.order.domain.entity.vo.OmsRealOrderExcelImportVo;
+import com.cloud.order.easyexcel.RealOrderWriteHandler;
 import com.cloud.order.enums.RealOrderFromEnum;
 import com.cloud.order.service.IOmsRealOrderService;
 import com.cloud.order.util.DataScopeUtil;
@@ -86,7 +87,7 @@ public class OmsRealOrderController extends BaseController {
                 example.and().andIn("productFactoryCode", Arrays.asList(
                         DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
             }
-        } else {
+        } else if(CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
             example.and().andEqualTo("createBy", sysUser.getLoginName());
         }
         startPage();
@@ -164,10 +165,9 @@ public class OmsRealOrderController extends BaseController {
                 example.and().andIn("productFactoryCode", Arrays.asList(
                         DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
             }
-        } else {
+        } else if(CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
             example.and().andEqualTo("createBy", sysUser.getLoginName());
         }
-        startPage();
         List<OmsRealOrder> omsRealOrderList = omsRealOrderService.selectByExample(example);
         String fileName = "真单.xlsx";
         return EasyExcelUtilOSS.writeExcel(omsRealOrderList, fileName, fileName, new OmsRealOrderExcelExportVo());
@@ -183,7 +183,7 @@ public class OmsRealOrderController extends BaseController {
     @ApiOperation(value = "导入模板下载", response = OmsRealOrder.class)
     public R exportExample() {
         String fileName = "真单.xlsx";
-        return EasyExcelUtilOSS.writeExcel(Arrays.asList(), fileName, fileName, new OmsRealOrderExcelImportVo());
+        return EasyExcelUtilOSS.writePostilExcel(Arrays.asList(), fileName, fileName, new OmsRealOrderExcelImportVo(),new RealOrderWriteHandler());
     }
 
     /**
@@ -264,8 +264,10 @@ public class OmsRealOrderController extends BaseController {
     @OperLog(title = "删除真单", businessType = BusinessType.DELETE)
     @ApiOperation(value = "删除真单", response = R.class)
     @ApiParam(name = "ids", value = "需删除数据的id")
-    public R remove(@RequestBody String ids) {
-        return toAjax(omsRealOrderService.deleteByIds(ids));
+    public R remove(@RequestParam(value = "ids",required = false) String ids,@RequestBody OmsRealOrder omsRealOrder) {
+        SysUser sysUser = getUserInfo(SysUser.class);
+        long currentUserId = getCurrentUserId();
+        return omsRealOrderService.deleteOmsRealOrder(ids,omsRealOrder,sysUser,currentUserId);
     }
 
 

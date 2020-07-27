@@ -3,6 +3,9 @@ package com.cloud.order.domain.entity.vo;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.cloud.common.core.domain.BaseEntity;
+import com.cloud.order.converter.OrderFromConverter;
+import com.cloud.order.converter.RealOrderClassConverter;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -13,6 +16,7 @@ import tk.mybatis.mapper.annotation.KeySql;
 
 import javax.persistence.Id;
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * 真单对象 导出专用
@@ -26,7 +30,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Builder
 @ApiModel(value = "真单")
-public class OmsRealOrderExcelExportVo extends BaseEntity {
+public class OmsRealOrderExcelExportVo {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -39,7 +43,7 @@ public class OmsRealOrderExcelExportVo extends BaseEntity {
     /**
      * 订单类型
      */
-    @ExcelProperty(value = "订单类型",index = 1)
+    @ExcelProperty(value = "SAP订单类型",index = 1)
     @ApiModelProperty(value = "订单类型")
     private String orderType;
 
@@ -47,25 +51,27 @@ public class OmsRealOrderExcelExportVo extends BaseEntity {
      * 订单来源 1：内单，2：外单
      */
     @ApiModelProperty(value = "订单来源 1：内单，2：外单")
+    @ExcelProperty(value = "订单来源",index = 13,converter = OrderFromConverter.class)
     private String orderFrom;
 
     /**
      * 订单种类 1：正常，2：追加，3：储备，4：新品
      */
     @ApiModelProperty(value = "订单种类 1：正常，2：追加，3：储备，4：新品")
+    @ExcelProperty(value = "订单分类",index = 14,converter = RealOrderClassConverter.class)
     private String orderClass;
 
     /**
      * 成品物料号
      */
-    @ExcelProperty(value = "成品物料号",index = 2)
+    @ExcelProperty(value = "专用号",index = 2)
     @ApiModelProperty(value = "成品物料号")
     private String productMaterialCode;
 
     /**
      * 成品物料描述
      */
-    @ExcelProperty(value = "成品物料描述",index = 3)
+    @ExcelProperty(value = "专用号描述",index = 3)
     @ApiModelProperty(value = "成品物料描述")
     private String productMaterialDesc;
 
@@ -99,12 +105,14 @@ public class OmsRealOrderExcelExportVo extends BaseEntity {
     /**
      * MRP范围
      */
+    @ExcelProperty(value = "MRP范围",index = 10)
     @ApiModelProperty(value = "MRP范围")
     private String mrpRange;
 
     /**
      * BOM版本
      */
+    @ExcelProperty(value = "BOM版本",index = 12)
     @ApiModelProperty(value = "BOM版本")
     private String bomVersion;
 
@@ -145,6 +153,7 @@ public class OmsRealOrderExcelExportVo extends BaseEntity {
      * 地点
      */
     @ApiModelProperty(value = "地点")
+    @ExcelProperty(value = "交货地点",index = 11)
     private String place;
 
     /**
@@ -169,5 +178,24 @@ public class OmsRealOrderExcelExportVo extends BaseEntity {
      * 是否删除 0：有效，1：删除
      */
     private String delFlag;
+
+    /**
+     * 备注
+     */
+    @ExcelProperty(value = "备注",index = 15)
+    private String remark;
+
+    /**
+     * 创建者
+     */
+    @ExcelProperty(value = "创建人",index = 16)
+    private String createBy;
+
+    /**
+     * 创建时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @ExcelProperty(value = "创建时间",index = 17)
+    private Date createTime;
 
 }

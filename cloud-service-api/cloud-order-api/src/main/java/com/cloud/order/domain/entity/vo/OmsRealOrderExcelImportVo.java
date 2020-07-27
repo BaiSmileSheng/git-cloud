@@ -30,7 +30,7 @@ public class OmsRealOrderExcelImportVo{
     /**
      * 订单类型
      */
-    @ExcelProperty(value = "订单类型",index = 0)
+    @ExcelProperty(value = "SAP订单类型",index = 0)
     @ApiModelProperty(value = "订单类型")
     private String orderType;
 
@@ -50,14 +50,14 @@ public class OmsRealOrderExcelImportVo{
     /**
      * 成品物料号
      */
-    @ExcelProperty(value = "成品物料号",index = 2)
+    @ExcelProperty(value = "专用号",index = 2)
     @ApiModelProperty(value = "成品物料号")
     private String productMaterialCode;
 
     /**
      * 成品物料描述
      */
-    @ApiModelProperty(value = "成品物料描述")
+    @ApiModelProperty(value = "专用号描述")
     private String productMaterialDesc;
 
     /**
@@ -137,7 +137,7 @@ public class OmsRealOrderExcelImportVo{
     /**
      * 地点
      */
-    @ExcelProperty(value = "地点",index = 11)
+    @ExcelProperty(value = "交货地点",index = 11)
     @ApiModelProperty(value = "地点")
     private String place;
 
