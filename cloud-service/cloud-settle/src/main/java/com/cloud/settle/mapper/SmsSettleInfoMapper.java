@@ -35,5 +35,11 @@ public interface SmsSettleInfoMapper extends BaseMapper<SmsSettleInfo> {
      */
     int updateBySupplierCodeAndCompanyCodeAndOrderStatusAndMonth(@Param("updated")SmsSettleInfo updated,@Param("supplierCode")String supplierCode,@Param("companyCode")String companyCode,@Param("orderStatus")String orderStatus,@Param("month") String month);
 
+    /**
+     * 根据生产订单号批量修改
+     * @param list
+     * @return
+     */
+    int batchUpdateByProductOrderCode(List<SmsSettleInfo> list);
 
 }
