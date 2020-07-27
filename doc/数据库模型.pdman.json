@@ -2467,7 +2467,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述"
             },
@@ -2744,7 +2744,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "",
