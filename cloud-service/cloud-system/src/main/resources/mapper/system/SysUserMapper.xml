@@ -234,13 +234,13 @@
     </select>
 
     <select id="checkPhoneUnique" parameterType="String" resultType="SysUser">
-        select user_id, phonenumber
+        select user_id as userId, phonenumber
         from sys_user
         where phonenumber = #{phonenumber}
     </select>
 
     <select id="checkEmailUnique" parameterType="String" resultType="SysUser">
-        select user_id, email
+        select user_id as userId, email
         from sys_user
         where email = #{email}
     </select>
