@@ -129,12 +129,13 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             throw new BusinessException("排产员仅可修改对应的工厂数据");
         }else{
             if(!sysUser.getLoginName().equals(omsRealOrderRes.getCreateBy())){
-                logger.error("排产员仅可修改对应的工厂数据 id:{},loginName:{},res:{}",omsRealOrder.getId(),
+                logger.error("业务仅可修改自己导入的数据 id:{},loginName:{},res:{}",omsRealOrder.getId(),
                         sysUser.getLoginName(),JSONObject.toJSON(omsRealOrderRes));
                 throw new BusinessException("业务仅可修改自己导入的数据");
             }
         }
         omsRealOrder.setStatus(RealOrderStatusEnum.STATUS_1.getCode());
+        omsRealOrder.setUpdateBy(sysUser.getLoginName());
         omsRealOrderMapper.updateByPrimaryKeySelective(omsRealOrder);
         return R.ok();
     }
@@ -280,6 +281,77 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         omsRealOrderMapper.batchInsetOrUpdate(omsRealOrdersList);
         logger.info("定时任务每天在获取到PO信息后 进行需求汇总  结束");
         return R.ok();
+    }
+
+    @Override
+    public R deleteOmsRealOrder(String ids, OmsRealOrder omsRealOrder,SysUser sysUser,long currentUserId) {
+        if(StringUtils.isNotBlank(ids)){
+            List<OmsRealOrder> omsRealOrderSelectList =  omsRealOrderMapper.selectByIds(ids);
+            if(CollectionUtils.isEmpty(omsRealOrderSelectList)){
+                return R.error("数据不存在");
+            }
+            omsRealOrderSelectList.forEach(omsRealOrder1 -> {
+                if(!RealOrderDataSourceEnum.DATA_SOURCE_1.getCode().equals(omsRealOrder1.getDataSource())){
+                    logger.error("非人工导入数据不可删除 订单号:{}",omsRealOrder1.getOrderCode());
+                    throw new BusinessException("非人工导入数据不可删除");
+                }
+            });
+            int count = omsRealOrderMapper.deleteByIds(ids);
+            return R.data(count);
+        }
+        Example example = assemblyConditions(omsRealOrder);
+        //排产员查对应工厂的数据,业务经理查自己导入的
+        if (CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)) {
+            if (StringUtils.isBlank(omsRealOrder.getProductFactoryCode())) {
+                example.and().andIn("productFactoryCode", Arrays.asList(
+                        DataScopeUtil.getUserFactoryScopes(currentUserId).split(",")));
+            }
+        } else if(CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
+            example.and().andEqualTo("createBy", sysUser.getLoginName());
+        }
+        example.and().andEqualTo("dataSource",RealOrderDataSourceEnum.DATA_SOURCE_1.getCode());
+        int count = omsRealOrderMapper.deleteByExample(example);
+        return R.data(count);
+    }
+
+    /**
+     * 组装查询条件
+     *
+     * @return
+     */
+    private Example assemblyConditions(OmsRealOrder omsRealOrder) {
+        Example example = new Example(OmsRealOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        //专用号 工厂 交付日期  订单来源  订单分类  订单类型  客户编号  审核状态
+        if (StringUtils.isNotBlank(omsRealOrder.getProductMaterialCode())) {
+            criteria.andEqualTo("productMaterialCode", omsRealOrder.getProductMaterialCode());
+        }
+        if (StringUtils.isNotBlank(omsRealOrder.getProductFactoryCode())) {
+            criteria.andEqualTo("productFactoryCode", omsRealOrder.getProductFactoryCode());
+        }
+        if (StringUtils.isNotBlank(omsRealOrder.getOrderFrom())) {
+            criteria.andEqualTo("orderFrom", omsRealOrder.getOrderFrom());
+        }
+        if (StringUtils.isNotBlank(omsRealOrder.getOrderType())) {
+            criteria.andEqualTo("orderType", omsRealOrder.getOrderType());
+        }
+        if (StringUtils.isNotBlank(omsRealOrder.getOrderClass())) {
+            criteria.andEqualTo("orderClass", omsRealOrder.getOrderClass());
+        }
+        if (StringUtils.isNotBlank(omsRealOrder.getCustomerCode())) {
+            criteria.andEqualTo("customerCode", omsRealOrder.getCustomerCode());
+        }
+        if (StringUtils.isNotBlank(omsRealOrder.getAuditStatus())) {
+            criteria.andEqualTo("auditStatus", omsRealOrder.getAuditStatus());
+        }
+
+        if(StringUtils.isNotBlank(omsRealOrder.getBeginTime())){
+            criteria.andGreaterThanOrEqualTo("deliveryDate",omsRealOrder.getBeginTime());
+        }
+        if(StringUtils.isNotBlank(omsRealOrder.getEndTime())){
+            criteria.andLessThanOrEqualTo("deliveryDate", omsRealOrder.getEndTime());
+        }
+        return example;
     }
 
     /**

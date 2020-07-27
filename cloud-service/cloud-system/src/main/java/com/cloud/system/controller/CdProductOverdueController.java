@@ -159,6 +159,7 @@ public class CdProductOverdueController extends BaseController {
      * 删除超期库存
      */
     @PostMapping("remove")
+    @HasPermissions("system:productOverdue:remove")
     @OperLog(title = "删除超期库存 ", businessType = BusinessType.DELETE)
     @ApiOperation(value = "删除超期库存 ", response = R.class)
     @ApiParam(name = "ids", value = "需删除数据的id")
