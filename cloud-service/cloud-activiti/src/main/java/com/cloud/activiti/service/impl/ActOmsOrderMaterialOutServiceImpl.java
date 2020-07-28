@@ -9,12 +9,16 @@ import com.cloud.activiti.domain.ActReProcdef;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.domain.entity.vo.OmsOrderMaterialOutVo;
+import com.cloud.activiti.mail.MailService;
 import com.cloud.activiti.service.IActOmsOrderMaterialOutService;
 import com.cloud.activiti.service.IActReProcdefService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
+import com.cloud.common.constant.EmailConstants;
+import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.Oms2weeksDemandOrderEdit;
 import com.cloud.order.domain.entity.OmsDemandOrderGatherEdit;
 import com.cloud.order.domain.entity.OmsRealOrder;
@@ -23,6 +27,9 @@ import com.cloud.order.feign.Remote2weeksDemandOrderEditService;
 import com.cloud.order.feign.RemoteDemandOrderGatherEditService;
 import com.cloud.order.feign.RemoteOmsRealOrderService;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.SysUserVo;
+import com.cloud.system.feign.RemoteUserService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +42,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -57,6 +65,12 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
     private RemoteDemandOrderGatherEditService remoteDemandOrderGatherEditService;
     @Autowired
     private Remote2weeksDemandOrderEditService remote2weeksDemandOrderEditService;
+
+    @Autowired
+    private RemoteUserService remoteUserService;
+
+    @Autowired
+    private MailService mailService;
 
     /**
      * 根据业务key获取下市审核信息
@@ -110,6 +124,8 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
         }
         Collections.sort(actReProcdefList, Comparator.comparing(ActReProcdef::getVersion).reversed());
         ActReProcdef actReProcdefRes = actReProcdefList.get(0);
+        //key工厂,value用户
+        Map<String,List<SysUserVo>> map = new HashMap<>();
         if(!CollectionUtils.isEmpty(list)){
             list.forEach(omsOrderMaterialOutVoReq ->{
                 //1.构造下市审核流程信息
@@ -119,9 +135,49 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
                 Map<String, Object> variables = Maps.newHashMap();
                 //启动下市审核流程
                 bizBusinessService.startProcess(business, variables);
+                //4.校验发送人邮箱是否存在
+                String factoryCode = omsOrderMaterialOutVoReq.getFactoryCode();
+                String roleKey = RoleConstants.ROLE_KEY_ORDER;
+                String orderCode = omsOrderMaterialOutVoReq.getOrderCode();
+                verifyEmail(orderCode, factoryCode, roleKey,map);
+            });
+            //发送邮件
+            list.forEach(omsOrderMaterialOutVoReq ->{
+                List<SysUserVo> sysUserVoList = map.get(omsOrderMaterialOutVoReq.getFactoryCode());
+                //发送邮件
+                for(SysUserVo sysUserVo : sysUserVoList){
+                    String email = sysUserVo.getEmail();
+                    String subject = "物料下市审批";
+                    String content = "您有一条待办消息要处理！" + "单号：" + omsOrderMaterialOutVoReq.getOrderCode()
+                            + "物料已下市需要审批。" + EmailConstants.ORW_URL;
+                    mailService.sendTextMail(email,subject,content);
+                }
             });
         }
         return R.ok();
+    }
+
+    /**
+     * 校验发送人邮箱是否存在
+     * @param orderCode
+     * @param factoryCode
+     * @param roleKey
+     */
+    private void verifyEmail(String orderCode,String factoryCode, String roleKey,Map<String,List<SysUserVo>> map) {
+        R sysUserR = remoteUserService.selectUserByMaterialCodeAndRoleKey(factoryCode,roleKey);
+        if(!sysUserR.isSuccess()){
+            logger.error("获取对应的负责人邮箱失败 factoryCode:{},roleKey:{}",factoryCode,roleKey);
+            throw new BusinessException("获取对应的负责人邮箱失败" + sysUserR.get("msg").toString());
+        }
+        List<SysUserVo> sysUserVoList = sysUserR.getCollectData(new TypeReference<List<SysUserVo>>() {});
+        //校验邮箱
+        for(SysUserVo sysUserVo : sysUserVoList){
+            String email = sysUserVo.getEmail();
+            if(StringUtils.isBlank(email)){
+                throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
+            }
+        }
+        map.put(factoryCode,sysUserVoList);
     }
 
     /**
