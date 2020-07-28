@@ -84,8 +84,8 @@ public class CdMouthRateController extends BaseController {
         SysUser sysUser = getUserInfo(SysUser.class);
         cdMouthRate.setCreateBy(sysUser.getLoginName());
         cdMouthRate.setCreateTime(new Date());
-        cdMouthRateService.insertUseGeneratedKeys(cdMouthRate);
-        return R.data(cdMouthRate.getId());
+        R result = cdMouthRateService.insertMouthRate(cdMouthRate);
+        return result;
     }
 
     /**
@@ -99,7 +99,8 @@ public class CdMouthRateController extends BaseController {
         SysUser sysUser = getUserInfo(SysUser.class);
         cdMouthRate.setUpdateBy(sysUser.getLoginName());
         cdMouthRate.setUpdateTime(new Date());
-        return toAjax(cdMouthRateService.updateByPrimaryKeySelective(cdMouthRate));
+        R r = cdMouthRateService.updateMouthRate(cdMouthRate);
+        return r;
     }
 
     /**
