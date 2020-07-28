@@ -86,6 +86,7 @@ public class CdProductOverdueController extends BaseController {
         if(StringUtils.isNotBlank(cdProductOverdue.getProductMaterialCode())){
             criteria.andEqualTo("productMaterialCode",cdProductOverdue.getProductMaterialCode());
         }
+        example.orderBy("createTime").desc();
         return example;
     }
     /**

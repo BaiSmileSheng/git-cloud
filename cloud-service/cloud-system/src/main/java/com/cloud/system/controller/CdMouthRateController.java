@@ -67,6 +67,7 @@ public class CdMouthRateController extends BaseController {
         if (StrUtil.isNotEmpty(cdMouthRate.getCurrency())) {
             criteria.andEqualTo("currency", cdMouthRate.getCurrency());
         }
+        example.orderBy("createTime").desc();
         startPage();
         List<CdMouthRate> cdMouthRateList = cdMouthRateService.selectByExample(example);
         return getDataTable(cdMouthRateList);

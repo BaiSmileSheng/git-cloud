@@ -30,7 +30,7 @@ public class OmsRealOrderExcelImportErrorVo {
     /**
      * 订单类型
      */
-    @ExcelProperty(value = "订单类型",index = 0)
+    @ExcelProperty(value = "SAP订单类型",index = 0)
     @ApiModelProperty(value = "订单类型")
     private String orderType;
 
@@ -43,7 +43,7 @@ public class OmsRealOrderExcelImportErrorVo {
     /**
      * 订单种类 1：正常，2：追加，3：储备，4：新品
      */
-    @ExcelProperty(value = "订单类型",index = 1)
+    @ExcelProperty(value = "订单种类",index = 1)
     @ApiModelProperty(value = "订单种类 1：正常，2：追加，3：储备，4：新品")
     private String orderClass;
 
