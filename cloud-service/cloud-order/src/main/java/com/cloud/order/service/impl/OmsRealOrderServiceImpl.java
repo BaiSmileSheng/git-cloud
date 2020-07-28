@@ -33,8 +33,10 @@ import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.CdFactoryStorehouseInfo;
 import com.cloud.system.domain.entity.CdMaterialExtendInfo;
+import com.cloud.system.domain.entity.SysDictData;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.enums.LifeCycleEnum;
+import com.cloud.system.feign.RemoteDictDataService;
 import com.cloud.system.feign.RemoteFactoryInfoService;
 import com.cloud.system.feign.RemoteFactoryStorehouseInfoService;
 import com.cloud.system.feign.RemoteMaterialExtendInfoService;
@@ -90,6 +92,9 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
 
     @Autowired
     private RemoteActOmsOrderMaterialOutService remoteActOmsOrderMaterialOutService;
+
+    @Autowired
+    private RemoteDictDataService remoteDictDataService;
 
     private final static String YYYY_MM_DD = "yyyy-MM-dd";//时间格式
 
@@ -525,7 +530,13 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             BeanUtils.copyProperties(omsRealOrder,omsRealOrderReq);
             StringBuffer errMsgBuffer = new StringBuffer();
             if(StringUtils.isBlank(omsRealOrder.getOrderType())){
-                errMsgBuffer.append("订单类型不能为空;");
+                errMsgBuffer.append("SAP订单类型不能为空;");
+            }
+            //校验订单类型
+            List<SysDictData> listSysDictData = remoteDictDataService.getType("sap_order_type");
+            List<String> dictValueS = listSysDictData.stream().map(m -> m.toString()).collect(Collectors.toList());
+            if(!dictValueS.contains(omsRealOrder.getOrderType())){
+                errMsgBuffer.append("此SAP订单类型不存在;");
             }
             String orderClassReq = omsRealOrder.getOrderClass();
             if(StringUtils.isNotBlank(orderClassReq)){
