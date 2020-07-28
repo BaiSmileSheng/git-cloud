@@ -1,5 +1,6 @@
 package com.cloud.system.service;
 
+import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.system.domain.entity.CdMouthRate;
 
@@ -11,5 +12,17 @@ import com.cloud.system.domain.entity.CdMouthRate;
  */
 public interface ICdMouthRateService extends BaseService<CdMouthRate> {
 
+    /**
+     * 新增
+     * @param cdMouthRate
+     * @return
+     */
+    R insertMouthRate(CdMouthRate cdMouthRate);
+    /**
+     *修改
+     * @param cdMouthRate
+     * @return
+     */
+    R updateMouthRate(CdMouthRate cdMouthRate);
 
 }
