@@ -534,7 +534,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             }
             //校验订单类型
             List<SysDictData> listSysDictData = remoteDictDataService.getType("sap_order_type");
-            List<String> dictValueS = listSysDictData.stream().map(m -> m.toString()).collect(Collectors.toList());
+            List<String> dictValueS = listSysDictData.stream().map(m -> m.getDictValue()).collect(Collectors.toList());
             if(!dictValueS.contains(omsRealOrder.getOrderType())){
                 errMsgBuffer.append("此SAP订单类型不存在;");
             }
