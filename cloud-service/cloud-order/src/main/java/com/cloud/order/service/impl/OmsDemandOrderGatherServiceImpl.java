@@ -13,6 +13,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
+import com.cloud.common.utils.RandomUtil;
 import com.cloud.order.domain.entity.*;
 import com.cloud.order.mapper.Oms2weeksDemandOrderMapper;
 import com.cloud.order.mapper.OmsDemandOrderGatherMapper;
@@ -128,9 +129,9 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
         //按天汇总oms_2weeks_demand_order
         R r = gather2WeeksDemandOrder();
         if (!r.isSuccess()) {
-            throw new BusinessException(rGather.getStr("msg")) ;
+            throw new BusinessException(r.getStr("msg")) ;
         }
-        List<Oms2weeksDemandOrder> list = rGather.getCollectData(new TypeReference<List<Oms2weeksDemandOrder>>() {});
+        List<Oms2weeksDemandOrder> list = r.getCollectData(new TypeReference<List<Oms2weeksDemandOrder>>() {});
         //插入新汇总
         if (list != null) {
             oms2weeksDemandOrderService.insertList(list);
@@ -188,7 +189,11 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
             if (DateUtil.dayOfWeek(deliveryDate)==1) {
                 weekNum = weekNum+1;
             }
-            String storeHouse = storehouseMap.get(StrUtil.concat(true, res.getProductFactoryCode(), res.getCustomerCode())).get("storehouseTo");
+            Map<String, String> storeHouseMap = storehouseMap.get(StrUtil.concat(true, res.getProductFactoryCode(), res.getCustomerCode()));
+            String storeHouse = new String();
+            if (storeHouseMap != null) {
+                storeHouse=storeHouseMap.get("storehouseTo");
+            }
             Oms2weeksDemandOrder oms2weeksDemandOrder = new Oms2weeksDemandOrder().builder()
                     .orderType("LA").orderFrom("1")
                     .productMaterialCode(res.getProductMaterialCode()).productMaterialDesc(res.getProductMaterialDesc())
@@ -259,11 +264,12 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
             Date deliveryDate = DateUtil.parse(res.getDeliveryDate());
             String deliveryYear = StrUtil.toString(DateUtil.year(deliveryDate));//交付日期年
             String deliveryWeek = StrUtil.split(keyCode, StrUtil.COMMA)[1];//交付日期周数
-            R seqresult = remoteSequeceService.selectSeq("demand_order_gather_seq", 4);
-            if(!seqresult.isSuccess()){
-                throw new BusinessException("查序列号失败");
-            }
-            String seq = seqresult.getStr("data");
+//            R seqresult = remoteSequeceService.selectSeq("demand_order_gather_seq", 4);
+//            if(!seqresult.isSuccess()){
+//                throw new BusinessException("查序列号失败");
+//            }
+//            String seq = seqresult.getStr("data");
+            String seq = RandomUtil.randomInt(6);
             //需求汇总单号
             String demandOrderCode = StrUtil.concat(true, "DM", DateUtils.dateTime(), seq);
             Date date = DateUtil.date();
