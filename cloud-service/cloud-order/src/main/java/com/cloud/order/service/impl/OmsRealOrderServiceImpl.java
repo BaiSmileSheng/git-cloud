@@ -155,7 +155,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         List<OmsRealOrder> auditResult = new ArrayList<>();
         if (!CollectionUtils.isEmpty(auditList)){
             auditResult =auditList.stream().map(excelImportAuditObjectDto -> {
-                OmsRealOrder omsRealOrder = BeanUtil.copyProperties(excelImportAuditObjectDto, OmsRealOrder.class);
+                OmsRealOrder omsRealOrder = BeanUtil.copyProperties(excelImportAuditObjectDto.getObject(), OmsRealOrder.class);
                 return omsRealOrder;
             }).collect(Collectors.toList());
         }
@@ -195,9 +195,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
      * @param orderFrom  内单或外单
      * @return
      */
-    @GlobalTransactional
-    @Override
-    public R importOmsRealOrder(List<OmsRealOrder> successResult, List<OmsRealOrder> auditResult, SysUser sysUser,String orderFrom) {
+    private R importOmsRealOrder(List<OmsRealOrder> successResult, List<OmsRealOrder> auditResult, SysUser sysUser,String orderFrom) {
         if(CollectionUtils.isEmpty(successResult)){
             return R.error("无需要插入的数据");
         }
