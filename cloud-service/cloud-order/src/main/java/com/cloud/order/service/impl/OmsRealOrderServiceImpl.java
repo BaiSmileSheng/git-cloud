@@ -406,6 +406,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 omsRealOrder.setOrderNum(internalOrderRes.getOrderNum());
                 omsRealOrder.setUnit(internalOrderRes.getUnit());
                 omsRealOrder.setDeliveryDate(internalOrderRes.getDeliveryDate());
+                omsRealOrder.setAuditStatus(RealOrderAduitStatusEnum.AUDIT_STATUS_WXSH.getCode());
                 CdFactoryStorehouseInfo cdFactoryStorehouseInfo = factoryStorehouseInfoMap.get(omsRealOrder.getCustomerCode()
                         + omsRealOrder.getProductFactoryCode());
                 if(null == cdFactoryStorehouseInfo){
