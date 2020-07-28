@@ -95,6 +95,7 @@ public class CdMaterialExtendInfoExportVo {
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     @ApiModelProperty(value = "建立日期")
+    @ExcelProperty(value = "建立日期",index = 6)
     private Date establishDate;
 
     /**
@@ -105,14 +106,14 @@ public class CdMaterialExtendInfoExportVo {
     /**
      * 创建者
      */
-    @ExcelProperty(value = "操作人",index = 6)
+    @ExcelProperty(value = "操作人",index = 7)
     private String createBy;
 
     /**
      * 创建时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @ExcelProperty(value = "操作时间",index = 7)
+    @ExcelProperty(value = "操作时间",index = 8)
     private Date createTime;
 
 }

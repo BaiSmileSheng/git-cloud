@@ -28,5 +28,6 @@ public class ExcelImportResult {
     public ExcelImportResult(List<ExcelImportErrObjectDto> errDtos){
         this.successDtos =new ArrayList<>();
         this.errDtos = errDtos;
+        this.otherDtos = new ArrayList<>();
     }
 }
