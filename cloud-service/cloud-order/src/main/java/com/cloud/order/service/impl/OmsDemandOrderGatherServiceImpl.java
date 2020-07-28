@@ -190,7 +190,7 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
             }
             String storeHouse = storehouseMap.get(StrUtil.concat(true, res.getProductFactoryCode(), res.getCustomerCode())).get("storehouseTo");
             Oms2weeksDemandOrder oms2weeksDemandOrder = new Oms2weeksDemandOrder().builder()
-                    .orderType("GN00").orderFrom("1")
+                    .orderType("LA").orderFrom("1")
                     .productMaterialCode(res.getProductMaterialCode()).productMaterialDesc(res.getProductMaterialDesc())
                     .productFactoryCode(res.getProductFactoryCode()).productFactoryDesc(res.getProductFactoryDesc())
                     .customerCode(res.getCustomerCode()).customerDesc(res.getCustomerDesc())
@@ -269,7 +269,7 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
             Date date = DateUtil.date();
             int thisWeek = NumberUtil.compare(flag , Week.FRIDAY.getValue())>0 ? DateUtil.weekOfYear(date) : DateUtil.weekOfYear(date) - 1;
             OmsDemandOrderGather omsDemandOrderGather = new OmsDemandOrderGather().builder()
-                    .demandOrderCode(demandOrderCode).orderType("GN00").orderFrom("1")
+                    .demandOrderCode(demandOrderCode).orderType("LA").orderFrom("1")
                     .productMaterialCode(res.getProductMaterialCode()).productMaterialDesc(res.getProductMaterialDesc())
                     .productFactoryCode(res.getProductFactoryCode()).productFactoryDesc(res.getProductFactoryDesc())
                     .customerCode(res.getCustomerCode()).customerDesc(res.getCustomerDesc())
