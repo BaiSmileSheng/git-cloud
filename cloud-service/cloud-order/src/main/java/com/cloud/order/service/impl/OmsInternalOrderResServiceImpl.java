@@ -20,7 +20,6 @@ import com.cloud.system.feign.RemoteBomService;
 import com.cloud.system.feign.RemoteFactoryInfoService;
 import com.cloud.system.feign.RemoteMaterialService;
 import com.fasterxml.jackson.core.type.TypeReference;
-import io.seata.spring.annotation.GlobalTransactional;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,7 +132,7 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
 	}
 
     @Override
-    @GlobalTransactional
+    @Transactional
     public R SAP800PRFindInternalOrderRes(Date startDate, Date endDate) {
         //删除原有的PR数据
         deleteByMarker("PR");
