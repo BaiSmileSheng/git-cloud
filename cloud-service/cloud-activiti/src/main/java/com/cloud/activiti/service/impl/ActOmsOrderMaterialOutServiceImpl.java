@@ -12,7 +12,6 @@ import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
 import com.cloud.activiti.domain.entity.vo.OmsOrderMaterialOutVo;
 import com.cloud.activiti.mail.MailService;
 import com.cloud.activiti.service.IActOmsOrderMaterialOutService;
-import com.cloud.activiti.service.IActReProcdefService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
 import com.cloud.common.constant.EmailConstants;
@@ -115,7 +114,6 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
      * 物料下市审核 真单审核开启流程
      * @return 成功或失败
      */
-    @Transactional
     @Override
     public R addSave(OmsOrderMaterialOutVo omsOrderMaterialOutVo) {
         List<OmsOrderMaterialOutVo> list = omsOrderMaterialOutVo.getOmsOrderMaterialOutVoList();

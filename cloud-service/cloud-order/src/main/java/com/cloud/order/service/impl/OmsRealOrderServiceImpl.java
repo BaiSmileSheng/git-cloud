@@ -5,6 +5,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.druid.util.Utils;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.domain.entity.vo.OmsOrderMaterialOutVo;
@@ -125,6 +126,10 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             factoryScopesList = Arrays.asList(DataScopeUtil.getUserFactoryScopes(userId).split(","));
         }
         OmsRealOrder omsRealOrderRes = omsRealOrderMapper.selectByPrimaryKey(omsRealOrder);
+        //修改交付日期时必须加备注
+        if(!omsRealOrder.getDeliveryDate().equals(omsRealOrderRes.getDeliveryDate()) && StringUtils.isBlank(omsRealOrder.getRemark())){
+            throw new BusinessException("请填写备注");
+        }
         if(!RealOrderDataSourceEnum.DATA_SOURCE_1.getCode().equals(omsRealOrderRes.getDataSource())){
             logger.error("修改保存真单异常 id:{},res:{}",omsRealOrder.getId(),JSONObject.toJSON(omsRealOrderRes));
             throw new BusinessException("非人工导入数据不可修改");
@@ -216,12 +221,10 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         logger.info("导入真单开启审批流开始");
         //key 工厂编号 ,客户编号 物料号,交货日期,订单类型
         if(!CollectionUtils.isEmpty(auditResult)){
-            Map<String,OmsRealOrder> auditResultMap = auditResult.stream().collect(Collectors.toMap(
-                    omsRealOrder -> omsRealOrder.getProductFactoryCode() + omsRealOrder.getCustomerCode() + omsRealOrder.getProductMaterialCode()
-                            + omsRealOrder.getDeliveryDate() + omsRealOrder.getOrderClass(),
-                    cdProductStock -> cdProductStock,(key1,key2) ->key2));
-
-            Map<String,OmsRealOrder> successResultMap = successResult.stream().collect(Collectors.toMap(
+            //查id
+            List<OmsRealOrder> listRes = omsRealOrderMapper.selectForIndexes(auditResult);
+            //去重
+            Map<String,OmsRealOrder> auditResultMap = listRes.stream().collect(Collectors.toMap(
                     omsRealOrder -> omsRealOrder.getProductFactoryCode() + omsRealOrder.getCustomerCode() + omsRealOrder.getProductMaterialCode()
                             + omsRealOrder.getDeliveryDate() + omsRealOrder.getOrderClass(),
                     cdProductStock -> cdProductStock,(key1,key2) ->key2));
@@ -229,7 +232,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             OmsOrderMaterialOutVo auditResultReq = new OmsOrderMaterialOutVo();
             List<OmsOrderMaterialOutVo> omsOrderMaterialOutVoList = new ArrayList<>();
             auditResultMap.keySet().forEach(code -> {
-                OmsRealOrder omsRealOrder = successResultMap.get(code);
+                OmsRealOrder omsRealOrder = auditResultMap.get(code);
                 OmsOrderMaterialOutVo omsOrderMaterialOutVo = new OmsOrderMaterialOutVo();
                 omsOrderMaterialOutVo.setLoginId(sysUser.getUserId());
                 omsOrderMaterialOutVo.setCreateBy(sysUser.getLoginName());
