@@ -6,6 +6,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.EasyExcel;
@@ -277,6 +278,18 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         List<OmsDemandOrderGatherEdit> listNeedAudti = CollUtil.newArrayList();
         Date date = DateUtil.date();
 
+        //获取不重复的物料号和工厂Map
+        List<Dict> maps = list.stream().map(s -> new Dict().set("productFactoryCode",s.getProductFactoryCode())
+                .set("customerCode",s.getCustomerCode())).distinct().collect(Collectors.toList());
+        //获取库位
+        R rStoreHouse = remoteFactoryStorehouseInfoService.selectStorehouseToMap(maps);
+        if(!rStoreHouse.isSuccess()){
+            throw new BusinessException("获取接收库位失败！");
+        }
+        Map<String, Map<String, String>> storehouseMap = rStoreHouse.getCollectData(new TypeReference<Map<String, Map<String, String>>>() {});
+        if (MapUtil.isEmpty(storehouseMap)) {
+            throw new BusinessException("获取接收库位失败！");
+        }
         for(OmsDemandOrderGatherEdit demandOrderGatherEdit:list){
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
@@ -374,26 +387,16 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 continue;
             }
             //判断地点是否存在
-            CdFactoryStorehouseInfo cdFactoryStorehouseInfo = new CdFactoryStorehouseInfo()
-                    .builder().productFactoryCode(demandOrderGatherEdit.getProductFactoryCode())
-                    .customerCode(demandOrderGatherEdit.getCustomerCode()).build();
-            R rFactoryStore=remoteFactoryStorehouseInfoService.findOneByExample(cdFactoryStorehouseInfo);
-            if (!rFactoryStore.isSuccess()) {
+            Map<String, String> storeHouseMap = storehouseMap.get(StrUtil.concat(true, demandOrderGatherEdit.getProductFactoryCode(), demandOrderGatherEdit.getCustomerCode()));
+            if (storeHouseMap == null) {
                 errObjectDto.setObject(demandOrderGatherEdit);
-                errObjectDto.setErrMsg(StrUtil.format("工厂：{}，客户编码{}无工厂库位信息！",demandOrderGatherEdit.getProductMaterialCode()));
+                errObjectDto.setErrMsg(StrUtil.format("工厂：{}，客户编码{}无工厂库位信息！",demandOrderGatherEdit.getProductFactoryCode(),demandOrderGatherEdit.getCustomerCode()));
                 errDtos.add(errObjectDto);
                 continue;
             }
-            cdFactoryStorehouseInfo = rFactoryStore.getData(CdFactoryStorehouseInfo.class);
-            if (StrUtil.isEmpty(cdFactoryStorehouseInfo.getStorehouseTo())) {
+            if (!StrUtil.equals(demandOrderGatherEdit.getPlace(), storeHouseMap.get("storehouseTo"))) {
                 errObjectDto.setObject(demandOrderGatherEdit);
-                errObjectDto.setErrMsg(StrUtil.format("工厂：{}，客户编码{}无工厂库位信息！",demandOrderGatherEdit.getProductMaterialCode()));
-                errDtos.add(errObjectDto);
-                continue;
-            }
-            if (!StrUtil.equals(demandOrderGatherEdit.getPlace(), cdFactoryStorehouseInfo.getStorehouseTo())) {
-                errObjectDto.setObject(demandOrderGatherEdit);
-                errObjectDto.setErrMsg(StrUtil.format("对应地点应为：{}",cdFactoryStorehouseInfo.getStorehouseTo()));
+                errObjectDto.setErrMsg(StrUtil.format("对应地点应为：{}",storeHouseMap.get("storehouseTo")));
                 errDtos.add(errObjectDto);
                 continue;
             }
