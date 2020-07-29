@@ -173,4 +173,15 @@
         create_by = VALUES(create_by),
         update_time = now()
     </insert>
+    <select id="selectForIndexes" parameterType="java.util.List" resultMap="OmsRealOrderResult">
+        <include refid="selectOmsRealOrderVo"/>
+        WHERE
+        <foreach collection="list" index="index" item="item" open="(" close=")" separator="or">
+            ( customer_code=#{item.customerCode}
+            and product_factory_code=#{item.productFactoryCode}
+            and product_material_code=#{item.productMaterialCode}
+            and delivery_date = #{item.deliveryDate}
+            and order_class = #{item.orderClass})
+        </foreach>
+    </select>
 </mapper>
