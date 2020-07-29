@@ -201,7 +201,7 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
                     .customerCode(res.getCustomerCode()).customerDesc(res.getCustomerDesc())
                     .mrpRange(res.getMrpRange()).bomVersion(res.getVersion()).purchaseGroupCode(res.getPurchaseGroupCode())
                     .place(storeHouse).deliveryDate(deliveryDate).year(deliveryYear).unit(res.getUnit())
-                    .weeks(Integer.toString(weekNum)).orderNum(orderNumTotal.longValue()).version(StrUtil.concat(true,DateUtil.now(),Integer.toString(weekNum))).build();
+                    .weeks(Integer.toString(weekNum)).orderNum(orderNumTotal.longValue()).version(StrUtil.concat(true,DateUtils.dateTime(),Integer.toString(weekNum))).build();
             oms2weeksDemandOrder.setCreateBy("定时任务");
             oms2weeksDemandOrder.setCreateTime(date);
             oms2weeksDemandOrder.setDelFlag("0");

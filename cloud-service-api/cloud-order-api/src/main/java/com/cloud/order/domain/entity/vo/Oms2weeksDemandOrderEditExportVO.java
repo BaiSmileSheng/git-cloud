@@ -51,7 +51,7 @@ public class Oms2weeksDemandOrderEditExportVO  {
      * 交付日期
      */
     @DateTimeFormat("yyyy-MM-dd")
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
     private Date deliveryDate;
 
     /**
