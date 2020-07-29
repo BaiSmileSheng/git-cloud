@@ -32,15 +32,6 @@ public interface IOmsRealOrderService extends BaseService<OmsRealOrder> {
      * @throws IOException
      */
     R importRealOrderFile(MultipartFile file, String orderFrom,SysUser sysUser) throws IOException;
-    /**
-     * 导入真单
-     * @param successResult  需要导入的数据
-     * @param auditResult  需要审核的数据
-     * @param sysUser  用户信息
-     * @param orderFrom  内单或外单
-     * @return
-     */
-    R importOmsRealOrder(List<OmsRealOrder> successResult,List<OmsRealOrder> auditResult,SysUser sysUser,String orderFrom);
 
     /**
      * 定时任务每天在获取到PO信息后 进行需求汇总

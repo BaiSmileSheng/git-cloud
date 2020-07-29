@@ -22,4 +22,11 @@ public interface OmsRealOrderMapper extends BaseMapper<OmsRealOrder>{
      */
     int batchInsetOrUpdate(List<OmsRealOrder> omsRealOrderList);
 
+    /**
+     * 根据唯一索引查数据
+     * @param omsRealOrderList
+     * @return
+     */
+    List<OmsRealOrder> selectForIndexes(List<OmsRealOrder> omsRealOrderList);
+
 }
