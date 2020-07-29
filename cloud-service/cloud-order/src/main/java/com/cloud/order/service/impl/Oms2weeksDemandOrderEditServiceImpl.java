@@ -464,10 +464,12 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
      * @return
      */
     @Override
-    public R deleteWithLimit(String ids) {
+    public R deleteWithLimit(String ids,Oms2weeksDemandOrderEdit oms2weeksDemandOrderEditVo) {
         if (StrUtil.isEmpty(ids)) {
             Example example = new Example(Oms2weeksDemandOrderEdit.class);
-            example.and().andEqualTo("status", DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode())
+            Example.Criteria criteria = example.createCriteria();
+            listCondition(oms2weeksDemandOrderEditVo,criteria);
+            criteria.andEqualTo("status", DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode())
                     .andNotEqualTo("auditStatus", DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHZ.getCode());
             List<Oms2weeksDemandOrderEdit> oms2weeksDemandOrderEditList = selectByExample(example);
             if (CollectionUtil.isEmpty(oms2weeksDemandOrderEditList)) {
