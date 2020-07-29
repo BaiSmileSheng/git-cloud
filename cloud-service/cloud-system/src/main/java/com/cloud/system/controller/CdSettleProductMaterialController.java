@@ -183,7 +183,7 @@ public class CdSettleProductMaterialController extends BaseController {
         //校验入参
         ValidatorUtils.validateEntity(cdSettleProductMaterial);
         SysUser sysUser = getUserInfo(SysUser.class);
-        cdSettleProductMaterial.setCreateBy(sysUser.getLoginName());
+        cdSettleProductMaterial.setUpdateBy(sysUser.getLoginName());
         R r = cdSettleProductMaterialService.updateProductMaterial(cdSettleProductMaterial);
         return r;
     }
