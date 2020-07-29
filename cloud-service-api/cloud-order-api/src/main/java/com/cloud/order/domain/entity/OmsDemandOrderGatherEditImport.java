@@ -4,6 +4,7 @@ import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.order.converter.OrderFromConverter;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -101,6 +102,7 @@ public class OmsDemandOrderGatherEditImport{
     @ExcelProperty(value = "交付日期")
     @DateTimeFormat("yyyy-MM-dd")
     @NotNull
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
     private Date deliveryDate;
 
     /**

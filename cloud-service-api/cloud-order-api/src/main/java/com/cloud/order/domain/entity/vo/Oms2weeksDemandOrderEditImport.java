@@ -3,6 +3,7 @@ package com.cloud.order.domain.entity.vo;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -106,6 +107,7 @@ public class Oms2weeksDemandOrderEditImport {
     @ExcelProperty(value = "交付日期")
     @DateTimeFormat("yyyy-MM-dd")
     @NotNull
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
     private Date deliveryDate;
 
     /**
