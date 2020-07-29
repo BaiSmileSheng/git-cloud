@@ -177,8 +177,8 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
     @ApiOperation(value = "删除T+1-T+2周需求导入 ", response = R.class)
     @ApiParam(name = "ids", value = "需删除数据的id")
     @HasPermissions("order:oms2weeksDemandOrderEdit:remove")
-    public R remove(@RequestBody String ids) {
-        return oms2weeksDemandOrderEditService.deleteWithLimit(ids);
+    public R remove(@RequestBody @ApiIgnore Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit) {
+        return oms2weeksDemandOrderEditService.deleteWithLimit(oms2weeksDemandOrderEdit.getIds(),oms2weeksDemandOrderEdit);
     }
 
     /**
@@ -189,8 +189,8 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
     @ApiOperation(value = "删除T+1-T+2周需求导入已下达SAP） ", response = R.class)
     @ApiParam(name = "ids", value = "需删除数据的id")
     @HasPermissions("order:oms2weeksDemandOrderEdit:removeWithXDSAP")
-    public R removeWithXDSAP(@RequestBody(required = false) String ids) {
-        return oms2weeksDemandOrderEditService.deleteWithLimit(ids);
+    public R removeWithXDSAP(@RequestBody @ApiIgnore Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit) {
+        return oms2weeksDemandOrderEditService.deleteWithLimit(oms2weeksDemandOrderEdit.getIds(),oms2weeksDemandOrderEdit);
     }
 
 

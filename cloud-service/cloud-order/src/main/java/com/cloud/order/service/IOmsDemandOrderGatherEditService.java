@@ -28,7 +28,7 @@ public interface IOmsDemandOrderGatherEditService extends BaseService<OmsDemandO
      * @param ids
      * @return
      */
-    R deleteWithLimit(String ids);
+    R deleteWithLimit(String ids,OmsDemandOrderGatherEdit omsDemandOrderGatherEdit);
 
     /**
      * 确认下达

@@ -22,10 +22,7 @@ import com.cloud.common.easyexcel.DTO.ExcelImportSucObjectDto;
 import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
-import com.cloud.order.domain.entity.OmsDemandOrderGatherEdit;
-import com.cloud.order.domain.entity.OmsDemandOrderGatherEditHis;
-import com.cloud.order.domain.entity.OmsDemandOrderGatherEditImport;
-import com.cloud.order.domain.entity.WeekAndNumGatherDTO;
+import com.cloud.order.domain.entity.*;
 import com.cloud.order.domain.entity.vo.OmsDemandOrderGatherEditExport;
 import com.cloud.order.enums.DemandOrderGatherEditAuditStatusEnum;
 import com.cloud.order.enums.DemandOrderGatherEditStatusEnum;
@@ -122,18 +119,29 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
      * @return
      */
     @Override
-    public R deleteWithLimit(String ids) {
+    public R deleteWithLimit(String ids,OmsDemandOrderGatherEdit omsDemandOrderGatherEditVo) {
         if (StrUtil.isEmpty(ids)) {
-            return R.error("参数为空！");
-        }
-        List<String> list = CollUtil.newArrayList(ids.split(StrUtil.COMMA));
-        for (String id : list) {
-            OmsDemandOrderGatherEdit omsDemandOrderGatherEdit = selectByPrimaryKey(Long.valueOf(id));
-            if (!StrUtil.equals(omsDemandOrderGatherEdit.getStatus(),
-                    DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode())||
-             StrUtil.equals(omsDemandOrderGatherEdit.getAuditStatus(),
-                            DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHZ.getCode())) {
-                return R.error(StrUtil.format("此状态数据不允许删除！需求订单号：{}",omsDemandOrderGatherEdit.getDemandOrderCode()));
+            Example example = new Example(Oms2weeksDemandOrderEdit.class);
+            Example.Criteria criteria = example.createCriteria();
+            listCondition(omsDemandOrderGatherEditVo,criteria);
+            criteria.andEqualTo("status", DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode())
+                    .andNotEqualTo("auditStatus", DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHZ.getCode());
+            List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList = selectByExample(example);
+            if (CollectionUtil.isEmpty(omsDemandOrderGatherEditList)) {
+                return R.error("无可删除数据！");
+            }
+            List idList = omsDemandOrderGatherEditList.stream().map(OmsDemandOrderGatherEdit::getId).collect(Collectors.toList());
+            ids = CollectionUtil.join(idList, StrUtil.COMMA);
+        }else{
+            List<String> list = CollUtil.newArrayList(ids.split(StrUtil.COMMA));
+            for (String id : list) {
+                OmsDemandOrderGatherEdit omsDemandOrderGatherEdit = selectByPrimaryKey(Long.valueOf(id));
+                if (!StrUtil.equals(omsDemandOrderGatherEdit.getStatus(),
+                        DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode())||
+                        StrUtil.equals(omsDemandOrderGatherEdit.getAuditStatus(),
+                                DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHZ.getCode())) {
+                    return R.error(StrUtil.format("此状态数据不允许删除！需求订单号：{}",omsDemandOrderGatherEdit.getDemandOrderCode()));
+                }
             }
         }
         deleteByIds(ids);
