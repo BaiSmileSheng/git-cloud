@@ -1,17 +1,17 @@
 package com.cloud.activiti.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.consts.ActivitiConstant;
 import com.cloud.activiti.consts.ActivitiProDefKeyConstants;
 import com.cloud.activiti.consts.ActivitiProTitleConstants;
 import com.cloud.activiti.consts.ActivitiTableNameConstants;
-import com.cloud.activiti.domain.ActReProcdef;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
+import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
 import com.cloud.activiti.domain.entity.vo.OmsOrderMaterialOutVo;
 import com.cloud.activiti.mail.MailService;
 import com.cloud.activiti.service.IActOmsOrderMaterialOutService;
-import com.cloud.activiti.service.IActReProcdefService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
 import com.cloud.common.constant.EmailConstants;
@@ -33,14 +33,15 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
+import org.activiti.engine.RepositoryService;
+import org.activiti.engine.repository.ProcessDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -56,8 +57,6 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
     @Autowired
     private IBizBusinessService bizBusinessService;
     @Autowired
-    private IActReProcdefService actReProcdefService;
-    @Autowired
     private IActTaskService actTaskService;
     @Autowired
     private RemoteOmsRealOrderService remoteOmsRealOrderService;
@@ -68,6 +67,9 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
 
     @Autowired
     private RemoteUserService remoteUserService;
+
+    @Autowired
+    private RepositoryService repositoryService;
 
     @Autowired
     private MailService mailService;
@@ -115,21 +117,12 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
     @Override
     public R addSave(OmsOrderMaterialOutVo omsOrderMaterialOutVo) {
         List<OmsOrderMaterialOutVo> list = omsOrderMaterialOutVo.getOmsOrderMaterialOutVoList();
-        //查流程定义  procDefId procName
-        ActReProcdef actReProcdef = new ActReProcdef();
-        actReProcdef.setKey(ActivitiProDefKeyConstants.ACTIVITI_PRO_DEF_KEY_MATERIAL_OUT_TEST);
-        List<ActReProcdef> actReProcdefList = actReProcdefService.selectList(actReProcdef);
-        if(CollectionUtils.isEmpty(actReProcdefList)){
-            throw new BusinessException("获取流程定义为空,请先定义流程");
-        }
-        Collections.sort(actReProcdefList, Comparator.comparing(ActReProcdef::getVersion).reversed());
-        ActReProcdef actReProcdefRes = actReProcdefList.get(0);
         //key工厂,value用户
         Map<String,List<SysUserVo>> map = new HashMap<>();
         if(!CollectionUtils.isEmpty(list)){
             list.forEach(omsOrderMaterialOutVoReq ->{
                 //1.构造下市审核流程信息
-                BizBusiness business = initBusiness(omsOrderMaterialOutVoReq,actReProcdefRes);
+                BizBusiness business = initBusiness(omsOrderMaterialOutVoReq);
                 //新增下市审核流程
                 bizBusinessService.insertBizBusiness(business);
                 Map<String, Object> variables = Maps.newHashMap();
@@ -185,13 +178,21 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
      * @param omsOrderMaterialOutVo 审核信息
      * @return
      */
-    private BizBusiness initBusiness(OmsOrderMaterialOutVo omsOrderMaterialOutVo,ActReProcdef actReProcdefRes) {
+    private BizBusiness initBusiness(OmsOrderMaterialOutVo omsOrderMaterialOutVo) {
+
+        //构造质量索赔流程信息
+        R keyMap = getByKey(ActivitiProDefKeyConstants.ACTIVITI_PRO_DEF_KEY_MATERIAL_OUT_TEST);
+        if (!keyMap.isSuccess()) {
+            logger.error("根据Key获取最新版流程实例失败："+keyMap.get("msg"));
+            throw new BusinessException("根据Key获取最新版流程实例失败!");
+        }
+        ProcessDefinitionAct processDefinitionAct = keyMap.getData(ProcessDefinitionAct.class);
         BizBusiness business = new BizBusiness();
         business.setOrderNo(omsOrderMaterialOutVo.getOrderCode());
         business.setTableId(omsOrderMaterialOutVo.getId().toString());
-        business.setProcDefId(actReProcdefRes.getId());
         business.setTitle(ActivitiProTitleConstants.ACTIVITI_PRO_TITLE_SMATERIAL_OUT_TEST);
-        business.setProcName(actReProcdefRes.getName());
+        business.setProcDefId(processDefinitionAct.getId());
+        business.setProcName(processDefinitionAct.getName());
         business.setUserId(omsOrderMaterialOutVo.getLoginId());
         business.setApplyer(omsOrderMaterialOutVo.getCreateBy());
         business.setTableName(omsOrderMaterialOutVo.getTableName());
@@ -200,6 +201,33 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
         business.setResult(ActivitiConstant.RESULT_DEALING);
         business.setApplyTime(new Date());
         return business;
+    }
+
+    /**
+     * Description:  根据Key查询最新版本流程
+     * Param: [key]
+     * return: com.cloud.common.core.domain.R
+     */
+    private R getByKey(String key) {
+        // 使用repositoryService查询单个流程实例
+        ProcessDefinition processDefinition = repositoryService
+                .createProcessDefinitionQuery().processDefinitionKey(key).latestVersion().singleResult();
+        if (BeanUtil.isEmpty(processDefinition)) {
+            logger.error("根据Key值查询流程实例失败!");
+            return R.error("根据Key值查询流程实例失败！");
+        }
+        ProcessDefinitionAct processDefinitionAct =
+                ProcessDefinitionAct.builder()
+                        .id(processDefinition.getId())
+                        .name(processDefinition.getName())
+                        .category(processDefinition.getCategory())
+                        .deploymentId(processDefinition.getDeploymentId())
+                        .description(processDefinition.getDescription())
+                        .diagramResourceName(processDefinition.getDiagramResourceName())
+                        .resourceName(processDefinition.getResourceName())
+                        .tenantId(processDefinition.getTenantId())
+                        .version(processDefinition.getVersion()).build();
+        return R.data(processDefinitionAct);
     }
 
     /**
