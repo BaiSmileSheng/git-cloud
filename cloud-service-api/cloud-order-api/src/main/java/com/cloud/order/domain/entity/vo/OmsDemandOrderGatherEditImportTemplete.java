@@ -2,6 +2,7 @@ package com.cloud.order.domain.entity.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.util.Date;
@@ -78,6 +79,7 @@ public class OmsDemandOrderGatherEditImportTemplete {
      * 交付日期
      */
     @ExcelProperty(value = "交付日期")
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
     private Date deliveryDate;
 
     /**

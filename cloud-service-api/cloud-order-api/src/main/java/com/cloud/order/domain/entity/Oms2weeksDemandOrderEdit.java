@@ -154,7 +154,7 @@ public class Oms2weeksDemandOrderEdit extends BaseEntity {
      */
     @ExcelProperty(value = "交付日期",index = 10)
     @DateTimeFormat("yyyy-MM-dd")
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
     @ApiModelProperty(value = "交付日期")
     private Date deliveryDate;
 

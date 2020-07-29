@@ -2,6 +2,7 @@ package com.cloud.order.domain.entity.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -10,7 +11,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Transient;
-import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 import java.util.Date;
 @ExcelIgnoreUnannotated
@@ -86,6 +86,7 @@ public class OmsRawMaterialFeedbackVo {
      */
     @DateTimeFormat("yyyy-MM-dd")
     @ApiModelProperty(value = "交付日期")
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
     private Date deliveryDate;
 
     /**
