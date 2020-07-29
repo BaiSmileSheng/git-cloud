@@ -9,9 +9,11 @@ import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.service.ICdMaterialInfoService;
 import io.swagger.annotations.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
@@ -173,4 +175,30 @@ public class CdMaterialInfoController extends BaseController {
         return cdMaterialInfoService.selectListByMaterialList(list);
     }
 
+    /**
+     * 按物料号模糊查询物料信息 分页
+     */
+    @GetMapping("listByMaterialCode")
+    @ApiOperation(value = "按物料号模糊查询物料信息 分页", response = CdMaterialInfo.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required =true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "materialCode", value = "物料号", required = false,paramType = "query", dataType = "String")
+    })
+    public R listByMaterialCode(@RequestParam(value = "materialCode",required = false) String materialCode) {
+        startPage();
+        R result = cdMaterialInfoService.selectByMaterialCode(materialCode);
+        return result;
+    }
+
+    /**
+     * 按物料号查物料数据
+     * @param list
+     * @return
+     */
+    @PostMapping("selectListByMaterialCodeList")
+    @ApiOperation(value = "根据成品专用号、生产工厂、物料类型查询 ", response = R.class)
+    public R selectListByMaterialCodeList(@RequestBody List<Dict> list){
+        return cdMaterialInfoService.selectListByMaterialCodeList(list);
+    }
 }

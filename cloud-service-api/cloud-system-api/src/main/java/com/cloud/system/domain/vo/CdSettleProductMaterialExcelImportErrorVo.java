@@ -69,9 +69,14 @@ public class CdSettleProductMaterialExcelImportErrorVo {
     private String outsourceWay;
 
     /**
+     * 备注
+     */
+    @ExcelProperty(value = "备注",index = 3)
+    private String remark;
+    /**
      * 错误信息
      */
-    @ExcelProperty(value = "错误信息",index = 3)
+    @ExcelProperty(value = "错误信息",index = 4)
     @ApiModelProperty(value = "错误信息")
     private String errorMessage;
     /**
