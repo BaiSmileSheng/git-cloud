@@ -20,6 +20,7 @@ import com.cloud.system.feign.RemoteBomService;
 import com.cloud.system.feign.RemoteFactoryInfoService;
 import com.cloud.system.feign.RemoteMaterialService;
 import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,7 @@ import java.util.stream.Collectors;
  * @author ltq
  * @date 2020-06-05
  */
+@Slf4j
 @Service
 public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalOrderRes> implements IOmsInternalOrderResService {
 
@@ -134,8 +136,12 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
     @Override
     @Transactional
     public R SAP800PRFindInternalOrderRes(Date startDate, Date endDate) {
+	    log.info(StrUtil.format("=====================周五或周一获取PR信息参数：开始日期：{} 结束日期：{}===================",
+                DateUtil.formatDate(startDate),DateUtil.formatDate(endDate)));
+	    log.info("=====================周五或周一获取PR信息：开始删除原有的PR数据 start===================");
         //删除原有的PR数据
         deleteByMarker("PR");
+        log.info("=====================周五或周一获取PR信息：开始删除原有的PR数据 end===================");
         //从SAP800获取PR数据
         R prR = orderFromSap800InterfaceService.queryDemandPRFromSap800(startDate,endDate);
         if (!prR.isSuccess()) {
@@ -146,7 +152,9 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
             return R.error("未取到PR数据！");
         }
         //插入
+        log.info("=====================周五或周一获取PR信息：开始插入 ===================");
         R rInsert = insert800PR(list);
+        log.info("=====================周五或周一获取PR信息：插入成功 ===================");
         return rInsert;
     }
 
