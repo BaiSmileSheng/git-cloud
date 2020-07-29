@@ -1,6 +1,7 @@
 package com.cloud.order.service.impl;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
@@ -69,6 +70,7 @@ public class OrderFromSap800InterfaceServiceImpl implements IOrderFromSap800Inte
             if (SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(outParam.getString("FLAG"))) {
                 //从输出table中获取每一行数据
                 if (outTableOutput != null && outTableOutput.getNumRows() > 0) {
+                    log.info(StrUtil.format("===================获取SAP PR数据{}条========================",outTableOutput.getNumRows()));
                     //循环取table行数据
                     for (int i = 0; i < outTableOutput.getNumRows(); i++) {
                         //设置指针位置
