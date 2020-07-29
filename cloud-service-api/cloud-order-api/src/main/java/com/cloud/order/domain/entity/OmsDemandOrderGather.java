@@ -131,7 +131,7 @@ public class OmsDemandOrderGather extends BaseEntity {
      */
     @ExcelProperty(value = "交付日期",index = 9)
     @DateTimeFormat("yyyy-MM-dd")
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
     @ApiModelProperty(value = "交付日期")
     private Date deliveryDate;
 

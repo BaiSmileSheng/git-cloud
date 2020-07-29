@@ -2986,7 +2986,7 @@
             },
             {
               "name": "raw_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "原材料描述",
               "defaultValue": "''"
@@ -3180,7 +3180,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "''"
@@ -3429,7 +3429,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "''"
@@ -3676,7 +3676,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "''"
@@ -3958,7 +3958,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "''"
@@ -4225,7 +4225,7 @@
             },
             {
               "name": "raw_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "原材料描述",
               "defaultValue": "''"
@@ -4779,7 +4779,7 @@
             },
             {
               "name": "material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "原材料描述",
               "defaultValue": "''"
@@ -4976,7 +4976,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "",
@@ -6055,7 +6055,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "",
@@ -6231,7 +6231,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "''"
@@ -6459,7 +6459,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "''"
@@ -6695,7 +6695,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "''"
@@ -6973,7 +6973,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "''"

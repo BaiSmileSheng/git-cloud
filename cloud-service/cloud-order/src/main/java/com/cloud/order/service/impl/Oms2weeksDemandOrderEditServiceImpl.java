@@ -6,6 +6,8 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Dict;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.EasyExcel;
 import com.cloud.activiti.domain.entity.vo.OmsOrderMaterialOutVo;
@@ -21,6 +23,7 @@ import com.cloud.common.easyexcel.DTO.ExcelImportSucObjectDto;
 import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
+import com.cloud.common.utils.RandomUtil;
 import com.cloud.order.domain.entity.Oms2weeksDemandOrder;
 import com.cloud.order.domain.entity.Oms2weeksDemandOrderEdit;
 import com.cloud.order.domain.entity.Oms2weeksDemandOrderEditHis;
@@ -42,6 +45,7 @@ import com.cloud.system.enums.MaterialTypeEnum;
 import com.cloud.system.feign.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sap.conn.jco.*;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +104,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
      */
     @Override
     @SneakyThrows
-    @Transactional
+    @GlobalTransactional
     public R import2weeksDemandEdit(MultipartFile file, SysUser sysUser) {
         EasyWithErrorExcelListener easyExcelListener = new EasyWithErrorExcelListener(oms2weeksDemandOrderEditImportService, Oms2weeksDemandOrderEditImport.class);
         EasyExcel.read(file.getInputStream(),Oms2weeksDemandOrderEditImport.class,easyExcelListener).sheet().doRead();
@@ -279,6 +283,18 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
         List<Oms2weeksDemandOrderEdit> listNeedAudti = CollUtil.newArrayList();
         Date date = DateUtil.date();
 
+        //获取不重复的物料号和工厂Map
+        List<Dict> maps = list.stream().map(s -> new Dict().set("productFactoryCode",s.getProductFactoryCode())
+                .set("customerCode",s.getCustomerCode())).distinct().collect(Collectors.toList());
+        //获取库位
+        R rStoreHouse = remoteFactoryStorehouseInfoService.selectStorehouseToMap(maps);
+        if(!rStoreHouse.isSuccess()){
+            throw new BusinessException("获取接收库位失败！");
+        }
+        Map<String, Map<String, String>> storehouseMap = rStoreHouse.getCollectData(new TypeReference<Map<String, Map<String, String>>>() {});
+        if (MapUtil.isEmpty(storehouseMap)) {
+            throw new BusinessException("获取接收库位失败！");
+        }
         for(Oms2weeksDemandOrderEdit weeksDemandOrderEdit:list){
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
@@ -345,12 +361,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             weeksDemandOrderEdit.setPurchaseGroupCode(cdMaterialInfo.getPurchaseGroupCode());
             weeksDemandOrderEdit.setUnit(cdMaterialInfo.getPrimaryUom());
             //需求订单号
-            R seqresult = remoteSequeceService.selectSeq("2weeks_demand_order_seq", 4);
-            if(!seqresult.isSuccess()){
-                throw new BusinessException("查序列号失败");
-            }
-            String seq = seqresult.getStr("data");
-            String demandOrderCode = StrUtil.concat(true, "DM", DateUtils.dateTime(), seq);
+            String demandOrderCode = StrUtil.concat(true, "DM", DateUtils.dateTime(), RandomUtil.randomInt(6));
             weeksDemandOrderEdit.setDemandOrderCode(demandOrderCode);
             //订单来源
             weeksDemandOrderEdit.setOrderFrom(OrderFromEnum.getCodeByMsg(weeksDemandOrderEdit.getOrderFrom()));
@@ -376,26 +387,16 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 continue;
             }
             //判断地点是否存在
-            CdFactoryStorehouseInfo cdFactoryStorehouseInfo = new CdFactoryStorehouseInfo()
-                    .builder().productFactoryCode(weeksDemandOrderEdit.getProductFactoryCode())
-                    .customerCode(weeksDemandOrderEdit.getCustomerCode()).build();
-            R rFactoryStore=remoteFactoryStorehouseInfoService.findOneByExample(cdFactoryStorehouseInfo);
-            if (!rFactoryStore.isSuccess()) {
+            Map<String, String> storeHouseMap = storehouseMap.get(StrUtil.concat(true, weeksDemandOrderEdit.getProductFactoryCode(), weeksDemandOrderEdit.getCustomerCode()));
+            if (storeHouseMap == null) {
                 errObjectDto.setObject(weeksDemandOrderEdit);
-                errObjectDto.setErrMsg(StrUtil.format("工厂：{}，客户编码{}无工厂库位信息！",weeksDemandOrderEdit.getProductMaterialCode()));
+                errObjectDto.setErrMsg(StrUtil.format("工厂：{}，客户编码{}无工厂库位信息！",weeksDemandOrderEdit.getProductFactoryCode(),weeksDemandOrderEdit.getCustomerCode()));
                 errDtos.add(errObjectDto);
                 continue;
             }
-            cdFactoryStorehouseInfo = rFactoryStore.getData(CdFactoryStorehouseInfo.class);
-            if (StrUtil.isEmpty(cdFactoryStorehouseInfo.getStorehouseTo())) {
+            if (!StrUtil.equals(weeksDemandOrderEdit.getPlace(), storeHouseMap.get("storehouseTo"))) {
                 errObjectDto.setObject(weeksDemandOrderEdit);
-                errObjectDto.setErrMsg(StrUtil.format("工厂：{}，客户编码{}无工厂库位信息！",weeksDemandOrderEdit.getProductMaterialCode()));
-                errDtos.add(errObjectDto);
-                continue;
-            }
-            if (!StrUtil.equals(weeksDemandOrderEdit.getPlace(), cdFactoryStorehouseInfo.getStorehouseTo())) {
-                errObjectDto.setObject(weeksDemandOrderEdit);
-                errObjectDto.setErrMsg(StrUtil.format("对应地点应为：{}",cdFactoryStorehouseInfo.getStorehouseTo()));
+                errObjectDto.setErrMsg(StrUtil.format("对应地点应为：{}",storeHouseMap.get("storehouseTo")));
                 errDtos.add(errObjectDto);
                 continue;
             }
@@ -464,10 +465,12 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
      * @return
      */
     @Override
-    public R deleteWithLimit(String ids) {
+    public R deleteWithLimit(String ids,Oms2weeksDemandOrderEdit oms2weeksDemandOrderEditVo) {
         if (StrUtil.isEmpty(ids)) {
             Example example = new Example(Oms2weeksDemandOrderEdit.class);
-            example.and().andEqualTo("status", DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode())
+            Example.Criteria criteria = example.createCriteria();
+            listCondition(oms2weeksDemandOrderEditVo,criteria);
+            criteria.andEqualTo("status", DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode())
                     .andNotEqualTo("auditStatus", DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHZ.getCode());
             List<Oms2weeksDemandOrderEdit> oms2weeksDemandOrderEditList = selectByExample(example);
             if (CollectionUtil.isEmpty(oms2weeksDemandOrderEditList)) {
