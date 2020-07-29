@@ -6,6 +6,7 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -165,6 +166,7 @@ public class Oms2weeksDemandOrder extends BaseEntity {
      */
     private String delFlag;
 
+    @JsonIgnore
     public String getDeliveryDateStr() {
         return DateUtil.formatDate(this.deliveryDate);
     }

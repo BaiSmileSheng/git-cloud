@@ -87,6 +87,8 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
     private RemoteInterfaceLogService remoteInterfaceLogService;
     @Autowired
     private RemoteActOmsOrderMaterialOutService remoteActOmsOrderMaterialOutService;
+    @Autowired
+    private RemoteFactoryStorehouseInfoService remoteFactoryStorehouseInfoService;
 
     private static final String TABLE_NAME = "oms_demand_order_gather_edit";
 
@@ -360,6 +362,30 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             if (extendInfo==null) {
                 errObjectDto.setObject(demandOrderGatherEdit);
                 errObjectDto.setErrMsg(StrUtil.format("物料号{}：无生命周期及产品类别信息！",demandOrderGatherEdit.getProductMaterialCode()));
+                errDtos.add(errObjectDto);
+                continue;
+            }
+            //判断地点是否存在
+            CdFactoryStorehouseInfo cdFactoryStorehouseInfo = new CdFactoryStorehouseInfo()
+                    .builder().productFactoryCode(demandOrderGatherEdit.getProductFactoryCode())
+                    .customerCode(demandOrderGatherEdit.getCustomerCode()).build();
+            R rFactoryStore=remoteFactoryStorehouseInfoService.findOneByExample(cdFactoryStorehouseInfo);
+            if (!rFactoryStore.isSuccess()) {
+                errObjectDto.setObject(demandOrderGatherEdit);
+                errObjectDto.setErrMsg(StrUtil.format("工厂：{}，客户编码{}无工厂库位信息！",demandOrderGatherEdit.getProductMaterialCode()));
+                errDtos.add(errObjectDto);
+                continue;
+            }
+            cdFactoryStorehouseInfo = rFactoryStore.getData(CdFactoryStorehouseInfo.class);
+            if (StrUtil.isEmpty(cdFactoryStorehouseInfo.getStorehouseTo())) {
+                errObjectDto.setObject(demandOrderGatherEdit);
+                errObjectDto.setErrMsg(StrUtil.format("工厂：{}，客户编码{}无工厂库位信息！",demandOrderGatherEdit.getProductMaterialCode()));
+                errDtos.add(errObjectDto);
+                continue;
+            }
+            if (!StrUtil.equals(demandOrderGatherEdit.getPlace(), cdFactoryStorehouseInfo.getStorehouseTo())) {
+                errObjectDto.setObject(demandOrderGatherEdit);
+                errObjectDto.setErrMsg(StrUtil.format("对应地点应为：{}",cdFactoryStorehouseInfo.getStorehouseTo()));
                 errDtos.add(errObjectDto);
                 continue;
             }
@@ -903,6 +929,9 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 if (CollUtil.isNotEmpty(failList)) {
                     omsDemandOrderGatherEditMapper.updateBatchByDemandOrderCode(failList);
                 }
+                return R.ok(StrUtil.format("下达SAP成功：{}条，异常：{}条",
+                        successList==null?0:successList.size(),
+                        failList==null?0:failList.size()));
             }
         } catch (JCoException e) {
             log.error("Connect SAP fault, error msg: " + e.toString());
