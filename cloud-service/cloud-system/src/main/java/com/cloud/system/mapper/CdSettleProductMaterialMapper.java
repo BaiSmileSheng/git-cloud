@@ -1,5 +1,6 @@
 package com.cloud.system.mapper;
 
+import cn.hutool.core.lang.Dict;
 import com.cloud.system.domain.entity.CdSettleProductMaterial;
 import com.cloud.common.core.dao.BaseMapper;
 
@@ -26,5 +27,12 @@ public interface CdSettleProductMaterialMapper extends BaseMapper<CdSettleProduc
      * @return
      */
     int batchInsertOrUpdate(List<CdSettleProductMaterial> list);
+
+    /**
+     * 按专用号和委外方式查询
+     * @param list
+     * @return
+     */
+    List<CdSettleProductMaterial> selectByIndexes(List<Dict> list);
 
 }

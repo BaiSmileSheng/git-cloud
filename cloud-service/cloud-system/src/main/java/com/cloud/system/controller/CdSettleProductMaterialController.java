@@ -13,6 +13,7 @@ import com.cloud.system.domain.vo.CdSettleProductMaterialExcelImportVo;
 import com.cloud.system.domain.vo.CdSettleProductMaterialExportVo;
 import com.cloud.system.service.ICdSettleProductMaterialService;
 import com.cloud.system.util.EasyExcelUtilOSS;
+import com.cloud.system.util.SettleProductMaterialWriteHandler;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,8 @@ public class CdSettleProductMaterialController extends BaseController {
     @ApiOperation(value = "导入模板", response = CdSettleProductMaterial.class)
     public R exportMul() {
         String fileName = "物料号和加工费号对应关系数据.xlsx";
-        return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new CdSettleProductMaterialExcelImportVo());
+        return EasyExcelUtilOSS.writePostilExcel(Arrays.asList(),fileName,fileName,new CdSettleProductMaterialExcelImportVo(),
+                new SettleProductMaterialWriteHandler());
     }
 
     /**

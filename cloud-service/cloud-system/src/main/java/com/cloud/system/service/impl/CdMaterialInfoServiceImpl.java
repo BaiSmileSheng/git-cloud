@@ -25,9 +25,10 @@ import com.cloud.system.webService.material.RowRisk;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import tk.mybatis.mapper.entity.Example;
 
 import javax.xml.rpc.holders.StringHolder;
 import java.math.BigDecimal;
@@ -252,6 +253,27 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
     @Override
     public R selectListByMaterialList(List<Dict> list) {
         return R.data(cdMaterialInfoMapper.selectListByMaterialList(list));
+    }
+
+    @Override
+    public R selectListByMaterialCodeList(List<Dict> list) {
+        return R.data(cdMaterialInfoMapper.selectListByMaterialCodeList(list));
+    }
+
+    @Override
+    public R selectByMaterialCode(String materialCode) {
+        List<String> materialCodeList = cdMaterialInfoMapper.selectByMaterialCode(materialCode);
+        if(CollectionUtils.isEmpty(materialCodeList)){
+            return R.error("没有数据");
+        }
+        Example example = new Example(CdMaterialInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andIn("materialCode", materialCodeList);
+        List<CdMaterialInfo> listSelect = cdMaterialInfoMapper.selectByExample(example);
+        Map<String,CdMaterialInfo> map = listSelect.stream().collect(Collectors.toMap(cdMaterialInfo ->cdMaterialInfo.getMaterialCode(),
+                cdMaterialInfo ->cdMaterialInfo,(key1,key2) ->key2));
+        List<CdMaterialInfo> list = map.values().stream().collect(Collectors.toList());
+        return R.data(list);
     }
 
     /**
