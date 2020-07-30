@@ -169,7 +169,7 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     @ApiOperation(value = "删除滚动计划需求操作 ", response = R.class)
     @ApiParam(name = "ids", value = "需删除数据的id")
     @HasPermissions("order:demandOrderGatherEdit:remove")
-    public R remove(@RequestBody @ApiIgnore OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
+    public R remove(@RequestBody(required = false) OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
         return omsDemandOrderGatherEditService.deleteWithLimit(omsDemandOrderGatherEdit.getIds(),omsDemandOrderGatherEdit);
     }
 

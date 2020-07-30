@@ -3,6 +3,7 @@ package com.cloud.activiti.mapper;
 import java.util.List;
 
 import com.cloud.activiti.domain.ActRuTask;
+import org.apache.ibatis.annotations.Param;
 
 public interface ActRuTaskMapper {
     int deleteByPrimaryKey(String id);
@@ -18,4 +19,6 @@ public interface ActRuTaskMapper {
     int updateByPrimaryKey(ActRuTask record);
 
     List<ActRuTask> selectAll();
+
+    List<ActRuTask> selectByProcInstId(List<String> list);
 }

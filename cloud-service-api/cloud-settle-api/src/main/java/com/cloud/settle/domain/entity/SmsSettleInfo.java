@@ -134,7 +134,7 @@ public class SmsSettleInfo extends BaseEntity {
     /**
      * 委外方式 0：半委外，1：全委外
      */
-    @ExcelProperty(value = "委外方式",index = 13,converter = OutsourceWayConverter.class)
+    @ExcelProperty(value = "加工承揽方式",index = 13,converter = OutsourceWayConverter.class)
     @ApiModelProperty(value = "委外方式 0：半委外，1：全委外")
     private String outsourceWay;
 

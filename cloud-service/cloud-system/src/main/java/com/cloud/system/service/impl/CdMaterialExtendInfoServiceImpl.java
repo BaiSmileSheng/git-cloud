@@ -297,18 +297,6 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
                 cdMaterialExtendInfoReq.setLifeCycle(lifeCycleCode);
             }
 
-            if (StringUtils.isBlank(cdMaterialExtendInfo.getIsPuttingOut())) {
-                errMsgBuffer.append("可否加工承揽不能为空;");
-            }
-            if(StringUtils.isNotBlank(cdMaterialExtendInfo.getIsPuttingOut())){
-                String isPuttingOut = cdMaterialExtendInfo.getIsPuttingOut();
-                String isPuttingOutCode = PuttingOutEnum.getCodeByMsg(isPuttingOut);
-                if (StringUtils.isBlank(isPuttingOutCode) || isPuttingOutCode.equals(isPuttingOut)) {
-                    errMsgBuffer.append("可否加工承揽方式不存在;");
-                }
-                cdMaterialExtendInfoReq.setIsPuttingOut(isPuttingOutCode);
-            }
-
             if (StringUtils.isBlank(cdMaterialExtendInfo.getIsZnAttestation())) {
                 errMsgBuffer.append("是否ZN认证不能为空;");
             }
@@ -328,6 +316,7 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
                 errDtos.add(errObjectDto);
                 continue;
             }
+            cdMaterialExtendInfoReq.setIsPuttingOut(PuttingOutEnum.IS_PUTTING_OUT_1.getCode());
             cdMaterialExtendInfoReq.setCreateTime(new Date());
             cdMaterialExtendInfoReq.setDelFlag("0");
             sucObjectDto.setObject(cdMaterialExtendInfoReq);

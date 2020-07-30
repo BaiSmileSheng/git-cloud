@@ -78,7 +78,7 @@ public class CdRawMaterialStockServiceImpl extends BaseServiceImpl<CdRawMaterial
      * @param sysUser
      * @return
      */
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     @Override
     public R currentqueryRawMaterialStock(List<CdRawMaterialStock> list, SysUser sysUser) {
         R r = systemFromSap601InterfaceService.currentqueryRawMaterialStockFromSap601(list,sysUser);
