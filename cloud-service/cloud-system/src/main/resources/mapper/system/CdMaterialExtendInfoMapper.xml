@@ -104,7 +104,8 @@
         del_flag,
         remark,
         create_by,
-        update_by)
+        update_by,
+        update_time)
         VALUES
         <foreach collection="list" item="item" separator=",">
             (
@@ -118,7 +119,8 @@
             ifnull(#{item.delFlag}, '0'),
             ifnull(#{item.remark}, ''),
             ifnull(#{item.createBy}, ''),
-            ifnull(#{item.updateBy}, '')
+            ifnull(#{item.updateBy}, ''),
+            now()
             )
         </foreach>
         ON DUPLICATE KEY UPDATE
