@@ -111,6 +111,9 @@ public class CdMaterialExtendInfoController extends BaseController {
         if(StringUtils.isNotBlank(cdMaterialExtendInfo.getLifeCycle())){
             criteria.andEqualTo("lifeCycle",cdMaterialExtendInfo.getLifeCycle());
         }
+        if(StringUtils.isNotBlank(cdMaterialExtendInfo.getIsZnAttestation())){
+            criteria.andEqualTo("isZnAttestation",cdMaterialExtendInfo.getIsZnAttestation());
+        }
     }
     /**
      * 下载模板

@@ -39,7 +39,7 @@ public class SmsSettleInfoServiceImpl extends BaseServiceImpl<SmsSettleInfo> imp
      * 计算加工费(定时任务调用)
      * @return 成功或失败
      */
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     @Override
     public R smsSettleInfoCalculate() {
         logger.info("加工费生成开始");

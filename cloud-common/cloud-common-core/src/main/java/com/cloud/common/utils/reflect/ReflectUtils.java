@@ -1,5 +1,7 @@
 package com.cloud.common.utils.reflect;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -324,4 +326,35 @@ public class ReflectUtils {
         }
         return new RuntimeException(msg, e);
     }
+
+    /**
+     * 判断判断对象属性是否全部为空  全部为空返回false,有值返回true
+     * @param obj
+     * @return
+     */
+    public static boolean isAllFieldNull(Object obj){
+        boolean flag = false;
+        try {
+            Class cla = (Class) obj.getClass();// 得到类对象
+            Field[] fs = cla.getDeclaredFields();//得到属性集合
+            for (Field f : fs) {//遍历属性
+                String name = f.getName();
+                if(!name.contains("serialVersionUID")){
+                    f.setAccessible(true); // 设置属性是可以访问的(私有的也可以)
+                    Object val = f.get(obj);// 得到此属性的值
+                    if(val!=null) {//只要有1个属性不为空,那么就不是所有的属性值都为空
+                        flag = true;
+                        break;
+                    }
+                }
+            }
+        }catch (Exception e){
+            StringWriter w = new StringWriter();
+            e.printStackTrace(new PrintWriter(w));
+            logger.error(
+                    "判断对象属性全部为空异常: {}", w.toString());
+        }
+        return flag;
+    }
+
 }
