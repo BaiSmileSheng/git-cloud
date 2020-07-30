@@ -21,6 +21,7 @@ import com.cloud.common.easyexcel.DTO.ExcelImportSucObjectDto;
 import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
+import com.cloud.common.utils.reflect.ReflectUtils;
 import com.cloud.order.domain.entity.OmsInternalOrderRes;
 import com.cloud.order.domain.entity.OmsRealOrder;
 import com.cloud.order.domain.entity.vo.OmsRealOrderExcelImportErrorVo;
@@ -306,6 +307,11 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             });
             int count = omsRealOrderMapper.deleteByIds(ids);
             return R.data(count);
+        }
+        //判断对象属性是否有赋值
+        Boolean flag = ReflectUtils.isAllFieldNull(omsRealOrder);
+        if(!flag){
+            return R.error("请勾选需要删除的数据或填写查询条件");
         }
         Example example = assemblyConditions(omsRealOrder);
         //排产员查对应工厂的数据,业务经理查自己导入的
