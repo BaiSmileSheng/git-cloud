@@ -58,14 +58,6 @@ public class RealOrderWriteHandler extends AbstractRowWriteHandler {
             // 将批注添加到单元格对象中 从0开始计算 第1行第2列
             sheet.getRow(0).getCell(2).setCellComment(commentOrderType);
 
-            // 在第一行 第11列 交付日期 批注
-            XSSFClientAnchor xssfClientAnchorDate = new XSSFClientAnchor(0, 0, 0, 0, (short)10, 0, (short)13, 1);
-            Comment commentDate = drawingPatriarch.createCellComment(xssfClientAnchorDate);
-            // 输入批注信息
-            commentDate.setString(new XSSFRichTextString("例：2020-07-07"));
-            // 将批注添加到单元格对象中 从0开始计算 第1行第11列
-            sheet.getRow(0).getCell(11).setCellComment(commentDate);
-
             // 在第一行 第12列 地点 批注
             XSSFClientAnchor xssfClientAnchorRelation = new XSSFClientAnchor(0, 0, 0, 0, (short)11, 0, (short)13, 1);
             Comment commentRelation = drawingPatriarch.createCellComment(xssfClientAnchorRelation);

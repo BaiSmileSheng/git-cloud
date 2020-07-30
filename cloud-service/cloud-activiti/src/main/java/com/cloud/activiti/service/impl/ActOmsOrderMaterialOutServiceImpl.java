@@ -6,11 +6,13 @@ import com.cloud.activiti.consts.ActivitiConstant;
 import com.cloud.activiti.consts.ActivitiProDefKeyConstants;
 import com.cloud.activiti.consts.ActivitiProTitleConstants;
 import com.cloud.activiti.consts.ActivitiTableNameConstants;
+import com.cloud.activiti.domain.ActRuTask;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
 import com.cloud.activiti.domain.entity.vo.OmsOrderMaterialOutVo;
 import com.cloud.activiti.mail.MailService;
+import com.cloud.activiti.mapper.ActRuTaskMapper;
 import com.cloud.activiti.service.IActOmsOrderMaterialOutService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
@@ -42,10 +44,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -73,6 +77,9 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
 
     @Autowired
     private MailService mailService;
+
+    @Autowired
+    private ActRuTaskMapper actRuTaskMapper;
 
     /**
      * 根据业务key获取下市审核信息
@@ -114,13 +121,38 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
      * 物料下市审核 真单审核开启流程
      * @return 成功或失败
      */
+    @Transactional(rollbackFor=Exception.class)
     @Override
     public R addSave(OmsOrderMaterialOutVo omsOrderMaterialOutVo) {
         List<OmsOrderMaterialOutVo> list = omsOrderMaterialOutVo.getOmsOrderMaterialOutVoList();
+
+        List<OmsOrderMaterialOutVo> listAdd = new ArrayList<>();
+        //判断流程实例是否正在运行,没有在运行的再开启流程
+        if(!CollectionUtils.isEmpty(list)){
+            for(OmsOrderMaterialOutVo omsOrderMaterialOutVoReq : list){
+                //根据业务表名和id查流程
+                BizBusiness business = new BizBusiness();
+                business.setTableId(omsOrderMaterialOutVoReq.getId().toString());
+                business.setTableName(omsOrderMaterialOutVo.getTableName());
+                List<BizBusiness> bizBusinessList = bizBusinessService.selectBizBusinessList(business);
+                if(CollectionUtils.isEmpty(bizBusinessList)){
+                    listAdd.add(omsOrderMaterialOutVoReq);
+                    continue;
+                }
+                //根据流程实例id查运行时任务数据表
+                List<String> procInstIdList = bizBusinessList.stream().map(b ->b.getProcInstId()).collect(Collectors.toList());
+                List<ActRuTask> actRuTaskList = actRuTaskMapper.selectByProcInstId(procInstIdList);
+                if(CollectionUtils.isEmpty(actRuTaskList)){
+                    listAdd.add(omsOrderMaterialOutVoReq);
+                    continue;
+                }
+            }
+        }
+
         //key工厂,value用户
         Map<String,List<SysUserVo>> map = new HashMap<>();
-        if(!CollectionUtils.isEmpty(list)){
-            list.forEach(omsOrderMaterialOutVoReq ->{
+        if(!CollectionUtils.isEmpty(listAdd)){
+            listAdd.forEach(omsOrderMaterialOutVoReq ->{
                 //1.构造下市审核流程信息
                 BizBusiness business = initBusiness(omsOrderMaterialOutVoReq);
                 //新增下市审核流程
