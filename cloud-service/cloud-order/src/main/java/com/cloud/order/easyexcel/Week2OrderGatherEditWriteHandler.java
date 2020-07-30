@@ -20,11 +20,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 13周导入模板加批注
+ * 2周导入模板加批注
  * @Author cs
  * @Date 2020-07-30
  */
-public class DemandOrderGatherEditWriteHandler extends AbstractRowWriteHandler {
+public class Week2OrderGatherEditWriteHandler extends AbstractRowWriteHandler {
 
     @Override
     public void afterRowDispose(WriteSheetHolder writeSheetHolder, WriteTableHolder writeTableHolder, Row row, Integer relativeRowIndex, Boolean isHead) {
@@ -46,11 +46,11 @@ public class DemandOrderGatherEditWriteHandler extends AbstractRowWriteHandler {
             RemoteDictDataService remoteDictDataService = ApplicationContextUtil.getBean(RemoteDictDataService.class);
 
             // 在第一行 第二列 SAP订单类型 批注
-            List<SysDictData> list = remoteDictDataService.getType("plan_order_type");
+            List<SysDictData> list = remoteDictDataService.getType("sap_order_type");
             String orderTypeStr=list.stream()
                     .map(t -> t.getDictLabel())
                     .collect(Collectors.joining(StrUtil.COMMA));
-            XSSFClientAnchor xssfClientAnchorOrderType = new XSSFClientAnchor(0, 0, 0, 0, (short)1, 0, (short)2, 2);
+            XSSFClientAnchor xssfClientAnchorOrderType = new XSSFClientAnchor(0, 0, 0, 0, (short)1, 0, (short)6, 4);
             Comment commentOrderType = drawingPatriarch.createCellComment(xssfClientAnchorOrderType);
             // 输入批注信息
             commentOrderType.setString(new XSSFRichTextString(orderTypeStr));
