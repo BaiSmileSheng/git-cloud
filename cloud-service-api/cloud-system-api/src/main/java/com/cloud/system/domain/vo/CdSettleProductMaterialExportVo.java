@@ -70,8 +70,8 @@ public class CdSettleProductMaterialExportVo {
     /**
      * 委外方式
      */
-    @ExcelProperty(value = "委外方式",index = 4,converter = OutSourceTypeConverter.class)
-    @ApiModelProperty(value = "委外方式")
+    @ExcelProperty(value = "加工承揽方式",index = 4,converter = OutSourceTypeConverter.class)
+    @ApiModelProperty(value = "加工承揽方式")
     private String outsourceWay;
 
     /**

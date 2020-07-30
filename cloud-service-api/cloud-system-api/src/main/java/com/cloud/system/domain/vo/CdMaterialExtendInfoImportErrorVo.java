@@ -73,14 +73,13 @@ public class CdMaterialExtendInfoImportErrorVo{
     /**
      * 可否加工承揽
      */
-    @ExcelProperty(value = "可否加工承揽",index = 3)
     @ApiModelProperty(value = "可否加工承揽")
     private String isPuttingOut;
 
     /**
      * 是否ZN认证
      */
-    @ExcelProperty(value = "是否ZN认证",index = 4)
+    @ExcelProperty(value = "是否ZN认证",index = 3)
     @ApiModelProperty(value = "是否ZN认证")
     private String isZnAttestation;
 
@@ -100,7 +99,7 @@ public class CdMaterialExtendInfoImportErrorVo{
     /**
      * 错误信息
      */
-    @ExcelProperty(value = "错误信息",index = 5)
+    @ExcelProperty(value = "错误信息",index = 4)
     @ApiModelProperty(value = "错误信息")
     private String errorMessage;
 
