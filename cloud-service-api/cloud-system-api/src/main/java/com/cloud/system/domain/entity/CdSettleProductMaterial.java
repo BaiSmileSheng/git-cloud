@@ -71,8 +71,8 @@ public class CdSettleProductMaterial extends BaseEntity {
     /**
      * 委外方式
      */
-    @ExcelProperty(value = "委外方式")
-    @ApiModelProperty(value = "委外方式")
+    @ExcelProperty(value = "加工承揽方式")
+    @ApiModelProperty(value = "加工承揽方式")
     @NotBlank(message = "委外方式不能为空")
     private String outsourceWay;
 

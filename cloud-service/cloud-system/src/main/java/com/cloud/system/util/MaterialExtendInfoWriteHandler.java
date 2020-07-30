@@ -53,20 +53,6 @@ public class MaterialExtendInfoWriteHandler extends AbstractRowWriteHandler {
             // 将批注添加到单元格对象中 从0开始计算 第1行第3列
             sheet.getRow(0).getCell(2).setCellComment(comment);
 
-            //在第一行 第三列创建一个可否加工承揽的批注
-            StringBuffer puttingOutBuffer = new StringBuffer("请填写:");
-            for (PuttingOutEnum pt : PuttingOutEnum.values()) {
-                puttingOutBuffer.append(pt.getMsg()).append(",");
-            }
-            String puttingOutString = puttingOutBuffer.toString();
-            String puttingOut = puttingOutString.substring(0,puttingOutString.length()-1);
-            XSSFClientAnchor xssfClientAnchor2 = new XSSFClientAnchor(0, 0, 0, 0, (short)3, 0, (short)5, 2);
-            Comment comment2 = drawingPatriarch.createCellComment(xssfClientAnchor2);
-            // 输入批注信息
-            comment2.setString(new XSSFRichTextString(puttingOut));
-            // 将批注添加到单元格对象中 从0开始计算 第1行第4列
-            sheet.getRow(0).getCell(3).setCellComment(comment);
-
             //在第一行 第四列创建一个可否加工承揽的批注
             StringBuffer znAttestationBuffer = new StringBuffer("请填写:");
             for (ZnAttestationEnum pt : ZnAttestationEnum.values()) {
@@ -74,12 +60,12 @@ public class MaterialExtendInfoWriteHandler extends AbstractRowWriteHandler {
             }
             String znAttestationString = (null == znAttestationBuffer) ? " " : znAttestationBuffer.toString();
             String znAttestation = znAttestationString.substring(0,znAttestationString.length()-1);
-            XSSFClientAnchor xssfClientAnchor3 = new XSSFClientAnchor(0, 0, 0, 0, (short)4, 0, (short)6, 2);
+            XSSFClientAnchor xssfClientAnchor3 = new XSSFClientAnchor(0, 0, 0, 0, (short)3, 0, (short)5, 2);
             Comment comment3 = drawingPatriarch.createCellComment(xssfClientAnchor3);
             // 输入批注信息
             comment3.setString(new XSSFRichTextString(znAttestation));
             // 将批注添加到单元格对象中 从0开始计算 第1行第5列
-            sheet.getRow(0).getCell(4).setCellComment(comment);
+            sheet.getRow(0).getCell(3).setCellComment(comment);
 
         }
     }
