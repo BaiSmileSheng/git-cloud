@@ -67,4 +67,19 @@ public interface ICdMaterialInfoService extends BaseService<CdMaterialInfo> {
      * Date: 2020/6/18
      */
     R selectListByMaterialList(List<Dict> list);
-    }
+
+    /**
+     * 按物料号查数据
+     * @param list
+     * @return
+     */
+    R selectListByMaterialCodeList(List<Dict> list);
+
+    /**
+     * 按物料号模糊查询并分页
+     * @param materialCode
+     * @return
+     */
+    R selectByMaterialCode(String materialCode);
+}
+

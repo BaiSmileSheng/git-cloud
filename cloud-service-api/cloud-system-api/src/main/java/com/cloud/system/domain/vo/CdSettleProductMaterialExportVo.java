@@ -106,4 +106,10 @@ public class CdSettleProductMaterialExportVo {
      */
     private String delFlag;
 
+    /**
+     * 备注
+     */
+    @ExcelProperty(value = "备注",index = 9)
+    private String remark;
+
 }

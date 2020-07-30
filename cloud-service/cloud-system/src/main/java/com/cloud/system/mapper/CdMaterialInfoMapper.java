@@ -6,7 +6,6 @@ import com.cloud.system.domain.entity.CdMaterialInfo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 物料信息 Mapper接口
@@ -45,4 +44,13 @@ public interface CdMaterialInfoMapper extends BaseMapper<CdMaterialInfo> {
      * Date: 2020/7/7
      */
     int batchInsetOrUpdate(List<CdMaterialInfo> list);
+
+    /**
+     * 按物料号批量查询
+     * @param list
+     * @return
+     */
+    List<CdMaterialInfo> selectListByMaterialCodeList(@Param(value = "list") List<Dict> list);
+
+    List<String> selectByMaterialCode(@Param("materialCode") String materialCode);
 }
