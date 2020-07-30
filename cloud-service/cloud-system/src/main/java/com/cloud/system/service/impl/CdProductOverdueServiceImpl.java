@@ -66,7 +66,7 @@ public class CdProductOverdueServiceImpl extends BaseServiceImpl<CdProductOverdu
      * @param file
      * @return
      */
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     @Override
     public R importFactoryStorehouse(MultipartFile file, String loginName) throws IOException {
 

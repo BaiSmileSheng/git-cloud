@@ -259,7 +259,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
      *
      * @return
      */
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     @Override
     public R timeCollectToOmsRealOrder() {
         logger.info("定时任务每天在获取到PO信息后 进行需求汇总  开始");

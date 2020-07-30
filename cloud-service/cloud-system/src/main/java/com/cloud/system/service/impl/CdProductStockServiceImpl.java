@@ -260,7 +260,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
      * @param sysUser
      * @return
      */
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     @Override
     public R sycProductStock(List<CdProductStock> cdProductStockList, SysUser sysUser) {
 
