@@ -932,7 +932,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
     }
 
     /**
-     * SAP601创建订单接口定时任务（ZPP_INT_DDPS_02）
+     * SAP601创建订单接口定时任务（ZPP_INT_DDPS_05）
      * @return
      */
     @Override
@@ -983,16 +983,23 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 for (int i = 0; i < outTableOutput.getNumRows(); i++) {
                     //设置指针位置
                     outTableOutput.setRow(i);
+                    String flag = outTableOutput.getString("FLAG");
                     Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit = new Oms2weeksDemandOrderEdit();
                     oms2weeksDemandOrderEdit.setDemandOrderCode(outTableOutput.getString("ABLAD"));//需求订单号
-                    oms2weeksDemandOrderEdit.setPlanOrderOrder(outTableOutput.getString("AUFNR"));//计划订单号
-                    oms2weeksDemandOrderEdit.setStatus(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode());//已传SAP
+                    oms2weeksDemandOrderEdit.setSapMessages(outTableOutput.getString("MESSAGE"));
+                    if (SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(flag)) {
+                        oms2weeksDemandOrderEdit.setPlanOrderOrder(outTableOutput.getString("AUFNR"));//计划订单号
+                        oms2weeksDemandOrderEdit.setStatus(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode());//已传SAP
+                    }else{
+                        oms2weeksDemandOrderEdit.setStatus(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());//传SAP异常
+                    }
                     dataList.add(oms2weeksDemandOrderEdit);
-                    String messageOne = StrUtil.format("ABLAD:{},AUFNR:{};"
-                            ,outTableOutput.getString("ABLAD"),outTableOutput.getString("AUFNR"));
+                    String messageOne = StrUtil.format("FLAG:{};ABLAD:{},AUFNR:{};MESSAGE:{};"
+                            ,flag,outTableOutput.getString("ABLAD"),outTableOutput.getString("AUFNR"),outTableOutput.getString("MESSAGE"));
                     sapBuffer.append(messageOne);
                 }
                 updateBatchByDemandOrderCode(dataList);
+                sysInterfaceLog.setResults(sapBuffer.toString());
             } else {
                 sysInterfaceLog.setResults("返回数据为空！");
                 log.error("获取生产订单数据为空！");
@@ -1008,7 +1015,6 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             remoteInterfaceLogService.saveInterfaceLog(sysInterfaceLog);
         }
         log.info("================(2周需求)获取SAP系统生产订单方法  end================");
-
         return R.ok();
     }
 }
