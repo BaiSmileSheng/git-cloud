@@ -80,6 +80,7 @@ public class CdProductOverdueServiceImpl extends BaseServiceImpl<CdProductOverdu
                 CdProductOverdue cdProductOverdue = BeanUtil.copyProperties(excelImportSucObjectDto.getObject(), CdProductOverdue.class);
                 cdProductOverdue.setCreateBy(loginName);
                 cdProductOverdue.setUpdateBy(loginName);
+                cdProductOverdue.setUpdateTime(new Date());
                 return cdProductOverdue;
             }).collect(Collectors.toList());
             if(!CollectionUtils.isEmpty(successResult)){

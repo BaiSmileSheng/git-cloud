@@ -23,6 +23,7 @@ import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -112,6 +113,7 @@ public class CdSettleProductMaterialController extends BaseController {
         Example.Criteria criteria = example.createCriteria();
         assemblyConditions(cdSettleProductMaterial, criteria);
         startPage();
+        example.orderBy("createTime").desc();
         List<CdSettleProductMaterial> cdSettleProductMaterialList = cdSettleProductMaterialService.selectByExample(example);
         return getDataTable(cdSettleProductMaterialList);
     }
@@ -153,6 +155,7 @@ public class CdSettleProductMaterialController extends BaseController {
         Example example = new Example(CdSettleProductMaterial.class);
         Example.Criteria criteria = example.createCriteria();
         assemblyConditions(cdSettleProductMaterial, criteria);
+        example.orderBy("createTime").desc();
         List<CdSettleProductMaterial> cdSettleProductMaterialList = cdSettleProductMaterialService.selectByExample(example);
         String fileName = "物料号和加工费号维护.xlsx";
         return EasyExcelUtilOSS.writeExcel(cdSettleProductMaterialList,fileName,fileName,new CdSettleProductMaterialExportVo());
@@ -170,6 +173,8 @@ public class CdSettleProductMaterialController extends BaseController {
         ValidatorUtils.validateEntity(cdSettleProductMaterial);
         SysUser sysUser = getUserInfo(SysUser.class);
         cdSettleProductMaterial.setCreateBy(sysUser.getLoginName());
+        cdSettleProductMaterial.setUpdateBy(sysUser.getLoginName());
+        cdSettleProductMaterial.setUpdateTime(new Date());
         R r = cdSettleProductMaterialService.insertProductMaterial(cdSettleProductMaterial);
         return r ;
     }
