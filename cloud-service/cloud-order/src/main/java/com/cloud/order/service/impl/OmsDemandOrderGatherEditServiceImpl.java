@@ -23,6 +23,7 @@ import com.cloud.common.easyexcel.DTO.ExcelImportSucObjectDto;
 import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
+import com.cloud.common.utils.RandomUtil;
 import com.cloud.order.domain.entity.*;
 import com.cloud.order.domain.entity.vo.OmsDemandOrderGatherEditExport;
 import com.cloud.order.enums.DemandOrderGatherEditAuditStatusEnum;
@@ -356,11 +357,11 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             demandOrderGatherEdit.setPurchaseGroupCode(cdMaterialInfo.getPurchaseGroupCode());
             demandOrderGatherEdit.setUnit(cdMaterialInfo.getPrimaryUom());
             //需求订单号
-            R seqresult = remoteSequeceService.selectSeq("demand_order_gather_seq", 4);
-            if(!seqresult.isSuccess()){
-                throw new BusinessException("查序列号失败");
-            }
-            String seq = seqresult.getStr("data");
+//            R seqresult = remoteSequeceService.selectSeq("demand_order_gather_seq", 4);
+//            if(!seqresult.isSuccess()){
+//                throw new BusinessException("查序列号失败");
+//            }
+            String seq = RandomUtil.randomInt(6);
             String demandOrderCode = StrUtil.concat(true, "DM", DateUtils.dateTime(), seq);
             demandOrderGatherEdit.setDemandOrderCode(demandOrderCode);
             //订单来源
