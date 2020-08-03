@@ -1348,7 +1348,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     public R timeSAPGetProductOrderCode() {
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("status", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPZ.getCode());
+        List<String> statusList = new ArrayList<>();
+        statusList.add(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPZ.getCode());
+        statusList.add(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAPYC.getCode());
+        criteria.andIn("status", statusList);
         List<OmsProductionOrder> list = omsProductionOrderMapper.selectByExample(example);
         //1.调用SAP获取生产订单号
         R resultSAP = orderFromSap601InterfaceService.queryProductOrderFromSap601(list);
@@ -1358,11 +1361,15 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         }
 
         List<OmsProductionOrder> listSapRes = (List<OmsProductionOrder>) resultSAP.get("data");
+        if(CollectionUtils.isEmpty(listSapRes)){
+            return R.ok("获取生产订单号SAP没有数据");
+        }
         listSapRes.forEach(omsProductionOrder -> {
             if("S".equals(omsProductionOrder.getSapFlag())){
                 omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode());
+            }else{
+                omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAPYC.getCode());
             }
-            //TODO else
         });
         //2.修改数据
         omsProductionOrderMapper.batchUpdateByOrderCode(listSapRes);
