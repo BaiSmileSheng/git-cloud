@@ -2,6 +2,7 @@ package com.cloud.system.feign.factory;
 
 import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.CdMaterialPriceInfo;
+import com.cloud.system.domain.entity.CdSettleProductMaterial;
 import com.cloud.system.feign.RemoteCdMaterialPriceInfoService;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -76,6 +77,16 @@ public class RemoteCdMaterialPriceInfoFallbackFactory implements FallbackFactory
             @Override
             public R selectOneByCondition(String materialCode, String purchasingOrganization, String memberCode) {
                 log.error("RemoteCdMaterialPriceInfoService.selectOneByCondition ：{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
+            }
+            /**
+             * 根据成品物料号查询SAP成本价格
+             * @param list
+             * @return R
+             */
+            @Override
+            public R selectMaterialPrice(List<CdSettleProductMaterial> list) {
+                log.error("RemoteCdMaterialPriceInfoService.selectMaterialPrice ：{}",throwable.getMessage());
                 return R.error("服务器拥挤，请稍后再试！");
             }
 

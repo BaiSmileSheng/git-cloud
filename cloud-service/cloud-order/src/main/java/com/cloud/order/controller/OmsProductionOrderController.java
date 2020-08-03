@@ -3,6 +3,7 @@ package com.cloud.order.controller;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.excel.EasyExcel;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.UserConstants;
@@ -10,10 +11,12 @@ import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.easyexcel.EasyExcelUtil;
+import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
+import com.cloud.order.domain.entity.OmsDemandOrderGatherEditImport;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderExportVo;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderImportVo;
@@ -21,6 +24,7 @@ import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.service.IOmsProductionOrderService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
+import com.cloud.order.util.OmsProductOrderWriteHandler;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.enums.OutSourceTypeEnum;
@@ -364,7 +368,7 @@ public class OmsProductionOrderController extends BaseController {
     @ApiOperation(value = "排产订单导入-导出模板", response = OmsProductionOrderExportVo.class)
     public R exportTemplate(){
         String fileName = "排产订单.xlsx";
-        return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new OmsProductionOrderImportVo());
+        return EasyExcelUtilOSS.writePostilExcel(Arrays.asList(),fileName,fileName,new OmsProductionOrderImportVo(),new OmsProductOrderWriteHandler());
     }
 
     /**
@@ -377,8 +381,7 @@ public class OmsProductionOrderController extends BaseController {
     @ApiOperation(value = "排产订单导入-导入", response = OmsProductionOrder.class)
     public R importProductOrder(@RequestParam("file") MultipartFile file) {
         SysUser sysUser = getUserInfo(SysUser.class);
-        List<OmsProductionOrderExportVo> list = (List<OmsProductionOrderExportVo>) EasyExcelUtil.readMulExcel(file, new OmsProductionOrderExportVo());
-        return omsProductionOrderService.importProductOrder(list, sysUser);
+        return omsProductionOrderService.importProductOrder(file, sysUser);
     }
 
     /**

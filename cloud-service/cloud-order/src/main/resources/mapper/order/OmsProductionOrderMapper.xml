@@ -190,8 +190,8 @@
         from oms_production_order
         where
         order_code in
-        <foreach collection="list" item="item" separator="," open="(" close=")">
-            #{item}
+        <foreach collection="list" item="item" separator=",">
+            (${item})
         </foreach>
     </select>
 

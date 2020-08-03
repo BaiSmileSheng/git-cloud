@@ -3,6 +3,7 @@ package com.cloud.system.service;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.system.domain.entity.CdMaterialPriceInfo;
+import com.cloud.system.domain.entity.CdSettleProductMaterial;
 
 import java.util.List;
 import java.util.Map;
@@ -43,4 +44,12 @@ public interface ICdMaterialPriceInfoService extends BaseService<CdMaterialPrice
      * @return 成功或失败
      */
     R synPriceYCL();
+    /**
+     * Description:  根据成品物料号查询SAP成本价格
+     * Param: [materialCodes]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/8/3
+     */
+    R selectMaterialPrice(List<CdSettleProductMaterial> list);
 }

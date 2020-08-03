@@ -7,6 +7,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.constant.ActProcessContants;
 import com.cloud.activiti.domain.entity.vo.ActBusinessVo;
@@ -15,7 +16,12 @@ import com.cloud.activiti.feign.RemoteActOmsProductionOrderService;
 import com.cloud.common.constant.*;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
+import com.cloud.common.easyexcel.DTO.ExcelImportErrObjectDto;
+import com.cloud.common.easyexcel.DTO.ExcelImportOtherObjectDto;
+import com.cloud.common.easyexcel.DTO.ExcelImportResult;
+import com.cloud.common.easyexcel.DTO.ExcelImportSucObjectDto;
 import com.cloud.common.easyexcel.EasyExcelUtil;
+import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.StringUtils;
@@ -37,12 +43,14 @@ import com.cloud.system.enums.OutSourceTypeEnum;
 import com.cloud.system.feign.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.seata.spring.annotation.GlobalTransactional;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.mail.MessagingException;
@@ -63,7 +71,7 @@ import static java.util.stream.Collectors.toMap;
  */
 @Service
 @Slf4j
-public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProductionOrder> implements IOmsProductionOrderService {
+public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProductionOrder> implements IOmsProductionOrderService,IOmsProductOrderImportService {
     private static final String PRODUCT_FACTORY_CODE = "productFactoryCode";
     private static final String PRODUCT_MATERIAL_CODE = "productMaterialCode";
     private static final String PRODUCT_LINE_CODE = "productLineCode";
@@ -83,6 +91,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     private static final String NO_LIFECYCLE_REMARK = "缺少生命周期信息";
 
     private static final String NO_BOM_REMARK = "缺少BOM清单数据";
+
+    private static final String NO_MATERIAL_RRICE = "缺少SAP成本价格";
 
     private final static String YYYY_MM_DD = "yyyy-MM-dd";//时间格式
 
@@ -137,6 +147,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     private RemoteSettleInfoService remoteSettleInfoService;
     @Autowired
     private RemoteCdSettleProductMaterialService remoteCdSettleProductMaterialService;
+    @Autowired
+    private IOmsProductOrderImportService omsProductOrderImportService;
 
     /**
      * Description:  排产订单导入
@@ -146,30 +158,128 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      * Date: 2020/6/22
      */
     @Override
+    @SneakyThrows
     @GlobalTransactional
-    public R importProductOrder(List<OmsProductionOrderExportVo> list, SysUser sysUser) {
-        if (CollectionUtil.isEmpty(list)) {
-            return R.error("导入数据不存在");
+    public R importProductOrder(MultipartFile file, SysUser sysUser) {
+        EasyWithErrorExcelListener easyExcelListener = new EasyWithErrorExcelListener(omsProductOrderImportService,OmsProductionOrderExportVo.class);
+        EasyExcel.read(file.getInputStream(),OmsProductionOrderExportVo.class,easyExcelListener).sheet().doRead();
+        //全部数据
+        List<ExcelImportSucObjectDto> excelList=easyExcelListener.getSuccessList();
+        List<OmsProductionOrderExportVo> list = new ArrayList<>();
+        if (excelList.size() > 0){
+            list =excelList.stream().map(excelImportSucObjectDto -> {
+                OmsProductionOrderExportVo omsProductionOrderExportVo = BeanUtil.copyProperties(excelImportSucObjectDto.getObject(), OmsProductionOrderExportVo.class);
+                return omsProductionOrderExportVo;
+            }).collect(Collectors.toList());
         }
+        //无法导入数据
+        List<OmsProductionOrderExportVo> exportList = list.stream().filter(o -> StrUtil.isNotBlank(o.getExportRemark())).collect(toList());
+        list = list.stream().filter(o -> !exportList.contains(o)).collect(Collectors.toList());
+        //1-8、排产订单号：根据生成规则生成排产订单号；
+        List<OmsProductionOrder> omsProductionOrders = list.stream().map(o -> {
+            OmsProductionOrder omsProductionOrder = new OmsProductionOrder();
+            BeanUtils.copyProperties(o, omsProductionOrder);
+            //获取排产订单号
+            R seqMap = remoteSequeceService.selectSeq(PRODUCT_ORDER_SEQ, PRODUCT_ORDER_LENGTH);
+            if (!seqMap.isSuccess()) {
+                log.error("获取排产订单号失败,原因：" + seqMap.get("msg"));
+                throw new BusinessException("获取排产订单号失败！");
+            }
+            String seq = seqMap.getStr("data");
+            //PC+年月日+4位顺序号
+            String orderCode = StrUtil.concat(true, "PC", DateUtils.dateTime(), seq);
+            omsProductionOrder.setOrderCode(orderCode);
+            omsProductionOrder.setCreateBy(sysUser.getLoginName());
+            omsProductionOrder.setCreateTime(new Date());
+            omsProductionOrder.setStatus(ProductOrderConstants.STATUS_ZERO);
+            omsProductionOrder.setDelFlag("0");
+            omsProductionOrder.setAuditStatus("0");
+            omsProductionOrder.setProductStartDate(formatDateString(o.getProductStartDate()));
+            omsProductionOrder.setProductEndDate(formatDateString(o.getProductEndDate()));
+            omsProductionOrder.setDeliveryDate(formatDateString(o.getDeliveryDate()));
+            return omsProductionOrder;
+        }).collect(toList());
+        //BOM拆解流程
         List<Dict> paramsMapList = list.stream().map(omsProductionOrder ->
+                new Dict().set(PRODUCT_FACTORY_CODE, omsProductionOrder.getProductFactoryCode())
+                        .set(PRODUCT_MATERIAL_CODE, omsProductionOrder.getProductMaterialCode())
+                        .set(BOM_VERSION, omsProductionOrder.getBomVersion())
+        ).distinct().collect(toList());
+        R bomInfoMap = remoteBomService.selectBomList(paramsMapList);
+        if (!bomInfoMap.isSuccess()) {
+            log.error("调用system服务根据生产工厂、成品专用号、bom版本查询BOM信息失败：" + bomInfoMap.get("msg"));
+            throw new BusinessException("调用system服务根据生产工厂、成品专用号、bom版本查询BOM信息失败!" + bomInfoMap.get("msg"));
+        }
+        List<CdBomInfo> bomInfoList = bomInfoMap.getCollectData(new TypeReference<List<CdBomInfo>>() {
+        });
+        R bomDisassemblyResult = bomDisassembly(omsProductionOrders, bomInfoList, sysUser);
+        if (!bomDisassemblyResult.isSuccess()) {
+            log.error("BOM拆解流程失败，原因：" + bomDisassemblyResult.get("msg"));
+            return R.error("BOM拆解流程失败!");
+        }
+        if (omsProductionOrders.size() > 0) {
+            omsProductionOrderMapper.insertList(omsProductionOrders);
+            List<String> orderCodes = omsProductionOrders.stream().map(OmsProductionOrder::getOrderCode).collect(Collectors.toList());
+            omsProductionOrders = omsProductionOrderMapper.selectByOrderCode(orderCodes);
+        }
+        //4、3版本审批校验，邮件通知排产员3版本审批
+        List<OmsProductionOrder> checkOmsProductList = checkThreeVersion(omsProductionOrders, sysUser);
+        //5、超期库存审批流程，邮件通知订单经理
+        List<OmsProductionOrder> checkOverStockList = checkOverStock(checkOmsProductList, sysUser);
+        //6、、超期未关闭订单审批校验，邮件通知工厂订单 - 工厂小微主 超期未关闭订单审批
+        List<OmsProductionOrder> insertProductOrderList = checkOverdueNotCloseOrder(checkOverStockList, sysUser);
+        //更新排产订单的审核状态
+        if (insertProductOrderList.size() > 0) {
+            omsProductionOrderMapper.updateBatchByPrimaryKeySelective(insertProductOrderList);
+        }
+        if (exportList.size() > 0) {
+            return EasyExcelUtilOSS.writeExcel(exportList, "排产订单失败数据.xlsx", "sheet", new OmsProductionOrderExportVo());
+        } else {
+            return R.ok();
+        }
+    }
+    @Override
+    public <T> ExcelImportResult checkImportExcel(List<T> objects) {
+        if (CollUtil.isEmpty(objects)) {
+            return new ExcelImportResult(new ArrayList<>());
+        }
+        //错误数据
+        List<ExcelImportErrObjectDto> errDtos = new ArrayList<>();
+        //可导入数据
+        List<ExcelImportSucObjectDto> successDtos = new ArrayList<>();
+        //其他导入数据
+        List<ExcelImportOtherObjectDto> otherDtos = new ArrayList<>();
+        List<OmsProductionOrderExportVo> listImport = (List<OmsProductionOrderExportVo>) objects;
+        List<Dict> paramsMapList = listImport.stream().map(omsProductionOrder ->
                 new Dict().set(PRODUCT_FACTORY_CODE, omsProductionOrder.getProductFactoryCode())
                         .set(PRODUCT_MATERIAL_CODE, omsProductionOrder.getProductMaterialCode())
                         .set(PRODUCT_LINE_CODE, omsProductionOrder.getProductLineCode())
                         .set(BOM_VERSION, omsProductionOrder.getBomVersion())
                         .set(PRODUCT_MATERIAL, PRODUCT_MATERIAL_TYPE)
         ).distinct().collect(toList());
+        List<CdSettleProductMaterial> settleProductMaterials = listImport.stream()
+                .filter(o -> !OutSourceTypeEnum.OUT_SOURCE_TYPE_ZZ.getCode().equals(o.getOutsourceType()))
+                .map(omsProductionOrderExportVo ->  CdSettleProductMaterial.builder().productMaterialCode(omsProductionOrderExportVo.getProductMaterialCode())
+                        .outsourceWay(omsProductionOrderExportVo.getOutsourceType()).build()
+                ).distinct().collect(toList());
+        /** 查询非自制排产订单在SAP中是否存在数据*/
+        R materialPriceMap = remoteCdMaterialPriceInfoService.selectMaterialPrice(settleProductMaterials);
+        if (!materialPriceMap.isSuccess()) {
+            log.error("查询非自制排产订单在SAP成本价格失败！");
+        }
+        List<CdMaterialPriceInfo> materialPriceInfos = materialPriceMap.getCollectData(new TypeReference<List<CdMaterialPriceInfo>>() {});
         /**调用服务获取成品物料扩展信息  start*/
         //调用服务获取成品物料扩展信息
         R materialExtendMap = remoteMaterialExtendInfoService.selectByMaterialList(paramsMapList);
         if (!materialExtendMap.isSuccess()) {
             log.error("调用服务获取成品物料扩展信息失败！");
-            return R.error("调用服务获取成品物料扩展信息失败!");
+            throw new BusinessException("调用服务获取成品物料扩展信息失败!");
         }
         List<CdMaterialExtendInfo> materialExtendInfoList = materialExtendMap.getCollectData(new TypeReference<List<CdMaterialExtendInfo>>() {
         });
         if (CollectionUtil.isEmpty(materialExtendInfoList)) {
             log.error("根据成品专用号查询成品物料扩展信息为空！");
-            return R.error("根据成品专用号查询成品物料扩展信息为空，请维护物料扩展信息数据！");
+            throw new BusinessException("根据成品专用号查询成品物料扩展信息为空，请维护物料扩展信息数据！");
         }
         /**调用服务获取成品物料扩展信息  end*/
 
@@ -178,7 +288,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         R materialInfoMap = remoteMaterialService.selectListByMaterialList(paramsMapList);
         if (!materialInfoMap.isSuccess()) {
             log.error("调用system服务根据成品物料、生产工厂、物料类型查询物料信息失败：" + materialInfoMap.get("msg"));
-            return R.error("调用system服务根据成品物料、生产工厂、物料类型查询物料信息失败!" + materialInfoMap.get("msg"));
+            throw new BusinessException("调用system服务根据成品物料、生产工厂、物料类型查询物料信息失败!" + materialInfoMap.get("msg"));
         }
         List<CdMaterialInfo> materialInfoList = materialInfoMap.getCollectData(new TypeReference<List<CdMaterialInfo>>() {
         });
@@ -188,7 +298,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         R factoryLineMap = remoteFactoryLineInfoService.selectListByMapList(paramsMapList);
         if (!factoryLineMap.isSuccess()) {
             log.error("调用system服务根据生产工厂、线体查询线体信息失败：" + factoryLineMap.get("msg"));
-            return R.error("调用system服务根据生产工厂、线体查询线体信息失败!" + factoryLineMap.get("msg"));
+            throw new BusinessException("调用system服务根据生产工厂、线体查询线体信息失败!" + factoryLineMap.get("msg"));
         }
         //获取线体信息
         List<CdFactoryLineInfo> cdFactoryLineInfoList = factoryLineMap.getCollectData(new TypeReference<List<CdFactoryLineInfo>>() {
@@ -199,11 +309,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         R bomInfoMap = remoteBomService.selectBomList(paramsMapList);
         if (!bomInfoMap.isSuccess()) {
             log.error("调用system服务根据生产工厂、成品专用号、bom版本查询BOM信息失败：" + bomInfoMap.get("msg"));
-            return R.error("调用system服务根据生产工厂、成品专用号、bom版本查询BOM信息失败!" + bomInfoMap.get("msg"));
+            throw new BusinessException("调用system服务根据生产工厂、成品专用号、bom版本查询BOM信息失败!" + bomInfoMap.get("msg"));
         }
         List<CdBomInfo> bomInfoList = bomInfoMap.getCollectData(new TypeReference<List<CdBomInfo>>() {
         });
-        /**调用服务获取BOM清单数据  start*/
 
         //1、数据校验，数据组织
         //1-1、判断可否加工承揽（cd_material_extend_info），如果否，则提示用户只允许自制，无法导入；如果是，则通过
@@ -214,7 +323,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 .collect(toList());
         //1-2、UPH节拍：根据导入信息的成品物料号、生产工厂获取物料信息表（cd_material_info）中对应的UPH节拍；
         //匹配UPH节拍数据
-        list.forEach(o -> materialInfoList.forEach(m -> {
+        listImport.forEach(o -> materialInfoList.forEach(m -> {
             if (o.getProductFactoryCode().equals(m.getPlantCode())
                     && o.getProductMaterialCode().equals(m.getMaterialCode())) {
                 o.setRhythm(m.getUph());
@@ -222,7 +331,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }
         }));
         //计算用时：排产量/UPH节拍
-        list.forEach(o -> {
+        listImport.forEach(o -> {
             if (o.getRhythm() != null) {
                 o.setUseTime(o.getProductNum()
                         .divide(o.getRhythm(), 2, BigDecimal.ROUND_HALF_UP));
@@ -231,7 +340,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         //1-3、产品定员：根据成品生产工厂、线体获取工厂线体关系表（cd_factory_line_info）中的产品定员；
         //1-6、分公司主管、班长：根据生产工厂、线体获取工厂线体关系表（cd_factory_line_info）中的分公司主管、班长的信息；
         //匹配产品定员信息,分公司主管、班长
-        list.forEach(o -> cdFactoryLineInfoList.forEach(f -> {
+        listImport.forEach(o -> cdFactoryLineInfoList.forEach(f -> {
             if (o.getProductFactoryCode().equals(f.getProductFactoryCode())
                     && o.getProductLineCode().equals(f.getProduceLineCode())) {
                 o.setProductQuota(f.getProductQuota());
@@ -242,7 +351,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
         //1-7、生命周期：根据成品专用号获取物料扩展信息表（cd_material_extend_info）中的生命周期；
         //匹配生命周期
-        list.forEach(o -> materialExtendInfoList.forEach(m -> {
+        listImport.forEach(o -> materialExtendInfoList.forEach(m -> {
             if (o.getProductMaterialCode().equals(m.getMaterialCode())) {
                 o.setLifeCycle(m.getLifeCycle());
             }
@@ -251,7 +360,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         //校验导入字段数据，设置导入失败原因
         Map<String, List<CdBomInfo>> bomMap =
                 bomInfoList.stream().collect(Collectors.groupingBy((bom) -> getBomGroupKey(bom)));
-        list.forEach(o -> {
+        listImport.forEach(o -> {
+            ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
             if ((PUTTING_OUT_ZERO.equals(o.getOutsourceType())
                     || PUTTING_OUT_ONE.equals(o.getOutsourceType()))
                     && noMaterialList.contains(o.getProductMaterialCode())) {
@@ -283,63 +393,28 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark()+"，";
                 o.setExportRemark(exportRemark + NO_BOM_REMARK);
             }
-        });
-        //无法导入数据
-        List<OmsProductionOrderExportVo> exportList = list.stream().filter(o -> StrUtil.isNotBlank(o.getExportRemark())).collect(toList());
-
-        list = list.stream().filter(o -> !exportList.contains(o)).collect(Collectors.toList());
-        //1-8、排产订单号：根据生成规则生成排产订单号；
-        List<OmsProductionOrder> omsProductionOrders = list.stream().map(o -> {
-            OmsProductionOrder omsProductionOrder = new OmsProductionOrder();
-            BeanUtils.copyProperties(o, omsProductionOrder);
-            //获取排产订单号
-            R seqMap = remoteSequeceService.selectSeq(PRODUCT_ORDER_SEQ, PRODUCT_ORDER_LENGTH);
-            if (!seqMap.isSuccess()) {
-                log.error("获取排产订单号失败,原因：" + seqMap.get("msg"));
-                throw new BusinessException("获取排产订单号失败！");
+            if (!OutSourceTypeEnum.OUT_SOURCE_TYPE_ZZ.getCode().equals(o.getOutsourceType())) {
+                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark()+"，";
+                if (ObjectUtil.isEmpty(materialPriceInfos) || materialPriceInfos.size() <= 0) {
+                    o.setExportRemark(exportRemark + NO_MATERIAL_RRICE);
+                } else {
+                    List<String> materialCode = materialPriceInfos.stream().map(CdMaterialPriceInfo::getMaterialCode).collect(toList());
+                    //根据成品物料号+加工承揽方式查询加工费号
+                    R productMaterialMap =
+                            remoteCdSettleProductMaterialService.selectOne(o.getProductMaterialCode(),o.getOutsourceType());
+                    if (productMaterialMap.isSuccess()) {
+                        CdSettleProductMaterial cdSettleProductMaterial = productMaterialMap.getData(CdSettleProductMaterial.class);
+                        if (!materialCode.contains(cdSettleProductMaterial.getRawMaterialCode())) {
+                            o.setExportRemark(exportRemark + NO_MATERIAL_RRICE);
+                        }
+                    }
+                }
             }
-            String seq = seqMap.getStr("data");
-            //PC+年月日+4位顺序号
-            String orderCode = StrUtil.concat(true, "PC", DateUtils.dateTime(), seq);
-            omsProductionOrder.setOrderCode(orderCode);
-            omsProductionOrder.setCreateBy(sysUser.getLoginName());
-            omsProductionOrder.setCreateTime(new Date());
-            omsProductionOrder.setStatus(ProductOrderConstants.STATUS_ZERO);
-            omsProductionOrder.setDelFlag("0");
-            omsProductionOrder.setAuditStatus("0");
-            omsProductionOrder.setProductStartDate(formatDateString(o.getProductStartDate()));
-            omsProductionOrder.setProductEndDate(formatDateString(o.getProductEndDate()));
-            omsProductionOrder.setDeliveryDate(formatDateString(o.getDeliveryDate()));
-            return omsProductionOrder;
-        }).collect(toList());
-        //BOM拆解流程
-        R bomDisassemblyResult = bomDisassembly(omsProductionOrders, bomInfoList, sysUser);
-        if (!bomDisassemblyResult.isSuccess()) {
-            log.error("BOM拆解流程失败，原因：" + bomDisassemblyResult.get("msg"));
-            return R.error("BOM拆解流程失败!");
-        }
-        if (omsProductionOrders.size() > 0) {
-            omsProductionOrderMapper.insertList(omsProductionOrders);
-            List<String> orderCodes = omsProductionOrders.stream().map(OmsProductionOrder::getOrderCode).collect(Collectors.toList());
-            omsProductionOrders = omsProductionOrderMapper.selectByOrderCode(orderCodes);
-        }
-        //4、3版本审批校验，邮件通知排产员3版本审批
-        List<OmsProductionOrder> checkOmsProductList = checkThreeVersion(omsProductionOrders, sysUser);
-        //5、超期库存审批流程，邮件通知订单经理
-        List<OmsProductionOrder> checkOverStockList = checkOverStock(checkOmsProductList, sysUser);
-        //6、、超期未关闭订单审批校验，邮件通知工厂订单 - 工厂小微主 超期未关闭订单审批
-        List<OmsProductionOrder> insertProductOrderList = checkOverdueNotCloseOrder(checkOverStockList, sysUser);
-        //更新排产订单的审核状态
-        if (insertProductOrderList.size() > 0) {
-            omsProductionOrderMapper.updateBatchByPrimaryKeySelective(insertProductOrderList);
-        }
-        if (exportList.size() > 0) {
-            return EasyExcelUtilOSS.writeExcel(exportList, "排产订单失败数据.xlsx", "sheet", new OmsProductionOrderExportVo());
-        } else {
-            return R.ok();
-        }
+            sucObjectDto.setObject(o);
+            successDtos.add(sucObjectDto);
+        });
+        return new ExcelImportResult(successDtos,errDtos,otherDtos);
     }
-
     /**
      * Description: 删除排产订单
      * Param: [ids]
@@ -582,6 +657,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         if (BeanUtil.isEmpty(omsProductionOrder)) {
             criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(",")));
             criteria.andEqualTo("status", ProductOrderConstants.STATUS_THREE);
+            criteria.andNotEqualTo("auditStatus",ProductOrderConstants.AUDIT_STATUS_ONE);
             omsProductionOrderList = omsProductionOrderMapper.selectByExample(example);
         } else {
             String ids = omsProductionOrder.getIds();
@@ -591,12 +667,20 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     if (!productionOrder.getStatus().equals(ProductOrderConstants.STATUS_THREE)) {
                         return R.error("非“已评审”状态的排产订单不可确认下达！");
                     }
+                    if (productionOrder.getAuditStatus().equals(ProductOrderConstants.AUDIT_STATUS_ONE)) {
+                        return R.error("审核中状态的排产订单不可确认下达！");
+                    }
                 }
             } else if (BeanUtil.isNotEmpty(omsProductionOrder)) {
                 if (StrUtil.isNotBlank(omsProductionOrder.getStatus())
                         && !ProductOrderConstants.STATUS_THREE.equals(omsProductionOrder.getStatus())) {
                     log.error("确认下达传入排产订单状态非已评审！");
                     return R.error("只可以下达已评审的排产订单！");
+                }
+                if (StrUtil.isNotBlank(omsProductionOrder.getAuditStatus())
+                        && omsProductionOrder.getAuditStatus().equals(ProductOrderConstants.AUDIT_STATUS_ONE)) {
+                    log.error("确认下达传入排产订单审核状态为审核中，不可下达！");
+                    return R.error("只可以下达非审核中的排产订单！");
                 }
                 if (StrUtil.isNotBlank(omsProductionOrder.getProductFactoryCode())) {
                     criteria.andEqualTo("productFactoryCode", omsProductionOrder.getProductFactoryCode());

@@ -3,11 +3,13 @@ package com.cloud.system.feign;
 import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.CdMaterialPriceInfo;
+import com.cloud.system.domain.entity.CdSettleProductMaterial;
 import com.cloud.system.feign.factory.RemoteCdMaterialPriceInfoFallbackFactory;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -79,5 +81,11 @@ public interface RemoteCdMaterialPriceInfoService {
     R selectOneByCondition(@RequestParam("materialCode") String materialCode,
                            @RequestParam("purchasingOrganization") String purchasingOrganization ,
                            @RequestParam("memberCode") String memberCode);
-
+    /**
+     * 根据成品物料号查询SAP成本价格
+     * @param materialCodes
+     * @return R
+     */
+    @GetMapping("materialPrice/selectMaterialPrice")
+    R selectMaterialPrice(@RequestBody List<CdSettleProductMaterial> list);
 }

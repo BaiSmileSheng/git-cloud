@@ -1,5 +1,7 @@
 package com.cloud.system.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
@@ -10,10 +12,12 @@ import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
 import com.cloud.settle.enums.MaterialPriceInfoSAPEnum;
 import com.cloud.settle.feign.RemoteSmsSupplementaryOrderService;
 import com.cloud.system.domain.entity.CdMaterialPriceInfo;
+import com.cloud.system.domain.entity.CdSettleProductMaterial;
 import com.cloud.system.domain.entity.SysInterfaceLog;
 import com.cloud.system.enums.PriceTypeEnum;
 import com.cloud.system.mapper.CdMaterialPriceInfoMapper;
 import com.cloud.system.service.ICdMaterialPriceInfoService;
+import com.cloud.system.service.ICdSettleProductMaterialService;
 import com.cloud.system.service.ISysInterfaceLogService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sap.conn.jco.*;
@@ -31,6 +35,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * SAP成本价格 Service业务层处理
@@ -51,6 +56,8 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
 
     @Autowired
     private RemoteSmsSupplementaryOrderService remoteSmsSupplementaryOrderService;
+    @Autowired
+    private ICdSettleProductMaterialService cdSettleProductMaterialService;
 
     /**
      * 根据物料号校验价格是否已同步SAP,如果是返回价格信息
@@ -134,6 +141,47 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
         });
         cdMaterialPriceInfoMapper.batchInsertOrUpdate(cdMaterialPriceInfoListY);
         return R.ok();
+    }
+    /**
+     * Description:  根据成品物料号查询SAP成本价格
+     * Param: [materialCodes]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/8/3
+     */
+    @Override
+    public R selectMaterialPrice(List<CdSettleProductMaterial> list) {
+        Example example = new Example(CdSettleProductMaterial.class);
+        Example.Criteria criteria = example.createCriteria();
+        if (ObjectUtil.isEmpty(list) || list.size() <= 0) {
+            return R.error("排产订单导入查询非自制订单的SAP价格，传入参数为空!");
+        }
+        List<CdSettleProductMaterial> settleProductMaterials = new ArrayList<>();
+        list.forEach(o ->{
+            criteria.andEqualTo("productMaterialCode",o.getProductMaterialCode());
+            criteria.andEqualTo("outsourceWay",o.getOutsourceWay());
+            CdSettleProductMaterial cdSettleProductMaterial = cdSettleProductMaterialService.findByExampleOne(example);
+            if (BeanUtil.isNotEmpty(cdSettleProductMaterial)) {
+                settleProductMaterials.add(cdSettleProductMaterial);
+            }
+        });
+        if (ObjectUtil.isEmpty(settleProductMaterials) || settleProductMaterials.size() <= 0) {
+            logger.error("根据物料号查询物料与加工费号关系数据为空！");
+            return R.error("根据物料号查询物料与加工费号关系数据为空！");
+        }
+        List<String> rawMaterialCodeList = settleProductMaterials
+                .stream().filter(s -> StrUtil.isNotBlank(s.getRawMaterialCode()))
+                .map(CdSettleProductMaterial::getRawMaterialCode)
+                .collect(Collectors.toList());
+        Example materialPriceExample = new Example(CdMaterialPriceInfo.class);
+        Example.Criteria materialPriceCriteria = materialPriceExample.createCriteria();
+        if (ObjectUtil.isEmpty(rawMaterialCodeList) || rawMaterialCodeList.size() <=  0) {
+            return R.error("排产订单导入查询非自制订单的SAP价格，未查询出加工费号！");
+        }
+        materialPriceCriteria.andIn("materialCode",rawMaterialCodeList);
+        List<CdMaterialPriceInfo> cdMaterialPriceInfos =
+                cdMaterialPriceInfoMapper.selectByExample(materialPriceExample);
+        return R.data(cdMaterialPriceInfos);
     }
 
     /**

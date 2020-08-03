@@ -8,15 +8,10 @@ import com.cloud.order.domain.entity.vo.OmsRawMaterialFeedbackVo;
 import com.cloud.order.service.IOmsProductionOrderService;
 import com.cloud.system.domain.entity.SysUser;
 import io.swagger.annotations.*;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.order.domain.entity.OmsRawMaterialFeedback;
@@ -147,9 +142,9 @@ public class OmsRawMaterialFeedbackController extends BaseController {
     @ApiOperation(value = "JIT反馈信息-删除 ", response = R.class)
     @ApiParam(name = "ids", value = "需删除数据的id")
     @HasPermissions("order:feedback:remove")
-    public R remove(@RequestBody String ids) {
+    public R remove(@RequestParam(value = "ids",required = false) String ids,@RequestBody OmsRawMaterialFeedback omsRawMaterialFeedback) {
         SysUser sysUser = getUserInfo(SysUser.class);
-        return omsRawMaterialFeedbackService.deleteByIds(ids,sysUser);
+        return omsRawMaterialFeedbackService.deleteByIds(ids,omsRawMaterialFeedback,sysUser);
     }
 
 }
