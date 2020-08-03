@@ -28,6 +28,9 @@ import com.cloud.order.mapper.OmsProductionOrderMapper;
 import com.cloud.order.service.*;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
+import com.cloud.order.webService.wms.OdsRawOrderOutStorageDTO;
+import com.cloud.order.webService.wms.OutStorageResult;
+import com.cloud.order.webService.wms.RfWebService;
 import com.cloud.settle.domain.entity.SmsSettleInfo;
 import com.cloud.settle.enums.SettleInfoOrderStatusEnum;
 import com.cloud.settle.feign.RemoteSettleInfoService;
@@ -40,14 +43,19 @@ import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.mail.MessagingException;
+import javax.xml.namespace.QName;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URL;
 import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -93,8 +101,18 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     //加工承揽方式
     private static final String PUTTING_OUT_ZERO = "0";
     private static final String PUTTING_OUT_ONE = "1";
+    private static final int WMS_PRODUCT_ORDER_LENGTH = 12;//向wms传生产订单号长度
 
     private static final String[] parsePatterns = {"yyyy.MM.dd","yyyy/MM/dd"};
+
+    @Value("${webService.findAllCodeForJIT.urlClaim}")
+    private String urlClaim;
+
+    @Value("${webService.findAllCodeForJIT.namespaceURL}")
+    private String namespaceURL;
+
+    @Value("${webService.findAllCodeForJIT.localPart}")
+    private String localPart;
 
 
     @Autowired
@@ -137,6 +155,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     private RemoteSettleInfoService remoteSettleInfoService;
     @Autowired
     private RemoteCdSettleProductMaterialService remoteCdSettleProductMaterialService;
+    @Autowired
+    private RemoteInterfaceLogService remoteInterfaceLogService;
 
     /**
      * Description:  排产订单导入
@@ -1339,7 +1359,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
         List<OmsProductionOrder> listSapRes = (List<OmsProductionOrder>) resultSAP.get("data");
         listSapRes.forEach(omsProductionOrder -> {
-            omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode());
+            if("S".equals(omsProductionOrder.getSapFlag())){
+                omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode());
+            }
+            //TODO else
         });
         //2.修改数据
         omsProductionOrderMapper.batchUpdateByOrderCode(listSapRes);
@@ -1691,8 +1714,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         //3.修改数据库
         List<OmsProductionOrder> listSapRes = (List<OmsProductionOrder>) resultSAP.get("data");
         listSapRes.forEach(omsProductionOrder -> {
-            omsProductionOrder.setNewVersion(omsProductionOrder.getBomVersion());
-            omsProductionOrder.setBomVersion("");
+            if("S".equals(omsProductionOrder.getSapFlag())){
+                omsProductionOrder.setNewVersion(omsProductionOrder.getBomVersion());
+                omsProductionOrder.setBomVersion("");
+            }
         });
         //修改数据
         omsProductionOrderMapper.batchUpdateByOrderCode(listSapRes);
@@ -1710,8 +1735,47 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         if(CollectionUtils.isEmpty(omsProductionOrderListReq)){
             return R.ok("无需要更新入库量的数据");
         }
-        //2.TODO 获取入库数量
+        //将集合工厂分组,key 工厂号 value 生产订单号的集合
+        Map<String,List<String>> wmsMap = new HashMap<>();
+        omsProductionOrderListReq.forEach(omsProductionOrder -> {
+            String factoryCode = omsProductionOrder.getProductFactoryCode();
+            String productOrderCode = omsProductionOrder.getProductOrderCode();
+            //补足12位
+            String productOrderCodeReq = getFixedLengthString(productOrderCode,WMS_PRODUCT_ORDER_LENGTH);
+            if(wmsMap.containsKey(factoryCode)){
+                List<String> productOrderCodeList = wmsMap.get(factoryCode);
+                productOrderCodeList.add(productOrderCodeReq);
+            }else {
+                List<String> productOrderCodeList = new ArrayList<>();
+                productOrderCodeList.add(productOrderCodeReq);
+                wmsMap.put(factoryCode,productOrderCodeList);
+            }
+        });
+
+        //2.调用wms系统 获取入库数量
         List<OmsProductionOrder> omsProductionOrderListGet = new ArrayList<>();
+        wmsMap.keySet().forEach(factoryCode ->{
+            List<String> productOrderCodeList = wmsMap.get(factoryCode);
+            //调用wms系统
+            OutStorageResult outStorageResult = wmsGetDeliveryNum(productOrderCodeList,factoryCode);
+            log.info("调用wms系统获取入库数量");
+            if(null == outStorageResult || "0".equals(outStorageResult.getStatus())){
+                log.error("调用wms系统异常 factoryCode:{},productOrderCodeList:{},res:{}",factoryCode,wmsMap.get(factoryCode),
+                        JSONObject.toJSONString(outStorageResult));
+                throw new BusinessException("调用wms系统异常" + outStorageResult.getMsg());
+            }
+            List<OdsRawOrderOutStorageDTO> odsRawOrderOutStorageDTOList = outStorageResult.getData();
+            odsRawOrderOutStorageDTOList.forEach(odsRawOrderOutStorageDTORes -> {
+                OmsProductionOrder omsProductionOrder = new OmsProductionOrder();
+                Date actualEndDate= DateUtils.convertToDate(odsRawOrderOutStorageDTORes.getGmtCreate());
+                omsProductionOrder.setActualEndDate(actualEndDate);//最后入库时间
+                omsProductionOrder.setProductOrderCode(odsRawOrderOutStorageDTORes.getPrdOrderNo());//生产订单号
+                omsProductionOrder.setDeliveryNum(new BigDecimal(odsRawOrderOutStorageDTORes.getProInAmount()));//入库数量
+                omsProductionOrderListGet.add(omsProductionOrder);
+            });
+
+        });
+
         //3.更新排产订单和加工费结算表(如果订单数量与交货数量一致则更新订单状态为已关单,更新实际结束时间actual_end_date)
         //key是生产订单号
         Map<String,OmsProductionOrder> omsProductionOrderMap = omsProductionOrderListReq.stream().collect(Collectors.toMap(
@@ -1745,6 +1809,57 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         return R.ok();
     }
 
+    /**
+     * 获取固定长度
+     * @param raw
+     * @param length
+     * @return
+     */
+    private String getFixedLengthString(String raw, int length) {
+        StringBuffer stringBuffer = new StringBuffer();
+        for (int i=0; i<length; i++){
+            stringBuffer.append("0");
+        }
+        stringBuffer.append(raw);
+        String seqAll = stringBuffer.toString();
+        String seq = seqAll.substring(seqAll.length()-length);
+        return seq;
+    }
+
+    /**
+     * wms获取入库数量
+     * @return
+     */
+    public  OutStorageResult wmsGetDeliveryNum(List<String> productOrderCodeList,String factoryCode){
+        log.info("调用wms系统获取入库数量");
+        SysInterfaceLog sysInterfaceLog = new SysInterfaceLog();
+        sysInterfaceLog.setAppId("wms");
+        sysInterfaceLog.setInterfaceName("getQryPays");
+        sysInterfaceLog.setContent("调用wms系统获取入库数量");
+        /** url：webservice 服务端提供的服务地址，结尾必须加 "?wsdl"*/
+        URL url = null;
+        try {
+            url = new URL(urlClaim);
+            /** QName 表示 XML 规范中定义的限定名称,QName 的值包含名称空间 URI、本地部分和前缀 */
+            QName qName = new QName(namespaceURL, localPart);
+            javax.xml.ws.Service service = javax.xml.ws.Service.create(url, qName);
+            RfWebService rfWebService = service.getPort(RfWebService.class);
+            OdsRawOrderOutStorageDTO odsRawOrderOutStorageDTO = new OdsRawOrderOutStorageDTO();
+            odsRawOrderOutStorageDTO.setSapFactoryCode(factoryCode);
+            odsRawOrderOutStorageDTO.setPrdOrderNoList(productOrderCodeList);
+            OutStorageResult outStorageResult = rfWebService.findAllCodeForJIT(odsRawOrderOutStorageDTO);
+            return outStorageResult;
+        }catch (Exception e){
+            sysInterfaceLog.setResults("调用wms系统获取入库数量异常");
+            StringWriter w = new StringWriter();
+            e.printStackTrace(new PrintWriter(w));
+            log.error(
+                    "调用wms系统获取入库数量异常: {}", w.toString());
+            throw new BusinessException("调用wms系统获取入库数量异常");
+        }finally {
+            remoteInterfaceLogService.saveInterfaceLog(sysInterfaceLog);
+        }
+    }
     private String getBomGroupKey(CdBomInfo cdBomInfo) {
         return StrUtil.concat(true, cdBomInfo.getProductMaterialCode(), cdBomInfo.getProductFactoryCode(), cdBomInfo.getVersion());
     }
