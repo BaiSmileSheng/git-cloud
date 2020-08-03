@@ -58,6 +58,8 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -674,6 +676,30 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     public List<OmsProductionOrder> selectPageInfo(OmsProductionOrder omsProductionOrder, SysUser sysUser) {
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();
+        if(StringUtils.isNotBlank(omsProductionOrder.getProductMaterialCode())){
+            String[] productMaterialCodeS = omsProductionOrder.getProductMaterialCode().split(",");
+            List<String> productMaterialCodeList = new ArrayList<>();
+            for(String productMaterialCode : productMaterialCodeS){
+                String regex = "\\s*|\t|\r|\n";
+                Pattern p = Pattern.compile(regex);
+                Matcher m = p.matcher(productMaterialCode);
+                String productMaterialCodeReq = m.replaceAll("");
+                productMaterialCodeList.add(productMaterialCodeReq);
+            }
+            criteria.andIn("productMaterialCode", productMaterialCodeList);
+        }
+        if(StringUtils.isNotBlank(omsProductionOrder.getProductOrderCode())){
+            String[] productOrderCodeS = omsProductionOrder.getProductOrderCode().split(",");
+            List<String> productOrderCodeList = new ArrayList<>();
+            for(String productOrderCode : productOrderCodeS){
+                String regex = "\\s*|\t|\r|\n";
+                Pattern p = Pattern.compile(regex);
+                Matcher m = p.matcher(productOrderCode);
+                String productOrderCodeReq = m.replaceAll("");
+                productOrderCodeList.add(productOrderCodeReq);
+            }
+            criteria.andIn("productOrderCode", productOrderCodeList);
+        }
         if (StrUtil.isNotBlank(omsProductionOrder.getProductFactoryCode())) {
             criteria.andEqualTo("productFactoryCode", omsProductionOrder.getProductFactoryCode());
         }
@@ -682,9 +708,6 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getStatus())) {
             criteria.andEqualTo("status", omsProductionOrder.getStatus());
-        }
-        if (StrUtil.isNotBlank(omsProductionOrder.getProductMaterialCode())) {
-            criteria.andEqualTo("productMaterialCode", omsProductionOrder.getProductMaterialCode());
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getCheckDateStart())) {
             if (ProductOrderConstants.DATE_TYPE_ONE.equals(omsProductionOrder.getDateType())) {
