@@ -254,8 +254,14 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
         SimpleDateFormat sft = new SimpleDateFormat("yyyy-MM-dd");
         criteria.andGreaterThan("productDate", sft.format(new Date()));
         List<OmsRealOrder> omsRealOrders = omsRealOrderService.selectByExample(example);
+        //提取修改生产日期但没有填写备注的真单数据 2020-07-23 by ltq
+        List<OmsRealOrder> omsRealOrderNoRemark = omsRealOrders.stream()
+                .filter(o ->"1".equals(o.getStatus()) && StrUtil.isBlank(o.getRemark())).collect(Collectors.toList());
+        //过滤掉修改生产日期但没有填写备注的真单数据，该类数据不允许后续流程 2020-07-23 by ltq
+        List<OmsRealOrder> realOrders = omsRealOrders.stream()
+                .filter(o -> !omsRealOrderNoRemark.contains(o)).collect(Collectors.toList());
         Map<String, List<OmsRealOrder>> mapFactory = new HashMap<>();
-        omsRealOrders.forEach(ros -> {
+        realOrders.forEach(ros -> {
             String key = StrUtil.concat(true, ros.getProductFactoryCode(), ros.getProductMaterialCode(), ros.getCustomerCode());
             List<OmsRealOrder> omsRealOrderList = mapFactory.getOrDefault(key, new ArrayList<>());
             omsRealOrderList.add(ros);
@@ -288,9 +294,9 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
             v.forEach(rel -> {
                 if (rel.getProductDate().equals(omsRealOrder.getProductDate())) {
                     omsRealOrderVo.setOrderNum(rel.getOrderNum());
+                    omsRealOrderVos.add(omsRealOrderVo);
                 }
             });
-            omsRealOrderVos.add(omsRealOrderVo);
         });
         return R.data(omsRealOrderVos);
     }
@@ -434,8 +440,7 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
                 .storehouse(omsRealOrder.getPlace()).build();
         R storeResult = remoteCdProductWarehouseService.queryOneByExample(cdProductWarehouse);
         if (!storeResult.isSuccess()) {
-            log.error("IOmsProductionOrderAnalysisService.getCustomerStockNum方法，获取客户库位库存失败!");
-            return R.error("获取客户库位库存失败!");
+            log.info("IOmsProductionOrderAnalysisService.getCustomerStockNum方法，获取客户库位库存失败!");
         }
         CdProductWarehouse productWarehouse = storeResult.getData(CdProductWarehouse.class);
         //在库量
@@ -448,11 +453,13 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
                 storehouseTo(omsRealOrder.getPlace()).build();
         R passageResult = remoteCdProductPassageService.queryOneByExample(cdProductPassage);
         if (!passageResult.isSuccess()) {
-            log.error("IOmsProductionOrderAnalysisService.getCustomerStockNum方法，获取客户在途库存失败!");
-            return R.error("获取客户在途库存失败!");
+            log.info("IOmsProductionOrderAnalysisService.getCustomerStockNum方法，获取客户在途库存失败!");
         }
-        List<CdProductPassage> productPassages = passageResult.getCollectData(new TypeReference<List<CdProductPassage>>() {
-        });
+        List<CdProductPassage> productPassages = new ArrayList<>();
+        if (passageResult.get("data") != null) {
+            productPassages = passageResult.getCollectData(new TypeReference<List<CdProductPassage>>() {
+            });
+        }
         //客户在途总量
         BigDecimal passageNumTotal = BigDecimal.ZERO;
         if (productPassages.size() > 0) {
@@ -496,18 +503,22 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
         R r = remoteCdProductStockService.queryOneByFactoryAndMaterial(productStocks);
         if (!r.isSuccess()) {
             log.error("IOmsProductionOrderAnalysisService.getFactoryStockNum方法， 获取到生产工厂、成品物料号的可用库存失败：" + r.get("msg"));
-            return R.error("获取到生产工厂、成品物料号的可用库存失败：" + r.get("msg"));
         }
-        List<CdProductStock> cdProductStock = r.getCollectData(new TypeReference<List<CdProductStock>>() {
-        });
+        List<CdProductStock> cdProductStock = new ArrayList<>();
+        if (r.get("data") != null) {
+            cdProductStock = r.getCollectData(new TypeReference<List<CdProductStock>>() {
+            });
+        }
         //计算生产工厂、成品专用号的可用总库存
         log.info("========计算生产工厂、成品专用号的可用总库存==========");
         Map<String, BigDecimal> stockMap = new HashMap<>();
-        cdProductStock.forEach(item -> {
-            String key = StrUtil.concat(true, item.getProductFactoryCode(), item.getProductMaterialCode());
-            BigDecimal stockNumSum = item.getSumNum();
-            stockMap.put(key, stockNumSum);
-        });
+        if (ObjectUtil.isNotEmpty(cdProductStock) || cdProductStock.size() <= 0) {
+            cdProductStock.forEach(item -> {
+                String key = StrUtil.concat(true, item.getProductFactoryCode(), item.getProductMaterialCode());
+                BigDecimal stockNumSum = item.getSumNum();
+                stockMap.put(key, stockNumSum);
+            });
+        }
         return R.data(stockMap);
     }
 
@@ -539,21 +550,25 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
         });
         R storeResult = remoteCdProductWarehouseService.queryByList(productWarehouses);
         if (!storeResult.isSuccess()) {
-            log.error("IOmsProductionOrderAnalysisService.getCustomerStockNum方法，获取客户库位库存失败!");
-            return R.error(StrUtil.toString(storeResult.get("msg")));
+            log.info("IOmsProductionOrderAnalysisService.queryCustomerStock，获取客户库位库存失败!");
         }
-        List<CdProductWarehouse> productWarehouseList = storeResult.getCollectData(new TypeReference<List<CdProductWarehouse>>() {
-        });
+        List<CdProductWarehouse> productWarehouseList = new ArrayList<>();
+        if (storeResult.get("data") != null) {
+            productWarehouseList = storeResult.getCollectData(new TypeReference<List<CdProductWarehouse>>() {
+            });
+        }
         Map<String, BigDecimal> productWarehouseMap = productWarehouseList.stream().
                 collect(Collectors.toMap(k -> k.getProductFactoryCode() +
                         k.getProductMaterialCode() + k.getStorehouse(), CdProductWarehouse::getWarehouseNum));
         R passageResult = remoteCdProductPassageService.queryByList(productPassages);
         if (!passageResult.isSuccess()) {
-            log.error("IOmsProductionOrderAnalysisService.getCustomerStockNum方法，获取客户在途库存失败!");
-            return R.error(StrUtil.toString(passageResult.get("msg")));
+            log.info("IOmsProductionOrderAnalysisService.queryCustomerStock，获取客户在途库存失败!");
         }
-        List<CdProductPassage> productPassageList = passageResult.getCollectData(new TypeReference<List<CdProductPassage>>() {
-        });
+        List<CdProductPassage> productPassageList = new ArrayList<>();
+        if (passageResult.get("data") != null ){
+            productPassageList = passageResult.getCollectData(new TypeReference<List<CdProductPassage>>() {
+            });
+        }
         Map<String, BigDecimal> productPassageMap = productPassageList.stream().
                 collect(Collectors.toMap(k -> k.getProductFactoryCode() +
                         k.getProductMaterialCode() + k.getStorehouseTo(), CdProductPassage::getPassageNum));

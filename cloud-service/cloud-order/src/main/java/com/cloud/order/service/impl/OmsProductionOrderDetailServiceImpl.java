@@ -239,8 +239,8 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
         List<OmsProductionOrderDetail> omsProductionOrderDetails =
                 omsProductionOrderDetailMapper.selectByExample(example);
         if (ObjectUtil.isEmpty(omsProductionOrderDetails) || omsProductionOrderDetails.size() <= 0) {
-            log.error("根据原材料号、生产工厂、开始日期查询排产订单明细为空！");
-            return R.error("根据原材料号、生产工厂、开始日期查询排产订单明细为空！");
+            log.info("根据原材料号、生产工厂、开始日期查询排产订单明细为空！");
+            return R.ok();
         }
         //根据排产订单号查询排产订单表，根据成品专用号进行汇总
         //获取排产订单号List
@@ -274,6 +274,9 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
                     .productStartDate(omsProductionOrder.getProductStartDate())
                     .build());
         });
+        if (ObjectUtil.isEmpty(omsRawMaterialFeedbacks) || omsRawMaterialFeedbacks.size() <= 0) {
+            return R.ok();
+        }
         return R.data(omsRawMaterialFeedbacks);
     }
 
@@ -335,11 +338,10 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
                     List<String> purchaseList = Arrays.asList(DataScopeUtil.getUserPurchaseScopes(sysUser.getUserId()).split(","));
                     String factorys = factoryList.stream().map(f -> "\'" + f +"\'").collect(Collectors.joining(","));
                     String purchases = purchaseList.stream().map(p -> "\'" + p +"\'").collect(Collectors.joining(","));
-                    OmsProductionOrderDetail orderDetail = new OmsProductionOrderDetail();
-                    orderDetail.setProductFactoryQuery(factorys);
-                    orderDetail.setPurchaseGroupQuery(purchases);
-                    orderDetail.setStatus(ProductOrderConstants.DETAIL_STATUS_ZERO);
-                    list.add(orderDetail);
+                    omsProductionOrderDetail.setProductFactoryQuery(factorys);
+                    omsProductionOrderDetail.setPurchaseGroupQuery(purchases);
+                    omsProductionOrderDetail.setStatus(ProductOrderConstants.DETAIL_STATUS_ZERO);
+                    list.add(omsProductionOrderDetail);
                 }
             }
         }

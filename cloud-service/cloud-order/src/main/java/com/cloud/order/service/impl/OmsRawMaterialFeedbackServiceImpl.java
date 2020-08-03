@@ -264,18 +264,34 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
      */
     @Override
     @GlobalTransactional
-    public R deleteByIds(String ids, SysUser sysUser) {
-
-        if (StrUtil.isBlank(ids) || ids.length() <= 0) {
-            log.info("反馈信息删除，传入ID为空！");
-            return R.error("请至少选择一条记录进行删除！");
-        }
-        /** 删除原材料反馈信息需要同时更新排产订单表记录的状态，然而删除的反馈信息记录不一定是一条排产订单对应的全部反馈信息，因此需要进行筛选*/
-        /** 筛选开始 */
+    public R deleteByIds(String ids, OmsRawMaterialFeedback omsRawMaterialFeedback ,SysUser sysUser) {
         Example example = new Example(OmsRawMaterialFeedback.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andIn("id", Arrays.asList(ids.split(",")));
+        if (StrUtil.isBlank(ids) || ids.length() <= 0) {
+            criteria.andIn("id", Arrays.asList(ids.split(",")));
+        } else {
+            if (StrUtil.isNotBlank(omsRawMaterialFeedback.getRawMaterialCode())) {
+                criteria.andEqualTo("rawMaterialCode",omsRawMaterialFeedback.getRawMaterialCode());
+            }
+            if (StrUtil.isNotBlank(omsRawMaterialFeedback.getProductFactoryCode())) {
+                criteria.andEqualTo("productFactoryCode", omsRawMaterialFeedback.getProductFactoryCode());
+            }
+            if (StrUtil.isNotBlank(omsRawMaterialFeedback.getCheckDateStart())) {
+                criteria.andGreaterThanOrEqualTo("productStartDate", omsRawMaterialFeedback.getCheckDateStart());
+            }
+            if (StrUtil.isNotBlank(omsRawMaterialFeedback.getCheckDateEnd())) {
+                criteria.andLessThanOrEqualTo("productStartDate", omsRawMaterialFeedback.getCheckDateEnd());
+            }
+            if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
+                if (CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_JIT)) {
+                    criteria.andEqualTo("createBy", sysUser.getLoginName());
+                }
+            }
+        }
         List<OmsRawMaterialFeedback> omsRawMaterialFeedbacks = omsRawMaterialFeedbackMapper.selectByExample(example);
+        /** 删除原材料反馈信息需要同时更新排产订单表记录的状态，然而删除的反馈信息记录不一定是一条排产订单对应的全部反馈信息，因此需要进行筛选*/
+        /** 筛选开始 */
+
         //根据专用号、生产工厂、基本开始日期、bom版本查询原材料反馈信息
         List<OmsRawMaterialFeedback> rawMaterialFeedbacks = omsRawMaterialFeedbackMapper.selectByList(omsRawMaterialFeedbacks);
         //取前台传的数据与同专用号、生产工厂、开始日期、bom版本查询出的数据差集
@@ -383,11 +399,19 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
         //查询排产订单明细,条件：生产工厂、基本开始日期、原材料物料、版本
         List<OmsProductionOrderDetail> details =
                 omsProductionOrderDetailService.selectListByList(omsProductionOrderDetails);
+        if (ObjectUtil.isEmpty(details) || details.size() <= 0) {
+            log.error("根据生产工厂、基本开始日期、原材料物料、版本未查询出排产订单明细！");
+            return R.error("没有查询出排产订单明细！");
+        }
         List<String> orderCodeList = details.stream()
                 .map(OmsProductionOrderDetail::getProductOrderCode).distinct().collect(Collectors.toList());
         //查询排产订单记录
         List<OmsProductionOrder> omsProductionOrders =
                 omsProductionOrderService.selectByOrderCode(orderCodeList);
+        if (ObjectUtil.isEmpty(omsProductionOrders) || omsProductionOrders.size() <= 0) {
+            log.error("根据排产订单号没有查询出排产订单！");
+            return R.error("没有查询出排产订单！");
+        }
         //更新排产订单明细状态
         details.forEach(d -> d.setStatus(ProductOrderConstants.DETAIL_STATUS_TWO));
         int updateOrderDetailCount = omsProductionOrderDetailService.updateBatchByPrimaryKeySelective(details);
