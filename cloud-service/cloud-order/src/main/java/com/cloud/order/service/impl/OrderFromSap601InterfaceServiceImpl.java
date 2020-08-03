@@ -81,7 +81,9 @@ public class OrderFromSap601InterfaceServiceImpl implements IOrderFromSap601Inte
                     omsProductionOrder.setProductNum(outTableOutput.getBigDecimal("GAMNG"));//订单数量
                     omsProductionOrder.setDestination(outTableOutput.getString("LGORT"));//地点、发往地
                     omsProductionOrder.setProductLineCode(outTableOutput.getString("CY_SEQNR"));//线体
-                    omsProductionOrder.setBomVersion(outTableOutput.getString("STLAL"));//BOM版本
+                    omsProductionOrder.setBomVersion(outTableOutput.getString("VERID"));//BOM版本
+                    omsProductionOrder.setSapMessages(outTableOutput.getString("MESSAGE"));
+                    omsProductionOrder.setSapFlag(outTableOutput.getString("FLAG"));
                     dataList.add(omsProductionOrder);
                 }
             } else {
