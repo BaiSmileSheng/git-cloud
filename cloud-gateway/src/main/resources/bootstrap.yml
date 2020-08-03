@@ -96,6 +96,15 @@ spring:
                 timeout:
                   productionOrder-importProductOrder: 60000
                   productOrderDetail-export: 60000
+                  demand-queryAndInsertDemandPRFromSap800Friday: 120000
+                  demand-queryDemandPRFromSap800: 120000
+                  demandOrderGather-gatherDemandOrderFriday: 60000
+                  demandOrderGather-gatherDemandOrderMonday: 60000
+                  demandOrderGatherEdit-importExcel: 60000
+                  oms2weeksDemandOrderEdit-importExcel: 100000
+                  demandOrderGatherEdit-toSAP: 30000
+                  oms2weeksDemandOrderEdit-toSAP: 30000
+                  actOmsOrderMaterialOut-save: 30000
         #settle 模块
         - id: cloud-settle
           uri: lb://cloud-settle

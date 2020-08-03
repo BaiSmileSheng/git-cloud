@@ -57,8 +57,6 @@ public class CdProductOverdueServiceImpl extends BaseServiceImpl<CdProductOverdu
     @Autowired
     private ICdProductOverdueExcelImportService cdProductOverdueExcelImportService;
 
-    @Autowired
-    private ICdFactoryInfoService cdFactoryInfoService;
 
     @Autowired
     private ICdMaterialInfoService cdMaterialInfoService;
@@ -68,7 +66,7 @@ public class CdProductOverdueServiceImpl extends BaseServiceImpl<CdProductOverdu
      * @param file
      * @return
      */
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     @Override
     public R importFactoryStorehouse(MultipartFile file, String loginName) throws IOException {
 
@@ -82,6 +80,7 @@ public class CdProductOverdueServiceImpl extends BaseServiceImpl<CdProductOverdu
                 CdProductOverdue cdProductOverdue = BeanUtil.copyProperties(excelImportSucObjectDto.getObject(), CdProductOverdue.class);
                 cdProductOverdue.setCreateBy(loginName);
                 cdProductOverdue.setUpdateBy(loginName);
+                cdProductOverdue.setUpdateTime(new Date());
                 return cdProductOverdue;
             }).collect(Collectors.toList());
             if(!CollectionUtils.isEmpty(successResult)){
@@ -113,12 +112,6 @@ public class CdProductOverdueServiceImpl extends BaseServiceImpl<CdProductOverdu
             return new ExcelImportResult(new ArrayList<>());
         }
 
-        //获取工厂编号信息
-        R rCompanyList = cdFactoryInfoService.selectAllCompanyCode();
-        if (!rCompanyList.isSuccess()) {
-            throw new BusinessException("无工厂信息，请到基础信息维护！");
-        }
-        List<String> companyCodeList = rCompanyList.getCollectData(new TypeReference<List<String>>() {});
         //错误数据
         List<ExcelImportErrObjectDto> errDtos = new ArrayList<>();
         //可导入数据
@@ -150,17 +143,14 @@ public class CdProductOverdueServiceImpl extends BaseServiceImpl<CdProductOverdu
                 criteria.andEqualTo("plantCode", factoryCode);
                 List<CdMaterialInfo> cdMaterialInfoList = cdMaterialInfoService.selectByExample(example);
                 if(CollectionUtils.isEmpty(cdMaterialInfoList)
-                        || null == cdMaterialInfoList.get(0)
-                        || StringUtils.isBlank(cdMaterialInfoList.get(0).getMaterialDesc())){
+                        || null == cdMaterialInfoList.get(0)){
+                    errMsgBuffer.append("对应工厂超期物料号不存在,请在物料主数据维护;");
+                }else if(StringUtils.isBlank(cdMaterialInfoList.get(0).getMaterialDesc())){
                     errMsgBuffer.append("超期物料号描述不存在,请维护;");
                 }else{
                     cdProductOverdueReq.setProductMaterialDesc(cdMaterialInfoList.get(0).getMaterialDesc());
                 }
             }
-            if (StringUtils.isNotBlank(factoryCode) && !companyCodeList.contains(factoryCode)) {
-                errMsgBuffer.append("工厂编号不存在请维护;");
-            }
-
             String errMsgBufferString = errMsgBuffer.toString();
             if(StringUtils.isNotBlank(errMsgBufferString)){
                 errObjectDto.setObject(cdProductOverdue);

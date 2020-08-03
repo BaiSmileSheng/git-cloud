@@ -78,14 +78,13 @@ public class CdMaterialExtendInfoExportVo {
     /**
      * 可否加工承揽
      */
-    @ExcelProperty(value = "可否加工承揽",index = 4,converter = PuttingOutConverter.class)
     @ApiModelProperty(value = "可否加工承揽")
     private String isPuttingOut;
 
     /**
      * 是否ZN认证
      */
-    @ExcelProperty(value = "是否ZN认证",index = 5,converter = ZnAttestationConverter.class)
+    @ExcelProperty(value = "是否ZN认证",index = 4,converter = ZnAttestationConverter.class)
     @ApiModelProperty(value = "是否ZN认证")
     private String isZnAttestation;
 
@@ -95,6 +94,7 @@ public class CdMaterialExtendInfoExportVo {
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     @ApiModelProperty(value = "建立日期")
+    @ExcelProperty(value = "建立日期",index = 5)
     private Date establishDate;
 
     /**

@@ -6,6 +6,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.EasyExcel;
@@ -22,10 +23,8 @@ import com.cloud.common.easyexcel.DTO.ExcelImportSucObjectDto;
 import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
-import com.cloud.order.domain.entity.OmsDemandOrderGatherEdit;
-import com.cloud.order.domain.entity.OmsDemandOrderGatherEditHis;
-import com.cloud.order.domain.entity.OmsDemandOrderGatherEditImport;
-import com.cloud.order.domain.entity.WeekAndNumGatherDTO;
+import com.cloud.common.utils.RandomUtil;
+import com.cloud.order.domain.entity.*;
 import com.cloud.order.domain.entity.vo.OmsDemandOrderGatherEditExport;
 import com.cloud.order.enums.DemandOrderGatherEditAuditStatusEnum;
 import com.cloud.order.enums.DemandOrderGatherEditStatusEnum;
@@ -87,6 +86,8 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
     private RemoteInterfaceLogService remoteInterfaceLogService;
     @Autowired
     private RemoteActOmsOrderMaterialOutService remoteActOmsOrderMaterialOutService;
+    @Autowired
+    private RemoteFactoryStorehouseInfoService remoteFactoryStorehouseInfoService;
 
     private static final String TABLE_NAME = "oms_demand_order_gather_edit";
 
@@ -120,18 +121,29 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
      * @return
      */
     @Override
-    public R deleteWithLimit(String ids) {
+    public R deleteWithLimit(String ids,OmsDemandOrderGatherEdit omsDemandOrderGatherEditVo) {
         if (StrUtil.isEmpty(ids)) {
-            return R.error("参数为空！");
-        }
-        List<String> list = CollUtil.newArrayList(ids.split(StrUtil.COMMA));
-        for (String id : list) {
-            OmsDemandOrderGatherEdit omsDemandOrderGatherEdit = selectByPrimaryKey(Long.valueOf(id));
-            if (!StrUtil.equals(omsDemandOrderGatherEdit.getStatus(),
-                    DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode())||
-             StrUtil.equals(omsDemandOrderGatherEdit.getAuditStatus(),
-                            DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHZ.getCode())) {
-                return R.error(StrUtil.format("此状态数据不允许删除！需求订单号：{}",omsDemandOrderGatherEdit.getDemandOrderCode()));
+            Example example = new Example(Oms2weeksDemandOrderEdit.class);
+            Example.Criteria criteria = example.createCriteria();
+            listCondition(omsDemandOrderGatherEditVo,criteria);
+            criteria.andEqualTo("status", DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode())
+                    .andNotEqualTo("auditStatus", DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHZ.getCode());
+            List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList = selectByExample(example);
+            if (CollectionUtil.isEmpty(omsDemandOrderGatherEditList)) {
+                return R.error("无可删除数据！");
+            }
+            List idList = omsDemandOrderGatherEditList.stream().map(OmsDemandOrderGatherEdit::getId).collect(Collectors.toList());
+            ids = CollectionUtil.join(idList, StrUtil.COMMA);
+        }else{
+            List<String> list = CollUtil.newArrayList(ids.split(StrUtil.COMMA));
+            for (String id : list) {
+                OmsDemandOrderGatherEdit omsDemandOrderGatherEdit = selectByPrimaryKey(Long.valueOf(id));
+                if (!StrUtil.equals(omsDemandOrderGatherEdit.getStatus(),
+                        DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode())||
+                        StrUtil.equals(omsDemandOrderGatherEdit.getAuditStatus(),
+                                DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHZ.getCode())) {
+                    return R.error(StrUtil.format("此状态数据不允许删除！需求订单号：{}",omsDemandOrderGatherEdit.getDemandOrderCode()));
+                }
             }
         }
         deleteByIds(ids);
@@ -267,6 +279,18 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         List<OmsDemandOrderGatherEdit> listNeedAudti = CollUtil.newArrayList();
         Date date = DateUtil.date();
 
+        //获取不重复的物料号和工厂Map
+        List<Dict> maps = list.stream().map(s -> new Dict().set("productFactoryCode",s.getProductFactoryCode())
+                .set("customerCode",s.getCustomerCode())).distinct().collect(Collectors.toList());
+        //获取库位
+        R rStoreHouse = remoteFactoryStorehouseInfoService.selectStorehouseToMap(maps);
+        if(!rStoreHouse.isSuccess()){
+            throw new BusinessException("获取接收库位失败！");
+        }
+        Map<String, Map<String, String>> storehouseMap = rStoreHouse.getCollectData(new TypeReference<Map<String, Map<String, String>>>() {});
+        if (MapUtil.isEmpty(storehouseMap)) {
+            throw new BusinessException("获取接收库位失败！");
+        }
         for(OmsDemandOrderGatherEdit demandOrderGatherEdit:list){
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
@@ -333,11 +357,11 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             demandOrderGatherEdit.setPurchaseGroupCode(cdMaterialInfo.getPurchaseGroupCode());
             demandOrderGatherEdit.setUnit(cdMaterialInfo.getPrimaryUom());
             //需求订单号
-            R seqresult = remoteSequeceService.selectSeq("demand_order_gather_seq", 4);
-            if(!seqresult.isSuccess()){
-                throw new BusinessException("查序列号失败");
-            }
-            String seq = seqresult.getStr("data");
+//            R seqresult = remoteSequeceService.selectSeq("demand_order_gather_seq", 4);
+//            if(!seqresult.isSuccess()){
+//                throw new BusinessException("查序列号失败");
+//            }
+            String seq = RandomUtil.randomInt(6);
             String demandOrderCode = StrUtil.concat(true, "DM", DateUtils.dateTime(), seq);
             demandOrderGatherEdit.setDemandOrderCode(demandOrderCode);
             //订单来源
@@ -360,6 +384,20 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             if (extendInfo==null) {
                 errObjectDto.setObject(demandOrderGatherEdit);
                 errObjectDto.setErrMsg(StrUtil.format("物料号{}：无生命周期及产品类别信息！",demandOrderGatherEdit.getProductMaterialCode()));
+                errDtos.add(errObjectDto);
+                continue;
+            }
+            //判断地点是否存在
+            Map<String, String> storeHouseMap = storehouseMap.get(StrUtil.concat(true, demandOrderGatherEdit.getProductFactoryCode(), demandOrderGatherEdit.getCustomerCode()));
+            if (storeHouseMap == null) {
+                errObjectDto.setObject(demandOrderGatherEdit);
+                errObjectDto.setErrMsg(StrUtil.format("工厂：{}，客户编码{}无工厂库位信息！",demandOrderGatherEdit.getProductFactoryCode(),demandOrderGatherEdit.getCustomerCode()));
+                errDtos.add(errObjectDto);
+                continue;
+            }
+            if (!StrUtil.equals(demandOrderGatherEdit.getPlace(), storeHouseMap.get("storehouseTo"))) {
+                errObjectDto.setObject(demandOrderGatherEdit);
+                errObjectDto.setErrMsg(StrUtil.format("对应地点应为：{}",storeHouseMap.get("storehouseTo")));
                 errDtos.add(errObjectDto);
                 continue;
             }
@@ -460,6 +498,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                     omsOrderMaterialOutVo.setOrderCode(omsDemandOrderGatherEdit.getDemandOrderCode());
                     omsOrderMaterialOutVo.setId(omsDemandOrderGatherEdit.getId());
                     omsOrderMaterialOutVo.setTableName(TABLE_NAME);
+                    omsOrderMaterialOutVo.setFactoryCode(omsDemandOrderGatherEdit.getProductFactoryCode());
                     omsOrderMaterialOutVoList.add(omsOrderMaterialOutVo);
                 }
             });
@@ -902,6 +941,9 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 if (CollUtil.isNotEmpty(failList)) {
                     omsDemandOrderGatherEditMapper.updateBatchByDemandOrderCode(failList);
                 }
+                return R.ok(StrUtil.format("下达SAP成功：{}条，异常：{}条",
+                        successList==null?0:successList.size(),
+                        failList==null?0:failList.size()));
             }
         } catch (JCoException e) {
             log.error("Connect SAP fault, error msg: " + e.toString());

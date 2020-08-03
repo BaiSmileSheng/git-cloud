@@ -7,8 +7,8 @@ package com.cloud.settle.enums;
  */
 public enum OutsourceWayEnum {
 
-    OUTSOURCE_WAY_0("0","半委外"),
-    OUTSOURCE_WAY_1("1","全委外"),
+    OUTSOURCE_WAY_0("0","半成品"),
+    OUTSOURCE_WAY_1("1","成品"),
 
     ;
     private String code;

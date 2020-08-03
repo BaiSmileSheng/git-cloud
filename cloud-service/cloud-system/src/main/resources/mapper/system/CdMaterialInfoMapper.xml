@@ -151,4 +151,21 @@
         update_time = now(),
         update_by  = values(create_by)
     </insert>
+
+    <select id="selectListByMaterialCodeList" parameterType="list" resultMap="CdMaterialInfoResult">
+        <include refid="selectCdMaterialInfoVo"/>
+        <where>
+            <foreach collection="list" index="index" separator="or" open="(" close=")" item="item">
+                material_code = #{item.productMaterialCode,jdbcType=VARCHAR}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="selectByMaterialCode" parameterType="string" resultType="string">
+        select  distinct material_code
+        from cd_material_info
+        <where>
+            material_code  LIKE '${materialCode}%'
+        </where>
+    </select>
 </mapper>

@@ -4,6 +4,7 @@ import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -134,6 +135,7 @@ public class OmsDemandOrderGatherHis extends BaseEntity {
     @ExcelProperty(value = "交付日期")
     @DateTimeFormat("yyyy-MM-dd")
     @ApiModelProperty(value = "交付日期")
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
     private Date deliveryDate;
 
     /**

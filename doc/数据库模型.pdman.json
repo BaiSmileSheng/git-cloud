@@ -2986,7 +2986,7 @@
             },
             {
               "name": "raw_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "原材料描述",
               "defaultValue": "''"
@@ -3180,7 +3180,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "''"
@@ -3429,7 +3429,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "''"
@@ -3676,7 +3676,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "''"
@@ -3958,7 +3958,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "''"
@@ -4225,7 +4225,7 @@
             },
             {
               "name": "raw_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "原材料描述",
               "defaultValue": "''"
@@ -4621,7 +4621,7 @@
             {
               "name": "status",
               "type": "DefaultString",
-              "remark": "0：待评审，1：反馈中，2：待调整，3：已评审，4：待传SAP，5：传SAP中，6：已传SAP，7：传SAP异常，8：已关单",
+              "remark": "状态：0：待评审，1：反馈中，2：待调整，3：已评审，4：待传SAP，5：传SAP中，6：已传SAP，7：传SAP异常(下达SAP时)，8：已关单,9:获取SAP生产订单号异常(下达SAP后,获取生产订单号时)",
               "chnname": "状态",
               "notNull": true,
               "defaultValue": "0"
@@ -4779,7 +4779,7 @@
             },
             {
               "name": "material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "原材料描述",
               "defaultValue": "''"
@@ -4976,7 +4976,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "",
@@ -6055,7 +6055,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "",
@@ -6231,7 +6231,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "''"
@@ -6459,7 +6459,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "''"
@@ -6695,7 +6695,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "''"
@@ -6973,7 +6973,7 @@
             },
             {
               "name": "product_material_desc",
-              "type": "DefaultString",
+              "type": "VARCHAR_64",
               "remark": "",
               "chnname": "成品物料描述",
               "defaultValue": "''"

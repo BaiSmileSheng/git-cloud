@@ -13,6 +13,7 @@ import com.cloud.system.domain.vo.CdSettleProductMaterialExcelImportVo;
 import com.cloud.system.domain.vo.CdSettleProductMaterialExportVo;
 import com.cloud.system.service.ICdSettleProductMaterialService;
 import com.cloud.system.util.EasyExcelUtilOSS;
+import com.cloud.system.util.SettleProductMaterialWriteHandler;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -44,7 +46,8 @@ public class CdSettleProductMaterialController extends BaseController {
     @ApiOperation(value = "导入模板", response = CdSettleProductMaterial.class)
     public R exportMul() {
         String fileName = "物料号和加工费号对应关系数据.xlsx";
-        return EasyExcelUtilOSS.writeExcel(Arrays.asList(),fileName,fileName,new CdSettleProductMaterialExcelImportVo());
+        return EasyExcelUtilOSS.writePostilExcel(Arrays.asList(),fileName,fileName,new CdSettleProductMaterialExcelImportVo(),
+                new SettleProductMaterialWriteHandler());
     }
 
     /**
@@ -110,6 +113,7 @@ public class CdSettleProductMaterialController extends BaseController {
         Example.Criteria criteria = example.createCriteria();
         assemblyConditions(cdSettleProductMaterial, criteria);
         startPage();
+        example.orderBy("createTime").desc();
         List<CdSettleProductMaterial> cdSettleProductMaterialList = cdSettleProductMaterialService.selectByExample(example);
         return getDataTable(cdSettleProductMaterialList);
     }
@@ -151,6 +155,7 @@ public class CdSettleProductMaterialController extends BaseController {
         Example example = new Example(CdSettleProductMaterial.class);
         Example.Criteria criteria = example.createCriteria();
         assemblyConditions(cdSettleProductMaterial, criteria);
+        example.orderBy("createTime").desc();
         List<CdSettleProductMaterial> cdSettleProductMaterialList = cdSettleProductMaterialService.selectByExample(example);
         String fileName = "物料号和加工费号维护.xlsx";
         return EasyExcelUtilOSS.writeExcel(cdSettleProductMaterialList,fileName,fileName,new CdSettleProductMaterialExportVo());
@@ -168,6 +173,8 @@ public class CdSettleProductMaterialController extends BaseController {
         ValidatorUtils.validateEntity(cdSettleProductMaterial);
         SysUser sysUser = getUserInfo(SysUser.class);
         cdSettleProductMaterial.setCreateBy(sysUser.getLoginName());
+        cdSettleProductMaterial.setUpdateBy(sysUser.getLoginName());
+        cdSettleProductMaterial.setUpdateTime(new Date());
         R r = cdSettleProductMaterialService.insertProductMaterial(cdSettleProductMaterial);
         return r ;
     }
@@ -183,7 +190,7 @@ public class CdSettleProductMaterialController extends BaseController {
         //校验入参
         ValidatorUtils.validateEntity(cdSettleProductMaterial);
         SysUser sysUser = getUserInfo(SysUser.class);
-        cdSettleProductMaterial.setCreateBy(sysUser.getLoginName());
+        cdSettleProductMaterial.setUpdateBy(sysUser.getLoginName());
         R r = cdSettleProductMaterialService.updateProductMaterial(cdSettleProductMaterial);
         return r;
     }

@@ -5,6 +5,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.druid.util.Utils;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.domain.entity.vo.OmsOrderMaterialOutVo;
@@ -20,6 +21,7 @@ import com.cloud.common.easyexcel.DTO.ExcelImportSucObjectDto;
 import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
+import com.cloud.common.utils.reflect.ReflectUtils;
 import com.cloud.order.domain.entity.OmsInternalOrderRes;
 import com.cloud.order.domain.entity.OmsRealOrder;
 import com.cloud.order.domain.entity.vo.OmsRealOrderExcelImportErrorVo;
@@ -33,8 +35,10 @@ import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.CdFactoryStorehouseInfo;
 import com.cloud.system.domain.entity.CdMaterialExtendInfo;
+import com.cloud.system.domain.entity.SysDictData;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.enums.LifeCycleEnum;
+import com.cloud.system.feign.RemoteDictDataService;
 import com.cloud.system.feign.RemoteFactoryInfoService;
 import com.cloud.system.feign.RemoteFactoryStorehouseInfoService;
 import com.cloud.system.feign.RemoteMaterialExtendInfoService;
@@ -91,6 +95,9 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
     @Autowired
     private RemoteActOmsOrderMaterialOutService remoteActOmsOrderMaterialOutService;
 
+    @Autowired
+    private RemoteDictDataService remoteDictDataService;
+
     private final static String YYYY_MM_DD = "yyyy-MM-dd";//时间格式
 
     private final static String ORDER_CODE_PRE = "RO";//订单号前缀
@@ -120,6 +127,10 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             factoryScopesList = Arrays.asList(DataScopeUtil.getUserFactoryScopes(userId).split(","));
         }
         OmsRealOrder omsRealOrderRes = omsRealOrderMapper.selectByPrimaryKey(omsRealOrder);
+        //修改交付日期时必须加备注
+        if(!omsRealOrder.getDeliveryDate().equals(omsRealOrderRes.getDeliveryDate()) && StringUtils.isBlank(omsRealOrder.getRemark())){
+            throw new BusinessException("请填写备注");
+        }
         if(!RealOrderDataSourceEnum.DATA_SOURCE_1.getCode().equals(omsRealOrderRes.getDataSource())){
             logger.error("修改保存真单异常 id:{},res:{}",omsRealOrder.getId(),JSONObject.toJSON(omsRealOrderRes));
             throw new BusinessException("非人工导入数据不可修改");
@@ -150,7 +161,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         List<OmsRealOrder> auditResult = new ArrayList<>();
         if (!CollectionUtils.isEmpty(auditList)){
             auditResult =auditList.stream().map(excelImportAuditObjectDto -> {
-                OmsRealOrder omsRealOrder = BeanUtil.copyProperties(excelImportAuditObjectDto, OmsRealOrder.class);
+                OmsRealOrder omsRealOrder = BeanUtil.copyProperties(excelImportAuditObjectDto.getObject(), OmsRealOrder.class);
                 return omsRealOrder;
             }).collect(Collectors.toList());
         }
@@ -190,8 +201,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
      * @param orderFrom  内单或外单
      * @return
      */
-    @Override
-    public R importOmsRealOrder(List<OmsRealOrder> successResult, List<OmsRealOrder> auditResult, SysUser sysUser,String orderFrom) {
+    private R importOmsRealOrder(List<OmsRealOrder> successResult, List<OmsRealOrder> auditResult, SysUser sysUser,String orderFrom) {
         if(CollectionUtils.isEmpty(successResult)){
             return R.error("无需要插入的数据");
         }
@@ -212,12 +222,10 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         logger.info("导入真单开启审批流开始");
         //key 工厂编号 ,客户编号 物料号,交货日期,订单类型
         if(!CollectionUtils.isEmpty(auditResult)){
-            Map<String,OmsRealOrder> auditResultMap = auditResult.stream().collect(Collectors.toMap(
-                    omsRealOrder -> omsRealOrder.getProductFactoryCode() + omsRealOrder.getCustomerCode() + omsRealOrder.getProductMaterialCode()
-                            + omsRealOrder.getDeliveryDate() + omsRealOrder.getOrderClass(),
-                    cdProductStock -> cdProductStock,(key1,key2) ->key2));
-
-            Map<String,OmsRealOrder> successResultMap = successResult.stream().collect(Collectors.toMap(
+            //查id
+            List<OmsRealOrder> listRes = omsRealOrderMapper.selectForIndexes(auditResult);
+            //去重
+            Map<String,OmsRealOrder> auditResultMap = listRes.stream().collect(Collectors.toMap(
                     omsRealOrder -> omsRealOrder.getProductFactoryCode() + omsRealOrder.getCustomerCode() + omsRealOrder.getProductMaterialCode()
                             + omsRealOrder.getDeliveryDate() + omsRealOrder.getOrderClass(),
                     cdProductStock -> cdProductStock,(key1,key2) ->key2));
@@ -225,13 +233,14 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             OmsOrderMaterialOutVo auditResultReq = new OmsOrderMaterialOutVo();
             List<OmsOrderMaterialOutVo> omsOrderMaterialOutVoList = new ArrayList<>();
             auditResultMap.keySet().forEach(code -> {
-                OmsRealOrder omsRealOrder = successResultMap.get(code);
+                OmsRealOrder omsRealOrder = auditResultMap.get(code);
                 OmsOrderMaterialOutVo omsOrderMaterialOutVo = new OmsOrderMaterialOutVo();
                 omsOrderMaterialOutVo.setLoginId(sysUser.getUserId());
                 omsOrderMaterialOutVo.setCreateBy(sysUser.getLoginName());
                 omsOrderMaterialOutVo.setOrderCode(omsRealOrder.getOrderCode());
                 omsOrderMaterialOutVo.setId(omsRealOrder.getId());
                 omsOrderMaterialOutVo.setTableName(TABLE_NAME);
+                omsOrderMaterialOutVo.setFactoryCode(omsRealOrder.getProductFactoryCode());
                 omsOrderMaterialOutVoList.add(omsOrderMaterialOutVo);
             });
             auditResultReq.setOmsOrderMaterialOutVoList(omsOrderMaterialOutVoList);
@@ -250,7 +259,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
      *
      * @return
      */
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     @Override
     public R timeCollectToOmsRealOrder() {
         logger.info("定时任务每天在获取到PO信息后 进行需求汇总  开始");
@@ -298,6 +307,11 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             });
             int count = omsRealOrderMapper.deleteByIds(ids);
             return R.data(count);
+        }
+        //判断对象属性是否有赋值
+        Boolean flag = ReflectUtils.isAllFieldNull(omsRealOrder);
+        if(!flag){
+            return R.error("请勾选需要删除的数据或填写至少一个查询条件");
         }
         Example example = assemblyConditions(omsRealOrder);
         //排产员查对应工厂的数据,业务经理查自己导入的
@@ -404,6 +418,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 omsRealOrder.setOrderNum(internalOrderRes.getOrderNum());
                 omsRealOrder.setUnit(internalOrderRes.getUnit());
                 omsRealOrder.setDeliveryDate(internalOrderRes.getDeliveryDate());
+                omsRealOrder.setAuditStatus(RealOrderAduitStatusEnum.AUDIT_STATUS_WXSH.getCode());
                 CdFactoryStorehouseInfo cdFactoryStorehouseInfo = factoryStorehouseInfoMap.get(omsRealOrder.getCustomerCode()
                         + omsRealOrder.getProductFactoryCode());
                 if(null == cdFactoryStorehouseInfo){
@@ -522,7 +537,13 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             BeanUtils.copyProperties(omsRealOrder,omsRealOrderReq);
             StringBuffer errMsgBuffer = new StringBuffer();
             if(StringUtils.isBlank(omsRealOrder.getOrderType())){
-                errMsgBuffer.append("订单类型不能为空;");
+                errMsgBuffer.append("SAP订单类型不能为空;");
+            }
+            //校验订单类型
+            List<SysDictData> listSysDictData = remoteDictDataService.getType("sap_order_type");
+            List<String> dictValueS = listSysDictData.stream().map(m -> m.getDictValue()).collect(Collectors.toList());
+            if(!dictValueS.contains(omsRealOrder.getOrderType())){
+                errMsgBuffer.append("此SAP订单类型不存在;");
             }
             String orderClassReq = omsRealOrder.getOrderClass();
             if(StringUtils.isNotBlank(orderClassReq)){

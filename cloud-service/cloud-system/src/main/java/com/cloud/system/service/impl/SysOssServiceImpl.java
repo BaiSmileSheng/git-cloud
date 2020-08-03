@@ -126,7 +126,7 @@ public class SysOssServiceImpl implements ISysOssService {
      * @param files 文件数组
      * @return 成功或失败
      */
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     @Override
     public R updateListByOrderNo(String orderNo, MultipartFile[] files) throws IOException {
         if(files.length == 0){
@@ -187,7 +187,7 @@ public class SysOssServiceImpl implements ISysOssService {
      * @param orderNo 订单编号
      * @return 成功或失败
      */
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     @Override
     public R deleteListByOrderNo(String orderNo) {
         deleteFilesByOrderNo(orderNo);

@@ -101,7 +101,7 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
         return cdMaterialPriceInfoMapper.selectPriceByInMaterialCodeAndDate(materialCodes, beginDate, endDate);
     }
 
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     @Override
     public R synPriceJGF() {
         //1.调SAP接口查加工费
@@ -116,7 +116,7 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
         return R.ok();
     }
 
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     @Override
     public R synPriceYCL() {
 

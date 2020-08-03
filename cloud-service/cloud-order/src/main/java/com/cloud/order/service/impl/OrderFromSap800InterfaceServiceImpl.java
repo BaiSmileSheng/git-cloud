@@ -1,5 +1,7 @@
 package com.cloud.order.service.impl;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
@@ -52,8 +54,11 @@ public class OrderFromSap800InterfaceServiceImpl implements IOrderFromSap800Inte
                 return R.error("获取SAP800系统13周PR需求接口函数为空!");
             }
             JCoParameterList jCoFields = fm.getImportParameterList();
-            jCoFields.setValue("BEGIN_DATE", startDate);
-            jCoFields.setValue("END_DATE", endDate);
+            String startDateStr = DateUtil.format(startDate, "yyyy-MM-dd");
+            String endDateStr = DateUtil.format(endDate, "yyyy-MM-dd");
+
+            jCoFields.setValue("BEGIN_DATE", startDateStr);
+            jCoFields.setValue("END_DATE", endDateStr);
             //执行函数
             JCoContext.begin(destination);
             fm.execute(destination);
@@ -65,6 +70,7 @@ public class OrderFromSap800InterfaceServiceImpl implements IOrderFromSap800Inte
             if (SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(outParam.getString("FLAG"))) {
                 //从输出table中获取每一行数据
                 if (outTableOutput != null && outTableOutput.getNumRows() > 0) {
+                    log.info(StrUtil.format("===================获取SAP PR数据{}条========================",outTableOutput.getNumRows()));
                     //循环取table行数据
                     for (int i = 0; i < outTableOutput.getNumRows(); i++) {
                         //设置指针位置
@@ -73,6 +79,7 @@ public class OrderFromSap800InterfaceServiceImpl implements IOrderFromSap800Inte
                         omsInternalOrderRes.setOrderCode(outTableOutput.getString("BANFN"));//采购申请号
                         omsInternalOrderRes.setOrderLineCode(outTableOutput.getString("BNFPO"));//采购申请行号
                         omsInternalOrderRes.setProductMaterialCode(outTableOutput.getString("MATNR"));//成品物料号
+                        omsInternalOrderRes.setProductMaterialDesc(outTableOutput.getString("TXZ01"));//成品物料号
                         omsInternalOrderRes.setCustomerCode(outTableOutput.getString("WERKS"));//客户编码
                         omsInternalOrderRes.setCustomerDesc(outTableOutput.getString("NAME1"));//客户描述
                         omsInternalOrderRes.setPurchaseGroupCode(outTableOutput.getString("EKGRP"));//采购组

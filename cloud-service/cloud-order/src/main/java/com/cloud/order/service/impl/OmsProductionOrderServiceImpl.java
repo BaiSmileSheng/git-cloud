@@ -34,6 +34,9 @@ import com.cloud.order.mapper.OmsProductionOrderMapper;
 import com.cloud.order.service.*;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
+import com.cloud.order.webService.wms.OdsRawOrderOutStorageDTO;
+import com.cloud.order.webService.wms.OutStorageResult;
+import com.cloud.order.webService.wms.RfWebService;
 import com.cloud.settle.domain.entity.SmsSettleInfo;
 import com.cloud.settle.enums.SettleInfoOrderStatusEnum;
 import com.cloud.settle.feign.RemoteSettleInfoService;
@@ -47,6 +50,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -54,10 +58,16 @@ import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.mail.MessagingException;
+import javax.xml.namespace.QName;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URL;
 import java.text.ParseException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -103,8 +113,18 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     //加工承揽方式
     private static final String PUTTING_OUT_ZERO = "0";
     private static final String PUTTING_OUT_ONE = "1";
+    private static final int WMS_PRODUCT_ORDER_LENGTH = 12;//向wms传生产订单号长度
 
     private static final String[] parsePatterns = {"yyyy.MM.dd","yyyy/MM/dd"};
+
+    @Value("${webService.findAllCodeForJIT.urlClaim}")
+    private String urlClaim;
+
+    @Value("${webService.findAllCodeForJIT.namespaceURL}")
+    private String namespaceURL;
+
+    @Value("${webService.findAllCodeForJIT.localPart}")
+    private String localPart;
 
 
     @Autowired
@@ -147,6 +167,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     private RemoteSettleInfoService remoteSettleInfoService;
     @Autowired
     private RemoteCdSettleProductMaterialService remoteCdSettleProductMaterialService;
+    @Autowired
+    private RemoteInterfaceLogService remoteInterfaceLogService;
     @Autowired
     private IOmsProductOrderImportService omsProductOrderImportService;
 
@@ -738,6 +760,30 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     public List<OmsProductionOrder> selectPageInfo(OmsProductionOrder omsProductionOrder, SysUser sysUser) {
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();
+        if(StringUtils.isNotBlank(omsProductionOrder.getProductMaterialCode())){
+            String[] productMaterialCodeS = omsProductionOrder.getProductMaterialCode().split(",");
+            List<String> productMaterialCodeList = new ArrayList<>();
+            for(String productMaterialCode : productMaterialCodeS){
+                String regex = "\\s*|\t|\r|\n";
+                Pattern p = Pattern.compile(regex);
+                Matcher m = p.matcher(productMaterialCode);
+                String productMaterialCodeReq = m.replaceAll("");
+                productMaterialCodeList.add(productMaterialCodeReq);
+            }
+            criteria.andIn("productMaterialCode", productMaterialCodeList);
+        }
+        if(StringUtils.isNotBlank(omsProductionOrder.getProductOrderCode())){
+            String[] productOrderCodeS = omsProductionOrder.getProductOrderCode().split(",");
+            List<String> productOrderCodeList = new ArrayList<>();
+            for(String productOrderCode : productOrderCodeS){
+                String regex = "\\s*|\t|\r|\n";
+                Pattern p = Pattern.compile(regex);
+                Matcher m = p.matcher(productOrderCode);
+                String productOrderCodeReq = m.replaceAll("");
+                productOrderCodeList.add(productOrderCodeReq);
+            }
+            criteria.andIn("productOrderCode", productOrderCodeList);
+        }
         if (StrUtil.isNotBlank(omsProductionOrder.getProductFactoryCode())) {
             criteria.andEqualTo("productFactoryCode", omsProductionOrder.getProductFactoryCode());
         }
@@ -746,9 +792,6 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getStatus())) {
             criteria.andEqualTo("status", omsProductionOrder.getStatus());
-        }
-        if (StrUtil.isNotBlank(omsProductionOrder.getProductMaterialCode())) {
-            criteria.andEqualTo("productMaterialCode", omsProductionOrder.getProductMaterialCode());
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getCheckDateStart())) {
             if (ProductOrderConstants.DATE_TYPE_ONE.equals(omsProductionOrder.getDateType())) {
@@ -1412,8 +1455,14 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     public R timeSAPGetProductOrderCode() {
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("status", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPZ.getCode());
+        List<String> statusList = new ArrayList<>();
+        statusList.add(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPZ.getCode());
+        statusList.add(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAPYC.getCode());
+        criteria.andIn("status", statusList);
         List<OmsProductionOrder> list = omsProductionOrderMapper.selectByExample(example);
+        if(CollectionUtils.isEmpty(list)){
+            return R.ok("无需要传SAP数据");
+        }
         //1.调用SAP获取生产订单号
         R resultSAP = orderFromSap601InterfaceService.queryProductOrderFromSap601(list);
         if (!resultSAP.isSuccess()) {
@@ -1422,18 +1471,33 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         }
 
         List<OmsProductionOrder> listSapRes = (List<OmsProductionOrder>) resultSAP.get("data");
+        if(CollectionUtils.isEmpty(listSapRes)){
+            return R.ok("获取生产订单号SAP没有数据");
+        }
+        List<OmsProductionOrder> successList = new ArrayList<>();
         listSapRes.forEach(omsProductionOrder -> {
-            omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode());
+            if("S".equals(omsProductionOrder.getSapFlag())){
+                omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode());
+                successList.add(omsProductionOrder);
+            }else{
+                omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAPYC.getCode());
+            }
         });
         //2.修改数据
         omsProductionOrderMapper.batchUpdateByOrderCode(listSapRes);
         //3.生成加工费结算单
-        List<String> orderOrderList = listSapRes.stream().map(omsProductionOrder -> {
+        if(CollectionUtils.isEmpty(successList)){
+            return R.ok("获取生产订单号后无需要生成加工费的数据");
+        }
+        List<String> orderOrderList = successList.stream().map(omsProductionOrder -> {
             return omsProductionOrder.getOrderCode();
         }).collect(toList());
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderMapper.selectByOrderCode(orderOrderList);
         if(!CollectionUtils.isEmpty(omsProductionOrderList)){
             List<SmsSettleInfo>  smsSettleInfoList = changeSmsSettleInfo(omsProductionOrderList);
+            if(CollectionUtils.isEmpty(smsSettleInfoList)){
+                return R.ok("无需要生成加工费的数据");
+            }
             R result = remoteSettleInfoService.batchInsert(smsSettleInfoList);
             if(!result.isSuccess()){
                 log.error("新增加工费结算失败 res:{}",JSONObject.toJSONString(result));
@@ -1472,21 +1536,23 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             throw new BusinessException("获取采购组织信息异常");
         }
         List<CdFactoryInfo> cdFactoryInfoList = resultFactory.getCollectData(new TypeReference<List<CdFactoryInfo>>() {});
-        Map<String,CdFactoryInfo> cdFactoryInfoMap = cdFactoryInfoList.stream().collect(Collectors.toMap(cdFactoryInfo ->cdFactoryInfo.getFactoryCode(),
+        Map<String,CdFactoryInfo> cdFactoryInfoMap = cdFactoryInfoList.stream().collect(Collectors.toMap(cdFactoryInfo ->
+                        cdFactoryInfo.getFactoryCode(),
                 cdFactoryInfo -> cdFactoryInfo,(key1,key2) -> key2));
 
-        List<SmsSettleInfo> smsSettleInfoList = omsProductionOrderList.stream().map(omsProductionOrder ->{
+        List<SmsSettleInfo> smsSettleInfoList = new ArrayList<>();
+        omsProductionOrderList.forEach(omsProductionOrder ->{
             String outsourceType = omsProductionOrder.getOutsourceType();
             Boolean flag = OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode().equals(outsourceType)
                     || OutSourceTypeEnum.OUT_SOURCE_TYPE_QWW.getCode().equals(outsourceType);
-            if(flag){
+            if(flag) {
                 SmsSettleInfo smsSettleInfo = new SmsSettleInfo();
                 smsSettleInfo.setLineNo(omsProductionOrder.getProductLineCode());
                 String key = omsProductionOrder.getProductFactoryCode() + omsProductionOrder.getProductLineCode();
                 CdFactoryLineInfo cdFactoryLineInfo = supplierMap.get(key);
-                if(null == cdFactoryLineInfo || StringUtils.isBlank(cdFactoryLineInfo.getSupplierCode())){
-                    throw new BusinessException("请维护工厂"+omsProductionOrder.getProductFactoryCode()
-                            +"线体"+omsProductionOrder.getProductLineCode()+"对应的供应商信息");
+                if (null == cdFactoryLineInfo || StringUtils.isBlank(cdFactoryLineInfo.getSupplierCode())) {
+                    throw new BusinessException("请维护工厂" + omsProductionOrder.getProductFactoryCode()
+                            + "线体" + omsProductionOrder.getProductLineCode() + "对应的供应商信息");
                 }
                 smsSettleInfo.setSupplierCode(cdFactoryLineInfo.getSupplierCode());
                 smsSettleInfo.setSupplierName(cdFactoryLineInfo.getSupplierDesc());
@@ -1499,59 +1565,59 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 smsSettleInfo.setOrderAmount(omsProductionOrder.getProductNum().intValue());
                 smsSettleInfo.setOutsourceWay(outsourceType);
                 CdFactoryInfo cdFactoryInfo = cdFactoryInfoMap.get(omsProductionOrder.getProductFactoryCode());
-                if(null == cdFactoryInfo){
-                    log.error("获取工厂信息失败 工厂:{}",omsProductionOrder.getProductFactoryCode());
-                    throw new BusinessException("请维护工厂"+omsProductionOrder.getProductFactoryCode()
+                if(null == cdFactoryInfo) {
+                    log.error("获取工厂信息失败 工厂:{}", omsProductionOrder.getProductFactoryCode());
+                    throw new BusinessException("请维护工厂" + omsProductionOrder.getProductFactoryCode()
                             +"信息");
                 }
                 String purchaseOrg = cdFactoryInfo.getPurchaseOrg();
-                if(StringUtils.isBlank(purchaseOrg)){
-                    log.error("获取工厂对应采购组织信息失败 工厂:{}",omsProductionOrder.getProductFactoryCode());
-                    throw new BusinessException("请维护工厂"+omsProductionOrder.getProductFactoryCode()
-                            +"对应的采购组织信息");
+                if (StringUtils.isBlank(purchaseOrg)) {
+                    log.error("获取工厂对应采购组织信息失败 工厂:{}", omsProductionOrder.getProductFactoryCode());
+                    throw new BusinessException("请维护工厂" + omsProductionOrder.getProductFactoryCode()
+                            + "对应的采购组织信息");
                 }
                 String companyCode = cdFactoryInfo.getCompanyCode();
-                if(StringUtils.isBlank(companyCode)){
-                    log.error("获取工厂对应公司信息失败 工厂:{}",omsProductionOrder.getProductFactoryCode());
-                    throw new BusinessException("请维护工厂"+omsProductionOrder.getProductFactoryCode()
-                            +"对应的公司信息");
+                if (StringUtils.isBlank(companyCode)) {
+                    log.error("获取工厂对应公司信息失败 工厂:{}", omsProductionOrder.getProductFactoryCode());
+                    throw new BusinessException("请维护工厂" + omsProductionOrder.getProductFactoryCode()
+                            + "对应的公司信息");
                 }
                 smsSettleInfo.setCompanyCode(companyCode);
                 //根据物料号和委外方式cd_settle_product_material查加工费号
-                R settleProductMaterialR = remoteCdSettleProductMaterialService.selectOne(omsProductionOrder.getProductMaterialCode(),outsourceType);
-                if(!settleProductMaterialR.isSuccess()){
-                    log.error("根据物料号和委外方式查加工费号异常 专用号:{},委外方式:{},res:{}",omsProductionOrder.getProductMaterialCode(),
-                            outsourceType,JSONObject.toJSON(settleProductMaterialR));
+                R settleProductMaterialR = remoteCdSettleProductMaterialService.selectOne(omsProductionOrder.getProductMaterialCode(),
+                        outsourceType);
+                if (!settleProductMaterialR.isSuccess()) {
+                    log.error("根据物料号和委外方式查加工费号异常 专用号:{},委外方式:{},res:{}", omsProductionOrder.getProductMaterialCode(),
+                            outsourceType, JSONObject.toJSON(settleProductMaterialR));
                     throw new BusinessException("根据物料号和委外方式查加工费号异常" + settleProductMaterialR.get("msg").toString());
                 }
                 CdSettleProductMaterial cdSettleProductMaterial = settleProductMaterialR.getData(CdSettleProductMaterial.class);
                 //加工费号
                 String rawMaterialCode = cdSettleProductMaterial.getRawMaterialCode();
                 //根据加工费号,供应商,采购组织 查加工费
-                R maResult = remoteCdMaterialPriceInfoService.selectOneByCondition(rawMaterialCode,purchaseOrg,
+                R maResult = remoteCdMaterialPriceInfoService.selectOneByCondition(rawMaterialCode, purchaseOrg,
                         cdFactoryLineInfo.getSupplierCode());
-                if(!maResult.isSuccess()){
-                    log.error("获取加工费失败 加工费号:{},采购组织:{},供应商:{}",rawMaterialCode,
-                            purchaseOrg,cdFactoryLineInfo.getSupplierCode());
+                if (!maResult.isSuccess()) {
+                    log.error("获取加工费失败 加工费号:{},采购组织:{},供应商:{}", rawMaterialCode,
+                            purchaseOrg, cdFactoryLineInfo.getSupplierCode());
                     throw new BusinessException("获取加工费失败" + maResult.get("msg").toString());
                 }
                 CdMaterialPriceInfo cdMaterialPriceInfo = maResult.getData(CdMaterialPriceInfo.class);
-                if(null == cdMaterialPriceInfo.getProcessPrice()){
-                    throw new BusinessException("请维护物料号"+omsProductionOrder.getProductMaterialCode()
-                            +"供应商"+cdFactoryLineInfo.getSupplierCode()+"采购组织"+purchaseOrg+"对应的加工费");
+                if (null == cdMaterialPriceInfo.getProcessPrice()) {
+                    throw new BusinessException("请维护物料号" + omsProductionOrder.getProductMaterialCode()
+                            + "供应商" + cdFactoryLineInfo.getSupplierCode() + "采购组织" + purchaseOrg + "对应的加工费");
                 }
                 smsSettleInfo.setMachiningPrice(cdMaterialPriceInfo.getProcessPrice());
                 smsSettleInfo.setDelFlag(DeleteFlagConstants.NO_DELETED);
-                smsSettleInfo.setProductStartDate(DateUtils.dateTime(YYYY_MM_DD,omsProductionOrder.getProductStartDate()));
-                smsSettleInfo.setProductEndDate(DateUtils.dateTime(YYYY_MM_DD,omsProductionOrder.getProductEndDate()));
+                smsSettleInfo.setProductStartDate(DateUtils.dateTime(YYYY_MM_DD, omsProductionOrder.getProductStartDate()));
+                smsSettleInfo.setProductEndDate(DateUtils.dateTime(YYYY_MM_DD, omsProductionOrder.getProductEndDate()));
                 smsSettleInfo.setActualEndDate(omsProductionOrder.getActualEndDate());
                 smsSettleInfo.setConfirmAmont(0);
                 smsSettleInfo.setCreateBy("定时任务");
                 smsSettleInfo.setCreateTime(new Date());
-                return smsSettleInfo;
+                smsSettleInfoList.add(smsSettleInfo);
             }
-            return null;
-        }).collect(toList());
+        });
         return smsSettleInfoList;
     }
     /**
@@ -1775,9 +1841,14 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         //3.修改数据库
         List<OmsProductionOrder> listSapRes = (List<OmsProductionOrder>) resultSAP.get("data");
         listSapRes.forEach(omsProductionOrder -> {
-            omsProductionOrder.setNewVersion(omsProductionOrder.getBomVersion());
-            omsProductionOrder.setBomVersion("");
+            if("S".equals(omsProductionOrder.getSapFlag())){
+                omsProductionOrder.setNewVersion(omsProductionOrder.getBomVersion());
+                omsProductionOrder.setBomVersion("");
+            }
         });
+        if(CollectionUtils.isEmpty(listSapRes)){
+            return R.ok("订单刷新无需更新数据");
+        }
         //修改数据
         omsProductionOrderMapper.batchUpdateByOrderCode(listSapRes);
         return R.ok();
@@ -1794,10 +1865,52 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         if(CollectionUtils.isEmpty(omsProductionOrderListReq)){
             return R.ok("无需要更新入库量的数据");
         }
-        //2.TODO 获取入库数量
+        //将集合工厂分组,key 工厂号 value 生产订单号的集合
+        Map<String,List<String>> wmsMap = new HashMap<>();
+        omsProductionOrderListReq.forEach(omsProductionOrder -> {
+            String factoryCode = omsProductionOrder.getProductFactoryCode();
+            String productOrderCode = omsProductionOrder.getProductOrderCode();
+            //补足12位
+            String productOrderCodeReq = getFixedLengthString(productOrderCode,WMS_PRODUCT_ORDER_LENGTH);
+            if(wmsMap.containsKey(factoryCode)){
+                List<String> productOrderCodeList = wmsMap.get(factoryCode);
+                productOrderCodeList.add(productOrderCodeReq);
+            }else {
+                List<String> productOrderCodeList = new ArrayList<>();
+                productOrderCodeList.add(productOrderCodeReq);
+                wmsMap.put(factoryCode,productOrderCodeList);
+            }
+        });
+
+        //2.调用wms系统 获取入库数量
         List<OmsProductionOrder> omsProductionOrderListGet = new ArrayList<>();
+        wmsMap.keySet().forEach(factoryCode ->{
+            List<String> productOrderCodeList = wmsMap.get(factoryCode);
+            //调用wms系统
+            OutStorageResult outStorageResult = wmsGetDeliveryNum(productOrderCodeList,factoryCode);
+            log.info("调用wms系统获取入库数量");
+            if(null == outStorageResult || "0".equals(outStorageResult.getStatus())){
+                log.error("调用wms系统异常 factoryCode:{},productOrderCodeList:{},res:{}",factoryCode,wmsMap.get(factoryCode),
+                        JSONObject.toJSONString(outStorageResult));
+                throw new BusinessException("调用wms系统异常" + outStorageResult.getMsg());
+            }
+            List<OdsRawOrderOutStorageDTO> odsRawOrderOutStorageDTOList = outStorageResult.getData();
+            odsRawOrderOutStorageDTOList.forEach(odsRawOrderOutStorageDTORes -> {
+                OmsProductionOrder omsProductionOrder = new OmsProductionOrder();
+                Date actualEndDate= DateUtils.convertToDate(odsRawOrderOutStorageDTORes.getGmtCreate());
+                omsProductionOrder.setActualEndDate(actualEndDate);//最后入库时间
+                omsProductionOrder.setProductOrderCode(odsRawOrderOutStorageDTORes.getPrdOrderNo());//生产订单号
+                omsProductionOrder.setDeliveryNum(new BigDecimal(odsRawOrderOutStorageDTORes.getProInAmount()));//入库数量
+                omsProductionOrderListGet.add(omsProductionOrder);
+            });
+
+        });
+
         //3.更新排产订单和加工费结算表(如果订单数量与交货数量一致则更新订单状态为已关单,更新实际结束时间actual_end_date)
         //key是生产订单号
+        if(CollectionUtils.isEmpty(omsProductionOrderListGet)){
+            return R.ok("SAP没有数据");
+        }
         Map<String,OmsProductionOrder> omsProductionOrderMap = omsProductionOrderListReq.stream().collect(Collectors.toMap(
                 omsProductionOrder ->omsProductionOrder.getProductOrderCode(),
                 omsProductionOrder -> omsProductionOrder,(key1,key2) -> key2));
@@ -1829,6 +1942,57 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         return R.ok();
     }
 
+    /**
+     * 获取固定长度
+     * @param raw
+     * @param length
+     * @return
+     */
+    private String getFixedLengthString(String raw, int length) {
+        StringBuffer stringBuffer = new StringBuffer();
+        for (int i=0; i<length; i++){
+            stringBuffer.append("0");
+        }
+        stringBuffer.append(raw);
+        String seqAll = stringBuffer.toString();
+        String seq = seqAll.substring(seqAll.length()-length);
+        return seq;
+    }
+
+    /**
+     * wms获取入库数量
+     * @return
+     */
+    public  OutStorageResult wmsGetDeliveryNum(List<String> productOrderCodeList,String factoryCode){
+        log.info("调用wms系统获取入库数量");
+        SysInterfaceLog sysInterfaceLog = new SysInterfaceLog();
+        sysInterfaceLog.setAppId("wms");
+        sysInterfaceLog.setInterfaceName("getQryPays");
+        sysInterfaceLog.setContent("调用wms系统获取入库数量");
+        /** url：webservice 服务端提供的服务地址，结尾必须加 "?wsdl"*/
+        URL url = null;
+        try {
+            url = new URL(urlClaim);
+            /** QName 表示 XML 规范中定义的限定名称,QName 的值包含名称空间 URI、本地部分和前缀 */
+            QName qName = new QName(namespaceURL, localPart);
+            javax.xml.ws.Service service = javax.xml.ws.Service.create(url, qName);
+            RfWebService rfWebService = service.getPort(RfWebService.class);
+            OdsRawOrderOutStorageDTO odsRawOrderOutStorageDTO = new OdsRawOrderOutStorageDTO();
+            odsRawOrderOutStorageDTO.setSapFactoryCode(factoryCode);
+            odsRawOrderOutStorageDTO.setPrdOrderNoList(productOrderCodeList);
+            OutStorageResult outStorageResult = rfWebService.findAllCodeForJIT(odsRawOrderOutStorageDTO);
+            return outStorageResult;
+        }catch (Exception e){
+            sysInterfaceLog.setResults("调用wms系统获取入库数量异常");
+            StringWriter w = new StringWriter();
+            e.printStackTrace(new PrintWriter(w));
+            log.error(
+                    "调用wms系统获取入库数量异常: {}", w.toString());
+            throw new BusinessException("调用wms系统获取入库数量异常");
+        }finally {
+            remoteInterfaceLogService.saveInterfaceLog(sysInterfaceLog);
+        }
+    }
     private String getBomGroupKey(CdBomInfo cdBomInfo) {
         return StrUtil.concat(true, cdBomInfo.getProductMaterialCode(), cdBomInfo.getProductFactoryCode(), cdBomInfo.getVersion());
     }

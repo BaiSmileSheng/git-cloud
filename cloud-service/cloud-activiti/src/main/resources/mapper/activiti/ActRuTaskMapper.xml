@@ -264,4 +264,14 @@
       FORM_KEY_ = #{formKey,jdbcType=VARCHAR}
     where ID_ = #{id,jdbcType=VARCHAR}
   </update>
+
+    <select id="selectByProcInstId" parameterType="java.util.List" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from act_ru_task
+        where PROC_INST_ID_ in
+        <foreach collection="list" item="procInstId" open="(" separator="," close=")">
+            #{procInstId}
+        </foreach>
+    </select>
 </mapper>

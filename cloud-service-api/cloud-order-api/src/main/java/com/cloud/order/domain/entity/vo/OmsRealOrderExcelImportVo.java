@@ -2,6 +2,7 @@ package com.cloud.order.domain.entity.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.alibaba.excel.annotation.format.DateTimeFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -124,6 +125,7 @@ public class OmsRealOrderExcelImportVo{
     /**
      * 交付日期
      */
+    @DateTimeFormat("yyyy-MM-dd")
     @ExcelProperty(value = "交付日期",index = 10)
     @ApiModelProperty(value = "交付日期")
     private String deliveryDate;

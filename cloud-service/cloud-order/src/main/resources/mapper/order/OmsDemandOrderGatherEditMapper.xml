@@ -141,6 +141,7 @@
                     #{item}
                 </foreach>
             </if>
+            and del_flag = '0'
         </where>
         ORDER BY product_material_code,product_factory_code DESC
     </select>

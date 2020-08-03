@@ -132,6 +132,7 @@ public class OmsRealOrderController extends BaseController {
         if(StringUtils.isNotBlank(omsRealOrder.getEndTime())){
             criteria.andLessThanOrEqualTo("deliveryDate", omsRealOrder.getEndTime());
         }
+        example.orderBy("createTime").desc();
         return example;
     }
 
@@ -231,16 +232,9 @@ public class OmsRealOrderController extends BaseController {
     @OperLog(title = "修改保存真单", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "修改保存真单", response = R.class)
     public R updateByYWOrPCY(@RequestBody OmsRealOrder omsRealOrder) {
-        if (!StringUtils.isBlank(omsRealOrder.getRemark())) {
-            return R.error("请填写备注");
-        }
         //排产员查对应工厂的数据,业务经理查自己导入的
         SysUser sysUser = getUserInfo(SysUser.class);
         long userId = getCurrentUserId();
-        //修改交付日期时必须加备注
-        if(StringUtils.isNotBlank(omsRealOrder.getDeliveryDate()) && StringUtils.isBlank(omsRealOrder.getRemark())){
-            return R.error("请填写备注");
-        }
         R result = omsRealOrderService.editSaveOmsRealOrder(omsRealOrder, sysUser, userId);
         return result;
     }

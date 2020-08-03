@@ -5,7 +5,6 @@ import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.easyexcel.SheetExcelData;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.log.annotation.OperLog;
@@ -28,6 +27,8 @@ import tk.mybatis.mapper.entity.Example;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 成品库存主表  提供者
@@ -140,7 +141,15 @@ public class CdProductStockController extends BaseController {
 
         }
         if(StringUtils.isNotBlank(cdProductStock.getProductMaterialCode())){
-            List<String> productMaterialCodeList = Arrays.asList(cdProductStock.getProductMaterialCode().split(","));
+            String[] productMaterialCodeS = cdProductStock.getProductMaterialCode().split(",");
+            List<String> productMaterialCodeList = new ArrayList<>();
+            for(String productMaterialCode : productMaterialCodeS){
+                String regex = "\\s*|\t|\r|\n";
+                Pattern p = Pattern.compile(regex);
+                Matcher m = p.matcher(productMaterialCode);
+                String productMaterialCodeReq = m.replaceAll("");
+                productMaterialCodeList.add(productMaterialCodeReq);
+            }
             criteria.andIn("productMaterialCode", productMaterialCodeList);
         }
         List<CdProductStock> cdProductStockList = cdProductStockService.selectByExample(example);

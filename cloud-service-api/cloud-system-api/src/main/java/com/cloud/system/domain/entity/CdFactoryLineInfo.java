@@ -118,7 +118,7 @@ public class CdFactoryLineInfo extends BaseEntity {
      */
     @ExcelProperty(value = "产品定员")
     @ApiModelProperty(value = "产品定员")
-    private int productQuota;
+    private Integer productQuota;
 
     /**
      * 是否删除0：有效，1：删除

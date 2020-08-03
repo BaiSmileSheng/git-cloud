@@ -51,11 +51,12 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -135,22 +136,34 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
     public R export(CdProductStock cdProductStock) {
 
         CdProductStockDetailVo cdProductStockDetail = new CdProductStockDetailVo();
+
+        List<String> productMaterialCodeList = new ArrayList<>();
+        if(StringUtils.isNotBlank(cdProductStock.getProductMaterialCode())){
+            String[] productMaterialCodeS = cdProductStock.getProductMaterialCode().split(",");
+            for(String productMaterialCode : productMaterialCodeS){
+                String regex = "\\s*|\t|\r|\n";
+                Pattern p = Pattern.compile(regex);
+                Matcher m = p.matcher(productMaterialCode);
+                String productMaterialCodeReq = m.replaceAll("");
+                productMaterialCodeList.add(productMaterialCodeReq);
+            }
+        }
         //1.查询主表数据
-        List<CdProductStock> cdProductStockList = listByCondition(cdProductStock);
+        List<CdProductStock> cdProductStockList = listByCondition(cdProductStock,productMaterialCodeList);
         cdProductStockDetail.setCdProductStockList(cdProductStockList);
         //2.在产信息
-        List<CdProductInProduction> cdProductInProductionList = listProductInProduction(cdProductStock);
+        List<CdProductInProduction> cdProductInProductionList = listProductInProduction(cdProductStock,productMaterialCodeList);
         cdProductStockDetail.setCdProductInProductionList(cdProductInProductionList);
 
         //3.在途信息
-        List<CdProductPassage> cdProductPassageList = listProductPassage(cdProductStock);
+        List<CdProductPassage> cdProductPassageList = listProductPassage(cdProductStock,productMaterialCodeList);
         cdProductStockDetail.setCdProductPassageList(cdProductPassageList);
 
         //4.在库信息(良品)
-        List<CdProductWarehouse> cdProductWarehouseListL = listProductWarehouse(cdProductStock,STOCK_TYPE);
+        List<CdProductWarehouse> cdProductWarehouseListL = listProductWarehouse(cdProductStock,STOCK_TYPE,productMaterialCodeList);
         cdProductStockDetail.setCdProductWarehouseListL(cdProductWarehouseListL);
         //4.不良信息
-        List<CdProductWarehouse> cdProductWarehouseListB = listProductWarehouse(cdProductStock,NO_STOCK_TYPE);
+        List<CdProductWarehouse> cdProductWarehouseListB = listProductWarehouse(cdProductStock,NO_STOCK_TYPE,productMaterialCodeList);
         cdProductStockDetail.setCdProductWarehouseListB(cdProductWarehouseListB);
 
         return R.data(cdProductStockDetail);
@@ -177,7 +190,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
      * @param cdProductStock
      * @return
      */
-    private List<CdProductStock> listByCondition(CdProductStock cdProductStock) {
+    private List<CdProductStock> listByCondition(CdProductStock cdProductStock,List<String> productMaterialCodeList) {
         Example example = new Example(CdProductStock.class);
         Example.Criteria criteria = example.createCriteria();
         if(StringUtils.isNotBlank(cdProductStock.getProductFactoryCode())){
@@ -185,7 +198,6 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
 
         }
         if(StringUtils.isNotBlank(cdProductStock.getProductMaterialCode())){
-            List<String> productMaterialCodeList = Arrays.asList(cdProductStock.getProductMaterialCode().split(","));
             criteria.andIn("productMaterialCode", productMaterialCodeList);
         }
         List<CdProductStock> cdProductStockList = selectByExample(example);
@@ -197,7 +209,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
      * @param cdProductStock
      * @return
      */
-    private List<CdProductInProduction> listProductInProduction(CdProductStock cdProductStock){
+    private List<CdProductInProduction> listProductInProduction(CdProductStock cdProductStock,List<String> productMaterialCodeList){
         Example example = new Example(CdProductInProduction.class);
         Example.Criteria criteria = example.createCriteria();
         if(StringUtils.isNotBlank(cdProductStock.getProductFactoryCode())){
@@ -205,7 +217,6 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
 
         }
         if(StringUtils.isNotBlank(cdProductStock.getProductMaterialCode())){
-            List<String> productMaterialCodeList = Arrays.asList(cdProductStock.getProductMaterialCode().split(","));
             criteria.andIn("productMaterialCode", productMaterialCodeList);
         }
         List<CdProductInProduction> cdProductInProductionList = cdProductInProductionService.selectByExample(example);
@@ -217,7 +228,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
      * @param cdProductStock
      * @return
      */
-    private List<CdProductPassage> listProductPassage(CdProductStock cdProductStock){
+    private List<CdProductPassage> listProductPassage(CdProductStock cdProductStock,List<String> productMaterialCodeList ){
         Example example = new Example(CdProductPassage.class);
         Example.Criteria criteria = example.createCriteria();
         if(StringUtils.isNotBlank(cdProductStock.getProductFactoryCode())){
@@ -225,7 +236,6 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
 
         }
         if(StringUtils.isNotBlank(cdProductStock.getProductMaterialCode())){
-            List<String> productMaterialCodeList = Arrays.asList(cdProductStock.getProductMaterialCode().split(","));
             criteria.andIn("productMaterialCode", productMaterialCodeList);
         }
         List<CdProductPassage> productPassageList = cdProductPassageService.selectByExample(example);
@@ -238,7 +248,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
      * @param stockType
      * @return
      */
-    private List<CdProductWarehouse> listProductWarehouse(CdProductStock cdProductStock,String stockType){
+    private List<CdProductWarehouse> listProductWarehouse(CdProductStock cdProductStock,String stockType,List<String> productMaterialCodeList){
         Example example = new Example(CdProductWarehouse.class);
         Example.Criteria criteria = example.createCriteria();
         if(StringUtils.isNotBlank(cdProductStock.getProductFactoryCode())){
@@ -246,7 +256,6 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
 
         }
         if(StringUtils.isNotBlank(cdProductStock.getProductMaterialCode())){
-            List<String> productMaterialCodeList = Arrays.asList(cdProductStock.getProductMaterialCode().split(","));
             criteria.andIn("productMaterialCode", productMaterialCodeList);
         }
         criteria.andEqualTo("stockType",stockType);
@@ -260,7 +269,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
      * @param sysUser
      * @return
      */
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     @Override
     public R sycProductStock(List<CdProductStock> cdProductStockList, SysUser sysUser) {
 

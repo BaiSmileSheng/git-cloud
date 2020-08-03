@@ -1,20 +1,26 @@
 package com.cloud.activiti.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.consts.ActivitiConstant;
 import com.cloud.activiti.consts.ActivitiProDefKeyConstants;
 import com.cloud.activiti.consts.ActivitiProTitleConstants;
 import com.cloud.activiti.consts.ActivitiTableNameConstants;
-import com.cloud.activiti.domain.ActReProcdef;
+import com.cloud.activiti.domain.ActRuTask;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
+import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
 import com.cloud.activiti.domain.entity.vo.OmsOrderMaterialOutVo;
+import com.cloud.activiti.mail.MailService;
+import com.cloud.activiti.mapper.ActRuTaskMapper;
 import com.cloud.activiti.service.IActOmsOrderMaterialOutService;
-import com.cloud.activiti.service.IActReProcdefService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
+import com.cloud.common.constant.EmailConstants;
+import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.Oms2weeksDemandOrderEdit;
 import com.cloud.order.domain.entity.OmsDemandOrderGatherEdit;
 import com.cloud.order.domain.entity.OmsRealOrder;
@@ -23,20 +29,27 @@ import com.cloud.order.feign.Remote2weeksDemandOrderEditService;
 import com.cloud.order.feign.RemoteDemandOrderGatherEditService;
 import com.cloud.order.feign.RemoteOmsRealOrderService;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.SysUserVo;
+import com.cloud.system.feign.RemoteUserService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
+import org.activiti.engine.RepositoryService;
+import org.activiti.engine.repository.ProcessDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -48,8 +61,6 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
     @Autowired
     private IBizBusinessService bizBusinessService;
     @Autowired
-    private IActReProcdefService actReProcdefService;
-    @Autowired
     private IActTaskService actTaskService;
     @Autowired
     private RemoteOmsRealOrderService remoteOmsRealOrderService;
@@ -57,6 +68,18 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
     private RemoteDemandOrderGatherEditService remoteDemandOrderGatherEditService;
     @Autowired
     private Remote2weeksDemandOrderEditService remote2weeksDemandOrderEditService;
+
+    @Autowired
+    private RemoteUserService remoteUserService;
+
+    @Autowired
+    private RepositoryService repositoryService;
+
+    @Autowired
+    private MailService mailService;
+
+    @Autowired
+    private ActRuTaskMapper actRuTaskMapper;
 
     /**
      * 根据业务key获取下市审核信息
@@ -98,30 +121,88 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
      * 物料下市审核 真单审核开启流程
      * @return 成功或失败
      */
+    @Transactional(rollbackFor=Exception.class)
     @Override
     public R addSave(OmsOrderMaterialOutVo omsOrderMaterialOutVo) {
         List<OmsOrderMaterialOutVo> list = omsOrderMaterialOutVo.getOmsOrderMaterialOutVoList();
-        //查流程定义  procDefId procName
-        ActReProcdef actReProcdef = new ActReProcdef();
-        actReProcdef.setKey(ActivitiProDefKeyConstants.ACTIVITI_PRO_DEF_KEY_MATERIAL_OUT_TEST);
-        List<ActReProcdef> actReProcdefList = actReProcdefService.selectList(actReProcdef);
-        if(CollectionUtils.isEmpty(actReProcdefList)){
-            throw new BusinessException("获取流程定义为空,请先定义流程");
-        }
-        Collections.sort(actReProcdefList, Comparator.comparing(ActReProcdef::getVersion).reversed());
-        ActReProcdef actReProcdefRes = actReProcdefList.get(0);
+
+        List<OmsOrderMaterialOutVo> listAdd = new ArrayList<>();
+        //判断流程实例是否正在运行,没有在运行的再开启流程
         if(!CollectionUtils.isEmpty(list)){
-            list.forEach(omsOrderMaterialOutVoReq ->{
+            for(OmsOrderMaterialOutVo omsOrderMaterialOutVoReq : list){
+                //根据业务表名和id查流程
+                BizBusiness business = new BizBusiness();
+                business.setTableId(omsOrderMaterialOutVoReq.getId().toString());
+                business.setTableName(omsOrderMaterialOutVo.getTableName());
+                List<BizBusiness> bizBusinessList = bizBusinessService.selectBizBusinessList(business);
+                if(CollectionUtils.isEmpty(bizBusinessList)){
+                    listAdd.add(omsOrderMaterialOutVoReq);
+                    continue;
+                }
+                //根据流程实例id查运行时任务数据表
+                List<String> procInstIdList = bizBusinessList.stream().map(b ->b.getProcInstId()).collect(Collectors.toList());
+                List<ActRuTask> actRuTaskList = actRuTaskMapper.selectByProcInstId(procInstIdList);
+                if(CollectionUtils.isEmpty(actRuTaskList)){
+                    listAdd.add(omsOrderMaterialOutVoReq);
+                    continue;
+                }
+            }
+        }
+
+        //key工厂,value用户
+        Map<String,List<SysUserVo>> map = new HashMap<>();
+        if(!CollectionUtils.isEmpty(listAdd)){
+            listAdd.forEach(omsOrderMaterialOutVoReq ->{
                 //1.构造下市审核流程信息
-                BizBusiness business = initBusiness(omsOrderMaterialOutVoReq,actReProcdefRes);
+                BizBusiness business = initBusiness(omsOrderMaterialOutVoReq);
                 //新增下市审核流程
                 bizBusinessService.insertBizBusiness(business);
                 Map<String, Object> variables = Maps.newHashMap();
                 //启动下市审核流程
                 bizBusinessService.startProcess(business, variables);
+                //4.校验发送人邮箱是否存在
+                String factoryCode = omsOrderMaterialOutVoReq.getFactoryCode();
+                String roleKey = RoleConstants.ROLE_KEY_ORDER;
+                String orderCode = omsOrderMaterialOutVoReq.getOrderCode();
+                verifyEmail(orderCode, factoryCode, roleKey,map);
+            });
+            //发送邮件
+            list.forEach(omsOrderMaterialOutVoReq ->{
+                List<SysUserVo> sysUserVoList = map.get(omsOrderMaterialOutVoReq.getFactoryCode());
+                //发送邮件
+                for(SysUserVo sysUserVo : sysUserVoList){
+                    String email = sysUserVo.getEmail();
+                    String subject = "物料下市审批";
+                    String content = "您有一条待办消息要处理！" + "单号：" + omsOrderMaterialOutVoReq.getOrderCode()
+                            + "物料已下市需要审批。" + EmailConstants.ORW_URL;
+                    mailService.sendTextMail(email,subject,content);
+                }
             });
         }
         return R.ok();
+    }
+
+    /**
+     * 校验发送人邮箱是否存在
+     * @param orderCode
+     * @param factoryCode
+     * @param roleKey
+     */
+    private void verifyEmail(String orderCode,String factoryCode, String roleKey,Map<String,List<SysUserVo>> map) {
+        R sysUserR = remoteUserService.selectUserByMaterialCodeAndRoleKey(factoryCode,roleKey);
+        if(!sysUserR.isSuccess()){
+            logger.error("获取对应的负责人邮箱失败 factoryCode:{},roleKey:{}",factoryCode,roleKey);
+            throw new BusinessException("获取对应的负责人邮箱失败" + sysUserR.get("msg").toString());
+        }
+        List<SysUserVo> sysUserVoList = sysUserR.getCollectData(new TypeReference<List<SysUserVo>>() {});
+        //校验邮箱
+        for(SysUserVo sysUserVo : sysUserVoList){
+            String email = sysUserVo.getEmail();
+            if(StringUtils.isBlank(email)){
+                throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
+            }
+        }
+        map.put(factoryCode,sysUserVoList);
     }
 
     /**
@@ -129,13 +210,21 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
      * @param omsOrderMaterialOutVo 审核信息
      * @return
      */
-    private BizBusiness initBusiness(OmsOrderMaterialOutVo omsOrderMaterialOutVo,ActReProcdef actReProcdefRes) {
+    private BizBusiness initBusiness(OmsOrderMaterialOutVo omsOrderMaterialOutVo) {
+
+        //构造质量索赔流程信息
+        R keyMap = getByKey(ActivitiProDefKeyConstants.ACTIVITI_PRO_DEF_KEY_MATERIAL_OUT_TEST);
+        if (!keyMap.isSuccess()) {
+            logger.error("根据Key获取最新版流程实例失败："+keyMap.get("msg"));
+            throw new BusinessException("根据Key获取最新版流程实例失败!");
+        }
+        ProcessDefinitionAct processDefinitionAct = keyMap.getData(ProcessDefinitionAct.class);
         BizBusiness business = new BizBusiness();
         business.setOrderNo(omsOrderMaterialOutVo.getOrderCode());
         business.setTableId(omsOrderMaterialOutVo.getId().toString());
-        business.setProcDefId(actReProcdefRes.getId());
         business.setTitle(ActivitiProTitleConstants.ACTIVITI_PRO_TITLE_SMATERIAL_OUT_TEST);
-        business.setProcName(actReProcdefRes.getName());
+        business.setProcDefId(processDefinitionAct.getId());
+        business.setProcName(processDefinitionAct.getName());
         business.setUserId(omsOrderMaterialOutVo.getLoginId());
         business.setApplyer(omsOrderMaterialOutVo.getCreateBy());
         business.setTableName(omsOrderMaterialOutVo.getTableName());
@@ -144,6 +233,33 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
         business.setResult(ActivitiConstant.RESULT_DEALING);
         business.setApplyTime(new Date());
         return business;
+    }
+
+    /**
+     * Description:  根据Key查询最新版本流程
+     * Param: [key]
+     * return: com.cloud.common.core.domain.R
+     */
+    private R getByKey(String key) {
+        // 使用repositoryService查询单个流程实例
+        ProcessDefinition processDefinition = repositoryService
+                .createProcessDefinitionQuery().processDefinitionKey(key).latestVersion().singleResult();
+        if (BeanUtil.isEmpty(processDefinition)) {
+            logger.error("根据Key值查询流程实例失败!");
+            return R.error("根据Key值查询流程实例失败！");
+        }
+        ProcessDefinitionAct processDefinitionAct =
+                ProcessDefinitionAct.builder()
+                        .id(processDefinition.getId())
+                        .name(processDefinition.getName())
+                        .category(processDefinition.getCategory())
+                        .deploymentId(processDefinition.getDeploymentId())
+                        .description(processDefinition.getDescription())
+                        .diagramResourceName(processDefinition.getDiagramResourceName())
+                        .resourceName(processDefinition.getResourceName())
+                        .tenantId(processDefinition.getTenantId())
+                        .version(processDefinition.getVersion()).build();
+        return R.data(processDefinitionAct);
     }
 
     /**

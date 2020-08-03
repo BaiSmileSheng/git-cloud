@@ -5,7 +5,9 @@ import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
+import com.cloud.order.converter.OrderFromConverter;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -43,32 +45,34 @@ public class Oms2weeksDemandOrder extends BaseEntity {
      * 订单类型
      */
     @ApiModelProperty(value = "订单类型")
+    @ExcelProperty(value = "SAP订单类型",index = 1)
     private String orderType;
 
     /**
      * 订单来源 1：内单，2：外单
      */
     @ApiModelProperty(value = "订单来源 1：内单，2：外单")
+    @ExcelProperty(value = "订单来源",index = 0,converter = OrderFromConverter.class)
     private String orderFrom;
 
     /**
      * 成品物料号
      */
-    @ExcelProperty(value = "专用号",index = 0)
+    @ExcelProperty(value = "成品物料",index = 2)
     @ApiModelProperty(value = "成品物料号")
     private String productMaterialCode;
 
     /**
      * 成品物料描述
      */
-    @ExcelProperty(value = "专用号描述",index = 1)
+    @ExcelProperty(value = "专用号描述",index = 3)
     @ApiModelProperty(value = "成品物料描述")
     private String productMaterialDesc;
 
     /**
      * 生产工厂编码
      */
-    @ExcelProperty(value = "生产工厂",index = 2)
+    @ExcelProperty(value = "工厂",index = 4)
     @ApiModelProperty(value = "生产工厂编码")
     private String productFactoryCode;
 
@@ -81,28 +85,28 @@ public class Oms2weeksDemandOrder extends BaseEntity {
     /**
      * 客户编码
      */
-    @ExcelProperty(value = "客户编码",index = 4)
+    @ExcelProperty(value = "客户编码",index = 5)
     @ApiModelProperty(value = "客户编码")
     private String customerCode;
 
     /**
      * 客户描述
      */
-    @ExcelProperty(value = "客户描述",index = 3)
+    @ExcelProperty(value = "客户名称",index = 6)
     @ApiModelProperty(value = "客户描述")
     private String customerDesc;
 
     /**
      * MRP范围
      */
-    @ExcelProperty(value = "MRP范围",index = 8)
+    @ExcelProperty(value = "MRP范围",index = 7)
     @ApiModelProperty(value = "MRP范围")
     private String mrpRange;
 
     /**
      * BOM版本
      */
-    @ExcelProperty(value = "BOM版本",index = 10)
+    @ExcelProperty(value = "版本",index = 8)
     @ApiModelProperty(value = "BOM版本")
     private String bomVersion;
 
@@ -115,16 +119,16 @@ public class Oms2weeksDemandOrder extends BaseEntity {
     /**
      * 地点
      */
-    @ExcelProperty(value = "交货地点",index = 9)
+    @ExcelProperty(value = "地点",index = 11)
     @ApiModelProperty(value = "地点")
     private String place;
 
     /**
      * 交付日期
      */
-    @ExcelProperty(value = "交付日期",index = 5)
+    @ExcelProperty(value = "交付日期",index = 10)
     @DateTimeFormat("yyyy-MM-dd")
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
     @ApiModelProperty(value = "交付日期")
     private Date deliveryDate;
 
@@ -137,14 +141,14 @@ public class Oms2weeksDemandOrder extends BaseEntity {
     /**
      * 周数 交货日期周数
      */
-    @ExcelProperty(value = "周数",index = 6)
+    @ExcelProperty(value = "周数",index = 12)
     @ApiModelProperty(value = "周数 交货日期周数")
     private String weeks;
 
     /**
      * 订单数量
      */
-    @ExcelProperty(value = "订单数量",index = 7)
+    @ExcelProperty(value = "数量",index = 9)
     @ApiModelProperty(value = "订单数量")
     private Long orderNum;
 
@@ -165,6 +169,7 @@ public class Oms2weeksDemandOrder extends BaseEntity {
      */
     private String delFlag;
 
+    @JsonIgnore
     public String getDeliveryDateStr() {
         return DateUtil.formatDate(this.deliveryDate);
     }

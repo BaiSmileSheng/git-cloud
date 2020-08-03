@@ -6,6 +6,8 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Dict;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.EasyExcel;
 import com.cloud.activiti.domain.entity.vo.OmsOrderMaterialOutVo;
@@ -21,6 +23,7 @@ import com.cloud.common.easyexcel.DTO.ExcelImportSucObjectDto;
 import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
+import com.cloud.common.utils.RandomUtil;
 import com.cloud.order.domain.entity.Oms2weeksDemandOrder;
 import com.cloud.order.domain.entity.Oms2weeksDemandOrderEdit;
 import com.cloud.order.domain.entity.Oms2weeksDemandOrderEditHis;
@@ -36,15 +39,13 @@ import com.cloud.order.service.IOms2weeksDemandOrderEditService;
 import com.cloud.order.service.IOms2weeksDemandOrderService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
-import com.cloud.system.domain.entity.CdMaterialExtendInfo;
-import com.cloud.system.domain.entity.CdMaterialInfo;
-import com.cloud.system.domain.entity.SysInterfaceLog;
-import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.entity.*;
 import com.cloud.system.enums.LifeCycleEnum;
 import com.cloud.system.enums.MaterialTypeEnum;
 import com.cloud.system.feign.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sap.conn.jco.*;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,6 +92,8 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
 
     @Autowired
     private RemoteActOmsOrderMaterialOutService remoteActOmsOrderMaterialOutService;
+    @Autowired
+    private RemoteFactoryStorehouseInfoService remoteFactoryStorehouseInfoService;
 
     private static final String TABLE_NAME = "oms2weeks_demand_order_edit";//对应的表名
 
@@ -101,7 +104,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
      */
     @Override
     @SneakyThrows
-    @Transactional
+    @GlobalTransactional
     public R import2weeksDemandEdit(MultipartFile file, SysUser sysUser) {
         EasyWithErrorExcelListener easyExcelListener = new EasyWithErrorExcelListener(oms2weeksDemandOrderEditImportService, Oms2weeksDemandOrderEditImport.class);
         EasyExcel.read(file.getInputStream(),Oms2weeksDemandOrderEditImport.class,easyExcelListener).sheet().doRead();
@@ -203,6 +206,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                     omsOrderMaterialOutVo.setOrderCode(omsDemandOrderGatherEdit.getDemandOrderCode());
                     omsOrderMaterialOutVo.setId(omsDemandOrderGatherEdit.getId());
                     omsOrderMaterialOutVo.setTableName(TABLE_NAME);
+                    omsOrderMaterialOutVo.setFactoryCode(omsDemandOrderGatherEdit.getProductFactoryCode());
                     omsOrderMaterialOutVoList.add(omsOrderMaterialOutVo);
                 }
             });
@@ -279,6 +283,18 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
         List<Oms2weeksDemandOrderEdit> listNeedAudti = CollUtil.newArrayList();
         Date date = DateUtil.date();
 
+        //获取不重复的物料号和工厂Map
+        List<Dict> maps = list.stream().map(s -> new Dict().set("productFactoryCode",s.getProductFactoryCode())
+                .set("customerCode",s.getCustomerCode())).distinct().collect(Collectors.toList());
+        //获取库位
+        R rStoreHouse = remoteFactoryStorehouseInfoService.selectStorehouseToMap(maps);
+        if(!rStoreHouse.isSuccess()){
+            throw new BusinessException("获取接收库位失败！");
+        }
+        Map<String, Map<String, String>> storehouseMap = rStoreHouse.getCollectData(new TypeReference<Map<String, Map<String, String>>>() {});
+        if (MapUtil.isEmpty(storehouseMap)) {
+            throw new BusinessException("获取接收库位失败！");
+        }
         for(Oms2weeksDemandOrderEdit weeksDemandOrderEdit:list){
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
@@ -345,12 +361,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             weeksDemandOrderEdit.setPurchaseGroupCode(cdMaterialInfo.getPurchaseGroupCode());
             weeksDemandOrderEdit.setUnit(cdMaterialInfo.getPrimaryUom());
             //需求订单号
-            R seqresult = remoteSequeceService.selectSeq("2weeks_demand_order_seq", 4);
-            if(!seqresult.isSuccess()){
-                throw new BusinessException("查序列号失败");
-            }
-            String seq = seqresult.getStr("data");
-            String demandOrderCode = StrUtil.concat(true, "DM", DateUtils.dateTime(), seq);
+            String demandOrderCode = StrUtil.concat(true, "DM", DateUtils.dateTime(), RandomUtil.randomInt(6));
             weeksDemandOrderEdit.setDemandOrderCode(demandOrderCode);
             //订单来源
             weeksDemandOrderEdit.setOrderFrom(OrderFromEnum.getCodeByMsg(weeksDemandOrderEdit.getOrderFrom()));
@@ -372,6 +383,20 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             if (extendInfo==null) {
                 errObjectDto.setObject(weeksDemandOrderEdit);
                 errObjectDto.setErrMsg(StrUtil.format("物料号{}：无生命周期及产品类别信息！",weeksDemandOrderEdit.getProductMaterialCode()));
+                errDtos.add(errObjectDto);
+                continue;
+            }
+            //判断地点是否存在
+            Map<String, String> storeHouseMap = storehouseMap.get(StrUtil.concat(true, weeksDemandOrderEdit.getProductFactoryCode(), weeksDemandOrderEdit.getCustomerCode()));
+            if (storeHouseMap == null) {
+                errObjectDto.setObject(weeksDemandOrderEdit);
+                errObjectDto.setErrMsg(StrUtil.format("工厂：{}，客户编码{}无工厂库位信息！",weeksDemandOrderEdit.getProductFactoryCode(),weeksDemandOrderEdit.getCustomerCode()));
+                errDtos.add(errObjectDto);
+                continue;
+            }
+            if (!StrUtil.equals(weeksDemandOrderEdit.getPlace(), storeHouseMap.get("storehouseTo"))) {
+                errObjectDto.setObject(weeksDemandOrderEdit);
+                errObjectDto.setErrMsg(StrUtil.format("对应地点应为：{}",storeHouseMap.get("storehouseTo")));
                 errDtos.add(errObjectDto);
                 continue;
             }
@@ -440,10 +465,12 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
      * @return
      */
     @Override
-    public R deleteWithLimit(String ids) {
+    public R deleteWithLimit(String ids,Oms2weeksDemandOrderEdit oms2weeksDemandOrderEditVo) {
         if (StrUtil.isEmpty(ids)) {
             Example example = new Example(Oms2weeksDemandOrderEdit.class);
-            example.and().andEqualTo("status", DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode())
+            Example.Criteria criteria = example.createCriteria();
+            listCondition(oms2weeksDemandOrderEditVo,criteria);
+            criteria.andEqualTo("status", DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode())
                     .andNotEqualTo("auditStatus", DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHZ.getCode());
             List<Oms2weeksDemandOrderEdit> oms2weeksDemandOrderEditList = selectByExample(example);
             if (CollectionUtil.isEmpty(oms2weeksDemandOrderEditList)) {
@@ -495,7 +522,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
      * @return
      */
     @Override
-    public R confirmRelease(String ids) {
+    public R confirmRelease(String ids,Oms2weeksDemandOrderEdit oms2weeksDemandOrderEditVo) {
         Example example = new Example(Oms2weeksDemandOrderEdit.class);
         Example.Criteria criteria = example.createCriteria();
         //允许下达的审核状态
@@ -510,6 +537,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             List<String> list = CollUtil.newArrayList(ids.split(StrUtil.COMMA));
             criteria.andIn("id", list);
         }
+        listCondition(oms2weeksDemandOrderEditVo,criteria);
         List<Oms2weeksDemandOrderEdit> list = selectByExample(example);
         if (CollUtil.isEmpty(list)) {
             return R.error("无数据需要下达！");
@@ -526,6 +554,44 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
         }
         updateBatchByPrimaryKeySelective(list);
         return R.ok();
+    }
+
+    /**
+     * Example查询时的条件
+     * @param oms2weeksDemandOrderEdit
+     * @return
+     */
+    void listCondition(Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit,Example.Criteria criteria){
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getProductMaterialCode())) {
+            criteria.andEqualTo("productMaterialCode",oms2weeksDemandOrderEdit.getProductMaterialCode() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getProductFactoryCode())) {
+            criteria.andEqualTo("productFactoryCode",oms2weeksDemandOrderEdit.getProductFactoryCode() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getCustomerCode())) {
+            criteria.andEqualTo("customerCode",oms2weeksDemandOrderEdit.getCustomerCode() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getOrderFrom())) {
+            criteria.andEqualTo("orderFrom",oms2weeksDemandOrderEdit.getOrderFrom() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getAuditStatus())) {
+            criteria.andEqualTo("auditStatus",oms2weeksDemandOrderEdit.getAuditStatus() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getStatus())) {
+            criteria.andEqualTo("status",oms2weeksDemandOrderEdit.getStatus() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getProductType())) {
+            criteria.andEqualTo("productType",oms2weeksDemandOrderEdit.getProductType() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getLifeCycle())) {
+            criteria.andEqualTo("lifeCycle",oms2weeksDemandOrderEdit.getLifeCycle() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getBeginTime())) {
+            criteria.andGreaterThanOrEqualTo("deliveryDate",oms2weeksDemandOrderEdit.getBeginTime() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getEndTime())) {
+            criteria.andLessThanOrEqualTo("deliveryDate", oms2weeksDemandOrderEdit.getEndTime() );
+        }
     }
 
     /**
@@ -795,8 +861,8 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 inputTable.setValue("MATNR", oms2weeksDemandOrderEdit.getProductMaterialCode().toUpperCase());
                 inputTable.setValue("WERKS", oms2weeksDemandOrderEdit.getProductFactoryCode());
                 inputTable.setValue("AUART", oms2weeksDemandOrderEdit.getOrderType());
-//                inputTable.setValue("GSTRP", oms2weeksDemandOrderEdit.getProductStartDate());
-//                inputTable.setValue("GLTRP", oms2weeksDemandOrderEdit.getProductEndDate());
+                inputTable.setValue("GSTRP", oms2weeksDemandOrderEdit.getDeliveryDate());
+                inputTable.setValue("GLTRP", oms2weeksDemandOrderEdit.getDeliveryDate());
                 inputTable.setValue("GAMNG", oms2weeksDemandOrderEdit.getOrderNum());
                 inputTable.setValue("LGORT", oms2weeksDemandOrderEdit.getPlace());
                 inputTable.setValue("ABLAD", oms2weeksDemandOrderEdit.getDemandOrderCode());
@@ -809,17 +875,26 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             JCoContext.end(destination);
             //获取返回的Table
             JCoTable outTableOutput = fm.getTableParameterList().getTable("OUTPUT");
+            int errNum = 0;//传SAP异常条数
             //从输出table中获取每一行数据
             if (outTableOutput != null && outTableOutput.getNumRows() > 0) {
                 //循环取table行数据
                 StringBuffer sapBuffer = new StringBuffer();
+                List<String> sucMsg = CollectionUtil.newArrayList("已安排作业",
+                        "订单已创建，请勿重复传输！");
                 for (int i = 0; i < outTableOutput.getNumRows(); i++) {
                     //设置指针位置
                     outTableOutput.setRow(i);
                     Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit = new Oms2weeksDemandOrderEdit();
                     oms2weeksDemandOrderEdit.setDemandOrderCode(outTableOutput.getString("ABLAD"));//排产订单号
                     oms2weeksDemandOrderEdit.setSapMessages(outTableOutput.getString("MESSAGE"));
-                    oms2weeksDemandOrderEdit.setStatus(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPZ.getCode());
+                    //无其他返回值，只能通过MESSAGE确认是否成功
+                    if (sucMsg.contains(outTableOutput.getString("MESSAGE"))) {
+                        oms2weeksDemandOrderEdit.setStatus(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPZ.getCode());
+                    }else{
+                        errNum++;
+                        oms2weeksDemandOrderEdit.setStatus(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());
+                    }
                     successList.add(oms2weeksDemandOrderEdit);
                     String messageOne = StrUtil.format("ABLAD:{},MESSAGE:{};"
                             ,outTableOutput.getString("ABLAD"),outTableOutput.getString("MESSAGE"));
@@ -827,6 +902,9 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 }
                 sysInterfaceLog.setResults(sapBuffer.toString());
                 updateBatchByDemandOrderCode(successList);
+                return R.ok(StrUtil.format("下达SAP成功：{}条，异常：{}条",
+                        successList==null?0:successList.size(),
+                        errNum));
             } else {
                 sysInterfaceLog.setResults("SAP返回数据为空！");
                 log.error("2周需求下达SAP传生产订单信息返回信息为空！");
@@ -841,7 +919,6 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             sysInterfaceLog.setRemark("2周需求下达SAP传生产订单信息");
             remoteInterfaceLogService.saveInterfaceLog(sysInterfaceLog);
         }
-        return R.ok();
     }
 
     /**
@@ -855,7 +932,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
     }
 
     /**
-     * SAP601创建订单接口定时任务（ZPP_INT_DDPS_02）
+     * SAP601创建订单接口定时任务（ZPP_INT_DDPS_05）
      * @return
      */
     @Override
@@ -906,15 +983,23 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 for (int i = 0; i < outTableOutput.getNumRows(); i++) {
                     //设置指针位置
                     outTableOutput.setRow(i);
+                    String flag = outTableOutput.getString("FLAG");
                     Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit = new Oms2weeksDemandOrderEdit();
                     oms2weeksDemandOrderEdit.setDemandOrderCode(outTableOutput.getString("ABLAD"));//需求订单号
-                    oms2weeksDemandOrderEdit.setPlanOrderOrder(outTableOutput.getString("AUFNR"));//计划订单号
-                    oms2weeksDemandOrderEdit.setStatus(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode());//已传SAP
+                    oms2weeksDemandOrderEdit.setSapMessages(outTableOutput.getString("MESSAGE"));
+                    if (SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(flag)) {
+                        oms2weeksDemandOrderEdit.setPlanOrderOrder(outTableOutput.getString("AUFNR"));//计划订单号
+                        oms2weeksDemandOrderEdit.setStatus(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode());//已传SAP
+                    }else{
+                        oms2weeksDemandOrderEdit.setStatus(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());//传SAP异常
+                    }
                     dataList.add(oms2weeksDemandOrderEdit);
-                    String messageOne = StrUtil.format("ABLAD:{},AUFNR:{};"
-                            ,outTableOutput.getString("ABLAD"),outTableOutput.getString("AUFNR"));
+                    String messageOne = StrUtil.format("FLAG:{};ABLAD:{},AUFNR:{};MESSAGE:{};"
+                            ,flag,outTableOutput.getString("ABLAD"),outTableOutput.getString("AUFNR"),outTableOutput.getString("MESSAGE"));
                     sapBuffer.append(messageOne);
                 }
+                updateBatchByDemandOrderCode(dataList);
+                sysInterfaceLog.setResults(sapBuffer.toString());
             } else {
                 sysInterfaceLog.setResults("返回数据为空！");
                 log.error("获取生产订单数据为空！");
@@ -930,7 +1015,6 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             remoteInterfaceLogService.saveInterfaceLog(sysInterfaceLog);
         }
         log.info("================(2周需求)获取SAP系统生产订单方法  end================");
-
         return R.ok();
     }
 }

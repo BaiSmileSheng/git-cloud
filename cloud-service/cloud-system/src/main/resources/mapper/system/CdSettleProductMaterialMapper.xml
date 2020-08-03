@@ -47,7 +47,7 @@
     <insert id="batchInsertOrUpdate" parameterType="java.util.List">
         insert into cd_settle_product_material (
         product_material_code, product_material_desc,raw_material_code, raw_material_desc,outsource_way, remark,
-        del_flag, create_by, update_by)
+        del_flag, create_by, update_by,update_time)
         VALUES
         <foreach collection="list" item="item" separator=",">
             (
@@ -59,7 +59,8 @@
             ifnull(#{item.remark}, ''),
             ifnull(#{item.delFlag}, 0),
             ifnull(#{item.createBy}, ''),
-            ifnull(#{item.updateBy}, '')
+            ifnull(#{item.updateBy}, ''),
+            now()
             )
         </foreach>
         ON DUPLICATE KEY UPDATE
@@ -75,4 +76,12 @@
         update_time = now()
     </insert>
 
+    <select id="selectByIndexes" parameterType="java.util.List" resultMap="CdSettleProductMaterialResult">
+        <include refid="selectCdSettleProductMaterialVo"/>
+        WHERE
+        <foreach collection="list" item="item" separator="or">
+            (product_material_code = #{item.productMaterialCode} and outsource_way = #{item.outsourceWay} and
+            del_flag = 0)
+        </foreach>
+    </select>
 </mapper>

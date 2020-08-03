@@ -78,6 +78,7 @@ public class CdMaterialExtendInfoController extends BaseController {
         Example example = new Example(CdMaterialExtendInfo.class);
         Example.Criteria criteria = example.createCriteria();
         listCondition(cdMaterialExtendInfo,criteria);
+        example.orderBy("createTime").desc();
         startPage();
         List<CdMaterialExtendInfo> cdMaterialExtendInfoList = cdMaterialExtendInfoService.selectByExample(example);
         return getDataTable(cdMaterialExtendInfoList);
@@ -110,6 +111,9 @@ public class CdMaterialExtendInfoController extends BaseController {
         if(StringUtils.isNotBlank(cdMaterialExtendInfo.getLifeCycle())){
             criteria.andEqualTo("lifeCycle",cdMaterialExtendInfo.getLifeCycle());
         }
+        if(StringUtils.isNotBlank(cdMaterialExtendInfo.getIsZnAttestation())){
+            criteria.andEqualTo("isZnAttestation",cdMaterialExtendInfo.getIsZnAttestation());
+        }
     }
     /**
      * 下载模板
@@ -137,6 +141,7 @@ public class CdMaterialExtendInfoController extends BaseController {
         Example example = new Example(CdMaterialExtendInfo.class);
         Example.Criteria criteria = example.createCriteria();
         listCondition(cdMaterialExtendInfo,criteria);
+        example.orderBy("createTime").desc();
         String fileName = "成品物料信息.xlsx";
         List<CdMaterialExtendInfo> cdMaterialExtendInfoList = cdMaterialExtendInfoService.selectByExample(example);
         return EasyExcelUtilOSS.writeExcel(cdMaterialExtendInfoList,fileName,fileName,new CdMaterialExtendInfoExportVo());

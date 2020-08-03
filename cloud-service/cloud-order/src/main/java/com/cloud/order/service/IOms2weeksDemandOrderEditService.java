@@ -53,7 +53,7 @@ public interface IOms2weeksDemandOrderEditService extends BaseService<Oms2weeksD
      * @param ids
      * @return
      */
-    R deleteWithLimit(String ids);
+    R deleteWithLimit(String ids,Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit);
 
     /**
      * 带逻辑删除已下达SAP数据
@@ -68,7 +68,7 @@ public interface IOms2weeksDemandOrderEditService extends BaseService<Oms2weeksD
      * @param ids
      * @return
      */
-    R confirmRelease(String ids);
+    R confirmRelease(String ids,Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit);
 
     /**
      * 查询不重复的物料号和工厂

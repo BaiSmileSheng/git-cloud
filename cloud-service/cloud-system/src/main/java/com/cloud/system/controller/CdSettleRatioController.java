@@ -86,6 +86,7 @@ public class CdSettleRatioController extends BaseController {
         if(StringUtils.isNotBlank(cdSettleRatio.getClaimType())){
             criteria.andEqualTo("claimType",cdSettleRatio.getClaimType());
         }
+        example.orderBy("createTime").desc();
         startPage();
         List<CdSettleRatio> cdSettleRatioList = cdSettleRatioService.selectByExample(example);
         return getDataTable(cdSettleRatioList);
