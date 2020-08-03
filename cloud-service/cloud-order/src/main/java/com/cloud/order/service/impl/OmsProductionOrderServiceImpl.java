@@ -1762,6 +1762,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 omsProductionOrder.setBomVersion("");
             }
         });
+        if(CollectionUtils.isEmpty(listSapRes)){
+            return R.ok("订单刷新无需更新数据");
+        }
         //修改数据
         omsProductionOrderMapper.batchUpdateByOrderCode(listSapRes);
         return R.ok();
