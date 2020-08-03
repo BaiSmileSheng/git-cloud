@@ -274,6 +274,9 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
                     .productStartDate(omsProductionOrder.getProductStartDate())
                     .build());
         });
+        if (ObjectUtil.isEmpty(omsRawMaterialFeedbacks) || omsRawMaterialFeedbacks.size() <= 0) {
+            return R.ok();
+        }
         return R.data(omsRawMaterialFeedbacks);
     }
 
