@@ -10022,6 +10022,18 @@
               "notNull": true
             },
             {
+              "name": "department",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "产品组"
+            },
+            {
+              "name": "mdm_delete_flag",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "集团级删除标识"
+            },
+            {
               "name": "del_flag",
               "type": "Char",
               "remark": "",
