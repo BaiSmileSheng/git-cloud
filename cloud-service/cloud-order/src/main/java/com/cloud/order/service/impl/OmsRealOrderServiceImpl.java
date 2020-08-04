@@ -267,7 +267,8 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         Example exampleInternal = new Example(OmsInternalOrderRes.class);
         Example.Criteria criteria = exampleInternal.createCriteria();
         criteria.andEqualTo("marker", InternalOrderResEnum.MARKER_PO.getCode());
-        criteria.andNotEqualTo("deliveryFlag",InternalOrderResEnum.DELIVERY_FLAG_X);
+        criteria.andNotEqualTo("deliveryFlag",InternalOrderResEnum.DELIVERY_FLAG_X.getCode());
+        criteria.andNotEqualTo("sapDelFlag",InternalOrderResEnum.SAP_DEL_FLAG_L.getCode());
         List<OmsInternalOrderRes> internalOrderResList = omsInternalOrderResService.selectByExample(exampleInternal);
         if(CollectionUtils.isEmpty(internalOrderResList)){
             logger.error("定时任务每天在获取到PO信息不存在");
@@ -280,7 +281,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         //一个工厂,一个客户对应一个库位
         Map<String, CdFactoryStorehouseInfo> factoryStorehouseInfoMap = factoryStorehouseInfoMap(new CdFactoryStorehouseInfo());
 
-        logger.info("定时任务每天在获取到PO信息后 进行需求汇总  汇总开始  ");
+        logger.info("定时任务每天在获取到PO信息后 进行需求汇总  汇总开始");
         //3.将原始数据按照成品专用号、生产工厂、客户编码、交付日期将未完成交货的数据订单数量进行汇总
         Map<String, OmsRealOrder> omsRealOrderMap = getStringOmsRealOrderMap(internalOrderResList, factoryStorehouseInfoMap,"定时任务");
 
