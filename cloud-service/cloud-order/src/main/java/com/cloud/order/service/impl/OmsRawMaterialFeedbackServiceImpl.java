@@ -269,7 +269,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
         Example.Criteria criteria = example.createCriteria();
         if (StrUtil.isBlank(ids) || ids.length() <= 0) {
             criteria.andIn("id", Arrays.asList(ids.split(",")));
-        } else {
+        } else if (BeanUtil.isNotEmpty(omsRawMaterialFeedback)) {
             if (StrUtil.isNotBlank(omsRawMaterialFeedback.getRawMaterialCode())) {
                 criteria.andEqualTo("rawMaterialCode",omsRawMaterialFeedback.getRawMaterialCode());
             }
@@ -287,11 +287,17 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
                     criteria.andEqualTo("createBy", sysUser.getLoginName());
                 }
             }
+        } else {
+            log.error("JIT原材料反馈信息删除操作,传入参数为空！");
+            return R.error("传入参数为空！");
         }
         List<OmsRawMaterialFeedback> omsRawMaterialFeedbacks = omsRawMaterialFeedbackMapper.selectByExample(example);
         /** 删除原材料反馈信息需要同时更新排产订单表记录的状态，然而删除的反馈信息记录不一定是一条排产订单对应的全部反馈信息，因此需要进行筛选*/
         /** 筛选开始 */
-
+        if (ObjectUtil.isEmpty(omsRawMaterialFeedbacks) || omsRawMaterialFeedbacks.size() <= 0) {
+            log.error("JIT原材料反馈信息删除操作，根据前台参数未查询出数据！");
+            return R.ok();
+        }
         //根据专用号、生产工厂、基本开始日期、bom版本查询原材料反馈信息
         List<OmsRawMaterialFeedback> rawMaterialFeedbacks = omsRawMaterialFeedbackMapper.selectByList(omsRawMaterialFeedbacks);
         //取前台传的数据与同专用号、生产工厂、开始日期、bom版本查询出的数据差集
@@ -370,7 +376,20 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             log.error("新增原材料反馈记录传入参数为空！");
             return R.error("新增原材料反馈记录传入参数为空!");
         }
+        Example example = new Example(OmsRawMaterialFeedback.class);
+        Example.Criteria criteria = example.createCriteria();
         omsRawMaterialFeedbacks.forEach(f -> {
+            //增加重复数据校验  2020-08-04  ltq
+            criteria.andEqualTo("productFactoryCode", f.getProductFactoryCode());
+            criteria.andEqualTo("rawMaterialCode", f.getRawMaterialCode());
+            criteria.andEqualTo("productStartDate", f.getProductStartDate());
+            criteria.andEqualTo("productMaterialCode", f.getProductMaterialCode());
+            criteria.andEqualTo("bomVersion", f.getBomVersion());
+            OmsRawMaterialFeedback omsRawMaterialFeedback = omsRawMaterialFeedbackMapper.selectOneByExample(example);
+            if (BeanUtil.isNotEmpty(omsRawMaterialFeedback)) {
+                log.error("数据库中存在了相同的反馈记录！");
+                throw new BusinessException("数据库中存在了相同的反馈记录，请先删除原反馈记录！");
+            }
             //根据成品专用、生产工厂、原材料物料号、BOM版本查询bom清单数据
             R rBom = remoteBomService.listByProductAndMaterial(f.getProductMaterialCode(), f.getRawMaterialCode(),
                     f.getBomVersion(), f.getProductFactoryCode());
