@@ -15,6 +15,7 @@ public enum InternalOrderResEnum {
     MARKER_PR("PR","PR标记"),
 
     DELIVERY_FLAG_X("X","已交货"),
+    SAP_DEL_FLAG_L("L","已删除"),//sap删除标记
 
 
     ;
