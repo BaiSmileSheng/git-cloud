@@ -89,6 +89,8 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
                     cdMaterialInfo.setMdmCreateTime(StrUtil.isNotBlank(rowRisk.getCREATED()) ? DateUtil.parse(rowRisk.getCREATED(),"yyyy-MM-dd HH:mm:ss") : new Date());
                     cdMaterialInfo.setDelFlag("0");
                     cdMaterialInfo.setCreateBy("systemJob");
+                    cdMaterialInfo.setMdmDeleteFlag(rowRisk.getDELETE_FLAG());
+                    cdMaterialInfo.setDepartment(rowRisk.getDEPARTMENT());
                     cdMaterialInfosInsertOrUpdate.add(cdMaterialInfo);
 
                 });
