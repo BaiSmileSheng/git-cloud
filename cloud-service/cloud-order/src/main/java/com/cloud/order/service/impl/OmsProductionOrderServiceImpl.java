@@ -1855,15 +1855,15 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         }
         //3.修改数据库
         List<OmsProductionOrder> listSapRes = (List<OmsProductionOrder>) resultSAP.get("data");
+        if(CollectionUtils.isEmpty(listSapRes)){
+            return R.ok("订单刷新无需更新数据");
+        }
         listSapRes.forEach(omsProductionOrder -> {
             if("S".equals(omsProductionOrder.getSapFlag())){
                 omsProductionOrder.setNewVersion(omsProductionOrder.getBomVersion());
                 omsProductionOrder.setBomVersion("");
             }
         });
-        if(CollectionUtils.isEmpty(listSapRes)){
-            return R.ok("订单刷新无需更新数据");
-        }
         //修改数据
         omsProductionOrderMapper.batchUpdateByOrderCode(listSapRes);
         return R.ok();
