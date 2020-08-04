@@ -1926,8 +1926,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         if(CollectionUtils.isEmpty(omsProductionOrderListGet)){
             return R.ok("SAP没有数据");
         }
+
         Map<String,OmsProductionOrder> omsProductionOrderMap = omsProductionOrderListReq.stream().collect(Collectors.toMap(
-                omsProductionOrder ->omsProductionOrder.getProductOrderCode(),
+                omsProductionOrder ->getFixedLengthString(omsProductionOrder.getProductOrderCode(),WMS_PRODUCT_ORDER_LENGTH),
                 omsProductionOrder -> omsProductionOrder,(key1,key2) -> key2));
         List<SmsSettleInfo> smsSettleInfoList = new ArrayList<>();
         omsProductionOrderListGet.forEach(omsProductionOrder -> {
@@ -1943,17 +1944,18 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             if(omsProductionOrder.getDeliveryNum().compareTo(omsProductionOrderRes.getProductNum()) == 0){
                 smsSettleInfo.setActualEndDate(omsProductionOrder.getActualEndDate());
                 smsSettleInfo.setOrderStatus(SettleInfoOrderStatusEnum.ORDER_STATUS_2.getCode());
-                smsSettleInfoList.add(smsSettleInfo);
                 omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
             }
+            smsSettleInfoList.add(smsSettleInfo);
         });
+        //4.修改排产订单入库数量,完成时间
+        omsProductionOrderMapper.batchUpdateByProductOrderCode(omsProductionOrderListGet);
         //根据生产订单号更新排产订单和加工费结算
         R result = remoteSettleInfoService.batchUpdateByProductOrderCode(smsSettleInfoList);
         if(!result.isSuccess()){
             log.error("定时任务更新加工费结算入库量异常 res:{}",JSONObject.toJSONString(result));
             throw new BusinessException(result.get("msg").toString());
         }
-        omsProductionOrderMapper.batchUpdateByProductOrderCode(omsProductionOrderListGet);
         return R.ok();
     }
 
