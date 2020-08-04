@@ -28,7 +28,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 @ApiModel(value = "排产订单邮件推送")
-public class OmsProductionOrderMailVo extends BaseEntity {
+public class OmsProductionOrderMailVo {
     private static final long serialVersionUID = 1L;
 
 

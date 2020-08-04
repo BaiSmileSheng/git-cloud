@@ -1597,27 +1597,36 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }
         });
 
-        //3.发送附件
+        //3.校验邮箱
         branchOfficeMap.keySet().forEach(branchOffice -> {
-            List<OmsProductionOrder> productionOrderList = branchOfficeMap.get(branchOffice);
             CdFactoryLineInfo branchOfficeLineInfo = branchOfficeFactoryLineMap.get(branchOffice);
-            if(null == branchOfficeLineInfo){
+            if(null == branchOfficeLineInfo || StringUtils.isBlank(branchOfficeLineInfo.getBranchOfficeEmail())){
                 log.error("请维护主管邮箱 branchOffice:{}",branchOffice);
                 throw new BusinessException("请维护主管邮箱");
             }
-            String to = branchOfficeFactoryLineMap.get(branchOffice).getBranchOfficeEmail();
+        });
+        monitorMap.keySet().forEach(monitor -> {
+            CdFactoryLineInfo monitorLineInfo = monitorFactoryLineMap.get(monitor);
+            if(null == monitorLineInfo || StringUtils.isBlank(monitorLineInfo.getBranchOfficeEmail())){
+                log.error("请维护班长邮箱 branchOffice:{}",monitor);
+                throw new BusinessException("请维护主管邮箱");
+            }
+        });
+        //4.发送邮件
+        log.info("邮件推送发送邮件开始");
+        branchOfficeMap.keySet().forEach(branchOffice -> {
+            List<OmsProductionOrder> productionOrderList = branchOfficeMap.get(branchOffice);
+            CdFactoryLineInfo branchOfficeLineInfo = branchOfficeFactoryLineMap.get(branchOffice);
+            String to = branchOfficeLineInfo.getBranchOfficeEmail();
             sendMail(productionOrderList, to);
         });
         monitorMap.keySet().forEach(monitor -> {
             List<OmsProductionOrder> productionOrderList = monitorMap.get(monitor);
             CdFactoryLineInfo monitorLineInfo = monitorFactoryLineMap.get(monitor);
-            if(null == monitorLineInfo){
-                log.error("请维护班长邮箱 branchOffice:{}",monitor);
-                throw new BusinessException("请维护主管邮箱");
-            }
-            String to = monitorFactoryLineMap.get(monitor).getBranchOfficeEmail();
+            String to = monitorLineInfo.getBranchOfficeEmail();
             sendMail(productionOrderList, to);
         });
+        log.info("邮件推送发送邮件结束");
         return R.ok();
     }
 
@@ -1641,9 +1650,15 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         try {
             mailService.sendAttachmentMail(to, subject, content, new String[]{path});
         }catch (MessagingException me){
-            log.error("发送邮件异常");
+            StringWriter w = new StringWriter();
+            me.printStackTrace(new PrintWriter(w));
+            log.error("发送邮件异常:{}",w.toString());
+            throw new BusinessException("发送邮件异常");
         }catch (UnsupportedEncodingException ue){
-            log.error("发送邮件异常");
+            StringWriter w = new StringWriter();
+            ue.printStackTrace(new PrintWriter(w));
+            log.error("发送邮件异常:{}",w.toString());
+            throw new BusinessException("发送邮件异常");
         }
         FileUtil.del(path);
         return r;
