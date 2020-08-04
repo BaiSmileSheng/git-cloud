@@ -24,6 +24,7 @@ import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
+import com.cloud.common.utils.ListCommonUtil;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.*;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderExportVo;
@@ -45,6 +46,7 @@ import com.cloud.system.domain.vo.SysUserRights;
 import com.cloud.system.enums.OutSourceTypeEnum;
 import com.cloud.system.feign.*;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -1205,7 +1207,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             log.info("无拆解后的排产订单明细！");
             return R.ok();
         }
-        omsProductionOrderDetailService.insertList(omsProductionOrderDetails);
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<List<OmsProductionOrderDetail>> list =
+                objectMapper.convertValue(ListCommonUtil.subCollection(omsProductionOrderDetails, 100), new TypeReference<List<List<OmsProductionOrderDetail>>>() {});
+        list.forEach(orderDetails -> omsProductionOrderDetailService.insertList(orderDetails));
         //3、邮件通知JIT评审
         //排产订单明细去重
         List<OmsProductionOrderDetail> detailList = omsProductionOrderDetails.stream()
