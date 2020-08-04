@@ -311,7 +311,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         //判断对象属性是否有赋值
         Boolean flag = ReflectUtils.isAllFieldNull(omsRealOrder);
         if(!flag){
-            return R.error("请勾选需要删除的数据或填写查询条件");
+            return R.error("请勾选需要删除的数据或填写至少一个查询条件");
         }
         Example example = assemblyConditions(omsRealOrder);
         //排产员查对应工厂的数据,业务经理查自己导入的

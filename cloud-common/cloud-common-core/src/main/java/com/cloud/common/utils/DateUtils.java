@@ -209,6 +209,19 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
     }
 
     /**
+     * XMLGregorianCalendar 转Date
+     * @param cal
+     * @return
+     */
+    public  static Date convertToDate(XMLGregorianCalendar cal){
+        GregorianCalendar ca = null;
+        if(cal!=null && cal.toGregorianCalendar()!=null){
+            ca = cal.toGregorianCalendar();
+            return ca.getTime();
+        }
+        return null;
+    }
+    /**
      * 时间差值 天数
      * @param date1
      * @param date2

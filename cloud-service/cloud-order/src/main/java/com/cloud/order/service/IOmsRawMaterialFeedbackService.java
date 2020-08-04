@@ -49,7 +49,7 @@ public interface IOmsRawMaterialFeedbackService extends BaseService<OmsRawMateri
      * Author: ltq
      * Date: 2020/6/28
      */
-    R deleteByIds(String ids,SysUser sysUser);
+    R deleteByIds(String ids,OmsRawMaterialFeedback omsRawMaterialFeedback,SysUser sysUser);
     /**
      * Description: 反馈信息新增
      * Param: [omsRawMaterialFeedbacks, sysUser]

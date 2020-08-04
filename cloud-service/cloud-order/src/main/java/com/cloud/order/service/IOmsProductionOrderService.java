@@ -5,6 +5,7 @@ import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderExportVo;
 import com.cloud.system.domain.entity.SysUser;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -22,7 +23,7 @@ public interface IOmsProductionOrderService extends BaseService<OmsProductionOrd
      * Author: ltq
      * Date: 2020/6/22
      */
-    R importProductOrder(List<OmsProductionOrderExportVo> list, SysUser sysUser);
+    R importProductOrder(MultipartFile file, SysUser sysUser);
 
     /**
      * Description: 删除排产订单

@@ -190,8 +190,8 @@
         from oms_production_order
         where
         order_code in
-        <foreach collection="list" item="item" separator="," open="(" close=")">
-            #{item}
+        <foreach collection="list" item="item" separator=",">
+            (${item})
         </foreach>
     </select>
 
@@ -221,6 +221,21 @@
                 </if>
                 <if test="item.productOrderCode != null and item.productOrderCode != ''">
                     product_order_code = #{item.productOrderCode},
+                </if>
+                <if test="item.orderType != null and item.orderType != ''">
+                    order_type = #{item.orderType},
+                </if>
+                <if test="item.productStartDate != null and item.productStartDate != ''">
+                    product_start_date = #{item.productStartDate},
+                </if>
+                <if test="item.productEndDate != null and item.productEndDate != ''">
+                    product_end_date = #{item.productEndDate},
+                </if>
+                <if test="item.productNum != null and item.productNum != ''">
+                    product_num = #{item.productNum},
+                </if>
+                <if test="item.destination != null and item.destination != ''">
+                    destination = #{item.destination},
                 </if>
                 <if test="item.newVersion != null and item.newVersion != ''">
                     new_version = #{item.newVersion},
