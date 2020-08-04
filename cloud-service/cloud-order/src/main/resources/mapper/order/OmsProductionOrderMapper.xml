@@ -248,7 +248,7 @@
         </foreach>
     </update>
 
-    <update id="batchUpdateByProductOrderCode" parameterType="list">
+    <update id="batchUpdateByProductOrderCode" parameterType="java.util.List">
         <foreach collection="list" separator=";" item="item">
             update oms_production_order
             <trim prefix="set" suffixOverrides=",">
@@ -258,7 +258,7 @@
                 <if test="item.status != null and item.status != ''">
                     status = #{item.status},
                 </if>
-                <if test="item.actualEndDate != null and item.actualEndDate != ''">
+                <if test="item.actualEndDate != null">
                     actual_end_date = #{item.actualEndDate},
                 </if>
                 <if test="item.updateBy != null and item.updateBy != ''">

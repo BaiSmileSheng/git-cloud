@@ -118,6 +118,18 @@ public class CdMaterialInfo extends BaseEntity {
     @ExcelProperty(value = "UPH节拍")
     @ApiModelProperty(value = "UPH节拍")
     private BigDecimal uph;
+    /**
+     * 产品组
+     */
+    @ExcelProperty(value = "产品组")
+    @ApiModelProperty(value = "产品组")
+    private String department;
+    /**
+     * 集团级删除标识
+     */
+    @ExcelProperty(value = "集团级删除标识")
+    @ApiModelProperty(value = "集团级删除标识")
+    private String mdmDeleteFlag;
 
     /**
      * 是否删除0：有效，1：删除
