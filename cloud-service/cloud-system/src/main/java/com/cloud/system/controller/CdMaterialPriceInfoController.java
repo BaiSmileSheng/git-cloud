@@ -8,6 +8,7 @@ import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.CdMaterialPriceInfo;
+import com.cloud.system.domain.entity.CdSettleProductMaterial;
 import com.cloud.system.enums.PriceTypeEnum;
 import com.cloud.system.service.ICdMaterialPriceInfoService;
 import io.swagger.annotations.*;
@@ -223,5 +224,12 @@ public class CdMaterialPriceInfoController extends BaseController {
         startPage();
         List<CdMaterialPriceInfo> cdMaterialPriceInfoList = cdMaterialPriceInfoService.selectByExample(example);
         return R.data(cdMaterialPriceInfoList);
+    }
+    /**
+     * 根据成品物料号查询SAP成本价格
+     */
+    @GetMapping("selectMaterialPrice")
+    public R selectMaterialPrice(List<CdSettleProductMaterial> list){
+        return cdMaterialPriceInfoService.selectMaterialPrice(list);
     }
 }
