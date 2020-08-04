@@ -1872,6 +1872,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     @GlobalTransactional
     @Override
     public R timeGetConfirmAmont() {
+        //注意:wms订单号12位,不足前面补零;sap获取的10位,存入订单系统的10位,在wms获取后截取
         //1.查已传SAP的排产订单
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();
@@ -1914,7 +1915,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 OmsProductionOrder omsProductionOrder = new OmsProductionOrder();
                 Date actualEndDate= DateUtils.convertToDate(odsRawOrderOutStorageDTORes.getGmtCreate());
                 omsProductionOrder.setActualEndDate(actualEndDate);//最后入库时间
-                omsProductionOrder.setProductOrderCode(odsRawOrderOutStorageDTORes.getPrdOrderNo());//生产订单号
+                String prdOrderNo = odsRawOrderOutStorageDTORes.getPrdOrderNo();
+                String productOrderCode = prdOrderNo.substring(2);
+                omsProductionOrder.setProductOrderCode(productOrderCode);//生产订单号
                 omsProductionOrder.setDeliveryNum(new BigDecimal(odsRawOrderOutStorageDTORes.getProInAmount()));//入库数量
                 omsProductionOrderListGet.add(omsProductionOrder);
             });
@@ -1928,7 +1931,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         }
 
         Map<String,OmsProductionOrder> omsProductionOrderMap = omsProductionOrderListReq.stream().collect(Collectors.toMap(
-                omsProductionOrder ->getFixedLengthString(omsProductionOrder.getProductOrderCode(),WMS_PRODUCT_ORDER_LENGTH),
+                omsProductionOrder ->omsProductionOrder.getProductOrderCode(),
                 omsProductionOrder -> omsProductionOrder,(key1,key2) -> key2));
         List<SmsSettleInfo> smsSettleInfoList = new ArrayList<>();
         omsProductionOrderListGet.forEach(omsProductionOrder -> {
