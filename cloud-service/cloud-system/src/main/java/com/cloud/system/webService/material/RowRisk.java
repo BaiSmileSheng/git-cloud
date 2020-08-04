@@ -15,6 +15,26 @@ public class RowRisk {
     private String ROUNDING_QUANTITY;
     private String LAST_UPD;
 
+    private String DEPARTMENT;
+
+    private String DELETE_FLAG;
+
+    public String getDEPARTMENT() {
+        return DEPARTMENT;
+    }
+
+    public void setDEPARTMENT(String DEPARTMENT) {
+        this.DEPARTMENT = DEPARTMENT;
+    }
+
+    public String getDELETE_FLAG() {
+        return DELETE_FLAG;
+    }
+
+    public void setDELETE_FLAG(String DELETE_FLAG) {
+        this.DELETE_FLAG = DELETE_FLAG;
+    }
+
     public String getCREATED() {
         return CREATED;
     }

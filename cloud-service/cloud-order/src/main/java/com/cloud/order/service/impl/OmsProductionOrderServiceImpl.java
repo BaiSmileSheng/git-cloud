@@ -197,6 +197,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         //无法导入数据
         List<OmsProductionOrderExportVo> exportList = list.stream().filter(o -> StrUtil.isNotBlank(o.getExportRemark())).collect(toList());
         list = list.stream().filter(o -> !exportList.contains(o)).collect(Collectors.toList());
+        if ((ObjectUtil.isEmpty(list) || list.size() <= 0)
+                && (ObjectUtil.isNotEmpty(exportList) && exportList.size() > 0)) {
+            return EasyExcelUtilOSS.writeExcel(exportList, "排产订单导入失败数据.xlsx", "sheet", new OmsProductionOrderExportVo());
+        }
         //1-8、排产订单号：根据生成规则生成排产订单号；
         List<OmsProductionOrder> omsProductionOrders = list.stream().map(o -> {
             OmsProductionOrder omsProductionOrder = new OmsProductionOrder();
@@ -255,7 +259,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             omsProductionOrderMapper.updateBatchByPrimaryKeySelective(insertProductOrderList);
         }
         if (exportList.size() > 0) {
-            return EasyExcelUtilOSS.writeExcel(exportList, "排产订单失败数据.xlsx", "sheet", new OmsProductionOrderExportVo());
+            return EasyExcelUtilOSS.writeExcel(exportList, "排产订单导入失败数据.xlsx", "sheet", new OmsProductionOrderExportVo());
         } else {
             return R.ok();
         }
@@ -783,6 +787,23 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 productOrderCodeList.add(productOrderCodeReq);
             }
             criteria.andIn("productOrderCode", productOrderCodeList);
+        }
+        //增加排产订单号查询条件，多排产订单号查询，逗号隔开  2020-08-04  ltq
+        if(StringUtils.isNotBlank(omsProductionOrder.getOrderCode())){
+            String[] orderCodes = omsProductionOrder.getOrderCode().split(",");
+            List<String> orderCodeList = new ArrayList<>();
+            for(String orderCOde : orderCodes){
+                String regex = "\\s*|\t|\r|\n";
+                Pattern p = Pattern.compile(regex);
+                Matcher m = p.matcher(orderCOde);
+                String productOrderCodeReq = m.replaceAll("");
+                orderCodeList.add(productOrderCodeReq);
+            }
+            criteria.andIn("orderCode", orderCodeList);
+        }
+        //增加审核状态查询条件  2020-08-04 ltq
+        if (StrUtil.isNotBlank(omsProductionOrder.getAuditStatus())) {
+            criteria.andEqualTo("auditStatus", omsProductionOrder.getAuditStatus());
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getProductFactoryCode())) {
             criteria.andEqualTo("productFactoryCode", omsProductionOrder.getProductFactoryCode());
