@@ -784,6 +784,19 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }
             criteria.andIn("productOrderCode", productOrderCodeList);
         }
+        //增加排产订单号查询条件，多排产订单号查询，逗号隔开  2020-08-04  ltq
+        if(StringUtils.isNotBlank(omsProductionOrder.getOrderCode())){
+            String[] orderCodes = omsProductionOrder.getOrderCode().split(",");
+            List<String> orderCodeList = new ArrayList<>();
+            for(String orderCOde : orderCodes){
+                String regex = "\\s*|\t|\r|\n";
+                Pattern p = Pattern.compile(regex);
+                Matcher m = p.matcher(orderCOde);
+                String productOrderCodeReq = m.replaceAll("");
+                orderCodeList.add(productOrderCodeReq);
+            }
+            criteria.andIn("orderCode", orderCodeList);
+        }
         if (StrUtil.isNotBlank(omsProductionOrder.getProductFactoryCode())) {
             criteria.andEqualTo("productFactoryCode", omsProductionOrder.getProductFactoryCode());
         }
