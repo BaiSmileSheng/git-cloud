@@ -161,10 +161,12 @@ public class OrderFromSap800InterfaceServiceImpl implements IOrderFromSap800Inte
                         //设置指针位置
                         outTableOutput.setRow(i);
                         OmsInternalOrderRes omsInternalOrderRes = OmsInternalOrderRes.builder()
+                                .sapDelFlag(outTableOutput.getString("LOEKZ"))//采购凭证中的删除标识
                                 .orderCode(outTableOutput.getString("EBELN"))//采购申请号
                                 .orderLineCode(outTableOutput.getString("EBELP"))//采购申请行号
                                 .deliveryFlag(outTableOutput.getString("ELIKZ"))//交货已完成标识
                                 .productMaterialCode(outTableOutput.getString("MATNR"))//成品物料号
+                                .productMaterialDesc(outTableOutput.getString("TXZ01"))//成品物料描述
                                 .customerCode(outTableOutput.getString("WERKS"))//客户编码
                                 .customerDesc(outTableOutput.getString("NAME1"))//客户描述
                                 .purchaseGroupCode(outTableOutput.getString("EKGRP"))//采购组
