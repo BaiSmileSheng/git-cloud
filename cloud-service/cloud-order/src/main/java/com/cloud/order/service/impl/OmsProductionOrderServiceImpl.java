@@ -797,6 +797,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }
             criteria.andIn("orderCode", orderCodeList);
         }
+        //增加审核状态查询条件  2020-08-04 ltq
+        if (StrUtil.isNotBlank(omsProductionOrder.getAuditStatus())) {
+            criteria.andEqualTo("auditStatus", omsProductionOrder.getAuditStatus());
+        }
         if (StrUtil.isNotBlank(omsProductionOrder.getProductFactoryCode())) {
             criteria.andEqualTo("productFactoryCode", omsProductionOrder.getProductFactoryCode());
         }
