@@ -197,6 +197,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         //无法导入数据
         List<OmsProductionOrderExportVo> exportList = list.stream().filter(o -> StrUtil.isNotBlank(o.getExportRemark())).collect(toList());
         list = list.stream().filter(o -> !exportList.contains(o)).collect(Collectors.toList());
+        if ((ObjectUtil.isEmpty(list) || list.size() <= 0)
+                && (ObjectUtil.isNotEmpty(exportList) && exportList.size() > 0)) {
+            return EasyExcelUtilOSS.writeExcel(exportList, "排产订单导入失败数据.xlsx", "sheet", new OmsProductionOrderExportVo());
+        }
         //1-8、排产订单号：根据生成规则生成排产订单号；
         List<OmsProductionOrder> omsProductionOrders = list.stream().map(o -> {
             OmsProductionOrder omsProductionOrder = new OmsProductionOrder();
@@ -255,7 +259,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             omsProductionOrderMapper.updateBatchByPrimaryKeySelective(insertProductOrderList);
         }
         if (exportList.size() > 0) {
-            return EasyExcelUtilOSS.writeExcel(exportList, "排产订单失败数据.xlsx", "sheet", new OmsProductionOrderExportVo());
+            return EasyExcelUtilOSS.writeExcel(exportList, "排产订单导入失败数据.xlsx", "sheet", new OmsProductionOrderExportVo());
         } else {
             return R.ok();
         }

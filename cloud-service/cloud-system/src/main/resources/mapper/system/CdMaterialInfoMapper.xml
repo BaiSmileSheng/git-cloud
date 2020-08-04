@@ -17,6 +17,8 @@
                     <result property="mdmCreateTime" column="mdm_create_time"/>
                     <result property="lastUpdate" column="last_update"/>
                     <result property="uph" column="uph"/>
+                    <result property="department" column="department"/>
+                    <result property="mdmDeleteFlag" column="mdm_delete_flag"/>
                     <result property="delFlag" column="del_flag"/>
                     <result property="remark" column="remark"/>
                     <result property="createTime" column="create_time"/>
@@ -26,7 +28,7 @@
                     </resultMap>
 
     <sql id="selectCdMaterialInfoVo">
-        select id, material_code, material_desc, material_type, primary_uom, mtl_group_code, purchase_group_code, plant_code, rounding_quantit,mdm_create_time, last_update,uph, del_flag, remark, create_time, create_by, update_time, update_by from cd_material_info
+        select id, material_code, material_desc, material_type, primary_uom, mtl_group_code, purchase_group_code, plant_code, rounding_quantit,mdm_create_time, last_update,uph,department,mdm_delete_flag, del_flag, remark, create_time, create_by, update_time, update_by from cd_material_info
     </sql>
 
     <update id="updateBatchByFactoryAndMaterial" parameterType="list">
@@ -112,6 +114,8 @@
           rounding_quantit,
           mdm_create_time,
           last_update,
+          department,
+          mdm_delete_flag,
           del_flag,
           remark,
           create_time,
@@ -129,6 +133,8 @@
             #{item.roundingQuantit},
             #{item.mdmCreateTime},
             #{item.lastUpdate},
+            #{item.department},
+            #{item.mdmDeleteFlag},
             #{item.delFlag},
             #{item.remark},
             now(),
@@ -146,6 +152,8 @@
         rounding_quantit = values(rounding_quantit),
         mdm_create_time = values(mdm_create_time),
         last_update = values(last_update),
+        department = values(department),
+        mdm_delete_flag = values(mdm_delete_flag),
         del_flag = values(del_flag),
         remark = values(remark),
         update_time = now(),
