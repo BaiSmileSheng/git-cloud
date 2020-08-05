@@ -1,5 +1,7 @@
 package com.cloud.common.utils.bean;
 
+import cn.hutool.core.util.StrUtil;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -27,6 +29,10 @@ public class BeanUtils extends org.springframework.beans.BeanUtils {
      * 匹配setter方法的正则表达式
      */
     private static final Pattern SET_PATTERN = Pattern.compile("set(\\p{javaUpperCase}\\w*)");
+    /**
+     * 序列化字段
+     */
+    private static final String SERIALVERSIONUID = "serialVersionUID";
 
     /**
      * Bean属性复制工具方法。
@@ -124,4 +130,28 @@ public class BeanUtils extends org.springframework.beans.BeanUtils {
         }
 
     }
+
+    /**
+     * 判断对象中属性值是否全为空
+     *
+     * @param object
+     * @return
+     */
+    public static boolean checkObjAllFieldsIsNull(Object object) {
+        if (null == object) {
+            return true;
+        }
+        try {
+            for (Field f : object.getClass().getDeclaredFields()) {
+                f.setAccessible(true);
+                if (!SERIALVERSIONUID.equals(f.getName()) && f.get(object) != null && StrUtil.isNotBlank(f.get(object).toString())) {
+                    return false;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
 }
