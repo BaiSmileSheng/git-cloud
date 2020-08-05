@@ -371,7 +371,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         listImport.forEach(o -> cdFactoryLineInfoList.forEach(f -> {
             if (o.getProductFactoryCode().equals(f.getProductFactoryCode())
                     && o.getProductLineCode().equals(f.getProduceLineCode())) {
-                o.setProductQuota(f.getProductQuota());
+                o.setProductQuota(f.getProductQuota() == null ? 0 : f.getProductQuota());
                 o.setBranchOffice(f.getBranchOffice());
                 o.setMonitor(f.getMonitor());
             }

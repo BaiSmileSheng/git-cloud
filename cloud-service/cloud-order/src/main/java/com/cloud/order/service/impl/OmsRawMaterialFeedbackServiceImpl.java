@@ -10,6 +10,7 @@ import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.common.utils.bean.BeanUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.domain.entity.OmsProductionOrderDetail;
 import com.cloud.order.domain.entity.OmsRawMaterialFeedback;
@@ -267,9 +268,9 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
     public R deleteByIds(String ids, OmsRawMaterialFeedback omsRawMaterialFeedback ,SysUser sysUser) {
         Example example = new Example(OmsRawMaterialFeedback.class);
         Example.Criteria criteria = example.createCriteria();
-        if (StrUtil.isBlank(ids) || ids.length() <= 0) {
+        if (StrUtil.isNotBlank(ids)) {
             criteria.andIn("id", Arrays.asList(ids.split(",")));
-        } else if (BeanUtil.isNotEmpty(omsRawMaterialFeedback)) {
+        } else if (!BeanUtils.checkObjAllFieldsIsNull(omsRawMaterialFeedback)) {
             if (StrUtil.isNotBlank(omsRawMaterialFeedback.getRawMaterialCode())) {
                 criteria.andEqualTo("rawMaterialCode",omsRawMaterialFeedback.getRawMaterialCode());
             }
@@ -287,6 +288,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
                     criteria.andEqualTo("createBy", sysUser.getLoginName());
                 }
             }
+            criteria.andEqualTo("status",FEEDBACK_STATUS_ZERO);
         } else {
             log.error("JIT原材料反馈信息删除操作,传入参数为空！");
             return R.error("传入参数为空！");
@@ -298,6 +300,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             log.error("JIT原材料反馈信息删除操作，根据前台参数未查询出数据！");
             return R.ok();
         }
+        ids = omsRawMaterialFeedbacks.stream().map(o -> o.getId().toString()).collect(Collectors.joining(","));
         //根据专用号、生产工厂、基本开始日期、bom版本查询原材料反馈信息
         List<OmsRawMaterialFeedback> rawMaterialFeedbacks = omsRawMaterialFeedbackMapper.selectByList(omsRawMaterialFeedbacks);
         //取前台传的数据与同专用号、生产工厂、开始日期、bom版本查询出的数据差集
@@ -347,12 +350,12 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
         );
         /** 筛选结束 */
         //更新排产订单明细状态
-        omsProductionOrderDetailService.updateBatchByProductOrderCode(omsProductionOrderDetails);
+        if (ObjectUtil.isNotEmpty(omsProductionOrderDetails) && omsProductionOrderDetails.size() > 0) {
+            omsProductionOrderDetailService.updateBatchByProductOrderCode(omsProductionOrderDetails);
+        }
         //更新排产订单状态
-        int orderUpdateCount = omsProductionOrderService.updateBatchByPrimaryKeySelective(productionOrders);
-        if (orderUpdateCount <= 0) {
-            log.error("更新排产订单状态失败！");
-            return R.error("更新排产订单状态失败!");
+        if (ObjectUtil.isNotEmpty(productionOrders) && productionOrders.size() > 0) {
+           omsProductionOrderService.updateBatchByPrimaryKeySelective(productionOrders);
         }
         int deleteCount = omsRawMaterialFeedbackMapper.deleteByIds(ids);
         if (deleteCount <= 0) {

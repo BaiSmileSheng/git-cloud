@@ -16,6 +16,7 @@ import javax.persistence.Transient;
 import tk.mybatis.mapper.annotation.KeySql;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 排产订单明细 对象 oms_production_order_detail
@@ -159,5 +160,11 @@ public class OmsProductionOrderDetail extends BaseEntity {
     @Transient
     @ApiModelProperty(value = "查询结束日期")
     private String checkEndDate;
+    /**
+     * 实体list
+     */
+    @Transient
+    @ApiModelProperty(value = "实体list")
+    private List<OmsProductionOrderDetail> orderDetailList;
 
 }

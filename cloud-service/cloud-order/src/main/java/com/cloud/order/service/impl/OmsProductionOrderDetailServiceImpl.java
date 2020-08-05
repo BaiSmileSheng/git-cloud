@@ -12,6 +12,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.StringUtils;
+import com.cloud.common.utils.bean.BeanUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.domain.entity.OmsRawMaterialFeedback;
 import com.cloud.order.domain.entity.vo.*;
@@ -336,13 +337,16 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
     @Transactional
     public R commitProductOrderDetail(List<OmsProductionOrderDetail> list, OmsProductionOrderDetail omsProductionOrderDetail, SysUser sysUser) {
         if (ObjectUtil.isEmpty(list) || list.size() <= 0) {
-            if (BeanUtil.isNotEmpty(omsProductionOrderDetail)) {
+            if (!BeanUtils.checkObjAllFieldsIsNull(omsProductionOrderDetail)) {
                 if (StrUtil.isNotBlank(omsProductionOrderDetail.getStatus())
                         && (ProductOrderConstants.DETAIL_STATUS_ONE.equals(omsProductionOrderDetail.getStatus())
                         || ProductOrderConstants.DETAIL_STATUS_TWO.equals(omsProductionOrderDetail.getStatus())
                         || ProductOrderConstants.DETAIL_STATUS_THREE.equals(omsProductionOrderDetail.getStatus()))) {
                     return R.error("只能确认未确认的数据！");
                 }
+            } else {
+                log.error("原材料确认,传入参数为空！");
+                return R.error("传入参数为空！");
             }
             if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
                 //JIT根据生产工厂、采购组权限查询

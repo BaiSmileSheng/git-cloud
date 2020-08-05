@@ -1,24 +1,19 @@
 package com.cloud.order.controller;
 
+import com.cloud.common.core.controller.BaseController;
+import com.cloud.common.core.domain.R;
+import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.order.domain.entity.OmsTest;
+import com.cloud.order.service.IOmsTestService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import tk.mybatis.mapper.entity.Example;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.cloud.common.core.domain.R;
-import com.cloud.common.core.controller.BaseController;
-import com.cloud.order.domain.entity.OmsTest;
-import com.cloud.order.service.IOmsTestService;
-import com.cloud.common.core.page.TableDataInfo;
+import org.springframework.web.bind.annotation.*;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
 
@@ -30,12 +25,15 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("test")
+@Api(tags = "测试seata")
 public class OmsTestController extends BaseController {
 
     @Autowired
     private IOmsTestService omsTestService;
 
     @GetMapping("seata")
+    @ApiOperation(value = "测试seata")
+    @OperLog(title = "测试seata", businessType = BusinessType.INSERT)
     public void seata() {
         omsTestService.updateTest();
     }
