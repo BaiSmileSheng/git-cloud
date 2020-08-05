@@ -1707,34 +1707,27 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }
         });
 
-        //3.校验邮箱
-        branchOfficeMap.keySet().forEach(branchOffice -> {
-            CdFactoryLineInfo branchOfficeLineInfo = branchOfficeFactoryLineMap.get(branchOffice);
-            if(null == branchOfficeLineInfo || StringUtils.isBlank(branchOfficeLineInfo.getBranchOfficeEmail())){
-                log.error("请维护主管邮箱 branchOffice:{}",branchOffice);
-                throw new BusinessException("请维护主管邮箱");
-            }
-        });
-        monitorMap.keySet().forEach(monitor -> {
-            CdFactoryLineInfo monitorLineInfo = monitorFactoryLineMap.get(monitor);
-            if(null == monitorLineInfo || StringUtils.isBlank(monitorLineInfo.getBranchOfficeEmail())){
-                log.error("请维护班长邮箱 branchOffice:{}",monitor);
-                throw new BusinessException("请维护主管邮箱");
-            }
-        });
-        //4.发送邮件
+        //3.发送邮件
         log.info("邮件推送发送邮件开始");
         branchOfficeMap.keySet().forEach(branchOffice -> {
             List<OmsProductionOrder> productionOrderList = branchOfficeMap.get(branchOffice);
             CdFactoryLineInfo branchOfficeLineInfo = branchOfficeFactoryLineMap.get(branchOffice);
-            String to = branchOfficeLineInfo.getBranchOfficeEmail();
-            sendMail(productionOrderList, to);
+            if(null == branchOfficeLineInfo || StringUtils.isBlank(branchOfficeLineInfo.getBranchOfficeEmail())){
+                log.error("邮件推送时获取主管邮箱异常 branchOffice:{}",branchOffice);
+            }else{
+                String to = branchOfficeLineInfo.getBranchOfficeEmail();
+                sendMail(productionOrderList, to);
+            }
         });
         monitorMap.keySet().forEach(monitor -> {
             List<OmsProductionOrder> productionOrderList = monitorMap.get(monitor);
             CdFactoryLineInfo monitorLineInfo = monitorFactoryLineMap.get(monitor);
-            String to = monitorLineInfo.getBranchOfficeEmail();
-            sendMail(productionOrderList, to);
+            if(null == monitorLineInfo || StringUtils.isBlank(monitorLineInfo.getBranchOfficeEmail())){
+                log.error("邮件推送时获取班长邮箱异常 monitor:{}",monitor);
+            }else {
+                String to = monitorLineInfo.getBranchOfficeEmail();
+                sendMail(productionOrderList, to);
+            }
         });
         log.info("邮件推送发送邮件结束");
         return R.ok();
