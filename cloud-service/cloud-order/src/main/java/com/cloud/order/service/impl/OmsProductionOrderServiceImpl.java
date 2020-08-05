@@ -24,6 +24,7 @@ import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
+import com.cloud.common.utils.ListCommonUtil;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.*;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderExportVo;
@@ -45,6 +46,7 @@ import com.cloud.system.domain.vo.SysUserRights;
 import com.cloud.system.enums.OutSourceTypeEnum;
 import com.cloud.system.feign.*;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -197,6 +199,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         //无法导入数据
         List<OmsProductionOrderExportVo> exportList = list.stream().filter(o -> StrUtil.isNotBlank(o.getExportRemark())).collect(toList());
         list = list.stream().filter(o -> !exportList.contains(o)).collect(Collectors.toList());
+        if ((ObjectUtil.isEmpty(list) || list.size() <= 0)
+                && (ObjectUtil.isNotEmpty(exportList) && exportList.size() > 0)) {
+            return EasyExcelUtilOSS.writeExcel(exportList, "排产订单导入失败数据.xlsx", "sheet", new OmsProductionOrderExportVo());
+        }
         //1-8、排产订单号：根据生成规则生成排产订单号；
         List<OmsProductionOrder> omsProductionOrders = list.stream().map(o -> {
             OmsProductionOrder omsProductionOrder = new OmsProductionOrder();
@@ -255,7 +261,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             omsProductionOrderMapper.updateBatchByPrimaryKeySelective(insertProductOrderList);
         }
         if (exportList.size() > 0) {
-            return EasyExcelUtilOSS.writeExcel(exportList, "排产订单失败数据.xlsx", "sheet", new OmsProductionOrderExportVo());
+            return EasyExcelUtilOSS.writeExcel(exportList, "排产订单导入失败数据.xlsx", "sheet", new OmsProductionOrderExportVo());
         } else {
             return R.ok();
         }
@@ -784,6 +790,23 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }
             criteria.andIn("productOrderCode", productOrderCodeList);
         }
+        //增加排产订单号查询条件，多排产订单号查询，逗号隔开  2020-08-04  ltq
+        if(StringUtils.isNotBlank(omsProductionOrder.getOrderCode())){
+            String[] orderCodes = omsProductionOrder.getOrderCode().split(",");
+            List<String> orderCodeList = new ArrayList<>();
+            for(String orderCOde : orderCodes){
+                String regex = "\\s*|\t|\r|\n";
+                Pattern p = Pattern.compile(regex);
+                Matcher m = p.matcher(orderCOde);
+                String productOrderCodeReq = m.replaceAll("");
+                orderCodeList.add(productOrderCodeReq);
+            }
+            criteria.andIn("orderCode", orderCodeList);
+        }
+        //增加审核状态查询条件  2020-08-04 ltq
+        if (StrUtil.isNotBlank(omsProductionOrder.getAuditStatus())) {
+            criteria.andEqualTo("auditStatus", omsProductionOrder.getAuditStatus());
+        }
         if (StrUtil.isNotBlank(omsProductionOrder.getProductFactoryCode())) {
             criteria.andEqualTo("productFactoryCode", omsProductionOrder.getProductFactoryCode());
         }
@@ -1184,7 +1207,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             log.info("无拆解后的排产订单明细！");
             return R.ok();
         }
-        omsProductionOrderDetailService.insertList(omsProductionOrderDetails);
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<List<OmsProductionOrderDetail>> list =
+                objectMapper.convertValue(ListCommonUtil.subCollection(omsProductionOrderDetails, 100), new TypeReference<List<List<OmsProductionOrderDetail>>>() {});
+        list.forEach(orderDetails -> omsProductionOrderDetailService.insertList(orderDetails));
         //3、邮件通知JIT评审
         //排产订单明细去重
         List<OmsProductionOrderDetail> detailList = omsProductionOrderDetails.stream()
@@ -1681,27 +1707,36 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }
         });
 
-        //3.发送附件
+        //3.校验邮箱
         branchOfficeMap.keySet().forEach(branchOffice -> {
-            List<OmsProductionOrder> productionOrderList = branchOfficeMap.get(branchOffice);
             CdFactoryLineInfo branchOfficeLineInfo = branchOfficeFactoryLineMap.get(branchOffice);
-            if(null == branchOfficeLineInfo){
+            if(null == branchOfficeLineInfo || StringUtils.isBlank(branchOfficeLineInfo.getBranchOfficeEmail())){
                 log.error("请维护主管邮箱 branchOffice:{}",branchOffice);
                 throw new BusinessException("请维护主管邮箱");
             }
-            String to = branchOfficeFactoryLineMap.get(branchOffice).getBranchOfficeEmail();
+        });
+        monitorMap.keySet().forEach(monitor -> {
+            CdFactoryLineInfo monitorLineInfo = monitorFactoryLineMap.get(monitor);
+            if(null == monitorLineInfo || StringUtils.isBlank(monitorLineInfo.getBranchOfficeEmail())){
+                log.error("请维护班长邮箱 branchOffice:{}",monitor);
+                throw new BusinessException("请维护主管邮箱");
+            }
+        });
+        //4.发送邮件
+        log.info("邮件推送发送邮件开始");
+        branchOfficeMap.keySet().forEach(branchOffice -> {
+            List<OmsProductionOrder> productionOrderList = branchOfficeMap.get(branchOffice);
+            CdFactoryLineInfo branchOfficeLineInfo = branchOfficeFactoryLineMap.get(branchOffice);
+            String to = branchOfficeLineInfo.getBranchOfficeEmail();
             sendMail(productionOrderList, to);
         });
         monitorMap.keySet().forEach(monitor -> {
             List<OmsProductionOrder> productionOrderList = monitorMap.get(monitor);
             CdFactoryLineInfo monitorLineInfo = monitorFactoryLineMap.get(monitor);
-            if(null == monitorLineInfo){
-                log.error("请维护班长邮箱 branchOffice:{}",monitor);
-                throw new BusinessException("请维护主管邮箱");
-            }
-            String to = monitorFactoryLineMap.get(monitor).getBranchOfficeEmail();
+            String to = monitorLineInfo.getBranchOfficeEmail();
             sendMail(productionOrderList, to);
         });
+        log.info("邮件推送发送邮件结束");
         return R.ok();
     }
 
@@ -1725,9 +1760,15 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         try {
             mailService.sendAttachmentMail(to, subject, content, new String[]{path});
         }catch (MessagingException me){
-            log.error("发送邮件异常");
+            StringWriter w = new StringWriter();
+            me.printStackTrace(new PrintWriter(w));
+            log.error("发送邮件异常:{}",w.toString());
+            throw new BusinessException("发送邮件异常");
         }catch (UnsupportedEncodingException ue){
-            log.error("发送邮件异常");
+            StringWriter w = new StringWriter();
+            ue.printStackTrace(new PrintWriter(w));
+            log.error("发送邮件异常:{}",w.toString());
+            throw new BusinessException("发送邮件异常");
         }
         FileUtil.del(path);
         return r;
@@ -1840,15 +1881,15 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         }
         //3.修改数据库
         List<OmsProductionOrder> listSapRes = (List<OmsProductionOrder>) resultSAP.get("data");
+        if(CollectionUtils.isEmpty(listSapRes)){
+            return R.ok("订单刷新无需更新数据");
+        }
         listSapRes.forEach(omsProductionOrder -> {
             if("S".equals(omsProductionOrder.getSapFlag())){
                 omsProductionOrder.setNewVersion(omsProductionOrder.getBomVersion());
                 omsProductionOrder.setBomVersion("");
             }
         });
-        if(CollectionUtils.isEmpty(listSapRes)){
-            return R.ok("订单刷新无需更新数据");
-        }
         //修改数据
         omsProductionOrderMapper.batchUpdateByOrderCode(listSapRes);
         return R.ok();
@@ -1857,6 +1898,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     @GlobalTransactional
     @Override
     public R timeGetConfirmAmont() {
+        //注意:wms订单号12位,不足前面补零;sap获取的10位,存入订单系统的10位,在wms获取后截取
         //1.查已传SAP的排产订单
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();
@@ -1899,7 +1941,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 OmsProductionOrder omsProductionOrder = new OmsProductionOrder();
                 Date actualEndDate= DateUtils.convertToDate(odsRawOrderOutStorageDTORes.getGmtCreate());
                 omsProductionOrder.setActualEndDate(actualEndDate);//最后入库时间
-                omsProductionOrder.setProductOrderCode(odsRawOrderOutStorageDTORes.getPrdOrderNo());//生产订单号
+                String prdOrderNo = odsRawOrderOutStorageDTORes.getPrdOrderNo();
+                String productOrderCode = prdOrderNo.substring(2);
+                omsProductionOrder.setProductOrderCode(productOrderCode);//生产订单号
                 omsProductionOrder.setDeliveryNum(new BigDecimal(odsRawOrderOutStorageDTORes.getProInAmount()));//入库数量
                 omsProductionOrderListGet.add(omsProductionOrder);
             });
@@ -1911,6 +1955,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         if(CollectionUtils.isEmpty(omsProductionOrderListGet)){
             return R.ok("SAP没有数据");
         }
+
         Map<String,OmsProductionOrder> omsProductionOrderMap = omsProductionOrderListReq.stream().collect(Collectors.toMap(
                 omsProductionOrder ->omsProductionOrder.getProductOrderCode(),
                 omsProductionOrder -> omsProductionOrder,(key1,key2) -> key2));
@@ -1928,17 +1973,18 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             if(omsProductionOrder.getDeliveryNum().compareTo(omsProductionOrderRes.getProductNum()) == 0){
                 smsSettleInfo.setActualEndDate(omsProductionOrder.getActualEndDate());
                 smsSettleInfo.setOrderStatus(SettleInfoOrderStatusEnum.ORDER_STATUS_2.getCode());
-                smsSettleInfoList.add(smsSettleInfo);
                 omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
             }
+            smsSettleInfoList.add(smsSettleInfo);
         });
+        //4.修改排产订单入库数量,完成时间
+        omsProductionOrderMapper.batchUpdateByProductOrderCode(omsProductionOrderListGet);
         //根据生产订单号更新排产订单和加工费结算
         R result = remoteSettleInfoService.batchUpdateByProductOrderCode(smsSettleInfoList);
         if(!result.isSuccess()){
             log.error("定时任务更新加工费结算入库量异常 res:{}",JSONObject.toJSONString(result));
             throw new BusinessException(result.get("msg").toString());
         }
-        omsProductionOrderMapper.batchUpdateByProductOrderCode(omsProductionOrderListGet);
         return R.ok();
     }
 
