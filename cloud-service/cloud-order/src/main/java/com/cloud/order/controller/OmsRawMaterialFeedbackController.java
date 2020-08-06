@@ -109,9 +109,9 @@ public class OmsRawMaterialFeedbackController extends BaseController {
     @OperLog(title = "反馈信息处理-快捷修改-确认 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "反馈信息处理-快捷修改-确认 ", response = R.class)
     @HasPermissions("order:feedback:updateProductOrder")
-    public R updateProductOrder(@RequestBody List<OmsProductionOrder> list) {
+    public R updateProductOrder(@RequestBody List<OmsProductionOrder> list,@RequestParam(value = "id") Long id) {
         SysUser sysUser = getUserInfo(SysUser.class);
-        return omsRawMaterialFeedbackService.updateProductOrder(list,sysUser);
+        return omsRawMaterialFeedbackService.updateProductOrder(list,id,sysUser);
     }
     /**
      * 原材料评审-新增反馈

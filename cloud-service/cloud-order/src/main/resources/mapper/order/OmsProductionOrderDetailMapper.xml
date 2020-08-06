@@ -78,45 +78,49 @@
     <select id="selectListPageInfo" parameterType="OmsProductionOrderDetail"
             resultMap="OmsProductionOrderDetailVoResult">
         select
-        material_code,material_desc,product_factory_code,purchase_group,unit
-        from oms_production_order_detail
+        detail.material_code,detail.material_desc,detail.product_factory_code,detail.purchase_group,detail.unit
+        from oms_production_order_detail detail , oms_production_order o
         <where>
-            product_start_date > DATE_FORMAT(now(),'%Y-%m-%d')
-            and product_start_date <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(now(),INTERVAL 14 day),'%Y-%m-%d')
+            detail.product_order_code = o.order_code
+            and (o.audit_status = '0' or o.audit_status = '2')
+            and detail.product_start_date > DATE_FORMAT(now(),'%Y-%m-%d')
+            and detail.product_start_date <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(now(),INTERVAL 14 day),'%Y-%m-%d')
             <if test="productFactoryCode != null and productFactoryCode != ''">
-                and product_factory_code = #{productFactoryCode,jdbcType=VARCHAR}
+                and detail.product_factory_code = #{productFactoryCode,jdbcType=VARCHAR}
             </if>
             <if test="materialCode != null and materialCode != ''">
-                and material_code = #{materialCode,jdbcType=VARCHAR}
+                and detail.material_code = #{materialCode,jdbcType=VARCHAR}
             </if>
             <if test="purchaseGroup != null and purchaseGroup != ''">
-                and purchase_group = #{purchaseGroup,jdbcType=VARCHAR}
+                and detail.purchase_group = #{purchaseGroup,jdbcType=VARCHAR}
             </if>
             <if test="productFactoryQuery != null and productFactoryQuery != ''">
-                and product_factory_code in (${productFactoryQuery})
+                and detail.product_factory_code in (${productFactoryQuery})
             </if>
             <if test="purchaseGroupQuery != null and purchaseGroupQuery != ''">
-                and purchase_group in (${purchaseGroupQuery})
+                and detail.purchase_group in (${purchaseGroupQuery})
             </if>
         </where>
-        group by product_factory_code,material_code,material_desc,purchase_group,unit
+        group by detail.product_factory_code,detail.material_code,detail.material_desc,detail.purchase_group,detail.unit
     </select>
 
     <select id="selectRawMaterialDay" resultMap="RawMaterialReviewDetailVoResult"
             parameterType="OmsProductionOrderDetail">
         select
-        product_start_date as product_start_date,
-        sum(IFNULL(raw_material_product_num,0)) as product_num
-        from oms_production_order_detail
+        detail.product_start_date as product_start_date,
+        sum(IFNULL(detail.raw_material_product_num,0)) as product_num
+        from oms_production_order_detail detail , oms_production_order o
         <where>
-            product_start_date > DATE_FORMAT(now(),'%Y-%m-%d')
-            and product_start_date <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(now(),INTERVAL 14 day),'%Y-%m-%d')
-            and product_factory_code = #{productFactoryCode,jdbcType=VARCHAR}
-            and material_code = #{materialCode,jdbcType=VARCHAR}
-            and purchase_group = #{purchaseGroup,jdbcType=VARCHAR}
+            detail.product_order_code = o.order_code
+            and (o.audit_status = '0' or o.audit_status = '2')
+            and detail.product_start_date > DATE_FORMAT(now(),'%Y-%m-%d')
+            and detail.product_start_date <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(now(),INTERVAL 14 day),'%Y-%m-%d')
+            and detail.product_factory_code = #{productFactoryCode,jdbcType=VARCHAR}
+            and detail.material_code = #{materialCode,jdbcType=VARCHAR}
+            and detail.purchase_group = #{purchaseGroup,jdbcType=VARCHAR}
         </where>
-        group by product_factory_code,material_code,purchase_group,unit,product_start_date
-        order by product_start_date asc
+        group by detail.product_factory_code,detail.material_code,detail.purchase_group,detail.unit,detail.product_start_date
+        order by detail.product_start_date asc
     </select>
 
     <select id="selectCommitListPageInfo" parameterType="OmsProductionOrderDetail"
@@ -159,8 +163,9 @@
         <include refid="selectOmsProductionOrderDetailVo"/>
         <where>
             <foreach collection="list" item="item" separator="or" open="(" close=")">
+                1=1
                 <if test="item.productFactoryCode != null and item.productFactoryCode != ''">
-                    product_factory_code = #{item.productFactoryCode,jdbcType=VARCHAR}
+                    and product_factory_code = #{item.productFactoryCode,jdbcType=VARCHAR}
                 </if>
                 <if test="item.productStartDate != null and item.productStartDate != ''">
                     and product_start_date = #{item.productStartDate,jdbcType=VARCHAR}
