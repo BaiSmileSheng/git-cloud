@@ -111,11 +111,11 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
         if (result) {
             //审批通过
             if (BeanUtil.isNotEmpty(bizBusinesses) && bizBusinesses.size() <= 1) {
-                omsProductionOrder.setStatus(ProductOrderConstants.AUDIT_STATUS_TWO);
+                omsProductionOrder.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_TWO);
             }
         } else {
             //审批驳回
-            omsProductionOrder.setStatus(ProductOrderConstants.AUDIT_STATUS_THREE);
+            omsProductionOrder.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_THREE);
 
         }
         //更新
