@@ -1707,34 +1707,27 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }
         });
 
-        //3.校验邮箱
-        branchOfficeMap.keySet().forEach(branchOffice -> {
-            CdFactoryLineInfo branchOfficeLineInfo = branchOfficeFactoryLineMap.get(branchOffice);
-            if(null == branchOfficeLineInfo || StringUtils.isBlank(branchOfficeLineInfo.getBranchOfficeEmail())){
-                log.error("请维护主管邮箱 branchOffice:{}",branchOffice);
-                throw new BusinessException("请维护主管邮箱");
-            }
-        });
-        monitorMap.keySet().forEach(monitor -> {
-            CdFactoryLineInfo monitorLineInfo = monitorFactoryLineMap.get(monitor);
-            if(null == monitorLineInfo || StringUtils.isBlank(monitorLineInfo.getBranchOfficeEmail())){
-                log.error("请维护班长邮箱 branchOffice:{}",monitor);
-                throw new BusinessException("请维护主管邮箱");
-            }
-        });
-        //4.发送邮件
+        //3.发送邮件
         log.info("邮件推送发送邮件开始");
         branchOfficeMap.keySet().forEach(branchOffice -> {
             List<OmsProductionOrder> productionOrderList = branchOfficeMap.get(branchOffice);
             CdFactoryLineInfo branchOfficeLineInfo = branchOfficeFactoryLineMap.get(branchOffice);
-            String to = branchOfficeLineInfo.getBranchOfficeEmail();
-            sendMail(productionOrderList, to);
+            if(null == branchOfficeLineInfo || StringUtils.isBlank(branchOfficeLineInfo.getBranchOfficeEmail())){
+                log.error("邮件推送时获取主管邮箱异常 branchOffice:{}",branchOffice);
+            }else{
+                String to = branchOfficeLineInfo.getBranchOfficeEmail();
+                sendMail(productionOrderList, to);
+            }
         });
         monitorMap.keySet().forEach(monitor -> {
             List<OmsProductionOrder> productionOrderList = monitorMap.get(monitor);
             CdFactoryLineInfo monitorLineInfo = monitorFactoryLineMap.get(monitor);
-            String to = monitorLineInfo.getBranchOfficeEmail();
-            sendMail(productionOrderList, to);
+            if(null == monitorLineInfo || StringUtils.isBlank(monitorLineInfo.getBranchOfficeEmail())){
+                log.error("邮件推送时获取班长邮箱异常 monitor:{}",monitor);
+            }else {
+                String to = monitorLineInfo.getBranchOfficeEmail();
+                sendMail(productionOrderList, to);
+            }
         });
         log.info("邮件推送发送邮件结束");
         return R.ok();
@@ -1903,6 +1896,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("status",ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode());
+        criteria.andEqualTo("delFlag",DeleteFlagConstants.NO_DELETED);
         List<OmsProductionOrder> omsProductionOrderListReq = omsProductionOrderMapper.selectByExample(example);
         if(CollectionUtils.isEmpty(omsProductionOrderListReq)){
             return R.ok("无需要更新入库量的数据");
@@ -1912,14 +1906,12 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         omsProductionOrderListReq.forEach(omsProductionOrder -> {
             String factoryCode = omsProductionOrder.getProductFactoryCode();
             String productOrderCode = omsProductionOrder.getProductOrderCode();
-            //补足12位
-            String productOrderCodeReq = getFixedLengthString(productOrderCode,WMS_PRODUCT_ORDER_LENGTH);
             if(wmsMap.containsKey(factoryCode)){
                 List<String> productOrderCodeList = wmsMap.get(factoryCode);
-                productOrderCodeList.add(productOrderCodeReq);
+                productOrderCodeList.add(productOrderCode);
             }else {
                 List<String> productOrderCodeList = new ArrayList<>();
-                productOrderCodeList.add(productOrderCodeReq);
+                productOrderCodeList.add(productOrderCode);
                 wmsMap.put(factoryCode,productOrderCodeList);
             }
         });
@@ -1942,8 +1934,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 Date actualEndDate= DateUtils.convertToDate(odsRawOrderOutStorageDTORes.getGmtCreate());
                 omsProductionOrder.setActualEndDate(actualEndDate);//最后入库时间
                 String prdOrderNo = odsRawOrderOutStorageDTORes.getPrdOrderNo();
-                String productOrderCode = prdOrderNo.substring(2);
-                omsProductionOrder.setProductOrderCode(productOrderCode);//生产订单号
+                omsProductionOrder.setProductOrderCode(prdOrderNo);//生产订单号
                 omsProductionOrder.setDeliveryNum(new BigDecimal(odsRawOrderOutStorageDTORes.getProInAmount()));//入库数量
                 omsProductionOrderListGet.add(omsProductionOrder);
             });
@@ -1970,7 +1961,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             omsProductionOrder.setUpdateBy("定时任务");
             OmsProductionOrder omsProductionOrderRes = omsProductionOrderMap.get(omsProductionOrder.getProductOrderCode());
             //交货数量与订单数量相等
-            if(omsProductionOrder.getDeliveryNum().compareTo(omsProductionOrderRes.getProductNum()) == 0){
+            if(omsProductionOrder.getDeliveryNum().compareTo(omsProductionOrderRes.getProductNum()) == 0
+            || omsProductionOrder.getDeliveryNum().compareTo(omsProductionOrderRes.getProductNum()) == 1){
                 smsSettleInfo.setActualEndDate(omsProductionOrder.getActualEndDate());
                 smsSettleInfo.setOrderStatus(SettleInfoOrderStatusEnum.ORDER_STATUS_2.getCode());
                 omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
@@ -1986,23 +1978,6 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             throw new BusinessException(result.get("msg").toString());
         }
         return R.ok();
-    }
-
-    /**
-     * 获取固定长度
-     * @param raw
-     * @param length
-     * @return
-     */
-    private String getFixedLengthString(String raw, int length) {
-        StringBuffer stringBuffer = new StringBuffer();
-        for (int i=0; i<length; i++){
-            stringBuffer.append("0");
-        }
-        stringBuffer.append(raw);
-        String seqAll = stringBuffer.toString();
-        String seq = seqAll.substring(seqAll.length()-length);
-        return seq;
     }
 
     /**

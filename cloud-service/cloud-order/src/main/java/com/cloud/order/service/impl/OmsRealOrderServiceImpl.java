@@ -285,8 +285,18 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         //3.将原始数据按照成品专用号、生产工厂、客户编码、交付日期将未完成交货的数据订单数量进行汇总
         Map<String, OmsRealOrder> omsRealOrderMap = getStringOmsRealOrderMap(internalOrderResList, factoryStorehouseInfoMap,"定时任务");
 
-        logger.info("定时任务每天在获取到PO信息后 进行需求汇总  批量插入开始  ");
+        logger.info("定时任务每天在获取到PO信息后 进行需求汇总  批量插入开始 ");
         //4.批量插入(生产工厂、客户编码、成品专用号、交付日期、订单种类唯一索引),存在就修改
+        //删除订单来源是内单,交付日期是两个月内的数据(因为po数据的sap删除标记可能改成了已删除)
+        Example exampleRealOrder = new Example(OmsRealOrder.class);
+        Example.Criteria criteriaRealOrder = exampleRealOrder.createCriteria();
+        criteriaRealOrder.andEqualTo("orderFrom",OrderFromEnum.OUT_SOURCE_TYPE_BWW.getCode());
+        Date startTime = DateUtils.getMonthTime(-2);
+        String startTimeString = DateUtils.dateTime(startTime);
+        criteriaRealOrder.andGreaterThanOrEqualTo("deliveryDate",startTimeString);
+        String endTimeString = DateUtils.getDate();
+        criteriaRealOrder.andLessThanOrEqualTo("deliveryDate",endTimeString);
+        omsRealOrderMapper.deleteByExample(exampleRealOrder);
         List<OmsRealOrder> omsRealOrdersList = omsRealOrderMap.values().stream().collect(Collectors.toList());
         omsRealOrderMapper.batchInsetOrUpdate(omsRealOrdersList);
         logger.info("定时任务每天在获取到PO信息后 进行需求汇总  结束");
