@@ -73,7 +73,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
      * @return
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     public R editSave(SmsSupplementaryOrder smsSupplementaryOrder) {
         Long id = smsSupplementaryOrder.getId();
         log.info(StrUtil.format("物耗申请修改保存开始：参数为{}", smsSupplementaryOrder.toString()));
@@ -94,7 +94,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     public R editSaveList(List<SmsSupplementaryOrder> smsSupplementaryOrders) {
         smsSupplementaryOrders.forEach(smsSupplementaryOrder ->{
             R r = editSave(smsSupplementaryOrder);
@@ -130,7 +130,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
      * @return id
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     public R addSave(SmsSupplementaryOrder smsSupplementaryOrder,SysUser sysUser) {
         log.info(StrUtil.format("物耗申请新增保存开始：参数为{}", smsSupplementaryOrder.toString()));
         String productOrderCode = smsSupplementaryOrder.getProductOrderCode();
@@ -234,7 +234,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
      * @return
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     public R addSaveList(List<SmsSupplementaryOrder> smsSupplementaryOrders, SysUser sysUser) {
         smsSupplementaryOrders.forEach(smsSupplementaryOrder ->{
             R r = addSave(smsSupplementaryOrder,sysUser);
@@ -261,7 +261,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
      * @return
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     public R updatePriceEveryMonth(String month) {
         //查询指定月、待结算的物耗申请中的物料号  用途是查询SAP成本价 更新到物耗表
         List<String> materialCodeList = smsSupplementaryOrderMapper.selectMaterialByMonthAndStatus(month, CollUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode()));

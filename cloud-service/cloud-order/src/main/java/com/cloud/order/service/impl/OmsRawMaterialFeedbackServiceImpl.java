@@ -24,9 +24,11 @@ import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteBomService;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.index.qual.GTENegativeOne;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
@@ -238,7 +240,8 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
      * Date: 2020/6/28
      */
     @Override
-    public R updateProductOrder(List<OmsProductionOrder> list, SysUser sysUser) {
+    @GlobalTransactional
+    public R updateProductOrder(List<OmsProductionOrder> list,Long id, SysUser sysUser) {
         log.info("============快捷修改排产订单量方法  start============");
         if (ObjectUtil.isEmpty(list) || list.size() <= 0) {
             log.error("快捷修改排产订单量，传入参数为空！");
@@ -250,6 +253,15 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             if (!updateOrderMap.isSuccess()) {
                 log.error("快捷修改排产订单量失败,原因：" + updateOrderMap.get("msg"));
                 return R.error("快捷修改排产订单量失败，原因："+updateOrderMap.get("msg"));
+            }
+        }
+        BigDecimal updateSum = list.stream().map(OmsProductionOrder::getProductNum).reduce(BigDecimal.ZERO,BigDecimal::add);
+        //更新反馈信息记录
+        if (StrUtil.isNotBlank(StrUtil.toString(id))) {
+            OmsRawMaterialFeedback omsRawMaterialFeedback = omsRawMaterialFeedbackMapper.selectByPrimaryKey(id);
+            if (BeanUtil.isNotEmpty(omsRawMaterialFeedback)
+                    && updateSum.compareTo(omsRawMaterialFeedback.getProductContentNum()) < 0) {
+                omsRawMaterialFeedbackMapper.updateStatusById(FEEDBACK_STATUS_ONE, id);
             }
         }
         log.info("============快捷修改排产订单量方法  end============");
@@ -402,7 +414,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             }
             CdBomInfo cdBom = rBom.getData(CdBomInfo.class);
             //计算成品满足量，原材料满足量 / 单耗 * 基本数量
-            BigDecimal productContentNum = f.getRawMaterialContentNum().divide(cdBom.getBomNum(), 2, BigDecimal.ROUND_HALF_DOWN)
+            BigDecimal productContentNum = f.getRawMaterialContentNum().divide(cdBom.getBomNum(), 0, BigDecimal.ROUND_HALF_DOWN)
                     .multiply(cdBom.getBasicNum());
             f.setProductContentNum(productContentNum);
             f.setCreateBy(sysUser.getLoginName());

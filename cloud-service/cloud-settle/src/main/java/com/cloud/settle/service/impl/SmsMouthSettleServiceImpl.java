@@ -83,7 +83,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
      * @return
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     public R countMonthSettle() {
         log.info("----------------------------月度结算定时任务开始------------------------------");
         Date date = DateUtil.date();//当前时间
