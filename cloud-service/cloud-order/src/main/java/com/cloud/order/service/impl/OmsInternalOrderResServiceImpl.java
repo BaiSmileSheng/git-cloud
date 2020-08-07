@@ -141,10 +141,6 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
     public R SAP800PRFindInternalOrderRes(Date startDate, Date endDate) {
 	    log.info(StrUtil.format("=====================周五或周一获取PR信息参数：开始日期：{} 结束日期：{}===================",
                 DateUtil.formatDate(startDate),DateUtil.formatDate(endDate)));
-	    log.info("=====================周五或周一获取PR信息：开始删除原有的PR数据 start===================");
-        //删除原有的PR数据
-        deleteByMarker("PR");
-        log.info("=====================周五或周一获取PR信息：开始删除原有的PR数据 end===================");
         //从SAP800获取PR数据
         R prR = orderFromSap800InterfaceService.queryDemandPRFromSap800(startDate,endDate);
         if (!prR.isSuccess()) {
@@ -154,6 +150,10 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
         if (CollUtil.isEmpty(list)) {
             return R.error("未取到PR数据！");
         }
+        log.info("=====================周五或周一获取PR信息：开始删除原有的PR数据 start===================");
+        //删除原有的PR数据
+        deleteByMarker("PR");
+        log.info("=====================周五或周一获取PR信息：开始删除原有的PR数据 end===================");
         //插入
         log.info("=====================周五或周一获取PR信息：开始插入 ===================");
         R rInsert = insert800PR(list);
