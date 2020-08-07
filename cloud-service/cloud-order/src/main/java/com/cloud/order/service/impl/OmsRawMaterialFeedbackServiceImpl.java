@@ -10,6 +10,7 @@ import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.common.utils.bean.BeanUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.domain.entity.OmsProductionOrderDetail;
 import com.cloud.order.domain.entity.OmsRawMaterialFeedback;
@@ -23,9 +24,11 @@ import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteBomService;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.index.qual.GTENegativeOne;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
@@ -237,7 +240,8 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
      * Date: 2020/6/28
      */
     @Override
-    public R updateProductOrder(List<OmsProductionOrder> list, SysUser sysUser) {
+    @GlobalTransactional
+    public R updateProductOrder(List<OmsProductionOrder> list,Long id, SysUser sysUser) {
         log.info("============快捷修改排产订单量方法  start============");
         if (ObjectUtil.isEmpty(list) || list.size() <= 0) {
             log.error("快捷修改排产订单量，传入参数为空！");
@@ -249,6 +253,15 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             if (!updateOrderMap.isSuccess()) {
                 log.error("快捷修改排产订单量失败,原因：" + updateOrderMap.get("msg"));
                 return R.error("快捷修改排产订单量失败，原因："+updateOrderMap.get("msg"));
+            }
+        }
+        BigDecimal updateSum = list.stream().map(OmsProductionOrder::getProductNum).reduce(BigDecimal.ZERO,BigDecimal::add);
+        //更新反馈信息记录
+        if (StrUtil.isNotBlank(StrUtil.toString(id))) {
+            OmsRawMaterialFeedback omsRawMaterialFeedback = omsRawMaterialFeedbackMapper.selectByPrimaryKey(id);
+            if (BeanUtil.isNotEmpty(omsRawMaterialFeedback)
+                    && updateSum.compareTo(omsRawMaterialFeedback.getProductContentNum()) < 0) {
+                omsRawMaterialFeedbackMapper.updateStatusById(FEEDBACK_STATUS_ONE, id);
             }
         }
         log.info("============快捷修改排产订单量方法  end============");
@@ -267,9 +280,9 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
     public R deleteByIds(String ids, OmsRawMaterialFeedback omsRawMaterialFeedback ,SysUser sysUser) {
         Example example = new Example(OmsRawMaterialFeedback.class);
         Example.Criteria criteria = example.createCriteria();
-        if (StrUtil.isBlank(ids) || ids.length() <= 0) {
+        if (StrUtil.isNotBlank(ids)) {
             criteria.andIn("id", Arrays.asList(ids.split(",")));
-        } else if (BeanUtil.isNotEmpty(omsRawMaterialFeedback)) {
+        } else if (!BeanUtils.checkObjAllFieldsIsNull(omsRawMaterialFeedback)) {
             if (StrUtil.isNotBlank(omsRawMaterialFeedback.getRawMaterialCode())) {
                 criteria.andEqualTo("rawMaterialCode",omsRawMaterialFeedback.getRawMaterialCode());
             }
@@ -287,6 +300,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
                     criteria.andEqualTo("createBy", sysUser.getLoginName());
                 }
             }
+            criteria.andEqualTo("status",FEEDBACK_STATUS_ZERO);
         } else {
             log.error("JIT原材料反馈信息删除操作,传入参数为空！");
             return R.error("传入参数为空！");
@@ -298,6 +312,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             log.error("JIT原材料反馈信息删除操作，根据前台参数未查询出数据！");
             return R.ok();
         }
+        ids = omsRawMaterialFeedbacks.stream().map(o -> o.getId().toString()).collect(Collectors.joining(","));
         //根据专用号、生产工厂、基本开始日期、bom版本查询原材料反馈信息
         List<OmsRawMaterialFeedback> rawMaterialFeedbacks = omsRawMaterialFeedbackMapper.selectByList(omsRawMaterialFeedbacks);
         //取前台传的数据与同专用号、生产工厂、开始日期、bom版本查询出的数据差集
@@ -347,12 +362,12 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
         );
         /** 筛选结束 */
         //更新排产订单明细状态
-        omsProductionOrderDetailService.updateBatchByProductOrderCode(omsProductionOrderDetails);
+        if (ObjectUtil.isNotEmpty(omsProductionOrderDetails) && omsProductionOrderDetails.size() > 0) {
+            omsProductionOrderDetailService.updateBatchByProductOrderCode(omsProductionOrderDetails);
+        }
         //更新排产订单状态
-        int orderUpdateCount = omsProductionOrderService.updateBatchByPrimaryKeySelective(productionOrders);
-        if (orderUpdateCount <= 0) {
-            log.error("更新排产订单状态失败！");
-            return R.error("更新排产订单状态失败!");
+        if (ObjectUtil.isNotEmpty(productionOrders) && productionOrders.size() > 0) {
+           omsProductionOrderService.updateBatchByPrimaryKeySelective(productionOrders);
         }
         int deleteCount = omsRawMaterialFeedbackMapper.deleteByIds(ids);
         if (deleteCount <= 0) {
@@ -399,7 +414,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             }
             CdBomInfo cdBom = rBom.getData(CdBomInfo.class);
             //计算成品满足量，原材料满足量 / 单耗 * 基本数量
-            BigDecimal productContentNum = f.getRawMaterialContentNum().divide(cdBom.getBomNum(), 2, BigDecimal.ROUND_HALF_DOWN)
+            BigDecimal productContentNum = f.getRawMaterialContentNum().divide(cdBom.getBomNum(), 0, BigDecimal.ROUND_HALF_DOWN)
                     .multiply(cdBom.getBasicNum());
             f.setProductContentNum(productContentNum);
             f.setCreateBy(sysUser.getLoginName());

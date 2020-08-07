@@ -59,6 +59,7 @@ public class OmsProductionOrderDetailController extends BaseController {
             @ApiImplicitParam(name = "materialCode", value = "原材料物料", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "purchaseGroup", value = "采购组", required = false, paramType = "query", dataType = "String")
     })
+    @HasPermissions("order:productOrderDetail:list")
     public TableDataInfo list(@ApiIgnore OmsProductionOrderDetail omsProductionOrderDetail) {
         SysUser sysUser = getUserInfo(SysUser.class);
         startPage();
@@ -113,6 +114,7 @@ public class OmsProductionOrderDetailController extends BaseController {
             @ApiImplicitParam(name = "checkEndDate", value = "查询结束日期", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "status", value = "状态，0：未确认，1：已确认，2：反馈中'", required = false, paramType = "query", dataType = "String")
     })
+    @HasPermissions("order:productOrderDetail:commitListPageInfo")
     public TableDataInfo commitListPageInfo(@ApiIgnore OmsProductionOrderDetail omsProductionOrderDetail) {
         SysUser sysUser = getUserInfo(SysUser.class);
         startPage();
@@ -126,14 +128,17 @@ public class OmsProductionOrderDetailController extends BaseController {
     @PostMapping("commitProductOrderDetail")
     @ApiOperation(value = "原材料确认-确认按钮", response = R.class)
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "list",value = "选中记录List",dataType = "OmsProductionOrderDetail",required = false ),
-            @ApiImplicitParam(name = "omsProductionOrderDetail", value = "查询条件对象"
-                    , required = false, dataType = "OmsProductionOrderDetail")
+            @ApiImplicitParam(name = "orderDetailList",value = "选中记录List",dataType = "List",required = false ),
+            @ApiImplicitParam(name = "materialCode", value = "原材料物料号", required = false, dataType = "String"),
+            @ApiImplicitParam(name = "checkStartDate", value = "查询开始日期", required = false, dataType = "String"),
+            @ApiImplicitParam(name = "checkEndDate", value = "查询结束日期", required = false, dataType = "String"),
+            @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = false, dataType = "String"),
+            @ApiImplicitParam(name = "status", value = "状态", required = false, dataType = "String")
     })
     @HasPermissions("order:productOrderDetail:commitProductOrderDetail")
-    public R commitProductOrderDetail(@RequestBody List<OmsProductionOrderDetail> list, @ApiIgnore OmsProductionOrderDetail omsProductionOrderDetail){
+    public R commitProductOrderDetail(@RequestBody OmsProductionOrderDetail omsProductionOrderDetail){
         SysUser sysUser = getUserInfo(SysUser.class);
-        return omsProductionOrderDetailService.commitProductOrderDetail(list,omsProductionOrderDetail,sysUser);
+        return omsProductionOrderDetailService.commitProductOrderDetail(omsProductionOrderDetail.getOrderDetailList(),omsProductionOrderDetail,sysUser);
     }
     /**
      * 新增保存排产订单明细

@@ -73,6 +73,7 @@ public class OmsProductionOrderAnalysisController extends BaseController {
             @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = false,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "orderFrom", value = "订单来源", required = false,paramType = "query", dataType = "String")
     })
+    @HasPermissions("order:productionOrderAnalysis:list")
     public TableDataInfo list(@ApiIgnore OmsProductionOrderAnalysis omsProductionOrderAnalysis) {
         SysUser sysUser = getUserInfo(SysUser.class);
         if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {

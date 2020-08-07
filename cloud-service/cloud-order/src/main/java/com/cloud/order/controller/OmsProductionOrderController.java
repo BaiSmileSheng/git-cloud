@@ -354,6 +354,7 @@ public class OmsProductionOrderController extends BaseController {
             @ApiImplicitParam(name = "productOrderCode", value = "生产订单号", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "orderCode", value = "排产订单号", required = false, paramType = "query", dataType = "String")
     })
+    @HasPermissions("order:productionOrder:selectAllPage")
     public TableDataInfo selectAllPage(@ApiIgnore() OmsProductionOrder omsProductionOrder) {
         SysUser sysUser = getUserInfo(SysUser.class);
         startPage();

@@ -61,6 +61,7 @@ public class OmsRawMaterialFeedbackController extends BaseController {
             @ApiImplicitParam(name = "checkDateEnd", value = "查询结束日期", required = false,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "status", value = "状态", required = false,paramType = "query", dataType = "String")
     })
+    @HasPermissions("order:feedback:list")
     public TableDataInfo list(@ApiIgnore OmsRawMaterialFeedback omsRawMaterialFeedback) {
         SysUser sysUser = getUserInfo(SysUser.class);
         startPage();
@@ -108,9 +109,9 @@ public class OmsRawMaterialFeedbackController extends BaseController {
     @OperLog(title = "反馈信息处理-快捷修改-确认 ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "反馈信息处理-快捷修改-确认 ", response = R.class)
     @HasPermissions("order:feedback:updateProductOrder")
-    public R updateProductOrder(@RequestBody List<OmsProductionOrder> list) {
+    public R updateProductOrder(@RequestBody List<OmsProductionOrder> list,@RequestParam(value = "id") Long id) {
         SysUser sysUser = getUserInfo(SysUser.class);
-        return omsRawMaterialFeedbackService.updateProductOrder(list,sysUser);
+        return omsRawMaterialFeedbackService.updateProductOrder(list,id,sysUser);
     }
     /**
      * 原材料评审-新增反馈
@@ -140,11 +141,13 @@ public class OmsRawMaterialFeedbackController extends BaseController {
     @PostMapping("remove")
     @OperLog(title = "JIT反馈信息-删除 ", businessType = BusinessType.DELETE)
     @ApiOperation(value = "JIT反馈信息-删除 ", response = R.class)
-    @ApiParam(name = "ids", value = "需删除数据的id")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "ids", value = "反馈信息主键字符串", required = true,paramType = "query", dataType = "String")
+    })
     @HasPermissions("order:feedback:remove")
-    public R remove(@RequestParam(value = "ids",required = false) String ids,@RequestBody OmsRawMaterialFeedback omsRawMaterialFeedback) {
+    public R remove(@ApiIgnore OmsRawMaterialFeedback omsRawMaterialFeedback) {
         SysUser sysUser = getUserInfo(SysUser.class);
-        return omsRawMaterialFeedbackService.deleteByIds(ids,omsRawMaterialFeedback,sysUser);
+        return omsRawMaterialFeedbackService.deleteByIds(omsRawMaterialFeedback.getIds(),omsRawMaterialFeedback,sysUser);
     }
 
 }
