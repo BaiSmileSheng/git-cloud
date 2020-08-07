@@ -67,7 +67,7 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
      * @return
      */
     @Override
-    @Transactional(timeout = 60,rollbackFor={RuntimeException.class, Exception.class})
+    @Transactional(timeout = 60,rollbackFor=Exception.class)
     public R gatherDemandOrderFriday() {
         //将原来的汇总加到汇总历史
         List<OmsDemandOrderGather> omsDemandOrderGathers = omsDemandOrderGatherMapper.selectAll();
@@ -107,7 +107,7 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
      * @return
      */
     @Override
-    @Transactional(timeout = 60,rollbackFor={RuntimeException.class, Exception.class})
+    @Transactional(timeout = 60,rollbackFor=Exception.class)
     public R gatherDemandOrderMonday() {
         //删除周五的汇总
         log.info("======================周一汇总：删除周五汇总  start=======================");

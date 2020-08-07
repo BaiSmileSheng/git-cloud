@@ -137,7 +137,7 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
 	}
 
     @Override
-    @Transactional(timeout = 60,rollbackFor={RuntimeException.class, Exception.class})
+    @Transactional(timeout = 60,rollbackFor=Exception.class)
     public R SAP800PRFindInternalOrderRes(Date startDate, Date endDate) {
 	    log.info(StrUtil.format("=====================周五或周一获取PR信息参数：开始日期：{} 结束日期：{}===================",
                 DateUtil.formatDate(startDate),DateUtil.formatDate(endDate)));
