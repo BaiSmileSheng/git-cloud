@@ -1669,7 +1669,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 List<OmsProductionOrder> omsProductionOrderListGet = branchOfficeMap.get(branchOffice);
                 omsProductionOrderListGet.add(omsProductionOrder);
                 branchOfficeMap.put(branchOffice, omsProductionOrderListGet);
-            } else {
+            } else if(StringUtils.isNotBlank(branchOffice)) {
                 List<OmsProductionOrder> omsProductionOrderListNew = new ArrayList<>();
                 omsProductionOrderListNew.add(omsProductionOrder);
                 branchOfficeMap.put(branchOffice, omsProductionOrderListNew);
@@ -1678,7 +1678,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 List<OmsProductionOrder> omsProductionOrderListGet = monitorMap.get(monitor);
                 omsProductionOrderListGet.add(omsProductionOrder);
                 monitorMap.put(monitor, omsProductionOrderListGet);
-            } else {
+            } else if(StringUtils.isNotBlank(monitor)) {
                 List<OmsProductionOrder> omsProductionOrderListNew = new ArrayList<>();
                 omsProductionOrderListNew.add(omsProductionOrder);
                 monitorMap.put(monitor, omsProductionOrderListNew);
