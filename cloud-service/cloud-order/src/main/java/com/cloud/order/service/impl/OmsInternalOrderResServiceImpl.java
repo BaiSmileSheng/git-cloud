@@ -132,7 +132,6 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
         final CountDownLatch countDownLatch = new CountDownLatch(5);
         int size = list.size();
         for (int i = 0; i < 5; i++) {
-            final int threadID = i;
             List<OmsInternalOrderRes> list1 = CollectionUtil.sub(list, (int)Math.ceil((double)i * size/5), (int)Math.ceil((double)size/5*(i+1)));
             threadPoolTaskExecutor.newThread(new Runnable() {
                 @Override
@@ -143,12 +142,12 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
             }).start();
         }
         try {
+            //线程都结束才继续向下执行
             countDownLatch.await();
         } catch (InterruptedException e) {
             log.error("OmsInternalOrderResServiceImpl_insert800PR_e:{}", e);
             return R.error("获取PR：线程错误！");
         }
-//        int rows=insertList(list);
         return R.ok();
     }
 
