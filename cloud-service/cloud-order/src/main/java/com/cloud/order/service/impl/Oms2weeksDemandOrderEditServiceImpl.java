@@ -792,7 +792,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
      * @return
      */
     @Override
-    @Transactional(timeout = 30,rollbackFor={RuntimeException.class, Exception.class})
+    @Transactional(rollbackFor={RuntimeException.class, Exception.class})
     public R toSAP(List<Long> ids,SysUser sysUser,Oms2weeksDemandOrderEdit weeksDemandOrderEdit) {
         //只能下达待传SAP和传SAP异常的数据
         List<String> statusList = CollUtil.newArrayList(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getCode()

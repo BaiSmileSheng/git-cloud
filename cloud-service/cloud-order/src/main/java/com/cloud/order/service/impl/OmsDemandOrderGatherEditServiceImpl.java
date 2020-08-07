@@ -816,7 +816,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
      * @return
      */
     @Override
-    @Transactional(timeout = 30,rollbackFor={RuntimeException.class, Exception.class})
+    @Transactional(rollbackFor={RuntimeException.class, Exception.class})
     public R toSAP(List<Long> ids,SysUser sysUser,OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
         //只能下达待传SAP和传SAP异常的数据
         List<String> statusList = CollUtil.newArrayList(DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getCode()
