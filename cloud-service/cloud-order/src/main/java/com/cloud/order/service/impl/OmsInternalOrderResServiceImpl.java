@@ -1,11 +1,13 @@
 package com.cloud.order.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.cloud.common.config.thread.ThreadPoolConfig;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
@@ -24,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -36,6 +39,7 @@ import java.io.StringWriter;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 /**
@@ -122,8 +126,29 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
                 }
             }
         });
-        int rows=insertList(list);
-        return rows > 0 ? R.ok() : R.error();
+        ThreadPoolConfig config = new ThreadPoolConfig();
+        ThreadPoolTaskExecutor threadPoolTaskExecutor = config.threadPoolTaskExecutor();
+        threadPoolTaskExecutor.initialize();
+        final CountDownLatch countDownLatch = new CountDownLatch(5);
+        int size = list.size();
+        for (int i = 0; i < 5; i++) {
+            List<OmsInternalOrderRes> list1 = CollectionUtil.sub(list, (int)Math.ceil((double)i * size/5), (int)Math.ceil((double)size/5*(i+1)));
+            threadPoolTaskExecutor.newThread(new Runnable() {
+                @Override
+                public void run() {
+                    insertList(list1);
+                    countDownLatch.countDown();
+                }
+            }).start();
+        }
+        try {
+            //线程都结束才继续向下执行
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            log.error("OmsInternalOrderResServiceImpl_insert800PR_e:{}", e);
+            return R.error("获取PR：线程错误！");
+        }
+        return R.ok();
     }
 
     /**
@@ -137,14 +162,10 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
 	}
 
     @Override
-    @Transactional
+    @Transactional(timeout = 60,rollbackFor=Exception.class)
     public R SAP800PRFindInternalOrderRes(Date startDate, Date endDate) {
 	    log.info(StrUtil.format("=====================周五或周一获取PR信息参数：开始日期：{} 结束日期：{}===================",
                 DateUtil.formatDate(startDate),DateUtil.formatDate(endDate)));
-	    log.info("=====================周五或周一获取PR信息：开始删除原有的PR数据 start===================");
-        //删除原有的PR数据
-        deleteByMarker("PR");
-        log.info("=====================周五或周一获取PR信息：开始删除原有的PR数据 end===================");
         //从SAP800获取PR数据
         R prR = orderFromSap800InterfaceService.queryDemandPRFromSap800(startDate,endDate);
         if (!prR.isSuccess()) {
@@ -154,11 +175,22 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
         if (CollUtil.isEmpty(list)) {
             return R.error("未取到PR数据！");
         }
+        log.info("=====================周五或周一获取PR信息：开始删除原有的PR数据 start===================");
+        //删除原有的PR数据
+        deleteByMarker("PR");
+        log.info("=====================周五或周一获取PR信息：开始删除原有的PR数据 end===================");
         //插入
         log.info("=====================周五或周一获取PR信息：开始插入 ===================");
         R rInsert = insert800PR(list);
-        log.info("=====================周五或周一获取PR信息：插入成功 ===================");
-        return rInsert;
+        if (rInsert.isSuccess()) {
+            log.info("=====================周五或周一获取PR信息：插入成功 ===================");
+            return rInsert;
+        } else {
+            log.error(StrUtil.format("=====================周五或周一获取PR信息：插入失败{} ===================",rInsert.getStr("msg")));
+            throw new BusinessException(rInsert.getStr("msg"));
+        }
+
+
     }
 
     /**

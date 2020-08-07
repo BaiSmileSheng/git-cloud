@@ -451,7 +451,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      * Date: 2020/6/22
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     public R deleteByIdString(String ids, SysUser sysUser) {
         List<OmsProductionOrder> omsProductionOrders = omsProductionOrderMapper.selectByIds(ids);
         if (omsProductionOrders.size() <= 0) {
@@ -521,7 +521,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      * Date: 2020/6/22
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     public R updateSave(OmsProductionOrder omsProductionOrder, SysUser sysUser) {
         //根据ID查询排产订单数据
         OmsProductionOrder productionOrder = omsProductionOrderMapper.selectByPrimaryKey(omsProductionOrder.getId());

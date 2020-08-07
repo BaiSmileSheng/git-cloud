@@ -528,7 +528,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
 
     @Override
     @SneakyThrows
-    @Transactional
+    @Transactional(timeout = 60,rollbackFor=Exception.class)
     public R importDemandGatherEdit(MultipartFile file,SysUser sysUser) {
         EasyWithErrorExcelListener easyExcelListener = new EasyWithErrorExcelListener(omsDemandOrderGatherEditImportService,OmsDemandOrderGatherEditImport.class);
         EasyExcel.read(file.getInputStream(),OmsDemandOrderGatherEditImport.class,easyExcelListener).sheet().doRead();
@@ -816,7 +816,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
      * @return
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     public R toSAP(List<Long> ids,SysUser sysUser,OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
         //只能下达待传SAP和传SAP异常的数据
         List<String> statusList = CollUtil.newArrayList(DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getCode()

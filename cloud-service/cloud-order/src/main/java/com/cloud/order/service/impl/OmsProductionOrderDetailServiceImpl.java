@@ -351,7 +351,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
      * Date: 2020/6/29
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     public R commitProductOrderDetail(List<OmsProductionOrderDetail> list, OmsProductionOrderDetail omsProductionOrderDetail, SysUser sysUser) {
         if (ObjectUtil.isEmpty(list) || list.size() <= 0) {
             if (!BeanUtils.checkObjAllFieldsIsNull(omsProductionOrderDetail)) {
