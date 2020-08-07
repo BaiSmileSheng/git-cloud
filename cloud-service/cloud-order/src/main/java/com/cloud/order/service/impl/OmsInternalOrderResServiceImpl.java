@@ -142,6 +142,12 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
                 }
             }).start();
         }
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            log.error("OmsInternalOrderResServiceImpl_insert800PR_e:{}", e);
+            return R.error("获取PR：线程错误！");
+        }
 //        int rows=insertList(list);
         return R.ok();
     }
