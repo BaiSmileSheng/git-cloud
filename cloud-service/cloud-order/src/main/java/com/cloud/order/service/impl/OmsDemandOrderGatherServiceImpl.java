@@ -293,7 +293,7 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
             //需求汇总单号
             String demandOrderCode = StrUtil.concat(true, "DM", DateUtils.dateTime(), seq);
             Date date = DateUtil.date();
-            int thisWeek = NumberUtil.compare(flag , Week.FRIDAY.getValue())>0 ? DateUtil.weekOfYear(date) : DateUtil.weekOfYear(date) - 1;
+            int thisWeek = NumberUtil.compare(flag , Week.FRIDAY.getValue()) == 0 ? DateUtil.weekOfYear(date) : DateUtil.weekOfYear(date) - 1;
             OmsDemandOrderGather omsDemandOrderGather = new OmsDemandOrderGather().builder()
                     .demandOrderCode(demandOrderCode).orderType("LA").orderFrom("1")
                     .productMaterialCode(res.getProductMaterialCode()).productMaterialDesc(res.getProductMaterialDesc())

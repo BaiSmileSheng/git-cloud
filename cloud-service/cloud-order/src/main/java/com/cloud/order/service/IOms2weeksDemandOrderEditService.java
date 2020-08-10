@@ -38,7 +38,7 @@ public interface IOms2weeksDemandOrderEditService extends BaseService<Oms2weeksD
      * @param customerCodes
      * @return
      */
-    int deleteByCreateByAndCustomerCode(String createBy,List<String> customerCodes);
+    int deleteByCreateByAndCustomerCode(String createBy,List<String> customerCodes,String status);
 
 
     /**
