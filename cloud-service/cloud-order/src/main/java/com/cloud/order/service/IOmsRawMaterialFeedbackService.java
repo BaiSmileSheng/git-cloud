@@ -41,7 +41,7 @@ public interface IOmsRawMaterialFeedbackService extends BaseService<OmsRawMateri
      * Author: ltq
      * Date: 2020/6/28
      */
-    R updateProductOrder(List<OmsProductionOrder> list,SysUser sysUser);
+    R updateProductOrder(List<OmsProductionOrder> list,Long id,SysUser sysUser);
     /**
      * Description:  删除原材料反馈信息记录
      * Param: [ids, sysUser]

@@ -20,7 +20,7 @@ public class OmsProductionOrderAnalysisXxJob {
     @Autowired
     private RemoteProductionOrderAnalysisService remoteProductionOrderAnalysisService;
     /**
-     * Description:  待排产订单分析汇总定时任务
+     * Description:  待排产订单分析汇总定时任务 每小时的15分、45分钟执行
      * Param: [param]
      * return: com.xxl.job.core.biz.model.ReturnT<java.lang.String>
      * Author: ltq

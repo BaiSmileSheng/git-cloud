@@ -31,5 +31,15 @@ public interface OmsRawMaterialFeedbackMapper extends BaseMapper<OmsRawMaterialF
      * Date: 2020/7/1
      */
     void updateBatchByList(@Param(value = "list") List<OmsRawMaterialFeedback> list);
+    /**
+     * Description:根据ID更新反馈信息状态
+     * Param: updatedStatus,id
+     * return: int
+     * Author: ltq
+     * Date: 2020/8/6
+     */
+    int updateStatusById(@Param("updatedStatus")String updatedStatus,@Param("id")Long id);
+
+
 
 }

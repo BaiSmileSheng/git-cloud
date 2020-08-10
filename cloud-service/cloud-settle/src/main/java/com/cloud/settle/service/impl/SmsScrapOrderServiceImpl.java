@@ -94,7 +94,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
      * @return
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     public R addSave(SmsScrapOrder smsScrapOrder) {
         log.info(StrUtil.format("报废申请新增保存开始：参数为{}", smsScrapOrder.toString()));
         //生产订单号
@@ -254,7 +254,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
      * @return
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     public R updatePriceEveryMonth(String month) {
         //报废索赔系数
         CdSettleRatio cdSettleRatioBF = remoteSettleRatioService.selectByClaimType(SettleRatioEnum.SPLX_BF.getCode());
