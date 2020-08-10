@@ -1,13 +1,11 @@
 package com.cloud.order.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
-import com.cloud.common.config.thread.ThreadPoolConfig;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
@@ -26,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -39,7 +36,6 @@ import java.io.StringWriter;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 /**
@@ -68,6 +64,8 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
     static final String BOM_VERSION_EIGHT = "8";
 
     static final String BOM_VERSION_NINE = "9";
+
+    private static final int PO_INSERT_MAX_SIZE = 20000;//po单次插入最大数据量
 
 
     @Override
@@ -126,28 +124,31 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
                 }
             }
         });
-        ThreadPoolConfig config = new ThreadPoolConfig();
-        ThreadPoolTaskExecutor threadPoolTaskExecutor = config.threadPoolTaskExecutor();
-        threadPoolTaskExecutor.initialize();
-        final CountDownLatch countDownLatch = new CountDownLatch(5);
-        int size = list.size();
-        for (int i = 0; i < 5; i++) {
-            List<OmsInternalOrderRes> list1 = CollectionUtil.sub(list, (int)Math.ceil((double)i * size/5), (int)Math.ceil((double)size/5*(i+1)));
-            threadPoolTaskExecutor.newThread(new Runnable() {
-                @Override
-                public void run() {
-                    insertList(list1);
-                    countDownLatch.countDown();
-                }
-            }).start();
-        }
-        try {
-            //线程都结束才继续向下执行
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            log.error("OmsInternalOrderResServiceImpl_insert800PR_e:{}", e);
-            return R.error("获取PR：线程错误！");
-        }
+//        ThreadPoolConfig config = new ThreadPoolConfig();
+//        ThreadPoolTaskExecutor threadPoolTaskExecutor = config.threadPoolTaskExecutor();
+//        threadPoolTaskExecutor.initialize();
+//        final CountDownLatch countDownLatch = new CountDownLatch(5);
+//        int size = list.size();
+//        for (int i = 0; i < 5; i++) {
+//            List<OmsInternalOrderRes> list1 = CollectionUtil.sub(list, (int)Math.ceil((double)i * size/5), (int)Math.ceil((double)size/5*(i+1)));
+//            threadPoolTaskExecutor.newThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    insertList(list1);
+//                    countDownLatch.countDown();
+//                }
+//            }).start();
+//        }
+//        try {
+//            //线程都结束才继续向下执行
+//            countDownLatch.await();
+//        } catch (InterruptedException e) {
+//            log.error("OmsInternalOrderResServiceImpl_insert800PR_e:{}", e);
+//            return R.error("获取PR：线程错误！");
+//        }finally {
+//            threadPoolTaskExecutor.shutdown();
+//        }
+        insertList(list);
         return R.ok();
     }
 
@@ -162,7 +163,7 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
 	}
 
     @Override
-    @Transactional(timeout = 60,rollbackFor=Exception.class)
+    @Transactional(timeout = 120,rollbackFor=Exception.class)
     public R SAP800PRFindInternalOrderRes(Date startDate, Date endDate) {
 	    log.info(StrUtil.format("=====================周五或周一获取PR信息参数：开始日期：{} 结束日期：{}===================",
                 DateUtil.formatDate(startDate),DateUtil.formatDate(endDate)));
@@ -197,14 +198,17 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
      * 获取PO接口定时任务
      * @return
      */
+    @Transactional
     @Override
     public R timeInsertFromSAP() {
         //获取两个月前的时间
-        Date time2 = DateUtils.getMonthTime(-2);
-        Date time1 = DateUtils.getMonthTime(-1);
-        Date endime = new Date();
-        poInsertFromSAP(time2,time1);
-        poInsertFromSAP(time1,endime);
+        Date time2 = DateUtils.getMonthTime(-2);//两个月前
+        Date time2End = DateUtils.getMonthTime(-1);//一个月前
+
+        Date time1Start = DateUtils.dayOffset(time2End,1);//一个月前那天的之后一天
+        Date time1End = new Date();
+        poInsertFromSAP(time2,time2End);
+        poInsertFromSAP(time1Start,time1End);
         return R.ok();
     }
 
@@ -214,73 +218,81 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
      */
     private void poInsertFromSAP(Date startTime,Date endTime){
         logger.info("获取po数据,插入数据库 startTime:{},endTime:{}",startTime,endTime);
-        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW); // 事物隔离级别，开启新事务，这样会比较安全些。
-        TransactionStatus transaction = dstManager.getTransaction(def); // 获得事务状态
-        try {
-            //1.从SAP800 获取数据 po数据
-            R resultSAP = orderFromSap800InterfaceService.queryDemandPOFromSap800(startTime,endTime);
-            if(!resultSAP.isSuccess()){
-                logger.error("获取po数据异常 res:{}",resultSAP.get("msg").toString());
-            }
-            List<OmsInternalOrderRes> omsInternalOrderResList = resultSAP.getCollectData(new TypeReference<List<OmsInternalOrderRes>>() {});
-            if(CollectionUtils.isEmpty(omsInternalOrderResList)){
-                logger.error("获取PO接口定时任务 没有在SAP到数据");
-                throw new BusinessException("获取PO接口定时任务 没有在SAP到数据");
-            }
-            //2.根据供应商v码获取 工厂编号 cd_factory_info company_code_v -- company_code
-            R resultFactory = remoteFactoryInfoService.listAll();
-            if(!resultFactory.isSuccess()){
-                logger.error("remoteFactoryInfoService.listAll() 异常res:{}", JSONObject.toJSONString(resultFactory));
+        //1.从SAP800 获取数据 po数据
+        R resultSAP = orderFromSap800InterfaceService.queryDemandPOFromSap800(startTime,endTime);
+        if(!resultSAP.isSuccess()){
+            logger.error("获取po数据异常 res:{}",resultSAP.get("msg").toString());
+        }
+        List<OmsInternalOrderRes> omsInternalOrderResList = resultSAP.getCollectData(new TypeReference<List<OmsInternalOrderRes>>() {});
+        logger.info("SAP获取po数据量size:{}",omsInternalOrderResList.size());
+        if(CollectionUtils.isEmpty(omsInternalOrderResList)){
+            logger.error("获取PO接口定时任务 没有在SAP到数据");
+            throw new BusinessException("获取PO接口定时任务 没有在SAP到数据");
+        }
+        //2.根据供应商v码获取 工厂编号 cd_factory_info company_code_v -- company_code
+        R resultFactory = remoteFactoryInfoService.listAll();
+        if(!resultFactory.isSuccess()){
+            logger.error("remoteFactoryInfoService.listAll() 异常res:{}", JSONObject.toJSONString(resultFactory));
+            throw new BusinessException("根据供应商v码获取 工厂编号 异常");
+        }
+        List<CdFactoryInfo> cdFactoryInfoList = resultFactory.getCollectData(new TypeReference<List<CdFactoryInfo>>() {});
+
+        Map<String,String> cdFactoryInfoMap = cdFactoryInfoList.stream().collect(Collectors.toMap(CdFactoryInfo ::getCompanyCodeV,
+                CdFactoryInfo ::getCompanyCode,(key1,key2) -> key2));
+        for(OmsInternalOrderRes omsInternalOrderRes : omsInternalOrderResList) {
+            String supplierCode = omsInternalOrderRes.getSupplierCode();
+            String factoryCode = cdFactoryInfoMap.get(supplierCode);
+            if (StringUtils.isBlank(factoryCode)) {
+                logger.error("根据供应商v码获取 工厂编号 异常 req:{},resAll:{}", supplierCode, JSONObject.toJSON(cdFactoryInfoMap));
                 throw new BusinessException("根据供应商v码获取 工厂编号 异常");
             }
-
-            List<CdFactoryInfo> cdFactoryInfoList = resultFactory.getCollectData(new TypeReference<List<CdFactoryInfo>>() {});
-            Map<String,String> cdFactoryInfoMap = cdFactoryInfoList.stream().collect(Collectors.toMap(CdFactoryInfo ::getCompanyCodeV,
-                    CdFactoryInfo ::getCompanyCode,(key1,key2) -> key2));
-            for(OmsInternalOrderRes omsInternalOrderRes : omsInternalOrderResList) {
-                String supplierCode = omsInternalOrderRes.getSupplierCode();
-                String factoryCode = cdFactoryInfoMap.get(supplierCode);
-                if (StringUtils.isBlank(factoryCode)) {
-                    logger.error("根据供应商v码获取 工厂编号 异常 req:{},resAll:{}", supplierCode, JSONObject.toJSON(cdFactoryInfoMap));
-                    throw new BusinessException("根据供应商v码获取 工厂编号 异常");
-                }
-                omsInternalOrderRes.setProductFactoryCode(factoryCode);
-            }
-            //获取bom版本
-            Map<String, Map<String, String>> bomMap = bomMap(omsInternalOrderResList);
-            for(OmsInternalOrderRes omsInternalOrderRes : omsInternalOrderResList){
-
-                //通过生产工厂、客户编码去BOM清单表（cd_bom_info）中获取BOM的版本号，优先8、9版本，有8选8，没8取9，其他取最小版本
-                String keyBom = StrUtil.concat(true, omsInternalOrderRes.getProductMaterialCode(), omsInternalOrderRes.getProductFactoryCode());
-                //key:成品物料号+生产工厂
-                if (bomMap.get(keyBom) != null) {
-                    //获取BOM版本
-                    String boms = bomMap.get(keyBom).get("version");//逗号分隔多版本拼接
-                    List<String> bomList = StrUtil.splitTrim(boms,StrUtil.COMMA);
-                    if (CollUtil.contains(bomList, BOM_VERSION_EIGHT)) {
-                        //有8取8
-                        omsInternalOrderRes.setVersion(BOM_VERSION_EIGHT);
-                    } else if (CollUtil.contains(bomList, BOM_VERSION_NINE)){
-                        //有9取9
-                        omsInternalOrderRes.setVersion(BOM_VERSION_NINE);
-                    }else{
-                        //取最小的
-                        omsInternalOrderRes.setVersion(bomList.stream().min((c,d)->StrUtil.compare(c,d,true)).get());
-                    }
-                }
-            }
-            //3.插入数据
-            omsInternalOrderResMapper.batchInsertOrUpdate(omsInternalOrderResList);
-
-            dstManager.commit(transaction);
-        }catch (Exception e){
-            StringWriter w = new StringWriter();
-            e.printStackTrace(new PrintWriter(w));
-            log.error("获取po数据异常 e:{}", w.toString());
-            dstManager.rollback(transaction);
+            omsInternalOrderRes.setProductFactoryCode(factoryCode);
         }
+        //获取bom版本
+        Map<String, Map<String, String>> bomMap = bomMap(omsInternalOrderResList);
+        for(OmsInternalOrderRes omsInternalOrderRes : omsInternalOrderResList){
 
+            //通过生产工厂、客户编码去BOM清单表（cd_bom_info）中获取BOM的版本号，优先8、9版本，有8选8，没8取9，其他取最小版本
+            String keyBom = StrUtil.concat(true, omsInternalOrderRes.getProductMaterialCode(), omsInternalOrderRes.getProductFactoryCode());
+            //key:成品物料号+生产工厂
+            if (bomMap.get(keyBom) != null) {
+                //获取BOM版本
+                String boms = bomMap.get(keyBom).get("version");//逗号分隔多版本拼接
+                List<String> bomList = StrUtil.splitTrim(boms,StrUtil.COMMA);
+                if (CollUtil.contains(bomList, BOM_VERSION_EIGHT)) {
+                    //有8取8
+                    omsInternalOrderRes.setVersion(BOM_VERSION_EIGHT);
+                } else if (CollUtil.contains(bomList, BOM_VERSION_NINE)){
+                    //有9取9
+                    omsInternalOrderRes.setVersion(BOM_VERSION_NINE);
+                }else{
+                    //取最小的
+                    omsInternalOrderRes.setVersion(bomList.stream().min((c,d)->StrUtil.compare(c,d,true)).get());
+                }
+            }
+        }
+        double length = omsInternalOrderResList.size();
+        int count = (int)Math.ceil(length/PO_INSERT_MAX_SIZE);
+        for(int i=0; i<count; i++){
+            int startList = i*PO_INSERT_MAX_SIZE;
+            int endList = i*PO_INSERT_MAX_SIZE + PO_INSERT_MAX_SIZE;
+            if(endList >length ){
+                endList = (int)length;
+            }
+            List<OmsInternalOrderRes> insertList = omsInternalOrderResList.subList(startList,endList);
+            DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW); // 事物隔离级别，开启新事务，这样会比较安全些。
+            TransactionStatus transaction = dstManager.getTransaction(def); // 获得事务状态
+            try {
+                omsInternalOrderResMapper.batchInsertOrUpdate(insertList);
+                dstManager.commit(transaction);
+            }catch (Exception e){
+                StringWriter w = new StringWriter();
+                e.printStackTrace(new PrintWriter(w));
+                log.error("获取po数据异常 e:{}", w.toString());
+                dstManager.rollback(transaction);
+            }
+        }
     }
     /**
      * 获取bom信息
