@@ -119,15 +119,15 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
         }
         //可以导入的结果集 插入
         List<ExcelImportSucObjectDto> successList=easyExcelListener.getSuccessList();
-        if (successList.size() > 0){
-            List<Oms2weeksDemandOrderEdit> successResult =successList.stream().map(excelImportSucObjectDto -> {
+        List<ExcelImportErrObjectDto> errList = easyExcelListener.getErrList();
+        if (CollectionUtil.isNotEmpty(successList) && CollectionUtil.isEmpty(errList)) {
+            List<Oms2weeksDemandOrderEdit> successResult = successList.stream().map(excelImportSucObjectDto -> {
                 Oms2weeksDemandOrderEdit weeksDemandOrderEdit = BeanUtil.copyProperties(excelImportSucObjectDto.getObject(), Oms2weeksDemandOrderEdit.class);
                 return weeksDemandOrderEdit;
             }).collect(Collectors.toList());
-            import2weeksDemandEdit(successResult,auditResult,sysUser);
+            import2weeksDemandEdit(successResult, auditResult, sysUser);
         }
         //错误结果集 导出
-        List<ExcelImportErrObjectDto> errList = easyExcelListener.getErrList();
         if (errList.size() > 0){
             List<Oms2weeksDemandOrderEditImport> errorResults = errList.stream().map(excelImportErrObjectDto -> {
                 Oms2weeksDemandOrderEditImport oms2weeksDemandOrderEditImport = BeanUtil.copyProperties(excelImportErrObjectDto.getObject(), Oms2weeksDemandOrderEditImport.class);
@@ -147,7 +147,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
      * @return
      */
     @Override
-    @Transactional
+    @Transactional(timeout = 60,rollbackFor=Exception.class)
     public R import2weeksDemandEdit(List<Oms2weeksDemandOrderEdit> successList, List<Oms2weeksDemandOrderEdit> auditList, SysUser sysUser) {
         //1、判断工厂编码
         //2、取物料描述
@@ -176,11 +176,11 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             String versionOld = weeksDemandOrderEditOld.getVersion();
             if (StrUtil.equals(version, versionOld)) {
                 //相同周：根据登录人、客户编码删除原有的，插入新的
-                List<String> customerList = oms2weeksDemandOrderEdits.stream()
+                List<String> customerList = successList.stream()
                         .filter(dto -> StrUtil.equals(sysUser.getLoginName(), dto.getCreateBy()))
                         .map(dtoMap-> dtoMap.getCustomerCode()).distinct().collect(Collectors.toList());
                 if (CollectionUtil.isNotEmpty(customerList)) {
-                    deleteByCreateByAndCustomerCode(weeksDemandOrderEditOld.getCreateBy(), customerList);
+                    deleteByCreateByAndCustomerCode(sysUser.getLoginName(), customerList);
                 }
             }else{
                 //上周：全部插入历史表，删除原有的，插入新的
@@ -299,6 +299,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
             ExcelImportOtherObjectDto othObjectDto = new ExcelImportOtherObjectDto();
+            StringBuffer errMsg = new StringBuffer();
 
             //交付日期
             Date dateDelivery = weeksDemandOrderEdit.getDeliveryDate();
@@ -332,34 +333,27 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
 
             String factoryCode = weeksDemandOrderEdit.getProductFactoryCode();
             if (!CollUtil.contains(companyCodeList, factoryCode)) {
-                errObjectDto.setObject(weeksDemandOrderEdit);
-                errObjectDto.setErrMsg(StrUtil.format("不存在此工厂：{}", factoryCode));
-                errDtos.add(errObjectDto);
-                continue;
+                errMsg.append(StrUtil.format("不存在此工厂：{};", factoryCode));
             }
             //物料描述赋值
             List<CdMaterialInfo> materialInfos = mapMaterial.get(weeksDemandOrderEdit.getProductMaterialCode());
             if (CollUtil.isEmpty(materialInfos)) {
-                errObjectDto.setObject(weeksDemandOrderEdit);
-                errObjectDto.setErrMsg(StrUtil.format("不存在物料信息：{}", weeksDemandOrderEdit.getProductMaterialCode()));
-                errDtos.add(errObjectDto);
-                continue;
+                errMsg.append(StrUtil.format("不存在物料信息：{};", weeksDemandOrderEdit.getProductMaterialCode()));
+            } else {
+                //根据工厂、物料号获取单一对象
+                Optional<CdMaterialInfo> cdMaterialInfoOpt = materialInfos.stream()
+                        .filter(ma -> StrUtil.equals(ma.getPlantCode(), factoryCode))
+                        .findFirst();
+                if (!cdMaterialInfoOpt.isPresent()) {
+                    errMsg.append(StrUtil.format("不存在物料号：{},工厂：{}的物料数据，请维护！",
+                            weeksDemandOrderEdit.getProductMaterialCode(),factoryCode));
+                }else{
+                    CdMaterialInfo cdMaterialInfo = cdMaterialInfoOpt.get();
+                    weeksDemandOrderEdit.setProductMaterialDesc(cdMaterialInfo.getMaterialDesc());
+                    weeksDemandOrderEdit.setPurchaseGroupCode(cdMaterialInfo.getPurchaseGroupCode());
+                    weeksDemandOrderEdit.setUnit(cdMaterialInfo.getPrimaryUom());
+                }
             }
-            //根据工厂、物料号获取单一对象
-            Optional<CdMaterialInfo> cdMaterialInfoOpt = materialInfos.stream()
-                    .filter(ma -> StrUtil.equals(ma.getPlantCode(), factoryCode))
-                    .findFirst();
-            if (!cdMaterialInfoOpt.isPresent()) {
-                errObjectDto.setObject(weeksDemandOrderEdit);
-                errObjectDto.setErrMsg(StrUtil.format("不存在物料号：{},工厂：{}的物料数据，请维护！",
-                        weeksDemandOrderEdit.getProductMaterialCode(),factoryCode));
-                errDtos.add(errObjectDto);
-                continue;
-            }
-            CdMaterialInfo cdMaterialInfo = cdMaterialInfoOpt.get();
-            weeksDemandOrderEdit.setProductMaterialDesc(cdMaterialInfo.getMaterialDesc());
-            weeksDemandOrderEdit.setPurchaseGroupCode(cdMaterialInfo.getPurchaseGroupCode());
-            weeksDemandOrderEdit.setUnit(cdMaterialInfo.getPrimaryUom());
             //需求订单号
             String demandOrderCode = StrUtil.concat(true, "DM", DateUtils.dateTime(), RandomUtil.randomInt(6));
             weeksDemandOrderEdit.setDemandOrderCode(demandOrderCode);
@@ -378,38 +372,32 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             }
             weeksDemandOrderEdit.setWeeks(StrUtil.toString(weekNum));
             weeksDemandOrderEdit.setStatus(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
-            //判断是否下市，下市则进入审批
-            CdMaterialExtendInfo extendInfo = materialExtendInfoMap.get(weeksDemandOrderEdit.getProductMaterialCode());
-            if (extendInfo==null) {
-                errObjectDto.setObject(weeksDemandOrderEdit);
-                errObjectDto.setErrMsg(StrUtil.format("物料号{}：无生命周期及产品类别信息！",weeksDemandOrderEdit.getProductMaterialCode()));
-                errDtos.add(errObjectDto);
-                continue;
-            }
             //判断地点是否存在
             Map<String, String> storeHouseMap = storehouseMap.get(StrUtil.concat(true, weeksDemandOrderEdit.getProductFactoryCode(), weeksDemandOrderEdit.getCustomerCode()));
             if (storeHouseMap == null) {
-                errObjectDto.setObject(weeksDemandOrderEdit);
-                errObjectDto.setErrMsg(StrUtil.format("工厂：{}，客户编码{}无工厂库位信息！",weeksDemandOrderEdit.getProductFactoryCode(),weeksDemandOrderEdit.getCustomerCode()));
-                errDtos.add(errObjectDto);
-                continue;
+                errMsg.append(StrUtil.format("工厂：{}，客户编码{}无工厂库位信息！",weeksDemandOrderEdit.getProductFactoryCode(),weeksDemandOrderEdit.getCustomerCode()));
             }
-            if (!StrUtil.equals(weeksDemandOrderEdit.getPlace(), storeHouseMap.get("storehouseTo"))) {
-                errObjectDto.setObject(weeksDemandOrderEdit);
-                errObjectDto.setErrMsg(StrUtil.format("对应地点应为：{}",storeHouseMap.get("storehouseTo")));
-                errDtos.add(errObjectDto);
-                continue;
+            if (storeHouseMap != null && !StrUtil.equals(weeksDemandOrderEdit.getPlace(), storeHouseMap.get("storehouseTo"))) {
+                errMsg.append(StrUtil.format("对应地点应为：{};",storeHouseMap.get("storehouseTo")));
             }
-            String productType = extendInfo.getProductType();
-            String lifeCyle = extendInfo.getLifeCycle();
-            if (StrUtil.isEmpty(productType)) {
+            //判断是否下市，下市则进入审批
+            CdMaterialExtendInfo extendInfo = materialExtendInfoMap.get(weeksDemandOrderEdit.getProductMaterialCode());
+            String productType = new String();
+            String lifeCyle = new String();
+            if (extendInfo==null) {
+                errMsg.append(StrUtil.format("物料号{}：无生命周期及产品类别信息！",weeksDemandOrderEdit.getProductMaterialCode()));
+            }else{
+                productType = extendInfo.getProductType();
+                lifeCyle = extendInfo.getLifeCycle();
+                if (StrUtil.isEmpty(productType)) {
+                    errMsg.append(StrUtil.format("物料号{}：无产品类别信息！",weeksDemandOrderEdit.getProductMaterialCode()));
+                } else if (StrUtil.isEmpty(lifeCyle)) {
+                    errMsg.append(StrUtil.format("物料号{}：无生命周期信息！",weeksDemandOrderEdit.getProductMaterialCode()));
+                }
+            }
+            if (StrUtil.isNotEmpty(errMsg)) {
                 errObjectDto.setObject(weeksDemandOrderEdit);
-                errObjectDto.setErrMsg(StrUtil.format("物料号{}：无产品类别信息！",weeksDemandOrderEdit.getProductMaterialCode()));
-                errDtos.add(errObjectDto);
-                continue;
-            } else if (StrUtil.isEmpty(lifeCyle)) {
-                errObjectDto.setObject(weeksDemandOrderEdit);
-                errObjectDto.setErrMsg(StrUtil.format("物料号{}：无生命周期信息！",weeksDemandOrderEdit.getProductMaterialCode()));
+                errObjectDto.setErrMsg(errMsg.toString());
                 errDtos.add(errObjectDto);
                 continue;
             }
@@ -792,7 +780,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
      * @return
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     public R toSAP(List<Long> ids,SysUser sysUser,Oms2weeksDemandOrderEdit weeksDemandOrderEdit) {
         //只能下达待传SAP和传SAP异常的数据
         List<String> statusList = CollUtil.newArrayList(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getCode()

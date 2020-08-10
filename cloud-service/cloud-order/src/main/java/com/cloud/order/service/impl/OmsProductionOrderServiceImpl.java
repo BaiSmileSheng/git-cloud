@@ -454,7 +454,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      * Date: 2020/6/22
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     public R deleteByIdString(OmsProductionOrder order, SysUser sysUser) {
         String ids = order.getIds();
         List<OmsProductionOrder> omsProductionOrders = new ArrayList<>();
@@ -532,7 +532,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      * Date: 2020/6/22
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     public R updateSave(OmsProductionOrder omsProductionOrder, SysUser sysUser) {
         //根据ID查询排产订单数据
         OmsProductionOrder productionOrder = omsProductionOrderMapper.selectByPrimaryKey(omsProductionOrder.getId());
@@ -1643,7 +1643,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 List<OmsProductionOrder> omsProductionOrderListGet = branchOfficeMap.get(branchOffice);
                 omsProductionOrderListGet.add(omsProductionOrder);
                 branchOfficeMap.put(branchOffice, omsProductionOrderListGet);
-            } else {
+            } else if(StringUtils.isNotBlank(branchOffice)) {
                 List<OmsProductionOrder> omsProductionOrderListNew = new ArrayList<>();
                 omsProductionOrderListNew.add(omsProductionOrder);
                 branchOfficeMap.put(branchOffice, omsProductionOrderListNew);
@@ -1652,7 +1652,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 List<OmsProductionOrder> omsProductionOrderListGet = monitorMap.get(monitor);
                 omsProductionOrderListGet.add(omsProductionOrder);
                 monitorMap.put(monitor, omsProductionOrderListGet);
-            } else {
+            } else if(StringUtils.isNotBlank(monitor)) {
                 List<OmsProductionOrder> omsProductionOrderListNew = new ArrayList<>();
                 omsProductionOrderListNew.add(omsProductionOrder);
                 monitorMap.put(monitor, omsProductionOrderListNew);
