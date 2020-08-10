@@ -415,11 +415,23 @@ public class OmsProductionOrderController extends BaseController {
     @PostMapping("delete")
     @OperLog(title = "排产订单删除 ", businessType = BusinessType.DELETE)
     @ApiOperation(value = "排产订单删除 ", response = R.class)
-    @ApiParam(name = "ids", value = "需删除数据的id")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "productMaterialCode", value = "专用号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productFactoryCode", value = "工厂", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productLineCode", value = "线体", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "status", value = "状态", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "checkDateStart", value = "查询开始日期", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "checkDateEnd", value = "查询结束日期", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "orderType", value = "sap订单类型", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "dateType", value = "查询日期类型", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productOrderCode", value = "生产订单号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "orderCode", value = "排产订单号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "ids", value = "id字符串", required = false, paramType = "query", dataType = "String")
+    })
     @HasPermissions("order:productionOrder:delete")
-    public R delete(@RequestBody String ids) {
+    public R delete(@ApiIgnore OmsProductionOrder omsProductionOrder) {
         SysUser sysUser = getUserInfo(SysUser.class);
-        return omsProductionOrderService.deleteByIdString(ids,sysUser);
+        return omsProductionOrderService.deleteByIdString(omsProductionOrder,sysUser);
     }
     /**
      * 更新保存排产订单

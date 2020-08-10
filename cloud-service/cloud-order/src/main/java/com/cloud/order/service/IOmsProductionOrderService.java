@@ -32,7 +32,7 @@ public interface IOmsProductionOrderService extends BaseService<OmsProductionOrd
      * Author: ltq
      * Date: 2020/6/22
      */
-    R deleteByIdString(String ids, SysUser sysUser);
+    R deleteByIdString(OmsProductionOrder omsProductionOrder, SysUser sysUser);
     /**
      * Description:  排产订单修改
      * Param: [omsProductionOrder, sysUser]
