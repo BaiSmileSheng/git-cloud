@@ -295,6 +295,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
             ExcelImportOtherObjectDto othObjectDto = new ExcelImportOtherObjectDto();
+            StringBuffer errMsg = new StringBuffer();
 
             //交付日期
             Date dateDelivery = demandOrderGatherEdit.getDeliveryDate();
@@ -328,39 +329,27 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
 
             String factoryCode = demandOrderGatherEdit.getProductFactoryCode();
             if (!CollUtil.contains(companyCodeList, factoryCode)) {
-                errObjectDto.setObject(demandOrderGatherEdit);
-                errObjectDto.setErrMsg(StrUtil.format("不存在此工厂：{}", factoryCode));
-                errDtos.add(errObjectDto);
-                continue;
+                errMsg.append(StrUtil.format("不存在此工厂：{};", factoryCode));
             }
             //物料描述赋值
             List<CdMaterialInfo> materialInfos = mapMaterial.get(demandOrderGatherEdit.getProductMaterialCode());
             if (CollUtil.isEmpty(materialInfos)) {
-                errObjectDto.setObject(demandOrderGatherEdit);
-                errObjectDto.setErrMsg(StrUtil.format("不存在物料信息：{}", demandOrderGatherEdit.getProductMaterialCode()));
-                errDtos.add(errObjectDto);
-                continue;
+                errMsg.append(StrUtil.format("不存在物料信息：{};", demandOrderGatherEdit.getProductMaterialCode()));
+            }else{
+                //根据工厂、物料号获取单一对象
+                Optional<CdMaterialInfo> cdMaterialInfoOpt = materialInfos.stream()
+                        .filter(ma -> StrUtil.equals(ma.getPlantCode(), factoryCode))
+                        .findFirst();
+                if (!cdMaterialInfoOpt.isPresent()) {
+                    errMsg.append(StrUtil.format("不存在物料号：{},工厂：{}的物料数据，请维护！",
+                            demandOrderGatherEdit.getProductMaterialCode(), factoryCode));
+                } else {
+                    CdMaterialInfo cdMaterialInfo = cdMaterialInfoOpt.get();
+                    demandOrderGatherEdit.setProductMaterialDesc(cdMaterialInfo.getMaterialDesc());
+                    demandOrderGatherEdit.setPurchaseGroupCode(cdMaterialInfo.getPurchaseGroupCode());
+                    demandOrderGatherEdit.setUnit(cdMaterialInfo.getPrimaryUom());
+                }
             }
-            //根据工厂、物料号获取单一对象
-            Optional<CdMaterialInfo> cdMaterialInfoOpt = materialInfos.stream()
-                    .filter(ma -> StrUtil.equals(ma.getPlantCode(), factoryCode))
-                    .findFirst();
-            if (!cdMaterialInfoOpt.isPresent()) {
-                errObjectDto.setObject(demandOrderGatherEdit);
-                errObjectDto.setErrMsg(StrUtil.format("不存在物料号：{},工厂：{}的物料数据，请维护！",
-                        demandOrderGatherEdit.getProductMaterialCode(),factoryCode));
-                errDtos.add(errObjectDto);
-                continue;
-            }
-            CdMaterialInfo cdMaterialInfo = cdMaterialInfoOpt.get();
-            demandOrderGatherEdit.setProductMaterialDesc(cdMaterialInfo.getMaterialDesc());
-            demandOrderGatherEdit.setPurchaseGroupCode(cdMaterialInfo.getPurchaseGroupCode());
-            demandOrderGatherEdit.setUnit(cdMaterialInfo.getPrimaryUom());
-            //需求订单号
-//            R seqresult = remoteSequeceService.selectSeq("demand_order_gather_seq", 4);
-//            if(!seqresult.isSuccess()){
-//                throw new BusinessException("查序列号失败");
-//            }
             String seq = RandomUtil.randomInt(6);
             String demandOrderCode = StrUtil.concat(true, "DM", DateUtils.dateTime(), seq);
             demandOrderGatherEdit.setDemandOrderCode(demandOrderCode);
@@ -379,38 +368,34 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             }
             demandOrderGatherEdit.setWeeks(StrUtil.toString(weekNum));
             demandOrderGatherEdit.setStatus(DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
-            //判断是否下市，下市则进入审批
-            CdMaterialExtendInfo extendInfo = materialExtendInfoMap.get(demandOrderGatherEdit.getProductMaterialCode());
-            if (extendInfo==null) {
-                errObjectDto.setObject(demandOrderGatherEdit);
-                errObjectDto.setErrMsg(StrUtil.format("物料号{}：无生命周期及产品类别信息！",demandOrderGatherEdit.getProductMaterialCode()));
-                errDtos.add(errObjectDto);
-                continue;
-            }
             //判断地点是否存在
             Map<String, String> storeHouseMap = storehouseMap.get(StrUtil.concat(true, demandOrderGatherEdit.getProductFactoryCode(), demandOrderGatherEdit.getCustomerCode()));
             if (storeHouseMap == null) {
-                errObjectDto.setObject(demandOrderGatherEdit);
-                errObjectDto.setErrMsg(StrUtil.format("工厂：{}，客户编码{}无工厂库位信息！",demandOrderGatherEdit.getProductFactoryCode(),demandOrderGatherEdit.getCustomerCode()));
-                errDtos.add(errObjectDto);
-                continue;
+                errMsg.append(StrUtil.format("工厂：{}，客户编码{}无工厂库位信息！",demandOrderGatherEdit.getProductFactoryCode(),demandOrderGatherEdit.getCustomerCode()));
             }
-            if (!StrUtil.equals(demandOrderGatherEdit.getPlace(), storeHouseMap.get("storehouseTo"))) {
-                errObjectDto.setObject(demandOrderGatherEdit);
-                errObjectDto.setErrMsg(StrUtil.format("对应地点应为：{}",storeHouseMap.get("storehouseTo")));
-                errDtos.add(errObjectDto);
-                continue;
+            if (storeHouseMap != null && !StrUtil.equals(demandOrderGatherEdit.getPlace(), storeHouseMap.get("storehouseTo"))) {
+                errMsg.append(StrUtil.format("对应地点应为：{};", storeHouseMap.get("storehouseTo")));
             }
-            String productType = extendInfo.getProductType();
-            String lifeCyle = extendInfo.getLifeCycle();
-            if (StrUtil.isEmpty(productType)) {
+
+            //判断是否下市，下市则进入审批
+            CdMaterialExtendInfo extendInfo = materialExtendInfoMap.get(demandOrderGatherEdit.getProductMaterialCode());
+            String productType = new String();
+            String lifeCyle = new String();
+            if (extendInfo==null) {
+                errMsg.append(StrUtil.format("物料号{}：无生命周期及产品类别信息！",demandOrderGatherEdit.getProductMaterialCode()));
+            }else{
+                productType = extendInfo.getProductType();
+                lifeCyle = extendInfo.getLifeCycle();
+                if (StrUtil.isEmpty(productType)) {
+                    errMsg.append(StrUtil.format("物料号{}：无产品类别信息！", demandOrderGatherEdit.getProductMaterialCode()));
+                }
+                if (StrUtil.isEmpty(lifeCyle)) {
+                    errMsg.append(StrUtil.format("物料号{}：无生命周期信息！", demandOrderGatherEdit.getProductMaterialCode()));
+                }
+            }
+            if (StrUtil.isNotEmpty(errMsg)) {
                 errObjectDto.setObject(demandOrderGatherEdit);
-                errObjectDto.setErrMsg(StrUtil.format("物料号{}：无产品类别信息！",demandOrderGatherEdit.getProductMaterialCode()));
-                errDtos.add(errObjectDto);
-                continue;
-            } else if (StrUtil.isEmpty(lifeCyle)) {
-                errObjectDto.setObject(demandOrderGatherEdit);
-                errObjectDto.setErrMsg(StrUtil.format("物料号{}：无生命周期信息！",demandOrderGatherEdit.getProductMaterialCode()));
+                errObjectDto.setErrMsg(errMsg.toString());
                 errDtos.add(errObjectDto);
                 continue;
             }
@@ -468,11 +453,11 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             String versionOld = demandOrderGatherEditOld.getVersion();
             if (StrUtil.equals(version, versionOld)) {
                 //相同周：根据登录人、客户编码删除原有的，插入新的
-                List<String> customerList = demandOrderGatherEditOlds.stream()
+                List<String> customerList = successList.stream()
                         .filter(dto -> StrUtil.equals(sysUser.getLoginName(), dto.getCreateBy()))
                         .map(dtoMap-> dtoMap.getCustomerCode()).distinct().collect(Collectors.toList());
                 if (CollectionUtil.isNotEmpty(customerList)) {
-                    deleteByCreateByAndCustomerCode(demandOrderGatherEditOld.getCreateBy(), customerList);
+                    deleteByCreateByAndCustomerCode(sysUser.getLoginName(), customerList);
                 }
             }else{
                 //上周：全部插入历史表，删除原有的，插入新的
@@ -543,15 +528,15 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         }
         //可以导入的结果集 插入
         List<ExcelImportSucObjectDto> successList=easyExcelListener.getSuccessList();
-        if (successList.size() > 0){
-            List<OmsDemandOrderGatherEdit> successResult =successList.stream().map(excelImportSucObjectDto -> {
+        List<ExcelImportErrObjectDto> errList = easyExcelListener.getErrList();
+        if (CollectionUtil.isNotEmpty(successList) && CollectionUtil.isEmpty(errList)) {
+            List<OmsDemandOrderGatherEdit> successResult = successList.stream().map(excelImportSucObjectDto -> {
                 OmsDemandOrderGatherEdit demandOrderGatherEdit = BeanUtil.copyProperties(excelImportSucObjectDto.getObject(), OmsDemandOrderGatherEdit.class);
                 return demandOrderGatherEdit;
             }).collect(Collectors.toList());
-                        importDemandGatherEdit(successResult,auditResult,sysUser);
+            importDemandGatherEdit(successResult, auditResult, sysUser);
         }
         //错误结果集 导出
-        List<ExcelImportErrObjectDto> errList = easyExcelListener.getErrList();
         if (errList.size() > 0){
             List<OmsDemandOrderGatherEditImport> errorResults = errList.stream().map(excelImportErrObjectDto -> {
                 OmsDemandOrderGatherEditImport omsDemandOrderGatherEditImport = BeanUtil.copyProperties(excelImportErrObjectDto.getObject(), OmsDemandOrderGatherEditImport.class);
