@@ -25,6 +25,7 @@ import com.cloud.system.domain.entity.CdRawMaterialStock;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteCdRawMaterialStockService;
 import com.fasterxml.jackson.core.type.TypeReference;
+import io.seata.core.context.RootContext;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,8 +78,8 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
     public R selectListByOrderCodes(String orderCodes) {
         List<OmsProductionOrderDetail> list = omsProductionOrderDetailMapper.selectListByOrderCodes(orderCodes);
         R r = new R();
-        r.put("code",0);
-        r.put("data",list);
+        r.put("code", 0);
+        r.put("data", list);
         return r;
     }
 
@@ -108,8 +109,8 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
             if (CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_JIT)) {
                 List<String> factoryList = Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(","));
                 List<String> purchaseList = Arrays.asList(DataScopeUtil.getUserPurchaseScopes(sysUser.getUserId()).split(","));
-                String factorys = factoryList.stream().map(f -> "\'" + f +"\'").collect(Collectors.joining(","));
-                String purchases = purchaseList.stream().map(p -> "\'" + p +"\'").collect(Collectors.joining(","));
+                String factorys = factoryList.stream().map(f -> "\'" + f + "\'").collect(Collectors.joining(","));
+                String purchases = purchaseList.stream().map(p -> "\'" + p + "\'").collect(Collectors.joining(","));
                 omsProductionOrderDetail.setProductFactoryQuery(factorys);
                 omsProductionOrderDetail.setPurchaseGroupQuery(purchases);
             }
@@ -234,7 +235,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
         } else if (StrUtil.isBlank(omsProductionOrderDetail.getProductStartDate())) {
             log.error("基本开始日期为空！");
             return R.error("基本开始日期不能为空！");
-        } else if (StrUtil.isBlank(omsProductionOrderDetail.getPurchaseGroup())){
+        } else if (StrUtil.isBlank(omsProductionOrderDetail.getPurchaseGroup())) {
             log.error("采购组为空！");
             return R.error("采购组不能为空！");
         }
@@ -252,10 +253,9 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
             return R.ok();
         }
         OmsProductionOrderDetail orderDetail = omsProductionOrderDetails.get(0);
-        if (ProductOrderConstants.DETAIL_STATUS_ONE.equals(orderDetail.getStatus())
-                && ProductOrderConstants.DETAIL_STATUS_THREE.equals(orderDetail.getStatus()) ) {
-            log.error("原材料物料号："+orderDetail.getMaterialCode()+"在"+orderDetail.getProductStartDate()+"日，已经确认，不可反馈！");
-            return R.error("原材料物料号："+orderDetail.getMaterialCode()+"在"+orderDetail.getProductStartDate()+"日，已经确认，不可反馈！");
+        if (ProductOrderConstants.DETAIL_STATUS_ONE.equals(orderDetail.getStatus())) {
+            log.error("原材料物料号：" + orderDetail.getMaterialCode() + "在" + orderDetail.getProductStartDate() + "日，已经确认，不可反馈！");
+            return R.error("原材料物料号：" + orderDetail.getMaterialCode() + "在" + orderDetail.getProductStartDate() + "日，已经确认，不可反馈！");
         }
         //根据排产订单号查询排产订单表，根据成品专用号进行汇总
         //获取排产订单号List
@@ -284,8 +284,8 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
             criteria1.andEqualTo("productFactoryCode", omsProductionOrderDetail.getProductFactoryCode());
             criteria1.andEqualTo("rawMaterialCode", omsProductionOrderDetail.getMaterialCode());
             criteria1.andEqualTo("productStartDate", omsProductionOrderDetail.getProductStartDate());
-            criteria1.andEqualTo("productMaterialCode",omsProductionOrder.getProductMaterialCode());
-            criteria1.andEqualTo("bomVersion",omsProductionOrder.getBomVersion());
+            criteria1.andEqualTo("productMaterialCode", omsProductionOrder.getProductMaterialCode());
+            criteria1.andEqualTo("bomVersion", omsProductionOrder.getBomVersion());
             OmsRawMaterialFeedback omsRawMaterialFeedback = omsRawMaterialFeedbackService.findByExampleOne(example1);
             if (BeanUtil.isNotEmpty(omsRawMaterialFeedback)) {
                 omsRawMaterialFeedbacks.add(omsRawMaterialFeedback);
@@ -321,13 +321,28 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
             if (CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_JIT)) {
                 List<String> factoryList = Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(","));
                 List<String> purchaseList = Arrays.asList(DataScopeUtil.getUserPurchaseScopes(sysUser.getUserId()).split(","));
-                String factorys = factoryList.stream().map(f -> "\'" + f +"\'").collect(Collectors.joining(","));
-                String purchases = purchaseList.stream().map(p -> "\'" + p +"\'").collect(Collectors.joining(","));
+                String factorys = factoryList.stream().map(f -> "\'" + f + "\'").collect(Collectors.joining(","));
+                String purchases = purchaseList.stream().map(p -> "\'" + p + "\'").collect(Collectors.joining(","));
                 omsProductionOrderDetail.setProductFactoryQuery(factorys);
                 omsProductionOrderDetail.setPurchaseGroupQuery(purchases);
             }
         }
         List<OmsProductionOrderDetail> list = omsProductionOrderDetailMapper.selectCommitListPageInfo(omsProductionOrderDetail);
+        //处理原材料确认汇总后状态
+        list.forEach(detail -> {
+            List<OmsProductionOrderDetail> orderDetails = omsProductionOrderDetailMapper.select(OmsProductionOrderDetail
+                    .builder()
+                    .materialCode(detail.getMaterialCode())
+                    .productFactoryCode(detail.getProductFactoryCode())
+                    .productStartDate(detail.getProductStartDate())
+                    .purchaseGroup(detail.getPurchaseGroup())
+                    .build());
+            List<OmsProductionOrderDetail> feedbckOrder = orderDetails.stream()
+                    .filter(o -> o.getStatus().equals(ProductOrderConstants.DETAIL_STATUS_TWO)).collect(Collectors.toList());
+            if (ObjectUtil.isNotEmpty(feedbckOrder) && feedbckOrder.size() > 0) {
+                detail.setStatus(ProductOrderConstants.DETAIL_STATUS_TWO);
+            }
+        });
         return list;
     }
 
@@ -339,7 +354,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
      * Date: 2020/6/29
      */
     @Override
-    public List<OmsProductionOrderDetail> selectListByList(List<OmsProductionOrderDetail> list) {
+    public List<OmsProductionOrderDetail> selectListByList(List<OmsRawMaterialFeedback> list) {
         return omsProductionOrderDetailMapper.selectListByList(list);
     }
 
@@ -357,8 +372,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
             if (!BeanUtils.checkObjAllFieldsIsNull(omsProductionOrderDetail)) {
                 if (StrUtil.isNotBlank(omsProductionOrderDetail.getStatus())
                         && (ProductOrderConstants.DETAIL_STATUS_ONE.equals(omsProductionOrderDetail.getStatus())
-                        || ProductOrderConstants.DETAIL_STATUS_TWO.equals(omsProductionOrderDetail.getStatus())
-                        || ProductOrderConstants.DETAIL_STATUS_THREE.equals(omsProductionOrderDetail.getStatus()))) {
+                        || ProductOrderConstants.DETAIL_STATUS_TWO.equals(omsProductionOrderDetail.getStatus()))) {
                     return R.error("只能确认未确认的数据！");
                 }
             } else {
@@ -370,8 +384,8 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
                 if (CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_JIT)) {
                     List<String> factoryList = Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(","));
                     List<String> purchaseList = Arrays.asList(DataScopeUtil.getUserPurchaseScopes(sysUser.getUserId()).split(","));
-                    String factorys = factoryList.stream().map(f -> "\'" + f +"\'").collect(Collectors.joining(","));
-                    String purchases = purchaseList.stream().map(p -> "\'" + p +"\'").collect(Collectors.joining(","));
+                    String factorys = factoryList.stream().map(f -> "\'" + f + "\'").collect(Collectors.joining(","));
+                    String purchases = purchaseList.stream().map(p -> "\'" + p + "\'").collect(Collectors.joining(","));
                     omsProductionOrderDetail.setProductFactoryQuery(factorys);
                     omsProductionOrderDetail.setPurchaseGroupQuery(purchases);
                     omsProductionOrderDetail.setStatus(ProductOrderConstants.DETAIL_STATUS_ZERO);
@@ -383,12 +397,13 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
         }
         /**更新反馈信息记录的状态为“未审核已确认”*/
         //根据生产工厂、原材料物料、开始日期查询未审核的原材料反馈信息
-        List<OmsRawMaterialFeedback> omsRawMaterialFeedbacks = list.stream().map(o ->{
+        List<OmsRawMaterialFeedback> omsRawMaterialFeedbacks = list.stream().map(o -> {
             OmsRawMaterialFeedback omsRawMaterialFeedback = new OmsRawMaterialFeedback();
             omsRawMaterialFeedback.setProductFactoryCode(o.getProductFactoryCode());
             omsRawMaterialFeedback.setRawMaterialCode(o.getMaterialCode());
             omsRawMaterialFeedback.setProductStartDate(o.getProductStartDate());
             omsRawMaterialFeedback.setStatus("0");
+            omsRawMaterialFeedback.setUpdateBy(sysUser.getLoginName());
             return omsRawMaterialFeedback;
         }).collect(Collectors.toList());
         //更新反馈信息状态
@@ -396,15 +411,16 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
         /**更新排产订单、排产订单明细的状态*/
         //根据生产工厂、原材料物料、开始日期查询排产订单明细
         List<OmsProductionOrderDetail> omsProductionOrderDetails =
-                omsProductionOrderDetailMapper.selectListByList(list);
+                omsProductionOrderDetailMapper.selectByFactoryDateMaterialList(list);
         if (ObjectUtil.isEmpty(omsProductionOrderDetails) || omsProductionOrderDetails.size() <= 0) {
-            log.error("未查询排产订单明细！");
-            return R.error("未查询排产订单明细！");
+            log.error("未查询到排产订单明细！");
+            return R.error("未查询到排产订单明细！");
         }
         //设置排产订单明细状态为“已确认”
         omsProductionOrderDetails.forEach(detail -> {
             detail.setStatus(ProductOrderConstants.DETAIL_STATUS_ONE);
             detail.setUpdateBy(sysUser.getLoginName());
+            detail.setUpdateTime(new Date());
         });
         int updatDetailCount = omsProductionOrderDetailMapper.updateBatchByPrimaryKeySelective(omsProductionOrderDetails);
         if (updatDetailCount <= 0) {
@@ -441,6 +457,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
         }
         return R.ok();
     }
+
     /**
      * Description:  根据排产订单号批量更新状态
      * Param: [list]
@@ -450,6 +467,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
      */
     @Override
     public void updateBatchByProductOrderCode(List<OmsProductionOrderDetail> list) {
+        log.info("XID:" + RootContext.getXID());
         omsProductionOrderDetailMapper.updateBatchByProductOrderCode(list);
     }
 

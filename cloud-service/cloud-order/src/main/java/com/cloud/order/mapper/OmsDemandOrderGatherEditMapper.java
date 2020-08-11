@@ -20,7 +20,7 @@ public interface OmsDemandOrderGatherEditMapper extends BaseMapper<OmsDemandOrde
      * @param customerCodes
      * @return
      */
-    int deleteByCreateByAndCustomerCode(@Param("createBy")String createBy,@Param("customerCodes") List<String> customerCodes);
+    int deleteByCreateByAndCustomerCode(@Param("createBy")String createBy,@Param("customerCodes") List<String> customerCodes,@Param("status")String status);
 
     /**
      * 查询不重复的物料号和工厂
