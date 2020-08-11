@@ -65,7 +65,9 @@ public class OmsProductStatementController extends BaseController {
             @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productMaterialCode", value = "专用号", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "deliveryDate", value = "应交付日期", required = false, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "status", value = "状态", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "beginTime", value = "交付日期开始时间", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "endTime", value = "交付日期结束时间", required = false, paramType = "query", dataType = "String")
     })
     public TableDataInfo list(@ApiIgnore OmsProductStatement omsProductStatement) {
         Example example = assemblyConditions(omsProductStatement);
@@ -83,7 +85,9 @@ public class OmsProductStatementController extends BaseController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "productMaterialCode", value = "专用号", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "deliveryDate", value = "应交付日期", required = false, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "status", value = "状态", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "beginTime", value = "交付日期开始时间", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "endTime", value = "交付日期结束时间", required = false, paramType = "query", dataType = "String")
     })
     public R export(@ApiIgnore OmsProductStatement omsProductStatement) {
         Example example = assemblyConditions(omsProductStatement);
@@ -106,8 +110,14 @@ public class OmsProductStatementController extends BaseController {
         if (StringUtils.isNotBlank(omsProductStatement.getProductFactoryCode())) {
             criteria.andEqualTo("productFactoryCode", omsProductStatement.getProductFactoryCode());
         }
-        if (StringUtils.isNotBlank(omsProductStatement.getDeliveryDate())) {
-            criteria.andEqualTo("deliveryDate", omsProductStatement.getDeliveryDate());
+        if(StringUtils.isNotBlank(omsProductStatement.getStatus())){
+            criteria.andEqualTo("status", omsProductStatement.getStatus());
+        }
+        if(StringUtils.isNotBlank(omsProductStatement.getBeginTime())){
+            criteria.andGreaterThanOrEqualTo("deliveryDate",omsProductStatement.getBeginTime());
+        }
+        if(StringUtils.isNotBlank(omsProductStatement.getEndTime())){
+            criteria.andLessThanOrEqualTo("deliveryDate", omsProductStatement.getEndTime());
         }
         example.orderBy("deliveryDate").desc();
         return example;
