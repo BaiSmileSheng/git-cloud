@@ -94,6 +94,8 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
 
     private static final int SAP_RAW_MATERIAL_SIZE = 10000;//获取原材料库存数据每次获取数量
 
+    private static final int BOM_INSERT_MAX_SIZE = 20000;//bom单次插入最大数据量
+
     /**
      * @Description: 获取uph数据
      * @Param: factorys, materials
@@ -477,6 +479,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
      *
      * @return
      */
+    @Transactional
     @Override
     public R sycBomInfo() {
         //1.获取工厂全部信息cd_factory_info
@@ -507,14 +510,14 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                 if (endCount > materialExtendInfoList.size()) {
                     endCount = materialExtendInfoList.size();
                 }
-                List<String> materials = new ArrayList<>();
-                materials = materialCodeList.subList(startCont,endCount);
+                List<String> materials = materialCodeList.subList(startCont,endCount);
                 R result = queryBomInfoFromSap601(Arrays.asList(factoryCode), materials);
                 if (!result.isSuccess()) {
                     log.error("连接SAP获取BOM数据异常 factoryCode:{},materials:{},res:{}", factoryCode, materials, JSONObject.toJSON(result));
                     continue;
                 }
                 List<CdBomInfo> cdBomInfoList = (List<CdBomInfo>) result.get("data");
+                log.info("获取SAP的bom数据size:{}",cdBomInfoList.size());
                 deleteFlag++;
                 if (deleteFlag == 1) {
                     insertBomDb(cdBomInfoList, Boolean.TRUE);
@@ -556,24 +559,46 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
      * @param flag          是否是第一次插入数据库,若是,则删除全表
      */
     private void insertBomDb(final List<CdBomInfo> cdBomInfoList, final Boolean flag) {
-        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW); // 事物隔离级别，开启新事务，这样会比较安全些。
-        TransactionStatus transaction = dstManager.getTransaction(def); // 获得事务状态
-        try {
-            if (flag) {
-                cdBomInfoService.deleteAll();
-            }
-            if (!CollectionUtils.isEmpty(cdBomInfoList)) {
-                cdBomInfoService.insertList(cdBomInfoList);
-            }
-            dstManager.commit(transaction);
-        } catch (Exception e) {
-            StringWriter w = new StringWriter();
-            e.printStackTrace(new PrintWriter(w));
-            log.error("插入bom清单异常 e:{}", w.toString());
-            dstManager.rollback(transaction);
-        }
 
+        if (flag) {
+            DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW); // 事物隔离级别，开启新事务，这样会比较安全些。
+            TransactionStatus transaction = dstManager.getTransaction(def); // 获得事务状态
+            try{
+                cdBomInfoService.deleteAll();
+                dstManager.commit(transaction);
+            }catch (Exception e){
+                StringWriter w = new StringWriter();
+                e.printStackTrace(new PrintWriter(w));
+                log.error("删除bom清单异常 e:{}", w.toString());
+                dstManager.rollback(transaction);
+                throw new BusinessException("删除bom清单异常");
+            }
+        }
+        if (!CollectionUtils.isEmpty(cdBomInfoList)) {
+            double length = cdBomInfoList.size();
+            int count = (int)Math.ceil(length/BOM_INSERT_MAX_SIZE);
+            for(int i=0; i<count; i++) {
+                int startList = i * BOM_INSERT_MAX_SIZE;
+                int endList = i * BOM_INSERT_MAX_SIZE + BOM_INSERT_MAX_SIZE;
+                if (endList > length) {
+                    endList = (int) length;
+                }
+                List<CdBomInfo> cdBomInfoListSub = cdBomInfoList.subList(startList,endList);
+                DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+                def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW); // 事物隔离级别，开启新事务，这样会比较安全些。
+                TransactionStatus transaction = dstManager.getTransaction(def); // 获得事务状态
+                try{
+                    cdBomInfoService.insertList(cdBomInfoListSub);
+                    dstManager.commit(transaction);
+                }catch (Exception e){
+                    StringWriter w = new StringWriter();
+                    e.printStackTrace(new PrintWriter(w));
+                    log.error("插入bom清单异常 e:{}", w.toString());
+                    dstManager.rollback(transaction);
+                }
+            }
+        }
     }
 
     /**
