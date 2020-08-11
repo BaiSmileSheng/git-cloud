@@ -78,6 +78,9 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
         if (StrUtil.isNotBlank(omsRawMaterialFeedback.getProductMaterialCode())) {
             criteria.andEqualTo("productMaterialCode", omsRawMaterialFeedback.getProductMaterialCode());
         }
+        if (StrUtil.isNotBlank(omsRawMaterialFeedback.getRawMaterialCode())) {
+            criteria.andEqualTo("rawMaterialCode", omsRawMaterialFeedback.getRawMaterialCode());
+        }
         if (StrUtil.isNotBlank(omsRawMaterialFeedback.getProductFactoryCode())) {
             criteria.andEqualTo("productFactoryCode", omsRawMaterialFeedback.getProductFactoryCode());
         }
@@ -117,12 +120,34 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             log.error("============传入通过/驳回标识为空=============");
             return R.error("传入通过/驳回标识为空");
         }
-        List<String> ids = Arrays.asList(omsRawMaterialFeedback.getIds().split(","));
         Example example = new Example(OmsRawMaterialFeedback.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andIn("id", ids);
+        if (StrUtil.isNotBlank(omsRawMaterialFeedback.getIds())) {
+            List<String> ids = Arrays.asList(omsRawMaterialFeedback.getIds().split(","));
+            criteria.andIn("id", ids);
+        } else {
+            if (StrUtil.isNotBlank(omsRawMaterialFeedback.getProductMaterialCode())) {
+                criteria.andEqualTo("productMaterialCode", omsRawMaterialFeedback.getProductMaterialCode());
+            }
+            if (StrUtil.isNotBlank(omsRawMaterialFeedback.getProductFactoryCode())) {
+                criteria.andEqualTo("productFactoryCode", omsRawMaterialFeedback.getProductFactoryCode());
+            }
+            if (StrUtil.isNotBlank(omsRawMaterialFeedback.getCheckDateStart())) {
+                criteria.andLessThanOrEqualTo("productStartDate", omsRawMaterialFeedback.getCheckDateStart());
+            }
+            if (StrUtil.isNotBlank(omsRawMaterialFeedback.getCheckDateEnd())) {
+                criteria.andGreaterThanOrEqualTo("productStartDate", omsRawMaterialFeedback.getCheckDateEnd());
+            }
+            if (StrUtil.isNotBlank(omsRawMaterialFeedback.getStatus())) {
+                criteria.andEqualTo("status", omsRawMaterialFeedback.getStatus());
+            }
+        }
         //根据id查询原材料反馈信息
         List<OmsRawMaterialFeedback> omsRawMaterialFeedbacks = omsRawMaterialFeedbackMapper.selectByExample(example);
+        if (ObjectUtil.isEmpty(omsRawMaterialFeedbacks) || omsRawMaterialFeedbacks.size() <= 0) {
+            log.info("根据条件为查询出JIT反馈信息记录！");
+            return R.ok();
+        }
         //根据专用号、生产工厂、基本开始日期、bom版本查询未审核的原材料反馈信息
         List<OmsRawMaterialFeedback> rawMaterialFeedbacks = omsRawMaterialFeedbackMapper.selectByList(omsRawMaterialFeedbacks);
         //取前台传的数据与同专用号、生产工厂、开始日期、bom版本查询出的数据差集
@@ -133,7 +158,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             OmsProductionOrder omsProductionOrder = new OmsProductionOrder();
             omsProductionOrder.setProductFactoryCode(o.getProductFactoryCode());
             omsProductionOrder.setProductMaterialCode(o.getProductMaterialCode());
-            omsProductionOrder.setProductStartDate(o.getProductStartDate());
+            omsProductionOrder.setProductStartDate(o.getProductStartDate()) ;
             omsProductionOrder.setBomVersion(o.getBomVersion());
             return omsProductionOrder;
         }).collect(Collectors.toList());
@@ -169,6 +194,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
                         omsProductionOrderDetail.setProductOrderCode(o.getOrderCode());
                         omsProductionOrderDetail.setMaterialCode(f.getRawMaterialCode());
                         omsProductionOrderDetail.setStatus(ProductOrderConstants.DETAIL_STATUS_THREE);
+                        omsProductionOrderDetail.setUpdateBy(sysUser.getLoginName());
                         omsProductionOrderDetails.add(omsProductionOrderDetail);
                     }
                 });
@@ -205,6 +231,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
                         omsProductionOrderDetail.setProductOrderCode(o.getOrderCode());
                         omsProductionOrderDetail.setMaterialCode(f.getRawMaterialCode());
                         omsProductionOrderDetail.setStatus(ProductOrderConstants.DETAIL_STATUS_ZERO);
+                        omsProductionOrderDetail.setUpdateBy(sysUser.getLoginName());
                         omsProductionOrderDetails.add(omsProductionOrderDetail);
                     }
                 });
@@ -260,7 +287,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
         if (StrUtil.isNotBlank(StrUtil.toString(id))) {
             OmsRawMaterialFeedback omsRawMaterialFeedback = omsRawMaterialFeedbackMapper.selectByPrimaryKey(id);
             if (BeanUtil.isNotEmpty(omsRawMaterialFeedback)
-                    && updateSum.compareTo(omsRawMaterialFeedback.getProductContentNum()) < 0) {
+                    && updateSum.compareTo(omsRawMaterialFeedback.getProductContentNum()) <= 0) {
                 omsRawMaterialFeedbackMapper.updateStatusById(FEEDBACK_STATUS_ONE, id);
             }
         }
@@ -283,6 +310,10 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
         if (StrUtil.isNotBlank(ids)) {
             criteria.andIn("id", Arrays.asList(ids.split(",")));
         } else if (!BeanUtils.checkObjAllFieldsIsNull(omsRawMaterialFeedback)) {
+            if (StrUtil.isNotBlank(omsRawMaterialFeedback.getStatus())
+                    && !FEEDBACK_STATUS_ZERO.equals(omsRawMaterialFeedback.getStatus())) {
+                return R.error("只允许删除未审核的反馈信息记录！");
+            }
             if (StrUtil.isNotBlank(omsRawMaterialFeedback.getRawMaterialCode())) {
                 criteria.andEqualTo("rawMaterialCode",omsRawMaterialFeedback.getRawMaterialCode());
             }
@@ -432,7 +463,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
                 .collect(Collectors.toList());
         //查询排产订单明细,条件：生产工厂、基本开始日期、原材料物料、版本
         List<OmsProductionOrderDetail> details =
-                omsProductionOrderDetailService.selectListByList(omsProductionOrderDetails);
+                omsProductionOrderDetailService.selectListByList(omsRawMaterialFeedbacks);
         if (ObjectUtil.isEmpty(details) || details.size() <= 0) {
             log.error("根据生产工厂、基本开始日期、原材料物料、版本未查询出排产订单明细！");
             return R.error("没有查询出排产订单明细！");

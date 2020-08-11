@@ -78,7 +78,9 @@
         <foreach collection="list" item="item" separator=";">
             update oms_raw_material_feedback
             <set>
-                status = '3'
+                status = '3',
+                update_by = #{item.updateBy},
+                update_time = now()
             </set>
             <where>
                 product_factory_code = #{item.productFactoryCode,jdbcType=VARCHAR}
