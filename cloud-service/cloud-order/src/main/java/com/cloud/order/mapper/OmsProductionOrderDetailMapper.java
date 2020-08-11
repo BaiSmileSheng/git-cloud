@@ -2,6 +2,7 @@ package com.cloud.order.mapper;
 
 import com.cloud.order.domain.entity.OmsProductionOrderDetail;
 import com.cloud.common.core.dao.BaseMapper;
+import com.cloud.order.domain.entity.OmsRawMaterialFeedback;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderDetailVo;
 import com.cloud.order.domain.entity.vo.RawMaterialReviewDetailVo;
 import org.apache.ibatis.annotations.Param;
@@ -62,7 +63,7 @@ public interface OmsProductionOrderDetailMapper extends BaseMapper<OmsProduction
     * Author: ltq
     * Date: 2020/7/1
     */
-    List<OmsProductionOrderDetail> selectListByList(@Param(value = "list") List<OmsProductionOrderDetail> list);
+    List<OmsProductionOrderDetail> selectListByList(@Param(value = "list") List<OmsRawMaterialFeedback> list);
     /**
     * Description: 根据排产订单号List查询
     * Param:
@@ -79,4 +80,12 @@ public interface OmsProductionOrderDetailMapper extends BaseMapper<OmsProduction
     * Date: 2020/7/1
     */
     void updateBatchByProductOrderCode(@Param(value = "list") List<OmsProductionOrderDetail> list);
+    /**
+     * Description: 根据生产工厂、原材料、生产日期查询
+     * Param:
+     * return:
+     * Author: ltq
+     * Date: 2020/8/7
+     */
+    List<OmsProductionOrderDetail> selectByFactoryDateMaterialList(@Param(value = "list") List<OmsProductionOrderDetail> list);
 }

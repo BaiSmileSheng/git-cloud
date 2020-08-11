@@ -200,8 +200,10 @@
           update oms_production_order
           <set>
               <if test="item.status != null and item.status != ''">
-                  status = #{item.status,jdbcType=VARCHAR}
+                  status = #{item.status,jdbcType=VARCHAR},
               </if>
+              update_by = #{item.updateBy},
+              update_time = now()
           </set>
           <where>
               order_code = #{item.orderCode,jdbcType=VARCHAR}
