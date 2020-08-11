@@ -12,6 +12,7 @@ import com.cloud.common.log.enums.BusinessType;
 import com.cloud.order.domain.entity.Oms2weeksDemandOrderEdit;
 import com.cloud.order.domain.entity.vo.OmsDemandOrderGatherEditImportTemplete;
 import com.cloud.order.easyexcel.Week2OrderGatherEditWriteHandler;
+import com.cloud.order.enums.OrderFromEnum;
 import com.cloud.order.service.IOms2weeksDemandOrderEditService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
@@ -77,6 +78,9 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
         SysUser sysUser = getUserInfo(SysUser.class);
         if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
             example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+        }
+        if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
+            example.and().andEqualTo("orderFrom", OrderFromEnum.OUT_SOURCE_TYPE_QWW.getCode());
         }
         startPage();
         List<Oms2weeksDemandOrderEdit> oms2weeksDemandOrderEditList = oms2weeksDemandOrderEditService.selectByExample(example);
@@ -218,13 +222,16 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
         if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
             example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
         }
+        if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
+            example.and().andEqualTo("orderFrom", OrderFromEnum.OUT_SOURCE_TYPE_QWW.getCode());
+        }
         List<Oms2weeksDemandOrderEdit> oms2weeksDemandOrderEditList = oms2weeksDemandOrderEditService.selectByExample(example);
         return EasyExcelUtilOSS.writeExcel(oms2weeksDemandOrderEditList, "T+1-T+2周需求导入.xlsx", "sheet", new Oms2weeksDemandOrderEdit());
     }
 
     /**
      * 确认下达
-     * @param ids
+     * @param oms2weeksDemandOrderEdit
      * @return
      */
     @PostMapping("confirmRelease")
@@ -299,7 +306,11 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
 
     })
     public TableDataInfo toSAPlist(@ApiIgnore Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit) {
+        SysUser sysUser = getUserInfo(SysUser.class);
         Example example = listCondition(oms2weeksDemandOrderEdit);
+        if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
+            example.and().andEqualTo("orderFrom", OrderFromEnum.OUT_SOURCE_TYPE_QWW.getCode());
+        }
         startPage();
         List<Oms2weeksDemandOrderEdit> oms2weeksDemandOrderEditList = oms2weeksDemandOrderEditService.selectByExample(example);
         return getDataTable(oms2weeksDemandOrderEditList);
