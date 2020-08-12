@@ -3,6 +3,9 @@ package com.cloud.activiti.service;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.common.core.domain.R;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * activiti审批流
  *
@@ -42,4 +45,12 @@ public interface IActTaskService {
      * Date: 2020/6/24
      */
     R getByKey(String key);
+    /**
+     * Description:  根据业务订单号删除审批流程
+     * Param: [orderCodeList]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/8/12
+     */
+    R deleteByOrderCode(Map<String,Object> map);
 }

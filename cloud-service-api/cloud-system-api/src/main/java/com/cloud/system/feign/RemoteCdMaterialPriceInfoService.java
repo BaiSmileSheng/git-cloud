@@ -7,10 +7,7 @@ import com.cloud.system.domain.entity.CdSettleProductMaterial;
 import com.cloud.system.feign.factory.RemoteCdMaterialPriceInfoFallbackFactory;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -83,9 +80,9 @@ public interface RemoteCdMaterialPriceInfoService {
                            @RequestParam("memberCode") String memberCode);
     /**
      * 根据成品物料号查询SAP成本价格
-     * @param materialCodes
+     * @param map
      * @return R
      */
-    @GetMapping("materialPrice/selectMaterialPrice")
-    R selectMaterialPrice(@RequestBody List<CdSettleProductMaterial> list);
+    @PostMapping("materialPrice/selectMaterialPrice")
+    R selectMaterialPrice(@RequestBody Map<String,List<CdSettleProductMaterial>> map);
 }

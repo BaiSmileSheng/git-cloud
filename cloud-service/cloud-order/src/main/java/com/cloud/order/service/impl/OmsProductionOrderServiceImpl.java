@@ -13,6 +13,7 @@ import com.cloud.activiti.constant.ActProcessContants;
 import com.cloud.activiti.domain.entity.vo.ActBusinessVo;
 import com.cloud.activiti.domain.entity.vo.ActStartProcessVo;
 import com.cloud.activiti.feign.RemoteActOmsProductionOrderService;
+import com.cloud.activiti.feign.RemoteActTaskService;
 import com.cloud.common.constant.*;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
@@ -173,6 +174,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     private RemoteInterfaceLogService remoteInterfaceLogService;
     @Autowired
     private IOmsProductOrderImportService omsProductOrderImportService;
+    @Autowired
+    private RemoteActTaskService remoteActTaskService;
 
     /**
      * Description:  排产订单导入
@@ -292,9 +295,11 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                         .outsourceWay(omsProductionOrderExportVo.getOutsourceType()).build()
                 ).distinct().collect(toList());
         /** 查询非自制排产订单在SAP中是否存在数据*/
-        R materialPriceMap = remoteCdMaterialPriceInfoService.selectMaterialPrice(settleProductMaterials);
+        Map<String,List<CdSettleProductMaterial>> map = new HashMap<>();
+        map.put("list",settleProductMaterials);
+        R materialPriceMap = remoteCdMaterialPriceInfoService.selectMaterialPrice(map);
         if (!materialPriceMap.isSuccess()) {
-            log.error("查询非自制排产订单在SAP成本价格失败！");
+            log.error("查询非自制排产订单在SAP成本价格失败：" + materialPriceMap.get("msg"));
         }
         List<CdMaterialPriceInfo> materialPriceInfos = materialPriceMap.getCollectData(new TypeReference<List<CdMaterialPriceInfo>>() {
         });
@@ -468,6 +473,16 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         if (omsProductionOrders.size() <= 0) {
             log.info("根据前台传参未查询出排产订单数据，直接返回成功！");
             return R.ok();
+        }
+        List<String> orderCodeList = omsProductionOrders.stream()
+                .map(OmsProductionOrder::getOrderCode).collect(toList());
+        Map<String,Object> map = new HashMap<>();
+        map.put("userName",sysUser.getLoginName());
+        map.put("orderCodeList",orderCodeList);
+        R deleteActMap = remoteActTaskService.deleteByOrderCode(map);
+        if (!deleteActMap.isSuccess()){
+            log.error("删除审批流程失败，原因："+deleteActMap.get("msg"));
+            return R.error("删除审批流程失败，原因："+deleteActMap.get("msg"));
         }
         for (OmsProductionOrder omsProductionOrder : omsProductionOrders) {
             if (ProductOrderConstants.STATUS_FOUR.equals(omsProductionOrder.getStatus())
@@ -706,8 +721,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     if (!productionOrder.getStatus().equals(ProductOrderConstants.STATUS_THREE)) {
                         return R.error("非“已评审”状态的排产订单不可确认下达！");
                     }
-                    if (productionOrder.getAuditStatus().equals(ProductOrderConstants.AUDIT_STATUS_ONE)) {
-                        return R.error("审核中状态的排产订单不可确认下达！");
+                    if (productionOrder.getAuditStatus().equals(ProductOrderConstants.AUDIT_STATUS_ONE)
+                            || productionOrder.getAuditStatus().equals(ProductOrderConstants.AUDIT_STATUS_THREE)) {
+                        return R.error("审核中、审核驳回状态的排产订单不可确认下达！");
                     }
                 }
             } else if (BeanUtil.isNotEmpty(omsProductionOrder)) {
@@ -717,9 +733,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     return R.error("只可以下达已评审的排产订单！");
                 }
                 if (StrUtil.isNotBlank(omsProductionOrder.getAuditStatus())
-                        && omsProductionOrder.getAuditStatus().equals(ProductOrderConstants.AUDIT_STATUS_ONE)) {
+                        && (omsProductionOrder.getAuditStatus().equals(ProductOrderConstants.AUDIT_STATUS_ONE)
+                        || omsProductionOrder.getAuditStatus().equals(ProductOrderConstants.AUDIT_STATUS_THREE))) {
                     log.error("确认下达传入排产订单审核状态为审核中，不可下达！");
-                    return R.error("只可以下达非审核中的排产订单！");
+                    return R.error("只可以下达非审核中、审核驳回的排产订单！");
                 }
                 if (StrUtil.isNotBlank(omsProductionOrder.getProductFactoryCode())) {
                     criteria.andEqualTo("productFactoryCode", omsProductionOrder.getProductFactoryCode());
@@ -731,6 +748,14 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     criteria.andEqualTo("status", omsProductionOrder.getStatus());
                 } else {
                     criteria.andEqualTo("status", ProductOrderConstants.STATUS_THREE);
+                }
+                if (StrUtil.isNotBlank(omsProductionOrder.getAuditStatus())) {
+                    criteria.andEqualTo("auditStauts", omsProductionOrder.getAuditStatus());
+                } else {
+                    List<String> auditStatusList = new ArrayList<>();
+                    auditStatusList.add(ProductOrderConstants.AUDIT_STATUS_ZERO);
+                    auditStatusList.add(ProductOrderConstants.AUDIT_STATUS_TWO);
+                    criteria.andIn("auditStauts",auditStatusList);
                 }
                 if (StrUtil.isNotBlank(omsProductionOrder.getProductMaterialCode())) {
                     criteria.andEqualTo("productMaterialCode", omsProductionOrder.getProductMaterialCode());

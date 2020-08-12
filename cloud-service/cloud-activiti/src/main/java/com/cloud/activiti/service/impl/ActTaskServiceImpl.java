@@ -1,6 +1,7 @@
 package com.cloud.activiti.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.cloud.activiti.consts.ActivitiConstant;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
@@ -12,6 +13,8 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteUserService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.activiti.engine.RepositoryService;
@@ -22,9 +25,12 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * activiti审批流
@@ -153,6 +159,48 @@ public class ActTaskServiceImpl implements IActTaskService {
                         .tenantId(processDefinition.getTenantId())
                         .version(processDefinition.getVersion()).build();
         return R.data(processDefinitionAct);
+    }
+    /**
+     * Description:  根据业务订单号删除审批流程
+     * Param: [orderCodeList]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/8/12
+     */
+    @Override
+    public R deleteByOrderCode(Map<String,Object> map) {
+        log.info("删除审批流程方法-开始执行！");
+        ObjectMapper objectMapper = new ObjectMapper();
+        String userId = objectMapper.convertValue(map.get("userName"),String.class);
+        List<String> orderCodeList =
+                objectMapper.convertValue(map.get("orderCodeList"), new TypeReference<List<String>>() {});
+        if (ObjectUtil.isEmpty(orderCodeList) || orderCodeList.size() <= 0) {
+            log.info("执行删除审批流程方法，传入的业务订单号为空！");
+            return R.error("执行删除审批流程方法，传入的业务订单号为空！");
+        }
+        Example example = new Example(BizBusiness.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andIn("orderNo",orderCodeList);
+        List<BizBusiness> businesses = businessService.selectByExample(example);
+        if (ObjectUtil.isEmpty(businesses) || businesses.size() <= 0) {
+            log.info("删除审批流程方法-根据业务订单号查询审批流程为空！");
+            return R.ok();
+        }
+        String ids = businesses.stream().map(b -> b.getId().toString()).collect(Collectors.joining(","));
+        businessService.deleteBizBusinessByIds(ids);
+        businesses.forEach(b -> {
+            String id  = b.getProcInstId();
+            ProcessInstance pi = runtimeService.createProcessInstanceQuery().processInstanceId(id).singleResult();
+            BizBusiness bizBusiness = new BizBusiness();
+            bizBusiness.setId(Long.valueOf(pi.getBusinessKey()));
+            bizBusiness.setCurrentTask(ActivitiConstant.END_TASK_NAME);
+            bizBusiness.setStatus(ActivitiConstant.STATUS_CANCELED);
+            bizBusiness.setResult(ActivitiConstant.RESULT_CANCELED);
+            businessService.updateBizBusiness(bizBusiness);
+            runtimeService.deleteProcessInstance(id, userId);
+        });
+        log.info("删除审批流程方法-执行结束！");
+        return R.ok();
     }
 
     /**

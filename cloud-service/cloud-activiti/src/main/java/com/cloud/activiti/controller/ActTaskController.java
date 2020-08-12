@@ -215,4 +215,16 @@ public class ActTaskController extends BaseController {
     public R remove(String ids) {
         return toAjax(bizAuditService.deleteBizAuditLogic(ids));
     }
+
+    /**
+     * Description:  根据业务订单号删除审批流程
+     * Param: [orderCodeList]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/8/12
+     */
+    @PostMapping("deleteByOrderCode")
+    public R deleteByOrderCode(@RequestBody Map<String,Object> map){
+        return actTaskService.deleteByOrderCode(map);
+    }
 }
