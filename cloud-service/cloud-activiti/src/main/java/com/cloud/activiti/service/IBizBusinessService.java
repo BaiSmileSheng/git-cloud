@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.cloud.activiti.domain.BizBusiness;
+import tk.mybatis.mapper.entity.Example;
 
 /**
  * <p>File：IBizBusinessService.java</p>
@@ -105,5 +106,12 @@ public interface IBizBusinessService {
      * @return
      */
     String selectByKeyAndTable(String procDefKey,String tableId);
-
+    /**
+     * Description:  根据Example查询
+     * Param: [example]
+     * return: java.util.List<com.cloud.activiti.domain.BizBusiness>
+     * Author: ltq
+     * Date: 2020/8/12
+     */
+    List<BizBusiness> selectByExample(Example example);
 }

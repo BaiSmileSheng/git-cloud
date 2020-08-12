@@ -228,8 +228,8 @@ public class CdMaterialPriceInfoController extends BaseController {
     /**
      * 根据成品物料号查询SAP成本价格
      */
-    @GetMapping("selectMaterialPrice")
-    public R selectMaterialPrice(List<CdSettleProductMaterial> list){
-        return cdMaterialPriceInfoService.selectMaterialPrice(list);
+    @PostMapping("selectMaterialPrice")
+    public R selectMaterialPrice(@RequestBody Map<String,List<CdSettleProductMaterial>> map){
+        return cdMaterialPriceInfoService.selectMaterialPrice(map);
     }
 }

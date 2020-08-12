@@ -81,11 +81,11 @@ public class RemoteCdMaterialPriceInfoFallbackFactory implements FallbackFactory
             }
             /**
              * 根据成品物料号查询SAP成本价格
-             * @param list
+             * @param map
              * @return R
              */
             @Override
-            public R selectMaterialPrice(List<CdSettleProductMaterial> list) {
+            public R selectMaterialPrice(Map<String,List<CdSettleProductMaterial>> map) {
                 log.error("RemoteCdMaterialPriceInfoService.selectMaterialPrice ：{}",throwable.getMessage());
                 return R.error("服务器拥挤，请稍后再试！");
             }
