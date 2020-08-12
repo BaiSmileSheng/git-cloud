@@ -1453,7 +1453,6 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         Example.Criteria criteria = example.createCriteria();
         List<String> statusList = new ArrayList<>();
         statusList.add(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPZ.getCode());
-        statusList.add(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAPYC.getCode());
         criteria.andIn("status", statusList);
         List<OmsProductionOrder> list = omsProductionOrderMapper.selectByExample(example);
         if (CollectionUtils.isEmpty(list)) {
@@ -1474,9 +1473,13 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         listSapRes.forEach(omsProductionOrder -> {
             if ("S".equals(omsProductionOrder.getSapFlag())) {
                 omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode());
+                omsProductionOrder.setSapMessages("生产订单创建成功成功");
                 successList.add(omsProductionOrder);
-            } else {
-                omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAPYC.getCode());
+            } else if("W".equals(omsProductionOrder.getSapFlag())){
+                omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode());
+                omsProductionOrder.setSapMessages("生产订单创建中");
+            }else {
+                omsProductionOrder.setSapMessages(omsProductionOrder.getSapFlag());
             }
         });
         //2.修改数据
