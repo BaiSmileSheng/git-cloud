@@ -13,6 +13,7 @@ import com.cloud.order.domain.entity.OmsDemandOrderGather;
 import com.cloud.order.domain.entity.OmsDemandOrderGatherEdit;
 import com.cloud.order.domain.entity.vo.OmsDemandOrderGatherEditImportTemplete;
 import com.cloud.order.easyexcel.DemandOrderGatherEditWriteHandler;
+import com.cloud.order.enums.OrderFromEnum;
 import com.cloud.order.service.IOmsDemandOrderGatherEditService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
@@ -83,6 +84,9 @@ public class OmsDemandOrderGatherEditController extends BaseController {
         SysUser sysUser = getUserInfo(SysUser.class);
         if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
             example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+        }
+        if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
+            example.and().andEqualTo("orderFrom", OrderFromEnum.OUT_SOURCE_TYPE_QWW.getCode());
         }
         startPage();
         List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList = omsDemandOrderGatherEditService.selectByExample(example);
@@ -175,7 +179,7 @@ public class OmsDemandOrderGatherEditController extends BaseController {
 
     /**
      * 确认下达
-     * @param ids
+     * @param omsDemandOrderGatherEdit
      * @return
      */
     @PostMapping("confirmRelease")
@@ -232,6 +236,9 @@ public class OmsDemandOrderGatherEditController extends BaseController {
         SysUser sysUser = getUserInfo(SysUser.class);
         if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
             example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+        }
+        if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
+            example.and().andEqualTo("orderFrom", OrderFromEnum.OUT_SOURCE_TYPE_QWW.getCode());
         }
         List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList = omsDemandOrderGatherEditService.selectByExample(example);
         return EasyExcelUtilOSS.writeExcel(omsDemandOrderGatherEditList, "13滚动需求-导入.xlsx", "sheet", new OmsDemandOrderGatherEdit());
@@ -305,7 +312,11 @@ public class OmsDemandOrderGatherEditController extends BaseController {
 
     })
     public TableDataInfo toSAPlist(@ApiIgnore OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
+        SysUser sysUser = getUserInfo(SysUser.class);
         Example example = listCondition(omsDemandOrderGatherEdit);
+        if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
+            example.and().andEqualTo("orderFrom", OrderFromEnum.OUT_SOURCE_TYPE_QWW.getCode());
+        }
         startPage();
         List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList = omsDemandOrderGatherEditService.selectByExample(example);
         return getDataTable(omsDemandOrderGatherEditList);
