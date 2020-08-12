@@ -91,6 +91,7 @@ public class QryPaysSoapServiceImpl implements IQryPaysSoapService {
             QryPaysSoapRequest qryPaysSoapRequest = new QryPaysSoapRequest();
             qryPaysSoapRequest.setDOC_NO(smsMouthSettle.getKmsNo());
             QryPaysSoapResponse qryPaysSoapResponse = queryBill(qryPaysSoapRequest);
+            logger.info("调用kems系统获取付款查询结果 res:{}",qryPaysSoapResponse.toString());
             if(QryPaysSoapStatusEnum.FLAG_SUCCESS.getCode().equals(qryPaysSoapResponse.getFlag())){
                 //支付成功的更新状态为结算完成
                 if(QryPaysSoapStatusEnum.S_SUCCESS.getCode().equals(qryPaysSoapResponse.getStatus())){

@@ -80,6 +80,9 @@
             <if test="createBy != null and createBy != ''">
                 and create_by=#{createBy}
             </if>
+            <if test="status != null and status != ''">
+                and status=#{status}
+            </if>
             <if test="customerCodes != null and customerCodes.size > 0">
                 and customer_code in
                 <foreach collection="customerCodes" item="item" open="(" close=")" separator=",">

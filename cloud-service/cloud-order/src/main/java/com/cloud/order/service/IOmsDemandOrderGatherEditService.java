@@ -53,7 +53,7 @@ public interface IOmsDemandOrderGatherEditService extends BaseService<OmsDemandO
      * @param customerCodes
      * @return
      */
-	int deleteByCreateByAndCustomerCode(String createBy,List<String> customerCodes);
+	int deleteByCreateByAndCustomerCode(String createBy,List<String> customerCodes,String status);
 
     /**
      * 需求数据导入

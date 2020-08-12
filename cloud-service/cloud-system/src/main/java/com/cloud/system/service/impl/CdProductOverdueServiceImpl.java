@@ -75,7 +75,10 @@ public class CdProductOverdueServiceImpl extends BaseServiceImpl<CdProductOverdu
 
         //可以导入的结果集 插入
         List<ExcelImportSucObjectDto> successList=easyExcelListener.getSuccessList();
-        if (!CollectionUtils.isEmpty(successList)){
+        //错误结果集 导出
+        List<ExcelImportErrObjectDto> errList = easyExcelListener.getErrList();
+        //如果有错误信息则不操作数据库
+        if (CollectionUtils.isEmpty(errList) && !CollectionUtils.isEmpty(successList)){
             List<CdProductOverdue> successResult =successList.stream().map(excelImportSucObjectDto -> {
                 CdProductOverdue cdProductOverdue = BeanUtil.copyProperties(excelImportSucObjectDto.getObject(), CdProductOverdue.class);
                 cdProductOverdue.setCreateBy(loginName);
@@ -92,7 +95,6 @@ public class CdProductOverdueServiceImpl extends BaseServiceImpl<CdProductOverdu
             }
         }
         //错误结果集 导出
-        List<ExcelImportErrObjectDto> errList = easyExcelListener.getErrList();
         if (!CollectionUtils.isEmpty(errList)){
             List<CdProductOverdueExcelImportErrorVo> errorResults = errList.stream().map(excelImportErrObjectDto -> {
                 CdProductOverdueExcelImportErrorVo cdProductOverdueExcelImportErrorVo = BeanUtil.copyProperties(excelImportErrObjectDto.getObject(),
