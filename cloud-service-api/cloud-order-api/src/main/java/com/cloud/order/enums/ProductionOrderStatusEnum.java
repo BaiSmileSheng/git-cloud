@@ -16,7 +16,6 @@ public enum ProductionOrderStatusEnum {
     PRODUCTION_ORDER_STATUS_YCSAP("6","已传SAP"),
     PRODUCTION_ORDER_STATUS_CSAPYC("7","传SAP异常"),
     PRODUCTION_ORDER_STATUS_YGD("8","已关单"),
-    PRODUCTION_ORDER_STATUS_YCSAPYC("9","获取SAP生产订单号异常(下达SAP后,获取生产订单号时)"),
 
 
     ;
