@@ -13,7 +13,7 @@ public class SapConstants {
      */
     public static final String SAP_RESULT_TYPE_SUCCESS = "S";
 
-    public static final String SAP_RESULT_TYPE_ING = "S";
+    public static final String SAP_RESULT_TYPE_ING = "W";
 
     public static final String SAP_RESULT_TYPE_FAIL = "E";
 
