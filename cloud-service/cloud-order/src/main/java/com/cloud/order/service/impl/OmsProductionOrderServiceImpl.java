@@ -1905,6 +1905,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 throw new BusinessException("调用wms系统异常" + outStorageResult.getMsg());
             }
             List<OdsRawOrderOutStorageDTO> odsRawOrderOutStorageDTOList = outStorageResult.getData();
+            log.info("wms获取的数据量size:{}",odsRawOrderOutStorageDTOList.size());
             odsRawOrderOutStorageDTOList.forEach(odsRawOrderOutStorageDTORes -> {
                 OmsProductionOrder omsProductionOrder = new OmsProductionOrder();
                 Date actualEndDate = DateUtils.convertToDate(odsRawOrderOutStorageDTORes.getGmtCreate());
