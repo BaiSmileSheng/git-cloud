@@ -350,23 +350,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
                 omsProductionOrderDetail.setPurchaseGroupQuery(purchases);
             }
         }
-        List<OmsProductionOrderDetail> list = omsProductionOrderDetailMapper.selectCommitListPageInfo(omsProductionOrderDetail);
-        //处理原材料确认汇总后状态
-        list.forEach(detail -> {
-            List<OmsProductionOrderDetail> orderDetails = omsProductionOrderDetailMapper.select(OmsProductionOrderDetail
-                    .builder()
-                    .materialCode(detail.getMaterialCode())
-                    .productFactoryCode(detail.getProductFactoryCode())
-                    .productStartDate(detail.getProductStartDate())
-                    .purchaseGroup(detail.getPurchaseGroup())
-                    .build());
-            List<OmsProductionOrderDetail> feedbckOrder = orderDetails.stream()
-                    .filter(o -> o.getStatus().equals(ProductOrderConstants.DETAIL_STATUS_TWO)).collect(Collectors.toList());
-            if (ObjectUtil.isNotEmpty(feedbckOrder) && feedbckOrder.size() > 0) {
-                detail.setStatus(ProductOrderConstants.DETAIL_STATUS_TWO);
-            }
-        });
-        return list;
+        return omsProductionOrderDetailMapper.selectCommitListPageInfo(omsProductionOrderDetail);
     }
 
     /**
