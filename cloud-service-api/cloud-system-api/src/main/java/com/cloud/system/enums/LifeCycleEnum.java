@@ -8,7 +8,7 @@ package com.cloud.system.enums;
 public enum LifeCycleEnum {
 //1、量产2、备件3、下市4、新品5、售后6、老品
     SMZQ_LC("1","量产"),
-    SMZQ_BJ("2","备件"),
+    SMZQ_BJ("2","纯备件"),
     SMZQ_XS("3","下市"),
     SMZQ_XP("4","新品"),
 
