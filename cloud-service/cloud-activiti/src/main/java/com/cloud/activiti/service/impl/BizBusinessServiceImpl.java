@@ -185,4 +185,15 @@ public class BizBusinessServiceImpl implements IBizBusinessService {
         BizBusiness bizBusiness = bizBusinessList.get(0);
         return bizBusiness.getProcInstId();
     }
+    /**
+     * Description:  根据Example查询
+     * Param: [example]
+     * return: java.util.List<com.cloud.activiti.domain.BizBusiness>
+     * Author: ltq
+     * Date: 2020/8/12
+     */
+    @Override
+    public List<BizBusiness> selectByExample(Example example) {
+        return businessMapper.selectByExample(example);
+    }
 }

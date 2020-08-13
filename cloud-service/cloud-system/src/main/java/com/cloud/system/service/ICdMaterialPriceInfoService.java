@@ -51,5 +51,5 @@ public interface ICdMaterialPriceInfoService extends BaseService<CdMaterialPrice
      * Author: ltq
      * Date: 2020/8/3
      */
-    R selectMaterialPrice(List<CdSettleProductMaterial> list);
+    R selectMaterialPrice(Map<String,List<CdSettleProductMaterial>> map);
 }

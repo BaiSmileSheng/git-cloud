@@ -150,7 +150,8 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
      * Date: 2020/8/3
      */
     @Override
-    public R selectMaterialPrice(List<CdSettleProductMaterial> list) {
+    public R selectMaterialPrice(Map<String,List<CdSettleProductMaterial>> map) {
+        List<CdSettleProductMaterial> list = map.get("list");
         Example example = new Example(CdSettleProductMaterial.class);
         Example.Criteria criteria = example.createCriteria();
         if (ObjectUtil.isEmpty(list) || list.size() <= 0) {

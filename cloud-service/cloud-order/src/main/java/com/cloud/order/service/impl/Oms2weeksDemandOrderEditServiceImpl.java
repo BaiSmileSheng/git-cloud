@@ -39,13 +39,15 @@ import com.cloud.order.service.IOms2weeksDemandOrderEditService;
 import com.cloud.order.service.IOms2weeksDemandOrderService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
-import com.cloud.system.domain.entity.*;
+import com.cloud.system.domain.entity.CdMaterialExtendInfo;
+import com.cloud.system.domain.entity.CdMaterialInfo;
+import com.cloud.system.domain.entity.SysInterfaceLog;
+import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.enums.LifeCycleEnum;
 import com.cloud.system.enums.MaterialTypeEnum;
 import com.cloud.system.feign.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sap.conn.jco.*;
-import io.seata.spring.annotation.GlobalTransactional;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,7 +106,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
      */
     @Override
     @SneakyThrows
-    @GlobalTransactional
+    @Transactional(rollbackFor = Exception.class)
     public R import2weeksDemandEdit(MultipartFile file, SysUser sysUser) {
         EasyWithErrorExcelListener easyExcelListener = new EasyWithErrorExcelListener(oms2weeksDemandOrderEditImportService, Oms2weeksDemandOrderEditImport.class);
         EasyExcel.read(file.getInputStream(),Oms2weeksDemandOrderEditImport.class,easyExcelListener).sheet().doRead();
@@ -180,14 +182,14 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                         .filter(dto -> StrUtil.equals(sysUser.getLoginName(), dto.getCreateBy()))
                         .map(dtoMap-> dtoMap.getCustomerCode()).distinct().collect(Collectors.toList());
                 if (CollectionUtil.isNotEmpty(customerList)) {
-                    deleteByCreateByAndCustomerCode(sysUser.getLoginName(), customerList);
+                    deleteByCreateByAndCustomerCode(sysUser.getLoginName(), customerList,Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
                 }
             }else{
                 //上周：全部插入历史表，删除原有的，插入新的
                 List<Oms2weeksDemandOrderEditHis> listHis= oms2weeksDemandOrderEdits.stream().map(weeksDemandOrderEdit ->
                         BeanUtil.copyProperties(weeksDemandOrderEdit,Oms2weeksDemandOrderEditHis.class)).collect(Collectors.toList());
                 oms2weeksDemandOrderEditHisService.insertList(listHis);
-                deleteByCreateByAndCustomerCode(null,null);
+                deleteByCreateByAndCustomerCode(null,null,null);
             }
         }
         insertList(successList);
@@ -229,8 +231,8 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
      * @return
      */
     @Override
-    public int deleteByCreateByAndCustomerCode(String createBy, List<String> customerCodes) {
-        return oms2weeksDemandOrderEditMapper.deleteByCreateByAndCustomerCode(createBy,customerCodes);
+    public int deleteByCreateByAndCustomerCode(String createBy, List<String> customerCodes,String status) {
+        return oms2weeksDemandOrderEditMapper.deleteByCreateByAndCustomerCode(createBy,customerCodes,status);
     }
 
 
@@ -295,11 +297,36 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
         if (MapUtil.isEmpty(storehouseMap)) {
             throw new BusinessException("获取接收库位失败！");
         }
+
+        //数据版本
+        int nowYear = DateUtil.year(date);
+        int nowWeek = DateUtil.weekOfYear(date);
+        if (DateUtil.dayOfWeek(date)==1) {
+            nowWeek = nowWeek+1;
+        }
+        String version = StrUtil.concat(true,StrUtil.toString(nowYear),StrUtil.toString(nowWeek) );
+        //查询已导入数据
+        Example example = new Example(Oms2weeksDemandOrderEdit.class);
+        example.and().andNotEqualTo("status",Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
+        List<Oms2weeksDemandOrderEdit> hisList = oms2weeksDemandOrderEditMapper.selectByExample(example);
         for(Oms2weeksDemandOrderEdit weeksDemandOrderEdit:list){
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
             ExcelImportOtherObjectDto othObjectDto = new ExcelImportOtherObjectDto();
             StringBuffer errMsg = new StringBuffer();
+
+            boolean flag = hisList.stream().anyMatch(s -> StrUtil.equals(s.getProductMaterialCode(), weeksDemandOrderEdit.getProductMaterialCode())
+                    && StrUtil.equals(s.getCustomerCode(), weeksDemandOrderEdit.getCustomerCode())
+                    && StrUtil.equals(s.getProductFactoryCode(), weeksDemandOrderEdit.getProductFactoryCode())
+                    && StrUtil.equals(s.getBomVersion(), weeksDemandOrderEdit.getBomVersion())
+                    && StrUtil.equals(s.getVersion(), version)
+                    && DateUtil.compare(s.getDeliveryDate(), weeksDemandOrderEdit.getDeliveryDate()) == 0);
+            if (flag) {
+                errObjectDto.setObject(weeksDemandOrderEdit);
+                errObjectDto.setErrMsg("非初始状态数据不允许重复导入！");
+                errDtos.add(errObjectDto);
+                continue;
+            }
 
             //交付日期
             Date dateDelivery = weeksDemandOrderEdit.getDeliveryDate();
@@ -978,6 +1005,8 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                     if (SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(flag)) {
                         oms2weeksDemandOrderEdit.setPlanOrderOrder(outTableOutput.getString("AUFNR"));//计划订单号
                         oms2weeksDemandOrderEdit.setStatus(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode());//已传SAP
+                    }else if(SapConstants.SAP_RESULT_TYPE_ING.equals(flag)){
+                        oms2weeksDemandOrderEdit.setSapMessages("SAP正在创建！");//传SAP异常
                     }else{
                         oms2weeksDemandOrderEdit.setStatus(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());//传SAP异常
                     }

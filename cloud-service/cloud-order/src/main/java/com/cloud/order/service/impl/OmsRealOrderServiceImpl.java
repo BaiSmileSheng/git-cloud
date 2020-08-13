@@ -211,10 +211,6 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             omsRealOrder.setDataSource(RealOrderDataSourceEnum.DATA_SOURCE_1.getCode());
             omsRealOrder.setOrderFrom(orderFrom);
             omsRealOrder.setCreateBy(sysUser.getLoginName());
-            if(RealOrderFromEnum.ORDER_FROM_2.getCode().equals(orderFrom)){
-                //交付日期即生产日期
-                omsRealOrder.setProductDate(omsRealOrder.getDeliveryDate());
-            }
         });
         logger.info("导入真单插入数据开始");
         omsRealOrderMapper.batchInsetOrUpdate(successResult);

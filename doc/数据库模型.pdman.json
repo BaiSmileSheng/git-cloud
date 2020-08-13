@@ -7278,6 +7278,18 @@
               "chnname": "单位"
             },
             {
+              "name": "delays_days",
+              "type": "Integer",
+              "remark": "",
+              "chnname": "拖期天数"
+            },
+            {
+              "name": "status",
+              "type": "DefaultString",
+              "remark": "0未关闭,1已关闭",
+              "chnname": "状态"
+            },
+            {
               "name": "del_flag",
               "type": "Char",
               "remark": "",

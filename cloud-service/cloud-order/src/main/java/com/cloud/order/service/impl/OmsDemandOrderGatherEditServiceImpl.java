@@ -291,12 +291,36 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         if (MapUtil.isEmpty(storehouseMap)) {
             throw new BusinessException("获取接收库位失败！");
         }
+
+        //数据版本
+        int nowYear = DateUtil.year(date);
+        int nowWeek = DateUtil.weekOfYear(date);
+        if (DateUtil.dayOfWeek(date)==1) {
+            nowWeek = nowWeek+1;
+        }
+        String version = StrUtil.concat(true,StrUtil.toString(nowYear),StrUtil.toString(nowWeek) );
+        //查询已导入数据
+        Example example = new Example(OmsDemandOrderGatherEdit.class);
+        example.and().andNotEqualTo("status",DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
+        List<OmsDemandOrderGatherEdit> hisList = omsDemandOrderGatherEditMapper.selectByExample(example);
         for(OmsDemandOrderGatherEdit demandOrderGatherEdit:list){
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
             ExcelImportOtherObjectDto othObjectDto = new ExcelImportOtherObjectDto();
             StringBuffer errMsg = new StringBuffer();
 
+            boolean flag = hisList.stream().anyMatch(s -> StrUtil.equals(s.getProductMaterialCode(), demandOrderGatherEdit.getProductMaterialCode())
+                    && StrUtil.equals(s.getCustomerCode(), demandOrderGatherEdit.getCustomerCode())
+                    && StrUtil.equals(s.getProductFactoryCode(), demandOrderGatherEdit.getProductFactoryCode())
+                    && StrUtil.equals(s.getBomVersion(), demandOrderGatherEdit.getBomVersion())
+                    && StrUtil.equals(s.getVersion(), version)
+                    && DateUtil.compare(s.getDeliveryDate(), demandOrderGatherEdit.getDeliveryDate()) == 0);
+            if (flag) {
+                errObjectDto.setObject(demandOrderGatherEdit);
+                errObjectDto.setErrMsg("非初始状态数据不允许重复导入！");
+                errDtos.add(errObjectDto);
+                continue;
+            }
             //交付日期
             Date dateDelivery = demandOrderGatherEdit.getDeliveryDate();
             //判断交付日期是否是T+1和T+2周
@@ -457,14 +481,14 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                         .filter(dto -> StrUtil.equals(sysUser.getLoginName(), dto.getCreateBy()))
                         .map(dtoMap-> dtoMap.getCustomerCode()).distinct().collect(Collectors.toList());
                 if (CollectionUtil.isNotEmpty(customerList)) {
-                    deleteByCreateByAndCustomerCode(sysUser.getLoginName(), customerList);
+                    deleteByCreateByAndCustomerCode(sysUser.getLoginName(), customerList,DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
                 }
             }else{
                 //上周：全部插入历史表，删除原有的，插入新的
                 List<OmsDemandOrderGatherEditHis> listHis= demandOrderGatherEditOlds.stream().map(demandOrderGatherEdit ->
                         BeanUtil.copyProperties(demandOrderGatherEdit,OmsDemandOrderGatherEditHis.class)).collect(Collectors.toList());
                 omsDemandOrderGatherEditHisService.insertList(listHis);
-                deleteByCreateByAndCustomerCode(null,null);
+                deleteByCreateByAndCustomerCode(null,null,null);
             }
         }
         insertList(successList);
@@ -506,8 +530,8 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
      * @return
      */
 	@Override
-	public int deleteByCreateByAndCustomerCode(String createBy,List<String> customerCodes){
-		 return omsDemandOrderGatherEditMapper.deleteByCreateByAndCustomerCode(createBy,customerCodes);
+	public int deleteByCreateByAndCustomerCode(String createBy,List<String> customerCodes,String status){
+		 return omsDemandOrderGatherEditMapper.deleteByCreateByAndCustomerCode(createBy,customerCodes,status);
 	}
 
 

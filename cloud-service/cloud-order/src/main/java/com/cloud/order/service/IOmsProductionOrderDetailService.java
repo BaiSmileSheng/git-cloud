@@ -74,7 +74,7 @@ public interface IOmsProductionOrderDetailService extends BaseService<OmsProduct
      * Author: ltq
      * Date: 2020/6/29
      */
-    List<OmsProductionOrderDetail> selectListByList(List<OmsProductionOrderDetail> list);
+    List<OmsProductionOrderDetail> selectListByList(List<OmsRawMaterialFeedback> list);
     /**
      * Description: 原材料确认
      * Param: [omsProductionOrderDetail, sysUser]
