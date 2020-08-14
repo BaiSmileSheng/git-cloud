@@ -193,7 +193,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
                         OmsProductionOrderDetail omsProductionOrderDetail = new OmsProductionOrderDetail();
                         omsProductionOrderDetail.setProductOrderCode(o.getOrderCode());
                         omsProductionOrderDetail.setMaterialCode(f.getRawMaterialCode());
-                        omsProductionOrderDetail.setStatus(ProductOrderConstants.DETAIL_STATUS_THREE);
+                        omsProductionOrderDetail.setStatus(ProductOrderConstants.DETAIL_STATUS_ZERO);
                         omsProductionOrderDetail.setUpdateBy(sysUser.getLoginName());
                         omsProductionOrderDetails.add(omsProductionOrderDetail);
                     }

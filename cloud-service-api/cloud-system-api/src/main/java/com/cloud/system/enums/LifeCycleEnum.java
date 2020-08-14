@@ -11,7 +11,8 @@ public enum LifeCycleEnum {
     SMZQ_BJ("2","纯备件"),
     SMZQ_XS("3","下市"),
     SMZQ_XP("4","新品"),
-
+//    SMZQ_SH("5","售后"),
+//    SMZQ_LP("6","老品")
     ;
 
 
