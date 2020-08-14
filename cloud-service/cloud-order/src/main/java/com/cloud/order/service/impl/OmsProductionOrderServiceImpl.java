@@ -750,12 +750,12 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     criteria.andEqualTo("status", ProductOrderConstants.STATUS_THREE);
                 }
                 if (StrUtil.isNotBlank(omsProductionOrder.getAuditStatus())) {
-                    criteria.andEqualTo("auditStauts", omsProductionOrder.getAuditStatus());
+                    criteria.andEqualTo("auditStatus", omsProductionOrder.getAuditStatus());
                 } else {
                     List<String> auditStatusList = new ArrayList<>();
                     auditStatusList.add(ProductOrderConstants.AUDIT_STATUS_ZERO);
                     auditStatusList.add(ProductOrderConstants.AUDIT_STATUS_TWO);
-                    criteria.andIn("auditStauts",auditStatusList);
+                    criteria.andIn("auditStatus",auditStatusList);
                 }
                 if (StrUtil.isNotBlank(omsProductionOrder.getProductMaterialCode())) {
                     criteria.andEqualTo("productMaterialCode", omsProductionOrder.getProductMaterialCode());
