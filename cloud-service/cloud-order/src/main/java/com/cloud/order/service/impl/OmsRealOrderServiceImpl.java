@@ -429,9 +429,9 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 CdFactoryStorehouseInfo cdFactoryStorehouseInfo = factoryStorehouseInfoMap.get(omsRealOrder.getCustomerCode()
                         + omsRealOrder.getProductFactoryCode());
                 if(null == cdFactoryStorehouseInfo){
-                    logger.error("此客户和工厂对应的工厂库存信息不存在 req:{}",omsRealOrder.getCustomerCode()
+                    logger.error("此客户和工厂对应的工厂库位信息不存在 req:{}",omsRealOrder.getCustomerCode()
                             + omsRealOrder.getProductFactoryCode());
-                    throw new BusinessException("此客户和工厂对应的工厂库存信息不存在");
+                    throw new BusinessException("此客户和工厂对应的工厂库位信息不存在,请在基础数据维护交货提前量信息");
                 }
                 //计算生产日期，根据生产工厂、客户编码去工厂库位基础表（cd_factory_storehouse_info）中获取提前量，交货日期 - 提前量 = 生产日期；
                 String productDate = DateUtils.dayOffset(deliveryDate, Integer.parseInt(cdFactoryStorehouseInfo.getLeadTime()), YYYY_MM_DD);
