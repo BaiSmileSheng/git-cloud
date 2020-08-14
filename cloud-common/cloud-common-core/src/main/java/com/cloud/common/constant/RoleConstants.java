@@ -23,7 +23,7 @@ public class RoleConstants {
     public final static String ROLE_KEY_JITCZJK = "JITCZJK";//进口件JIT处长
     public final static String ROLE_KEY_NK = "NK";//内控
     public final static String ROLE_KEY_SCBJL = "SCBJL";//市场部经理
-    public final static String DDLRY = "DDLRY";//订单录入员
+    public final static String ROLE_KEY_DDLRY = "DDLRY";//订单录入员
 
 
 }
