@@ -523,12 +523,15 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
     }
 
     private R queryCustomerStock(List<OmsRealOrder> list) {
-        //按照生产工厂、成品专用号去重
+        //按照生产工厂、成品专用号、客户编码去重
         list = list.stream()
                 .collect(
                         Collectors.collectingAndThen(
                                 Collectors.toCollection(() ->
-                                        new TreeSet<>(Comparator.comparing(OmsRealOrder::getCustomerCode))),
+                                        new TreeSet<>(Comparator.comparing(omsRealOrder ->
+                                                omsRealOrder.getProductFactoryCode() +
+                                                        omsRealOrder.getProductMaterialCode() +
+                                                        omsRealOrder.getCustomerCode()))),
                                 ArrayList::new
                         )
                 );

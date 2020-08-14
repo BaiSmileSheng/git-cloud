@@ -4842,7 +4842,7 @@
             {
               "name": "status",
               "type": "Char",
-              "remark": "0：未确认，1：已确认，2：反馈中，3：反馈已确认",
+              "remark": "0：未确认，1：已确认，2：反馈中",
               "chnname": "状态"
             },
             {
@@ -5239,7 +5239,7 @@
             {
               "name": "status",
               "type": "Char",
-              "remark": "0：未审核，1：通过，2：驳回，3：未审核已下达",
+              "remark": "0：未审核，1：通过，2：驳回",
               "chnname": "状态",
               "notNull": true,
               "defaultValue": "0"
