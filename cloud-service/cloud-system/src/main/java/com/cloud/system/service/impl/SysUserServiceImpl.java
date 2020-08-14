@@ -508,4 +508,11 @@ public class SysUserServiceImpl implements ISysUserService {
 
         return listRes;
     }
+
+    @Override
+    public List<SysUserRights> selectUserByRoleKey(String roleKey) {
+        //查询指定角色用户
+        List<SysUserRights> userRights = userMapper.selectListByRoleKey(roleKey);
+        return userRights;
+    }
 }
