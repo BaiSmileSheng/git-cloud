@@ -226,4 +226,15 @@ public class SysUserController extends BaseController {
     public R selectUserByMaterialCodeAndRoleKey(@RequestParam("materialCode") String materialCode, @RequestParam("roleKey")String roleKey){
         return R.data(sysUserService.selectUserByMaterialCodeAndRoleKey(materialCode,roleKey));
     }
+
+    /**
+     * 根据角色查对应的用户名,邮箱
+     * @param roleKey
+     * @return
+     */
+    @GetMapping("selectUserByRoleKey")
+    @ApiOperation(value = "根据角色查对应的用户名,邮箱", response = R.class)
+    public R selectUserByRoleKey(@RequestParam("roleKey")String roleKey){
+        return R.data(sysUserService.selectUserByRoleKey(roleKey));
+    }
 }

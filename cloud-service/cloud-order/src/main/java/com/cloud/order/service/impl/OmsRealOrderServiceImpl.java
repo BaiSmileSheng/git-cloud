@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.domain.entity.vo.OmsOrderMaterialOutVo;
 import com.cloud.activiti.feign.RemoteActOmsOrderMaterialOutService;
 import com.cloud.common.constant.DeleteFlagConstants;
+import com.cloud.common.constant.EmailConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
@@ -27,6 +28,7 @@ import com.cloud.order.domain.entity.OmsRealOrder;
 import com.cloud.order.domain.entity.vo.OmsRealOrderExcelImportErrorVo;
 import com.cloud.order.domain.entity.vo.OmsRealOrderExcelImportVo;
 import com.cloud.order.enums.*;
+import com.cloud.order.mail.MailService;
 import com.cloud.order.mapper.OmsRealOrderMapper;
 import com.cloud.order.service.IOmsInternalOrderResService;
 import com.cloud.order.service.IOmsRealOrderExcelImportService;
@@ -37,12 +39,14 @@ import com.cloud.system.domain.entity.CdFactoryStorehouseInfo;
 import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.system.domain.entity.SysDictData;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.SysUserRights;
 import com.cloud.system.enums.LifeCycleEnum;
 import com.cloud.system.feign.RemoteDictDataService;
 import com.cloud.system.feign.RemoteFactoryInfoService;
 import com.cloud.system.feign.RemoteFactoryStorehouseInfoService;
 import com.cloud.system.feign.RemoteMaterialExtendInfoService;
 import com.cloud.system.feign.RemoteSequeceService;
+import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.apache.commons.lang3.StringUtils;
@@ -50,6 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -57,6 +62,7 @@ import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -98,6 +104,12 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
     @Autowired
     private RemoteDictDataService remoteDictDataService;
 
+    @Autowired
+    private RemoteUserService remoteUserService;
+
+    @Autowired
+    private MailService mailService;
+
     private final static String YYYY_MM_DD = "yyyy-MM-dd";//时间格式
 
     private final static String ORDER_CODE_PRE = "RO";//订单号前缀
@@ -112,6 +124,18 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
     private static final int OMS_REAL_ORDER_SEQ_LENGTH = 4;
 
     private static String TABLE_NAME = "oms_real_order";
+
+    /**
+     * 交货提前量
+     */
+    @Value("${realOrderStorehouseInfo.leadTime}")
+    private String leadTime;
+
+    /**
+     * 交货库位
+     */
+    @Value("${realOrderStorehouseInfo.storehouseTo}")
+    private String storehouseTo;
 
     /**
      * 修改保存真单
@@ -279,7 +303,9 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
 
         logger.info("定时任务每天在获取到PO信息后 进行需求汇总  汇总开始");
         //3.将原始数据按照成品专用号、生产工厂、客户编码、交付日期将未完成交货的数据订单数量进行汇总
-        Map<String, OmsRealOrder> omsRealOrderMap = getStringOmsRealOrderMap(internalOrderResList, factoryStorehouseInfoMap,"定时任务");
+        Map<String,String> sendEmailMap = new HashMap<>();//key:客户编号 + 工厂编号 value:发送信息
+        Map<String, OmsRealOrder> omsRealOrderMap = getStringOmsRealOrderMap(internalOrderResList, factoryStorehouseInfoMap,
+                "定时任务",sendEmailMap);
 
         logger.info("定时任务每天在获取到PO信息后 进行需求汇总  批量插入开始 ");
         //4.批量插入(生产工厂、客户编码、成品专用号、交付日期、订单种类唯一索引),存在就修改
@@ -296,6 +322,22 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         List<OmsRealOrder> omsRealOrdersList = omsRealOrderMap.values().stream().collect(Collectors.toList());
         omsRealOrderMapper.batchInsetOrUpdate(omsRealOrdersList);
         logger.info("定时任务每天在获取到PO信息后 进行需求汇总  结束");
+        //5.发送维护交货提前量的邮件
+        if(sendEmailMap.size() > 0){
+            R userListR = remoteUserService.selectUserByRoleKey(RoleConstants.DDLRY);
+            if(!userListR.isSuccess()){
+                logger.error("汇总po数据时获取订单录入员信息失败 res:{}",JSONObject.toJSONString(userListR));
+            }
+            List<SysUserRights> sysUserRightsList = userListR.getCollectData(new TypeReference<List<SysUserRights>>() {});
+            String subject = "交货提前量维护信息";
+            String contentReq = "您有一些交货提前量信息需要维护:\n";
+            String contentList = String.join("\n",sendEmailMap.values());
+            String content = contentReq + contentList + EmailConstants.ORW_URL;
+            sysUserRightsList.forEach(sysUserRights -> {
+                mailService.sendTextMail(sysUserRights.getEmail(),subject,content);
+            });
+
+        }
         return R.ok();
     }
 
@@ -383,7 +425,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
      */
     private Map<String, OmsRealOrder> getStringOmsRealOrderMap(List<OmsInternalOrderRes> internalOrderResList,
                                                                Map<String, CdFactoryStorehouseInfo> factoryStorehouseInfoMap,
-                                                              String createBy) {
+                                                              String createBy,Map<String,String> sendEmailMap) {
         Map<String, OmsRealOrder> omsRealOrderMap = new HashMap<>();
         internalOrderResList.forEach(internalOrderRes -> {
             String productMaterialCode = internalOrderRes.getProductMaterialCode();
@@ -431,13 +473,21 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 if(null == cdFactoryStorehouseInfo){
                     logger.error("此客户和工厂对应的工厂库位信息不存在 req:{}",omsRealOrder.getCustomerCode()
                             + omsRealOrder.getProductFactoryCode());
-                    throw new BusinessException("此客户和工厂对应的工厂库位信息不存在,请在基础数据维护交货提前量信息");
+                    String massage = "请维护工厂:" + omsRealOrder.getProductFactoryCode() + "客户编号:"+omsRealOrder.getCustomerCode()
+                            +"的交货提前量";
+                    sendEmailMap.put(omsRealOrder.getCustomerCode() + omsRealOrder.getProductFactoryCode(),massage);
+                }
+                String leadTimeReq = leadTime;
+                String storehouseToReq = storehouseTo;
+                if(null != cdFactoryStorehouseInfo){
+                    leadTimeReq = cdFactoryStorehouseInfo.getLeadTime();
+                    storehouseToReq = cdFactoryStorehouseInfo.getStorehouseTo();
                 }
                 //计算生产日期，根据生产工厂、客户编码去工厂库位基础表（cd_factory_storehouse_info）中获取提前量，交货日期 - 提前量 = 生产日期；
-                String productDate = DateUtils.dayOffset(deliveryDate, Integer.parseInt(cdFactoryStorehouseInfo.getLeadTime()), YYYY_MM_DD);
+                String productDate = DateUtils.dayOffset(deliveryDate, Integer.parseInt(leadTimeReq), YYYY_MM_DD);
                 omsRealOrder.setProductDate(productDate);
                 //匹配交货地点，根据生产工厂、客户编码去工厂库位基础表（cd_factory_storehouse_info）中获取对应的交货地点；
-                omsRealOrder.setPlace(cdFactoryStorehouseInfo.getStorehouseTo());
+                omsRealOrder.setPlace(storehouseToReq);
                 omsRealOrder.setDataSource(RealOrderDataSourceEnum.DATA_SOURCE_0.getCode());
                 omsRealOrder.setDelFlag(DeleteFlagConstants.NO_DELETED);
                 omsRealOrder.setCreateBy(createBy);
