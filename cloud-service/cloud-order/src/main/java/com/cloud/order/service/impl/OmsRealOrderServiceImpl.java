@@ -327,6 +327,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             R userListR = remoteUserService.selectUserByRoleKey(RoleConstants.DDLRY);
             if(!userListR.isSuccess()){
                 logger.error("汇总po数据时获取订单录入员信息失败 res:{}",JSONObject.toJSONString(userListR));
+                return R.ok("汇总po数据时获取角色用户失败");
             }
             List<SysUserRights> sysUserRightsList = userListR.getCollectData(new TypeReference<List<SysUserRights>>() {});
             String subject = "交货提前量维护信息";
@@ -471,8 +472,8 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 CdFactoryStorehouseInfo cdFactoryStorehouseInfo = factoryStorehouseInfoMap.get(omsRealOrder.getCustomerCode()
                         + omsRealOrder.getProductFactoryCode());
                 if(null == cdFactoryStorehouseInfo){
-                    logger.error("此客户和工厂对应的工厂库位信息不存在 req:{}",omsRealOrder.getCustomerCode()
-                            + omsRealOrder.getProductFactoryCode());
+                    logger.error("此客户和工厂对应的工厂库位信息不存在 客户编号:{},工厂编号:{}",omsRealOrder.getCustomerCode(),
+                            omsRealOrder.getProductFactoryCode());
                     String massage = "请维护工厂:" + omsRealOrder.getProductFactoryCode() + "客户编号:"+omsRealOrder.getCustomerCode()
                             +"的交货提前量";
                     sendEmailMap.put(omsRealOrder.getCustomerCode() + omsRealOrder.getProductFactoryCode(),massage);
