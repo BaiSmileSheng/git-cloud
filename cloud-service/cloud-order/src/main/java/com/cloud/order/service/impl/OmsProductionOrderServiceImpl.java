@@ -459,14 +459,20 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      * Date: 2020/6/22
      */
     @Override
-    @Transactional(rollbackFor=Exception.class)
+    @GlobalTransactional
     public R deleteByIdString(OmsProductionOrder order, SysUser sysUser) {
         String ids = order.getIds();
         List<OmsProductionOrder> omsProductionOrders = new ArrayList<>();
         if (StrUtil.isNotBlank(ids)) {
             omsProductionOrders = omsProductionOrderMapper.selectByIds(ids);
         } else {
+            //增加删除状态的判断  2020-08-17  ltq
+            if (StrUtil.isNotBlank(order.getStatus()) && !order.getStatus().equals(ProductOrderConstants.STATUS_ZERO)) {
+                log.info("非待评审状态订单不可删除！");
+                return R.error("非待评审状态订单不可删除！");
+            }
             Example example = checkParams(order,sysUser);
+            example.getOredCriteria().get(0).andEqualTo("status",ProductOrderConstants.STATUS_ZERO);
             omsProductionOrders = omsProductionOrderMapper.selectByExample(example);
             ids= omsProductionOrders.stream().map(o ->o.getId().toString()).collect(Collectors.joining(","));
         }
