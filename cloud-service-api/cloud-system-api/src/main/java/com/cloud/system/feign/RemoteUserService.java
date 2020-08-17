@@ -77,4 +77,12 @@ public interface RemoteUserService {
      */
     @GetMapping("user/selectUserByMaterialCodeAndRoleKey")
     R selectUserByMaterialCodeAndRoleKey(@RequestParam("materialCode") String materialCode, @RequestParam("roleKey")String roleKey);
+
+    /**
+     * 根据角色查对应的用户名,邮箱
+     * @param roleKey
+     * @return
+     */
+    @GetMapping("user/selectUserByRoleKey")
+    R selectUserByRoleKey(@RequestParam("roleKey")String roleKey);
 }

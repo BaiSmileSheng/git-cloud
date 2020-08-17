@@ -42,12 +42,11 @@ public class ProductOrderConstants {
 
     /**
      * 排产订单明细状态
-     * 0：未确认，1：已确认，2：反馈中,3反馈已确认'
+     * 0：未确认，1：已确认，2：反馈中'
      */
     public final static String DETAIL_STATUS_ZERO = "0";
     public final static String DETAIL_STATUS_ONE = "1";
     public final static String DETAIL_STATUS_TWO = "2";
-    public final static String DETAIL_STATUS_THREE = "3";
 
     /**
      * 日期查询类型
