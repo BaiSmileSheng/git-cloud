@@ -2,6 +2,7 @@ package com.cloud.system.service;
 
 import com.cloud.common.core.domain.R;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.SysUserRights;
 import com.cloud.system.domain.vo.SysUserVo;
 
 import java.util.List;
@@ -216,4 +217,11 @@ public interface ISysUserService {
      * @return
      */
     List<SysUserVo> selectUserByMaterialCodeAndRoleKey(String materialCode,String roleKey);
+
+    /**
+     * 根据角色查对应的用户名,邮箱
+     * @param roleKey
+     * @return
+     */
+    List<SysUserRights> selectUserByRoleKey(String roleKey);
 }
