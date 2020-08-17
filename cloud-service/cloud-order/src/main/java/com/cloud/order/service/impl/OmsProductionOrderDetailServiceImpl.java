@@ -403,8 +403,9 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
             }
         }
         /**更新反馈信息记录的状态为“未审核已确认”*/
+        //后因为反馈的原材料修改为不可以确认，故注释掉该部分代码  2020-08-14  ltq
         //根据生产工厂、原材料物料、开始日期查询未审核的原材料反馈信息
-        List<OmsRawMaterialFeedback> omsRawMaterialFeedbacks = list.stream().map(o -> {
+        /*List<OmsRawMaterialFeedback> omsRawMaterialFeedbacks = list.stream().map(o -> {
             OmsRawMaterialFeedback omsRawMaterialFeedback = new OmsRawMaterialFeedback();
             omsRawMaterialFeedback.setProductFactoryCode(o.getProductFactoryCode());
             omsRawMaterialFeedback.setRawMaterialCode(o.getMaterialCode());
@@ -414,7 +415,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
             return omsRawMaterialFeedback;
         }).collect(Collectors.toList());
         //更新反馈信息状态
-        omsRawMaterialFeedbackService.updateBatchByList(omsRawMaterialFeedbacks);
+        omsRawMaterialFeedbackService.updateBatchByList(omsRawMaterialFeedbacks);*/
         /**更新排产订单、排产订单明细的状态*/
         //根据生产工厂、原材料物料、开始日期查询排产订单明细
         List<OmsProductionOrderDetail> omsProductionOrderDetails =
