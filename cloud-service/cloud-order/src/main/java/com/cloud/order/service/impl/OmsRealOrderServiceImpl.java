@@ -485,7 +485,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                     storehouseToReq = cdFactoryStorehouseInfo.getStorehouseTo();
                 }
                 //计算生产日期，根据生产工厂、客户编码去工厂库位基础表（cd_factory_storehouse_info）中获取提前量，交货日期 - 提前量 = 生产日期；
-                String productDate = DateUtils.dayOffset(deliveryDate, Integer.parseInt(leadTimeReq), YYYY_MM_DD);
+                String productDate = DateUtils.dayOffset(deliveryDate, -Integer.parseInt(leadTimeReq), YYYY_MM_DD);
                 omsRealOrder.setProductDate(productDate);
                 //匹配交货地点，根据生产工厂、客户编码去工厂库位基础表（cd_factory_storehouse_info）中获取对应的交货地点；
                 omsRealOrder.setPlace(storehouseToReq);
