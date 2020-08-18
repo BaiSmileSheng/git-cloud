@@ -28,14 +28,14 @@ public interface IOmsDemandOrderGatherEditService extends BaseService<OmsDemandO
      * @param ids
      * @return
      */
-    R deleteWithLimit(String ids,OmsDemandOrderGatherEdit omsDemandOrderGatherEdit);
+    R deleteWithLimit(String ids,OmsDemandOrderGatherEdit omsDemandOrderGatherEdit,SysUser sysUser);
 
     /**
      * 确认下达
      * @param ids
      * @return
      */
-    R confirmRelease(String ids,OmsDemandOrderGatherEdit omsDemandOrderGatherEdit);
+    R confirmRelease(String ids,OmsDemandOrderGatherEdit omsDemandOrderGatherEdit,SysUser sysUser);
 
 
     /**

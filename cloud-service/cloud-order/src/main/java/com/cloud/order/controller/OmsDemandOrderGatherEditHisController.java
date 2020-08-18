@@ -34,9 +34,9 @@ public class OmsDemandOrderGatherEditHisController extends BaseController {
      */
     @GetMapping("get")
     @ApiOperation(value = "根据id查询滚动计划需求操作历史 ", response = OmsDemandOrderGatherEditHis.class)
-    public OmsDemandOrderGatherEditHis get(Long id) {
-        return omsDemandOrderGatherEditHisService.selectByPrimaryKey(id);
-
+    public R get(Long id) {
+        OmsDemandOrderGatherEditHis his = omsDemandOrderGatherEditHisService.selectByPrimaryKey(id);
+        return R.data(his);
     }
 
     /**

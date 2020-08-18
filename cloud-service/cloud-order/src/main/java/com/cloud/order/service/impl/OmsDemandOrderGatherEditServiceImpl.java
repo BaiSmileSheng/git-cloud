@@ -12,6 +12,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.EasyExcel;
 import com.cloud.activiti.domain.entity.vo.OmsOrderMaterialOutVo;
 import com.cloud.activiti.feign.RemoteActOmsOrderMaterialOutService;
+import com.cloud.activiti.feign.RemoteActTaskService;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
@@ -37,7 +38,6 @@ import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.*;
 import com.cloud.system.enums.LifeCycleEnum;
-import com.cloud.system.enums.MaterialTypeEnum;
 import com.cloud.system.feign.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sap.conn.jco.*;
@@ -56,6 +56,8 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * 滚动计划需求操作 Service业务层处理
@@ -88,6 +90,8 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
     private RemoteActOmsOrderMaterialOutService remoteActOmsOrderMaterialOutService;
     @Autowired
     private RemoteFactoryStorehouseInfoService remoteFactoryStorehouseInfoService;
+    @Autowired
+    private RemoteActTaskService remoteActTaskService;
 
     private static final String TABLE_NAME = "oms_demand_order_gather_edit";
 
@@ -121,14 +125,21 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
      * @return
      */
     @Override
-    public R deleteWithLimit(String ids,OmsDemandOrderGatherEdit omsDemandOrderGatherEditVo) {
+    @GlobalTransactional
+    public R deleteWithLimit(String ids,OmsDemandOrderGatherEdit omsDemandOrderGatherEditVo,SysUser sysUser) {
+        Example example = new Example(Oms2weeksDemandOrderEdit.class);
+        Example.Criteria criteria = example.createCriteria();
+        List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList ;
         if (StrUtil.isEmpty(ids)) {
-            Example example = new Example(Oms2weeksDemandOrderEdit.class);
-            Example.Criteria criteria = example.createCriteria();
+            if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
+                criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(",")));
+            }
+            if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
+                criteria.andEqualTo("orderFrom", OrderFromEnum.OUT_SOURCE_TYPE_QWW.getCode());
+            }
             listCondition(omsDemandOrderGatherEditVo,criteria);
-            criteria.andEqualTo("status", DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode())
-                    .andNotEqualTo("auditStatus", DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHZ.getCode());
-            List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList = selectByExample(example);
+            criteria.andEqualTo("status", DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
+            omsDemandOrderGatherEditList = selectByExample(example);
             if (CollectionUtil.isEmpty(omsDemandOrderGatherEditList)) {
                 return R.error("无可删除数据！");
             }
@@ -136,14 +147,28 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             ids = CollectionUtil.join(idList, StrUtil.COMMA);
         }else{
             List<String> list = CollUtil.newArrayList(ids.split(StrUtil.COMMA));
-            for (String id : list) {
-                OmsDemandOrderGatherEdit omsDemandOrderGatherEdit = selectByPrimaryKey(Long.valueOf(id));
-                if (!StrUtil.equals(omsDemandOrderGatherEdit.getStatus(),
-                        DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode())||
-                        StrUtil.equals(omsDemandOrderGatherEdit.getAuditStatus(),
-                                DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHZ.getCode())) {
-                    return R.error(StrUtil.format("此状态数据不允许删除！需求订单号：{}",omsDemandOrderGatherEdit.getDemandOrderCode()));
-                }
+            example.and().andIn("id", list);
+            List<OmsDemandOrderGatherEdit> listAll = selectByExample(example);
+            if (CollectionUtil.isEmpty(listAll)) {
+                return R.error("无可删除数据！");
+            }
+            Boolean bo=listAll.stream()
+                    .anyMatch(s -> !s.getStatus().equals(DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode()));
+            if(bo){
+                return R.error("非初始状态的数据不允许删除！");
+            }
+            omsDemandOrderGatherEditList = listAll;
+        }
+        if (CollectionUtil.isNotEmpty(omsDemandOrderGatherEditList)) {
+            List<String> orderCodeList = omsDemandOrderGatherEditList.stream()
+                    .map(OmsDemandOrderGatherEdit::getDemandOrderCode).collect(toList());
+            Map<String,Object> map = new HashMap<>();
+            map.put("userName",sysUser.getLoginName());
+            map.put("orderCodeList",orderCodeList);
+            R deleteActMap = remoteActTaskService.deleteByOrderCode(map);
+            if (!deleteActMap.isSuccess()){
+                log.error("删除审批流程失败，原因："+deleteActMap.get("msg"));
+                throw new BusinessException("删除审批流程失败，原因："+deleteActMap.get("msg"));
             }
         }
         deleteByIds(ids);
@@ -156,13 +181,19 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
      * @return
      */
     @Override
-    public R confirmRelease(String ids,OmsDemandOrderGatherEdit omsDemandOrderGatherEditParam) {
+    public R confirmRelease(String ids,OmsDemandOrderGatherEdit omsDemandOrderGatherEditParam,SysUser sysUser) {
         Example example = new Example(OmsDemandOrderGatherEdit.class);
         Example.Criteria criteria = example.createCriteria();
         //允许下达的审核状态
         List<String> auditStatusList = CollUtil.newArrayList(DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_WXSH.getCode()
                 ,DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHWC.getCode());
         if (StrUtil.isEmpty(ids)) {
+            if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
+                criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(",")));
+            }
+            if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
+                criteria.andEqualTo("orderFrom", OrderFromEnum.OUT_SOURCE_TYPE_QWW.getCode());
+            }
             //如果参数为空，则查询初始状态,无需审核、审核完成的数据
             if (StrUtil.isNotEmpty(omsDemandOrderGatherEditParam.getStatus())) {
                 if (StrUtil.equals(omsDemandOrderGatherEditParam.getStatus(), DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode())) {
@@ -210,6 +241,9 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
      * @return
      */
     void listCondition(OmsDemandOrderGatherEdit omsDemandOrderGatherEdit,Example.Criteria criteria){
+        if (omsDemandOrderGatherEdit == null) {
+            return;
+        }
         if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getProductMaterialCode())) {
             criteria.andEqualTo("productMaterialCode",omsDemandOrderGatherEdit.getProductMaterialCode() );
         }
@@ -270,7 +304,8 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         }
         Map<String, CdMaterialExtendInfo> materialExtendInfoMap = rMateiralExt.getCollectData(new TypeReference<Map<String, CdMaterialExtendInfo>>() {});
         //key:物料号 value：物料信息
-        R rMaterial = remoteMaterialService.selectInfoByInMaterialCodeAndMaterialType(materialCodeList, MaterialTypeEnum.WLLX_HALB.getCode());
+        //MaterialTypeEnum.WLLX_HALB.getCode()
+        R rMaterial = remoteMaterialService.selectInfoByInMaterialCodeAndMaterialType(materialCodeList, null);
         if (!rMaterial.isSuccess()) {
             throw new BusinessException("导入数据的物料信息无数据，请到基础信息维护！");
         }
@@ -448,7 +483,6 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
      * @return
      */
     @Override
-    @GlobalTransactional
     public R importDemandGatherEdit(List<OmsDemandOrderGatherEdit> successList,List<OmsDemandOrderGatherEdit> auditList, SysUser sysUser) {
         //1、判断工厂编码
         //2、取物料描述
@@ -531,13 +565,33 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
      */
 	@Override
 	public int deleteByCreateByAndCustomerCode(String createBy,List<String> customerCodes,String status){
+        if (createBy != null && customerCodes != null && status != null) {
+            //查询是否有已开启审批的数据
+            Example example = new Example(OmsDemandOrderGatherEdit.class);
+            example.and().andEqualTo("createBy", createBy)
+                    .andIn("customerCode", customerCodes)
+                    .andEqualTo("status", status);
+            List<OmsDemandOrderGatherEdit> list = selectByExample(example);
+            if (CollectionUtil.isNotEmpty(list)) {
+                List<String> orderCodeList = list.stream()
+                        .map(OmsDemandOrderGatherEdit::getDemandOrderCode).collect(toList());
+                Map<String,Object> map = new HashMap<>();
+                map.put("userName",createBy);
+                map.put("orderCodeList",orderCodeList);
+                R deleteActMap = remoteActTaskService.deleteByOrderCode(map);
+                if (!deleteActMap.isSuccess()){
+                    log.error("删除审批流程失败，原因："+deleteActMap.get("msg"));
+                    throw new BusinessException("删除审批流程失败，原因："+deleteActMap.get("msg"));
+                }
+            }
+        }
 		 return omsDemandOrderGatherEditMapper.deleteByCreateByAndCustomerCode(createBy,customerCodes,status);
 	}
 
 
     @Override
     @SneakyThrows
-    @Transactional(timeout = 60,rollbackFor=Exception.class)
+    @GlobalTransactional
     public R importDemandGatherEdit(MultipartFile file,SysUser sysUser) {
         EasyWithErrorExcelListener easyExcelListener = new EasyWithErrorExcelListener(omsDemandOrderGatherEditImportService,OmsDemandOrderGatherEditImport.class);
         EasyExcel.read(file.getInputStream(),OmsDemandOrderGatherEditImport.class,easyExcelListener).sheet().doRead();
