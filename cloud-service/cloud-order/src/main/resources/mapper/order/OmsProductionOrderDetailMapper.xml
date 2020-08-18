@@ -128,35 +128,37 @@
             resultMap="OmsProductionOrderDetailResult">
         select
         (@i:= @i+1) as id,
-        product_factory_code,material_code,material_desc,product_start_date,purchase_group,unit,min(status) as status,
-        sum(IFNULL(raw_material_product_num,0)) as raw_material_product_num
-        from oms_production_order_detail,(SELECT @i:=0) as i
+        detail.product_factory_code,detail.material_code,detail.material_desc,detail.product_start_date,detail.purchase_group,detail.unit,min(detail.status) as status,
+        sum(IFNULL(detail.raw_material_product_num,0)) as raw_material_product_num
+        from oms_production_order_detail detail, oms_production_order o,(SELECT @i:=0) as i
         <where>
-            product_start_date > DATE_FORMAT(now(),'%Y-%m-%d')
-            and product_start_date <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(now(),INTERVAL 14 day),'%Y-%m-%d')
+            detail.product_order_code = o.order_code
+            and (o.audit_status = '0' or o.audit_status = '2')
+            and detail.product_start_date > DATE_FORMAT(now(),'%Y-%m-%d')
+            and detail.product_start_date <![CDATA[ <= ]]> DATE_FORMAT(DATE_ADD(now(),INTERVAL 14 day),'%Y-%m-%d')
             <if test="productFactoryCode != null and productFactoryCode != ''">
-                and product_factory_code = #{productFactoryCode,jdbcType=VARCHAR}
+                and detail.product_factory_code = #{productFactoryCode,jdbcType=VARCHAR}
             </if>
             <if test="materialCode != null and materialCode != ''">
-                and material_code = #{materialCode,jdbcType=VARCHAR}
+                and detail.material_code = #{materialCode,jdbcType=VARCHAR}
             </if>
             <if test="checkStartDate != null and checkStartDate != ''">
-                and product_start_date >= #{checkStartDate,jdbcType=VARCHAR}
+                and detail.product_start_date >= #{checkStartDate,jdbcType=VARCHAR}
             </if>
             <if test="checkEndDate != null and checkEndDate != ''">
-                and product_start_date <![CDATA[ <= ]]> #{checkEndDate,jdbcType=VARCHAR}
+                and detail.product_start_date <![CDATA[ <= ]]> #{checkEndDate,jdbcType=VARCHAR}
             </if>
             <if test="status != null and status != ''">
-                and status = #{status,jdbcType=VARCHAR}
+                and detail.status = #{status,jdbcType=VARCHAR}
             </if>
             <if test="productFactoryQuery != null and productFactoryQuery != ''">
-                and product_factory_code in (${productFactoryQuery})
+                and detail.product_factory_code in (${productFactoryQuery})
             </if>
             <if test="purchaseGroupQuery != null and purchaseGroupQuery != ''">
-                and purchase_group in (${purchaseGroupQuery})
+                and detail.purchase_group in (${purchaseGroupQuery})
             </if>
         </where>
-        group by product_factory_code,material_code,material_desc,product_start_date,purchase_group,unit
+        group by detail.product_factory_code,detail.material_code,detail.material_desc,detail.product_start_date,detail.purchase_group,detail.unit
     </select>
 
     <select id="selectListByList" resultMap="OmsProductionOrderDetailResult" parameterType="list">

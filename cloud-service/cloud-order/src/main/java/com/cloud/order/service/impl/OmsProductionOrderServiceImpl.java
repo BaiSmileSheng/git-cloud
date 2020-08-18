@@ -576,6 +576,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             log.info("待传SAP、传SAP中、已传SAP、传SAP异常、已关单状态的记录不可修改！");
             return R.error("待传SAP、传SAP中、已传SAP、传SAP异常、已关单状态的记录不可修改！");
         }
+        List<String> rawMaterialCodes = new ArrayList<>();
         if (ProductOrderConstants.STATUS_ONE.equals(productionOrder.getStatus())
                 || ProductOrderConstants.STATUS_TWO.equals(productionOrder.getStatus())) {
             //”反馈中“、“待调整”状态的数据
@@ -584,13 +585,17 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     omsRawMaterialFeedbackService.select(OmsRawMaterialFeedback.builder()
                             .productMaterialCode(productionOrder.getProductMaterialCode())
                             .productFactoryCode(productionOrder.getProductFactoryCode())
-                            .productStartDate(productionOrder.getProductStartDate()).status("0").build());
+                            .productStartDate(productionOrder.getProductStartDate())
+                            .bomVersion(productionOrder.getBomVersion())
+                            .status("0").build());
             //根据成品专用号、生产工厂、基本开始日期查询除当前订单外的其他排产订单记录
             Example example = new Example(OmsProductionOrder.class);
             Example.Criteria criteria = example.createCriteria();
             criteria.andEqualTo("productMaterialCode", omsProductionOrder.getProductMaterialCode());
             criteria.andEqualTo("productFactoryCode", omsProductionOrder.getProductFactoryCode());
             criteria.andEqualTo("productStartDate", omsProductionOrder.getProductStartDate());
+            criteria.andEqualTo("bomVersion",productionOrder.getBomVersion());
+            criteria.andEqualTo("status",ProductOrderConstants.STATUS_ONE);
             criteria.andNotEqualTo("id", omsProductionOrder.getId());
             List<OmsProductionOrder> omsProductionOrders = omsProductionOrderMapper.selectByExample(example);
             //计算成品专用号、生产工厂、基本开始日期下的总排产量
@@ -598,18 +603,23 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     .map(OmsProductionOrder::getProductNum).reduce(BigDecimal.ZERO, BigDecimal::add);
             orderSum = orderSum.add(omsProductionOrder.getProductNum());
             //如果存在反馈信息记录，判断修改后的量，如果小于等于反馈信息记录的成品满足量，
-            //则更新反馈信息表记录状态为“通过”，排产订单状态“已评审”，明细数据更新成“已确认”
+            //则更新反馈信息表记录状态为“通过”，排产订单状态“待评审”
             int checkCount = 0;
             for (OmsRawMaterialFeedback omsRawMaterialFeedback : omsRawMaterialFeedbacks) {
                 if (orderSum.compareTo(omsRawMaterialFeedback.getProductContentNum()) <= 0) {
                     omsRawMaterialFeedback.setStatus(RawMaterialFeedbackConstants.STATUS_ONE);
                     omsRawMaterialFeedbackService.updateByPrimaryKeySelective(omsRawMaterialFeedback);
                     checkCount++;
+                } else {
+                    rawMaterialCodes.add(omsRawMaterialFeedback.getRawMaterialCode());
                 }
             }
-            //如果满足数量的记录条数与反馈信息总条数相同，则排产订单状态为“已评审”
+            //如果满足数量的记录条数与反馈信息总条数相同，则排产订单状态为“待评审”，反之“反馈中”
             if (omsRawMaterialFeedbacks.size() == checkCount) {
-                omsProductionOrder.setStatus(ProductOrderConstants.STATUS_THREE);
+                omsProductionOrder.setStatus(ProductOrderConstants.STATUS_ZERO);
+                omsProductionOrders.forEach(o -> o.setStatus(ProductOrderConstants.STATUS_ZERO));
+                //更新其他排产订单的状态
+                omsProductionOrderMapper.updateBatchByPrimaryKeySelective(omsProductionOrders);
             }
         } else if (ProductOrderConstants.STATUS_THREE.equals(productionOrder.getStatus())) {
             //“已评审”状态的排产订单
@@ -623,7 +633,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         int updateCount = omsProductionOrderMapper.updateByPrimaryKeySelective(omsProductionOrder);
         if (updateCount <= 0) {
             log.error("更新排产订单失败！");
-            return R.error("更新排产订单失败！");
+            throw new BusinessException("更新排产订单失败！");
         }
         //bom拆解
         //查询bom清单，根据生产工厂、成品专用号、bom版本
@@ -636,18 +646,19 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         R bomMap = remoteBomService.selectBomList(dicts);
         if (!bomMap.isSuccess()) {
             log.error("获取bom清单数据失败：" + bomMap.get("msg"));
-            return R.error("获取bom清单数据失败:" + bomMap.get("msg"));
+            throw new BusinessException("获取bom清单数据失败:" + bomMap.get("msg"));
         }
         List<CdBomInfo> bomInfos = bomMap.getCollectData(new TypeReference<List<CdBomInfo>>() {
         });
         if (CollUtil.isEmpty(bomInfos)) {
             log.error("获取bom清单数据为空！");
-            return R.error("获取bom清单数据为空!");
+            throw new BusinessException("获取bom清单数据为空!");
         }
-        String detailStatus = omsProductionOrder.getStatus().equals(ProductOrderConstants.STATUS_ZERO)
-                ? ProductOrderConstants.DETAIL_STATUS_ZERO : ProductOrderConstants.DETAIL_STATUS_ONE;
         List<OmsProductionOrderDetail> omsProductionOrderDetails = new ArrayList<>();
         bomInfos.forEach(bom -> {
+            //判断排产订单明细的状态
+            String detailStatus = rawMaterialCodes.contains(bom.getRawMaterialCode())
+                    ? ProductOrderConstants.DETAIL_STATUS_TWO : ProductOrderConstants.DETAIL_STATUS_ZERO;
             //计算原材料排产量
             BigDecimal rawMaterialProductNum = bom.getBomNum()
                     .divide(bom.getBasicNum(), 2, BigDecimal.ROUND_HALF_UP).multiply(omsProductionOrder.getProductNum());
@@ -678,7 +689,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             R userRightsMap = userService.selectUserRights(RoleConstants.ROLE_KEY_JIT);
             if (!userRightsMap.isSuccess()) {
                 log.error("获取权限用户列表失败：" + userRightsMap.get("msg"));
-                return R.error("获取权限用户列表失败!");
+                throw new BusinessException("获取权限用户列表失败!");
             }
             List<SysUserRights> sysUserRightsList = userRightsMap.getCollectData(new TypeReference<List<SysUserRights>>() {
             });
