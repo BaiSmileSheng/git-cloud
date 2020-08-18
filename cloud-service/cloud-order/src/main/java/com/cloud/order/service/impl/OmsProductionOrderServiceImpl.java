@@ -570,9 +570,11 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         //待传SAP，传SAP中，已传SAP状态的数据不可修改
         if (ProductOrderConstants.STATUS_FOUR.equals(productionOrder.getStatus())
                 || ProductOrderConstants.STATUS_FIVE.equals(productionOrder.getStatus())
-                || ProductOrderConstants.STATUS_SIX.equals(productionOrder.getStatus())) {
-            log.info("待传SAP、传SAP中、已传SAP状态的记录不可修改！");
-            return R.error("待传SAP、传SAP中、已传SAP状态的记录不可修改！");
+                || ProductOrderConstants.STATUS_SIX.equals(productionOrder.getStatus())
+                || ProductOrderConstants.STATUS_SEVEN.equals(productionOrder.getStatus())
+                || ProductOrderConstants.STATUS_EIGHT.equals(productionOrder.getStatus())) {
+            log.info("待传SAP、传SAP中、已传SAP、传SAP异常、已关单状态的记录不可修改！");
+            return R.error("待传SAP、传SAP中、已传SAP、传SAP异常、已关单状态的记录不可修改！");
         }
         if (ProductOrderConstants.STATUS_ONE.equals(productionOrder.getStatus())
                 || ProductOrderConstants.STATUS_TWO.equals(productionOrder.getStatus())) {
