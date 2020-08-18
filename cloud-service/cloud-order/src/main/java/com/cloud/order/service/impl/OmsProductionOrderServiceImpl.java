@@ -640,7 +640,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 omsProductionOrder.setStatus(ProductOrderConstants.STATUS_ZERO);
                 omsProductionOrders.forEach(o -> o.setStatus(ProductOrderConstants.STATUS_ZERO));
                 //更新其他排产订单的状态
-                omsProductionOrderMapper.updateBatchByPrimaryKeySelective(omsProductionOrders);
+                if (omsProductionOrders.size() > 0) {
+                    omsProductionOrderMapper.updateBatchByPrimaryKeySelective(omsProductionOrders);
+                }
             }
         } else if (ProductOrderConstants.STATUS_THREE.equals(productionOrder.getStatus())) {
             //“已评审”状态的排产订单

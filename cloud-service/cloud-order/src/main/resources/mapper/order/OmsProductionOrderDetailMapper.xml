@@ -227,7 +227,7 @@
                     and product_factory_code in (${item.productFactoryQuery})
                 </if>
                 <if test="item.purchaseGroupQuery != null and item.purchaseGroupQuery != ''">
-                    and purchase_group in (${item.materialCode})
+                    and purchase_group in (${item.purchaseGroupQuery})
                 </if>
                 <if test="item.status != null and item.status != ''">
                     and status = #{item.status,jdbcType=VARCHAR}
