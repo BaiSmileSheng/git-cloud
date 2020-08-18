@@ -2904,7 +2904,9 @@
                 "order_class",
                 "product_material_code",
                 "delivery_date",
-                "place"
+                "place",
+                "data_source",
+                "product_factory_code"
               ]
             }
           ],

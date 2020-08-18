@@ -10,6 +10,7 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.domain.entity.vo.OmsOrderMaterialOutVo;
 import com.cloud.activiti.feign.RemoteActOmsOrderMaterialOutService;
+import com.cloud.activiti.feign.RemoteActTaskService;
 import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.constant.EmailConstants;
 import com.cloud.common.constant.RoleConstants;
@@ -67,6 +68,8 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 /**
  * 真单Service业务层处理
  *
@@ -109,6 +112,9 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
 
     @Autowired
     private MailService mailService;
+
+    @Autowired
+    private RemoteActTaskService remoteActTaskService;
 
     private final static String YYYY_MM_DD = "yyyy-MM-dd";//时间格式
 
@@ -343,7 +349,9 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
     }
 
     @Override
+    @GlobalTransactional
     public R deleteOmsRealOrder(String ids, OmsRealOrder omsRealOrder,SysUser sysUser,long currentUserId) {
+        List<String> orderCodeList = new ArrayList<>();//删除审批流的编号集合
         if(StringUtils.isNotBlank(ids)){
             List<OmsRealOrder> omsRealOrderSelectList =  omsRealOrderMapper.selectByIds(ids);
             if(CollectionUtils.isEmpty(omsRealOrderSelectList)){
@@ -356,6 +364,9 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 }
             });
             int count = omsRealOrderMapper.deleteByIds(ids);
+            orderCodeList = omsRealOrderSelectList.stream()
+                    .map(OmsRealOrder::getOrderCode).collect(toList());
+            deleteActTask(orderCodeList,sysUser);//删除相应的审批流
             return R.data(count);
         }
         //判断对象属性是否有赋值
@@ -374,10 +385,27 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             example.and().andEqualTo("createBy", sysUser.getLoginName());
         }
         example.and().andEqualTo("dataSource",RealOrderDataSourceEnum.DATA_SOURCE_1.getCode());
+        List<OmsRealOrder> omsRealOrderListDel = omsRealOrderMapper.selectByExample(example);
         int count = omsRealOrderMapper.deleteByExample(example);
+        orderCodeList = omsRealOrderListDel.stream()
+                .map(OmsRealOrder::getOrderCode).collect(toList());
+        deleteActTask(orderCodeList,sysUser);//删除相应的审批流
         return R.data(count);
     }
 
+    /**
+     * 删除真单时删除审批流
+     */
+    private void deleteActTask(List<String> orderCodeList,SysUser sysUser){
+        Map<String,Object> map = new HashMap<>();
+        map.put("userName",sysUser.getLoginName());
+        map.put("orderCodeList",orderCodeList);
+        R deleteActMap = remoteActTaskService.deleteByOrderCode(map);
+        if (!deleteActMap.isSuccess()){
+            logger.error("删除审批流程失败，原因："+deleteActMap.get("msg"));
+            throw new BusinessException("删除审批流程失败，原因："+deleteActMap.get("msg"));
+        }
+    }
     /**
      * 组装查询条件
      *
