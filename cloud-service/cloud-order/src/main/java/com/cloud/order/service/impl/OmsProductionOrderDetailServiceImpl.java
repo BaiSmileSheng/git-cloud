@@ -262,11 +262,15 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
         List<String> orderCodeList = omsProductionOrderDetails.stream()
                 .map(OmsProductionOrderDetail::getProductOrderCode).distinct().collect(Collectors.toList());
         List<OmsProductionOrder> productionOrders = omsProductionOrderService.selectByOrderCode(orderCodeList);
+        //只统计无需审核和审核完成的排产订单数据
+        List<OmsProductionOrder> orderList = productionOrders.stream()
+                .filter(o -> o.getAuditStatus().equals(ProductOrderConstants.AUDIT_STATUS_ZERO)
+                        || o.getAuditStatus().equals(ProductOrderConstants.AUDIT_STATUS_TWO)).collect(Collectors.toList());
         //排产订单状态待评审、反馈中的分组
-        Map<String, List<OmsProductionOrder>> mapOne = productionOrders.stream().filter(o -> o.getStatus().equals(ProductOrderConstants.STATUS_ZERO)
+        Map<String, List<OmsProductionOrder>> mapOne = orderList.stream().filter(o -> o.getStatus().equals(ProductOrderConstants.STATUS_ZERO)
                 || o.getStatus().equals(ProductOrderConstants.STATUS_ONE)).collect(Collectors.groupingBy((o) -> fetchGroupKey(o)));
         //排产订单其他状态的分组
-        Map<String, List<OmsProductionOrder>> mapThree = productionOrders.stream().filter(o -> !o.getStatus().equals(ProductOrderConstants.STATUS_ZERO)
+        Map<String, List<OmsProductionOrder>> mapThree = orderList.stream().filter(o -> !o.getStatus().equals(ProductOrderConstants.STATUS_ZERO)
                 && !o.getStatus().equals(ProductOrderConstants.STATUS_ONE)).collect(Collectors.groupingBy((o) -> fetchGroupKey(o)));
         //按照成品专用号、bom版本进行分组
 
