@@ -303,8 +303,6 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         //其他导入数据
         List<ExcelImportOtherObjectDto> otherDtos = new ArrayList<>();
         List<OmsProductionOrderExportVo> listImport = (List<OmsProductionOrderExportVo>) objects;
-        //校验非空
-        ValidatorUtils.validateEntity(listImport);
         List<Dict> paramsMapList = listImport.stream().map(omsProductionOrder ->
                 new Dict().set(PRODUCT_FACTORY_CODE, omsProductionOrder.getProductFactoryCode())
                         .set(PRODUCT_MATERIAL_CODE, omsProductionOrder.getProductMaterialCode())
