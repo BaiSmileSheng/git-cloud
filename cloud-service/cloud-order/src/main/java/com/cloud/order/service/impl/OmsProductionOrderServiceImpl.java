@@ -27,7 +27,9 @@ import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.ListCommonUtil;
 import com.cloud.common.utils.StringUtils;
+import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.order.domain.entity.*;
+import com.cloud.order.domain.entity.vo.Oms2weeksDemandOrderEditImport;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderExportVo;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderMailVo;
 import com.cloud.order.enums.ProductionOrderStatusEnum;
@@ -192,6 +194,24 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         EasyExcel.read(file.getInputStream(), OmsProductionOrderExportVo.class, easyExcelListener).sheet().doRead();
         //全部数据
         List<ExcelImportSucObjectDto> excelList = easyExcelListener.getSuccessList();
+        List<ExcelImportErrObjectDto> errObjectDtos = easyExcelListener.getErrList();
+        //错误结果集 导出
+        List<OmsProductionOrderExportVo> errorResults = new ArrayList<>();
+        if (errObjectDtos.size() > 0){
+            errorResults = errObjectDtos.stream().map(excelImportErrObjectDto -> {
+                OmsProductionOrderExportVo omsProductionOrderExportVo = BeanUtil.copyProperties(excelImportErrObjectDto.getObject(), OmsProductionOrderExportVo.class);
+                omsProductionOrderExportVo.setExportRemark(excelImportErrObjectDto.getErrMsg());
+                return omsProductionOrderExportVo;
+            }).collect(Collectors.toList());
+        }
+        if (ObjectUtil.isEmpty(excelList) || excelList.size() <= 0) {
+            if (errorResults.size() > 0 ) {
+                //导出excel
+                return EasyExcelUtilOSS.writeExcel(errorResults, "排产订单导入失败数据.xlsx", "sheet", new OmsProductionOrderExportVo());
+            }
+            log.error("未解析出导入数据，请核实排产订单导入文件！");
+            return R.error("未解析出导入数据，请核实排产订单导入文件！");
+        }
         List<OmsProductionOrderExportVo> list = new ArrayList<>();
         if (excelList.size() > 0) {
             list = excelList.stream().map(excelImportSucObjectDto -> {
@@ -204,6 +224,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         list = list.stream().filter(o -> !exportList.contains(o)).collect(Collectors.toList());
         if ((ObjectUtil.isEmpty(list) || list.size() <= 0)
                 && (ObjectUtil.isNotEmpty(exportList) && exportList.size() > 0)) {
+            exportList.addAll(errorResults);
             return EasyExcelUtilOSS.writeExcel(exportList, "排产订单导入失败数据.xlsx", "sheet", new OmsProductionOrderExportVo());
         }
         //1-8、排产订单号：根据生成规则生成排产订单号；
@@ -619,7 +640,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 omsProductionOrder.setStatus(ProductOrderConstants.STATUS_ZERO);
                 omsProductionOrders.forEach(o -> o.setStatus(ProductOrderConstants.STATUS_ZERO));
                 //更新其他排产订单的状态
-                omsProductionOrderMapper.updateBatchByPrimaryKeySelective(omsProductionOrders);
+                if (omsProductionOrders.size() > 0) {
+                    omsProductionOrderMapper.updateBatchByPrimaryKeySelective(omsProductionOrders);
+                }
             }
         } else if (ProductOrderConstants.STATUS_THREE.equals(productionOrder.getStatus())) {
             //“已评审”状态的排产订单
