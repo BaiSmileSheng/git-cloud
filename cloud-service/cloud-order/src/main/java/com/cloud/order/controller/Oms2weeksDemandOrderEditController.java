@@ -182,7 +182,8 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
     @ApiParam(name = "ids", value = "需删除数据的id")
     @HasPermissions("order:oms2weeksDemandOrderEdit:remove")
     public R remove(@RequestBody(required = false) Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit) {
-        return oms2weeksDemandOrderEditService.deleteWithLimit(oms2weeksDemandOrderEdit.getIds(),oms2weeksDemandOrderEdit);
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return oms2weeksDemandOrderEditService.deleteWithLimit(oms2weeksDemandOrderEdit==null?null:oms2weeksDemandOrderEdit.getIds(),oms2weeksDemandOrderEdit,sysUser);
     }
 
     /**
@@ -194,7 +195,8 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
     @ApiParam(name = "ids", value = "需删除数据的id")
     @HasPermissions("order:oms2weeksDemandOrderEdit:removeWithXDSAP")
     public R removeWithXDSAP(@RequestBody @ApiIgnore Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit) {
-        return oms2weeksDemandOrderEditService.deleteWithLimit(oms2weeksDemandOrderEdit.getIds(),oms2weeksDemandOrderEdit);
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return oms2weeksDemandOrderEditService.deleteWithLimitXDSAP(oms2weeksDemandOrderEdit==null?null:oms2weeksDemandOrderEdit.getIds(),oms2weeksDemandOrderEdit,sysUser);
     }
 
 
@@ -239,7 +241,8 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
     @ApiParam(name = "ids", value = "需确认下达数据的id")
     @HasPermissions("order:oms2weeksDemandOrderEdit:confirmRelease")
     public R confirmRelease(@RequestBody @ApiIgnore Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit){
-        return oms2weeksDemandOrderEditService.confirmRelease(oms2weeksDemandOrderEdit.getIds(),oms2weeksDemandOrderEdit);
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return oms2weeksDemandOrderEditService.confirmRelease(oms2weeksDemandOrderEdit==null?null:oms2weeksDemandOrderEdit.getIds(),oms2weeksDemandOrderEdit,sysUser);
     }
 
 
