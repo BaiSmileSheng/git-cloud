@@ -139,15 +139,10 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
         List<String> dayList = Arrays.asList(days);
         //匹配库存，查询
         list.forEach(o -> {
-            rawMaterialStocks.forEach(s -> {
-                if (o.getProductFactoryCode().equals(s.getProductFactoryCode())
-                        && o.getMaterialCode().equals(s.getRawMaterialCode())) {
-                    BigDecimal stockNum = o.getStockNum() == null || StrUtil.isBlank(o.getStockNum().toString()) ? BigDecimal.ZERO : o.getStockNum();
-                    o.setStockNum(stockNum.add(s.getCurrentStock()));
-                } else {
-                    o.setStockNum(BigDecimal.ZERO);
-                }
-            });
+            BigDecimal stockCurrent = rawMaterialStocks.stream().filter(s ->o.getProductFactoryCode().equals(s.getProductFactoryCode())
+                    && o.getMaterialCode().equals(s.getRawMaterialCode())).map(CdRawMaterialStock::getCurrentStock).reduce(BigDecimal.ZERO,BigDecimal::add);
+            BigDecimal stockNum = o.getStockNum() == null || StrUtil.isBlank(o.getStockNum().toString()) ? BigDecimal.ZERO : o.getStockNum();
+            o.setStockNum(stockNum.add(stockCurrent));
             //可用库存
             BigDecimal currenStock = o.getStockNum();
             List<RawMaterialReviewDetailVo> rawMaterialReviewDetailVos = omsProductionOrderDetailMapper.selectRawMaterialDay(OmsProductionOrderDetail.builder()
@@ -428,6 +423,29 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
             log.error("未查询到排产订单明细！");
             return R.error("未查询到排产订单明细！");
         }
+        List<String> productOrderCodeList = omsProductionOrderDetails.stream()
+                .map(o -> o.getProductOrderCode()).distinct().collect(Collectors.toList());
+        Example example = new Example(OmsProductionOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andIn("orderCode",productOrderCodeList);
+        criteria.andEqualTo("status",ProductOrderConstants.STATUS_TWO);
+        List<OmsProductionOrder> productionOrders = omsProductionOrderService.selectByExample(example);
+        if (ObjectUtil.isNotEmpty(productionOrders) && productionOrders.size() > 0) {
+            List<String> orderCodeList = productionOrders.stream()
+                    .map(OmsProductionOrder::getOrderCode).collect(Collectors.toList());
+            omsProductionOrderDetails = omsProductionOrderDetails.stream()
+                    .filter(o -> !orderCodeList.contains(o.getProductOrderCode())).collect(Collectors.toList());
+        }
+        if (omsProductionOrderDetails.size() <= 0) {
+            if (ObjectUtil.isNotEmpty(productionOrders) && productionOrders.size() > 0) {
+                String orderCodeStr = productionOrders.stream()
+                        .map(OmsProductionOrder::getOrderCode).distinct().collect(Collectors.joining(","));
+                log.info("确认通过部分数据，以下排产订单尚未调整，请联系排产员调整后再确认！"+orderCodeStr);
+                return R.error("确认通过部分数据，以下排产订单尚未调整，请联系排产员调整后再确认！"+orderCodeStr);
+            }
+            log.info("无可更新排产订单明细数据！");
+            return R.ok();
+        }
         //设置排产订单明细状态为“已确认”
         omsProductionOrderDetails.forEach(detail -> {
             detail.setStatus(ProductOrderConstants.DETAIL_STATUS_ONE);
@@ -441,7 +459,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
         }
         //组织排产订单号
         List<String> orderCodes = omsProductionOrderDetails.stream()
-                .map(OmsProductionOrderDetail::getProductOrderCode).collect(Collectors.toList());
+                .map(OmsProductionOrderDetail::getProductOrderCode).distinct().collect(Collectors.toList());
         //根据排产订单号查询明细数据
         List<OmsProductionOrderDetail> omsProductionOrderDetailList =
                 omsProductionOrderDetailMapper.selectByOrderCodeList(orderCodes);
@@ -466,6 +484,11 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
         });
         if (orderList.size() > 0) {
             omsProductionOrderService.updateByOrderCode(orderList);
+        }
+        if (ObjectUtil.isNotEmpty(productionOrders) && productionOrders.size() > 0) {
+            String orderCodeStr = productionOrders.stream()
+                    .map(OmsProductionOrder::getOrderCode).distinct().collect(Collectors.joining(","));
+            return R.error("确认通过部分数据，以下排产订单尚未调整，请联系排产员调整后再确认！"+orderCodeStr);
         }
         return R.ok();
     }

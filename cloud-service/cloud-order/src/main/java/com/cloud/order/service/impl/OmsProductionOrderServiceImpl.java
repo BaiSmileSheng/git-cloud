@@ -638,7 +638,11 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             //如果满足数量的记录条数与反馈信息总条数相同，则排产订单状态为“待评审”，反之“反馈中”
             if (omsRawMaterialFeedbacks.size() == checkCount) {
                 omsProductionOrder.setStatus(ProductOrderConstants.STATUS_ZERO);
-                omsProductionOrders.forEach(o -> o.setStatus(ProductOrderConstants.STATUS_ZERO));
+                omsProductionOrder.setCreateBy(sysUser.getLoginName());
+                omsProductionOrders.forEach(o -> {
+                    o.setStatus(ProductOrderConstants.STATUS_ZERO);
+                    o.setUpdateBy(sysUser.getLoginName());
+                });
                 //更新其他排产订单的状态
                 if (omsProductionOrders.size() > 0) {
                     omsProductionOrderMapper.updateBatchByPrimaryKeySelective(omsProductionOrders);
@@ -650,6 +654,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             //如果排产量向上调整，需JIT重新评审，即状态更新为“待评审”，排产订单明细状态更新为“未确认”；
             if (omsProductionOrder.getProductNum().compareTo(productionOrder.getProductNum()) > 0) {
                 omsProductionOrder.setStatus(ProductOrderConstants.STATUS_ZERO);
+                omsProductionOrder.setUpdateBy(sysUser.getLoginName());
             }
         }
         //更新排产订单
@@ -683,8 +688,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             String detailStatus = rawMaterialCodes.contains(bom.getRawMaterialCode())
                     ? ProductOrderConstants.DETAIL_STATUS_TWO : ProductOrderConstants.DETAIL_STATUS_ZERO;
             //计算原材料排产量
-            BigDecimal rawMaterialProductNum = bom.getBomNum()
-                    .divide(bom.getBasicNum(), 2, BigDecimal.ROUND_HALF_UP).multiply(omsProductionOrder.getProductNum());
+            BigDecimal rawMaterialProductNum = bom.getBomNum().multiply(omsProductionOrder.getProductNum())
+                    .divide(bom.getBasicNum(), 2, BigDecimal.ROUND_HALF_UP);
             OmsProductionOrderDetail omsProductionOrderDetail = OmsProductionOrderDetail.builder()
                     .productOrderCode(omsProductionOrder.getOrderCode())
                     .productFactoryCode(omsProductionOrder.getProductFactoryCode())
@@ -1217,8 +1222,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             List<CdBomInfo> bomInfos = bomMap.get(key);
             bomInfos.forEach(bom -> {
                 //计算原材料排产量
-                BigDecimal rawMaterialProductNum = bom.getBomNum()
-                        .divide(bom.getBasicNum(), 2, BigDecimal.ROUND_HALF_UP).multiply(o.getProductNum());
+                BigDecimal rawMaterialProductNum = bom.getBomNum().multiply(o.getProductNum())
+                        .divide(bom.getBasicNum(), 2, BigDecimal.ROUND_HALF_UP);
                 OmsProductionOrderDetail omsProductionOrderDetail = OmsProductionOrderDetail.builder()
                         .productOrderCode(o.getOrderCode())
                         .productFactoryCode(o.getProductFactoryCode())
@@ -1439,6 +1444,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         list.forEach(o -> {
                     if (!listAllDistinct.contains(o)) {
                         o.setStatus(ProductOrderConstants.STATUS_FOUR);
+                        o.setUpdateBy(sysUser.getLoginName());
                     }
                 }
         );
