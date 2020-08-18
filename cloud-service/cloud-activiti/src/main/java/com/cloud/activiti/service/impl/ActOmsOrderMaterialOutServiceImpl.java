@@ -25,9 +25,7 @@ import com.cloud.order.domain.entity.Oms2weeksDemandOrderEdit;
 import com.cloud.order.domain.entity.OmsDemandOrderGatherEdit;
 import com.cloud.order.domain.entity.OmsRealOrder;
 import com.cloud.order.enums.RealOrderAduitStatusEnum;
-import com.cloud.order.feign.Remote2weeksDemandOrderEditService;
-import com.cloud.order.feign.RemoteDemandOrderGatherEditService;
-import com.cloud.order.feign.RemoteOmsRealOrderService;
+import com.cloud.order.feign.*;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteUserService;
@@ -44,11 +42,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -67,8 +61,11 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
     @Autowired
     private RemoteDemandOrderGatherEditService remoteDemandOrderGatherEditService;
     @Autowired
+    private RemoteDemandOrderGatherEditHisService remoteDemandOrderGatherEditHisService;
+    @Autowired
     private Remote2weeksDemandOrderEditService remote2weeksDemandOrderEditService;
-
+    @Autowired
+    private Remote2weeksDemandOrderEditHisService remote2weeksDemandOrderEditHisService;
     @Autowired
     private RemoteUserService remoteUserService;
 
@@ -102,9 +99,15 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
                     break;
                 case ActivitiTableNameConstants.ACTIVITI_TABLE_NAME_ORDER_GATHER_EDIT :
                     selectResult = remoteDemandOrderGatherEditService.get(Long.valueOf(business.getTableId()));
+                    if (!selectResult.isSuccess()) {
+                        selectResult = remoteDemandOrderGatherEditHisService.get(Long.valueOf(business.getTableId()));
+                    }
                     break;
                 case ActivitiTableNameConstants.ACTIVITI_TABLE_NAME_DEMAND_ORDER_EDIT :
                     selectResult = remote2weeksDemandOrderEditService.get(Long.valueOf(business.getTableId()));
+                    if (!selectResult.isSuccess()) {
+                        selectResult = remote2weeksDemandOrderEditHisService.get(Long.valueOf(business.getTableId()));
+                    }
                     break;
                 default:
                     break;

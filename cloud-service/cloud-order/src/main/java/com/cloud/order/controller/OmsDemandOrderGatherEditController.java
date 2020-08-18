@@ -174,7 +174,8 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     @ApiParam(name = "ids", value = "需删除数据的id")
     @HasPermissions("order:demandOrderGatherEdit:remove")
     public R remove(@RequestBody(required = false) OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
-        return omsDemandOrderGatherEditService.deleteWithLimit(omsDemandOrderGatherEdit.getIds(),omsDemandOrderGatherEdit);
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return omsDemandOrderGatherEditService.deleteWithLimit(omsDemandOrderGatherEdit==null?null:omsDemandOrderGatherEdit.getIds(),omsDemandOrderGatherEdit,sysUser);
     }
 
     /**
@@ -187,7 +188,8 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     @ApiParam(name = "ids", value = "需确认下达数据的id")
     @HasPermissions("order:demandOrderGatherEdit:confirmRelease")
     public R confirmRelease(@RequestBody @ApiIgnore OmsDemandOrderGatherEdit omsDemandOrderGatherEdit){
-        return omsDemandOrderGatherEditService.confirmRelease(omsDemandOrderGatherEdit.getIds(),omsDemandOrderGatherEdit);
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return omsDemandOrderGatherEditService.confirmRelease(omsDemandOrderGatherEdit==null?null:omsDemandOrderGatherEdit.getIds(),omsDemandOrderGatherEdit,sysUser);
     }
 
     /**
