@@ -9,11 +9,9 @@ import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.service.ICdMaterialInfoService;
 import io.swagger.annotations.*;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
@@ -159,7 +157,7 @@ public class CdMaterialInfoController extends BaseController {
      * @return
      */
     @PostMapping("selectInfoByInMaterialCodeAndMaterialType")
-    public R selectInfoByInMaterialCodeAndMaterialType(@RequestBody List<String> materialCodes,@RequestParam(value = "materialType")String materialType) {
+    public R selectInfoByInMaterialCodeAndMaterialType(@RequestBody List<String> materialCodes,@RequestParam(value = "materialType",required = false)String materialType) {
         return cdMaterialInfoService.selectInfoByInMaterialCodeAndMaterialType(materialCodes,materialType);
     }
     /**
