@@ -103,7 +103,7 @@ public class SysDictDataServiceImpl implements ISysDictDataService {
             String id = StrUtil.split(ids,StrUtil.C_COMMA).get(0);
             SysDictData sysDictData = selectDictDataById(Long.parseLong(id));
             String dictType = sysDictData.getDictType();
-            String rk = "dict:" + dictType;
+            String rk = StrUtil.format("dict:{}",dictType);
             redis.delete(rk);
         }
         return dictDataMapper.deleteDictDataByIds(Convert.toStrArray(ids));
