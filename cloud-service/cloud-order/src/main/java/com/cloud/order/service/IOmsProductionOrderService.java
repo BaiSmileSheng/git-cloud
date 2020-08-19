@@ -77,6 +77,13 @@ public interface IOmsProductionOrderService extends BaseService<OmsProductionOrd
      */
     R timeSAPGetProductOrderCode();
 
+
+    /**
+     * 生成加工结算信息
+     * @return
+     */
+    R insertSettleList();
+
     /**
      * 邮件推送
      * @return
@@ -128,4 +135,5 @@ public interface IOmsProductionOrderService extends BaseService<OmsProductionOrd
      * @return
      */
     R timeGetConfirmAmont();
+
 }

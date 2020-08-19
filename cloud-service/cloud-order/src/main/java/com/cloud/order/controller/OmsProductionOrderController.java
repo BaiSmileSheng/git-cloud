@@ -496,6 +496,17 @@ public class OmsProductionOrderController extends BaseController {
     }
 
     /**
+     * 生成加工结算信息
+     * @return
+     */
+    @PostMapping("timeInsertSettleList")
+    @OperLog(title = "生成加工结算信息 ", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "生成加工结算信息 ", response = R.class)
+    public R timeInsertSettleList(){
+        return omsProductionOrderService.insertSettleList();
+    }
+
+    /**
      * 邮件推送
      */
     @HasPermissions("order:productionOrder:mailPush")
