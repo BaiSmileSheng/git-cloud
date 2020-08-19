@@ -27,11 +27,10 @@ import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.ListCommonUtil;
 import com.cloud.common.utils.StringUtils;
-import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.order.domain.entity.*;
-import com.cloud.order.domain.entity.vo.Oms2weeksDemandOrderEditImport;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderExportVo;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderMailVo;
+import com.cloud.order.enums.ProductionOrderSettleFlagEnum;
 import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.mail.MailService;
 import com.cloud.order.mapper.OmsProductionOrderMapper;
@@ -1519,14 +1518,11 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      *
      * @return
      */
-    @GlobalTransactional
     @Override
     public R timeSAPGetProductOrderCode() {
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();
-        List<String> statusList = new ArrayList<>();
-        statusList.add(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPZ.getCode());
-        criteria.andIn("status", statusList);
+        criteria.andEqualTo("status", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPZ.getCode());
         List<OmsProductionOrder> list = omsProductionOrderMapper.selectByExample(example);
         if (CollectionUtils.isEmpty(list)) {
             return R.ok("无需要传SAP数据");
@@ -1542,40 +1538,62 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         if (CollectionUtils.isEmpty(listSapRes)) {
             return R.ok("获取生产订单号SAP没有数据");
         }
-        List<OmsProductionOrder> successList = new ArrayList<>();
+        //map 为甄别是否生成加工结算单
+        Map<String,OmsProductionOrder> map = list.stream().collect(Collectors.toMap(omsProductionOrder ->omsProductionOrder.getOrderCode(),
+                omsProductionOrder -> omsProductionOrder,(key1,key2) ->key2));
         listSapRes.forEach(omsProductionOrder -> {
             if ("S".equals(omsProductionOrder.getSapFlag())) {
                 omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode());
                 omsProductionOrder.setSapMessages("生产订单创建成功成功");
-                successList.add(omsProductionOrder);
+                OmsProductionOrder omsProductionOrderSelect = map.get(omsProductionOrder.getOrderCode());
+                if(null != omsProductionOrderSelect){
+                    if(OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode().equals(omsProductionOrderSelect.getOutsourceType())
+                        ||OutSourceTypeEnum.OUT_SOURCE_TYPE_QWW.getCode().equals(omsProductionOrderSelect.getOutsourceType())){
+                        omsProductionOrder.setSettleFlag(ProductionOrderSettleFlagEnum.PRODUCTION_ORDER_SETTLE_FLAG_1.getCode());
+                    }else {
+                        omsProductionOrder.setSettleFlag(ProductionOrderSettleFlagEnum.PRODUCTION_ORDER_SETTLE_FLAG_0.getCode());
+                    }
+                }
             } else if("W".equals(omsProductionOrder.getSapFlag())){
                 omsProductionOrder.setSapMessages("生产订单创建中");
             }
         });
         //2.修改数据
         omsProductionOrderMapper.batchUpdateByOrderCode(listSapRes);
-        //3.生成加工费结算单
-        if (CollectionUtils.isEmpty(successList)) {
-            return R.ok("获取生产订单号后无需要生成加工费的数据");
-        }
-        List<String> orderOrderList = successList.stream().map(omsProductionOrder -> {
-            return omsProductionOrder.getOrderCode();
-        }).collect(toList());
-        List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderMapper.selectByOrderCode(orderOrderList);
-        if (!CollectionUtils.isEmpty(omsProductionOrderList)) {
-            List<SmsSettleInfo> smsSettleInfoList = changeSmsSettleInfo(omsProductionOrderList);
-            if (CollectionUtils.isEmpty(smsSettleInfoList)) {
-                return R.ok("无需要生成加工费的数据");
-            }
-            R result = remoteSettleInfoService.batchInsert(smsSettleInfoList);
-            if (!result.isSuccess()) {
-                log.error("新增加工费结算失败 res:{}", JSONObject.toJSONString(result));
-                throw new BusinessException(result.get("msg").toString());
-            }
-        }
+
         return R.ok();
     }
 
+
+    /**
+     * 生成加工结算信息
+     * @return
+     */
+    @GlobalTransactional
+    @Override
+    public R insertSettleList() {
+
+        Example example = new Example(OmsProductionOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("settleFlag", ProductionOrderSettleFlagEnum.PRODUCTION_ORDER_SETTLE_FLAG_1.getCode());
+        List<OmsProductionOrder> list = omsProductionOrderMapper.selectByExample(example);
+        if (CollectionUtils.isEmpty(list)) {
+            return R.ok("无需要生成加工费的数据");
+        }
+        List<SmsSettleInfo> smsSettleInfoList = changeSmsSettleInfo(list);
+        //1.更新排产订单的settle标记
+        omsProductionOrderMapper.batchUpdateByOrderCode(list);
+        if (CollectionUtils.isEmpty(smsSettleInfoList)) {
+            return R.ok("无需要生成加工费的数据");
+        }
+        //2.生成加工费结算单
+        R result = remoteSettleInfoService.batchInsert(smsSettleInfoList);
+        if (!result.isSuccess()) {
+            log.error("新增加工费结算失败 res:{}", JSONObject.toJSONString(result));
+            throw new BusinessException(result.get("msg").toString());
+        }
+        return R.ok();
+    }
     /**
      * 转化加工费结算信息
      *
@@ -1613,83 +1631,88 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 cdFactoryInfo -> cdFactoryInfo, (key1, key2) -> key2));
 
         List<SmsSettleInfo> smsSettleInfoList = new ArrayList<>();
-        omsProductionOrderList.forEach(omsProductionOrder -> {
+        for(OmsProductionOrder omsProductionOrder : omsProductionOrderList){
             String outsourceType = omsProductionOrder.getOutsourceType();
-            Boolean flag = OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode().equals(outsourceType)
-                    || OutSourceTypeEnum.OUT_SOURCE_TYPE_QWW.getCode().equals(outsourceType);
-            if (flag) {
-                SmsSettleInfo smsSettleInfo = new SmsSettleInfo();
-                smsSettleInfo.setLineNo(omsProductionOrder.getProductLineCode());
-                String key = omsProductionOrder.getProductFactoryCode() + omsProductionOrder.getProductLineCode();
-                CdFactoryLineInfo cdFactoryLineInfo = supplierMap.get(key);
-                if (null == cdFactoryLineInfo || StringUtils.isBlank(cdFactoryLineInfo.getSupplierCode())) {
-                    throw new BusinessException("请维护工厂" + omsProductionOrder.getProductFactoryCode()
-                            + "线体" + omsProductionOrder.getProductLineCode() + "对应的供应商信息");
-                }
-                smsSettleInfo.setSupplierCode(cdFactoryLineInfo.getSupplierCode());
-                smsSettleInfo.setSupplierName(cdFactoryLineInfo.getSupplierDesc());
-                smsSettleInfo.setFactoryCode(omsProductionOrder.getProductFactoryCode());
-                smsSettleInfo.setProductOrderCode(omsProductionOrder.getProductOrderCode());
-                smsSettleInfo.setOrderStatus(SettleInfoOrderStatusEnum.ORDER_STATUS_1.getCode());
-                smsSettleInfo.setProductMaterialCode(omsProductionOrder.getProductMaterialCode());
-                smsSettleInfo.setProductMaterialName(omsProductionOrder.getProductMaterialDesc());
-                smsSettleInfo.setBomVersion(omsProductionOrder.getBomVersion());
-                smsSettleInfo.setOrderAmount(omsProductionOrder.getProductNum().intValue());
-                smsSettleInfo.setOutsourceWay(outsourceType);
-                CdFactoryInfo cdFactoryInfo = cdFactoryInfoMap.get(omsProductionOrder.getProductFactoryCode());
-                if (null == cdFactoryInfo) {
-                    log.error("获取工厂信息失败 工厂:{}", omsProductionOrder.getProductFactoryCode());
-                    throw new BusinessException("请维护工厂" + omsProductionOrder.getProductFactoryCode()
-                            + "信息");
-                }
-                String purchaseOrg = cdFactoryInfo.getPurchaseOrg();
-                if (StringUtils.isBlank(purchaseOrg)) {
-                    log.error("获取工厂对应采购组织信息失败 工厂:{}", omsProductionOrder.getProductFactoryCode());
-                    throw new BusinessException("请维护工厂" + omsProductionOrder.getProductFactoryCode()
-                            + "对应的采购组织信息");
-                }
-                String companyCode = cdFactoryInfo.getCompanyCode();
-                if (StringUtils.isBlank(companyCode)) {
-                    log.error("获取工厂对应公司信息失败 工厂:{}", omsProductionOrder.getProductFactoryCode());
-                    throw new BusinessException("请维护工厂" + omsProductionOrder.getProductFactoryCode()
-                            + "对应的公司信息");
-                }
-                smsSettleInfo.setCompanyCode(companyCode);
-                //根据物料号和委外方式cd_settle_product_material查加工费号
-                R settleProductMaterialR = remoteCdSettleProductMaterialService.selectOne(omsProductionOrder.getProductMaterialCode(),
-                        outsourceType);
-                if (!settleProductMaterialR.isSuccess()) {
-                    log.error("根据物料号和委外方式查加工费号异常 专用号:{},委外方式:{},res:{}", omsProductionOrder.getProductMaterialCode(),
-                            outsourceType, JSONObject.toJSON(settleProductMaterialR));
-                    throw new BusinessException("根据物料号和委外方式查加工费号异常" + settleProductMaterialR.get("msg").toString());
-                }
-                CdSettleProductMaterial cdSettleProductMaterial = settleProductMaterialR.getData(CdSettleProductMaterial.class);
-                //加工费号
-                String rawMaterialCode = cdSettleProductMaterial.getRawMaterialCode();
-                //根据加工费号,供应商,采购组织 查加工费
-                R maResult = remoteCdMaterialPriceInfoService.selectOneByCondition(rawMaterialCode, purchaseOrg,
-                        cdFactoryLineInfo.getSupplierCode());
-                if (!maResult.isSuccess()) {
-                    log.error("获取加工费失败 加工费号:{},采购组织:{},供应商:{}", rawMaterialCode,
-                            purchaseOrg, cdFactoryLineInfo.getSupplierCode());
-                    throw new BusinessException("获取加工费失败" + maResult.get("msg").toString());
-                }
-                CdMaterialPriceInfo cdMaterialPriceInfo = maResult.getData(CdMaterialPriceInfo.class);
-                if (null == cdMaterialPriceInfo.getProcessPrice()) {
-                    throw new BusinessException("请维护物料号" + omsProductionOrder.getProductMaterialCode()
-                            + "供应商" + cdFactoryLineInfo.getSupplierCode() + "采购组织" + purchaseOrg + "对应的加工费");
-                }
-                smsSettleInfo.setMachiningPrice(cdMaterialPriceInfo.getProcessPrice());
-                smsSettleInfo.setDelFlag(DeleteFlagConstants.NO_DELETED);
-                smsSettleInfo.setProductStartDate(DateUtils.dateTime(YYYY_MM_DD, omsProductionOrder.getProductStartDate()));
-                smsSettleInfo.setProductEndDate(DateUtils.dateTime(YYYY_MM_DD, omsProductionOrder.getProductEndDate()));
-                smsSettleInfo.setActualEndDate(omsProductionOrder.getActualEndDate());
-                smsSettleInfo.setConfirmAmont(0);
-                smsSettleInfo.setCreateBy("定时任务");
-                smsSettleInfo.setCreateTime(new Date());
-                smsSettleInfoList.add(smsSettleInfo);
+            StringBuffer settleMassagesBuffer = new StringBuffer();
+            SmsSettleInfo smsSettleInfo = new SmsSettleInfo();
+            smsSettleInfo.setLineNo(omsProductionOrder.getProductLineCode());
+            String key = omsProductionOrder.getProductFactoryCode() + omsProductionOrder.getProductLineCode();
+            CdFactoryLineInfo cdFactoryLineInfo = supplierMap.get(key);
+            if (null == cdFactoryLineInfo || StringUtils.isBlank(cdFactoryLineInfo.getSupplierCode())) {
+                settleMassagesBuffer.append("工厂:" + omsProductionOrder.getProductFactoryCode()
+                        + "线体:" + omsProductionOrder.getProductLineCode() + "工厂线体关系表无对应的供应商信息;");
+                omsProductionOrder.setSettleMessages(settleMassagesBuffer.toString());
+                continue;
             }
-        });
+            smsSettleInfo.setSupplierCode(cdFactoryLineInfo.getSupplierCode());
+            smsSettleInfo.setSupplierName(cdFactoryLineInfo.getSupplierDesc());
+            smsSettleInfo.setFactoryCode(omsProductionOrder.getProductFactoryCode());
+            smsSettleInfo.setProductOrderCode(omsProductionOrder.getProductOrderCode());
+            smsSettleInfo.setOrderStatus(SettleInfoOrderStatusEnum.ORDER_STATUS_1.getCode());
+            smsSettleInfo.setProductMaterialCode(omsProductionOrder.getProductMaterialCode());
+            smsSettleInfo.setProductMaterialName(omsProductionOrder.getProductMaterialDesc());
+            smsSettleInfo.setBomVersion(omsProductionOrder.getBomVersion());
+            smsSettleInfo.setOrderAmount(omsProductionOrder.getProductNum().intValue());
+            smsSettleInfo.setOutsourceWay(outsourceType);
+            CdFactoryInfo cdFactoryInfo = cdFactoryInfoMap.get(omsProductionOrder.getProductFactoryCode());
+            if (null == cdFactoryInfo) {
+                settleMassagesBuffer.append("工厂:" + omsProductionOrder.getProductFactoryCode() + "工厂信息表无对应的工厂信息;");
+                omsProductionOrder.setSettleMessages(settleMassagesBuffer.toString());
+                continue;
+            }
+            String purchaseOrg = cdFactoryInfo.getPurchaseOrg();
+            if (StringUtils.isBlank(purchaseOrg)) {
+                settleMassagesBuffer.append("工厂:" + omsProductionOrder.getProductFactoryCode() + "采购组织:" + purchaseOrg + "工厂信息表无对应的采购组织信息;");
+                omsProductionOrder.setSettleMessages(settleMassagesBuffer.toString());
+                continue;
+            }
+            String companyCode = cdFactoryInfo.getCompanyCode();
+            if (StringUtils.isBlank(companyCode)) {
+                settleMassagesBuffer.append("工厂:" + omsProductionOrder.getProductFactoryCode() + "客户编号:" + companyCode + "工厂信息表无对应的客户编号信息;");
+                omsProductionOrder.setSettleMessages(settleMassagesBuffer.toString());
+                continue;
+            }
+            smsSettleInfo.setCompanyCode(companyCode);
+            //根据物料号和委外方式cd_settle_product_material查加工费号
+            R settleProductMaterialR = remoteCdSettleProductMaterialService.selectOne(omsProductionOrder.getProductMaterialCode(),
+                    outsourceType);
+            if (!settleProductMaterialR.isSuccess()) {
+                settleMassagesBuffer.append("专用号:" + omsProductionOrder.getProductMaterialCode() + "委外方式:" + outsourceType
+                        + "查加工费号异常:" + settleProductMaterialR.get("msg").toString());
+                omsProductionOrder.setSettleMessages(settleMassagesBuffer.toString());
+                continue;
+            }
+            CdSettleProductMaterial cdSettleProductMaterial = settleProductMaterialR.getData(CdSettleProductMaterial.class);
+            //加工费号
+            String rawMaterialCode = cdSettleProductMaterial.getRawMaterialCode();
+            //根据加工费号,供应商,采购组织 查加工费
+            R maResult = remoteCdMaterialPriceInfoService.selectOneByCondition(rawMaterialCode, purchaseOrg,
+                    cdFactoryLineInfo.getSupplierCode());
+            if (!maResult.isSuccess()) {
+                settleMassagesBuffer.append("加工费号:" + rawMaterialCode + "采购组织:" + purchaseOrg + "供应商:" + cdFactoryLineInfo.getSupplierCode()
+                        + "获取加工费失败:" + maResult.get("msg").toString());
+                omsProductionOrder.setSettleMessages(settleMassagesBuffer.toString());
+                continue;
+            }
+            CdMaterialPriceInfo cdMaterialPriceInfo = maResult.getData(CdMaterialPriceInfo.class);
+            if (null == cdMaterialPriceInfo.getProcessPrice()) {
+                settleMassagesBuffer.append("加工费号:" + rawMaterialCode + "采购组织:" + purchaseOrg + "供应商:" + cdFactoryLineInfo.getSupplierCode()
+                        + "无对应的加工费" );
+                omsProductionOrder.setSettleMessages(settleMassagesBuffer.toString());
+                continue;
+            }
+            smsSettleInfo.setMachiningPrice(cdMaterialPriceInfo.getProcessPrice());
+            smsSettleInfo.setDelFlag(DeleteFlagConstants.NO_DELETED);
+            smsSettleInfo.setProductStartDate(DateUtils.dateTime(YYYY_MM_DD, omsProductionOrder.getProductStartDate()));
+            smsSettleInfo.setProductEndDate(DateUtils.dateTime(YYYY_MM_DD, omsProductionOrder.getProductEndDate()));
+            smsSettleInfo.setActualEndDate(omsProductionOrder.getActualEndDate());
+            smsSettleInfo.setConfirmAmont(0);
+            smsSettleInfo.setCreateBy("定时任务");
+            smsSettleInfo.setCreateTime(new Date());
+            smsSettleInfoList.add(smsSettleInfo);
+            omsProductionOrder.setSettleFlag(ProductionOrderSettleFlagEnum.PRODUCTION_ORDER_SETTLE_FLAG_2.getCode());
+            omsProductionOrder.setSettleMessages("已生成结算信息");
+        }
         return smsSettleInfoList;
     }
 
@@ -2029,6 +2052,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         }
         return R.ok();
     }
+
 
     /**
      * wms获取入库数量
