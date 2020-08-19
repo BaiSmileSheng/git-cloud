@@ -1,6 +1,8 @@
 package com.cloud.system.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.text.Convert;
+import com.cloud.common.redis.util.RedisUtils;
 import com.cloud.system.domain.entity.SysDictData;
 import com.cloud.system.mapper.SysDictDataMapper;
 import com.cloud.system.service.ISysDictDataService;
@@ -18,6 +20,8 @@ import java.util.List;
 public class SysDictDataServiceImpl implements ISysDictDataService {
     @Autowired
     private SysDictDataMapper dictDataMapper;
+    @Autowired
+    private RedisUtils redis;
 
     /**
      * 根据条件分页查询字典数据
@@ -95,6 +99,13 @@ public class SysDictDataServiceImpl implements ISysDictDataService {
      */
     @Override
     public int deleteDictDataByIds(String ids) {
+        if (StrUtil.isNotEmpty(ids)) {
+            String id = StrUtil.split(ids,StrUtil.C_COMMA).get(0);
+            SysDictData sysDictData = selectDictDataById(Long.parseLong(id));
+            String dictType = sysDictData.getDictType();
+            String rk = "dict:" + dictType;
+            redis.delete(rk);
+        }
         return dictDataMapper.deleteDictDataByIds(Convert.toStrArray(ids));
     }
 
