@@ -1994,7 +1994,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         //3.更新排产订单和加工费结算表(如果订单数量与交货数量一致则更新订单状态为已关单,更新实际结束时间actual_end_date)
         //key是生产订单号
         if (CollectionUtils.isEmpty(omsProductionOrderListGet)) {
-            return R.ok("SAP没有数据");
+            return R.ok("wms没有数据");
         }
 
         Map<String, OmsProductionOrder> omsProductionOrderMap = omsProductionOrderListReq.stream().collect(Collectors.toMap(
