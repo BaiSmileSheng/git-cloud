@@ -421,7 +421,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
     @Override
     @GlobalTransactional
     public R insertFeedback(List<OmsRawMaterialFeedback> omsRawMaterialFeedbacks, SysUser sysUser) {
-        if (BeanUtil.isEmpty(omsRawMaterialFeedbacks) && omsRawMaterialFeedbacks.size() <= 0) {
+        if (BeanUtil.isEmpty(omsRawMaterialFeedbacks) || omsRawMaterialFeedbacks.size() <= 0) {
             log.error("新增原材料反馈记录传入参数为空！");
             return R.error("新增原材料反馈记录传入参数为空!");
         }
