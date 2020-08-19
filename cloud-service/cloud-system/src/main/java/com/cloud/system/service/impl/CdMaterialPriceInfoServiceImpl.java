@@ -152,13 +152,13 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
     @Override
     public R selectMaterialPrice(Map<String,List<CdSettleProductMaterial>> map) {
         List<CdSettleProductMaterial> list = map.get("list");
-        Example example = new Example(CdSettleProductMaterial.class);
-        Example.Criteria criteria = example.createCriteria();
         if (ObjectUtil.isEmpty(list) || list.size() <= 0) {
             return R.error("排产订单导入查询非自制订单的SAP价格，传入参数为空!");
         }
         List<CdSettleProductMaterial> settleProductMaterials = new ArrayList<>();
         list.forEach(o ->{
+            Example example = new Example(CdSettleProductMaterial.class);
+            Example.Criteria criteria = example.createCriteria();
             criteria.andEqualTo("productMaterialCode",o.getProductMaterialCode());
             criteria.andEqualTo("outsourceWay",o.getOutsourceWay());
             CdSettleProductMaterial cdSettleProductMaterial = cdSettleProductMaterialService.findByExampleOne(example);
