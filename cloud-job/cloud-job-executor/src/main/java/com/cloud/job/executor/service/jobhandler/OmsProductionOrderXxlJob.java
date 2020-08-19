@@ -28,7 +28,7 @@ public class OmsProductionOrderXxlJob {
 
     /**
      * 定时任务SAP获取订单号
-     * 0 0 2 * * ?
+     * 0 0/10 * * * ?
      */
     @XxlJob("timeSAPGetProductOrderCode")
     public ReturnT<String> timeSAPGetProductOrderCode(String param) {
@@ -45,8 +45,26 @@ public class OmsProductionOrderXxlJob {
     }
 
     /**
+     * 定时任务生成加工结算信息
+     * 0 0 0 * * ?
+     */
+    @XxlJob("timeInsertSettleList")
+    public ReturnT<String> timeInsertSettleList(String param) {
+        log.info("--------------定时任务生成加工结算信息开始----------");
+        R r=remoteProductionOrderService.timeInsertSettleList();
+        XxlJobLogger.log(StrUtil.format("定时任务生成加工结算信息结果：{}",r.toString()));
+        log.info(StrUtil.format("定时任务生成加工结算信息结果：{}",r.toString()));
+        log.info("--------------定时任务生成加工结算信息结束------------");
+        if (r.isSuccess()) {
+            return ReturnT.SUCCESS;
+        }else{
+            return ReturnT.FAIL;
+        }
+    }
+
+    /**
      * 定时任务获取入库量
-     * TODO
+     * 0 0 0 * * ?
      */
     @XxlJob("timeGetConfirmAmont")
     public ReturnT<String> timeGetConfirmAmont(String param) {
