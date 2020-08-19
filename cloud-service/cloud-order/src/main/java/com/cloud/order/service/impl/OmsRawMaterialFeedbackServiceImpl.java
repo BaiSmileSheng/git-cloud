@@ -288,7 +288,9 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             OmsRawMaterialFeedback omsRawMaterialFeedback = omsRawMaterialFeedbackMapper.selectByPrimaryKey(id);
             if (BeanUtil.isNotEmpty(omsRawMaterialFeedback)
                     && updateSum.compareTo(omsRawMaterialFeedback.getProductContentNum()) <= 0) {
-                omsRawMaterialFeedbackMapper.updateStatusById(FEEDBACK_STATUS_ONE, id);
+                omsRawMaterialFeedback.setUpdateBy(sysUser.getLoginName());
+                omsRawMaterialFeedback.setStatus(FEEDBACK_STATUS_ONE);
+                omsRawMaterialFeedbackMapper.updateByPrimaryKeySelective(omsRawMaterialFeedback);
             }
         }
         log.info("============快捷修改排产订单量方法  end============");
@@ -387,6 +389,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
                         omsProductionOrderDetail.setProductOrderCode(o.getOrderCode());
                         omsProductionOrderDetail.setMaterialCode(f.getRawMaterialCode());
                         omsProductionOrderDetail.setStatus(ProductOrderConstants.DETAIL_STATUS_ZERO);
+                        omsProductionOrderDetail.setUpdateBy(sysUser.getLoginName());
                         omsProductionOrderDetails.add(omsProductionOrderDetail);
                     }
                 })
@@ -418,7 +421,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
     @Override
     @GlobalTransactional
     public R insertFeedback(List<OmsRawMaterialFeedback> omsRawMaterialFeedbacks, SysUser sysUser) {
-        if (BeanUtil.isEmpty(omsRawMaterialFeedbacks) && omsRawMaterialFeedbacks.size() <= 0) {
+        if (BeanUtil.isEmpty(omsRawMaterialFeedbacks) || omsRawMaterialFeedbacks.size() <= 0) {
             log.error("新增原材料反馈记录传入参数为空！");
             return R.error("新增原材料反馈记录传入参数为空!");
         }
