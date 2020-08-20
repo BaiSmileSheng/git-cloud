@@ -42,6 +42,8 @@
     `status`,
     audit_status,
     sap_messages,
+    settle_flag,
+    settle_messages,
     del_flag,
     remark,
     create_time,
@@ -87,6 +89,8 @@
         <result property="status" column="status"/>
         <result property="auditStatus" column="audit_status"/>
         <result property="sapMessages" column="sap_messages"/>
+        <result property="settleFlag" column="settle_flag"/>
+        <result property="settleMessages" column="settle_messages"/>
         <result property="delFlag" column="del_flag"/>
         <result property="remark" column="remark"/>
         <result property="createTime" column="create_time"/>
@@ -133,6 +137,8 @@
                status,
                audit_status,
                sap_messages,
+               settle_flag,
+               settle_messages,
                del_flag,
                remark,
                create_time,
@@ -241,6 +247,12 @@
                 </if>
                 <if test="item.newVersion != null and item.newVersion != ''">
                     new_version = #{item.newVersion},
+                </if>
+                <if test="item.settleFlag != null and item.settleFlag != ''">
+                    settle_flag = #{item.settleFlag},
+                </if>
+                <if test="item.settleMessages != null and item.settleMessages != ''">
+                    settle_messages = #{item.settleMessages},
                 </if>
                 <if test="item.updateBy != null and item.updateBy != ''">
                     update_by = #{item.updateBy},
