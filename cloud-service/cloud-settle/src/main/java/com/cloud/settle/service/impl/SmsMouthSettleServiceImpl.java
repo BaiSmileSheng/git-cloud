@@ -21,6 +21,7 @@ import com.cloud.settle.mapper.SmsQualityOrderMapper;
 import com.cloud.settle.service.*;
 import com.cloud.system.domain.entity.SysInterfaceLog;
 import com.cloud.system.enums.SettleRatioEnum;
+import com.cloud.settle.enums.SettleUpdateFlagEnum;
 import com.cloud.system.feign.RemoteInterfaceLogService;
 import com.cloud.system.feign.RemoteSequeceService;
 import lombok.extern.slf4j.Slf4j;
@@ -36,9 +37,13 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * 月度结算信息 Service业务层处理
@@ -1242,6 +1247,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         return R.data(map);
     }
 
+
     /**
      * 创建报账单并修改月度结算状态回填kems单号
      * @param smsMouthSettle
@@ -1324,5 +1330,110 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         }
         baseMultiItemClaimSaveRequest.setClaimDetailList(claimDetailList);
         return baseMultiItemClaimSaveRequest;
+    }
+
+    /**
+     * 定时任务更新索赔单已兑现的为已结算
+     */
+    @Override
+    public R timeUpdateSettle() {
+        //1.查 update_settle_flag 为待更新的
+        Example exampleMouthSettle = new Example(SmsMouthSettle.class);
+        Example.Criteria criteriaMouthSettle = exampleMouthSettle.createCriteria();
+        criteriaMouthSettle.andEqualTo("updateSettleFlag", SettleUpdateFlagEnum.UPDATE_FLAG_0.getCode());
+        List<SmsMouthSettle> smsMouthSettleList = smsMouthSettleMapper.selectByExample(exampleMouthSettle);
+        if(CollectionUtils.isEmpty(smsMouthSettleList)){
+            return R.ok("无需更新数据");
+        }
+        List<String> settleNoList = smsMouthSettleList.stream().map(SmsMouthSettle :: getSettleNo).collect(Collectors.toList());
+        //2.查索赔对象明细
+        Example exampleClaimCashDetail = new Example(SmsClaimCashDetail.class);
+        Example.Criteria criteriaClaimCashDetail = exampleClaimCashDetail.createCriteria();
+        criteriaClaimCashDetail.andIn("settleNo",settleNoList);
+        List<SmsClaimCashDetail> smsClaimCashDetailList = smsClaimCashDetailService.selectByExample(exampleClaimCashDetail);
+        if(CollectionUtils.isEmpty(smsClaimCashDetailList)){
+            return R.ok("索赔兑现明细");
+        }
+        Map<String, Set<String>> map = new HashMap<>();//key是索赔类型,value是索赔单号集合
+        smsClaimCashDetailList.forEach(smsClaimCashDetail ->{
+            String claimType = smsClaimCashDetail.getClaimType();
+            if(map.containsKey(claimType)){
+                Set<String> set = map.get(claimType);
+                set.add(smsClaimCashDetail.getSettleNo());
+                map.put(claimType,set);
+            }else {
+                Set<String> set = new HashSet<>();
+                set.add(smsClaimCashDetail.getSettleNo());
+                map.put(claimType,set);
+            }
+        });
+        //3.更新对应的索赔单状态
+        updateDbSettle(map);
+        //4.更新月度结算更新标记
+        Example exampleMouthSettleUpdate = new Example(SmsMouthSettle.class);
+        Example.Criteria criteriaMouthSettleUpdate = exampleMouthSettleUpdate.createCriteria();
+        criteriaMouthSettleUpdate.andEqualTo("updateSettleFlag", SettleUpdateFlagEnum.UPDATE_FLAG_0.getCode());
+        SmsMouthSettle smsMouthSettleReq = new SmsMouthSettle();
+        smsMouthSettleReq.setUpdateSettleFlag(SettleUpdateFlagEnum.UPDATE_FLAG_1.getCode());
+        smsMouthSettleMapper.updateByConditionSelective(smsMouthSettleReq,exampleMouthSettleUpdate);
+        return R.ok();
+    }
+
+    /**
+     * 更新索赔单状态为已结算
+     * @param map
+     */
+    private void updateDbSettle(Map<String, Set<String>> map) {
+        map.keySet().forEach(claimType ->{
+            Set<String> settleList = map.get(claimType);
+            if(!CollectionUtils.isEmpty(settleList)){
+                if(SettleRatioEnum.SPLX_BF.getCode().equals(claimType)){
+                    Example exampleScrapOrder = new Example(SmsScrapOrder.class);
+                    Example.Criteria criteriaScrapOrder = exampleScrapOrder.createCriteria();
+                    criteriaScrapOrder.andEqualTo("scrapStatus", ScrapOrderStatusEnum.BF_ORDER_STATUS_YDX.getCode());
+                    criteriaScrapOrder.andIn("settleNo",settleList);
+                    SmsScrapOrder smsScrapOrderReq = new SmsScrapOrder();
+                    smsScrapOrderReq.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_JSWC.getCode());
+                    smsScrapOrderService.updateByExampleSelective(smsScrapOrderReq,exampleScrapOrder);
+                }
+                if(SettleRatioEnum.SPLX_WH.getCode().equals(claimType)){
+                    Example exampleSupplementaryOrder = new Example(SmsSupplementaryOrder.class);
+                    Example.Criteria criteriaSupplementaryOrder = exampleSupplementaryOrder.createCriteria();
+                    criteriaSupplementaryOrder.andEqualTo("stuffStatus", SupplementaryOrderStatusEnum.WH_ORDER_STATUS_YDX.getCode());
+                    criteriaSupplementaryOrder.andIn("settleNo",settleList);
+                    SmsSupplementaryOrder smsSupplementaryOrderReq = new SmsSupplementaryOrder();
+                    smsSupplementaryOrderReq.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JSWC.getCode());
+                    smsSupplementaryOrderService.updateByExampleSelective(smsSupplementaryOrderReq,exampleSupplementaryOrder);
+                }
+                if(SettleRatioEnum.SPLX_ZL.getCode().equals(claimType)){
+                    Example exampleQualityOrder = new Example(SmsQualityOrder.class);
+                    Example.Criteria criteriaQualityOrder = exampleQualityOrder.createCriteria();
+                    criteriaQualityOrder.andEqualTo("qualityStatus", QualityStatusEnum.QUALITY_STATUS_13.getCode());
+                    criteriaQualityOrder.andIn("settleNo",settleList);
+                    SmsQualityOrder smsQualityOrderReq = new SmsQualityOrder();
+                    smsQualityOrderReq.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_12.getCode());
+                    smsQualityOrderMapper.updateByExampleSelective(smsQualityOrderReq,exampleQualityOrder);
+                }
+                if(SettleRatioEnum.SPLX_QT.getCode().equals(claimType)){
+                    Example exampleClaimOther = new Example(SmsClaimOther.class);
+                    Example.Criteria criteriaClaimOther = exampleClaimOther.createCriteria();
+                    criteriaClaimOther.andEqualTo("claimOtherStatus", ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_13.getCode());
+                    criteriaClaimOther.andIn("settleNo",settleList);
+                    SmsClaimOther smsClaimOtherReq = new SmsClaimOther();
+                    smsClaimOtherReq.setClaimOtherStatus(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_12.getCode());
+                    smsClaimOtherMapper.updateByExampleSelective(smsClaimOtherReq,exampleClaimOther);
+                }
+                if(SettleRatioEnum.SPLX_YQ.getCode().equals(claimType)){
+                    Example exampleDelaysDelivery = new Example(SmsDelaysDelivery.class);
+                    Example.Criteria criteriaDelaysDelivery = exampleDelaysDelivery.createCriteria();
+                    criteriaDelaysDelivery.andEqualTo("delaysStatus", DeplayStatusEnum.DELAYS_STATUS_13.getCode());
+                    criteriaDelaysDelivery.andIn("settleNo",settleList);
+                    SmsDelaysDelivery smsDelaysDeliveryReq = new SmsDelaysDelivery();
+                    smsDelaysDeliveryReq.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_12.getCode());
+                    smsDelaysDeliveryMapper.updateByExampleSelective(smsDelaysDeliveryReq,exampleDelaysDelivery);
+                }
+            }
+
+        });
     }
 }

@@ -14,6 +14,7 @@ import com.cloud.settle.service.ISmsMouthSettleService;
 import com.cloud.settle.webService.fm.ErpPayoutReceiveServiceServiceLocator;
 import com.cloud.settle.webService.fm.QryPaysSoapBindingStub;
 import com.cloud.system.domain.entity.SysInterfaceLog;
+import com.cloud.settle.enums.SettleUpdateFlagEnum;
 import com.cloud.system.feign.RemoteInterfaceLogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,6 @@ import javax.xml.namespace.QName;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -101,6 +101,7 @@ public class QryPaysSoapServiceImpl implements IQryPaysSoapService {
                     Date kmsPayDate = DateUtils.parseDate(qryPaysSoapResponse.getTradedate());
                     smsMouthSettleReq.setKmsPayDate(kmsPayDate);
                     smsMouthSettleReq.setKmsNo(qryPaysSoapResponse.getKmsNo());
+                    smsMouthSettleReq.setUpdateSettleFlag(SettleUpdateFlagEnum.UPDATE_FLAG_0.getCode());
                     Example example = new Example(SmsMouthSettle.class);
                     Example.Criteria criteria = example.createCriteria();
                     criteria.andEqualTo("kmsNo",smsMouthSettleReq.getKmsNo());
