@@ -21,5 +21,12 @@ public interface RemoteMouthSettleService {
     @PostMapping("mouthSettle/countMonthSettle")
     R countMonthSettle();
 
+    /**
+     * 定时任务更新索赔单已兑现的为已结算
+     * @return R
+     */
+    @PostMapping("mouthSettle/timeUpdateSettle")
+    R timeUpdateSettle();
+
 
 }

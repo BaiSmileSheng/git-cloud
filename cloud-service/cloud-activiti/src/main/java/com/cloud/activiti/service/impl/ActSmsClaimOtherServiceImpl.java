@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -309,6 +310,7 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         //小微主审批: 将待小微主审核5--->已结算12   驳回将待小微主审核5--->待供应商确认7
         if(flagBizResult){
             smsClaimOther.setClaimOtherStatus(ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_12.getCode());
+            smsClaimOther.setSettleFee(BigDecimal.ZERO);
             //发送邮件
             String contentDetail = "申诉通过";
             supplierSendEmail(claimCode,supplierCode,contentDetail);

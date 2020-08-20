@@ -53,13 +53,9 @@ public class SmsInvoiceInfoServiceImpl extends BaseServiceImpl<SmsInvoiceInfo> i
         criteria.andEqualTo("delFlag", DeleteFlagConstants.NO_DELETED);
         SmsMouthSettle smsMouthSettle = smsMouthSettleService.selectOneByExample(example);
         if(null == smsMouthSettle || !MonthSettleStatusEnum.YD_SETTLE_STATUS_DFPLR.getCode().equals(smsMouthSettle.getSettleStatus())){
-            throw new BusinessException("月度结算单已确认,不允许修改发票");
+            throw new BusinessException("发票已提交,不允许修改发票");
         }
-        //2.按结算单号先删除后增加
-        Example exampleInvoiceInfo = new Example(SmsInvoiceInfo.class);
-        Example.Criteria criteriaInvoiceInfo = exampleInvoiceInfo.createCriteria();
-        criteriaInvoiceInfo.andEqualTo("mouthSettleId",mouthSettleId);
-        smsInvoiceInfoMapper.deleteByExample(exampleInvoiceInfo);
+        //2.校验金额相差不足1才可提交,按结算单号先删除后增加
         List<SmsInvoiceInfo> smsInvoiceInfoList = smsInvoiceInfoS.getSmsInvoiceInfoList();
         BigDecimal invoiceFeeAll = BigDecimal.ZERO;
         if(!CollectionUtils.isEmpty(smsInvoiceInfoList)){
@@ -68,12 +64,27 @@ public class SmsInvoiceInfoServiceImpl extends BaseServiceImpl<SmsInvoiceInfo> i
                 smsInvoiceInfo.setDelFlag(DeleteFlagConstants.NO_DELETED);
                 invoiceFeeAll = invoiceFeeAll.add(smsInvoiceInfo.getInvoiceAmount());
             }
+        }
+        BigDecimal includeTaxeFee = smsMouthSettle.getIncludeTaxeFee();
+        BigDecimal includeTaxeFeeX = includeTaxeFee.subtract(BigDecimal.ONE);
+        BigDecimal includeTaxeFeeD = includeTaxeFee.add(BigDecimal.ONE);
+        //如果比最小值小 比最大值大,则不允许修改
+        if(invoiceFeeAll.compareTo(includeTaxeFeeX) == -1
+                || invoiceFeeAll.compareTo(includeTaxeFeeD) == 1){
+            throw new BusinessException("请确认填写发票总金额和月度结算含税金额相差不到1");
+        }
+        Example exampleInvoiceInfo = new Example(SmsInvoiceInfo.class);
+        Example.Criteria criteriaInvoiceInfo = exampleInvoiceInfo.createCriteria();
+        criteriaInvoiceInfo.andEqualTo("mouthSettleId",mouthSettleId);
+        smsInvoiceInfoMapper.deleteByExample(exampleInvoiceInfo);
+        if(!CollectionUtils.isEmpty(smsInvoiceInfoList)){
             smsInvoiceInfoMapper.insertList(smsInvoiceInfoList);
         }
         //3.修改月度结算单发票金额
         SmsMouthSettle smsMouthSettleReq = new SmsMouthSettle();
         smsMouthSettleReq.setId(smsMouthSettle.getId());
         smsMouthSettleReq.setInvoiceFee(invoiceFeeAll);
+        smsMouthSettleReq.setSettleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_NKDQR.getCode());
         smsMouthSettleService.updateByPrimaryKeySelective(smsMouthSettleReq);
         return R.ok();
     }

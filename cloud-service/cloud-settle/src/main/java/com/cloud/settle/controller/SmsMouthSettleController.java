@@ -295,4 +295,14 @@ public class SmsMouthSettleController extends BaseController {
     public R spPrint(String settleNo) {
         return smsMouthSettleService.spPrint(settleNo);
     }
+
+    /**
+     * 定时任务更新索赔单已兑现的为已结算
+     */
+    @PostMapping("timeUpdateSettle")
+    @OperLog(title = "定时任务更新索赔单已兑现的为已结算 ", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "定时任务更新索赔单已兑现的为已结算 ", response = R.class)
+    public R timeUpdateSettle(){
+        return smsMouthSettleService.timeUpdateSettle();
+    }
 }

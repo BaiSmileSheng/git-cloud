@@ -1,6 +1,7 @@
 package com.cloud.job.executor.service.jobhandler;
 
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.core.domain.R;
 import com.cloud.settle.feign.RemoteMouthSettleService;
 import com.cloud.settle.feign.RemoteQryPaysSoapService;
@@ -54,12 +55,32 @@ public class SmsMouthSettleXxlJob {
      */
     @XxlJob("qryPaysSoapHandler")
     public ReturnT<String> qryPaysSoapHandler(String param) {
-        log.info("--------------月度结算定时任务查询付款结果开始----------");
+        XxlJobLogger.log("--------------月度结算定时任务查询付款结果开始----------");
         R r=remoteQryPaysSoapService.updateKmsStatus();
-        log.info("--------------月度结算定时任务查询付款结果结束-------------");
+        XxlJobLogger.log("--------------月度结算定时任务查询付款结果结束-------------");
         if (r.isSuccess()) {
             return ReturnT.SUCCESS;
         }else{
+            XxlJobLogger.log("月度结算定时任务查询付款结果异常 :{}", JSONObject.toJSONString(r));
+            return ReturnT.FAIL;
+        }
+    }
+
+    /**
+     * 定时任务更新索赔单已兑现的为已结算
+     * 每天凌晨执行 0 0 0 * * ?
+     * @param param
+     * @return
+     */
+    @XxlJob("timeUpdateSettle")
+    public ReturnT<String> timeUpdateSettle(String param) {
+        XxlJobLogger.log("--------------定时任务更新索赔单已兑现的为已结算开始----------");
+        R r=remoteMouthSettleService.timeUpdateSettle();
+        XxlJobLogger.log("--------------定时任务更新索赔单已兑现的为已结算结束-------------");
+        if (r.isSuccess()) {
+            return ReturnT.SUCCESS;
+        }else{
+            XxlJobLogger.log("定时任务更新索赔单已兑现的为已结算异常 :{}", JSONObject.toJSONString(r));
             return ReturnT.FAIL;
         }
     }
