@@ -52,7 +52,7 @@ public class SmsInvoiceInfoServiceImpl extends BaseServiceImpl<SmsInvoiceInfo> i
         criteria.andEqualTo("settleNo",mouthSettleId);
         criteria.andEqualTo("delFlag", DeleteFlagConstants.NO_DELETED);
         SmsMouthSettle smsMouthSettle = smsMouthSettleService.selectOneByExample(example);
-        if(null == smsMouthSettle || !MonthSettleStatusEnum.YD_SETTLE_STATUS_DJS.getCode().equals(smsMouthSettle.getSettleStatus())){
+        if(null == smsMouthSettle || !MonthSettleStatusEnum.YD_SETTLE_STATUS_DFPLR.getCode().equals(smsMouthSettle.getSettleStatus())){
             throw new BusinessException("月度结算单已确认,不允许修改发票");
         }
         //2.按结算单号先删除后增加

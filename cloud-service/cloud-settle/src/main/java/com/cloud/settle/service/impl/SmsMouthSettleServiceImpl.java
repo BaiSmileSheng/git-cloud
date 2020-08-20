@@ -5,7 +5,6 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
-import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
@@ -215,7 +214,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
                     .claimAmount(claimPrice).noCashAmount(noCashAmount)
                     .cashAmount(cashAmount).excludingFee(excludingFee)
                     .includeTaxeFee(excludingFee.multiply(BigDecimal.valueOf(1.13)))
-                    .settleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_DJS.getCode()).build();
+                    .settleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_DFPLR.getCode()).build();
             smsMouthSettle.setDelFlag("0");
             smsMouthSettle.setCreateBy("定时任务");
             smsMouthSettle.setCreateTime(date);
@@ -1106,18 +1105,18 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         if (!settleStatus.equals(smsMouthSettle.getSettleStatus())) {
             return R.error("数据状态不允许此操作！");
         }
-        if(MonthSettleStatusEnum.YD_SETTLE_STATUS_DJS.getCode().equals(settleStatus)){
+        if(MonthSettleStatusEnum.YD_SETTLE_STATUS_NKDQR.getCode().equals(settleStatus)){
             //内控确认
             BigDecimal includeTaxeFee = smsMouthSettle.getIncludeTaxeFee();
             BigDecimal invoiceFee = smsMouthSettle.getInvoiceFee();
             if ((includeTaxeFee.subtract(invoiceFee).abs()).compareTo(BigDecimal.ONE)>0) {
                 return R.error("含税金额与发票金额不等，不允许提交！");
             }
-            smsMouthSettle.setSettleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_NKQR.getCode());
+            smsMouthSettle.setSettleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_XWZDQR.getCode());
             updateByPrimaryKeySelective(smsMouthSettle);
-        }else if(MonthSettleStatusEnum.YD_SETTLE_STATUS_NKQR.getCode().equals(settleStatus)){
+        }else if(MonthSettleStatusEnum.YD_SETTLE_STATUS_XWZDQR.getCode().equals(settleStatus)){
             //小微主确认
-            smsMouthSettle.setSettleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_XWZQR.getCode());
+            smsMouthSettle.setSettleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_DFK.getCode());
             updateByPrimaryKeySelective(smsMouthSettle);
             //传KMS
             createMultiItemClaim(smsMouthSettle);
