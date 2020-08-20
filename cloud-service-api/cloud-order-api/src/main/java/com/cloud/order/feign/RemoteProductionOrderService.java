@@ -58,6 +58,12 @@ public interface RemoteProductionOrderService {
     R timeSAPGetProductOrderCode();
 
     /**
+     * 定时任务生成加工结算信息
+     */
+    @PostMapping("productionOrder/timeInsertSettleList")
+    R timeInsertSettleList();
+
+    /**
      * 定时获取入库量
      * @return
      */

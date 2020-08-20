@@ -57,7 +57,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         if (smsScrapOrder.getId() == null) {
             smsScrapOrder.setCreateBy(sysUser.getLoginName());
             smsScrapOrder.setSubmitDate(DateUtil.date());
-            smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
+            smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYSH.getCode());
             R rAdd = remoteSmsScrapOrderService.addSave(smsScrapOrder);
             if (!rAdd.isSuccess()) {
                 log.info("报废申请保存结果：{}", rAdd.toString());
@@ -69,7 +69,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
             //编辑提交  更新数据
             smsScrapOrder.setUpdateBy(sysUser.getLoginName());
             smsScrapOrder.setSubmitDate(DateUtil.date());
-            smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
+            smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYSH.getCode());
             R rUpdate = remoteSmsScrapOrderService.editSave(smsScrapOrder);
             if (!rUpdate.isSuccess()) {
                 log.info("报废申请更新结果：{}", rUpdate.toString());
@@ -112,7 +112,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         }
         //更新数据
         smsScrapOrder.setSubmitDate(DateUtil.date());
-        smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
+        smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYSH.getCode());
         R rUpdate = remoteSmsScrapOrderService.update(smsScrapOrder);
         if (!rUpdate.isSuccess()) {
             throw new BusinessException(rUpdate.getStr("msg"));
@@ -164,7 +164,14 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
                 if (!r.isSuccess()) {
                     throw new BusinessException(r.getStr("msg"));
                 }
-            } else {
+            }else if(ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYSH.getCode().equals(smsScrapOrder.getScrapStatus())){
+                //排产员审核通过至业务科审核
+                smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
+                R r = remoteSmsScrapOrderService.update(smsScrapOrder);
+                if (!r.isSuccess()) {
+                    throw new BusinessException(r.getStr("msg"));
+                }
+            }else {
                 log.error(StrUtil.format("(报废)此状态数据不允许审核：{}", smsScrapOrder.getScrapStatus()));
                 return R.error("此状态数据不允许审核！");
             }
@@ -172,6 +179,12 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
             //审批驳回
             if (ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode().equals(smsScrapOrder.getScrapStatus())) {
                 smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKBH.getCode());
+                R r = remoteSmsScrapOrderService.update(smsScrapOrder);
+                if (!r.isSuccess()) {
+                    throw new BusinessException(r.getStr("msg"));
+                }
+            }else if(ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYSH.getCode().equals(smsScrapOrder.getScrapStatus())) {
+                smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYBH.getCode());
                 R r = remoteSmsScrapOrderService.update(smsScrapOrder);
                 if (!r.isSuccess()) {
                     throw new BusinessException(r.getStr("msg"));

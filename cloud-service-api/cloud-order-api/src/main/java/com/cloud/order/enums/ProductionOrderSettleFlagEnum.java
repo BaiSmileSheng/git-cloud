@@ -1,23 +1,20 @@
-package com.cloud.settle.enums;
+package com.cloud.order.enums;
 
 /**
- * 月度结算单状态
- * @Author cs
- * @Date 2020-05-26
+ * 排产订单生成加工费结算单标记枚举
+ * @Author lihongxia
+ * @Date 2020-08-18
  */
-public enum MonthSettleStatusEnum {
+public enum ProductionOrderSettleFlagEnum {
 
-    YD_SETTLE_STATUS_DFPLR("11","待发票录入"),
-    YD_SETTLE_STATUS_JSWC("12","结算完成"),
-    YD_SETTLE_STATUS_NKDQR("13","内控待确认"),
-    YD_SETTLE_STATUS_XWZDQR("14","小微主待确认"),
-    YD_SETTLE_STATUS_DFK("15","待付款");
-
-
+    //0:无需生成,1:待生成,2:已生成
+    PRODUCTION_ORDER_SETTLE_FLAG_0("0","无需生成"),
+    PRODUCTION_ORDER_SETTLE_FLAG_1("1","待生成"),
+    PRODUCTION_ORDER_SETTLE_FLAG_2("2","已生成"),
+    ;
     private String code;
     private String msg;
-
-    MonthSettleStatusEnum(String code, String msg) {
+    ProductionOrderSettleFlagEnum(String code, String msg) {
         this.code = code;
         this.msg = msg;
     }
@@ -31,7 +28,7 @@ public enum MonthSettleStatusEnum {
     }
 
     public static String getMsgByCode(String code) {
-        for (MonthSettleStatusEnum bt : values()) {
+        for (ProductionOrderSettleFlagEnum bt : values()) {
             if (bt.code .equals(code) ) {
                 return bt.getMsg();
             }
@@ -40,7 +37,7 @@ public enum MonthSettleStatusEnum {
     }
 
     public static String getCodeByMsg(String msg) {
-        for (MonthSettleStatusEnum bt : values()) {
+        for (ProductionOrderSettleFlagEnum bt : values()) {
             if (bt.msg .equals(msg) ) {
                 return bt.getCode();
             }

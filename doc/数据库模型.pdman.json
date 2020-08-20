@@ -4643,6 +4643,19 @@
               "chnname": "SAP返回信息"
             },
             {
+              "name": "settle_flag",
+              "type": "DefaultString",
+              "remark": "0:无需生成,1:需要生成",
+              "chnname": "生成加工结算标记",
+              "defaultValue": "'0'"
+            },
+            {
+              "name": "settle_messages",
+              "type": "VARCHAR_1000",
+              "remark": "",
+              "chnname": "生成加工结算错误信息"
+            },
+            {
               "name": "del_flag",
               "type": "Char",
               "remark": "0：有效，1：删除",

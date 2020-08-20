@@ -304,6 +304,18 @@ public class OmsProductionOrder extends BaseEntity {
     private String auditStatus;
 
     /**
+     * 生成加工结算标记
+     */
+    @ApiModelProperty(value = "生成加工结算标记",notes = "0:无需生成,1:待生成,2.已生成")
+    private String settleFlag;
+
+    /**
+     * 生成加工结算错误信息
+     */
+    @ApiModelProperty(value = "生成加工结算错误信息")
+    private String settleMessages;
+
+    /**
      * 是否删除 0：有效，1：删除
      */
     private String delFlag;

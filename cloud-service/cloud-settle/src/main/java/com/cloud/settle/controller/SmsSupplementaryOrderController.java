@@ -99,8 +99,6 @@ public class SmsSupplementaryOrderController extends BaseController {
                 if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ)) {
                     List<String> statusXWZ = CollectionUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode(),
                             SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZBH.getCode(),
-                            SupplementaryOrderStatusEnum.WH_ORDER_STATUS_SAPSUCCESS.getCode(),
-                            SupplementaryOrderStatusEnum.WH_ORDER_STATUS_SAPFAIL.getCode(),
                             SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode(),
                             SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JSWC.getCode(),
                             SupplementaryOrderStatusEnum.WH_ORDER_STATUS_YDX.getCode(),
@@ -319,8 +317,6 @@ public class SmsSupplementaryOrderController extends BaseController {
                     //小微主查看jit审核成功的自己工厂权限下的物耗申请单
                     List<String> statusXWZ = CollectionUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode(),
                             SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZBH.getCode(),
-                            SupplementaryOrderStatusEnum.WH_ORDER_STATUS_SAPSUCCESS.getCode(),
-                            SupplementaryOrderStatusEnum.WH_ORDER_STATUS_SAPFAIL.getCode(),
                             SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode(),
                             SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JSWC.getCode(),
                             SupplementaryOrderStatusEnum.WH_ORDER_STATUS_YDX.getCode(),
