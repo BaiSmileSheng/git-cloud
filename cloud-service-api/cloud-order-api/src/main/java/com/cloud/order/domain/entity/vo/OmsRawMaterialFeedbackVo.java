@@ -114,9 +114,9 @@ public class OmsRawMaterialFeedbackVo {
     private BigDecimal rawMaterialContentNum;
 
     /**
-     * 状态 0：未审核，1：通过，2：驳回，3：未审核已下达
+     * 状态 0：未审核，1：通过，2：驳回
      */
-    @ApiModelProperty(value = "状态 0：未审核，1：通过，2：驳回，3：未审核已下达")
+    @ApiModelProperty(value = "状态 0：未审核，1：通过，2：驳回")
     private String status;
 
     /**

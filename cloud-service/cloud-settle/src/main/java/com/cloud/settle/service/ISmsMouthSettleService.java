@@ -39,4 +39,9 @@ public interface ISmsMouthSettleService extends BaseService<SmsMouthSettle>{
      * @return
      */
     R spPrint(String settleNo);
+
+    /**
+     * 定时任务更新索赔单已兑现的为已结算
+     */
+    R timeUpdateSettle();
 }

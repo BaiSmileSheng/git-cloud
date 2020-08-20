@@ -149,6 +149,11 @@ public class SmsMouthSettle extends BaseEntity {
     private String settleStatus;
 
     /**
+     * 更新索赔单标记 0:待更新,1:已更新(月度结算为已结算是更新已兑现的索赔单)
+     */
+    @ApiModelProperty(value = "更新索赔单标记 0:待更新,1:已更新(月度结算为已结算是更新已兑现的索赔单)")
+    private String updateSettleFlag;
+    /**
      * 删除状态 0：有效，1：删除
      */
     private String delFlag;
