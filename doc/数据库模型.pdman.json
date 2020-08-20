@@ -4645,7 +4645,7 @@
             {
               "name": "settle_flag",
               "type": "DefaultString",
-              "remark": "0:无需生成,1:需要生成",
+              "remark": "0:无需生成,1:待生成,2.已生成",
               "chnname": "生成加工结算标记",
               "defaultValue": "'0'"
             },
@@ -9358,6 +9358,12 @@
               "remark": "11待结算、13内控确认、14小微主确认、15待付款、12结算完成",
               "chnname": "结算状态",
               "defaultValue": "''"
+            },
+            {
+              "name": "update_settle_flag",
+              "type": "VARCHAR_32",
+              "remark": "0:待更新,1:已更新(月度结算为已结算是更新已兑现的索赔单)",
+              "chnname": "更新索赔单标记"
             },
             {
               "name": "del_flag",

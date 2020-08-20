@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -308,6 +309,7 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
         if(flagBizResult){
             //质量部部长审批: 将供应商申诉4--->待小微主审核5 //小微主审批: 将待小微主审核5--->已结算12
             smsQualityOrder.setQualityStatus(QualityStatusEnum.QUALITY_STATUS_12.getCode());
+            smsQualityOrder.setSettleFee(BigDecimal.ZERO);
             //发送邮件
             String contentDetail = "申诉通过";
             supplierSendEmail(qualityNo,supplierCode,contentDetail);
