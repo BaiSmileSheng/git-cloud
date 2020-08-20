@@ -101,7 +101,7 @@ public class SmsMouthSettleController extends BaseController {
                 //海尔内部
                  if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ)) {
                     //小微主查看内控确认数据
-                     List<String> statusXWZ = CollectionUtil.newArrayList(MonthSettleStatusEnum.YD_SETTLE_STATUS_XWZQR.getCode(),
+                     List<String> statusXWZ = CollectionUtil.newArrayList(MonthSettleStatusEnum.YD_SETTLE_STATUS_XWZDQR.getCode(),
                              MonthSettleStatusEnum.YD_SETTLE_STATUS_DFK.getCode(),
                              MonthSettleStatusEnum.YD_SETTLE_STATUS_JSWC.getCode());
                     criteria.andIn("settleStatus", statusXWZ);
@@ -258,7 +258,7 @@ public class SmsMouthSettleController extends BaseController {
                 //海尔内部
                 if (sysUser.getRoleKeys().contains(RoleConstants.ROLE_KEY_XWZ)) {
                     //小微主查看内控确认数据
-                    List<String> statusXWZ = CollectionUtil.newArrayList(MonthSettleStatusEnum.YD_SETTLE_STATUS_XWZQR.getCode(),
+                    List<String> statusXWZ = CollectionUtil.newArrayList(MonthSettleStatusEnum.YD_SETTLE_STATUS_XWZDQR.getCode(),
                             MonthSettleStatusEnum.YD_SETTLE_STATUS_DFK.getCode(),
                             MonthSettleStatusEnum.YD_SETTLE_STATUS_JSWC.getCode());
                     criteria.andIn("settleStatus", statusXWZ);
