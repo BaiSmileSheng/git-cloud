@@ -635,10 +635,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     rawMaterialCodes.add(omsRawMaterialFeedback.getRawMaterialCode());
                 }
             }
-            //如果满足数量的记录条数与反馈信息总条数相同，则排产订单状态为“待评审”，反之“反馈中”
+            //如果满足数量的记录条数与反馈信息总条数相同，则排产订单状态为“待评审”
             if (omsRawMaterialFeedbacks.size() == checkCount) {
-                omsProductionOrder.setStatus(ProductOrderConstants.STATUS_ZERO);
-                omsProductionOrder.setCreateBy(sysUser.getLoginName());
                 omsProductionOrders.forEach(o -> {
                     o.setStatus(ProductOrderConstants.STATUS_ZERO);
                     o.setUpdateBy(sysUser.getLoginName());
@@ -648,6 +646,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     omsProductionOrderMapper.updateBatchByPrimaryKeySelective(omsProductionOrders);
                 }
             }
+            omsProductionOrder.setStatus(ProductOrderConstants.STATUS_ZERO);
+            omsProductionOrder.setCreateBy(sysUser.getLoginName());
         } else if (ProductOrderConstants.STATUS_THREE.equals(productionOrder.getStatus())) {
             //“已评审”状态的排产订单
             //如果排产量向下调整，则无需JIT重新评审，状态无需变更；
@@ -685,8 +685,18 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         List<OmsProductionOrderDetail> omsProductionOrderDetails = new ArrayList<>();
         bomInfos.forEach(bom -> {
             //判断排产订单明细的状态
-            String detailStatus = rawMaterialCodes.contains(bom.getRawMaterialCode())
-                    ? ProductOrderConstants.DETAIL_STATUS_TWO : ProductOrderConstants.DETAIL_STATUS_ZERO;
+            String detailStatus = "";
+            //如果已评审的排产订单修改订单量，并且向上调整，则排产订单明细状态为“未确认”
+            if (productionOrder.getStatus().equals(ProductOrderConstants.STATUS_THREE)
+                    && omsProductionOrder.getStatus().equals(ProductOrderConstants.STATUS_ZERO)) {
+                detailStatus = ProductOrderConstants.DETAIL_STATUS_ZERO;
+            }else if (productionOrder.getStatus().equals(ProductOrderConstants.STATUS_THREE)
+                    && omsProductionOrder.getStatus().equals(productionOrder.getStatus())) {
+                detailStatus = ProductOrderConstants.DETAIL_STATUS_ONE;
+            }else if (rawMaterialCodes.contains(bom.getRawMaterialCode())){
+                //如果是反馈信息处理-快捷修改，即排产订单是反馈中状态，根据原材料反馈信息中未审核的原材料状态进行判断
+                detailStatus = ProductOrderConstants.DETAIL_STATUS_TWO;
+            }
             //计算原材料排产量
             BigDecimal rawMaterialProductNum = bom.getBomNum().multiply(omsProductionOrder.getProductNum())
                     .divide(bom.getBasicNum(), 2, BigDecimal.ROUND_HALF_UP);
@@ -1332,7 +1342,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         List<OmsProductionOrder> znOrderList = new ArrayList<>();
         StringBuffer orderCodeBuffer = new StringBuffer();
         list.forEach(o -> {
-            //如果订单交付日期 - 当前日期 <= 2 为追加
+            //如果订单基本开始日期 - 当前日期 <= 2 为追加
             String dateNow = DateUtils.getDate();
             int contDay = DateUtils.dayDiffSt(o.getProductStartDate(), dateNow, YYYY_MM_DD);
             if (contDay <= 2) {
