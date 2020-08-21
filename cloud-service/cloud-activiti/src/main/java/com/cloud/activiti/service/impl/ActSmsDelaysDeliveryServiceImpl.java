@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -306,6 +307,7 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
                 sendEmail(delaysNo, factoryCode, roleKey);
             }else if(flagStatus5){
                 smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_12.getCode());
+                smsDelaysDelivery.setSettleFee(BigDecimal.ZERO);
                 //向供应商发邮件
                 String contentDetail = "申诉通过";
                 supplierSendEmail(delaysNo,supplierCode,contentDetail);
