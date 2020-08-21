@@ -22,10 +22,10 @@ public interface ICdFactoryInfoService extends BaseService<CdFactoryInfo>{
 
 
     /**
-     * 查询所有公司编码
+     * 查询所有工厂编码
      * @return
      */
-	R selectAllCompanyCode();
+	R selectAllFactoryCode();
 
 
 

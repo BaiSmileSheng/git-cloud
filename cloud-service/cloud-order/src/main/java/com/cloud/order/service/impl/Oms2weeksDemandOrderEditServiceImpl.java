@@ -287,11 +287,11 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 BeanUtil.copyProperties(oms2weeksDemandOrderEditImport,Oms2weeksDemandOrderEdit.class)).collect(Collectors.toList());
 
         //因数量较大，一次性取出cd_material_info物料描述，cd_material_extend_info生命周期，cd_factory_info公司编码
-        R rCompanyList=remoteFactoryInfoService.getAllCompanyCode();
-        if (!rCompanyList.isSuccess()) {
+        R rFactoryList=remoteFactoryInfoService.getAllFactoryCode();
+        if (!rFactoryList.isSuccess()) {
             throw new BusinessException("无工厂信息，请到基础信息维护！");
         }
-        List<String> companyCodeList = rCompanyList.getCollectData(new TypeReference<List<String>>() {});
+        List<String> factoryCodeList = rFactoryList.getCollectData(new TypeReference<List<String>>() {});
         //取导入数据的所有物料号
         List<String> materialCodeList=list.stream().map(weeksDemandOrderEdit->{
             return weeksDemandOrderEdit.getProductMaterialCode();
@@ -387,7 +387,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             }
 
             String factoryCode = weeksDemandOrderEdit.getProductFactoryCode();
-            if (!CollUtil.contains(companyCodeList, factoryCode)) {
+            if (!CollUtil.contains(factoryCodeList, factoryCode)) {
                 errMsg.append(StrUtil.format("不存在此工厂：{};", factoryCode));
             }
             //物料描述赋值
