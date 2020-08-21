@@ -35,8 +35,8 @@ public class CdFactoryInfoServiceImpl extends BaseServiceImpl<CdFactoryInfo> imp
 	 * @return
 	 */
 	@Override
-	public R selectAllCompanyCode(){
-		 return R.data(cdFactoryInfoMapper.selectAllCompanyCode());
+	public R selectAllFactoryCode(){
+		 return R.data(cdFactoryInfoMapper.selectAllFactoryCode());
 	}
 
 

@@ -28,7 +28,7 @@ public interface CdFactoryInfoMapper extends BaseMapper<CdFactoryInfo>{
      *  获取所有公司编码
      * @return
      */
-    List<String> selectAllCompanyCode();
+    List<String> selectAllFactoryCode();
 
 
 

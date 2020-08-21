@@ -127,9 +127,9 @@ public class CdFactoryInfoController extends BaseController {
      * 查询所有公司编码
      * @return
      */
-    @GetMapping("getAllCompanyCode")
+    @GetMapping("getAllFactoryCode")
     @ApiOperation(value = "获取所有公司编码 ", response = R.class)
-    public R getAllCompanyCode(){
-        return cdFactoryInfoService.selectAllCompanyCode();
+    public R getAllFactoryCode(){
+        return cdFactoryInfoService.selectAllFactoryCode();
     }
 }

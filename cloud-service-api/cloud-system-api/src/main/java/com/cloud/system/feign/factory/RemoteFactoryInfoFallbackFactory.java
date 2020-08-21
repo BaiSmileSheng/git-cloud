@@ -41,8 +41,8 @@ public class RemoteFactoryInfoFallbackFactory implements FallbackFactory<RemoteF
              * @return
              */
             @Override
-            public R getAllCompanyCode() {
-                log.error("RemoteFactoryInfoService.getAllCompanyCode错误信息：{}",throwable.getMessage());
+            public R getAllFactoryCode() {
+                log.error("RemoteFactoryInfoService.getAllFactoryCode错误信息：{}",throwable.getMessage());
                 return R.error("服务拥挤，请稍后再试！");
             }
 

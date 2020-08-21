@@ -5,7 +5,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.druid.util.Utils;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.domain.entity.vo.OmsOrderMaterialOutVo;
@@ -63,7 +62,6 @@ import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -596,7 +594,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 storehouseInfo -> storehouseInfo, (key1, key2) -> key2));
 
         //因数量较大，一次性取出cd_material_info物料描述，cd_material_extend_info生命周期，cd_factory_info公司编码
-        R rCompanyList=remoteFactoryInfoService.getAllCompanyCode();
+        R rCompanyList=remoteFactoryInfoService.getAllFactoryCode();
         if (!rCompanyList.isSuccess()) {
             throw new BusinessException("无工厂信息，请到基础信息维护！");
         }
