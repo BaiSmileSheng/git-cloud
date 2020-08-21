@@ -31,11 +31,10 @@ public class OmsProductStatementXxlJob {
      */
     @XxlJob("timeAddSaveProductStatement")
     public ReturnT<String> timeAddSaveProductStatement(String param) {
-        log.info("--------------定时任务生成T-1交付考核报表开始----------");
+        XxlJobLogger.log("--------------定时任务生成T-1交付考核报表开始----------");
         R r=remoteProductStatementService.timeAddSave();
+        XxlJobLogger.log("--------------定时任务生成T-1交付考核报表结果结束------------");
         XxlJobLogger.log(StrUtil.format("定时任务生成T-1交付考核报表结果：{}",r.toString()));
-        log.info(StrUtil.format("定时任务生成T-1交付考核报表结果：{}",r.toString()));
-        log.info("--------------定时任务生成T-1交付考核报表结果结束------------");
         if (r.isSuccess()) {
             return ReturnT.SUCCESS;
         }else{

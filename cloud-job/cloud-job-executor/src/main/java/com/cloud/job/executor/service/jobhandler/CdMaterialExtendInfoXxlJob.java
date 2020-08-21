@@ -32,14 +32,16 @@ public class CdMaterialExtendInfoXxlJob {
      * @throws Exception
      */
     @XxlJob("timeSycMaterialCode")
-    public ReturnT<String> timeSycMaterialCode(String param) throws Exception {
+    public ReturnT<String> timeSycMaterialCode(String param){
         XxlJobLogger.log("定时任务传输成品物料开始");
         R r = remoteMaterialExtendInfoService.timeSycMaterialCode();
-        if (!r.isSuccess()) {
-            XxlJobLogger.log("定时任务传输成品物料异常 :{}", JSONObject.toJSONString(r));
-        }
         XxlJobLogger.log("定时任务传输成品物料结束");
-        return ReturnT.SUCCESS;
+        XxlJobLogger.log("定时任务传输成品物料异常 :{}", JSONObject.toJSONString(r));
+        if (!r.isSuccess()) {
+            return ReturnT.FAIL;
+        }else {
+            return ReturnT.SUCCESS;
+        }
     }
 
 }
