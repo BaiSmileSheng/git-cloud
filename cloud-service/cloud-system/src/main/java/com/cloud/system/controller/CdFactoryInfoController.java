@@ -124,11 +124,11 @@ public class CdFactoryInfoController extends BaseController {
     }
 
     /**
-     * 查询所有公司编码
+     * 查询所有工厂编码
      * @return
      */
     @GetMapping("getAllFactoryCode")
-    @ApiOperation(value = "获取所有公司编码 ", response = R.class)
+    @ApiOperation(value = "获取所有工厂编码 ", response = R.class)
     public R getAllFactoryCode(){
         return cdFactoryInfoService.selectAllFactoryCode();
     }

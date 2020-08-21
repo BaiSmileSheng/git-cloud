@@ -31,7 +31,7 @@ public class CdFactoryInfoServiceImpl extends BaseServiceImpl<CdFactoryInfo> imp
 	}
 
 	/**
-	 * 查询所有公司编码
+	 * 查询所有工厂编码
 	 * @return
 	 */
 	@Override

@@ -32,7 +32,7 @@ public interface RemoteFactoryInfoService {
     R selectAllByCompanyCodeV(@RequestParam(value = "companyCodeV") String companyCodeV);
 
     /**
-     * 获取所有公司编码
+     * 获取所有工厂编码
      * @return
      */
     @GetMapping("factoryInfo/getAllFactoryCode")
