@@ -299,7 +299,8 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
                     .productMaterialCode(res.getProductMaterialCode()).productMaterialDesc(res.getProductMaterialDesc())
                     .productFactoryCode(res.getProductFactoryCode()).productFactoryDesc(res.getProductFactoryDesc())
                     .customerCode(res.getCustomerCode()).customerDesc(res.getCustomerDesc())
-                    .mrpRange(res.getMrpRange()).bomVersion(res.getVersion()).purchaseGroupCode(res.getPurchaseGroupCode())
+                    //20200821 经王福丽同意  如果PR里没有bom信息则bom版本默认为#
+                    .mrpRange(res.getMrpRange()).bomVersion(res.getVersion()==null?"#":res.getVersion()).purchaseGroupCode(res.getPurchaseGroupCode())
                     .place(storeHouse).deliveryDate(deliveryDate).year(deliveryYear).unit(res.getUnit())
                     .weeks(deliveryWeek).orderNum(orderNumTotal.longValue())
                     .version(StrUtil.concat(true,StrUtil.toString(DateUtil.year(date)),StrUtil.toString(thisWeek))).build();
