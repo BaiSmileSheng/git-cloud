@@ -146,9 +146,10 @@ public class CdProductOverdueServiceImpl extends BaseServiceImpl<CdProductOverdu
                 List<CdMaterialInfo> cdMaterialInfoList = cdMaterialInfoService.selectByExample(example);
                 if(CollectionUtils.isEmpty(cdMaterialInfoList)
                         || null == cdMaterialInfoList.get(0)){
-                    errMsgBuffer.append("对应工厂超期物料号不存在,请在物料主数据维护;");
+                    errMsgBuffer.append(StrUtil.format("工厂:{}超期物料号:{}不存在,请在物料主数据维护;",
+                            factoryCode,productMaterialCode));
                 }else if(StringUtils.isBlank(cdMaterialInfoList.get(0).getMaterialDesc())){
-                    errMsgBuffer.append("超期物料号描述不存在,请维护;");
+                    errMsgBuffer.append(StrUtil.format("超期物料号描述:{}不存在,请维护;",productMaterialCode));
                 }else{
                     cdProductOverdueReq.setProductMaterialDesc(cdMaterialInfoList.get(0).getMaterialDesc());
                 }
