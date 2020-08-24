@@ -2460,6 +2460,12 @@
               "chnname": "PR/PO行号"
             },
             {
+              "name": "po_type",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "PO类型"
+            },
+            {
               "name": "product_material_code",
               "type": "DefaultString",
               "remark": "",

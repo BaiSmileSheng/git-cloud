@@ -53,6 +53,13 @@ public class OmsInternalOrderRes extends BaseEntity {
     private String orderLineCode;
 
     /**
+     * PO类型
+     */
+    @ExcelProperty(value = "PO类型")
+    @ApiModelProperty(value = "PO类型")
+    private String poType;
+
+    /**
      * 成品物料号
      */
     @ExcelProperty(value = "成品物料号")
