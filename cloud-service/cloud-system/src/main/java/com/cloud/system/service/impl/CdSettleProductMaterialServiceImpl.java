@@ -223,35 +223,35 @@ public class CdSettleProductMaterialServiceImpl extends BaseServiceImpl<CdSettle
 
             StringBuffer errMsgBuffer = new StringBuffer();
             if (StringUtils.isBlank(cdSettleProductMaterialExcelImportVo.getProductMaterialCode())) {
-                errMsgBuffer.append("专用号不能为空");
+                errMsgBuffer.append("专用号不能为空;");
             }
             if(StringUtils.isNotBlank(cdSettleProductMaterialExcelImportVo.getProductMaterialCode())){
                 CdMaterialExtendInfo cdMaterialExtendInfo = materialExtendInfoMap.get(cdSettleProductMaterialExcelImportVo.getProductMaterialCode());
                 if(null == cdMaterialExtendInfo ||StringUtils.isBlank(cdMaterialExtendInfo.getMaterialDesc())){
-                    errMsgBuffer.append("专用号描述不存在请去物料扩展表维护信息");
+                    errMsgBuffer.append("专用号描述不存在请去物料扩展表维护信息;");
                 }  else {
                     cdSettleProductMaterialReq.setProductMaterialDesc(cdMaterialExtendInfo.getMaterialDesc());
                 }
             }
             if (StringUtils.isBlank(cdSettleProductMaterialExcelImportVo.getRawMaterialCode())) {
-                errMsgBuffer.append("加工费号不能为空");
+                errMsgBuffer.append("加工费号不能为空;");
             }
             if(StringUtils.isNotBlank(cdSettleProductMaterialExcelImportVo.getRawMaterialCode())){
                 CdMaterialInfo cdMaterialInfo = cdMaterialInfoMap.get(cdSettleProductMaterialExcelImportVo.getRawMaterialCode());
                 if(null == cdMaterialInfo || StringUtils.isBlank(cdMaterialInfo.getMaterialDesc())){
-                    errMsgBuffer.append("加工费号描述不存在请去物料主数据表维护信息");
+                    errMsgBuffer.append("加工费号描述不存在请去物料主数据表维护信息;");
                 }else {
                     cdSettleProductMaterialReq.setRawMaterialDesc(cdMaterialInfo.getMaterialDesc());
                 }
             }
 
             if (StringUtils.isBlank(cdSettleProductMaterialExcelImportVo.getOutsourceWay())) {
-                errMsgBuffer.append("委外方式不能为空");
+                errMsgBuffer.append("委外方式不能为空;");
             }
             if(StringUtils.isNotBlank(cdSettleProductMaterialExcelImportVo.getOutsourceWay())){
                 String outsourceWay = OutSourceTypeEnum.getCodeByMsg(cdSettleProductMaterialExcelImportVo.getOutsourceWay());
                 if(StringUtils.isBlank(outsourceWay) || outsourceWay.equals(cdSettleProductMaterialExcelImportVo.getOutsourceWay())){
-                    errMsgBuffer.append("委外方式不存在");
+                    errMsgBuffer.append("委外方式不存在;");
                 } else {
                     cdSettleProductMaterialReq.setOutsourceWay(outsourceWay);
                 }
@@ -260,11 +260,11 @@ public class CdSettleProductMaterialServiceImpl extends BaseServiceImpl<CdSettle
                     && StringUtils.isNotBlank(cdSettleProductMaterialExcelImportVo.getOutsourceWay())){
                 String code = cdSettleProductMaterialExcelImportVo.getProductMaterialCode()+cdSettleProductMaterialExcelImportVo.getOutsourceWay();
                 if(codeSet.contains(code)){
-                    errMsgBuffer.append("此专用号和委外方式导入重复");
+                    errMsgBuffer.append("此专用号和委外方式导入重复;");
                 }
                 codeSet.add(code);
                 if(null != cdSettleProductMaterialMap.get(code)){
-                    errMsgBuffer.append("此专用号和委外方式已存在加工费号");
+                    errMsgBuffer.append("此专用号和委外方式已存在加工费号;");
                 }
             }
             String errMsgBufferString = errMsgBuffer.toString();
