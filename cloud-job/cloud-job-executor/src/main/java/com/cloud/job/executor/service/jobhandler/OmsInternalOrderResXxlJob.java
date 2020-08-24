@@ -1,6 +1,7 @@
 package com.cloud.job.executor.service.jobhandler;
 
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.core.domain.R;
 import com.cloud.order.feign.RemoteInternalOrderResService;
 import com.xxl.job.core.biz.model.ReturnT;
@@ -72,11 +73,10 @@ public class OmsInternalOrderResXxlJob {
      */
     @XxlJob("timeInsertFromSAP")
     public ReturnT<String> timeInsertFromSAP(String param) {
-        log.info("--------------定时任务获取PO数据定时任务开始----------");
+        XxlJobLogger.log("--------------定时任务获取PO数据定时任务开始----------");
         R r=remoteInternalOrderResService.timeInsertFromSAP();
-        XxlJobLogger.log(StrUtil.format("定时任务获取PO数据 数据结果：{}",r.toString()));
-        log.info(StrUtil.format("定时任务获取PO数据结果：{}",r.toString()));
-        log.info("--------------定时任务获取PO数据结束------------");
+        XxlJobLogger.log("--------------定时任务获取PO数据定时任务结束---------");
+        XxlJobLogger.log("获取PO数据定时任务异常:{}", JSONObject.toJSONString(r));
         if (r.isSuccess()) {
             return ReturnT.SUCCESS;
         }else{

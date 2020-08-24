@@ -32,11 +32,10 @@ public class OmsProductionOrderXxlJob {
      */
     @XxlJob("timeSAPGetProductOrderCode")
     public ReturnT<String> timeSAPGetProductOrderCode(String param) {
-        log.info("--------------定时任务SAP获取订单号开始----------");
+        XxlJobLogger.log("--------------定时任务SAP获取订单号开始----------");
         R r=remoteProductionOrderService.timeSAPGetProductOrderCode();
         XxlJobLogger.log(StrUtil.format("定时任务SAP获取订单号结果：{}",r.toString()));
-        log.info(StrUtil.format("定时任务SAP获取订单号结果：{}",r.toString()));
-        log.info("--------------定时任务SAP获取订单号结束------------");
+        XxlJobLogger.log("--------------定时任务SAP获取订单号结束------------");
         if (r.isSuccess()) {
             return ReturnT.SUCCESS;
         }else{
@@ -50,11 +49,10 @@ public class OmsProductionOrderXxlJob {
      */
     @XxlJob("timeInsertSettleList")
     public ReturnT<String> timeInsertSettleList(String param) {
-        log.info("--------------定时任务生成加工结算信息开始----------");
+        XxlJobLogger.log("--------------定时任务生成加工结算信息开始----------");
         R r=remoteProductionOrderService.timeInsertSettleList();
         XxlJobLogger.log(StrUtil.format("定时任务生成加工结算信息结果：{}",r.toString()));
-        log.info(StrUtil.format("定时任务生成加工结算信息结果：{}",r.toString()));
-        log.info("--------------定时任务生成加工结算信息结束------------");
+        XxlJobLogger.log("--------------定时任务生成加工结算信息结束------------");
         if (r.isSuccess()) {
             return ReturnT.SUCCESS;
         }else{
@@ -68,11 +66,10 @@ public class OmsProductionOrderXxlJob {
      */
     @XxlJob("timeGetConfirmAmont")
     public ReturnT<String> timeGetConfirmAmont(String param) {
-        log.info("--------------定时任务获取入库量开始----------");
+        XxlJobLogger.log("--------------定时任务获取入库量开始----------");
         R r=remoteProductionOrderService.timeGetConfirmAmont();
         XxlJobLogger.log(StrUtil.format("定时任务获取入库量结果：{}",r.toString()));
-        log.info(StrUtil.format("定时任务获取入库量结果：{}",r.toString()));
-        log.info("--------------定时任务获取入库量结束------------");
+        XxlJobLogger.log("--------------定时任务获取入库量结束------------");
         if (r.isSuccess()) {
             return ReturnT.SUCCESS;
         }else{
