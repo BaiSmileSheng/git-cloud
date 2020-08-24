@@ -228,7 +228,7 @@ public class CdSettleProductMaterialServiceImpl extends BaseServiceImpl<CdSettle
             if(StringUtils.isNotBlank(cdSettleProductMaterialExcelImportVo.getProductMaterialCode())){
                 CdMaterialExtendInfo cdMaterialExtendInfo = materialExtendInfoMap.get(cdSettleProductMaterialExcelImportVo.getProductMaterialCode());
                 if(null == cdMaterialExtendInfo ||StringUtils.isBlank(cdMaterialExtendInfo.getMaterialDesc())){
-                    errMsgBuffer.append("专用号描述不存在请去物料扩展表维护信息;");
+                    errMsgBuffer.append("专用号描述不存在请去成品物料信息维护;");
                 }  else {
                     cdSettleProductMaterialReq.setProductMaterialDesc(cdMaterialExtendInfo.getMaterialDesc());
                 }
