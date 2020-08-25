@@ -12122,7 +12122,8 @@
               "fields": [
                 "material_code",
                 "member_code",
-                "purchasing_organization"
+                "purchasing_organization",
+                "price_type"
               ]
             }
           ],

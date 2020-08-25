@@ -46,6 +46,7 @@ import com.cloud.settle.feign.RemoteSettleInfoService;
 import com.cloud.system.domain.entity.*;
 import com.cloud.system.domain.vo.SysUserRights;
 import com.cloud.system.enums.OutSourceTypeEnum;
+import com.cloud.system.enums.PriceTypeEnum;
 import com.cloud.system.feign.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -1697,7 +1698,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             String rawMaterialCode = cdSettleProductMaterial.getRawMaterialCode();
             //根据加工费号,供应商,采购组织 查加工费
             R maResult = remoteCdMaterialPriceInfoService.selectOneByCondition(rawMaterialCode, purchaseOrg,
-                    cdFactoryLineInfo.getSupplierCode());
+                    cdFactoryLineInfo.getSupplierCode(), PriceTypeEnum.PRICE_TYPE_1.getCode());
             if (!maResult.isSuccess()) {
                 settleMassagesBuffer.append("加工费号:" + rawMaterialCode + "采购组织:" + purchaseOrg + "供应商:" + cdFactoryLineInfo.getSupplierCode()
                         + "获取加工费失败:" + maResult.get("msg").toString());
