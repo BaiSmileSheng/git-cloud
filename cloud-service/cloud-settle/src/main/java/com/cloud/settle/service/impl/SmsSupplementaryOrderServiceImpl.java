@@ -19,6 +19,7 @@ import com.cloud.settle.enums.SupplementaryOrderStatusEnum;
 import com.cloud.settle.mapper.SmsSupplementaryOrderMapper;
 import com.cloud.settle.service.ISmsSupplementaryOrderService;
 import com.cloud.system.domain.entity.*;
+import com.cloud.system.enums.PriceTypeEnum;
 import com.cloud.system.enums.SettleRatioEnum;
 import com.cloud.system.feign.*;
 import com.sap.conn.jco.*;
@@ -293,7 +294,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
                     return R.error(StringUtils.format("{}公司信息为空！",factCode));
                 }
                 CdFactoryInfo cdFactoryInfo = rFactoryInfo.getData(CdFactoryInfo.class);
-                CdMaterialPriceInfo cdMaterialPriceInfo = mapMaterialPrice.get(smsSupplementaryOrder.getRawMaterialCode()+cdFactoryInfo.getPurchaseOrg()+smsSupplementaryOrder.getSupplierCode());
+                CdMaterialPriceInfo cdMaterialPriceInfo = mapMaterialPrice.get(smsSupplementaryOrder.getRawMaterialCode()+cdFactoryInfo.getPurchaseOrg()+smsSupplementaryOrder.getSupplierCode()+PriceTypeEnum.PRICE_TYPE_0.getCode());
                 if (cdMaterialPriceInfo == null) {
                     //如果没有找到SAP价格，则更新备注
                     log.info(StrUtil.format("(月度结算定时任务)SAP价格未同步的物料号:{}", smsSupplementaryOrder.getRawMaterialCode()));
