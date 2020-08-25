@@ -2460,6 +2460,12 @@
               "chnname": "PR/PO行号"
             },
             {
+              "name": "po_type",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "PO类型"
+            },
+            {
               "name": "product_material_code",
               "type": "DefaultString",
               "remark": "",
@@ -12116,7 +12122,8 @@
               "fields": [
                 "material_code",
                 "member_code",
-                "purchasing_organization"
+                "purchasing_organization",
+                "price_type"
               ]
             }
           ],

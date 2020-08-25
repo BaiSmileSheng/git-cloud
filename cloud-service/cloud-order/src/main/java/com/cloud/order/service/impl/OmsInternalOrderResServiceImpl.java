@@ -198,7 +198,7 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
      * 获取PO接口定时任务
      * @return
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public R timeInsertFromSAP() {
         //获取两个月前的时间

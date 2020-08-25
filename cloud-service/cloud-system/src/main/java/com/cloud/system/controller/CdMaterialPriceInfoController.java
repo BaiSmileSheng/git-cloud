@@ -194,14 +194,15 @@ public class CdMaterialPriceInfoController extends BaseController {
     @GetMapping("selectOneByCondition")
     public R selectOneByCondition(@RequestParam("materialCode") String materialCode,
                                   @RequestParam("purchasingOrganization") String purchasingOrganization ,
-                                  @RequestParam("memberCode") String memberCode){
+                                  @RequestParam("memberCode") String memberCode,
+                                  @RequestParam("priceType")String priceType){
         //查询CdMaterialPriceInfo
         Example example = new Example(CdMaterialPriceInfo.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("materialCode", materialCode);
         criteria.andEqualTo("purchasingOrganization", purchasingOrganization);
         criteria.andEqualTo("memberCode", memberCode);
-
+        criteria.andEqualTo("priceType",priceType);
         CdMaterialPriceInfo cdMaterialPriceInfo = cdMaterialPriceInfoService.findByExampleOne(example);
         return R.data(cdMaterialPriceInfo);
     }

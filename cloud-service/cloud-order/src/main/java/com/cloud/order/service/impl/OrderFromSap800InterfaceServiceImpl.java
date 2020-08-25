@@ -180,6 +180,7 @@ public class OrderFromSap800InterfaceServiceImpl implements IOrderFromSap800Inte
                                 .createDatePr(outTableOutput.getString("BEDAT"))//批准日期
                                 .projectType(outTableOutput.getString("PSTYP"))//项目类别
                                 .mrpRange(outTableOutput.getString("BERID"))//MRP范围
+                                .poType(outTableOutput.getString("BSART"))//PO类型
                                 .marker("PO")
                                 .delFlag("0")
                                 .build();
