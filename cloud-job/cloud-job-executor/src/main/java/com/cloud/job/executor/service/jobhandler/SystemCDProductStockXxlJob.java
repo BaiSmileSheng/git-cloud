@@ -29,14 +29,16 @@ public class SystemCDProductStockXxlJob {
      * @throws Exception
      */
     @XxlJob("timeSycProductStock")
-    public ReturnT<String> timeSycProductStock(String param) throws Exception {
+    public ReturnT<String> timeSycProductStock(String param){
         XxlJobLogger.log("获取SAP成品库存信息开始");
         R r = remoteProductStockService.timeSycProductStock();
-        if(!r.isSuccess()){
-            XxlJobLogger.log("获取SAP成品库存信息异常 :{}",JSONObject.toJSONString(r));
-        }
         XxlJobLogger.log("获取SAP成品库存信息结束");
-        return ReturnT.SUCCESS;
+        XxlJobLogger.log("获取SAP成品库存信息异常 :{}",JSONObject.toJSONString(r));
+        if(!r.isSuccess()){
+            return ReturnT.FAIL;
+        }else {
+            return ReturnT.SUCCESS;
+        }
     }
 
 }

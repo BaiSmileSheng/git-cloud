@@ -5,6 +5,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.settle.feign.RemoteQualityOrderService;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.XxlJob;
+import com.xxl.job.core.log.XxlJobLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,14 +33,16 @@ public class SmsQualityOrderXxlJob {
      * @throws Exception
      */
     @XxlJob("qualityOrderOverTimeSendMail")
-    public ReturnT<String> qualityOrderOverTimeSendMail(String param) throws Exception {
-        logger.info("质量索赔48H超时未确认发送邮件开始");
+    public ReturnT<String> qualityOrderOverTimeSendMail(String param){
+        XxlJobLogger.log("质量索赔48H超时未确认发送邮件开始");
         R r = remoteQualityOrderService.overTimeSendMail();
+        XxlJobLogger.log("质量索赔48H超时未确认发送邮件结束");
+        XxlJobLogger.log("质量索赔48H超时未确认发送邮件异常:{}", JSONObject.toJSONString(r));
         if(!r.isSuccess()){
-            logger.error("质量索赔48H超时未确认发送邮件异常:{}", JSONObject.toJSONString(r));
+            return ReturnT.FAIL;
+        }else {
+            return ReturnT.SUCCESS;
         }
-        logger.info("质量索赔48H超时未确认发送邮件结束");
-        return ReturnT.SUCCESS;
     }
 
     /**
@@ -51,12 +54,14 @@ public class SmsQualityOrderXxlJob {
      */
     @XxlJob("qualityOrderOverTimeConfim")
     public ReturnT<String> qualityOrderOverTimeConfim(String param) throws Exception {
-        logger.info("质量索赔72H超时供应商自动确认开始");
+        XxlJobLogger.log("质量索赔72H超时供应商自动确认开始");
         R r = remoteQualityOrderService.overTimeConfim();
+        XxlJobLogger.log("质量索赔72H超时供应商自动确认结束");
+        XxlJobLogger.log("质量索赔72H超时供应商自动确认异常:{}", JSONObject.toJSONString(r));
         if(!r.isSuccess()){
-            logger.error("质量索赔72H超时供应商自动确认异常:{}", JSONObject.toJSONString(r));
+            return ReturnT.FAIL;
+        }else {
+            return ReturnT.SUCCESS;
         }
-        logger.info("质量索赔72H超时供应商自动确认结束");
-        return ReturnT.SUCCESS;
     }
 }

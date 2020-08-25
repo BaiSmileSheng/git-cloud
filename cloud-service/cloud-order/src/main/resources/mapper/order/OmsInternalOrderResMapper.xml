@@ -8,6 +8,7 @@
         id,
         order_code,
         order_line_code,
+        po_type,
         product_material_code,
         product_material_desc,
         product_factory_code,
@@ -41,6 +42,7 @@
         <result property="id" column="id"/>
         <result property="orderCode" column="order_code"/>
         <result property="orderLineCode" column="order_line_code"/>
+        <result property="poType" column="po_type"/>
         <result property="productMaterialCode" column="product_material_code"/>
         <result property="productMaterialDesc" column="product_material_desc"/>
         <result property="productFactoryCode" column="product_factory_code"/>
@@ -120,6 +122,7 @@
         insert into oms_internal_order_res (
         order_code,
         order_line_code,
+        po_type,
         product_material_code,
         product_material_desc,
         product_factory_code,
@@ -151,6 +154,7 @@
             (
             #{item.orderCode},
             #{item.orderLineCode},
+            #{item.poType},
             #{item.productMaterialCode},
             ifnull(#{item.productMaterialDesc}, ''),
             #{item.productFactoryCode},
@@ -180,9 +184,10 @@
             )
         </foreach>
         ON DUPLICATE KEY UPDATE
-        delivery_flag = VALUES(delivery_flag),
+        po_type = VALUES(po_type),
         product_material_code = VALUES(product_material_code),
         product_material_desc =  VALUES(product_material_desc),
+        product_factory_code = VALUES(product_factory_code),
         customer_code = VALUES(customer_code),
         customer_desc = VALUES(customer_desc),
         purchase_group_code = VALUES(purchase_group_code),
@@ -192,7 +197,10 @@
         delivery_date = VALUES(delivery_date),
         order_num = VALUES(order_num),
         delivery_num = VALUES(delivery_num),
+        sap_del_flag = VALUES(sap_del_flag),
+        delivery_flag = VALUES(delivery_flag),
         unit = VALUES(unit),
+        status = VALUES(status),
         create_date_pr = VALUES(create_date_pr),
         project_type = VALUES(project_type),
         mrp_range = VALUES(mrp_range),

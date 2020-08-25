@@ -32,11 +32,10 @@ public class OmsRealOrderXxlJob {
      */
     @XxlJob("timeCollectToOmsRealOrder")
     public ReturnT<String> timeCollectToOmsRealOrder(String param) {
-        log.info("--------------定时任务每天在获取到PO信息后 进行需求汇总开始----------");
+        XxlJobLogger.log("--------------定时任务每天在获取到PO信息后 进行需求汇总开始----------");
         R r=remoteOmsRealOrderService.timeCollectToOmsRealOrder();
         XxlJobLogger.log(StrUtil.format("定时任务每天在获取到PO信息后 进行需求汇总结果：{}",r.toString()));
-        log.info(StrUtil.format("定时任务每天在获取到PO信息后 进行需求汇总结果：{}",r.toString()));
-        log.info("--------------定时任务每天在获取到PO信息后 进行需求汇总结束------------");
+        XxlJobLogger.log("--------------定时任务每天在获取到PO信息后 进行需求汇总结束------------");
         if (r.isSuccess()) {
             return ReturnT.SUCCESS;
         }else{
