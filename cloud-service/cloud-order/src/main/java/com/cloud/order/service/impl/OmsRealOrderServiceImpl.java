@@ -704,16 +704,25 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             if(StringUtils.isBlank(place)){
                 errMsgBuffer.append("地点不能为空;");
             }
-            if(StringUtils.isNotBlank(place)){
-                CdFactoryStorehouseInfo cdFactoryStorehouseInfo = factoryStorehouseInfoMap.get(omsRealOrder.getCustomerCode()
-                        + omsRealOrder.getProductFactoryCode());
-                if (null == cdFactoryStorehouseInfo) {
-                    errMsgBuffer.append(StrUtil.format("客户:{}和生产工厂:{}无对应交货提前量信息,请维护;",
-                            omsRealOrder.getCustomerCode(),omsRealOrder.getProductFactoryCode()));
-                }else{
-                    //计算生产日期，根据生产工厂、客户编码去工厂库位基础表（cd_factory_storehouse_info）中获取提前量，交货日期 - 提前量 = 生产日期；
-                    String productDate = DateUtils.dayOffset(omsRealOrder.getDeliveryDate(), -Integer.parseInt(cdFactoryStorehouseInfo.getLeadTime()), YYYY_MM_DD);
-                    omsRealOrderReq.setProductDate(productDate);
+            if(StringUtils.isNotBlank(omsRealOrder.getCustomerCode())
+                    && StringUtils.isNotBlank(omsRealOrder.getProductFactoryCode())
+                    && StringUtils.isNotBlank(omsRealOrder.getDeliveryDate())){
+                String orderClass = RealOrderClassEnum.getCodeByMsg(orderClassReq);
+                //如果是储备生产日期即交货日期
+                if(RealOrderClassEnum.ORDER_CLASS_3.getCode().equals(orderClass)){
+                    omsRealOrderReq.setProductDate(omsRealOrder.getDeliveryDate());
+                }else {
+                    CdFactoryStorehouseInfo cdFactoryStorehouseInfo = factoryStorehouseInfoMap.get(omsRealOrder.getCustomerCode()
+                            + omsRealOrder.getProductFactoryCode());
+                    if (null == cdFactoryStorehouseInfo) {
+                        errMsgBuffer.append(StrUtil.format("客户:{}和生产工厂:{}无对应交货提前量信息,请维护;",
+                                omsRealOrder.getCustomerCode(),omsRealOrder.getProductFactoryCode()));
+                    }else{
+                        //计算生产日期，根据生产工厂、客户编码去工厂库位基础表（cd_factory_storehouse_info）中获取提前量，交货日期 - 提前量 = 生产日期；
+                        String productDate = DateUtils.dayOffset(omsRealOrder.getDeliveryDate(), -Integer.parseInt(cdFactoryStorehouseInfo.getLeadTime()),
+                                YYYY_MM_DD);
+                        omsRealOrderReq.setProductDate(productDate);
+                    }
                 }
             }
             String errMsgBufferString = errMsgBuffer.toString();
