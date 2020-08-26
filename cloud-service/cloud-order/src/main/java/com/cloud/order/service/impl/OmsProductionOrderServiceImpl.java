@@ -1465,11 +1465,12 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     /**
      * 下达SAP
      *
-     * @param ids
+     * @param order
      * @return
      */
     @Override
-    public R giveSAP(String ids) {
+    public R giveSAP(OmsProductionOrder order) {
+        String ids = order.getIds();
         List<OmsProductionOrder> list = new ArrayList<>();
         if (StringUtils.isNotBlank(ids)) {
             list = omsProductionOrderMapper.selectByIds(ids);
@@ -1495,9 +1496,68 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             Example example = new Example(OmsProductionOrder.class);
             Example.Criteria criteria = example.createCriteria();
             List<String> statusList = new ArrayList<>();
-            statusList.add(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_DCSAP.getCode());
-            statusList.add(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPYC.getCode());
-            criteria.andIn("status", statusList);
+            //增加按照查询条件下达SAP的逻辑
+            if (StrUtil.isNotBlank(order.getStatus())
+                    && (!ProductOrderConstants.STATUS_FOUR.equals(order.getStatus())
+                    || !ProductOrderConstants.STATUS_SEVEN.equals(order.getStatus()))) {
+                log.error("下达SAP操作只可以下达待传SAP、传SAP异常的订单！");
+                return R.error("下达SAP操作只可以下达待传SAP、传SAP异常的订单！");
+            }
+            if (StrUtil.isNotBlank(order.getProductFactoryCode())) {
+                criteria.andEqualTo("productFactoryCode", order.getProductFactoryCode());
+            }
+            if (StrUtil.isNotBlank(order.getStatus())) {
+                criteria.andEqualTo("status", order.getStatus());
+            } else {
+                statusList.add(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_DCSAP.getCode());
+                statusList.add(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPYC.getCode());
+                criteria.andIn("status", statusList);
+            }
+            if (StringUtils.isNotBlank(order.getProductMaterialCode())) {
+                String[] productMaterialCodeS = order.getProductMaterialCode().split(",");
+                List<String> productMaterialCodeList = new ArrayList<>();
+                for (String productMaterialCode : productMaterialCodeS) {
+                    String regex = "\\s*|\t|\r|\n";
+                    Pattern p = Pattern.compile(regex);
+                    Matcher m = p.matcher(productMaterialCode);
+                    String productMaterialCodeReq = m.replaceAll("");
+                    productMaterialCodeList.add(productMaterialCodeReq);
+                }
+                criteria.andIn("productMaterialCode", productMaterialCodeList);
+            }
+            if (StringUtils.isNotBlank(order.getProductOrderCode())) {
+                String[] productOrderCodeS = order.getProductOrderCode().split(",");
+                List<String> productOrderCodeList = new ArrayList<>();
+                for (String productOrderCode : productOrderCodeS) {
+                    String regex = "\\s*|\t|\r|\n";
+                    Pattern p = Pattern.compile(regex);
+                    Matcher m = p.matcher(productOrderCode);
+                    String productOrderCodeReq = m.replaceAll("");
+                    productOrderCodeList.add(productOrderCodeReq);
+                }
+                criteria.andIn("productOrderCode", productOrderCodeList);
+            }
+            if (StrUtil.isNotBlank(order.getCheckDateStart())) {
+                if (ProductOrderConstants.DATE_TYPE_ONE.equals(order.getDateType())) {
+                    criteria.andGreaterThanOrEqualTo("deliveryDate", order.getCheckDateStart());
+                } else if (ProductOrderConstants.DATE_TYPE_TWO.equals(order.getDateType())) {
+                    criteria.andGreaterThanOrEqualTo("productStartDate", order.getCheckDateStart());
+                } else if (ProductOrderConstants.DATE_TYPE_THREE.equals(order.getDateType())) {
+                    criteria.andGreaterThanOrEqualTo("productEndDate", order.getCheckDateStart());
+                }
+            }
+            if (StrUtil.isNotBlank(order.getCheckDateEnd())) {
+                if (ProductOrderConstants.DATE_TYPE_ONE.equals(order.getDateType())) {
+                    criteria.andLessThanOrEqualTo("deliveryDate", order.getCheckDateEnd());
+                } else if (ProductOrderConstants.DATE_TYPE_TWO.equals(order.getDateType())) {
+                    criteria.andLessThanOrEqualTo("productStartDate", order.getCheckDateEnd());
+                } else if (ProductOrderConstants.DATE_TYPE_THREE.equals(order.getDateType())) {
+                    criteria.andLessThanOrEqualTo("productEndDate", order.getCheckDateEnd());
+                }
+            }
+            if (StrUtil.isNotBlank(order.getOrderType())) {
+                criteria.andEqualTo("orderType", order.getOrderType());
+            }
             list = omsProductionOrderMapper.selectByExample(example);
         }
         if (CollectionUtils.isEmpty(list)) {
