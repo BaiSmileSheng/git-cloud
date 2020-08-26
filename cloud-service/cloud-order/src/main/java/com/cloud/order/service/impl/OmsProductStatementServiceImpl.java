@@ -138,9 +138,16 @@ public class OmsProductStatementServiceImpl extends BaseServiceImpl<OmsProductSt
                 map.put(key,omsProductStatement);
             }
         });
-        //5.将map转成list插入数据库
+        //5.将map转成list
         List<OmsProductStatement> omsProductStatements = map.values().stream().collect(Collectors.toList());
-        omsProductStatementMapper.insertList(omsProductStatements);
+        //库存数量小于订单数量的插入数据库
+        List<OmsProductStatement> omsProductStatementListReq = new ArrayList<>();
+        omsProductStatements.forEach(omsProductStatement ->{
+            if(omsProductStatement.getSumNum().compareTo(omsProductStatement.getDeliveryNum()) == -1){
+                omsProductStatementListReq.add(omsProductStatement);
+            }
+        });
+        omsProductStatementMapper.insertList(omsProductStatementListReq);
         return R.ok();
     }
 }
