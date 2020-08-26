@@ -107,8 +107,17 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
         list.forEach(internalOrderRes -> {
             String productFactoryCode = internalOrderRes.getProductFactoryCode();
             String key = StrUtil.concat(true, internalOrderRes.getProductMaterialCode(), productFactoryCode);
+            //如果当前工厂没有bom版本，则取子工厂版本号
+            int i = 0;
+            String pre = StrUtil.subPre(productFactoryCode, productFactoryCode.length() - 1);
+            while (bomMap.get(key)==null&&i<=9){
+                productFactoryCode=StrUtil.concat(true, pre, StrUtil.toString(i));
+                key = StrUtil.concat(true, internalOrderRes.getProductMaterialCode(), productFactoryCode);
+                i++;
+            }
             //key:成品物料号+生产工厂
             if (bomMap.get(key) != null) {
+                internalOrderRes.setProductFactoryCode(productFactoryCode);
                 //获取BOM版本
                 String boms = bomMap.get(key).get("version");//逗号分隔多版本拼接
                 List<String> bomList = StrUtil.splitTrim(boms,StrUtil.COMMA);
@@ -122,32 +131,10 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
                     //取最小的
                     internalOrderRes.setVersion(bomList.stream().min((c,d)->StrUtil.compare(c,d,true)).get());
                 }
+            } else {
+                internalOrderRes.setVersion("#");
             }
         });
-//        ThreadPoolConfig config = new ThreadPoolConfig();
-//        ThreadPoolTaskExecutor threadPoolTaskExecutor = config.threadPoolTaskExecutor();
-//        threadPoolTaskExecutor.initialize();
-//        final CountDownLatch countDownLatch = new CountDownLatch(5);
-//        int size = list.size();
-//        for (int i = 0; i < 5; i++) {
-//            List<OmsInternalOrderRes> list1 = CollectionUtil.sub(list, (int)Math.ceil((double)i * size/5), (int)Math.ceil((double)size/5*(i+1)));
-//            threadPoolTaskExecutor.newThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    insertList(list1);
-//                    countDownLatch.countDown();
-//                }
-//            }).start();
-//        }
-//        try {
-//            //线程都结束才继续向下执行
-//            countDownLatch.await();
-//        } catch (InterruptedException e) {
-//            log.error("OmsInternalOrderResServiceImpl_insert800PR_e:{}", e);
-//            return R.error("获取PR：线程错误！");
-//        }finally {
-//            threadPoolTaskExecutor.shutdown();
-//        }
         insertList(list);
         return R.ok();
     }
@@ -198,7 +185,7 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
      * 获取PO接口定时任务
      * @return
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public R timeInsertFromSAP() {
         //获取两个月前的时间

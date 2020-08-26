@@ -171,7 +171,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 throw new BusinessException("删除审批流程失败，原因："+deleteActMap.get("msg"));
             }
         }
-        deleteByIds(ids);
+        deleteByIdsWL(ids);
         return R.ok();
     }
 

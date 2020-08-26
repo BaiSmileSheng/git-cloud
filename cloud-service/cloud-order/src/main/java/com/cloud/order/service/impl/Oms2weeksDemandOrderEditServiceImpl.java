@@ -553,7 +553,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 throw new BusinessException("删除审批流程失败，原因："+deleteActMap.get("msg"));
             }
         }
-        deleteByIds(ids);
+        deleteByIdsWL(ids);
         return R.ok();
     }
 

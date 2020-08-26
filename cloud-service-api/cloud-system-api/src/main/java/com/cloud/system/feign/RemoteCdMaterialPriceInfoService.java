@@ -77,7 +77,8 @@ public interface RemoteCdMaterialPriceInfoService {
     @GetMapping("materialPrice/selectOneByCondition")
     R selectOneByCondition(@RequestParam("materialCode") String materialCode,
                            @RequestParam("purchasingOrganization") String purchasingOrganization ,
-                           @RequestParam("memberCode") String memberCode);
+                           @RequestParam("memberCode") String memberCode,
+                           @RequestParam("priceType")String priceType);
     /**
      * 根据成品物料号查询SAP成本价格
      * @param map

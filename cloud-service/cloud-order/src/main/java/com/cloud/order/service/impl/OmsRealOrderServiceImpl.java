@@ -129,6 +129,9 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
 
     private static String TABLE_NAME = "oms_real_order";
 
+    private static final String PO_TYPE_NB = "NB"; //po类型NB
+
+    private static final String PO_TYPE_ZBS = "ZBS";//po类型ZBS
     /**
      * 交货提前量
      */
@@ -181,7 +184,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
 
     @GlobalTransactional
     @Override
-    public R importRealOrderFile(MultipartFile file, String orderFrom,SysUser sysUser) throws IOException {
+    public R  importRealOrderFile(MultipartFile file, String orderFrom,SysUser sysUser) throws IOException {
         EasyWithErrorExcelListener easyExcelListener = new EasyWithErrorExcelListener(omsRealOrderExcelImportService, OmsRealOrderExcelImportVo.class);
         EasyExcel.read(file.getInputStream(),OmsRealOrderExcelImportVo.class,easyExcelListener).sheet().doRead();
         //需要审核的结果
@@ -293,6 +296,10 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         criteria.andEqualTo("marker", InternalOrderResEnum.MARKER_PO.getCode());
         criteria.andNotEqualTo("deliveryFlag",InternalOrderResEnum.DELIVERY_FLAG_X.getCode());
         criteria.andNotEqualTo("sapDelFlag",InternalOrderResEnum.SAP_DEL_FLAG_L.getCode());
+        List<String> listPOType = new ArrayList<>();
+        listPOType.add(PO_TYPE_NB);
+        listPOType.add(PO_TYPE_ZBS);
+        criteria.andIn("poType",listPOType);
         List<OmsInternalOrderRes> internalOrderResList = omsInternalOrderResService.selectByExample(exampleInternal);
         if(CollectionUtils.isEmpty(internalOrderResList)){
             logger.error("定时任务每天在获取到PO信息不存在");
@@ -627,13 +634,13 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             List<SysDictData> listSysDictData = remoteDictDataService.getType("sap_order_type");
             List<String> dictValueS = listSysDictData.stream().map(m -> m.getDictValue()).collect(Collectors.toList());
             if(!dictValueS.contains(omsRealOrder.getOrderType())){
-                errMsgBuffer.append("此SAP订单类型不存在;");
+                errMsgBuffer.append(StrUtil.format("SAP订单类型:{}不存在;",omsRealOrder.getOrderType()));
             }
             String orderClassReq = omsRealOrder.getOrderClass();
             if(StringUtils.isNotBlank(orderClassReq)){
                 String orderClass = RealOrderClassEnum.getCodeByMsg(orderClassReq);
                 if(StringUtils.isBlank(orderClass) || orderClassReq.equals(orderClass)){
-                    errMsgBuffer.append("不存在此订单种类;");
+                    errMsgBuffer.append(StrUtil.format("订单种类:{}不存在;",orderClassReq));
                 }else{
                     omsRealOrderReq.setOrderClass(orderClass);
                 }
@@ -644,7 +651,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 errMsgBuffer.append("工厂编号不能为空;");
             }
             if(StringUtils.isNotBlank(factoryCode) && !companyCodeList.contains(factoryCode)){
-                errMsgBuffer.append("不存在此工厂,请维护;");
+                errMsgBuffer.append(StrUtil.format("此工厂:{}不存在,请维护;",factoryCode));
             }
 
             String productMaterialCode = omsRealOrder.getProductMaterialCode();
@@ -655,7 +662,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 //物料描述赋值
                 CdMaterialExtendInfo cdMaterialExtendInfo = materialExtendInfoMap.get(omsRealOrder.getProductMaterialCode());
                 if (null == cdMaterialExtendInfo || StringUtils.isBlank(cdMaterialExtendInfo.getMaterialDesc())) {
-                    errMsgBuffer.append("成品物料描述不存在,请维护;");
+                    errMsgBuffer.append(StrUtil.format("成品物料:{}不存在,请在成品物料信息中维护;",omsRealOrder.getProductMaterialCode()));
                 } else {
                     omsRealOrderReq.setProductMaterialDesc(cdMaterialExtendInfo.getMaterialDesc());
                     String lifeCyle = cdMaterialExtendInfo.getLifeCycle();
@@ -674,7 +681,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 errMsgBuffer.append("客户编码不存在,请维护;");
             }
             if(StringUtils.isNotBlank(customerCode) && !customerCodeList.contains(customerCode)){
-                errMsgBuffer.append("不存在此客户,请维护;");
+                errMsgBuffer.append(StrUtil.format("客户:{}不存在,请维护;",customerCode));
             }
             if(StringUtils.isBlank(omsRealOrder.getCustomerDesc())){
                 errMsgBuffer.append("客户名称不能为空;");
@@ -697,15 +704,25 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             if(StringUtils.isBlank(place)){
                 errMsgBuffer.append("地点不能为空;");
             }
-            if(StringUtils.isNotBlank(place)){
-                CdFactoryStorehouseInfo cdFactoryStorehouseInfo = factoryStorehouseInfoMap.get(omsRealOrder.getCustomerCode()
-                        + omsRealOrder.getProductFactoryCode());
-                if (null == cdFactoryStorehouseInfo) {
-                    errMsgBuffer.append("客户和生产工厂不对应此库位;");
-                }else{
-                    //计算生产日期，根据生产工厂、客户编码去工厂库位基础表（cd_factory_storehouse_info）中获取提前量，交货日期 - 提前量 = 生产日期；
-                    String productDate = DateUtils.dayOffset(omsRealOrder.getDeliveryDate(), -Integer.parseInt(cdFactoryStorehouseInfo.getLeadTime()), YYYY_MM_DD);
-                    omsRealOrderReq.setProductDate(productDate);
+            if(StringUtils.isNotBlank(omsRealOrder.getCustomerCode())
+                    && StringUtils.isNotBlank(omsRealOrder.getProductFactoryCode())
+                    && StringUtils.isNotBlank(omsRealOrder.getDeliveryDate())){
+                String orderClass = RealOrderClassEnum.getCodeByMsg(orderClassReq);
+                //如果是储备生产日期即交货日期
+                if(RealOrderClassEnum.ORDER_CLASS_3.getCode().equals(orderClass)){
+                    omsRealOrderReq.setProductDate(omsRealOrder.getDeliveryDate());
+                }else {
+                    CdFactoryStorehouseInfo cdFactoryStorehouseInfo = factoryStorehouseInfoMap.get(omsRealOrder.getCustomerCode()
+                            + omsRealOrder.getProductFactoryCode());
+                    if (null == cdFactoryStorehouseInfo) {
+                        errMsgBuffer.append(StrUtil.format("客户:{}和生产工厂:{}无对应交货提前量信息,请维护;",
+                                omsRealOrder.getCustomerCode(),omsRealOrder.getProductFactoryCode()));
+                    }else{
+                        //计算生产日期，根据生产工厂、客户编码去工厂库位基础表（cd_factory_storehouse_info）中获取提前量，交货日期 - 提前量 = 生产日期；
+                        String productDate = DateUtils.dayOffset(omsRealOrder.getDeliveryDate(), -Integer.parseInt(cdFactoryStorehouseInfo.getLeadTime()),
+                                YYYY_MM_DD);
+                        omsRealOrderReq.setProductDate(productDate);
+                    }
                 }
             }
             String errMsgBufferString = errMsgBuffer.toString();
