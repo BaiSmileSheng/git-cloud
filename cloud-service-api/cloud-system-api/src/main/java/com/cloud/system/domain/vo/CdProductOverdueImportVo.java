@@ -51,7 +51,7 @@ public class CdProductOverdueImportVo {
     /**
      * 生产工厂编码
      */
-    @ExcelProperty(value = "生产工厂编码",index = 1)
+    @ExcelProperty(value = "超期工厂编码",index = 1)
     @ApiModelProperty(value = "生产工厂编码")
     private String productFactoryCode;
 
