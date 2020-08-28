@@ -156,18 +156,24 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
         Map<String,List<SysUserVo>> map = new HashMap<>();
         if(!CollectionUtils.isEmpty(listAdd)){
             listAdd.forEach(omsOrderMaterialOutVoReq ->{
+                String factoryCode = omsOrderMaterialOutVoReq.getFactoryCode();
+                String roleKey = RoleConstants.ROLE_KEY_ORDER;
                 //1.构造下市审核流程信息
                 BizBusiness business = initBusiness(omsOrderMaterialOutVoReq);
                 //新增下市审核流程
                 bizBusinessService.insertBizBusiness(business);
                 Map<String, Object> variables = Maps.newHashMap();
                 //启动下市审核流程
-                bizBusinessService.startProcess(business, variables);
+                R sysUserR = remoteUserService.selectUserByMaterialCodeAndRoleKey(factoryCode,roleKey);
+                if(!sysUserR.isSuccess()){
+                    logger.error("获取对应的负责人邮箱失败 factoryCode:{},roleKey:{}",factoryCode,roleKey);
+                    throw new BusinessException("获取对应的负责人邮箱失败" + sysUserR.get("msg").toString());
+                }
+                List<SysUserVo> sysUserVoList = sysUserR.getCollectData(new TypeReference<List<SysUserVo>>() {});
+                Set<String> userIdSet = sysUserVoList.stream().map(sysUserVo -> sysUserVo.getUserId().toString()).collect(Collectors.toSet());
+                bizBusinessService.startProcess(business, variables,userIdSet);
                 //4.校验发送人邮箱是否存在
-                String factoryCode = omsOrderMaterialOutVoReq.getFactoryCode();
-                String roleKey = RoleConstants.ROLE_KEY_ORDER;
-                String orderCode = omsOrderMaterialOutVoReq.getOrderCode();
-                verifyEmail(orderCode, factoryCode, roleKey,map);
+                verifyEmail(factoryCode,sysUserVoList,map);
             });
             //发送邮件
             list.forEach(omsOrderMaterialOutVoReq ->{
@@ -187,17 +193,11 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
 
     /**
      * 校验发送人邮箱是否存在
-     * @param orderCode
      * @param factoryCode
-     * @param roleKey
+     * @param sysUserVoList
+     * @param map
      */
-    private void verifyEmail(String orderCode,String factoryCode, String roleKey,Map<String,List<SysUserVo>> map) {
-        R sysUserR = remoteUserService.selectUserByMaterialCodeAndRoleKey(factoryCode,roleKey);
-        if(!sysUserR.isSuccess()){
-            logger.error("获取对应的负责人邮箱失败 factoryCode:{},roleKey:{}",factoryCode,roleKey);
-            throw new BusinessException("获取对应的负责人邮箱失败" + sysUserR.get("msg").toString());
-        }
-        List<SysUserVo> sysUserVoList = sysUserR.getCollectData(new TypeReference<List<SysUserVo>>() {});
+    private void verifyEmail(String factoryCode,List<SysUserVo> sysUserVoList,Map<String,List<SysUserVo>> map) {
         //校验邮箱
         for(SysUserVo sysUserVo : sysUserVoList){
             String email = sysUserVo.getEmail();
