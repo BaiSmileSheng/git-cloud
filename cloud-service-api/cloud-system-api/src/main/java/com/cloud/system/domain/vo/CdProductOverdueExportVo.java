@@ -2,7 +2,6 @@ package com.cloud.system.domain.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
-import com.cloud.common.core.domain.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -28,7 +27,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 @ApiModel(value = "超期库存 ")
-public class CdProductOverdueExportVo extends BaseEntity {
+public class CdProductOverdueExportVo{
     private static final long serialVersionUID = 1L;
 
     /**
@@ -55,7 +54,7 @@ public class CdProductOverdueExportVo extends BaseEntity {
     /**
      * 生产工厂编码
      */
-    @ExcelProperty(value = "生产工厂编码",index = 2)
+    @ExcelProperty(value = "超期工厂编码",index = 2)
     @ApiModelProperty(value = "生产工厂编码")
     private String productFactoryCode;
 
