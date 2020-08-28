@@ -5,6 +5,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.settle.feign.RemoteClaimOtherService;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.XxlJob;
+import com.xxl.job.core.log.XxlJobLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,14 +33,16 @@ public class SmsChaimOtherXxlJob {
      * @throws Exception
      */
     @XxlJob("chaimOtherOverTimeSendMail")
-    public ReturnT<String> chaimOtherOverTimeSendMail(String param) throws Exception {
-        logger.info("其他索赔48H超时未确认发送邮件开始");
+    public ReturnT<String> chaimOtherOverTimeSendMail(String param){
+        XxlJobLogger.log("其他索赔48H超时未确认发送邮件开始");
         R r = remoteClaimOtherService.overTimeSendMail();
+        XxlJobLogger.log("其他索赔48H超时未确认发送邮件结束");
+        XxlJobLogger.log("其他索赔48H超时未确认发送邮件异常:{}", JSONObject.toJSONString(r));
         if(!r.isSuccess()){
-            logger.error("其他索赔48H超时未确认发送邮件异常:{}", JSONObject.toJSONString(r));
+            return ReturnT.FAIL;
+        }else {
+            return ReturnT.SUCCESS;
         }
-        logger.info("其他索赔48H超时未确认发送邮件结束");
-        return ReturnT.SUCCESS;
     }
 
     /**
@@ -50,13 +53,15 @@ public class SmsChaimOtherXxlJob {
      * @throws Exception
      */
     @XxlJob("chaimOtherOverTimeConfim")
-    public ReturnT<String> chaimOtherOverTimeConfim(String param) throws Exception {
-        logger.info("其他索赔72H超时供应商自动确认开始");
+    public ReturnT<String> chaimOtherOverTimeConfim(String param){
+        XxlJobLogger.log("其他索赔72H超时供应商自动确认开始");
         R r = remoteClaimOtherService.overTimeConfim();
+        XxlJobLogger.log("其他索赔72H超时供应商自动确认结束");
+        XxlJobLogger.log("其他索赔72H超时供应商自动确认异常:{}", JSONObject.toJSONString(r));
         if(!r.isSuccess()){
-            logger.error("其他索赔72H超时供应商自动确认异常:{}", JSONObject.toJSONString(r));
+            return ReturnT.FAIL;
+        }else {
+            return ReturnT.SUCCESS;
         }
-        logger.info("其他索赔72H超时供应商自动确认结束");
-        return ReturnT.SUCCESS;
     }
 }

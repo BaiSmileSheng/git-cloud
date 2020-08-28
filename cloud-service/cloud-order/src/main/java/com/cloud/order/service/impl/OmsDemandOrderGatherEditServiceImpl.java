@@ -171,7 +171,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 throw new BusinessException("删除审批流程失败，原因："+deleteActMap.get("msg"));
             }
         }
-        deleteByIds(ids);
+        deleteByIdsWL(ids);
         return R.ok();
     }
 
@@ -287,12 +287,12 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         List<OmsDemandOrderGatherEdit> list= listImport.stream().map(demandOrderGatherEditIMport ->
                 BeanUtil.copyProperties(demandOrderGatherEditIMport,OmsDemandOrderGatherEdit.class)).collect(Collectors.toList());
 
-        //因数量较大，一次性取出cd_material_info物料描述，cd_material_extend_info生命周期，cd_factory_info公司编码
-        R rCompanyList=remoteFactoryInfoService.getAllCompanyCode();
-        if (!rCompanyList.isSuccess()) {
+        //因数量较大，一次性取出cd_material_info物料描述，cd_material_extend_info生命周期，cd_factory_info工厂编码
+        R rFactoryList=remoteFactoryInfoService.getAllFactoryCode();
+        if (!rFactoryList.isSuccess()) {
             throw new BusinessException("无工厂信息，请到基础信息维护！");
         }
-        List<String> companyCodeList = rCompanyList.getCollectData(new TypeReference<List<String>>() {});
+        List<String> factoryCodeList = rFactoryList.getCollectData(new TypeReference<List<String>>() {});
         //取导入数据的所有物料号
         List<String> materialCodeList=list.stream().map(demandOrderGatherEdit->{
             return demandOrderGatherEdit.getProductMaterialCode();
@@ -387,7 +387,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             }
 
             String factoryCode = demandOrderGatherEdit.getProductFactoryCode();
-            if (!CollUtil.contains(companyCodeList, factoryCode)) {
+            if (!CollUtil.contains(factoryCodeList, factoryCode)) {
                 errMsg.append(StrUtil.format("不存在此工厂：{};", factoryCode));
             }
             //物料描述赋值

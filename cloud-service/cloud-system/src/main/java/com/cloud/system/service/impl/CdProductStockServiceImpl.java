@@ -501,16 +501,84 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
         //成品库存在库明细
         List<CdProductWarehouse> cdProductWarehouseList = cdProductStockDetail.getCdProductWarehouseList();
         //3.汇总数据 插入数据库  key是工厂+物料号
-        Map<String,CdProductStock> cdProductStockMap = cdProductStockList.stream().collect(Collectors.toMap(
-                cdProductStock -> cdProductStock.getProductFactoryCode()+cdProductStock.getProductMaterialCode(),
-                cdProductStock -> cdProductStock,(key1,key2) ->key2));
-        Map<String,CdProductInProduction> cdProductInProductionMap = cdProductInProductionList.stream().collect(Collectors.toMap(
-                cdProductInProduction -> cdProductInProduction.getProductFactoryCode()+cdProductInProduction.getProductMaterialCode(),
-                cdProductInProduction -> cdProductInProduction,(key1,key2) ->key2));
-        Map<String,CdProductPassage> cdProductPassageMap = cdProductPassageList.stream().collect(Collectors.toMap(
-                cdProductPassage -> cdProductPassage.getProductFactoryCode()+cdProductPassage.getProductMaterialCode(),
-                cdProductPassage -> cdProductPassage,(key1,key2) ->key2));
-
+        //寄售不足Map
+        Map<String,CdProductStock> cdProductStockMap = new HashMap<>();
+        cdProductStockList.forEach(cdProductStock ->{
+            String key = cdProductStock.getProductFactoryCode()+cdProductStock.getProductMaterialCode();
+            if(cdProductStockMap.containsKey(key)){
+                CdProductStock cdProductStock1 = cdProductStockMap.get(key);
+                BigDecimal stockKNumO = cdProductStock1.getStockKNum();
+                BigDecimal stockKNumX = cdProductStock.getStockKNum();
+                BigDecimal stockKNum = stockKNumO.add(stockKNumX);
+                cdProductStock1.setStockKNum(stockKNum);
+                cdProductStockMap.put(key,cdProductStock1);
+            }else {
+                CdProductStock cdProductStock1 = new CdProductStock();
+                cdProductStock1.setProductFactoryCode(cdProductStock.getProductFactoryCode());
+                cdProductStock1.setProductMaterialCode(cdProductStock.getProductMaterialCode());
+                cdProductStock1.setProductMaterialDesc(cdProductStock.getProductMaterialDesc());
+                cdProductStock1.setStockKNum(cdProductStock.getStockKNum());
+                cdProductStock1.setUnit(cdProductStock.getUnit());
+                cdProductStock1.setCreateBy("定时任务");
+                cdProductStock1.setCreateTime(new Date());
+                cdProductStock1.setUpdateBy("定时任务");
+                cdProductStock1.setUpdateTime(new Date());
+                cdProductStock1.setDelFlag(DeleteFlagConstants.NO_DELETED);
+                cdProductStockMap.put(key,cdProductStock1);
+            }
+        });
+        //在产
+        Map<String,CdProductInProduction> cdProductInProductionMap = new HashMap<>();
+        cdProductInProductionList.forEach(cdProductInProduction ->{
+            String key = cdProductInProduction.getProductFactoryCode()+cdProductInProduction.getProductMaterialCode();
+            if(cdProductInProductionMap.containsKey(key)){
+                CdProductInProduction cdProductInProduction1 = cdProductInProductionMap.get(key);
+                BigDecimal inProductionNumX = cdProductInProduction1.getInProductionNum();
+                BigDecimal inProductionNumO = cdProductInProduction.getInProductionNum();
+                BigDecimal inProductionNum = inProductionNumX.add(inProductionNumO);
+                cdProductInProduction1.setInProductionNum(inProductionNum);
+                cdProductInProductionMap.put(key,cdProductInProduction1);
+            }else {
+                CdProductInProduction cdProductInProduction1 = new CdProductInProduction();
+                cdProductInProduction1.setProductFactoryCode(cdProductInProduction.getProductFactoryCode());
+                cdProductInProduction1.setProductMaterialCode(cdProductInProduction.getProductMaterialCode());
+                cdProductInProduction1.setProductMaterialDesc(cdProductInProduction.getProductMaterialDesc());
+                cdProductInProduction1.setInProductionNum(cdProductInProduction.getInProductionNum());
+                cdProductInProduction1.setUnit(cdProductInProduction.getUnit());
+                cdProductInProduction1.setCreateBy("定时任务");
+                cdProductInProduction1.setCreateTime(new Date());
+                cdProductInProduction1.setUpdateBy("定时任务");
+                cdProductInProduction1.setUpdateTime(new Date());
+                cdProductInProduction1.setDelFlag(DeleteFlagConstants.NO_DELETED);
+                cdProductInProductionMap.put(key,cdProductInProduction1);
+            }
+        });
+        //在途
+        Map<String,CdProductPassage> cdProductPassageMap = new HashMap<>();
+        cdProductPassageList.forEach(cdProductPassage ->{
+            String key = cdProductPassage.getProductFactoryCode()+cdProductPassage.getProductMaterialCode();
+            if(cdProductPassageMap.containsKey(key)){
+                CdProductPassage cdProductPassage1 = cdProductPassageMap.get(key);
+                BigDecimal passageNumX = cdProductPassage1.getPassageNum();
+                BigDecimal passageNumO = cdProductPassage.getPassageNum();
+                BigDecimal passageNum = passageNumX.add(passageNumO);
+                cdProductPassage1.setPassageNum(passageNum);
+                cdProductPassageMap.put(key,cdProductPassage1);
+            }else {
+                CdProductPassage cdProductPassage1 = new CdProductPassage();
+                cdProductPassage1.setProductFactoryCode(cdProductPassage.getProductFactoryCode());
+                cdProductPassage1.setProductMaterialCode(cdProductPassage.getProductMaterialCode());
+                cdProductPassage1.setProductMaterialCode(cdProductPassage.getProductMaterialDesc());
+                cdProductPassage1.setPassageNum(cdProductPassage.getPassageNum());
+                cdProductPassage1.setUnit(cdProductPassage.getUnit());
+                cdProductPassage1.setCreateBy("定时任务");
+                cdProductPassage1.setCreateTime(new Date());
+                cdProductPassage1.setUpdateBy("定时任务");
+                cdProductPassage1.setUpdateTime(new Date());
+                cdProductPassage1.setDelFlag(DeleteFlagConstants.NO_DELETED);
+                cdProductPassageMap.put(key,cdProductPassage1);
+            }
+        });
         //在库库存(根据SAP在库库存去掉不良库存)
         Map<String,CdProductStock> cdProductStockMapL = new HashMap<>();
         //不良库存(根据SAP在库库存标记为不良库存)

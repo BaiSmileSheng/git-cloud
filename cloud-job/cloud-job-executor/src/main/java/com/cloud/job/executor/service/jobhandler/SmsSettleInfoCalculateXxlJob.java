@@ -5,6 +5,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.settle.feign.RemoteSettleInfoService;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.XxlJob;
+import com.xxl.job.core.log.XxlJobLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,14 +32,16 @@ public class SmsSettleInfoCalculateXxlJob {
      * @throws Exception
      */
     @XxlJob("smsSettleInfoCalculateHandler")
-    public ReturnT<String> smsSettleInfoCalculateHandler(String param) throws Exception {
-        logger.info("加工费生成开始");
+    public ReturnT<String> smsSettleInfoCalculateHandler(String param){
+        XxlJobLogger.log("加工费生成开始");
         R r = remoteSettleInfoService.smsSettleInfoCalculate();
+        XxlJobLogger.log("加工费生成结束");
+        XxlJobLogger.log("加工费生成异常:{}", JSONObject.toJSONString(r));
         if(!r.isSuccess()){
-            logger.error("加工费生成异常:{}", JSONObject.toJSONString(r));
+            return ReturnT.FAIL;
+        }else {
+            return ReturnT.SUCCESS;
         }
-        logger.info("加工费生成结束");
-        return ReturnT.SUCCESS;
     }
 
 }

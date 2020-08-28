@@ -22,11 +22,9 @@ import com.cloud.order.mapper.OmsProductStatementMapper;
 import com.cloud.order.domain.entity.OmsProductStatement;
 import com.cloud.order.service.IOmsProductStatementService;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -77,7 +75,7 @@ public class OmsProductStatementServiceImpl extends BaseServiceImpl<OmsProductSt
             omsProductStatementMapper.updateBatchByPrimaryKeySelective(omsProductStatementList);
         }
 
-        //2.查排产订单 交货日期是当天的,未关单的数据
+        //2.查真单 交货日期是当天的,外单
         Example exampleRealOrder = new Example(OmsRealOrder.class);
         Example.Criteria criteriaRealOrder = exampleRealOrder.createCriteria();
         String deliveryDate = DateUtils.getDate();
@@ -140,9 +138,16 @@ public class OmsProductStatementServiceImpl extends BaseServiceImpl<OmsProductSt
                 map.put(key,omsProductStatement);
             }
         });
-        //5.将map转成list插入数据库
+        //5.将map转成list
         List<OmsProductStatement> omsProductStatements = map.values().stream().collect(Collectors.toList());
-        omsProductStatementMapper.insertList(omsProductStatements);
+        //库存数量小于订单数量的插入数据库
+        List<OmsProductStatement> omsProductStatementListReq = new ArrayList<>();
+        omsProductStatements.forEach(omsProductStatement ->{
+            if(omsProductStatement.getSumNum().compareTo(omsProductStatement.getDeliveryNum()) == -1){
+                omsProductStatementListReq.add(omsProductStatement);
+            }
+        });
+        omsProductStatementMapper.insertList(omsProductStatementListReq);
         return R.ok();
     }
 }

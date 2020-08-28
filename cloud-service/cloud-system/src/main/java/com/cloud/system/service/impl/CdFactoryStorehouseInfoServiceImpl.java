@@ -3,7 +3,6 @@ package com.cloud.system.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Dict;
-import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.EasyExcel;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
@@ -31,7 +30,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -111,7 +109,7 @@ public class CdFactoryStorehouseInfoServiceImpl extends BaseServiceImpl<CdFactor
 
         List<CdFactoryStorehouseInfoExportVo> listImport = (List<CdFactoryStorehouseInfoExportVo>) objects;
 
-        R  factoryInfoListR = cdFactoryInfoService.selectAllCompanyCode();
+        R  factoryInfoListR = cdFactoryInfoService.selectAllFactoryCode();
         if(!factoryInfoListR.isSuccess()){
             throw new BusinessException("查工厂信息失败" + factoryInfoListR.get("msg").toString());
         }
