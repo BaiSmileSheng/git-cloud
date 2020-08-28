@@ -145,6 +145,39 @@ public class BizBusinessServiceImpl implements IBizBusinessService {
         setAuditor(bizBusiness, ActivitiConstant.RESULT_SUSPEND, business.getUserId());
     }
 
+    /**
+     * start 启动流程 动态赋值下一级审批人
+     *
+     * @param business  业务对象，必须包含id,title,userId,procDefId属性
+     * @param variables 启动流程需要的变量
+     * @author zmr
+     */
+    @Override
+    public void startProcess(BizBusiness business, Map<String, Object> variables,Set<String> userIds) {
+        // 启动流程用户
+        identityService.setAuthenticatedUserId(business.getUserId().toString());
+        // 启动流程 需传入业务表id变量
+        ProcessInstance pi = runtimeService.startProcessInstanceById(business.getProcDefId(),
+                business.getId().toString(), variables);
+        // 设置流程实例名称
+        runtimeService.setProcessInstanceName(pi.getId(), business.getTitle());
+        BizBusiness bizBusiness = new BizBusiness().setId(business.getId()).setProcInstId(pi.getId())
+                .setProcDefKey(pi.getProcessDefinitionKey());
+        // 假如开始就没有任务，那就认为是中止的流程，通常是不存在的
+        if (CollectionUtil.isEmpty(userIds)) {
+            setAuditor(bizBusiness, ActivitiConstant.RESULT_SUSPEND, business.getUserId());
+        }else{
+            setAuditorCandidateUser(bizBusiness, ActivitiConstant.RESULT_SUSPEND, userIds);
+        }
+    }
+
+    /**
+     * start 启动流程（会签）
+     *
+     * @param business  业务对象，必须包含id,title,userId,procDefId属性
+     * @param variables 启动流程需要的变量
+     * @author cs
+     */
     @Override
     public void startProcessForHuiQian(BizBusiness business, Map<String, Object> variables) {
         if (ObjectUtil.isEmpty(variables.get("signList"))) {
@@ -169,6 +202,38 @@ public class BizBusinessServiceImpl implements IBizBusinessService {
                     .setResult(ActivitiConstant.RESULT_SUSPEND);
         }
         updateBizBusiness(business);
+    }
+
+    /**
+     * 动态赋值下一级审批人
+     * @param business
+     * @param result
+     * @param userIds
+     * @return
+     */
+    @Override
+    public int setAuditorCandidateUser(BizBusiness business, int result, Set<String> userIds) {
+        List<Task> tasks = taskService.createTaskQuery().processInstanceId(business.getProcInstId()).list();
+        if (null != tasks && tasks.size() > 0) {
+            Task task = tasks.get(0);
+            if (null != userIds && userIds.size() > 0) {
+                // 添加审核候选人
+                for (String auditor : userIds) {
+                    taskService.addCandidateUser(task.getId(), auditor);
+                }
+                business.setCurrentTask(task.getName());
+            } else {
+                runtimeService.deleteProcessInstance(task.getProcessInstanceId(),
+                        ActivitiConstant.SUSPEND_PRE + "no auditor");
+                business.setCurrentTask(ActivitiConstant.END_TASK_NAME).setStatus(ActivitiConstant.STATUS_SUSPEND)
+                        .setResult(ActivitiConstant.RESULT_SUSPEND);
+            }
+        } else {
+            // 任务结束
+            business.setCurrentTask(ActivitiConstant.END_TASK_NAME).setStatus(ActivitiConstant.STATUS_FINISH)
+                    .setResult(result);
+        }
+        return updateBizBusiness(business);
     }
 
     @Override

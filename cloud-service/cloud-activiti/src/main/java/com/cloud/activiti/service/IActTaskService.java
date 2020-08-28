@@ -22,6 +22,13 @@ public interface IActTaskService {
     R audit(BizAudit bizAudit,long auditUserId);
 
     /**
+     * 审批方法  推进流程  设置下一审批人
+     * @param bizAudit 审批信息  auditUserId 审批人ID
+     * @return 是否成功
+     */
+    R auditCandidateUser(BizAudit bizAudit,long auditUserId,Set<String> userIds);
+
+    /**
      * 开启会签审批及会签审批通用方法
      * @param bizAudit 审批信息  auditUserId 审批人ID signers 下级审批人IDs
      * @return 是否成功

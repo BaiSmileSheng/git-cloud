@@ -85,6 +85,28 @@ public class ActTaskServiceImpl implements IActTaskService {
         return R.ok();
     }
 
+    @Override
+    public R auditCandidateUser(BizAudit bizAudit, long auditUserId,Set<String> userIds) {
+        Map<String, Object> variables = Maps.newHashMap();
+        variables.put("result", bizAudit.getResult());
+        // 审批
+        taskService.complete(bizAudit.getTaskId(), variables);
+        SysUser user = remoteUserService.selectSysUserByUserId(auditUserId);
+        bizAudit.setAuditor(user.getUserName() + "-" + user.getLoginName());
+        bizAudit.setAuditorId(user.getUserId());
+        //增加审批历史
+        bizAuditService.insertBizAudit(bizAudit);
+        BizBusiness bizBusiness = new BizBusiness().setId(bizAudit.getBusinessKey())
+                .setProcInstId(bizAudit.getProcInstId());
+        //如果有下级，设置审批人并推进，没有则结束
+        if (CollectionUtil.isEmpty(userIds)) {
+            businessService.setAuditor(bizBusiness, ActivitiConstant.RESULT_SUSPEND, auditUserId);
+        }else{
+            businessService.setAuditorCandidateUser(bizBusiness, ActivitiConstant.RESULT_SUSPEND, userIds);
+        }
+        return R.ok();
+    }
+
     /**
      * 开启会签审批及会签审批人审批方法
      * signers不为null则生成会签审批，如果为null则为会签审批
