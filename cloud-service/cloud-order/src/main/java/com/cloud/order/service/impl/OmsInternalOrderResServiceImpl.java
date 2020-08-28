@@ -96,7 +96,7 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
             }
         });
         //获取不重复的物料号和工厂Map
-        List<Dict> maps = list.stream().map(s -> new Dict().set("productFactoryCode",s.getProductFactoryCode())
+        List<Dict> maps = list.stream().map(s -> new Dict()
                 .set("productMaterialCode",s.getProductMaterialCode())).distinct().collect(Collectors.toList());
         //获取bom版本
         R rBomMap = remoteBomService.selectVersionMap(maps);

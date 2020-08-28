@@ -38,14 +38,12 @@
         FROM
             cd_bom_info
         where del_flag='0'
-        and product_material_code in
-        <foreach collection="list" index="index" item="dict" open="(" close=")" separator=",">
-            #{dict.productMaterialCode}
-        </foreach>
-            and product_factory_code in
-        <foreach collection="list" index="index" item="dict" open="(" close=")" separator=",">
-            #{dict.productFactoryCode}
-        </foreach>
+        <if test="list!=null">
+            and product_material_code in
+            <foreach collection="list" index="index" item="dict" open="(" close=")" separator=",">
+                #{dict.productMaterialCode}
+            </foreach>
+        </if>
         GROUP BY
             product_material_code,
             product_factory_code
