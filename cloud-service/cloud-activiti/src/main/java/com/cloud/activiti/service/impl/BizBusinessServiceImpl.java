@@ -5,12 +5,15 @@
  */
 package com.cloud.activiti.service.impl;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ObjectUtil;
+import com.cloud.activiti.consts.ActivitiConstant;
+import com.cloud.activiti.domain.BizBusiness;
+import com.cloud.activiti.mapper.BizBusinessMapper;
+import com.cloud.activiti.service.IBizBusinessService;
+import com.cloud.activiti.service.IBizNodeService;
+import com.cloud.common.exception.BusinessException;
+import com.google.common.collect.Lists;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -18,15 +21,9 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.google.common.collect.Lists;
-import com.cloud.activiti.consts.ActivitiConstant;
-import com.cloud.activiti.domain.BizBusiness;
-import com.cloud.activiti.mapper.BizBusinessMapper;
-import com.cloud.activiti.service.IBizBusinessService;
-import com.cloud.activiti.service.IBizNodeService;
-
 import tk.mybatis.mapper.entity.Example;
+
+import java.util.*;
 
 /**
  * <p>File：BizBusinessServiceImpl.java</p>
@@ -146,6 +143,32 @@ public class BizBusinessServiceImpl implements IBizBusinessService {
                 .setProcDefKey(pi.getProcessDefinitionKey());
         // 假如开始就没有任务，那就认为是中止的流程，通常是不存在的
         setAuditor(bizBusiness, ActivitiConstant.RESULT_SUSPEND, business.getUserId());
+    }
+
+    @Override
+    public void startProcessForHuiQian(BizBusiness business, Map<String, Object> variables) {
+        if (ObjectUtil.isEmpty(variables.get("signList"))) {
+            throw new BusinessException("开启会签传入审批人参数为空！");
+        }
+        // 启动流程用户
+        identityService.setAuthenticatedUserId(business.getUserId().toString());
+        // 启动流程 需传入业务表id变量
+        ProcessInstance pi = runtimeService.startProcessInstanceById(business.getProcDefId(),
+                business.getId().toString(), variables);
+        business.setProcDefKey(pi.getProcessDefinitionKey());
+        // 设置流程实例名称
+        runtimeService.setProcessInstanceName(pi.getId(), business.getTitle());
+
+        //下一步生成会签审批
+        List<Task> tasks =  taskService.createTaskQuery().processInstanceId(pi.getId()).list();
+        if (CollectionUtil.isNotEmpty(tasks)) {
+            business.setCurrentTask(tasks.get(0).getName());
+        }else{
+            // 任务结束
+            business.setCurrentTask(ActivitiConstant.END_TASK_NAME).setStatus(ActivitiConstant.STATUS_FINISH)
+                    .setResult(ActivitiConstant.RESULT_SUSPEND);
+        }
+        updateBizBusiness(business);
     }
 
     @Override

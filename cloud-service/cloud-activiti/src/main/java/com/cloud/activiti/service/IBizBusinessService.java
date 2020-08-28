@@ -5,11 +5,11 @@
  */
 package com.cloud.activiti.service;
 
-import java.util.List;
-import java.util.Map;
-
 import com.cloud.activiti.domain.BizBusiness;
 import tk.mybatis.mapper.entity.Example;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>File：IBizBusinessService.java</p>
@@ -87,6 +87,15 @@ public interface IBizBusinessService {
      * @author zmr
      */
     void startProcess(BizBusiness business, Map<String, Object> variables);
+
+    /**
+     * start 启动流程（会签）
+     *
+     * @param business  业务对象，必须包含id,title,userId,procDefId属性
+     * @param variables 启动流程需要的变量
+     * @author cs
+     */
+    void startProcessForHuiQian(BizBusiness business, Map<String, Object> variables);
 
     /**
      * check 检查负责人

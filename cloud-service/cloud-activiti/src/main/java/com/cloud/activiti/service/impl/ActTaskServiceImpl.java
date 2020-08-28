@@ -1,6 +1,7 @@
 package com.cloud.activiti.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.cloud.activiti.consts.ActivitiConstant;
 import com.cloud.activiti.domain.BizAudit;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
@@ -30,6 +32,7 @@ import tk.mybatis.mapper.entity.Example;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -79,6 +82,65 @@ public class ActTaskServiceImpl implements IActTaskService {
                 .setProcInstId(bizAudit.getProcInstId());
         //如果有下级，设置审批人并推进，没有则结束
         businessService.setAuditor(bizBusiness, bizAudit.getResult(), auditUserId);
+        return R.ok();
+    }
+
+    /**
+     * 开启会签审批及会签审批人审批方法
+     * signers不为null则生成会签审批，如果为null则为会签审批
+     * @param bizAudit 审批信息  auditUserId 审批人ID signers 下级审批人ID集合
+     * @return 是否成功
+     */
+    @Override
+    public R audit(BizAudit bizAudit, long auditUserId, Set<String> signers) {
+        SysUser user = remoteUserService.selectSysUserByUserId(auditUserId);
+        bizAudit.setAuditor(user.getUserName() + "-" + user.getLoginName());
+        bizAudit.setAuditorId(user.getUserId());
+        //增加审批历史
+        bizAuditService.insertBizAudit(bizAudit);
+        // 审批
+        Map<String, Object> variables = Maps.newHashMap();
+        //如果审批驳回，则pass为false 将值传到监听类中
+        variables.put("pass", bizAudit.getResult()==2?true:false);
+        variables.put("businessKey", bizAudit.getBusinessKey());
+        if (CollectionUtil.isNotEmpty(signers)) {
+            //给会签节点赋审批人
+            variables.put("signList", signers);
+        }
+        //当会签审批时，会走监听
+        taskService.complete(bizAudit.getTaskId(), variables);
+        //执行实例
+        ExecutionEntity execution = (ExecutionEntity) runtimeService.createProcessInstanceQuery().processInstanceId(bizAudit.getProcInstId()).singleResult();
+        BizBusiness bizBusiness = new BizBusiness().setId(bizAudit.getBusinessKey())
+                .setProcInstId(bizAudit.getProcInstId());
+        if (execution != null) {
+            //当前实例的执行到哪个节点
+            String activitiId = execution.getActivityId();
+            if (activitiId!=null) {
+                //会签结束
+                //如果有下级，设置审批人并推进，没有则结束
+                businessService.setAuditor(bizBusiness, bizAudit.getResult(), auditUserId);
+            }
+        }else {
+            bizBusiness.setCurrentTask(ActivitiConstant.END_TASK_NAME);
+            bizBusiness.setStatus(ActivitiConstant.STATUS_FINISH);
+            bizBusiness.setResult(bizAudit.getResult());
+            businessService.updateBizBusiness(bizBusiness);
+        }
+
+        //如果signers不为null，生成会签流程
+        if (CollectionUtil.isNotEmpty(signers)) {
+            //下一步生成会签审批
+            List<Task> tasks =  taskService.createTaskQuery().processInstanceId(bizAudit.getProcInstId()).list();
+            if (CollectionUtil.isNotEmpty(tasks)) {
+                bizBusiness.setCurrentTask(tasks.get(0).getName());
+            }else{
+                //如果下一步没有审批节点，则任务结束(一般不会发生)
+                bizBusiness.setCurrentTask(ActivitiConstant.END_TASK_NAME).setStatus(ActivitiConstant.STATUS_FINISH)
+                        .setResult(bizAudit.getResult());
+            }
+            businessService.updateBizBusiness(bizBusiness);
+        }
         return R.ok();
     }
 

@@ -3,8 +3,8 @@ package com.cloud.activiti.service;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.common.core.domain.R;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * activiti审批流
@@ -20,6 +20,13 @@ public interface IActTaskService {
      * @return 是否成功
      */
     R audit(BizAudit bizAudit,long auditUserId);
+
+    /**
+     * 开启会签审批及会签审批通用方法
+     * @param bizAudit 审批信息  auditUserId 审批人ID signers 下级审批人IDs
+     * @return 是否成功
+     */
+    R audit(BizAudit bizAudit, long auditUserId, Set<String> signers);
 
     /**
      * 批量审批   与单一审批不同的是  taskIds为数组
