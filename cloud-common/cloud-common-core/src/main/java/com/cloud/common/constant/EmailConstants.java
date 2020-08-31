@@ -23,11 +23,11 @@ public class EmailConstants {
     /**
      * 内容
      * */
-    public static final String RAW_MATERIAL_REVIEW_CONTEXT = "，您好！\n 您有新的原材料待评审，请及时评审！";
+    public static final String RAW_MATERIAL_REVIEW_CONTEXT = "，您好！\n 订单评审系统有新的原材料待评审，请及时评审！";
 
-    public static final String THREE_VERSION_REVIEW_CONTEXT = "，您好！\n 您导入系统中的数据存在3版本超配订单，导入数据需审批，请及时审批！";
+    public static final String THREE_VERSION_REVIEW_CONTEXT = "，您好！\n 订单评审系统有新的3版本超配订单待审批，请及时审批！";
 
-    public static final String OVERDUE_NOT_CLOSE_ORDER_REVIEW_CONTEXT = "，您好！\n 您导入的数据在系统中存在超期未关闭订单，导入数据需审批，请及时审批！";
+    public static final String OVERDUE_NOT_CLOSE_ORDER_REVIEW_CONTEXT = "，您好！\n 订单评审系统有新的超期未关闭订单需审批，请及时审批！";
 
     public static final String ADD_ORDER_REVIEW_CONTEXT = "，您好！\n 订单评审系统有新的T+2追加订单待审批，请及时审批！";
 

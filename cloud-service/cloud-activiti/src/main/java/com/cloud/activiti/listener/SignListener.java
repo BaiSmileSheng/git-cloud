@@ -55,11 +55,16 @@ public class SignListener implements TaskListener {
         }else{
             Integer complete = (Integer) runtimeService.getVariable(exId, "nrOfCompletedInstances");
             Integer all = (Integer) runtimeService.getVariable(exId, "nrOfInstances");
+            Integer noComplete = (Integer) runtimeService.getVariable(exId,"nrOfActiveInstances");
             //说明都完成了并且没有人拒绝
             if((complete + 1) / all == 1){
                 log.info("会签审批全部通过！！！！！！！");
                 runtimeService.setVariable(exId, "result", "2");
                 //TODO:会签都通过业务逻辑
+            } else if (noComplete <= 0){
+                //有人驳回，则整体驳回
+                //会签结束，设置参数result为3(通过result:2  驳回result:3)
+                runtimeService.setVariable(exId, "result", "3");
             }
         }
     }

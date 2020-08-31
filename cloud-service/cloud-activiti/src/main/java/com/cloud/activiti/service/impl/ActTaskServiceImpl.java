@@ -3,6 +3,8 @@ package com.cloud.activiti.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
+import com.cloud.activiti.constant.ActProcessContants;
 import com.cloud.activiti.consts.ActivitiConstant;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
@@ -10,8 +12,11 @@ import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizAuditService;
 import com.cloud.activiti.service.IBizBusinessService;
+import com.cloud.activiti.vo.HiTaskVo;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.common.log.enums.BusinessStatus;
+import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -144,9 +149,18 @@ public class ActTaskServiceImpl implements IActTaskService {
                 businessService.setAuditor(bizBusiness, bizAudit.getResult(), auditUserId);
             }
         }else {
+            HiTaskVo hiTaskVo = new HiTaskVo();
+            hiTaskVo.setProcInstId(bizAudit.getProcInstId());
+            List<HiTaskVo> hiTaskVos = bizAuditService.getHistoryTaskList(hiTaskVo);
+            int count = hiTaskVos.stream()
+                    .filter(o -> ActivitiConstant.RESULT_FAIL.equals(o.getResult())).collect(Collectors.toList()).size();
+            if (count > 0) {
+                bizBusiness.setResult(ActivitiConstant.RESULT_FAIL);
+            } else {
+                bizBusiness.setResult(bizAudit.getResult());
+            }
             bizBusiness.setCurrentTask(ActivitiConstant.END_TASK_NAME);
             bizBusiness.setStatus(ActivitiConstant.STATUS_FINISH);
-            bizBusiness.setResult(bizAudit.getResult());
             businessService.updateBizBusiness(bizBusiness);
         }
 
@@ -271,18 +285,13 @@ public class ActTaskServiceImpl implements IActTaskService {
             return R.ok();
         }
         String ids = businesses.stream().map(b -> b.getId().toString()).collect(Collectors.joining(","));
-        businessService.deleteBizBusinessByIds(ids);
+        businesses = businesses.stream()
+                .filter(o -> StrUtil.isNotBlank(o.getProcInstId()) && StrUtil.equals("1",o.getStatus().toString())).collect(Collectors.toList());
         businesses.forEach(b -> {
             String id  = b.getProcInstId();
-            ProcessInstance pi = runtimeService.createProcessInstanceQuery().processInstanceId(id).singleResult();
-            BizBusiness bizBusiness = new BizBusiness();
-            bizBusiness.setId(Long.valueOf(pi.getBusinessKey()));
-            bizBusiness.setCurrentTask(ActivitiConstant.END_TASK_NAME);
-            bizBusiness.setStatus(ActivitiConstant.STATUS_CANCELED);
-            bizBusiness.setResult(ActivitiConstant.RESULT_CANCELED);
-            businessService.updateBizBusiness(bizBusiness);
             runtimeService.deleteProcessInstance(id, userId);
         });
+        businessService.deleteBizBusinessByIds(ids);
         log.info("删除审批流程方法-执行结束！");
         return R.ok();
     }
