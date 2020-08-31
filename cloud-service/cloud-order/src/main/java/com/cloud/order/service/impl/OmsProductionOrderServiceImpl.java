@@ -388,7 +388,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         }));
         //计算用时：排产量/UPH节拍
         listImport.forEach(o -> {
-            if (o.getRhythm() != null) {
+            if (o.getRhythm() != null && o.getRhythm().compareTo(BigDecimal.ZERO) > 0) {
                 o.setUseTime(o.getProductNum()
                         .divide(o.getRhythm(), 2, BigDecimal.ROUND_HALF_UP));
             }
@@ -424,11 +424,12 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "，";
                 o.setExportRemark(exportRemark + NO_OUTSOURCE_REMARK);
             }
-            if (o.getRhythm() == null || StringUtils.isBlank(o.getRhythm().toString())
+            //TODO 应王福丽要求将UPH数据的校验去除 2020-08-31  ltq
+            /*if (o.getRhythm() == null || StringUtils.isBlank(o.getRhythm().toString())
                     || o.getRhythm().compareTo(BigDecimal.ZERO) == 0) {
                 String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "，";
                 o.setExportRemark(exportRemark + NO_UPH_REMARK);
-            }
+            }*/
             //筛选没有产品定员、分公司主管、班长的信息
             if ((StringUtils.isBlank(String.valueOf(o.getProductQuota()))
                     || o.getProductQuota() == 0)
@@ -556,7 +557,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             //排产订单明细转存删除表
             omsProductionOrderDetailDelService.insertList(omsProductionOrderDetailDels);
             //删除排产订单明细数据
-            omsProductionOrderDetailService.deleteByIds(detailIds);
+            omsProductionOrderDetailService.deleteByIdsWL(detailIds);
         }
         //将删除的排产订单存到删除表中
         omsProductionOrderDelService.insertList(omsProductionOrderDels);
@@ -1052,11 +1053,30 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }
         });
         if (checkList.size() > 0) {
+            //获取权限用户列表
+            R userRightsMap = userService.selectUserRights(RoleConstants.ROLE_KEY_DDLRY);
+            Set<SysUser> sysUsers = new HashSet<>();
+            if (!userRightsMap.isSuccess()) {
+                log.error("3版本审批流开启-获取权限用户列表失败：" + userRightsMap.get("msg"));
+                throw new BusinessException("3版本审批流开启-获取权限用户列表失败：" + userRightsMap.get("msg"));
+            }
+            List<SysUserRights> sysUserRightsList =
+                    userRightsMap.getCollectData(new TypeReference<List<SysUserRights>>() {});
             //  3版本审批流程
             List<ActStartProcessVo> processVos = checkList.stream().map(o -> {
                 ActStartProcessVo actStartProcessVo = new ActStartProcessVo();
                 actStartProcessVo.setOrderId(o.getId().toString());
                 actStartProcessVo.setOrderCode(o.getOrderCode());
+                Set<String> userIdSet = new HashSet<>();
+                sysUserRightsList.forEach(u ->{
+                    if (u.getProductFactorys().contains(o.getProductFactoryCode())) {
+                        userIdSet.add(u.getId());
+                        if (StrUtil.isNotBlank(u.getEmail())) {
+                            sysUsers.add(SysUser.builder().userName(u.getUserName()).email(u.getEmail()).build());
+                        }
+                    }
+                });
+                actStartProcessVo.setUserIds(userIdSet);
                 return actStartProcessVo;
             }).collect(toList());
             ActBusinessVo actBusinessVo = ActBusinessVo.builder().key(ActProcessContants.ACTIVITI_THREE_VERSION_REVIEW)
@@ -1069,12 +1089,11 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 log.error("开启排产订单3版本审批流失败，原因：" + r.get("msg"));
                 throw new BusinessException("开启排产订单3版本审批流失败!");
             }
-
-            String email = sysUser.getEmail();
-            if (StrUtil.isNotBlank(email)) {
-                String context = sysUser.getUserName() + EmailConstants.THREE_VERSION_REVIEW_CONTEXT + EmailConstants.ORW_URL;
+            sysUsers.forEach(u ->{
+                String email = u.getEmail();
+                String context = u.getUserName() + EmailConstants.THREE_VERSION_REVIEW_CONTEXT + EmailConstants.ORW_URL;
                 mailService.sendTextMail(email, EmailConstants.TITLE_THREE_VERSION_REVIEW, context);
-            }
+            });
         }
         return list;
     }
@@ -1100,11 +1119,30 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 })
         );
         if (checkOrders.size() > 0) {
+            //获取权限用户列表
+            R userRightsMap = userService.selectUserRights(RoleConstants.ROLE_KEY_ORDER);
+            Set<SysUser> sysUsers = new HashSet<>();
+            if (!userRightsMap.isSuccess()) {
+                log.error("超期未关闭订单审批流开启-获取权限用户列表失败：" + userRightsMap.get("msg"));
+                throw new BusinessException("超期未关闭订单审批流开启-获取权限用户列表失败：" + userRightsMap.get("msg"));
+            }
+            List<SysUserRights> sysUserRightsList =
+                    userRightsMap.getCollectData(new TypeReference<List<SysUserRights>>() {});
             //  超期未关闭订单审批流程
             List<ActStartProcessVo> processVos = checkOrders.stream().map(o -> {
                 ActStartProcessVo actStartProcessVo = new ActStartProcessVo();
                 actStartProcessVo.setOrderId(o.getId().toString());
                 actStartProcessVo.setOrderCode(o.getOrderCode());
+                Set<String> userIdSet = new HashSet<>();
+                sysUserRightsList.forEach(u ->{
+                    if (u.getProductFactorys().contains(o.getProductFactoryCode())) {
+                        userIdSet.add(u.getId());
+                        if (StrUtil.isNotBlank(u.getEmail())) {
+                            sysUsers.add(SysUser.builder().userName(u.getUserName()).email(u.getEmail()).build());
+                        }
+                    }
+                });
+                actStartProcessVo.setUserIds(userIdSet);
                 return actStartProcessVo;
             }).collect(toList());
             ActBusinessVo actBusinessVo = ActBusinessVo.builder().key(ActProcessContants.ACTIVITI_OVERDUE_NOT_CLOSE_ORDER_REVIEW)
@@ -1118,28 +1156,13 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 throw new BusinessException("开启排产订单超期未关闭订单审批流程失败!");
             }
 
-            //获取权限用户列表
-            R userRightsMap = userService.selectUserRights(RoleConstants.ROLE_KEY_ORDER);
-            if (!userRightsMap.isSuccess()) {
-                log.error("获取权限用户列表失败：" + userRightsMap.get("msg"));
-            } else {
-                List<SysUserRights> sysUserRightsList = userRightsMap.getCollectData(new TypeReference<List<SysUserRights>>() {
-                });
-                Set<SysUser> sysUsers = new HashSet<>();
-                sysUserRightsList.forEach(u ->
-                        checkOrders.forEach(o -> {
-                            if (u.getProductFactorys().contains(o.getProductFactoryCode()) && StrUtil.isNotBlank(u.getEmail())) {
-                                sysUsers.add(SysUser.builder().userName(u.getUserName()).email(u.getEmail()).build());
-                            }
-                        })
-                );
-                //发送邮件
-                sysUsers.forEach(u -> {
-                    String email = u.getEmail();
-                    String context = u.getUserName() + EmailConstants.OVERDUE_NOT_CLOSE_ORDER_REVIEW_CONTEXT + EmailConstants.ORW_URL;
-                    mailService.sendTextMail(email, EmailConstants.TITLE_OVERDUE_NOT_CLOSE_ORDER_REVIEW, context);
-                });
-            }
+
+            //发送邮件
+            sysUsers.forEach(u -> {
+                String email = u.getEmail();
+                String context = u.getUserName() + EmailConstants.OVERDUE_NOT_CLOSE_ORDER_REVIEW_CONTEXT + EmailConstants.ORW_URL;
+                mailService.sendTextMail(email, EmailConstants.TITLE_OVERDUE_NOT_CLOSE_ORDER_REVIEW, context);
+            });
         }
         return list;
     }
@@ -1153,26 +1176,62 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      */
     private List<OmsProductionOrder> checkOverStock(List<OmsProductionOrder> list, SysUser sysUser) {
         Set<OmsProductionOrder> omsProductionOrders = new HashSet<>();
+        Set<String> userFactoryCodeSet = new HashSet<>();
+        Map<String,Set<String>> map = new HashMap<>();
         list.forEach(o -> {
             R overStockMap = remoteCdProductOverdueService.selectOverStockByFactoryAndMaterial(CdProductOverdue
-                    .builder().productFactoryCode(o.getProductFactoryCode())
+                    .builder()
                     .productMaterialCode(o.getProductMaterialCode()).build());
             if (!overStockMap.isSuccess()) {
-                log.info("根据工厂、物料号查询超期库存" + overStockMap.get("msg"));
+                log.info("根据成品物料号查询超期库存" + overStockMap.get("msg"));
             }
             List<CdProductOverdue> productOverdues =
                     overStockMap.getCollectData(new TypeReference<List<CdProductOverdue>>() {
                     });
             if (BeanUtil.isNotEmpty(productOverdues) && productOverdues.size() > 0) {
+                Set<String> overduesFactoryCodes = productOverdues.stream().map(CdProductOverdue::getProductFactoryCode).collect(Collectors.toSet());
+                userFactoryCodeSet.addAll(overduesFactoryCodes);
+                userFactoryCodeSet.add(o.getProductFactoryCode());
+                map.put(o.getProductMaterialCode(),userFactoryCodeSet);
                 o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_ONE);
                 omsProductionOrders.add(o);
             }
         });
         if (omsProductionOrders.size() > 0) {
+            //获取权限用户列表
+            R userRightsMap = userService.selectUserRights(RoleConstants.ROLE_KEY_ORDER);
+            //需要发邮件的用户信息
+            Set<SysUser> sysUsers = new HashSet<>();
+
+            if (!userRightsMap.isSuccess()) {
+                log.error("获取权限用户列表失败：" + userRightsMap.get("msg"));
+                throw new BusinessException("获取权限用户列表失败：" + userRightsMap.get("msg"));
+            }
+            List<SysUserRights> sysUserRightsList =
+                    userRightsMap.getCollectData(new TypeReference<List<SysUserRights>>() {});
+            //todo 修改审批对象到人
             List<ActStartProcessVo> processVos = omsProductionOrders.stream().map(o -> {
+                Set<String> userFactorys = map.get(o.getProductMaterialCode());
                 ActStartProcessVo actStartProcessVo = new ActStartProcessVo();
                 actStartProcessVo.setOrderId(o.getId().toString());
                 actStartProcessVo.setOrderCode(o.getOrderCode());
+                Set<String> userIdSet = new HashSet<>();
+                sysUserRightsList.forEach(u -> {
+                    int count = userFactorys.stream()
+                            .map(f -> u.getProductFactorys().stream()
+                                    .filter(uf -> Objects.nonNull(f) && Objects.nonNull(uf) && Objects.equals(f,uf))
+                                    .findAny().orElse(null))
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toList())
+                            .size();
+                    if (count > 0){
+                        userIdSet.add(u.getId());
+                        if (StrUtil.isNotBlank(u.getEmail())) {
+                            sysUsers.add(SysUser.builder().userName(u.getUserName()).email(u.getEmail()).build());
+                        }
+                    }
+                });
+                actStartProcessVo.setUserIds(userIdSet);
                 return actStartProcessVo;
             }).collect(toList());
             ActBusinessVo actBusinessVo = ActBusinessVo.builder().key(ActProcessContants.ACTIVITI_OVERDUE_STOCK_ORDER_REVIEW)
@@ -1185,29 +1244,12 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 log.error("开启排产订单超期未关闭订单审批流程失败，原因：" + r.get("msg"));
                 throw new BusinessException("开启排产订单超期未关闭订单审批流程失败!");
             }
-
-            //获取权限用户列表
-            R userRightsMap = userService.selectUserRights(RoleConstants.ROLE_KEY_ORDER);
-            if (!userRightsMap.isSuccess()) {
-                log.error("获取权限用户列表失败：" + userRightsMap.get("msg"));
-            } else {
-                List<SysUserRights> sysUserRightsList = userRightsMap.getCollectData(new TypeReference<List<SysUserRights>>() {
-                });
-                Set<SysUser> sysUsers = new HashSet<>();
-                sysUserRightsList.forEach(u ->
-                        omsProductionOrders.forEach(o -> {
-                            if (u.getProductFactorys().contains(o.getProductFactoryCode()) && StrUtil.isNotBlank(u.getEmail())) {
-                                sysUsers.add(SysUser.builder().userName(u.getUserName()).email(u.getEmail()).build());
-                            }
-                        })
-                );
-                //发送邮件
-                sysUsers.forEach(u -> {
-                    String email = u.getEmail();
-                    String context = u.getUserName() + EmailConstants.OVER_STOCK_CONTEXT + EmailConstants.ORW_URL;
-                    mailService.sendTextMail(email, EmailConstants.TITLE_OVER_STOCK, context);
-                });
-            }
+            //发送邮件
+            sysUsers.forEach(u -> {
+                String email = u.getEmail();
+                String context = u.getUserName() + EmailConstants.OVER_STOCK_CONTEXT + EmailConstants.ORW_URL;
+                mailService.sendTextMail(email, EmailConstants.TITLE_OVER_STOCK, context);
+            });
         }
         return list;
     }
@@ -1367,11 +1409,45 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }
         });
         if (addOrderList.size() > 0) {
+            //获取国产件JIT处长
+            R jitUserRightsMap = userService.selectUserRights(RoleConstants.ROLE_KEY_JITCZGC);
+            if (!jitUserRightsMap.isSuccess()) {
+                log.error("T+2追加订单审批流程-获取国产件JIT处长列表失败：" + jitUserRightsMap.get("msg"));
+                throw new BusinessException("T+2追加订单审批流程-获取国产件JIT处长列表失败：" + jitUserRightsMap.get("msg"));
+            }
+            List<SysUserRights> sysUserRightsJitGcList = jitUserRightsMap.getCollectData(new TypeReference<List<SysUserRights>>() {
+                });
+
+            //获取进口件JIT处长信息
+            R userRightsMap = userService.selectUserRights(RoleConstants.ROLE_KEY_JITCZJK);
+            if (!userRightsMap.isSuccess()) {
+                log.error("T+2追加订单审批流程-获取进口件JIT处长列表失败：" + jitUserRightsMap.get("msg"));
+                throw new BusinessException("T+2追加订单审批流程-获取进口件JIT处长列表失败：" + jitUserRightsMap.get("msg"));
+            }
+            List<SysUserRights> sysUserRightsJitJkList = userRightsMap.getCollectData(new TypeReference<List<SysUserRights>>() {
+                });
+
+            sysUserRightsJitGcList.addAll(sysUserRightsJitJkList);
+            //发送邮件
+            Set<SysUser> userSet = new HashSet<>();
+
             //T+2追加订单审批流程
+            // todo 修改T+2追加订单审批流程到人  2020-08-28  ltq  by  wangfuli
             List<ActStartProcessVo> processVos = addOrderList.stream().map(o -> {
                 ActStartProcessVo actStartProcessVo = new ActStartProcessVo();
                 actStartProcessVo.setOrderId(o.getId().toString());
                 actStartProcessVo.setOrderCode(o.getOrderCode());
+                Set<String> userIdSet = new HashSet<>();
+                //修改T+2追加订单审核流程的人员信息到工厂，会签审核  2020-08-28 ltq  by  wangfuli
+                sysUserRightsJitGcList.forEach(u ->{
+                    if (u.getProductFactorys().contains(o.getProductFactoryCode())) {
+                        userIdSet.add(u.getId());
+                        if (StrUtil.isNotBlank(u.getEmail())) {
+                            userSet.add(SysUser.builder().email(u.getEmail()).userName(u.getUserName()).build());
+                        }
+                    }
+                });
+                actStartProcessVo.setUserIds(userIdSet);
                 return actStartProcessVo;
             }).collect(toList());
             ActBusinessVo actBusinessVo = ActBusinessVo.builder().key(ActProcessContants.ACTIVITI_ADD_REVIEW)
@@ -1384,28 +1460,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 log.error("开启排产订单T+2追加订单审批流程失败，原因：" + r.get("msg"));
                 throw new BusinessException("开启排产订单T+2追加订单审批流程失败!");
             }
-
-            //获取国产件JIT处长
-            List<SysUserRights> sysUserRightsJitGcList = new ArrayList<>();
-            R jitUserRightsMap = userService.selectUserRights(RoleConstants.ROLE_KEY_JITCZGC);
-            if (!jitUserRightsMap.isSuccess()) {
-                log.error("获取权限用户列表失败：" + jitUserRightsMap.get("msg"));
-            } else {
-                sysUserRightsJitGcList = jitUserRightsMap.getCollectData(new TypeReference<List<SysUserRights>>() {
-                });
-            }
-            //获取进口件JIT处长信息
-            List<SysUserRights> sysUserRightsJitJkList = new ArrayList<>();
-            R userRightsMap = userService.selectUserRights(RoleConstants.ROLE_KEY_JITCZJK);
-            if (!userRightsMap.isSuccess()) {
-                log.error("获取权限用户列表失败：" + userRightsMap.get("msg"));
-            } else {
-                sysUserRightsJitJkList = userRightsMap.getCollectData(new TypeReference<List<SysUserRights>>() {
-                });
-            }
-            sysUserRightsJitGcList.addAll(sysUserRightsJitJkList);
-            //发送邮件
-            sysUserRightsJitGcList.forEach(u -> {
+            userSet.forEach(u ->{
                 String email = u.getEmail();
                 String contexts = u.getUserName() + EmailConstants.ADD_ORDER_REVIEW_CONTEXT + EmailConstants.ORW_URL;
                 mailService.sendTextMail(email, EmailConstants.TITLE_ADD_ORDER_REVIEW, contexts);
@@ -1413,11 +1468,30 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         }
         //ZN 认证邮件通知
         if (znOrderList.size() > 0) {
+            //获取权限用户列表
+            R userRightsMap = userService.selectUserRights(RoleConstants.ROLE_KEY_ZLGCS);
+            Set<SysUser> userSet = new HashSet<>();
+            if (!userRightsMap.isSuccess()) {
+                log.error("ZN认证审批流程-获取质量工程师列表失败：" + userRightsMap.get("msg"));
+                throw new BusinessException("ZN认证审批流程-获取质量工程师列表失败：" + userRightsMap.get("msg"));
+            }
+            List<SysUserRights> sysUserRightsList =
+                    userRightsMap.getCollectData(new TypeReference<List<SysUserRights>>() {});
             //开启ZN认证审批流程task
             List<ActStartProcessVo> processVos = znOrderList.stream().map(o -> {
                 ActStartProcessVo actStartProcessVo = new ActStartProcessVo();
                 actStartProcessVo.setOrderId(o.getId().toString());
                 actStartProcessVo.setOrderCode(o.getOrderCode());
+                Set<String> userIdSet = new HashSet<>();
+                sysUserRightsList.forEach(u ->{
+                    if (u.getProductFactorys().contains(o.getProductFactoryCode())) {
+                        userIdSet.add(u.getId());
+                        if (StrUtil.isNotBlank(u.getEmail())) {
+                            userSet.add(SysUser.builder().email(u.getEmail()).userName(u.getUserName()).build());
+                        }
+                    }
+                });
+                actStartProcessVo.setUserIds(userIdSet);
                 return actStartProcessVo;
             }).collect(toList());
             ActBusinessVo actBusinessVo = ActBusinessVo.builder().key(ActProcessContants.ACTIVITI_ZN_REVIEW)
@@ -1430,21 +1504,12 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 log.error("开启排产订单ZN认证审批流程失败，原因：" + r.get("msg"));
                 throw new BusinessException("开启排产订单ZN认证审批流程失败!");
             }
-
-            //获取权限用户列表
-            R userRightsMap = userService.selectUserRights(RoleConstants.ROLE_KEY_ZLGCS);
-            if (!userRightsMap.isSuccess()) {
-                log.error("获取权限用户列表失败：" + userRightsMap.get("msg"));
-            } else {
-                List<SysUserRights> sysUserRightsList = userRightsMap.getCollectData(new TypeReference<List<SysUserRights>>() {
-                });
-                //发送邮件
-                sysUserRightsList.forEach(u -> {
-                    String email = u.getEmail();
-                    String contexts = u.getUserName() + EmailConstants.ZN_REVIEW_CONTEXT + EmailConstants.ORW_URL;
-                    mailService.sendTextMail(email, EmailConstants.TITLE_ZN_REVIEW, contexts);
-                });
-            }
+            //发送邮件
+            userSet.forEach(u -> {
+                String email = u.getEmail();
+                String contexts = u.getUserName() + EmailConstants.ZN_REVIEW_CONTEXT + EmailConstants.ORW_URL;
+                mailService.sendTextMail(email, EmailConstants.TITLE_ZN_REVIEW, contexts);
+            });
 
         }
         List<OmsProductionOrder> checkListAll = new ArrayList<>();
@@ -1466,11 +1531,12 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     /**
      * 下达SAP
      *
-     * @param ids
+     * @param order
      * @return
      */
     @Override
-    public R giveSAP(String ids) {
+    public R giveSAP(OmsProductionOrder order) {
+        String ids = order.getIds();
         List<OmsProductionOrder> list = new ArrayList<>();
         if (StringUtils.isNotBlank(ids)) {
             list = omsProductionOrderMapper.selectByIds(ids);
@@ -1496,9 +1562,68 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             Example example = new Example(OmsProductionOrder.class);
             Example.Criteria criteria = example.createCriteria();
             List<String> statusList = new ArrayList<>();
-            statusList.add(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_DCSAP.getCode());
-            statusList.add(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPYC.getCode());
-            criteria.andIn("status", statusList);
+            //增加按照查询条件下达SAP的逻辑
+            if (StrUtil.isNotBlank(order.getStatus())
+                    && (!ProductOrderConstants.STATUS_FOUR.equals(order.getStatus())
+                    || !ProductOrderConstants.STATUS_SEVEN.equals(order.getStatus()))) {
+                log.error("下达SAP操作只可以下达待传SAP、传SAP异常的订单！");
+                return R.error("下达SAP操作只可以下达待传SAP、传SAP异常的订单！");
+            }
+            if (StrUtil.isNotBlank(order.getProductFactoryCode())) {
+                criteria.andEqualTo("productFactoryCode", order.getProductFactoryCode());
+            }
+            if (StrUtil.isNotBlank(order.getStatus())) {
+                criteria.andEqualTo("status", order.getStatus());
+            } else {
+                statusList.add(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_DCSAP.getCode());
+                statusList.add(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPYC.getCode());
+                criteria.andIn("status", statusList);
+            }
+            if (StringUtils.isNotBlank(order.getProductMaterialCode())) {
+                String[] productMaterialCodeS = order.getProductMaterialCode().split(",");
+                List<String> productMaterialCodeList = new ArrayList<>();
+                for (String productMaterialCode : productMaterialCodeS) {
+                    String regex = "\\s*|\t|\r|\n";
+                    Pattern p = Pattern.compile(regex);
+                    Matcher m = p.matcher(productMaterialCode);
+                    String productMaterialCodeReq = m.replaceAll("");
+                    productMaterialCodeList.add(productMaterialCodeReq);
+                }
+                criteria.andIn("productMaterialCode", productMaterialCodeList);
+            }
+            if (StringUtils.isNotBlank(order.getProductOrderCode())) {
+                String[] productOrderCodeS = order.getProductOrderCode().split(",");
+                List<String> productOrderCodeList = new ArrayList<>();
+                for (String productOrderCode : productOrderCodeS) {
+                    String regex = "\\s*|\t|\r|\n";
+                    Pattern p = Pattern.compile(regex);
+                    Matcher m = p.matcher(productOrderCode);
+                    String productOrderCodeReq = m.replaceAll("");
+                    productOrderCodeList.add(productOrderCodeReq);
+                }
+                criteria.andIn("productOrderCode", productOrderCodeList);
+            }
+            if (StrUtil.isNotBlank(order.getCheckDateStart())) {
+                if (ProductOrderConstants.DATE_TYPE_ONE.equals(order.getDateType())) {
+                    criteria.andGreaterThanOrEqualTo("deliveryDate", order.getCheckDateStart());
+                } else if (ProductOrderConstants.DATE_TYPE_TWO.equals(order.getDateType())) {
+                    criteria.andGreaterThanOrEqualTo("productStartDate", order.getCheckDateStart());
+                } else if (ProductOrderConstants.DATE_TYPE_THREE.equals(order.getDateType())) {
+                    criteria.andGreaterThanOrEqualTo("productEndDate", order.getCheckDateStart());
+                }
+            }
+            if (StrUtil.isNotBlank(order.getCheckDateEnd())) {
+                if (ProductOrderConstants.DATE_TYPE_ONE.equals(order.getDateType())) {
+                    criteria.andLessThanOrEqualTo("deliveryDate", order.getCheckDateEnd());
+                } else if (ProductOrderConstants.DATE_TYPE_TWO.equals(order.getDateType())) {
+                    criteria.andLessThanOrEqualTo("productStartDate", order.getCheckDateEnd());
+                } else if (ProductOrderConstants.DATE_TYPE_THREE.equals(order.getDateType())) {
+                    criteria.andLessThanOrEqualTo("productEndDate", order.getCheckDateEnd());
+                }
+            }
+            if (StrUtil.isNotBlank(order.getOrderType())) {
+                criteria.andEqualTo("orderType", order.getOrderType());
+            }
             list = omsProductionOrderMapper.selectByExample(example);
         }
         if (CollectionUtils.isEmpty(list)) {
