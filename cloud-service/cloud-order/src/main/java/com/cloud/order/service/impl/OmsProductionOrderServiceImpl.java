@@ -388,7 +388,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         }));
         //计算用时：排产量/UPH节拍
         listImport.forEach(o -> {
-            if (o.getRhythm() != null) {
+            if (o.getRhythm() != null && o.getRhythm().compareTo(BigDecimal.ZERO) > 0) {
                 o.setUseTime(o.getProductNum()
                         .divide(o.getRhythm(), 2, BigDecimal.ROUND_HALF_UP));
             }
@@ -424,11 +424,12 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "，";
                 o.setExportRemark(exportRemark + NO_OUTSOURCE_REMARK);
             }
-            if (o.getRhythm() == null || StringUtils.isBlank(o.getRhythm().toString())
+            //TODO 应王福丽要求将UPH数据的校验去除 2020-08-31  ltq
+            /*if (o.getRhythm() == null || StringUtils.isBlank(o.getRhythm().toString())
                     || o.getRhythm().compareTo(BigDecimal.ZERO) == 0) {
                 String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "，";
                 o.setExportRemark(exportRemark + NO_UPH_REMARK);
-            }
+            }*/
             //筛选没有产品定员、分公司主管、班长的信息
             if ((StringUtils.isBlank(String.valueOf(o.getProductQuota()))
                     || o.getProductQuota() == 0)
