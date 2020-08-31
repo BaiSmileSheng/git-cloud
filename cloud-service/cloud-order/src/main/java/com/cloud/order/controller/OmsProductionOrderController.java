@@ -479,8 +479,18 @@ public class OmsProductionOrderController extends BaseController {
     @PostMapping("giveSAP")
     @OperLog(title = "下达SAP ", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "下达SAP ", response = R.class)
-    public R giveSAP(@RequestParam(value = "ids",required = false) String ids){
-        R result = omsProductionOrderService.giveSAP(ids);
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "productMaterialCode", value = "专用号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productFactoryCode", value = "工厂", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "status", value = "状态", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "checkDateStart", value = "查询开始日期", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "checkDateEnd", value = "查询结束日期", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "orderType", value = "sap订单类型", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "dateType", value = "查询日期类型", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "ids", value = "id字符串", required = false, paramType = "query", dataType = "String")
+    })
+    public R giveSAP(@ApiIgnore OmsProductionOrder omsProductionOrder){
+        R result = omsProductionOrderService.giveSAP(omsProductionOrder);
         return result;
     }
 

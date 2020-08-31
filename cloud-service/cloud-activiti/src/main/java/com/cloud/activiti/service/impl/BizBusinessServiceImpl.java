@@ -14,6 +14,16 @@ import com.cloud.activiti.service.IBizBusinessService;
 import com.cloud.activiti.service.IBizNodeService;
 import com.cloud.common.exception.BusinessException;
 import com.google.common.collect.Lists;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import com.cloud.activiti.constant.ActProcessContants;
+import com.cloud.activiti.service.IBizAuditService;
+import com.cloud.activiti.vo.HiTaskVo;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -51,6 +61,8 @@ public class BizBusinessServiceImpl implements IBizBusinessService {
 
     @Autowired
     private IBizNodeService bizNodeService;
+    @Autowired
+    private IBizAuditService bizAuditService;
 
     /**
      * 查询流程业务
@@ -189,6 +201,7 @@ public class BizBusinessServiceImpl implements IBizBusinessService {
         ProcessInstance pi = runtimeService.startProcessInstanceById(business.getProcDefId(),
                 business.getId().toString(), variables);
         business.setProcDefKey(pi.getProcessDefinitionKey());
+        business.setProcInstId(pi.getProcessInstanceId());
         // 设置流程实例名称
         runtimeService.setProcessInstanceName(pi.getId(), business.getTitle());
 
@@ -255,6 +268,15 @@ public class BizBusinessServiceImpl implements IBizBusinessService {
                         .setResult(ActivitiConstant.RESULT_SUSPEND);
             }
         } else {
+            //对审批节点，判断是否全部通过，有一个节点驳回，则整体都驳回
+            HiTaskVo hiTaskVo = new HiTaskVo();
+            hiTaskVo.setProcInstId(business.getProcInstId());
+            List<HiTaskVo> hiTaskVos = bizAuditService.getHistoryTaskList(hiTaskVo);
+            hiTaskVos = hiTaskVos.stream()
+                    .filter(t -> t.getResult().equals(ActivitiConstant.RESULT_FAIL)).collect(Collectors.toList());
+            if (hiTaskVos.size() > 0) {
+                result = ActivitiConstant.RESULT_FAIL;
+            }
             // 任务结束
             business.setCurrentTask(ActivitiConstant.END_TASK_NAME).setStatus(ActivitiConstant.STATUS_FINISH)
                     .setResult(result);
