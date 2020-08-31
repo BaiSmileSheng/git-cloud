@@ -266,6 +266,9 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
                         //取最小的
                         omsInternalOrderRes.setVersion(bomList.stream().min((c,d)->StrUtil.compare(c,d,true)).get());
                     }
+                }else {
+                    //如果不存在bom设为#
+                    omsInternalOrderRes.setVersion("#");
                 }
             }
             double length = omsInternalOrderResList.size();
