@@ -14,6 +14,7 @@ import com.cloud.order.domain.entity.OmsDemandOrderGatherEdit;
 import com.cloud.order.domain.entity.vo.OmsDemandOrderGatherEditImportTemplete;
 import com.cloud.order.easyexcel.DemandOrderGatherEditWriteHandler;
 import com.cloud.order.enums.OrderFromEnum;
+import com.cloud.order.enums.ProductTypeOrderEnum;
 import com.cloud.order.service.IOmsDemandOrderGatherEditService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
@@ -243,6 +244,7 @@ public class OmsDemandOrderGatherEditController extends BaseController {
             example.and().andEqualTo("orderFrom", OrderFromEnum.OUT_SOURCE_TYPE_QWW.getCode());
         }
         List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList = omsDemandOrderGatherEditService.selectByExample(example);
+        ProductTypeOrderEnum.init();
         return EasyExcelUtilOSS.writeExcel(omsDemandOrderGatherEditList, "13滚动需求-导入.xlsx", "sheet", new OmsDemandOrderGatherEdit());
     }
 

@@ -105,8 +105,13 @@ public class SysDictDataServiceImpl implements ISysDictDataService {
             String dictType = sysDictData.getDictType();
             String rk = StrUtil.format("dict:{}",dictType);
             redis.delete(rk);
+            int i=dictDataMapper.deleteDictDataByIds(Convert.toStrArray(ids));
+            List<SysDictData> list= selectDictDataByType(dictType);
+            redis.set(rk,list);
+            return i;
         }
-        return dictDataMapper.deleteDictDataByIds(Convert.toStrArray(ids));
+        return 0;
+
     }
 
     /**
