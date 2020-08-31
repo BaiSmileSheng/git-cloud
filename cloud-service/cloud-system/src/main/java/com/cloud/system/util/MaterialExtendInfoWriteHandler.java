@@ -5,7 +5,6 @@ import com.alibaba.excel.write.metadata.holder.WriteSheetHolder;
 import com.alibaba.excel.write.metadata.holder.WriteTableHolder;
 import com.cloud.system.enums.LifeCycleEnum;
 import com.cloud.system.enums.ProductTypeEnum;
-import com.cloud.system.enums.PuttingOutEnum;
 import com.cloud.system.enums.ZnAttestationEnum;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.Drawing;
@@ -28,6 +27,7 @@ public class MaterialExtendInfoWriteHandler extends AbstractRowWriteHandler {
             Drawing<?> drawingPatriarch = sheet.createDrawingPatriarch();
             // 在第一行 第二列创建一个产品类别批注
             StringBuffer productTypeBuffer = new StringBuffer("请填写:");
+            ProductTypeEnum.init();
             for (ProductTypeEnum pt : ProductTypeEnum.values()) {
                 productTypeBuffer.append(pt.getMsg()).append(",");
             }

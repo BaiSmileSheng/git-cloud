@@ -3,7 +3,6 @@ package com.cloud.system.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Dict;
-import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.EasyExcel;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
@@ -19,21 +18,16 @@ import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.CdMaterialExtendInfoImportErrorVo;
 import com.cloud.system.domain.vo.CdMaterialExtendInfoImportVo;
-import com.cloud.system.enums.PuttingOutEnum;
-import com.cloud.system.enums.ZnAttestationEnum;
 import com.cloud.system.enums.LifeCycleEnum;
 import com.cloud.system.enums.ProductTypeEnum;
+import com.cloud.system.enums.PuttingOutEnum;
+import com.cloud.system.enums.ZnAttestationEnum;
 import com.cloud.system.mapper.CdMaterialExtendInfoMapper;
 import com.cloud.system.service.ICdMaterialExtendInfoExcelImportService;
 import com.cloud.system.service.ICdMaterialExtendInfoService;
 import com.cloud.system.service.ICdMaterialInfoService;
 import com.cloud.system.util.EasyExcelUtilOSS;
-import com.sap.conn.jco.JCoContext;
-import com.sap.conn.jco.JCoDestination;
-import com.sap.conn.jco.JCoDestinationManager;
-import com.sap.conn.jco.JCoFunction;
-import com.sap.conn.jco.JCoRepository;
-import com.sap.conn.jco.JCoTable;
+import com.sap.conn.jco.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -202,6 +196,7 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
      */
     @Override
     public R importMaterialExtendInfo(MultipartFile file, SysUser sysUser) throws IOException {
+        ProductTypeEnum.init();
         EasyWithErrorExcelListener easyExcelListener = new EasyWithErrorExcelListener(cdMaterialExtendInfoExcelImportService,
                 CdMaterialExtendInfoImportVo.class);
         EasyExcel.read(file.getInputStream(), CdMaterialExtendInfoImportVo.class, easyExcelListener).sheet().doRead();
@@ -278,6 +273,7 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
             }
             if(StringUtils.isNotBlank(cdMaterialExtendInfo.getProductType())){
                 String productType = cdMaterialExtendInfo.getProductType();
+                ProductTypeEnum.init();
                 String productTypeCode = ProductTypeEnum.getCodeByMsg(productType);
                 if (StringUtils.isBlank(productTypeCode) || productTypeCode.equals(productType)) {
                     errMsgBuffer.append("产品类别不存在;");
