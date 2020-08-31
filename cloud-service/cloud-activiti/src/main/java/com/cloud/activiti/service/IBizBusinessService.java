@@ -5,11 +5,12 @@
  */
 package com.cloud.activiti.service;
 
-import java.util.List;
-import java.util.Map;
-
 import com.cloud.activiti.domain.BizBusiness;
 import tk.mybatis.mapper.entity.Example;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * <p>File：IBizBusinessService.java</p>
@@ -89,6 +90,24 @@ public interface IBizBusinessService {
     void startProcess(BizBusiness business, Map<String, Object> variables);
 
     /**
+     * start 启动流程 动态赋值下一级审批人
+     *
+     * @param business  业务对象，必须包含id,title,userId,procDefId属性
+     * @param variables 启动流程需要的变量
+     * @author zmr
+     */
+    void startProcess(BizBusiness business, Map<String, Object> variables,Set<String> userIds);
+
+    /**
+     * start 启动流程（会签）
+     *
+     * @param business  业务对象，必须包含id,title,userId,procDefId属性
+     * @param variables 启动流程需要的变量
+     * @author cs
+     */
+    void startProcessForHuiQian(BizBusiness business, Map<String, Object> variables);
+
+    /**
      * check 检查负责人
      *
      * @param business      业务对象，必须包含id,procInstId属性
@@ -98,6 +117,15 @@ public interface IBizBusinessService {
      * @author zmr
      */
     public int setAuditor(BizBusiness business, int result, long currentUserId);
+
+    /**
+     * 动态赋值下一级审批人
+     * @param business
+     * @param result
+     * @param userIds
+     * @return
+     */
+    public int setAuditorCandidateUser(BizBusiness business, int result, Set<String> userIds);
 
     /**
      * 根据procDefKey和tableId查procInstId
