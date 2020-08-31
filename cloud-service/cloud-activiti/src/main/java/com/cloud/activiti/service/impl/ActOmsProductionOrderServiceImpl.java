@@ -185,9 +185,12 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
         //查询流程业务表
         BizBusiness business = bizBusinessService.selectBizBusinessById(businessKey);
         if (null != business) {
+            R resultMap = new R();
             //根据流程业务表 tableId 查询业务表信息
             OmsProductionOrder omsProductionOrder = remoteProductionOrderService.get(Long.valueOf(business.getTableId()));
-            return R.data(omsProductionOrder);
+            resultMap.put("data",omsProductionOrder);
+            resultMap.put("procInstId",business.getProcInstId());
+            return resultMap;
         }
         return R.error("no record");
     }
