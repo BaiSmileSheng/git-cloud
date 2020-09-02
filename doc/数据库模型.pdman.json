@@ -4665,6 +4665,18 @@
               "chnname": "生成加工结算错误信息"
             },
             {
+              "name": "assign_sap_time",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "下达SAP时间"
+            },
+            {
+              "name": "get_sap_time",
+              "type": "DefaultString",
+              "remark": "在sap成功获取生产订单号的时间",
+              "chnname": "已传SAP时间"
+            },
+            {
               "name": "del_flag",
               "type": "Char",
               "remark": "0：有效，1：删除",

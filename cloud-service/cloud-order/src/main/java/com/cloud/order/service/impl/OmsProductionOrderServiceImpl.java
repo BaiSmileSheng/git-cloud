@@ -932,6 +932,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 criteria.andGreaterThanOrEqualTo("productStartDate", omsProductionOrder.getCheckDateStart());
             } else if (ProductOrderConstants.DATE_TYPE_THREE.equals(omsProductionOrder.getDateType())) {
                 criteria.andGreaterThanOrEqualTo("productEndDate", omsProductionOrder.getCheckDateStart());
+            }else if(ProductOrderConstants.DATE_TYPE_FOUR.equals(omsProductionOrder.getDateType())){
+                criteria.andGreaterThanOrEqualTo("assignSapTime", omsProductionOrder.getCheckDateStart());
+            }else if(ProductOrderConstants.DATE_TYPE_FIVE.equals(omsProductionOrder.getDateType())){
+                criteria.andGreaterThanOrEqualTo("getSapTime", omsProductionOrder.getCheckDateStart());
             }
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getCheckDateEnd())) {
@@ -941,6 +945,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 criteria.andLessThanOrEqualTo("productStartDate", omsProductionOrder.getCheckDateEnd());
             } else if (ProductOrderConstants.DATE_TYPE_THREE.equals(omsProductionOrder.getDateType())) {
                 criteria.andLessThanOrEqualTo("productEndDate", omsProductionOrder.getCheckDateEnd());
+            }else if(ProductOrderConstants.DATE_TYPE_FOUR.equals(omsProductionOrder.getDateType())){
+                criteria.andLessThanOrEqualTo("assignSapTime", omsProductionOrder.getCheckDateEnd());
+            }else if(ProductOrderConstants.DATE_TYPE_FIVE.equals(omsProductionOrder.getDateType())){
+                criteria.andLessThanOrEqualTo("getSapTime", omsProductionOrder.getCheckDateEnd());
             }
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getOrderType())) {
@@ -1559,9 +1567,6 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         }
         //1.获取list
         if (CollectionUtils.isEmpty(list)) {
-            Example example = new Example(OmsProductionOrder.class);
-            Example.Criteria criteria = example.createCriteria();
-            List<String> statusList = new ArrayList<>();
             //增加按照查询条件下达SAP的逻辑
             if (StrUtil.isNotBlank(order.getStatus())
                     && (!ProductOrderConstants.STATUS_FOUR.equals(order.getStatus())
@@ -1569,60 +1574,12 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 log.error("下达SAP操作只可以下达待传SAP、传SAP异常的订单！");
                 return R.error("下达SAP操作只可以下达待传SAP、传SAP异常的订单！");
             }
-            if (StrUtil.isNotBlank(order.getProductFactoryCode())) {
-                criteria.andEqualTo("productFactoryCode", order.getProductFactoryCode());
-            }
-            if (StrUtil.isNotBlank(order.getStatus())) {
-                criteria.andEqualTo("status", order.getStatus());
-            } else {
+            Example example = getSAPExample(order);
+            if(StrUtil.isBlank(order.getStatus())){
+                List<String> statusList = new ArrayList<>();
                 statusList.add(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_DCSAP.getCode());
                 statusList.add(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPYC.getCode());
-                criteria.andIn("status", statusList);
-            }
-            if (StringUtils.isNotBlank(order.getProductMaterialCode())) {
-                String[] productMaterialCodeS = order.getProductMaterialCode().split(",");
-                List<String> productMaterialCodeList = new ArrayList<>();
-                for (String productMaterialCode : productMaterialCodeS) {
-                    String regex = "\\s*|\t|\r|\n";
-                    Pattern p = Pattern.compile(regex);
-                    Matcher m = p.matcher(productMaterialCode);
-                    String productMaterialCodeReq = m.replaceAll("");
-                    productMaterialCodeList.add(productMaterialCodeReq);
-                }
-                criteria.andIn("productMaterialCode", productMaterialCodeList);
-            }
-            if (StringUtils.isNotBlank(order.getProductOrderCode())) {
-                String[] productOrderCodeS = order.getProductOrderCode().split(",");
-                List<String> productOrderCodeList = new ArrayList<>();
-                for (String productOrderCode : productOrderCodeS) {
-                    String regex = "\\s*|\t|\r|\n";
-                    Pattern p = Pattern.compile(regex);
-                    Matcher m = p.matcher(productOrderCode);
-                    String productOrderCodeReq = m.replaceAll("");
-                    productOrderCodeList.add(productOrderCodeReq);
-                }
-                criteria.andIn("productOrderCode", productOrderCodeList);
-            }
-            if (StrUtil.isNotBlank(order.getCheckDateStart())) {
-                if (ProductOrderConstants.DATE_TYPE_ONE.equals(order.getDateType())) {
-                    criteria.andGreaterThanOrEqualTo("deliveryDate", order.getCheckDateStart());
-                } else if (ProductOrderConstants.DATE_TYPE_TWO.equals(order.getDateType())) {
-                    criteria.andGreaterThanOrEqualTo("productStartDate", order.getCheckDateStart());
-                } else if (ProductOrderConstants.DATE_TYPE_THREE.equals(order.getDateType())) {
-                    criteria.andGreaterThanOrEqualTo("productEndDate", order.getCheckDateStart());
-                }
-            }
-            if (StrUtil.isNotBlank(order.getCheckDateEnd())) {
-                if (ProductOrderConstants.DATE_TYPE_ONE.equals(order.getDateType())) {
-                    criteria.andLessThanOrEqualTo("deliveryDate", order.getCheckDateEnd());
-                } else if (ProductOrderConstants.DATE_TYPE_TWO.equals(order.getDateType())) {
-                    criteria.andLessThanOrEqualTo("productStartDate", order.getCheckDateEnd());
-                } else if (ProductOrderConstants.DATE_TYPE_THREE.equals(order.getDateType())) {
-                    criteria.andLessThanOrEqualTo("productEndDate", order.getCheckDateEnd());
-                }
-            }
-            if (StrUtil.isNotBlank(order.getOrderType())) {
-                criteria.andEqualTo("orderType", order.getOrderType());
+                example.and().andIn("status", statusList);
             }
             list = omsProductionOrderMapper.selectByExample(example);
         }
@@ -1635,6 +1592,11 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             log.error("下达SAP调用SAP接口异常res:{}", JSONObject.toJSONString(resultSAP));
             return resultSAP;
         }
+        //更新下达SAP时间
+        list.forEach(omsProductionOrder ->{
+            omsProductionOrder.setAssignSapTime(DateUtils.parseDateToStr(YYYY_MM_DD,new Date()));
+        });
+        omsProductionOrderMapper.batchUpdateByOrderCode(list);
         //3.修改排产订单状态
         List<OmsProductionOrder> listSapRes = (List<OmsProductionOrder>) resultSAP.get("data");
         listSapRes.forEach(omsProductionOrder -> {
@@ -1647,6 +1609,77 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
         omsProductionOrderMapper.batchUpdateByOrderCode(listSapRes);
         return R.ok();
+    }
+
+    /**
+     * 下达SAP查询条件
+     * @param order
+     * @return
+     */
+    private Example getSAPExample(OmsProductionOrder order) {
+        Example example = new Example(OmsProductionOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        if (StrUtil.isNotBlank(order.getProductFactoryCode())) {
+            criteria.andEqualTo("productFactoryCode", order.getProductFactoryCode());
+        }
+
+        if (StrUtil.isNotBlank(order.getStatus())) {
+            criteria.andEqualTo("status", order.getStatus());
+        }
+        if (StringUtils.isNotBlank(order.getProductMaterialCode())) {
+            String[] productMaterialCodeS = order.getProductMaterialCode().split(",");
+            List<String> productMaterialCodeList = new ArrayList<>();
+            for (String productMaterialCode : productMaterialCodeS) {
+                String regex = "\\s*|\t|\r|\n";
+                Pattern p = Pattern.compile(regex);
+                Matcher m = p.matcher(productMaterialCode);
+                String productMaterialCodeReq = m.replaceAll("");
+                productMaterialCodeList.add(productMaterialCodeReq);
+            }
+            criteria.andIn("productMaterialCode", productMaterialCodeList);
+        }
+        if (StringUtils.isNotBlank(order.getProductOrderCode())) {
+            String[] productOrderCodeS = order.getProductOrderCode().split(",");
+            List<String> productOrderCodeList = new ArrayList<>();
+            for (String productOrderCode : productOrderCodeS) {
+                String regex = "\\s*|\t|\r|\n";
+                Pattern p = Pattern.compile(regex);
+                Matcher m = p.matcher(productOrderCode);
+                String productOrderCodeReq = m.replaceAll("");
+                productOrderCodeList.add(productOrderCodeReq);
+            }
+            criteria.andIn("productOrderCode", productOrderCodeList);
+        }
+        if (StrUtil.isNotBlank(order.getCheckDateStart())) {
+            if (ProductOrderConstants.DATE_TYPE_ONE.equals(order.getDateType())) {
+                criteria.andGreaterThanOrEqualTo("deliveryDate", order.getCheckDateStart());
+            } else if (ProductOrderConstants.DATE_TYPE_TWO.equals(order.getDateType())) {
+                criteria.andGreaterThanOrEqualTo("productStartDate", order.getCheckDateStart());
+            } else if (ProductOrderConstants.DATE_TYPE_THREE.equals(order.getDateType())) {
+                criteria.andGreaterThanOrEqualTo("productEndDate", order.getCheckDateStart());
+            }else if(ProductOrderConstants.DATE_TYPE_FOUR.equals(order.getDateType())){
+                criteria.andGreaterThanOrEqualTo("assignSapTime", order.getCheckDateStart());
+            }else if(ProductOrderConstants.DATE_TYPE_FIVE.equals(order.getDateType())){
+                criteria.andGreaterThanOrEqualTo("getSapTime", order.getCheckDateStart());
+            }
+        }
+        if (StrUtil.isNotBlank(order.getCheckDateEnd())) {
+            if (ProductOrderConstants.DATE_TYPE_ONE.equals(order.getDateType())) {
+                criteria.andLessThanOrEqualTo("deliveryDate", order.getCheckDateEnd());
+            } else if (ProductOrderConstants.DATE_TYPE_TWO.equals(order.getDateType())) {
+                criteria.andLessThanOrEqualTo("productStartDate", order.getCheckDateEnd());
+            } else if (ProductOrderConstants.DATE_TYPE_THREE.equals(order.getDateType())) {
+                criteria.andLessThanOrEqualTo("productEndDate", order.getCheckDateEnd());
+            }else if(ProductOrderConstants.DATE_TYPE_FOUR.equals(order.getDateType())){
+                criteria.andLessThanOrEqualTo("assignSapTime", order.getCheckDateEnd());
+            }else if(ProductOrderConstants.DATE_TYPE_FIVE.equals(order.getDateType())){
+                criteria.andLessThanOrEqualTo("getSapTime", order.getCheckDateEnd());
+            }
+        }
+        if (StrUtil.isNotBlank(order.getOrderType())) {
+            criteria.andEqualTo("orderType", order.getOrderType());
+        }
+        return example;
     }
 
     /**
@@ -1690,6 +1723,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                         omsProductionOrder.setSettleFlag(ProductionOrderSettleFlagEnum.PRODUCTION_ORDER_SETTLE_FLAG_0.getCode());
                     }
                 }
+                //更新获取SAP生产订单号
+                omsProductionOrder.setGetSapTime(DateUtils.parseDateToStr(YYYY_MM_DD,new Date()));
             } else if("W".equals(omsProductionOrder.getSapFlag())){
                 omsProductionOrder.setSapMessages("生产订单创建中");
             }
@@ -1858,11 +1893,18 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      * @return
      */
     @Override
-    public R mailPush() {
+    public R mailPush(OmsProductionOrder omsProductionOrderReq) {
         //1.查已传SAP的数据
-        Example example = new Example(OmsProductionOrder.class);
-        Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("status", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode());
+        //增加按照查询条件下达SAP的逻辑
+        if (StrUtil.isNotBlank(omsProductionOrderReq.getStatus())
+                && (!ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode().equals(omsProductionOrderReq.getStatus()))) {
+            log.error("邮件推送只推送已传SAP的订单！");
+            return R.error("邮件推送只推送已传SAP的订单！");
+        }
+        Example example = getSAPExample(omsProductionOrderReq);
+        if(StrUtil.isBlank(omsProductionOrderReq.getStatus())){
+            example.and().andEqualTo("status", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode());
+        }
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderMapper.selectByExample(example);
         //key 是分公司主管
         Map<String, List<OmsProductionOrder>> branchOfficeMap = new HashMap<>();
