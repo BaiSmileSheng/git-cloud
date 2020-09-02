@@ -218,4 +218,16 @@ public class OmsInternalOrderRes extends BaseEntity {
      */
     private String delFlag;
 
+    /**
+     * sap创建po时间
+     */
+    @ApiModelProperty(value = "sap创建po时间")
+    private String sapCreatePo;
+
+    /**
+     * 交货计划行计数器
+     */
+    @ApiModelProperty(value = "交货计划行计数器")
+    private String orderLineCounter;
+
 }

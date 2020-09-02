@@ -2598,6 +2598,18 @@
               "chnname": "版本"
             },
             {
+              "name": "sap_create_po",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "sap创建po时间"
+            },
+            {
+              "name": "order_line_counter",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "交货计划行计数器"
+            },
+            {
               "name": "del_flag",
               "type": "Char",
               "remark": "0：有效，1：删除",
@@ -2639,16 +2651,7 @@
               "defaultValue": "''"
             }
           ],
-          "indexs": [
-            {
-              "name": "order_order_line_key",
-              "isUnique": true,
-              "fields": [
-                "order_code",
-                "order_line_code"
-              ]
-            }
-          ],
+          "indexs": [],
           "headers": [
             {
               "fieldName": "chnname",
