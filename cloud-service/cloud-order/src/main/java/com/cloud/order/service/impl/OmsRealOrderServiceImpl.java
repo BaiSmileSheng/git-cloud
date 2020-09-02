@@ -324,11 +324,6 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         Example exampleRealOrder = new Example(OmsRealOrder.class);
         Example.Criteria criteriaRealOrder = exampleRealOrder.createCriteria();
         criteriaRealOrder.andEqualTo("dataSource",RealOrderDataSourceEnum.DATA_SOURCE_0.getCode());
-        Date startTime = DateUtils.getMonthTime(-2);
-        String startTimeString = DateUtils.dateTime(startTime);
-        criteriaRealOrder.andGreaterThanOrEqualTo("deliveryDate",startTimeString);
-        String endTimeString = DateUtils.getDate();
-        criteriaRealOrder.andLessThanOrEqualTo("deliveryDate",endTimeString);
         omsRealOrderMapper.deleteByExample(exampleRealOrder);
         List<OmsRealOrder> omsRealOrdersList = omsRealOrderMap.values().stream().collect(Collectors.toList());
         omsRealOrderMapper.batchInsetOrUpdate(omsRealOrdersList);
@@ -505,8 +500,6 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 CdFactoryStorehouseInfo cdFactoryStorehouseInfo = factoryStorehouseInfoMap.get(omsRealOrder.getCustomerCode()
                         + omsRealOrder.getProductFactoryCode());
                 if(null == cdFactoryStorehouseInfo){
-                    logger.error("此客户和工厂对应的工厂库位信息不存在 客户编号:{},工厂编号:{}",omsRealOrder.getCustomerCode(),
-                            omsRealOrder.getProductFactoryCode());
                     String massage = "请维护工厂:" + omsRealOrder.getProductFactoryCode() + "客户编号:"+omsRealOrder.getCustomerCode()
                             +"的交货提前量";
                     sendEmailMap.put(omsRealOrder.getCustomerCode() + omsRealOrder.getProductFactoryCode(),massage);
