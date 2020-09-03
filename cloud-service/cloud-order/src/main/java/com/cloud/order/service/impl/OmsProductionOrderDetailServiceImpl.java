@@ -517,12 +517,12 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
      * Date: 2020/6/29
      */
     private String[] getDays() {
-        int[] days = NumberUtil.range(1, 14);
+        int[] days = NumberUtil.range(0, 13);
         String[] dates = new String[14];
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         for (int i : days) {
             String day = dateTimeFormatter.format(LocalDate.now().plusDays(i));
-            dates[i - 1] = day;
+            dates[i] = day;
         }
         return dates;
     }
