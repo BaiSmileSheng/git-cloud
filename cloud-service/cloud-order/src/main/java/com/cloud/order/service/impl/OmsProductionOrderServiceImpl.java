@@ -2135,7 +2135,6 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     @GlobalTransactional
     @Override
     public R timeGetConfirmAmont() {
-        //注意:wms订单号12位,不足前面补零;sap获取的10位,存入订单系统的10位,在wms获取后截取
         //1.查已传SAP的排产订单
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();
@@ -2225,7 +2224,6 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         return R.ok();
     }
 
-
     /**
      * wms获取入库数量
      *
@@ -2288,5 +2286,66 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             dateStr = StrUtil.replace(dateStr, "/", "-");
         }
         return dateStr;
+    }
+
+    @GlobalTransactional
+    @Override
+    public R deleteSAP(String id, SysUser sysUser) {
+
+        OmsProductionOrder omsProductionOrders = omsProductionOrderMapper.selectByPrimaryKey(id);
+        if(!ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode().equals(omsProductionOrders.getStatus())
+            || !ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPYC.getCode().equals(omsProductionOrders.getStatus())){
+            return R.error("请删除已传SAP或传SAP异常的数据");
+        }
+        //1.按单号删除审批流
+        Map<String,Object> map = new HashMap<>();
+        map.put("userName",sysUser.getLoginName());
+        map.put("orderCodeList",Arrays.asList(omsProductionOrders.getOrderCode()));
+        R deleteActMap = remoteActTaskService.deleteByOrderCode(map);
+        if (!deleteActMap.isSuccess()){
+            log.error("删除审批流程失败，原因："+deleteActMap.get("msg"));
+            return R.error("删除审批流程失败，原因："+deleteActMap.get("msg"));
+        }
+
+        //2.排产明细转删除
+        OmsProductionOrderDel omsProductionOrderDels = new OmsProductionOrderDel();
+        BeanUtils.copyProperties(omsProductionOrders, omsProductionOrderDels);
+        omsProductionOrderDels.setId(null);
+        omsProductionOrderDels.setCreateBy(sysUser.getLoginName());
+        omsProductionOrderDels.setCreateTime(new Date());
+        //查询明细数据
+        R detailMap = omsProductionOrderDetailService.selectListByOrderCodes("\"" + omsProductionOrders.getOrderCode() + "\"");
+        if (!detailMap.isSuccess()) {
+            log.error("查询明细数据失败！");
+            return R.error("查询明细数据失败!");
+        }
+        List<OmsProductionOrderDetail> omsProductionOrderDetails =
+                detailMap.getCollectData(new TypeReference<List<OmsProductionOrderDetail>>() {
+                });
+        StringBuffer detailIdBuffer = new StringBuffer();
+        if (ObjectUtil.isNotEmpty(omsProductionOrderDetails) && omsProductionOrderDetails.size() > 0) {
+            //转类型
+            List<OmsProductionOrderDetailDel> omsProductionOrderDetailDels = omsProductionOrderDetails
+                    .stream().map(d -> {
+                        detailIdBuffer.append("\'").append(d.getId()).append("\',");
+                        OmsProductionOrderDetailDel omsProductionOrderDetailDel = new OmsProductionOrderDetailDel();
+                        BeanUtils.copyProperties(d, omsProductionOrderDetailDel);
+                        omsProductionOrderDetailDel.setId(null);
+                        omsProductionOrderDetailDel.setCreateBy(sysUser.getLoginName());
+                        omsProductionOrderDetailDel.setCreateTime(new Date());
+                        return omsProductionOrderDetailDel;
+                    }).collect(toList());
+            String detailIds = detailIdBuffer.substring(0, detailIdBuffer.length() - 1);
+            //排产订单明细转存删除表
+            omsProductionOrderDetailDelService.insertList(omsProductionOrderDetailDels);
+            //删除排产订单明细数据
+            omsProductionOrderDetailService.deleteByIdsWL(detailIds);
+        }
+        //3.排产转删除
+        //将删除的排产订单存到删除表中
+        omsProductionOrderDelService.insertSelective(omsProductionOrderDels);
+        //删除排产订单表数据
+        omsProductionOrderMapper.deleteByIds(id);
+        return R.ok();
     }
 }
