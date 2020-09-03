@@ -1902,9 +1902,6 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             return R.error("邮件推送只推送已传SAP的订单！");
         }
         Example example = getSAPExample(omsProductionOrderReq);
-        if(StrUtil.isBlank(omsProductionOrderReq.getStatus())){
-            example.and().andEqualTo("status", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode());
-        }
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderMapper.selectByExample(example);
         //key 是分公司主管
         Map<String, List<OmsProductionOrder>> branchOfficeMap = new HashMap<>();
