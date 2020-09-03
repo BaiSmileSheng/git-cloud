@@ -316,6 +316,18 @@ public class OmsProductionOrder extends BaseEntity {
     private String settleMessages;
 
     /**
+     * 下达SAP时间
+     */
+    @ApiModelProperty(value = "下达SAP时间")
+    private String assignSapTime;
+
+    /**
+     * 已传SAP时间
+     */
+    @ApiModelProperty(value = "已传SAP时间")
+    private String getSapTime;
+
+    /**
      * 是否删除 0：有效，1：删除
      */
     private String delFlag;
