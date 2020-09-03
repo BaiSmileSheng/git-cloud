@@ -512,6 +512,8 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
         Example example = new Example(Oms2weeksDemandOrderEdit.class);
         Example.Criteria criteria = example.createCriteria();
         List<Oms2weeksDemandOrderEdit> oms2weeksDemandOrderEditList ;
+        List<String> canStatus = CollectionUtil.newArrayList(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode(),
+                Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());
         if (StrUtil.isEmpty(ids)) {
             if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
                 criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(",")));
@@ -520,7 +522,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 criteria.andEqualTo("orderFrom", OrderFromEnum.OUT_SOURCE_TYPE_QWW.getCode());
             }
             listCondition(oms2weeksDemandOrderEditVo,criteria);
-            criteria.andEqualTo("status", Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
+            criteria.andIn("status", canStatus);
             oms2weeksDemandOrderEditList = selectByExample(example);
             if (CollectionUtil.isEmpty(oms2weeksDemandOrderEditList)) {
                 return R.error("无可删除数据！");
@@ -535,9 +537,9 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 return R.error("无可删除数据！");
             }
             Boolean bo=listAll.stream()
-                    .anyMatch(s -> !s.getStatus().equals(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode()));
+                    .anyMatch(s -> !CollectionUtil.contains(canStatus,s.getStatus()));
             if(bo){
-                return R.error("非初始状态的数据不允许删除！");
+                return R.error("非初始或传SAP异常状态的数据不允许删除！");
             }
             oms2weeksDemandOrderEditList = listAll;
         }
