@@ -51,14 +51,14 @@ public class OmsRealOrderExcelExportVo {
      * 订单来源 1：内单，2：外单
      */
     @ApiModelProperty(value = "订单来源 1：内单，2：外单")
-    @ExcelProperty(value = "订单来源",index = 13,converter = OrderFromConverter.class)
+    @ExcelProperty(value = "订单来源",index = 15,converter = OrderFromConverter.class)
     private String orderFrom;
 
     /**
      * 订单种类 1：正常，2：追加，3：储备，4：新品
      */
     @ApiModelProperty(value = "订单种类 1：正常，2：追加，3：储备，4：新品")
-    @ExcelProperty(value = "订单分类",index = 14,converter = RealOrderClassConverter.class)
+    @ExcelProperty(value = "订单分类",index = 16,converter = RealOrderClassConverter.class)
     private String orderClass;
 
     /**
@@ -105,14 +105,14 @@ public class OmsRealOrderExcelExportVo {
     /**
      * MRP范围
      */
-    @ExcelProperty(value = "MRP范围",index = 10)
+    @ExcelProperty(value = "MRP范围",index = 12)
     @ApiModelProperty(value = "MRP范围")
     private String mrpRange;
 
     /**
      * BOM版本
      */
-    @ExcelProperty(value = "BOM版本",index = 12)
+    @ExcelProperty(value = "BOM版本",index = 14)
     @ApiModelProperty(value = "BOM版本")
     private String bomVersion;
 
@@ -128,6 +128,20 @@ public class OmsRealOrderExcelExportVo {
     @ExcelProperty(value = "订单数量",index = 9)
     @ApiModelProperty(value = "订单数量")
     private BigDecimal orderNum;
+
+    /**
+     * 已交货数量
+     */
+    @ExcelProperty(value = "已交货数量",index = 10)
+    @ApiModelProperty(value = "已交货数量")
+    private BigDecimal deliveryNum;
+
+    /**
+     * 未交货数量
+     */
+    @ExcelProperty(value = "未交货数量",index = 11)
+    @ApiModelProperty(value = "未交货数量")
+    private BigDecimal undeliveryNum;
 
     /**
      * 单位
@@ -153,7 +167,7 @@ public class OmsRealOrderExcelExportVo {
      * 地点
      */
     @ApiModelProperty(value = "地点")
-    @ExcelProperty(value = "交货地点",index = 11)
+    @ExcelProperty(value = "交货地点",index = 13)
     private String place;
 
     /**
@@ -182,20 +196,20 @@ public class OmsRealOrderExcelExportVo {
     /**
      * 备注
      */
-    @ExcelProperty(value = "备注",index = 15)
+    @ExcelProperty(value = "备注",index = 17)
     private String remark;
 
     /**
      * 创建者
      */
-    @ExcelProperty(value = "创建人",index = 16)
+    @ExcelProperty(value = "创建人",index = 18)
     private String createBy;
 
     /**
      * 创建时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @ExcelProperty(value = "创建时间",index = 17)
+    @ExcelProperty(value = "创建时间",index = 19)
     private Date createTime;
 
 }

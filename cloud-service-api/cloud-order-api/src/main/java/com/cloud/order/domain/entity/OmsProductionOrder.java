@@ -173,10 +173,29 @@ public class OmsProductionOrder extends BaseEntity {
     @NotBlank
     private String deliveryDate;
 
+
+    /**
+     * 下达SAP时间
+     */
+    @ExcelProperty(value = "下达SAP时间",index = 14)
+    @DateTimeFormat("yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @ApiModelProperty(value = "下达SAP时间")
+    private String assignSapTime;
+
+    /**
+     * 已传SAP时间
+     */
+    @ExcelProperty(value = "已传SAP时间",index = 15)
+    @DateTimeFormat("yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @ApiModelProperty(value = "已传SAP时间")
+    private String getSapTime;
+
     /**
      * 实际结束日期
      */
-    @ExcelProperty(value = "实际结束日期",index=14)
+    @ExcelProperty(value = "实际结束日期",index=16)
     @DateTimeFormat("yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "实际结束日期")
@@ -185,7 +204,7 @@ public class OmsProductionOrder extends BaseEntity {
     /**
      * BOM版本
      */
-    @ExcelProperty(value = "BOM版本",index = 15)
+    @ExcelProperty(value = "BOM版本",index = 17)
     @ApiModelProperty(value = "BOM版本")
     @NotBlank
     private String bomVersion;
@@ -199,55 +218,55 @@ public class OmsProductionOrder extends BaseEntity {
     /**
      * 老品/新品
      */
-    @ExcelProperty(value = "老品/新品",index = 16)
+    @ExcelProperty(value = "老品/新品",index = 18)
     @ApiModelProperty(value = "老品/新品")
     private String oldNew;
 
     /**
      * 用时
      */
-    @ExcelProperty(value = "用时",index = 17)
+    @ExcelProperty(value = "用时",index = 19)
     @ApiModelProperty(value = "用时")
     private BigDecimal useTime;
 
     /**
      * 节拍
      */
-    @ExcelProperty(value = "节拍",index = 18)
+    @ExcelProperty(value = "节拍",index = 20)
     @ApiModelProperty(value = "节拍")
     private BigDecimal rhythm;
 
     /**
      * 产品定员
      */
-    @ExcelProperty(value = "产品定员",index = 19)
+    @ExcelProperty(value = "产品定员",index = 21)
     @ApiModelProperty(value = "产品定员")
     private Integer productQuota;
 
     /**
      * PCB专用号
      */
-    @ExcelProperty(value = "PCB专用号",index = 20)
+    @ExcelProperty(value = "PCB专用号",index = 22)
     @ApiModelProperty(value = "PCB专用号")
     @NotBlank
     private String pcbSpecialCode;
     /**
      * 委外方式 0：半委外，1：全委外，2：自制
      */
-    @ExcelProperty(value = "加工承揽方式" ,index = 21,converter = OutSourceTypeConverter.class)
+    @ExcelProperty(value = "加工承揽方式" ,index = 23,converter = OutSourceTypeConverter.class)
     @ApiModelProperty(value = "委外方式 0：半委外，1：全委外，2：自制")
     @NotBlank
     private String outsourceType;
     /**
      * 状态 0：待评审，1：反馈中，2：待调整，3：已评审，4：待传SAP，5：传SAP中，6：已传SAP，7：传SAP异常，8：已关单
      */
-    @ExcelProperty(value = "状态 ",index=22,converter = ProductionOrderStatusConverter.class)
+    @ExcelProperty(value = "状态 ",index=24,converter = ProductionOrderStatusConverter.class)
     @ApiModelProperty(value = "状态 0：待评审，1：反馈中，2：待调整，3：已评审，4：待传SAP，5：传SAP中，6：已传SAP，7：传SAP异常，8：已关单")
     private String status;
     /**
      * sap返回信息
      */
-    @ExcelProperty(value = "sap返回信息",index = 23)
+    @ExcelProperty(value = "sap返回信息",index = 25)
     @ApiModelProperty(value = "sap返回信息")
     private String sapMessages;
 
@@ -315,17 +334,6 @@ public class OmsProductionOrder extends BaseEntity {
     @ApiModelProperty(value = "生成加工结算错误信息")
     private String settleMessages;
 
-    /**
-     * 下达SAP时间
-     */
-    @ApiModelProperty(value = "下达SAP时间")
-    private String assignSapTime;
-
-    /**
-     * 已传SAP时间
-     */
-    @ApiModelProperty(value = "已传SAP时间")
-    private String getSapTime;
 
     /**
      * 是否删除 0：有效，1：删除
