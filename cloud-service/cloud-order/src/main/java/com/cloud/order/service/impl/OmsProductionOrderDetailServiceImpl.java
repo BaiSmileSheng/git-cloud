@@ -9,9 +9,7 @@ import com.cloud.common.constant.ProductOrderConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.domain.R;
-import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.exception.BusinessException;
-import com.cloud.common.utils.StringUtils;
 import com.cloud.common.utils.bean.BeanUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.domain.entity.OmsRawMaterialFeedback;
@@ -20,13 +18,11 @@ import com.cloud.order.service.IOmsProductionOrderService;
 import com.cloud.order.service.IOmsRawMaterialFeedbackService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
-import com.cloud.system.domain.entity.CdBomInfo;
 import com.cloud.system.domain.entity.CdRawMaterialStock;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteCdRawMaterialStockService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.seata.core.context.RootContext;
-import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,19 +30,15 @@ import com.cloud.order.mapper.OmsProductionOrderDetailMapper;
 import com.cloud.order.domain.entity.OmsProductionOrderDetail;
 import com.cloud.order.service.IOmsProductionOrderDetailService;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import javax.swing.plaf.basic.BasicIconFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.logging.SimpleFormatter;
 import java.util.stream.Collectors;
 
 /**
@@ -189,13 +181,19 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
             List<RawMaterialReviewDetailVo> rawMaterialReviewDetailVos = o.getList();
             Map<String, BigDecimal> mapNum = rawMaterialReviewDetailVos.stream()
                     .collect(Collectors.toMap(RawMaterialReviewDetailVo::getProductStartDate, RawMaterialReviewDetailVo::getProductNum));
+            //应张宇舰张工要求，增加原材料评审导出差异量数据  2020-09-03  ltq
+            Map<String, BigDecimal> gapNum = rawMaterialReviewDetailVos.stream()
+                    .collect(Collectors.toMap(RawMaterialReviewDetailVo::getProductStartDate, RawMaterialReviewDetailVo::getGapNum));
             int index = 1;
             for (String day : days) {
                 BigDecimal dayNum = mapNum.get(day);
+                BigDecimal gapDayNum = gapNum.get(day);
                 String dayStr = StrUtil.toString(index);
                 try {
                     Method method = OmsProductionOrderDetailExportVo.class.getMethod(StrUtil.format("setDay{}", dayStr), BigDecimal.class);
+                    Method gapMethod = OmsProductionOrderDetailExportVo.class.getMethod(StrUtil.format("setDay{}Gap", dayStr), BigDecimal.class);
                     method.invoke(omsProductionOrderDetailExportVo, dayNum);
+                    gapMethod.invoke(omsProductionOrderDetailExportVo, gapDayNum);
                 } catch (IllegalAccessException e) {
                     throw new BusinessException("系统拥挤，请稍后再试！（Invoke）");
                 } catch (InvocationTargetException e) {
@@ -550,9 +548,13 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
         headList.add(headTitle4);
         headList.add(headTitle5);
         for (String day : days) {
+            day = StrUtil.sub(day,day.indexOf("-")+1,day.length());
             List<String> headTitle6 = new ArrayList<String>();
             headTitle6.add(day);
+            List<String> headTitle7 = new ArrayList<String>();
+            headTitle7.add(StrUtil.concat(true,day,"缺口"));
             headList.add(headTitle6);
+            headList.add(headTitle7);
         }
         return headList;
     }
