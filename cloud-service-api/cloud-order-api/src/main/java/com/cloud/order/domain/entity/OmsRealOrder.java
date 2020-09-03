@@ -138,6 +138,20 @@ public class OmsRealOrder extends BaseEntity {
     private BigDecimal orderNum;
 
     /**
+     * 已交货数量
+     */
+    @ExcelProperty(value = "已交货数量")
+    @ApiModelProperty(value = "已交货数量")
+    private BigDecimal deliveryNum;
+
+    /**
+     * 未交货数量
+     */
+    @ExcelProperty(value = "未交货数量")
+    @ApiModelProperty(value = "未交货数量")
+    private BigDecimal undeliveryNum;
+
+    /**
      * 单位
      */
     @ExcelProperty(value = "单位")

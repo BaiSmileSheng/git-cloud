@@ -20,6 +20,8 @@
         <result property="bomVersion" column="bom_version"/>
         <result property="purchaseGroupCode" column="purchase_group_code"/>
         <result property="orderNum" column="order_num"/>
+        <result property="deliveryNum" column="delivery_num"/>
+        <result property="undeliveryNum" column="undelivery_num"/>
         <result property="unit" column="unit"/>
         <result property="deliveryDate" column="delivery_date"/>
         <result property="productDate" column="product_date"/>
@@ -51,6 +53,8 @@
                bom_version,
                purchase_group_code,
                order_num,
+               delivery_num,
+               undelivery_num,
                unit,
                delivery_date,
                product_date,
@@ -117,6 +121,8 @@
         bom_version,
         purchase_group_code,
         order_num,
+        delivery_num,
+        undelivery_num,
         unit,
         delivery_date,
         product_date,
@@ -145,6 +151,8 @@
             #{item.bomVersion},
             ifnull(#{item.purchaseGroupCode}, ''),
             #{item.orderNum},
+            #{item.deliveryNum},
+            #{item.undeliveryNum},
             ifnull(#{item.unit}, ''),
             #{item.deliveryDate},
             ifnull(#{item.productDate}, ''),
@@ -165,6 +173,8 @@
         mrp_range = VALUES(mrp_range),
         bom_version = VALUES(bom_version),
         order_num = VALUES(order_num),
+        delivery_num = VALUES(delivery_num),
+        undelivery_num = VALUES(undelivery_num),
         unit = VALUES(unit),
         product_date = VALUES(product_date),
         place = VALUES(place),
