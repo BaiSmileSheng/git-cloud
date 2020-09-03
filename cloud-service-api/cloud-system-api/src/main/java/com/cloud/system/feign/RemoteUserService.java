@@ -1,19 +1,13 @@
 package com.cloud.system.feign;
 
-import java.util.Set;
-
-import com.cloud.system.domain.entity.SysRole;
-import com.cloud.system.domain.entity.SysUser;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.common.core.domain.R;
+import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.factory.RemoteUserFallbackFactory;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Set;
 
 /**
  * 用户 Feign服务层
@@ -77,6 +71,17 @@ public interface RemoteUserService {
      */
     @GetMapping("user/selectUserByMaterialCodeAndRoleKey")
     R selectUserByMaterialCodeAndRoleKey(@RequestParam("materialCode") String materialCode, @RequestParam("roleKey")String roleKey);
+
+    /**
+     * 根据角色、工厂、采购组查对应的用户信息
+     * @param factoryCode
+     * @param purchaseCode
+     * @param roleKey
+     * @return
+     */
+    @GetMapping("user/selectUserByFactoryCodeAndPurchaseCodeAndRoleKey")
+    R selectUserByFactoryCodeAndPurchaseCodeAndRoleKey(@RequestParam("factoryCode") String factoryCode,@RequestParam("purchaseCode") String purchaseCode, @RequestParam("roleKey")String roleKey);
+
 
     /**
      * 根据角色查对应的用户名,邮箱

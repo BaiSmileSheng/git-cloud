@@ -219,6 +219,15 @@ public interface ISysUserService {
     List<SysUserVo> selectUserByMaterialCodeAndRoleKey(String materialCode,String roleKey);
 
     /**
+     * 根据角色、工厂、采购组查对应的用户信息
+     * @param factoryCode
+     * @param purchaseCode
+     * @param roleKey
+     * @return
+     */
+    List<SysUserVo> selectUserByFactoryCodeAndPurchaseCodeAndRoleKey(String factoryCode,String purchaseCode,String roleKey);
+
+    /**
      * 根据角色查对应的用户名,邮箱
      * @param roleKey
      * @return

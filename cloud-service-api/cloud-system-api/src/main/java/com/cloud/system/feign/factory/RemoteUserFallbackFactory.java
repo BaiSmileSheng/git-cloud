@@ -78,6 +78,12 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
                 return R.error("根据工厂或物料号,角色查用户信息失败,原因{}："+throwable.getMessage());
             }
 
+            @Override
+            public R selectUserByFactoryCodeAndPurchaseCodeAndRoleKey(String factoryCode, String purchaseCode, String roleKey) {
+                log.error("根据角色、工厂、采购组查对应的用户信息失败,原因{}："+throwable.getMessage());
+                return R.error("根据角色、工厂、采购组查对应的用户信息失败,原因{}："+throwable.getMessage());
+            }
+
             /**
              * 根据角色查对应的用户名,邮箱
              * @param roleKey
