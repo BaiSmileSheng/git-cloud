@@ -181,6 +181,8 @@ public class OrderFromSap800InterfaceServiceImpl implements IOrderFromSap800Inte
                                 .projectType(outTableOutput.getString("PSTYP"))//项目类别
                                 .mrpRange(outTableOutput.getString("BERID"))//MRP范围
                                 .poType(outTableOutput.getString("BSART"))//PO类型
+                                .sapCreatePo(outTableOutput.getString("AEDAT"))//记录的创建日期
+                                .orderLineCounter(outTableOutput.getString("ETENR"))//交货计划行计数器
                                 .marker("PO")
                                 .delFlag("0")
                                 .build();

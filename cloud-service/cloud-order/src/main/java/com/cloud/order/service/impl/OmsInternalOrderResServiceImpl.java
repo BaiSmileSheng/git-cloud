@@ -11,6 +11,7 @@ import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.order.domain.entity.OmsInternalOrderRes;
+import com.cloud.order.enums.InternalOrderResEnum;
 import com.cloud.order.mapper.OmsInternalOrderResMapper;
 import com.cloud.order.service.IOmsInternalOrderResService;
 import com.cloud.order.service.IOrderFromSap800InterfaceService;
@@ -30,6 +31,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.CollectionUtils;
+import tk.mybatis.mapper.entity.Example;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -66,6 +68,8 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
     static final String BOM_VERSION_NINE = "9";
 
     private static final int PO_INSERT_MAX_SIZE = 20000;//po单次插入最大数据量
+
+    public static final String YYYY_MM_DD = "yyyy-MM-dd";
 
 
     @Override
@@ -194,6 +198,26 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
 
         Date time1Start = DateUtils.dayOffset(time2End,1);//一个月前那天的之后一天
         Date time1End = new Date();
+        //删除这个时间段的数据
+        Example example = new Example(OmsInternalOrderRes.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("marker", InternalOrderResEnum.MARKER_PO.getCode());
+        //sap创建po时间
+        criteria.andGreaterThanOrEqualTo("sapCreatePo",DateUtils.parseDateToStr(YYYY_MM_DD,time2));
+        criteria.andLessThanOrEqualTo("sapCreatePo",DateUtils.parseDateToStr(YYYY_MM_DD,time1End));
+        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW); // 事物隔离级别，开启新事务，这样会比较安全些。
+        TransactionStatus transaction = dstManager.getTransaction(def); // 获得事务状态
+        try {
+            omsInternalOrderResMapper.deleteByExample(example);;
+            dstManager.commit(transaction);
+        }catch (Exception e){
+            StringWriter w = new StringWriter();
+            e.printStackTrace(new PrintWriter(w));
+            log.error("按时间删除po数据异常 e:{}", w.toString());
+            dstManager.rollback(transaction);
+            throw new BusinessException("按时间删除po数据异常" + w.toString());
+        }
         poInsertFromSAP(time2,time2End);
         poInsertFromSAP(time1Start,time1End);
         return R.ok();
@@ -284,7 +308,7 @@ public class OmsInternalOrderResServiceImpl extends BaseServiceImpl<OmsInternalO
                 def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW); // 事物隔离级别，开启新事务，这样会比较安全些。
                 TransactionStatus transaction = dstManager.getTransaction(def); // 获得事务状态
                 try {
-                    omsInternalOrderResMapper.batchInsertOrUpdate(insertList);
+                    omsInternalOrderResMapper.insertList(insertList);
                     dstManager.commit(transaction);
                 }catch (Exception e){
                     StringWriter w = new StringWriter();

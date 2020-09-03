@@ -1,12 +1,12 @@
 package com.cloud.system.controller;
 
+import cn.hutool.core.util.StrUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.redis.annotation.RedisCache;
-import com.cloud.common.redis.annotation.RedisEvict;
 import com.cloud.common.redis.util.RedisUtils;
 import com.cloud.system.domain.entity.SysDictData;
 import com.cloud.system.service.ISysDictDataService;
@@ -96,9 +96,11 @@ public class SysDictDataController extends BaseController {
     @OperLog(title = "字典数据", businessType = BusinessType.INSERT)
     @HasPermissions("system:dict:add")
     @PostMapping("save")
-    @RedisEvict(key = "dict",fieldKey = "#sysDictData.dictType")
     public R addSave(@RequestBody SysDictData sysDictData) {
-        return toAjax(sysDictDataService.insertDictData(sysDictData));
+        sysDictDataService.insertDictData(sysDictData);
+        List<SysDictData> list=sysDictDataService.selectDictDataByType(sysDictData.getDictType());
+        redisUtils.set(StrUtil.format("dict:{}",sysDictData.getDictType()),list);
+        return R.ok();
     }
 
     /**
@@ -107,9 +109,12 @@ public class SysDictDataController extends BaseController {
     @OperLog(title = "字典数据", businessType = BusinessType.UPDATE)
     @HasPermissions("system:dict:edit")
     @PostMapping("update")
-    @RedisEvict(key = "dict",fieldKey = "#sysDictData.dictType")
+//    @RedisEvict(key = "dict",fieldKey = "#sysDictData.dictType")
     public R editSave(@RequestBody SysDictData sysDictData) {
-        return toAjax(sysDictDataService.updateDictData(sysDictData));
+        sysDictDataService.updateDictData(sysDictData);
+        List<SysDictData> list=sysDictDataService.selectDictDataByType(sysDictData.getDictType());
+        redisUtils.set(StrUtil.format("dict:{}",sysDictData.getDictType()),list);
+        return R.ok();
     }
 
     /**

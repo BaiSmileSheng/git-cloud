@@ -1,41 +1,31 @@
 package com.cloud.system.enums;
 
+import cn.hutool.core.lang.Console;
+import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
+import com.cloud.common.redis.util.RedisUtils;
+import com.cloud.common.utils.spring.ApplicationContextUtil;
+import com.cloud.system.domain.entity.SysDictData;
+import com.cloud.system.util.DynamicEnumUtils;
+
+import java.util.List;
+
 /**
  * 产品类别
  *
  * @Author lihongxia
  * @Date 2020-07-02
  */
-public enum ProductTypeEnum {
-
-    //内板空调,内板商空,主控板外单,显示冰箱,主控板冰箱,模块空调,外板商空,外板空调,主控板电热,显示电热,显示外单,显示空调,模块商空,主控板冰箱,主控板厨电
-    //显示厨电,内板外单,电源驱动电热,显示商空,半成品冰箱,半成品电热,显示波轮,电源驱动波轮,电源驱动滚筒,显示滚筒,外单冰箱,外单波轮
-
-    PRODUCT_TYPE_1("1", "空调内板"),
-    PRODUCT_TYPE_2("2", "空调外板"),
-    PRODUCT_TYPE_3("3", "空调模块"),
-    PRODUCT_TYPE_4("4", "空调显示"),
-    PRODUCT_TYPE_5("5", "波轮显示"),
-    PRODUCT_TYPE_6("6", "波轮电源驱动"),
-    PRODUCT_TYPE_7("7", "滚筒显示"),
-    PRODUCT_TYPE_8("8", "滚筒电源驱动"),
-    PRODUCT_TYPE_9("9", "冰箱显示"),
-    PRODUCT_TYPE_10("10", "冰箱主控"),
-    PRODUCT_TYPE_11("11", "电热显示"),
-    PRODUCT_TYPE_12("12", "电热主控"),
-    PRODUCT_TYPE_13("13", "厨电显示"),
-    PRODUCT_TYPE_14("14", "厨电主控"),
-    PRODUCT_TYPE_15("15", "洗碗机"),
-    PRODUCT_TYPE_16("16", "液晶模组"),
-    PRODUCT_TYPE_17("17", "云单（购销业务）"),
-    PRODUCT_TYPE_18("18", "海达维B2C"),
-    PRODUCT_TYPE_19("19", "海达维照明模块"),
-    PRODUCT_TYPE_20("20", "海达维杀菌模块"),
-    PRODUCT_TYPE_21("21", "海达维购销物料"),
-    PRODUCT_TYPE_22("22", "HMI"),
-    PRODUCT_TYPE_23("23", "物联网模块"),
+public enum  ProductTypeEnum {
 
     ;
+    private static RedisUtils redis;
+
+    static {
+        init();
+    }
+
     private String code;
     private String msg;
 
@@ -67,5 +57,21 @@ public enum ProductTypeEnum {
             }
         }
         return msg;
+    }
+
+    public static void init(){
+        Console.log("-----------我执行了！！！！！！！！！！！---------");
+        redis =  ApplicationContextUtil.getBean(RedisUtils.class);
+        String rk = "dict:product_type";
+        Object o=  redis.get(rk);
+        List<SysDictData> list= JSON.parseObject((String) o, new TypeReference<List<SysDictData>>() {
+        });
+        int index = 0;
+        for (SysDictData sysDictData : list) {
+            DynamicEnumUtils.addEnum(ProductTypeEnum.class, StrUtil.format("PRODUCT_TYPE_{}",index), new Class[] {
+                    java.lang.String.class, String.class }, new Object[] {
+                    sysDictData.getDictValue(), sysDictData.getDictLabel() });
+            index++;
+        }
     }
 }

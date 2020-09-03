@@ -30,6 +30,7 @@ import com.cloud.order.domain.entity.vo.OmsDemandOrderGatherEditExport;
 import com.cloud.order.enums.DemandOrderGatherEditAuditStatusEnum;
 import com.cloud.order.enums.DemandOrderGatherEditStatusEnum;
 import com.cloud.order.enums.OrderFromEnum;
+import com.cloud.order.enums.ProductTypeOrderEnum;
 import com.cloud.order.mapper.OmsDemandOrderGatherEditMapper;
 import com.cloud.order.service.IOmsDemandOrderGatherEditHisService;
 import com.cloud.order.service.IOmsDemandOrderGatherEditImportService;
@@ -593,6 +594,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
     @SneakyThrows
     @GlobalTransactional
     public R importDemandGatherEdit(MultipartFile file,SysUser sysUser) {
+        ProductTypeOrderEnum.init();
         EasyWithErrorExcelListener easyExcelListener = new EasyWithErrorExcelListener(omsDemandOrderGatherEditImportService,OmsDemandOrderGatherEditImport.class);
         EasyExcel.read(file.getInputStream(),OmsDemandOrderGatherEditImport.class,easyExcelListener).sheet().doRead();
         //需要审核的结果

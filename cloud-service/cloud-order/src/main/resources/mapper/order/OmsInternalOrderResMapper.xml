@@ -31,6 +31,8 @@
         mrp_range,
         marker,
         version,
+        sap_create_po,
+        order_line_counter,
         del_flag,
         remark,
         create_time,
@@ -65,6 +67,8 @@
         <result property="mrpRange" column="mrp_range"/>
         <result property="marker" column="marker"/>
         <result property="version" column="version"/>
+        <result property="sapCreatePo" column="sap_create_po"/>
+        <result property="orderLinCounter" column="order_line_counter"/>
         <result property="delFlag" column="del_flag"/>
         <result property="remark" column="remark"/>
         <result property="createTime" column="create_time"/>
@@ -99,6 +103,8 @@
                mrp_range,
                marker,
                version,
+               sap_create_po,
+               order_line_counter,
                del_flag,
                remark,
                create_time,
@@ -145,6 +151,8 @@
         mrp_range,
         marker,
         version,
+        sap_create_po,
+        order_line_counter,
         del_flag,
         remark,
         create_time,
@@ -177,6 +185,8 @@
             ifnull(#{item.mrpRange}, ''),
             ifnull(#{item.marker}, ''),
             ifnull(#{item.version}, ''),
+            ifnull(#{item.sapCreatePo}, ''),
+            ifnull(#{item.orderLineCounter}, ''),
             ifnull(#{item.delFlag}, 0),
             ifnull(#{item.remark}, ''),
             ifnull(#{item.createTime}, now()),
@@ -206,6 +216,8 @@
         mrp_range = VALUES(mrp_range),
         marker = VALUES(marker),
         version = VALUES(version),
+        sap_create_po = VALUES(sap_create_po),
+        order_line_counter = VALUES(order_line_counter),
         update_time = now()
     </insert>
 </mapper>
