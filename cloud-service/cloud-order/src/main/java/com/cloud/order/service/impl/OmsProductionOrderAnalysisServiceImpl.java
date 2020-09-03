@@ -79,8 +79,9 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
         Calendar date = Calendar.getInstance();
         date.setTime(new Date());
         date.add(Calendar.DATE, DAYS);
-        criteria.andGreaterThan("productDate", sft.format(new Date()));
-        criteria.andLessThanOrEqualTo("productDate", sft.format(date.getTime()));
+        //应韩宁韩工要求，待排产订单分析从当天开始  2020-09-03  ltq
+        criteria.andGreaterThanOrEqualTo("productDate", sft.format(new Date()));
+        criteria.andLessThan("productDate", sft.format(date.getTime()));
         List<OmsRealOrder> omsRealOrders = omsRealOrderService.selectByExample(example);
         //增加数据空判断  2020-07-23 by ltq
         if (ObjectUtil.isEmpty(omsRealOrders) && omsRealOrders.size() <= 0) {
@@ -369,12 +370,13 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
      * Date: 2020/6/29
      */
     private String[] getDays() {
-        int[] days = NumberUtil.range(1, 14);
+        //应韩宁韩工要求，待排产订单分析从当天开始  2020-09-03  ltq
+        int[] days = NumberUtil.range(0, 13);
         String[] dates = new String[14];
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         for (int i : days) {
             String day = dateTimeFormatter.format(LocalDate.now().plusDays(i));
-            dates[i - 1] = day;
+            dates[i] = day;
         }
         return dates;
     }
