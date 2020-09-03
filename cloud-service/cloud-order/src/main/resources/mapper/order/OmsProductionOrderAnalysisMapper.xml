@@ -66,8 +66,8 @@
                 product_factory_code = #{item.productFactoryCode}
                 and product_material_code = #{item.productMaterialCode}
             </foreach>
-            and product_date > DATE_FORMAT(now(),'%Y-%m-%d')
-            and product_date <![CDATA[<= ]]> DATE_FORMAT(DATE_ADD(now(),INTERVAL 14 day),'%Y-%m-%d')
+            and product_date <![CDATA[>= ]]> DATE_FORMAT(now(),'%Y-%m-%d')
+            and product_date <![CDATA[< ]]> DATE_FORMAT(DATE_ADD(now(),INTERVAL 14 day),'%Y-%m-%d')
         </where>
         order by product_factory_code,product_material_code,product_date
     </select>

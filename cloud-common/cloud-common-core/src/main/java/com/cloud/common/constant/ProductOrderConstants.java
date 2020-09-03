@@ -66,6 +66,12 @@ public class ProductOrderConstants {
     public final static String ORDER_CLASS_FOUR = "4";
     public final static String ORDER_CLASS_FIVE = "5";
 
+    /**
+     * 新品成品物料，无需校验ZN认证条件
+     */
+    public final static String NEW_FACTORY_CODE = "8310";
+    public final static String NEW_LINE_CODE = "36";
+
 
 
 
