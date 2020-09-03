@@ -27,10 +27,7 @@ import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.RandomUtil;
 import com.cloud.order.domain.entity.*;
 import com.cloud.order.domain.entity.vo.OmsDemandOrderGatherEditExport;
-import com.cloud.order.enums.DemandOrderGatherEditAuditStatusEnum;
-import com.cloud.order.enums.DemandOrderGatherEditStatusEnum;
-import com.cloud.order.enums.OrderFromEnum;
-import com.cloud.order.enums.ProductTypeOrderEnum;
+import com.cloud.order.enums.*;
 import com.cloud.order.mapper.OmsDemandOrderGatherEditMapper;
 import com.cloud.order.service.IOmsDemandOrderGatherEditHisService;
 import com.cloud.order.service.IOmsDemandOrderGatherEditImportService;
@@ -131,6 +128,8 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         Example example = new Example(Oms2weeksDemandOrderEdit.class);
         Example.Criteria criteria = example.createCriteria();
         List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList ;
+        List<String> canStatus = CollectionUtil.newArrayList(DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode(),
+                DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());
         if (StrUtil.isEmpty(ids)) {
             if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
                 criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(",")));
@@ -139,7 +138,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 criteria.andEqualTo("orderFrom", OrderFromEnum.OUT_SOURCE_TYPE_QWW.getCode());
             }
             listCondition(omsDemandOrderGatherEditVo,criteria);
-            criteria.andEqualTo("status", DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
+            criteria.andIn("status", canStatus);
             omsDemandOrderGatherEditList = selectByExample(example);
             if (CollectionUtil.isEmpty(omsDemandOrderGatherEditList)) {
                 return R.error("无可删除数据！");
@@ -154,9 +153,9 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 return R.error("无可删除数据！");
             }
             Boolean bo=listAll.stream()
-                    .anyMatch(s -> !s.getStatus().equals(DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode()));
+                    .anyMatch(s -> !CollectionUtil.contains(canStatus,s.getStatus()));
             if(bo){
-                return R.error("非初始状态的数据不允许删除！");
+                return R.error("非初始或传SAP异常状态的数据不允许删除！");
             }
             omsDemandOrderGatherEditList = listAll;
         }
