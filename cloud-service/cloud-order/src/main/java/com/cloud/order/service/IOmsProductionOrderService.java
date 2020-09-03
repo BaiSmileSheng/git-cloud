@@ -88,7 +88,7 @@ public interface IOmsProductionOrderService extends BaseService<OmsProductionOrd
      * 邮件推送
      * @return
      */
-    R mailPush();
+    R mailPush(OmsProductionOrder omsProductionOrder);
 
     /**
      * Description:  反馈信息处理-快捷修改查询

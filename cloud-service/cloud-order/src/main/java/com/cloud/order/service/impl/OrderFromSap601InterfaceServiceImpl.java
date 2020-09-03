@@ -1,18 +1,23 @@
 package com.cloud.order.service.impl;
 
+import cn.hutool.core.date.DateUtil;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.service.IOrderFromSap601InterfaceService;
+import com.cloud.system.domain.entity.SysInterfaceLog;
+import com.cloud.system.feign.RemoteInterfaceLogService;
 import com.sap.conn.jco.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Description: Order服务 - sap601系统接口
@@ -24,6 +29,9 @@ import java.util.List;
 @Service
 @Slf4j
 public class OrderFromSap601InterfaceServiceImpl implements IOrderFromSap601InterfaceService {
+
+    @Autowired
+    private RemoteInterfaceLogService remoteInterfaceLogService;
     /**
      * @Description: 获取SAP系统生产订单
      * @Param: [list]
@@ -108,6 +116,10 @@ public class OrderFromSap601InterfaceServiceImpl implements IOrderFromSap601Inte
     @Override
     public R createProductOrderFromSap601(List<OmsProductionOrder> list) {
         log.info("================联动SAP创建生产订单方法  start================");
+        String orderNoS = list.stream().map(omsProductionOrder -> omsProductionOrder.getOrderCode()).collect(Collectors.joining(","));
+        SysInterfaceLog sysInterfaceLog = new SysInterfaceLog().builder()
+                .appId("SAP").interfaceName(SapConstants.ZPP_INT_DDPS_02)
+                .content("oms_production_order排产订单号:" + orderNoS).build();
         JCoDestination destination = null;
         if (list.size() <= 0) {
             log.error("================联动SAP创建生产订单方法,传入参数为空================");
@@ -158,13 +170,20 @@ public class OrderFromSap601InterfaceServiceImpl implements IOrderFromSap601Inte
                     omsProductionOrder.setSapMessages(outTableOutput.getString("MESSAGE"));
                     dataList.add(omsProductionOrder);
                 }
+                sysInterfaceLog.setResults("联动SAP创建生产订单成功");
             } else {
+                sysInterfaceLog.setResults("联动SAP创建生产订单返回信息为空");
                 log.error("联动SAP创建生产订单返回信息为空！");
                 return R.error("联动SAP创建生产订单返回信息为空！");
             }
         } catch (Exception e) {
+            sysInterfaceLog.setResults("联动SAP创建生产订单方法异常");
             log.error("联动SAP创建生产订单方法异常:" + e);
             throw new BusinessException("联动SAP创建生产订单方法异常:"+e);
+        }finally {
+            sysInterfaceLog.setCreateTime(DateUtil.date());
+            sysInterfaceLog.setRemark("联动SAP创建生产订单方法 ");
+            remoteInterfaceLogService.saveInterfaceLog(sysInterfaceLog);
         }
         log.info("================联动SAP创建生产订单方法  end================");
         return R.data(dataList);

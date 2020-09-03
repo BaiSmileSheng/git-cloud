@@ -2810,11 +2810,23 @@
             },
             {
               "name": "order_num",
-              "type": "BigInt",
+              "type": "Money",
               "remark": "",
               "chnname": "订单数量",
               "defaultValue": "",
               "notNull": true
+            },
+            {
+              "name": "delivery_num",
+              "type": "Money",
+              "remark": "",
+              "chnname": "已交货数量"
+            },
+            {
+              "name": "undelivery_num",
+              "type": "Money",
+              "remark": "",
+              "chnname": "未交货数量"
             },
             {
               "name": "unit",
@@ -4663,6 +4675,18 @@
               "type": "VARCHAR_1000",
               "remark": "",
               "chnname": "生成加工结算错误信息"
+            },
+            {
+              "name": "assign_sap_time",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "下达SAP时间"
+            },
+            {
+              "name": "get_sap_time",
+              "type": "DefaultString",
+              "remark": "在sap成功获取生产订单号的时间",
+              "chnname": "已传SAP时间"
             },
             {
               "name": "del_flag",
