@@ -270,19 +270,13 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             return R.error("BOM拆解流程失败!");
         }
         if (omsProductionOrders.size() > 0) {
+            //4、3版本审批校验，邮件通知排产员3版本审批
+            omsProductionOrders = checkThreeVersion(omsProductionOrders, sysUser);
+            //5、超期库存审批流程，邮件通知订单经理
+            omsProductionOrders = checkOverStock(omsProductionOrders, sysUser);
+            //6、、超期未关闭订单审批校验，邮件通知工厂订单 - 工厂小微主 超期未关闭订单审批
+            omsProductionOrders = checkOverdueNotCloseOrder(omsProductionOrders, sysUser);
             omsProductionOrderMapper.insertList(omsProductionOrders);
-            List<String> orderCodes = omsProductionOrders.stream().map(OmsProductionOrder::getOrderCode).collect(Collectors.toList());
-            omsProductionOrders = omsProductionOrderMapper.selectByOrderCode(orderCodes);
-        }
-        //4、3版本审批校验，邮件通知排产员3版本审批
-        List<OmsProductionOrder> checkOmsProductList = checkThreeVersion(omsProductionOrders, sysUser);
-        //5、超期库存审批流程，邮件通知订单经理
-        List<OmsProductionOrder> checkOverStockList = checkOverStock(checkOmsProductList, sysUser);
-        //6、、超期未关闭订单审批校验，邮件通知工厂订单 - 工厂小微主 超期未关闭订单审批
-        List<OmsProductionOrder> insertProductOrderList = checkOverdueNotCloseOrder(checkOverStockList, sysUser);
-        //更新排产订单的审核状态
-        if (insertProductOrderList.size() > 0) {
-            omsProductionOrderMapper.updateBatchByPrimaryKeySelective(insertProductOrderList);
         }
         if (exportList.size() > 0) {
             return EasyExcelUtilOSS.writeExcel(exportList, "排产订单导入失败数据.xlsx", "sheet", new OmsProductionOrderExportVo());
@@ -1411,7 +1405,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 log.error("根据成品专用号查询物料扩展信息记录为空！");
                 throw new BusinessException("根据成品专用号查询物料扩展信息记录为空，请及时维护物料扩展信息数据！");
             }
-            if (cdMaterialExtendInfo.getIsZnAttestation().equals(ZN_ATTESTATION)) {
+            //应徐海萍要求，8310工厂36号线不校验ZN认证  2020-09-03 ltq
+            if (cdMaterialExtendInfo.getIsZnAttestation().equals(ZN_ATTESTATION)
+                    && (!o.getProductFactoryCode().equals(ProductOrderConstants.NEW_FACTORY_CODE)
+                    || !o.getProductLineCode().equals(ProductOrderConstants.NEW_LINE_CODE))) {
                 znOrderList.add(o);
                 o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_ONE);
             }

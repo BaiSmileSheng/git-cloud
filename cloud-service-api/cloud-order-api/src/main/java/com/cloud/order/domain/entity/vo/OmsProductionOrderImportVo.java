@@ -157,7 +157,6 @@ public class OmsProductionOrderImportVo {
      */
     @ExcelProperty(value = "PCB专用号", index = 15)
     @ApiModelProperty(value = "PCB专用号")
-    @NotBlank(message = "不能为空")
     private String pcbSpecialCode;
     /**
      * 是否卡萨帝 0：否，1：是
