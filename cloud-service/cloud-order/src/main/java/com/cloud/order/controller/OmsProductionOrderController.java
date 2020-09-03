@@ -582,4 +582,16 @@ public class OmsProductionOrderController extends BaseController {
         R result = omsProductionOrderService.timeGetConfirmAmont();
         return result;
     }
+
+    /**
+     * 排产订单下达SAP删除排产订单
+     */
+    @PostMapping("deleteSAP")
+    @OperLog(title = "排产订单下达SAP删除排产订单", businessType = BusinessType.DELETE)
+    @ApiOperation(value = "排产订单下达SAP删除排产订单 ", response = R.class)
+    @HasPermissions("order:productionOrder:deleteSAP")
+    public R deleteSAP(@RequestParam("id") String id) {
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return omsProductionOrderService.deleteSAP(id,sysUser);
+    }
 }
