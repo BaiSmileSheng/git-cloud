@@ -462,12 +462,20 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             String customerCode = internalOrderRes.getCustomerCode();
             String deliveryDate = internalOrderRes.getDeliveryDate();
             BigDecimal orderNum = (internalOrderRes.getOrderNum() == null ? BigDecimal.ZERO : internalOrderRes.getOrderNum());
+            BigDecimal deliveryNum = (internalOrderRes.getDeliveryNum() == null ? BigDecimal.ZERO : internalOrderRes.getDeliveryNum());
             String key = productMaterialCode + productFactoryCode + customerCode + deliveryDate;
             if (omsRealOrderMap.containsKey(key)) {
                 OmsRealOrder omsRealOrder = omsRealOrderMap.get(key);
                 BigDecimal orderNumRealO = omsRealOrder.getOrderNum();
                 BigDecimal orderNumRealX = orderNumRealO.add(orderNum);
                 omsRealOrder.setOrderNum(orderNumRealX);
+
+                BigDecimal deliveryNumO = omsRealOrder.getDeliveryNum();
+                BigDecimal deliveryNumX = deliveryNumO.add(deliveryNum);
+                omsRealOrder.setDeliveryNum(deliveryNumX);
+
+                BigDecimal undeliveryNum = orderNumRealX.subtract(deliveryNumX);
+                omsRealOrder.setUndeliveryNum(undeliveryNum);
             } else {
                 //1.订单号生成规则 ZD+年月日+4位顺序号，循序号每日清零
                 String orderCode = getOrderCode();
@@ -494,6 +502,9 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 omsRealOrder.setBomVersion(internalOrderRes.getVersion());
                 omsRealOrder.setPurchaseGroupCode(internalOrderRes.getPurchaseGroupCode());
                 omsRealOrder.setOrderNum(internalOrderRes.getOrderNum());
+                omsRealOrder.setDeliveryNum(internalOrderRes.getDeliveryNum());
+                BigDecimal undeliveryNum = internalOrderRes.getOrderNum().subtract(internalOrderRes.getDeliveryNum());
+                omsRealOrder.setUndeliveryNum(undeliveryNum);
                 omsRealOrder.setUnit(internalOrderRes.getUnit());
                 omsRealOrder.setDeliveryDate(internalOrderRes.getDeliveryDate());
                 omsRealOrder.setAuditStatus(RealOrderAduitStatusEnum.AUDIT_STATUS_WXSH.getCode());
@@ -728,6 +739,8 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             omsRealOrderReq.setStatus(RealOrderStatusEnum.STATUS_0.getCode());
             omsRealOrderReq.setCreateTime(date);
             omsRealOrderReq.setDelFlag("0");
+            omsRealOrderReq.setDeliveryNum(BigDecimal.ZERO);
+            omsRealOrderReq.setUndeliveryNum(omsRealOrderReq.getOrderNum());
             //下市需要审批的集合
             if(RealOrderAduitStatusEnum.AUDIT_STATUS_SHZ.getCode().equals(omsRealOrderReq.getAuditStatus())){
                 othObjectDto.setObject(omsRealOrderReq);

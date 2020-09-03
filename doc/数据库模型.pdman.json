@@ -2810,11 +2810,23 @@
             },
             {
               "name": "order_num",
-              "type": "BigInt",
+              "type": "Money",
               "remark": "",
               "chnname": "订单数量",
               "defaultValue": "",
               "notNull": true
+            },
+            {
+              "name": "delivery_num",
+              "type": "Money",
+              "remark": "",
+              "chnname": "已交货数量"
+            },
+            {
+              "name": "undelivery_num",
+              "type": "Money",
+              "remark": "",
+              "chnname": "未交货数量"
             },
             {
               "name": "unit",
