@@ -34,7 +34,7 @@ public class OmsProductionOrderImportVo {
      * 订单类型
      */
     @ExcelProperty(value = "SAP订单类型", index = 0)
-    @ApiModelProperty(value = "订单类型")
+    @ApiModelProperty(value = "SAP订单类型")
     @NotBlank(message = "不能为空")
     private String orderType;
     /**

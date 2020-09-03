@@ -2294,8 +2294,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
         OmsProductionOrder omsProductionOrders = omsProductionOrderMapper.selectByPrimaryKey(id);
         if(!ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode().equals(omsProductionOrders.getStatus())
-            || !ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPYC.getCode().equals(omsProductionOrders.getStatus())){
-            return R.error("请删除已传SAP或传SAP异常的数据");
+            && !ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPYC.getCode().equals(omsProductionOrders.getStatus())){
+            return R.error("只能删除已传SAP或传SAP异常的数据");
         }
         //1.按单号删除审批流
         Map<String,Object> map = new HashMap<>();
