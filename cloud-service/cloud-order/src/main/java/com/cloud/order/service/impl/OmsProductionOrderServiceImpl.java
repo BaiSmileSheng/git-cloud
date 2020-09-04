@@ -269,14 +269,21 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             log.error("BOM拆解流程失败，原因：" + bomDisassemblyResult.get("msg"));
             return R.error("BOM拆解流程失败!");
         }
+        // 还原先插入排产订单，在进行校验订单导入的闸口的顺序
         if (omsProductionOrders.size() > 0) {
-            //4、3版本审批校验，邮件通知排产员3版本审批
-            omsProductionOrders = checkThreeVersion(omsProductionOrders, sysUser);
-            //5、超期库存审批流程，邮件通知订单经理
-            omsProductionOrders = checkOverStock(omsProductionOrders, sysUser);
-            //6、、超期未关闭订单审批校验，邮件通知工厂订单 - 工厂小微主 超期未关闭订单审批
-            omsProductionOrders = checkOverdueNotCloseOrder(omsProductionOrders, sysUser);
             omsProductionOrderMapper.insertList(omsProductionOrders);
+            List<String> orderCodes = omsProductionOrders.stream().map(OmsProductionOrder::getOrderCode).collect(Collectors.toList());
+            omsProductionOrders = omsProductionOrderMapper.selectByOrderCode(orderCodes);
+        }
+        //4、3版本审批校验，邮件通知排产员3版本审批
+        List<OmsProductionOrder> checkOmsProductList = checkThreeVersion(omsProductionOrders, sysUser);
+        //5、超期库存审批流程，邮件通知订单经理
+        List<OmsProductionOrder> checkOverStockList = checkOverStock(checkOmsProductList, sysUser);
+        //6、、超期未关闭订单审批校验，邮件通知工厂订单 - 工厂小微主 超期未关闭订单审批
+        List<OmsProductionOrder> insertProductOrderList = checkOverdueNotCloseOrder(checkOverStockList, sysUser);
+        //更新排产订单的审核状态
+        if (insertProductOrderList.size() > 0) {
+            omsProductionOrderMapper.updateBatchByPrimaryKeySelective(insertProductOrderList);
         }
         if (exportList.size() > 0) {
             return EasyExcelUtilOSS.writeExcel(exportList, "排产订单导入失败数据.xlsx", "sheet", new OmsProductionOrderExportVo());
