@@ -196,8 +196,8 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
             }
             R uplodeFileResult = remoteOssService.batchEditSaveById(sysOssList);
             if (!uplodeFileResult.isSuccess()) {
-                logger.error("新增质量索赔时会写文件订单号失败 orderNo:{},ossIds:{},res:{}", orderNo, ossIds,JSONObject.toJSON(uplodeFileResult));
-                throw new BusinessException("新增质量索赔时会写文件订单号失败");
+                logger.error("新增质量索赔时回写文件订单号失败 orderNo:{},ossIds:{},res:{}", orderNo, ossIds,JSONObject.toJSON(uplodeFileResult));
+                throw new BusinessException("新增质量索赔时回写文件订单号失败");
             }
         }
         return R.data(smsQualityOrder.getId());
@@ -286,8 +286,8 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
                 }
                 R uplodeFileResult = remoteOssService.batchEditSaveById(sysOssList);
                 if (!uplodeFileResult.isSuccess()) {
-                    logger.error("修改质量索赔时会写文件订单号失败 orderNo:{},ossIds:{},res:{}", orderNo, ossIds,JSONObject.toJSON(uplodeFileResult));
-                    throw new BusinessException("修改质量索赔时会写文件订单号失败");
+                    logger.error("修改质量索赔时回写文件订单号失败 orderNo:{},ossIds:{},res:{}", orderNo, ossIds,JSONObject.toJSON(uplodeFileResult));
+                    throw new BusinessException("修改质量索赔时回写文件订单号失败");
                 }
             }
         }
