@@ -136,4 +136,9 @@ public interface IOmsProductionOrderService extends BaseService<OmsProductionOrd
      */
     R timeGetConfirmAmont();
 
+    /**
+     * 排产订单下达SAP删除排产订单
+     */
+    R deleteSAP(String id,SysUser sysUser);
+
 }

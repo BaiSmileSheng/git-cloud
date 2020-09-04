@@ -269,14 +269,21 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             log.error("BOM拆解流程失败，原因：" + bomDisassemblyResult.get("msg"));
             return R.error("BOM拆解流程失败!");
         }
+        // 还原先插入排产订单，在进行校验订单导入的闸口的顺序
         if (omsProductionOrders.size() > 0) {
-            //4、3版本审批校验，邮件通知排产员3版本审批
-            omsProductionOrders = checkThreeVersion(omsProductionOrders, sysUser);
-            //5、超期库存审批流程，邮件通知订单经理
-            omsProductionOrders = checkOverStock(omsProductionOrders, sysUser);
-            //6、、超期未关闭订单审批校验，邮件通知工厂订单 - 工厂小微主 超期未关闭订单审批
-            omsProductionOrders = checkOverdueNotCloseOrder(omsProductionOrders, sysUser);
             omsProductionOrderMapper.insertList(omsProductionOrders);
+            List<String> orderCodes = omsProductionOrders.stream().map(OmsProductionOrder::getOrderCode).collect(Collectors.toList());
+            omsProductionOrders = omsProductionOrderMapper.selectByOrderCode(orderCodes);
+        }
+        //4、3版本审批校验，邮件通知排产员3版本审批
+        List<OmsProductionOrder> checkOmsProductList = checkThreeVersion(omsProductionOrders, sysUser);
+        //5、超期库存审批流程，邮件通知订单经理
+        List<OmsProductionOrder> checkOverStockList = checkOverStock(checkOmsProductList, sysUser);
+        //6、、超期未关闭订单审批校验，邮件通知工厂订单 - 工厂小微主 超期未关闭订单审批
+        List<OmsProductionOrder> insertProductOrderList = checkOverdueNotCloseOrder(checkOverStockList, sysUser);
+        //更新排产订单的审核状态
+        if (insertProductOrderList.size() > 0) {
+            omsProductionOrderMapper.updateBatchByPrimaryKeySelective(insertProductOrderList);
         }
         if (exportList.size() > 0) {
             return EasyExcelUtilOSS.writeExcel(exportList, "排产订单导入失败数据.xlsx", "sheet", new OmsProductionOrderExportVo());
@@ -2135,7 +2142,6 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     @GlobalTransactional
     @Override
     public R timeGetConfirmAmont() {
-        //注意:wms订单号12位,不足前面补零;sap获取的10位,存入订单系统的10位,在wms获取后截取
         //1.查已传SAP的排产订单
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();
@@ -2225,7 +2231,6 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         return R.ok();
     }
 
-
     /**
      * wms获取入库数量
      *
@@ -2288,5 +2293,66 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             dateStr = StrUtil.replace(dateStr, "/", "-");
         }
         return dateStr;
+    }
+
+    @GlobalTransactional
+    @Override
+    public R deleteSAP(String id, SysUser sysUser) {
+
+        OmsProductionOrder omsProductionOrders = omsProductionOrderMapper.selectByPrimaryKey(id);
+        if(!ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode().equals(omsProductionOrders.getStatus())
+            && !ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPYC.getCode().equals(omsProductionOrders.getStatus())){
+            return R.error("只能删除已传SAP或传SAP异常的数据");
+        }
+        //1.按单号删除审批流
+        Map<String,Object> map = new HashMap<>();
+        map.put("userName",sysUser.getLoginName());
+        map.put("orderCodeList",Arrays.asList(omsProductionOrders.getOrderCode()));
+        R deleteActMap = remoteActTaskService.deleteByOrderCode(map);
+        if (!deleteActMap.isSuccess()){
+            log.error("删除审批流程失败，原因："+deleteActMap.get("msg"));
+            return R.error("删除审批流程失败，原因："+deleteActMap.get("msg"));
+        }
+
+        //2.排产明细转删除
+        OmsProductionOrderDel omsProductionOrderDels = new OmsProductionOrderDel();
+        BeanUtils.copyProperties(omsProductionOrders, omsProductionOrderDels);
+        omsProductionOrderDels.setId(null);
+        omsProductionOrderDels.setCreateBy(sysUser.getLoginName());
+        omsProductionOrderDels.setCreateTime(new Date());
+        //查询明细数据
+        R detailMap = omsProductionOrderDetailService.selectListByOrderCodes("\"" + omsProductionOrders.getOrderCode() + "\"");
+        if (!detailMap.isSuccess()) {
+            log.error("查询明细数据失败！");
+            return R.error("查询明细数据失败!");
+        }
+        List<OmsProductionOrderDetail> omsProductionOrderDetails =
+                detailMap.getCollectData(new TypeReference<List<OmsProductionOrderDetail>>() {
+                });
+        StringBuffer detailIdBuffer = new StringBuffer();
+        if (ObjectUtil.isNotEmpty(omsProductionOrderDetails) && omsProductionOrderDetails.size() > 0) {
+            //转类型
+            List<OmsProductionOrderDetailDel> omsProductionOrderDetailDels = omsProductionOrderDetails
+                    .stream().map(d -> {
+                        detailIdBuffer.append("\'").append(d.getId()).append("\',");
+                        OmsProductionOrderDetailDel omsProductionOrderDetailDel = new OmsProductionOrderDetailDel();
+                        BeanUtils.copyProperties(d, omsProductionOrderDetailDel);
+                        omsProductionOrderDetailDel.setId(null);
+                        omsProductionOrderDetailDel.setCreateBy(sysUser.getLoginName());
+                        omsProductionOrderDetailDel.setCreateTime(new Date());
+                        return omsProductionOrderDetailDel;
+                    }).collect(toList());
+            String detailIds = detailIdBuffer.substring(0, detailIdBuffer.length() - 1);
+            //排产订单明细转存删除表
+            omsProductionOrderDetailDelService.insertList(omsProductionOrderDetailDels);
+            //删除排产订单明细数据
+            omsProductionOrderDetailService.deleteByIdsWL(detailIds);
+        }
+        //3.排产转删除
+        //将删除的排产订单存到删除表中
+        omsProductionOrderDelService.insertSelective(omsProductionOrderDels);
+        //删除排产订单表数据
+        omsProductionOrderMapper.deleteByIds(id);
+        return R.ok();
     }
 }
