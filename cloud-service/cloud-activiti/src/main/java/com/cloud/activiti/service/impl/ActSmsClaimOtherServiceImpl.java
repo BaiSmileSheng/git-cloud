@@ -41,6 +41,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 其他索赔审批
@@ -117,13 +119,13 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         logger.info("其他索赔开启流程 其他索赔id:{},其他索赔索赔单号:{}",smsClaimOther.getId(),
                 smsClaimOther.getClaimCode());
         //1.供应商申诉
-        R appealResult = supplierAppeal(smsClaimOther,ossIds);
-        if(!appealResult.isSuccess()){
-            logger.error("其他索赔开启流程失败 其他索赔索赔单号:{},res:{}", smsClaimOther.getClaimCode(),
-                    JSONObject.toJSON(appealResult));
-            return appealResult;
+        R suppResult = supplierAppeal(smsClaimOther,ossIds);
+        if(!suppResult.isSuccess()){
+            return suppResult;
         }
-        String claimCode = appealResult.getStr("data");
+        SmsClaimOther smsClaimOtherSelect = (SmsClaimOther)suppResult.get("smsClaimOtherRes");
+        List<SysUserVo> sysUserVoList = (List<SysUserVo>)suppResult.get("sysUserVoList");
+        String claimCode = smsClaimOtherSelect.getClaimCode();
         smsClaimOther.setClaimCode(claimCode);
         //2.构造其他索赔流程信息
         BizBusiness business = initBusiness(smsClaimOther,sysUser);
@@ -131,7 +133,8 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         bizBusinessService.insertBizBusiness(business);
         Map<String, Object> variables = Maps.newHashMap();
         //启动其他索赔流程
-        bizBusinessService.startProcess(business, variables);
+        Set<String> userIdSet = sysUserVoList.stream().map(sysUserVo -> sysUserVo.getUserId().toString()).collect(Collectors.toSet());
+        bizBusinessService.startProcess(business, variables,userIdSet);
         return R.ok();
     }
 
@@ -186,8 +189,11 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
         String factoryCode = smsClaimOtherRes.getFactoryCode();
         String roleKey = RoleConstants.ROLE_KEY_XWZ;
         String claimCode = smsClaimOtherRes.getClaimCode();
-        sendEmail(claimCode, factoryCode, roleKey);
-        return R.data(smsClaimOtherRes.getClaimCode());
+        List<SysUserVo> sysUserVoList = sendEmail(claimCode, factoryCode, roleKey);
+        R resultRes = new R();
+        resultRes.put("smsClaimOtherRes",smsClaimOtherRes);
+        resultRes.put("sysUserVoList",sysUserVoList);
+        return resultRes;
     }
 
     /**
@@ -196,7 +202,7 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
      * @param factoryCode
      * @param roleKey
      */
-    private void sendEmail(String claimCode, String factoryCode, String roleKey) {
+    private List<SysUserVo> sendEmail(String claimCode, String factoryCode, String roleKey) {
         R sysUserR = remoteUserService.selectUserByMaterialCodeAndRoleKey(factoryCode,roleKey);
         if(!sysUserR.isSuccess()){
             logger.error("获取对应的负责人邮箱失败");
@@ -217,6 +223,7 @@ public class ActSmsClaimOtherServiceImpl implements IActSmsClaimOtherService {
             String content = "您有一条待办消息要处理！" + "其他索赔单 单号：" + claimCode + "供应商发起申诉。" + EmailConstants.ORW_URL;
             mailService.sendTextMail(email,subject,content);
         }
+        return sysUserVoList;
     }
     /**
      * Description:  根据Key查询最新版本流程

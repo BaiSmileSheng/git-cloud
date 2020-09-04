@@ -43,6 +43,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 质量索赔审批
@@ -123,14 +125,18 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
         if(!suppResult.isSuccess()){
             return suppResult;
         }
-        String orderNo = suppResult.getStr("data");
+        SmsQualityOrder smsQualityOrderSelect = (SmsQualityOrder)suppResult.get("smsQualityOrderRes");
+        List<SysUserVo> sysUserVoList = (List<SysUserVo>)suppResult.get("sysUserVoList");
+
+        String orderNo = smsQualityOrderSelect.getQualityNo();
         smsQualityOrder.setQualityNo(orderNo);
         BizBusiness business = initBusiness(smsQualityOrder,sysUser);
         //新增质量索赔流程
         bizBusinessService.insertBizBusiness(business);
         Map<String, Object> variables = Maps.newHashMap();
         //启动质量索赔流程
-        bizBusinessService.startProcess(business, variables);
+        Set<String> userIdSet = sysUserVoList.stream().map(sysUserVo -> sysUserVo.getUserId().toString()).collect(Collectors.toSet());
+        bizBusinessService.startProcess(business, variables,userIdSet);
         return R.ok();
     }
 
@@ -184,8 +190,11 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
         String factoryCode = smsQualityOrderRes.getFactoryCode();
         String roleKey = RoleConstants.ROLE_KEY_ZLBBZ;
         String qualityNo = smsQualityOrderRes.getQualityNo();
-        sendEmail(qualityNo, factoryCode, roleKey);
-        return R.data(smsQualityOrderRes.getQualityNo());
+        List<SysUserVo> sysUserVoList = sendEmail(qualityNo, factoryCode, roleKey);
+        R resultRes  = new R();
+        resultRes.put("smsQualityOrderRes",smsQualityOrderRes);
+        resultRes.put("sysUserVoList",sysUserVoList);
+        return resultRes;
     }
 
     /**
@@ -194,7 +203,7 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
      * @param factoryCode
      * @param roleKey
      */
-    private void sendEmail(String qualityNo, String factoryCode, String roleKey) {
+    private List<SysUserVo> sendEmail(String qualityNo, String factoryCode, String roleKey) {
         R sysUserR = remoteUserService.selectUserByMaterialCodeAndRoleKey(factoryCode,roleKey);
         if(!sysUserR.isSuccess()){
             logger.error("获取对应的负责人邮箱失败");
@@ -215,6 +224,7 @@ public class ActSmsQualityOrderServiceImpl implements IActSmsQualityOrderService
             String content = "您有一条待办消息要处理！" + "质量索赔单 单号：" + qualityNo + "供应商发起申诉。" + EmailConstants.ORW_URL;
             mailService.sendTextMail(email,subject,content);
         }
+        return sysUserVoList;
     }
 
     /**
