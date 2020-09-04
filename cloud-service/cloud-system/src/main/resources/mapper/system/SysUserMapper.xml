@@ -443,6 +443,6 @@
             sdc.material_code =#{factoryCode}
             and sdc1.material_code=#{purchaseCode}
           AND sr.role_key
-            = 'JIT'
+            = #{roleKey}
     </select>
 </mapper>
