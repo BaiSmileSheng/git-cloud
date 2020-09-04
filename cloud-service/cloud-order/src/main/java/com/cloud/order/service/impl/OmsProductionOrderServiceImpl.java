@@ -953,7 +953,6 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             } else if (ProductOrderConstants.DATE_TYPE_THREE.equals(omsProductionOrder.getDateType())) {
                 criteria.andLessThanOrEqualTo("productEndDate", omsProductionOrder.getCheckDateEnd());
             }else if(ProductOrderConstants.DATE_TYPE_FOUR.equals(omsProductionOrder.getDateType())){
-
                 criteria.andLessThan("assignSapTime", checkDateEnd);
             }else if(ProductOrderConstants.DATE_TYPE_FIVE.equals(omsProductionOrder.getDateType())){
                 criteria.andLessThan("getSapTime", checkDateEnd);
