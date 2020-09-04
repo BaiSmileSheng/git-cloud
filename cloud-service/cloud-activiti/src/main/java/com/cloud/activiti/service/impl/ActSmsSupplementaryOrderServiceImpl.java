@@ -12,13 +12,16 @@ import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
 import com.cloud.activiti.service.IActSmsSupplementaryOrderService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
+import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
 import com.cloud.settle.enums.SupplementaryOrderStatusEnum;
 import com.cloud.settle.feign.RemoteSmsSupplementaryOrderService;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteUserService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +31,8 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -77,10 +82,21 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
         //插入流程物业表  并开启流程
         smsSupplementaryOrder.setProcDefId(procDefId);
         smsSupplementaryOrder.setProcName(procName);
+        SmsSupplementaryOrder smsSupplementaryOrderCheck = remoteSmsSupplementaryOrderService.get(smsSupplementaryOrder.getId());
+        smsSupplementaryOrder.setStuffNo(smsSupplementaryOrderCheck.getStuffNo());
         BizBusiness business = initBusiness(smsSupplementaryOrder, sysUser.getUserId());
         bizBusinessService.insertBizBusiness(business);
         Map<String, Object> variables = Maps.newHashMap();
-        bizBusinessService.startProcess(business, variables);
+        //指定下一审批人
+        R rUser = remoteUserService.selectUserByFactoryCodeAndPurchaseCodeAndRoleKey(smsSupplementaryOrderCheck.getFactoryCode()
+        ,smsSupplementaryOrderCheck.getPurchaseGroupCode(), RoleConstants.ROLE_KEY_JIT);
+        if(!rUser.isSuccess()){
+            log.error("物耗审批开启失败，下一级审核人为空！");
+            throw new BusinessException("物耗审批开启失败，下一级审核人为空！");
+        }
+        List<SysUserVo> users=rUser.getCollectData(new TypeReference<List<SysUserVo>>() {});
+        Set<String> userIds = users.stream().map(user->user.getUserId().toString()).collect(Collectors.toSet());
+        bizBusinessService.startProcess(business, variables,userIds);
         return R.ok("提交成功！");
     }
 
@@ -147,7 +163,16 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
         BizBusiness business = initBusiness(smsSupplementaryOrder, userId);
         bizBusinessService.insertBizBusiness(business);
         Map<String, Object> variables = Maps.newHashMap();
-        bizBusinessService.startProcess(business, variables);
+        //指定下一审批人
+        R rUser = remoteUserService.selectUserByFactoryCodeAndPurchaseCodeAndRoleKey(smsSupplementaryOrderCheck.getFactoryCode()
+                ,smsSupplementaryOrderCheck.getPurchaseGroupCode(), RoleConstants.ROLE_KEY_JIT);
+        if(!rUser.isSuccess()){
+            log.error("物耗审批开启失败，下一级审核人为空！");
+            throw new BusinessException("物耗审批开启失败，下一级审核人为空！");
+        }
+        List<SysUserVo> users=rUser.getCollectData(new TypeReference<List<SysUserVo>>() {});
+        Set<String> userIds = users.stream().map(user->user.getUserId().toString()).collect(Collectors.toSet());
+        bizBusinessService.startProcess(business, variables,userIds);
         return R.ok("提交成功！");
     }
 
@@ -211,7 +236,17 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
         R r = remoteSmsSupplementaryOrderService.update(smsSupplementaryOrder);
         if (r.isSuccess()) {
             //审批 推进工作流
-            return actTaskService.audit(bizAudit, userId);
+            //指定下一审批人
+            R rUser = remoteUserService.selectUserByMaterialCodeAndRoleKey(smsSupplementaryOrder.getFactoryCode()
+                    ,  RoleConstants.ROLE_KEY_XWZ);
+            if (!rUser.isSuccess()) {
+                log.error("物耗审批开启失败，下一级审核人为空！");
+                throw new BusinessException("物耗审批开启失败，下一级审核人为空！");
+            }
+            List<SysUserVo> users = rUser.getCollectData(new TypeReference<List<SysUserVo>>() {
+            });
+            Set<String> userIds = users.stream().map(user -> user.getUserId().toString()).collect(Collectors.toSet());
+            return actTaskService.auditCandidateUser(bizAudit, userId,userIds);
         }else{
             throw new BusinessException(r.getStr("msg"));
         }

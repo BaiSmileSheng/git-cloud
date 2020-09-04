@@ -1,5 +1,6 @@
 package com.cloud.activiti.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.consts.ActivitiConstant;
@@ -12,13 +13,18 @@ import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
 import com.cloud.activiti.service.IActSmsScrapOrderService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
+import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.order.domain.entity.OmsProductionOrder;
+import com.cloud.order.feign.RemoteProductionOrderService;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
 import com.cloud.settle.enums.ScrapOrderStatusEnum;
 import com.cloud.settle.feign.RemoteSmsScrapOrderService;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteUserService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +32,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -40,6 +49,8 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
     private RemoteSmsScrapOrderService remoteSmsScrapOrderService;
     @Autowired
     private IActTaskService actTaskService;
+    @Autowired
+    private RemoteProductionOrderService remoteProductionOrderService;
 
 
     /**
@@ -76,12 +87,24 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
                 throw new BusinessException(rUpdate.getStr("msg"));
             }
         }
+        SmsScrapOrder smsScrapOrderCheck = remoteSmsScrapOrderService.get(smsScrapOrder.getId());
+        smsScrapOrder.setScrapNo(smsScrapOrderCheck.getScrapNo());
         //插入流程物业表  并开启流程
         BizBusiness business = initBusiness(smsScrapOrder, sysUser.getUserId());
 
         bizBusinessService.insertBizBusiness(business);
         Map<String, Object> variables = Maps.newHashMap();
-        bizBusinessService.startProcess(business, variables);
+        //指定下一审批人
+        R omsProductionOrderResult = remoteProductionOrderService.selectByProdctOrderCode(smsScrapOrderCheck.getProductOrderCode());
+        if (!omsProductionOrderResult.isSuccess()) {
+            return R.error("订单信息不存在！");
+        }
+        OmsProductionOrder omsProductionOrder = omsProductionOrderResult.getData(OmsProductionOrder.class);
+        String createBy = omsProductionOrder.getCreateBy();
+        SysUser createUser=remoteUserService.selectSysUserByUsername(createBy);
+        Set<String> userIds = CollectionUtil.set(false, createUser.getUserId().toString());
+        bizBusinessService.startProcess(business, variables,userIds);
+//        bizBusinessService.startProcess(business, variables);
         return R.ok("提交成功！");
     }
 
@@ -122,7 +145,17 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         BizBusiness business = initBusiness(smsScrapOrder, userId);
         bizBusinessService.insertBizBusiness(business);
         Map<String, Object> variables = Maps.newHashMap();
-        bizBusinessService.startProcess(business, variables);
+        //指定下一审批人
+        R omsProductionOrderResult = remoteProductionOrderService.selectByProdctOrderCode(smsScrapOrderCheck.getProductOrderCode());
+        if (!omsProductionOrderResult.isSuccess()) {
+            return R.error("订单信息不存在！");
+        }
+        OmsProductionOrder omsProductionOrder = omsProductionOrderResult.getData(OmsProductionOrder.class);
+        String createBy = omsProductionOrder.getCreateBy();
+        SysUser createUser=remoteUserService.selectSysUserByUsername(createBy);
+        Set<String> userIds = CollectionUtil.set(false, createUser.getUserId().toString());
+        bizBusinessService.startProcess(business, variables,userIds);
+//        bizBusinessService.startProcess(business, variables);
         return R.ok("提交成功！");
     }
 
@@ -195,7 +228,17 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
             }
         }
         //审批 推进工作流
-        return actTaskService.audit(bizAudit, userId);
+        //指定下一审批人
+        R rUser = remoteUserService.selectUserByMaterialCodeAndRoleKey(smsScrapOrder.getFactoryCode()
+                ,  RoleConstants.ROLE_KEY_YWK);
+        if (!rUser.isSuccess()) {
+            log.error("报废审批失败，下一级审核人为空！");
+            throw new BusinessException("报废审批失败，下一级审核人为空！");
+        }
+        List<SysUserVo> users = rUser.getCollectData(new TypeReference<List<SysUserVo>>() {
+        });
+        Set<String> userIds = users.stream().map(user -> user.getUserId().toString()).collect(Collectors.toSet());
+        return actTaskService.auditCandidateUser(bizAudit, userId,userIds);
     }
 
     /**
