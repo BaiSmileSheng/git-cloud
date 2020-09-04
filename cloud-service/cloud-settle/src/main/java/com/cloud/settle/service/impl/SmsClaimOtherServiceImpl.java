@@ -194,7 +194,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
             R uplodeFileResult = remoteOssService.batchEditSaveById(sysOssList);
             if(!uplodeFileResult.isSuccess()){
                 logger.error("新增其他索赔时新增文件失败订单号 orderNo:{},res:{}",orderNo, JSONObject.toJSON(uplodeFileResult));
-                throw new BusinessException("新增其他索赔时新增质新增文件失败");
+                throw new BusinessException("新增其他索赔时新增文件失败");
             }
         }
 

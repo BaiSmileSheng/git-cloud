@@ -147,7 +147,6 @@ public class OrderFromSap601InterfaceServiceImpl implements IOrderFromSap601Inte
                 inputTable.setValue("GSTRP", omsProductionOrder.getProductStartDate());
                 inputTable.setValue("GLTRP", omsProductionOrder.getProductEndDate());
                 inputTable.setValue("GAMNG", omsProductionOrder.getProductNum());
-                inputTable.setValue("LGORT", omsProductionOrder.getDestination());
                 inputTable.setValue("ABLAD", omsProductionOrder.getOrderCode());
                 inputTable.setValue("CY_SEQNR", omsProductionOrder.getProductLineCode());
                 inputTable.setValue("VERID", omsProductionOrder.getBomVersion());

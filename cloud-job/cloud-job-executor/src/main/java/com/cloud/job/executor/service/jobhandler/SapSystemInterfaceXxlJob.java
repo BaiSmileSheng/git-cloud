@@ -37,6 +37,7 @@ public class SapSystemInterfaceXxlJob {
         R r = remoteSapSystemInterfaceService.sycRawMaterialStock();
         if (!r.isSuccess()) {
             XxlJobLogger.log("定时同步原材料库存异常 :{}", JSONObject.toJSONString(r));
+            return ReturnT.FAIL;
         }
         XxlJobLogger.log("定时同步原材料库存结束");
         return ReturnT.SUCCESS;
@@ -55,6 +56,7 @@ public class SapSystemInterfaceXxlJob {
         R r = remoteSapSystemInterfaceService.sycBomInfo();
         if (!r.isSuccess()) {
             XxlJobLogger.log("定时获取BOM清单异常 :{}", JSONObject.toJSONString(r));
+            return ReturnT.FAIL;
         }
         XxlJobLogger.log("定时获取BOM清单结束");
         return ReturnT.SUCCESS;
