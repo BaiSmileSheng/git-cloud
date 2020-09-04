@@ -9,7 +9,6 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.RandomUtil;
-import com.cloud.system.domain.entity.SysRole;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.service.ISysMenuService;
@@ -19,7 +18,6 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -225,6 +223,19 @@ public class SysUserController extends BaseController {
     @ApiOperation(value = "根据工厂或物料号 角色查 用户信息 ", response = R.class)
     public R selectUserByMaterialCodeAndRoleKey(@RequestParam("materialCode") String materialCode, @RequestParam("roleKey")String roleKey){
         return R.data(sysUserService.selectUserByMaterialCodeAndRoleKey(materialCode,roleKey));
+    }
+
+    /**
+     * 根据角色、工厂、采购组查对应的用户信息
+     * @param factoryCode
+     * @param purchaseCode
+     * @param roleKey
+     * @return
+     */
+    @GetMapping("selectUserByFactoryCodeAndPurchaseCodeAndRoleKey")
+    @ApiOperation(value = "根据角色、工厂、采购组查对应的用户信息 ", response = R.class)
+    public R selectUserByFactoryCodeAndPurchaseCodeAndRoleKey(@RequestParam("factoryCode") String factoryCode,@RequestParam("purchaseCode") String purchaseCode, @RequestParam("roleKey")String roleKey){
+        return R.data(sysUserService.selectUserByFactoryCodeAndPurchaseCodeAndRoleKey(factoryCode,purchaseCode,roleKey));
     }
 
     /**
