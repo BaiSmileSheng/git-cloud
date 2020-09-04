@@ -1724,6 +1724,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 omsProductionOrder.setGetSapTime(DateUtils.parseDateToStr(YYYY_MM_DD,new Date()));
             } else if("W".equals(omsProductionOrder.getSapFlag())){
                 omsProductionOrder.setSapMessages("生产订单创建中");
+            }else{
+                omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPYC.getCode());
             }
         });
         //2.修改数据
