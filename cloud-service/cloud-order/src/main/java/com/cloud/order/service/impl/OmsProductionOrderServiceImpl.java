@@ -3,6 +3,8 @@ package com.cloud.order.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.ObjectUtil;
@@ -111,6 +113,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
     private final static String YYYY_MM_DD = "yyyy-MM-dd";//时间格式
 
+    public final static String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
+
     private static final String ZN_ATTESTATION = "0";//zn认证，否
     //可否加工承揽
     private static final String IS_PUTTING_OUT_YES = "1";//可
@@ -178,6 +182,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     private IOmsProductOrderImportService omsProductOrderImportService;
     @Autowired
     private RemoteActTaskService remoteActTaskService;
+    @Autowired
+    private RemoteUserService remoteUserService;
 
     /**
      * Description:  排产订单导入
@@ -940,6 +946,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getCheckDateEnd())) {
+            Date date = DateUtil.parse(omsProductionOrder.getCheckDateEnd()).offset(DateField.DAY_OF_MONTH,1);
+            String checkDateEnd = DateUtils.parseDateToStr(YYYY_MM_DD,date);
             if (ProductOrderConstants.DATE_TYPE_ONE.equals(omsProductionOrder.getDateType())) {
                 criteria.andLessThanOrEqualTo("deliveryDate", omsProductionOrder.getCheckDateEnd());
             } else if (ProductOrderConstants.DATE_TYPE_TWO.equals(omsProductionOrder.getDateType())) {
@@ -947,9 +955,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             } else if (ProductOrderConstants.DATE_TYPE_THREE.equals(omsProductionOrder.getDateType())) {
                 criteria.andLessThanOrEqualTo("productEndDate", omsProductionOrder.getCheckDateEnd());
             }else if(ProductOrderConstants.DATE_TYPE_FOUR.equals(omsProductionOrder.getDateType())){
-                criteria.andLessThanOrEqualTo("assignSapTime", omsProductionOrder.getCheckDateEnd());
+                criteria.andLessThan("assignSapTime", checkDateEnd);
             }else if(ProductOrderConstants.DATE_TYPE_FIVE.equals(omsProductionOrder.getDateType())){
-                criteria.andLessThanOrEqualTo("getSapTime", omsProductionOrder.getCheckDateEnd());
+                criteria.andLessThan("getSapTime", checkDateEnd);
             }
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getOrderType())) {
@@ -1598,7 +1606,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         }
         //更新下达SAP时间
         list.forEach(omsProductionOrder ->{
-            omsProductionOrder.setAssignSapTime(DateUtils.parseDateToStr(YYYY_MM_DD,new Date()));
+            omsProductionOrder.setAssignSapTime(DateUtils.parseDateToStr(YYYY_MM_DD_HH_MM_SS,new Date()));
         });
         omsProductionOrderMapper.batchUpdateByOrderCode(list);
         //3.修改排产订单状态
@@ -1728,7 +1736,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     }
                 }
                 //更新获取SAP生产订单号
-                omsProductionOrder.setGetSapTime(DateUtils.parseDateToStr(YYYY_MM_DD,new Date()));
+                omsProductionOrder.setGetSapTime(DateUtils.parseDateToStr(YYYY_MM_DD_HH_MM_SS,new Date()));
             } else if("W".equals(omsProductionOrder.getSapFlag())){
                 omsProductionOrder.setSapMessages("生产订单创建中");
             }else{
@@ -1960,6 +1968,17 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
         //3.发送邮件
         log.info("邮件推送发送邮件开始");
+        //发送订单录入员邮件,全部数据
+        R userListR = remoteUserService.selectUserByRoleKey(RoleConstants.ROLE_KEY_DDLRY);
+        if(!userListR.isSuccess()){
+            log.error("邮件推送时获取订单录入员信息失败 res:{}",JSONObject.toJSONString(userListR));
+            throw new BusinessException("邮件推送时获取订单录入员信息失败");
+        }
+        List<SysUserRights> sysUserRightsList = userListR.getCollectData(new TypeReference<List<SysUserRights>>() {});
+        sysUserRightsList.forEach(sysUserRights -> {
+            String to = sysUserRights.getEmail();
+            sendMail(omsProductionOrderList,to);
+        });
         branchOfficeMap.keySet().forEach(branchOffice -> {
             List<OmsProductionOrder> productionOrderList = branchOfficeMap.get(branchOffice);
             CdFactoryLineInfo branchOfficeLineInfo = branchOfficeFactoryLineMap.get(branchOffice);
