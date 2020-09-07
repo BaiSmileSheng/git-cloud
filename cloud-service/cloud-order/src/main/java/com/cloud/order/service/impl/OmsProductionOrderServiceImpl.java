@@ -482,13 +482,17 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         if (StrUtil.isNotBlank(ids)) {
             omsProductionOrders = omsProductionOrderMapper.selectByIds(ids);
         } else {
-            //增加删除状态的判断  2020-08-17  ltq
-            if (StrUtil.isNotBlank(order.getStatus()) && !order.getStatus().equals(ProductOrderConstants.STATUS_ZERO)) {
-                log.info("非待评审状态订单不可删除！");
-                return R.error("非待评审状态订单不可删除！");
-            }
             Example example = checkParams(order,sysUser);
-            example.getOredCriteria().get(0).andEqualTo("status",ProductOrderConstants.STATUS_ZERO);
+            //增加删除状态的判断  2020-08-17  ltq
+            if (StrUtil.isNotBlank(order.getStatus()) && ProductOrderConstants.STATUS_FOUR.equals(order.getStatus())
+                    && ProductOrderConstants.STATUS_FIVE.equals(order.getStatus())
+                    && ProductOrderConstants.STATUS_SIX.equals(order.getStatus())) {
+                log.info("待传SAP、传SAP中、已传SAP的排产订单不可删除！");
+                return R.error("待传SAP、传SAP中、已传SAP的排产订单不可删除！");
+            } else if (!StrUtil.isNotBlank(order.getStatus())){
+                //默认删除待评审状态的排产订单  2020-09-04  ltq
+                example.getOredCriteria().get(0).andEqualTo("status",ProductOrderConstants.STATUS_ZERO);
+            }
             omsProductionOrders = omsProductionOrderMapper.selectByExample(example);
             ids= omsProductionOrders.stream().map(o ->o.getId().toString()).collect(Collectors.joining(","));
         }
@@ -1403,7 +1407,11 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             CdMaterialExtendInfo cdMaterialExtendInfo = materialExtendMap.getData(CdMaterialExtendInfo.class);
             if (BeanUtil.isEmpty(cdMaterialExtendInfo)) {
                 log.error("根据成品专用号查询物料扩展信息记录为空！");
-                throw new BusinessException("根据成品专用号查询物料扩展信息记录为空，请及时维护物料扩展信息数据！");
+                throw new BusinessException("根据成品专用号:"+o.getProductMaterialCode()+",查询物料扩展信息记录为空，请及时维护物料扩展信息数据！");
+            }
+            if (StrUtil.isBlank(cdMaterialExtendInfo.getIsZnAttestation())) {
+                log.error("根据成品专用号查询物料扩展信息记录,是否ZN认证信息为空！");
+                throw new BusinessException("根据成品专用号:"+o.getProductMaterialCode()+",查询物料扩展信息记录是否ZN认证信息为空，请及时维护物料扩展信息数据！");
             }
             //应徐海萍要求，8310工厂36号线不校验ZN认证  2020-09-03 ltq
             if (cdMaterialExtendInfo.getIsZnAttestation().equals(ZN_ATTESTATION)

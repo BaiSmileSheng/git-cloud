@@ -416,6 +416,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
         omsRawMaterialFeedbackService.updateBatchByList(omsRawMaterialFeedbacks);*/
         /**更新排产订单、排产订单明细的状态*/
         //根据生产工厂、原材料物料、开始日期查询排产订单明细
+        //修改查询逻辑，只查询审核状态为“无需审核”，“审核完成”的排产订单明细数据
         List<OmsProductionOrderDetail> omsProductionOrderDetails =
                 omsProductionOrderDetailMapper.selectByFactoryDateMaterialList(list);
         if (ObjectUtil.isEmpty(omsProductionOrderDetails) || omsProductionOrderDetails.size() <= 0) {
