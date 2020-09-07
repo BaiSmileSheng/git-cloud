@@ -132,6 +132,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
     private static final String PO_TYPE_NB = "NB"; //po类型NB
 
     private static final String PO_TYPE_ZBS = "ZBS";//po类型ZBS
+
     /**
      * 交货提前量
      */
@@ -246,9 +247,9 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         logger.info("导入真单插入数据开始");
         omsRealOrderMapper.batchInsetOrUpdate(successResult);
 
-        logger.info("导入真单开启审批流开始");
         //key 工厂编号 ,客户编号 物料号,交货日期,订单类型
         if(!CollectionUtils.isEmpty(auditResult)){
+            logger.info("导入真单开启审批流开始");
             //查id
             List<OmsRealOrder> listRes = omsRealOrderMapper.selectForIndexes(auditResult);
             //去重
@@ -470,12 +471,12 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 BigDecimal orderNumRealX = orderNumRealO.add(orderNum);
                 omsRealOrder.setOrderNum(orderNumRealX);
 
-                BigDecimal deliveryNumO = omsRealOrder.getDeliveryNum();
+                BigDecimal deliveryNumO = new BigDecimal(omsRealOrder.getDeliveryNum());
                 BigDecimal deliveryNumX = deliveryNumO.add(deliveryNum);
-                omsRealOrder.setDeliveryNum(deliveryNumX);
+                omsRealOrder.setDeliveryNum(deliveryNumX.toString());
 
                 BigDecimal undeliveryNum = orderNumRealX.subtract(deliveryNumX);
-                omsRealOrder.setUndeliveryNum(undeliveryNum);
+                omsRealOrder.setUndeliveryNum(undeliveryNum.toString());
             } else {
                 //1.订单号生成规则 ZD+年月日+4位顺序号，循序号每日清零
                 String orderCode = getOrderCode();
@@ -502,9 +503,9 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 omsRealOrder.setBomVersion(internalOrderRes.getVersion());
                 omsRealOrder.setPurchaseGroupCode(internalOrderRes.getPurchaseGroupCode());
                 omsRealOrder.setOrderNum(internalOrderRes.getOrderNum());
-                omsRealOrder.setDeliveryNum(internalOrderRes.getDeliveryNum());
+                omsRealOrder.setDeliveryNum(internalOrderRes.getDeliveryNum().toString());
                 BigDecimal undeliveryNum = internalOrderRes.getOrderNum().subtract(internalOrderRes.getDeliveryNum());
-                omsRealOrder.setUndeliveryNum(undeliveryNum);
+                omsRealOrder.setUndeliveryNum(undeliveryNum.toString());
                 omsRealOrder.setUnit(internalOrderRes.getUnit());
                 omsRealOrder.setDeliveryDate(internalOrderRes.getDeliveryDate());
                 omsRealOrder.setAuditStatus(RealOrderAduitStatusEnum.AUDIT_STATUS_WXSH.getCode());
@@ -531,6 +532,13 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 omsRealOrder.setCreateBy(createBy);
                 omsRealOrder.setCreateTime(new Date());
                 omsRealOrder.setOrderNum(internalOrderRes.getOrderNum());
+                //如果生产日期<sap创建po时间,将生产日期改为sap创建po时间
+                String sapCreatePo = internalOrderRes.getSapCreatePo();
+                Date sapCreatePoDate = DateUtils.dateTime(YYYY_MM_DD, sapCreatePo);
+                Date productDateDate = DateUtils.dateTime(YYYY_MM_DD, productDate);
+                if(productDateDate.before(sapCreatePoDate)){
+                    omsRealOrder.setProductDate(sapCreatePo);
+                }
                 omsRealOrderMap.put(key, omsRealOrder);
             }
 
@@ -728,6 +736,14 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                         omsRealOrderReq.setProductDate(productDate);
                     }
                 }
+                //如果生产日期<今天,将生产日期改为今天
+                Date today = new Date();
+                String productDate = omsRealOrderReq.getProductDate();
+                Date productDateDate = DateUtils.dateTime(YYYY_MM_DD, productDate);
+                if(productDateDate.before(today)){
+                    String todayString = DateUtils.parseDateToStr(YYYY_MM_DD,today);
+                    omsRealOrderReq.setProductDate(todayString);
+                }
             }
             String errMsgBufferString = errMsgBuffer.toString();
             if(StringUtils.isNotBlank(errMsgBufferString)){
@@ -739,8 +755,8 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             omsRealOrderReq.setStatus(RealOrderStatusEnum.STATUS_0.getCode());
             omsRealOrderReq.setCreateTime(date);
             omsRealOrderReq.setDelFlag("0");
-            omsRealOrderReq.setDeliveryNum(BigDecimal.ZERO);
-            omsRealOrderReq.setUndeliveryNum(omsRealOrderReq.getOrderNum());
+            omsRealOrderReq.setDeliveryNum("/");
+            omsRealOrderReq.setUndeliveryNum("/");
             //下市需要审批的集合
             if(RealOrderAduitStatusEnum.AUDIT_STATUS_SHZ.getCode().equals(omsRealOrderReq.getAuditStatus())){
                 othObjectDto.setObject(omsRealOrderReq);
