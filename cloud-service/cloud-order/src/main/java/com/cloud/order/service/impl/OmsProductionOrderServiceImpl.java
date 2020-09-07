@@ -182,6 +182,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     private IOmsProductOrderImportService omsProductOrderImportService;
     @Autowired
     private RemoteActTaskService remoteActTaskService;
+    @Autowired
+    private RemoteUserService remoteUserService;
 
     /**
      * Description:  排产订单导入
@@ -1966,6 +1968,17 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
         //3.发送邮件
         log.info("邮件推送发送邮件开始");
+        //发送订单录入员邮件,全部数据
+        R userListR = remoteUserService.selectUserByRoleKey(RoleConstants.ROLE_KEY_DDLRY);
+        if(!userListR.isSuccess()){
+            log.error("邮件推送时获取订单录入员信息失败 res:{}",JSONObject.toJSONString(userListR));
+            throw new BusinessException("邮件推送时获取订单录入员信息失败");
+        }
+        List<SysUserRights> sysUserRightsList = userListR.getCollectData(new TypeReference<List<SysUserRights>>() {});
+        sysUserRightsList.forEach(sysUserRights -> {
+            String to = sysUserRights.getEmail();
+            sendMail(omsProductionOrderList,to);
+        });
         branchOfficeMap.keySet().forEach(branchOffice -> {
             List<OmsProductionOrder> productionOrderList = branchOfficeMap.get(branchOffice);
             CdFactoryLineInfo branchOfficeLineInfo = branchOfficeFactoryLineMap.get(branchOffice);
