@@ -103,6 +103,10 @@ public class CdMaterialInfo extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "MDM创建时间")
     private Date mdmCreateTime;
+
+    @ExcelProperty(value = "MRP组编码")
+    @ApiModelProperty(value = "MRP组编码")
+    private String mrpGrpCode;
     /**
      * 最后更新时间
      */

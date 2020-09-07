@@ -5087,13 +5087,6 @@
               "chnname": "单位"
             },
             {
-              "name": "delivery_date",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "交付日期",
-              "notNull": true
-            },
-            {
               "name": "product_date",
               "type": "DefaultString",
               "remark": "",
@@ -10302,6 +10295,12 @@
               "remark": "",
               "chnname": "更新人",
               "defaultValue": "''"
+            },
+            {
+              "name": "mrp_grp_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "MRP组编码"
             }
           ],
           "indexs": [
