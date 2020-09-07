@@ -59,6 +59,8 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
     private ICdFactoryInfoService cdFactoryInfoService;
     //成品物料的MRP组
     private static final String[] PRODUCT_MATERIAL_MRP = new String[]{"Z001"};
+    //删除标识：0可用
+    private static final String DELETE_FLAG = "0";
 
     /**
      * @Description: 保存MDM接口获取的物料信息数据
@@ -100,7 +102,8 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
                     cdMaterialInfo.setMrpGrpCode(rowRisk.getMRP_GRP_CODE());
                     cdMaterialInfosInsertOrUpdate.add(cdMaterialInfo);
                     //TODO 物料主数据增加MRP组字段，可以判断出成品和原材料，现根据该字段区分成品并存入成品扩展信息表中
-                    if (ArrayUtil.contains(PRODUCT_MATERIAL_MRP,rowRisk.getMRP_GRP_CODE())) {
+                    if (ArrayUtil.contains(PRODUCT_MATERIAL_MRP,rowRisk.getMRP_GRP_CODE())
+                            && rowRisk.getDELETE_FLAG().equals(DELETE_FLAG)) {
                         CdMaterialExtendInfo cdMaterialExtendInfo = new CdMaterialExtendInfo();
                         cdMaterialExtendInfo.setMaterialCode(rowRisk.getMATERIAL_CODE());
                         cdMaterialExtendInfo.setMaterialDesc(rowRisk.getMATERIAL_DESCRITION());
