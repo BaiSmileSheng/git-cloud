@@ -60,5 +60,13 @@ public interface ICdMaterialExtendInfoService extends BaseService<CdMaterialExte
      * 导入
      */
     R importMaterialExtendInfo(MultipartFile file, SysUser sysUser)throws IOException;
+    /**
+     * Description:  批量新增或更新
+     * Param: [cdMaterialExtendInfos]
+     * return:
+     * Author: ltq
+     * Date: 2020/9/7
+     */
+    void batchInsetOrUpdate(List<CdMaterialExtendInfo> cdMaterialExtendInfos);
 
 }
