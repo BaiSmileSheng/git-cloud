@@ -3,6 +3,8 @@ package com.cloud.order.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.ObjectUtil;
@@ -111,6 +113,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
     private final static String YYYY_MM_DD = "yyyy-MM-dd";//时间格式
 
+    public final static String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
+
     private static final String ZN_ATTESTATION = "0";//zn认证，否
     //可否加工承揽
     private static final String IS_PUTTING_OUT_YES = "1";//可
@@ -178,6 +182,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     private IOmsProductOrderImportService omsProductOrderImportService;
     @Autowired
     private RemoteActTaskService remoteActTaskService;
+    @Autowired
+    private RemoteUserService remoteUserService;
 
     /**
      * Description:  排产订单导入
@@ -269,14 +275,21 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             log.error("BOM拆解流程失败，原因：" + bomDisassemblyResult.get("msg"));
             return R.error("BOM拆解流程失败!");
         }
+        // 还原先插入排产订单，在进行校验订单导入的闸口的顺序
         if (omsProductionOrders.size() > 0) {
-            //4、3版本审批校验，邮件通知排产员3版本审批
-            omsProductionOrders = checkThreeVersion(omsProductionOrders, sysUser);
-            //5、超期库存审批流程，邮件通知订单经理
-            omsProductionOrders = checkOverStock(omsProductionOrders, sysUser);
-            //6、、超期未关闭订单审批校验，邮件通知工厂订单 - 工厂小微主 超期未关闭订单审批
-            omsProductionOrders = checkOverdueNotCloseOrder(omsProductionOrders, sysUser);
             omsProductionOrderMapper.insertList(omsProductionOrders);
+            List<String> orderCodes = omsProductionOrders.stream().map(OmsProductionOrder::getOrderCode).collect(Collectors.toList());
+            omsProductionOrders = omsProductionOrderMapper.selectByOrderCode(orderCodes);
+        }
+        //4、3版本审批校验，邮件通知排产员3版本审批
+        List<OmsProductionOrder> checkOmsProductList = checkThreeVersion(omsProductionOrders, sysUser);
+        //5、超期库存审批流程，邮件通知订单经理
+        List<OmsProductionOrder> checkOverStockList = checkOverStock(checkOmsProductList, sysUser);
+        //6、、超期未关闭订单审批校验，邮件通知工厂订单 - 工厂小微主 超期未关闭订单审批
+        List<OmsProductionOrder> insertProductOrderList = checkOverdueNotCloseOrder(checkOverStockList, sysUser);
+        //更新排产订单的审核状态
+        if (insertProductOrderList.size() > 0) {
+            omsProductionOrderMapper.updateBatchByPrimaryKeySelective(insertProductOrderList);
         }
         if (exportList.size() > 0) {
             return EasyExcelUtilOSS.writeExcel(exportList, "排产订单导入失败数据.xlsx", "sheet", new OmsProductionOrderExportVo());
@@ -937,6 +950,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getCheckDateEnd())) {
+            Date date = DateUtil.parse(omsProductionOrder.getCheckDateEnd()).offset(DateField.DAY_OF_MONTH,1);
+            String checkDateEnd = DateUtils.parseDateToStr(YYYY_MM_DD,date);
             if (ProductOrderConstants.DATE_TYPE_ONE.equals(omsProductionOrder.getDateType())) {
                 criteria.andLessThanOrEqualTo("deliveryDate", omsProductionOrder.getCheckDateEnd());
             } else if (ProductOrderConstants.DATE_TYPE_TWO.equals(omsProductionOrder.getDateType())) {
@@ -944,9 +959,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             } else if (ProductOrderConstants.DATE_TYPE_THREE.equals(omsProductionOrder.getDateType())) {
                 criteria.andLessThanOrEqualTo("productEndDate", omsProductionOrder.getCheckDateEnd());
             }else if(ProductOrderConstants.DATE_TYPE_FOUR.equals(omsProductionOrder.getDateType())){
-                criteria.andLessThanOrEqualTo("assignSapTime", omsProductionOrder.getCheckDateEnd());
+                criteria.andLessThan("assignSapTime", checkDateEnd);
             }else if(ProductOrderConstants.DATE_TYPE_FIVE.equals(omsProductionOrder.getDateType())){
-                criteria.andLessThanOrEqualTo("getSapTime", omsProductionOrder.getCheckDateEnd());
+                criteria.andLessThan("getSapTime", checkDateEnd);
             }
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getOrderType())) {
@@ -1599,7 +1614,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         }
         //更新下达SAP时间
         list.forEach(omsProductionOrder ->{
-            omsProductionOrder.setAssignSapTime(DateUtils.parseDateToStr(YYYY_MM_DD,new Date()));
+            omsProductionOrder.setAssignSapTime(DateUtils.parseDateToStr(YYYY_MM_DD_HH_MM_SS,new Date()));
         });
         omsProductionOrderMapper.batchUpdateByOrderCode(list);
         //3.修改排产订单状态
@@ -1729,9 +1744,11 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     }
                 }
                 //更新获取SAP生产订单号
-                omsProductionOrder.setGetSapTime(DateUtils.parseDateToStr(YYYY_MM_DD,new Date()));
+                omsProductionOrder.setGetSapTime(DateUtils.parseDateToStr(YYYY_MM_DD_HH_MM_SS,new Date()));
             } else if("W".equals(omsProductionOrder.getSapFlag())){
                 omsProductionOrder.setSapMessages("生产订单创建中");
+            }else{
+                omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPYC.getCode());
             }
         });
         //2.修改数据
@@ -1959,6 +1976,17 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
         //3.发送邮件
         log.info("邮件推送发送邮件开始");
+        //发送订单录入员邮件,全部数据
+        R userListR = remoteUserService.selectUserByRoleKey(RoleConstants.ROLE_KEY_DDLRY);
+        if(!userListR.isSuccess()){
+            log.error("邮件推送时获取订单录入员信息失败 res:{}",JSONObject.toJSONString(userListR));
+            throw new BusinessException("邮件推送时获取订单录入员信息失败");
+        }
+        List<SysUserRights> sysUserRightsList = userListR.getCollectData(new TypeReference<List<SysUserRights>>() {});
+        sysUserRightsList.forEach(sysUserRights -> {
+            String to = sysUserRights.getEmail();
+            sendMail(omsProductionOrderList,to);
+        });
         branchOfficeMap.keySet().forEach(branchOffice -> {
             List<OmsProductionOrder> productionOrderList = branchOfficeMap.get(branchOffice);
             CdFactoryLineInfo branchOfficeLineInfo = branchOfficeFactoryLineMap.get(branchOffice);
@@ -2302,8 +2330,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
         OmsProductionOrder omsProductionOrders = omsProductionOrderMapper.selectByPrimaryKey(id);
         if(!ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode().equals(omsProductionOrders.getStatus())
-            || !ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPYC.getCode().equals(omsProductionOrders.getStatus())){
-            return R.error("请删除已传SAP或传SAP异常的数据");
+            && !ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPYC.getCode().equals(omsProductionOrders.getStatus())){
+            return R.error("只能删除已传SAP或传SAP异常的数据");
         }
         //1.按单号删除审批流
         Map<String,Object> map = new HashMap<>();

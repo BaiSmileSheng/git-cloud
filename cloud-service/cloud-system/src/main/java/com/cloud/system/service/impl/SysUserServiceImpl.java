@@ -510,6 +510,17 @@ public class SysUserServiceImpl implements ISysUserService {
     }
 
     @Override
+    public List<SysUserVo> selectUserByFactoryCodeAndPurchaseCodeAndRoleKey(String factoryCode,String purchaseCode,String roleKey) {
+        List<SysUser> list = userMapper.selectUserByFactoryCodeAndPurchaseCodeAndRoleKey(factoryCode,purchaseCode,roleKey);
+        List<SysUserVo> listRes = list.stream().map(sysUser -> {
+            SysUserVo sysUserVo = BeanUtil.copyProperties(sysUser,
+                    SysUserVo.class);
+            return sysUserVo;
+        }).collect(Collectors.toList());
+        return listRes;
+    }
+
+    @Override
     public List<SysUserRights> selectUserByRoleKey(String roleKey) {
         //查询指定角色用户
         List<SysUserRights> userRights = userMapper.selectListByRoleKey(roleKey);

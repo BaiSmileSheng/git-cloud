@@ -41,6 +41,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @Author Lihongxia
@@ -113,13 +115,10 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
         logger.info("供应商申诉延期索赔开启流程 延期索赔id:{},延期索赔索赔单号:{}",smsDelaysDelivery.getId(),
                 smsDelaysDelivery.getDelaysNo());
         //1.供应商申诉
-        R supplierAppeal = supplierAppeal(smsDelaysDelivery,ossIds);
-        if(!supplierAppeal.isSuccess()){
-            logger.error("供应商申诉延期索赔开启流程时 供应商申诉失败 req:{},res:{}",JSONObject.toJSONString(smsDelaysDelivery),
-                    JSONObject.toJSON(supplierAppeal));
-            throw new BusinessException("供应商申诉延期索赔开启流程时 供应商申诉失败");
-        }
-        String orderNo = supplierAppeal.getStr("data");
+        R resultRes = supplierAppeal(smsDelaysDelivery,ossIds);
+        SmsDelaysDelivery smsDelaysDeliverySelect = (SmsDelaysDelivery)resultRes.get("smsDelaysDeliveryRes");
+        List<SysUserVo> sysUserVoList = (List<SysUserVo>)resultRes.get("sysUserVoList");
+        String orderNo = smsDelaysDeliverySelect.getDelaysNo();
         smsDelaysDelivery.setDelaysNo(orderNo);
         //2.构造延期索赔流程信息
         BizBusiness business = initBusiness(smsDelaysDelivery,sysUser);
@@ -127,7 +126,8 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
         bizBusinessService.insertBizBusiness(business);
         Map<String, Object> variables = Maps.newHashMap();
         //启动延期索赔流程
-        bizBusinessService.startProcess(business, variables);
+        Set<String> userIdSet = sysUserVoList.stream().map(sysUserVo -> sysUserVo.getUserId().toString()).collect(Collectors.toSet());
+        bizBusinessService.startProcess(business, variables,userIdSet);
         return R.ok();
     }
 
@@ -180,8 +180,11 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
         String factoryCode = selectSmsDelaysDelivery.getFactoryCode();
         String roleKey = RoleConstants.ROLE_KEY_ZLBBZ;
         String delaysNo = selectSmsDelaysDelivery.getDelaysNo();
-        sendEmail(delaysNo, factoryCode, roleKey);
-        return R.data(orderNo);
+        List<SysUserVo> sysUserVoList = sendEmail(delaysNo, factoryCode, roleKey);
+        R resultRes = new R();
+        resultRes.put("smsDelaysDeliveryRes",selectSmsDelaysDelivery);
+        resultRes.put("sysUserVoList",sysUserVoList);
+        return resultRes;
     }
 
     /**
@@ -190,7 +193,7 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
      * @param factoryCode
      * @param roleKey
      */
-    private void sendEmail(String delaysNo, String factoryCode, String roleKey) {
+    private List<SysUserVo> sendEmail(String delaysNo, String factoryCode, String roleKey) {
         R sysUserR = remoteUserService.selectUserByMaterialCodeAndRoleKey(factoryCode,roleKey);
         if(!sysUserR.isSuccess()){
             logger.error("获取对应的负责人邮箱失败");
@@ -211,6 +214,7 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
             String content = "您有一条待办消息要处理!" + "延期索赔单 单号:" + delaysNo + "供应商发起申诉。" + EmailConstants.ORW_URL;
             mailService.sendTextMail(email,subject,content);
         }
+        return sysUserVoList;
     }
     /**
      * Description:  根据Key查询最新版本流程
@@ -298,19 +302,25 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
         String supplierCode = smsDelaysDelivery.getSupplierCode();
         //根据角色和延期索赔状态审批
         //订单部部长审批: 将供应商申诉4--->待小微主审核5  小微主审批: 将待小微主审核5--->已结算12
+        R  resultAck;
         if(flagBizResult){
             if( flagStatus4){
                 smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_5.getCode());
                 //向小微主发送邮件
                 String factoryCode = smsDelaysDelivery.getFactoryCode();
                 String roleKey = RoleConstants.ROLE_KEY_XWZ;
-                sendEmail(delaysNo, factoryCode, roleKey);
+                List<SysUserVo> sysUserVoList = sendEmail(delaysNo, factoryCode, roleKey);
+                //审批 推进工作流
+                Set<String> userIdSet = sysUserVoList.stream().map(sysUserVo -> sysUserVo.getUserId().toString()).collect(Collectors.toSet());
+                resultAck =actTaskService.auditCandidateUser(bizAudit, sysUser.getUserId(),userIdSet);
             }else if(flagStatus5){
                 smsDelaysDelivery.setDelaysStatus(DeplayStatusEnum.DELAYS_STATUS_12.getCode());
                 smsDelaysDelivery.setSettleFee(BigDecimal.ZERO);
                 //向供应商发邮件
                 String contentDetail = "申诉通过";
                 supplierSendEmail(delaysNo,supplierCode,contentDetail);
+                //审批 推进工作流
+                resultAck =actTaskService.auditCandidateUser(bizAudit, sysUser.getUserId(),null);
             }else{
                 logger.error ("延期索赔审批流程 此延期索赔单不可审批Req主键id:{} 状态:{}",bizBusiness.getTableId(),
                         smsDelaysDelivery.getDelaysStatus());
@@ -321,6 +331,12 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
             //向供应商发邮件
             String contentDetail = "申诉驳回";
             supplierSendEmail(delaysNo,supplierCode,contentDetail);
+            //审批 推进工作流
+            resultAck =actTaskService.auditCandidateUser(bizAudit, sysUser.getUserId(),null);
+        }
+        if(!resultAck.isSuccess()){
+            logger.error("延期索赔审批流程 审批 推进工作流 req:{}res:{}",JSONObject.toJSON(bizAudit),JSONObject.toJSON(resultAck));
+            throw new BusinessException("延期索赔审批流程 审批 推进工作流失败 ");
         }
         //更新延期索赔状态
         logger.info ("延期索赔审批流程 更新延期索赔主键id:{} 状态:{}",smsDelaysDelivery.getId(),smsDelaysDelivery.getDelaysStatus());
@@ -328,12 +344,6 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
         if(!updateResult.isSuccess()){
             logger.error("延期索赔审批流程 更新延期索赔失败 主键id:{}res:{}",smsDelaysDelivery.getId(),JSONObject.toJSON(updateResult));
             throw new BusinessException("延期索赔审批流程 更新索赔索赔失败 ");
-        }
-        //审批 推进工作流
-        R  resultAck =actTaskService.audit(bizAudit, sysUser.getUserId());
-        if(!resultAck.isSuccess()){
-            logger.error("延期索赔审批流程 审批 推进工作流 req:{}res:{}",JSONObject.toJSON(bizAudit),JSONObject.toJSON(resultAck));
-            throw new BusinessException("延期索赔审批流程 审批 推进工作流失败 ");
         }
         return R.ok();
     }
