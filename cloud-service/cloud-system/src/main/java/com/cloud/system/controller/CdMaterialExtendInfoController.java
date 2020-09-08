@@ -64,7 +64,9 @@ public class CdMaterialExtendInfoController extends BaseController {
             @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "materialCode", value = "专用号", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productType", value = "产品类别", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "lifeCycle", value = "生命周期", required = false, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "lifeCycle", value = "生命周期", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "isZnAttestation", value = "zn认证", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "isGetStock", value = "获取库存", required = false, paramType = "query", dataType = "String")
     })
     public TableDataInfo list(@ApiIgnore CdMaterialExtendInfo cdMaterialExtendInfo) {
         Example example = new Example(CdMaterialExtendInfo.class);
@@ -105,6 +107,9 @@ public class CdMaterialExtendInfoController extends BaseController {
         }
         if(StringUtils.isNotBlank(cdMaterialExtendInfo.getIsZnAttestation())){
             criteria.andEqualTo("isZnAttestation",cdMaterialExtendInfo.getIsZnAttestation());
+        }
+        if(StringUtils.isNotBlank(cdMaterialExtendInfo.getIsGetStock())){
+            criteria.andEqualTo("isGetStock",cdMaterialExtendInfo.getIsGetStock());
         }
     }
     /**

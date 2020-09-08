@@ -325,7 +325,7 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
                 if (StringUtils.isBlank(isGetStockCode) || isGetStock.equals(isGetStockCode)) {
                     errMsgBuffer.append("获取库存不存在;");
                 }
-                cdMaterialExtendInfoReq.setLifeCycle(isGetStockCode);
+                cdMaterialExtendInfoReq.setIsGetStock(isGetStockCode);
             }
 
             String errMsgBufferString = errMsgBuffer.toString();
