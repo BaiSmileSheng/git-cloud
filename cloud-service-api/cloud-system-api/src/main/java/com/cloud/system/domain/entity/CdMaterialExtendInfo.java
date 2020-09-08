@@ -4,6 +4,7 @@ import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
+import com.cloud.system.converter.GetStockConverter;
 import com.cloud.system.converter.LifeCycleConverter;
 import com.cloud.system.converter.ProductTypeConverter;
 import com.cloud.system.converter.PuttingOutConverter;
@@ -89,6 +90,13 @@ public class CdMaterialExtendInfo extends BaseEntity {
     @ExcelProperty(value = "是否ZN认证",index = 5,converter = ZnAttestationConverter.class)
     @ApiModelProperty(value = "是否ZN认证")
     private String isZnAttestation;
+
+    /**
+     * 获取库存
+     */
+    @ExcelProperty(value = "获取库存")
+    @ApiModelProperty(value = "获取库存")
+    private String isGetStock;
 
     /**
      * 建立日期

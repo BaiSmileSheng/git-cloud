@@ -61,4 +61,11 @@ public interface CdMaterialExtendInfoMapper extends BaseMapper<CdMaterialExtendI
      * @return
      */
     int batchInsertOrUpdate(List<CdMaterialExtendInfo> list);
+
+    /**
+     * 增量更新仅更新时间和更新人
+     * @param list
+     * @return
+     */
+    int batchMaterialInsertOrUpdate(List<CdMaterialExtendInfo> list);
 }

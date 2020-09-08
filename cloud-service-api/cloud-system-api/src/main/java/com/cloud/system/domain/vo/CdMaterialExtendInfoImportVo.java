@@ -3,6 +3,7 @@ package com.cloud.system.domain.vo;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
+import com.cloud.system.converter.GetStockConverter;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -82,6 +83,13 @@ public class CdMaterialExtendInfoImportVo {
     @ExcelProperty(value = "是否ZN认证",index = 3)
     @ApiModelProperty(value = "是否ZN认证")
     private String isZnAttestation;
+
+    /**
+     * 获取库存
+     */
+    @ExcelProperty(value = "获取库存",index = 4)
+    @ApiModelProperty(value = "获取库存")
+    private String isGetStock;
 
     /**
      * 建立日期
