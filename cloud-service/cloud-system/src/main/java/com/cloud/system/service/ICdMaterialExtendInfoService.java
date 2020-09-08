@@ -67,6 +67,6 @@ public interface ICdMaterialExtendInfoService extends BaseService<CdMaterialExte
      * Author: ltq
      * Date: 2020/9/7
      */
-    void batchInsetOrUpdate(List<CdMaterialExtendInfo> cdMaterialExtendInfos);
+    void batchMaterialInsertOrUpdate(List<CdMaterialExtendInfo> cdMaterialExtendInfos);
 
 }

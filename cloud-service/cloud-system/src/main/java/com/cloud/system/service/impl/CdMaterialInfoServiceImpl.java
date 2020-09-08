@@ -14,6 +14,7 @@ import com.cloud.system.config.MdmConnConfig;
 import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.system.domain.entity.CdMaterialInfo;
+import com.cloud.system.enums.GetStockEnum;
 import com.cloud.system.enums.PuttingOutEnum;
 import com.cloud.system.mapper.CdMaterialInfoMapper;
 import com.cloud.system.service.ICdFactoryInfoService;
@@ -110,6 +111,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
                         cdMaterialExtendInfo.setEstablishDate(StrUtil.isNotBlank(rowRisk.getCREATED()) ? DateUtil.parse(rowRisk.getCREATED(),"yyyy-MM-dd HH:mm:ss") : null);
                         cdMaterialExtendInfo.setDelFlag("0");
                         cdMaterialExtendInfo.setIsPuttingOut(PuttingOutEnum.IS_PUTTING_OUT_1.getCode());
+                        cdMaterialExtendInfo.setIsGetStock(GetStockEnum.IS_GET_STOCK_0.getCode());
                         cdMaterialExtendInfo.setCreateBy("systemJob");
                         cdMaterialExtendInfo.setUpdateBy("systemJob");
                         cdMaterialExtendInfosInsertOrUpdate.add(cdMaterialExtendInfo);
@@ -117,7 +119,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
                 });
                 cdMaterialInfoMapper.batchInsetOrUpdate(cdMaterialInfosInsertOrUpdate);
                 if (cdMaterialExtendInfosInsertOrUpdate.size() > 0) {
-                    cdMaterialExtendInfoService.batchInsetOrUpdate(cdMaterialExtendInfosInsertOrUpdate);
+                    cdMaterialExtendInfoService.batchMaterialInsertOrUpdate(cdMaterialExtendInfosInsertOrUpdate);
                 }
             } else {
                 log.error("接口获取物料主数据为空！");
