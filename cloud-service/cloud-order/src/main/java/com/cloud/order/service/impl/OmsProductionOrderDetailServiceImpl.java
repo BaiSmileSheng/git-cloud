@@ -246,7 +246,9 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
             return R.ok();
         }
         OmsProductionOrderDetail orderDetail = omsProductionOrderDetails.get(0);
-        if (ProductOrderConstants.DETAIL_STATUS_ONE.equals(orderDetail.getStatus())) {
+        Set<String> detailStatus =
+                omsProductionOrderDetails.stream().map(OmsProductionOrderDetail::getStatus).collect(Collectors.toSet());
+        if (detailStatus.size() <= 1 && detailStatus.contains(ProductOrderConstants.DETAIL_STATUS_ONE)) {
             log.error("原材料物料号：" + orderDetail.getMaterialCode() + "在" + orderDetail.getProductStartDate() + "日，已经确认，不可反馈！");
             return R.error("原材料物料号：" + orderDetail.getMaterialCode() + "在" + orderDetail.getProductStartDate() + "日，已经确认，不可反馈！");
         }
@@ -269,11 +271,11 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
 
         List<OmsRawMaterialFeedback> omsRawMaterialFeedbacks = new ArrayList<>();
         mapOne.forEach((key, value) -> {
-            OmsRawMaterialFeedback omsRawMaterialFeedback = getFeedback(value,omsProductionOrderDetails,omsProductionOrderDetail);
+            OmsRawMaterialFeedback omsRawMaterialFeedback = getFeedback(value,omsProductionOrderDetails,omsProductionOrderDetail,ProductOrderConstants.STATUS_ZERO);
             omsRawMaterialFeedbacks.add(omsRawMaterialFeedback);
         });
         mapThree.forEach((key, value) -> {
-            OmsRawMaterialFeedback omsRawMaterialFeedback = getFeedback(value,omsProductionOrderDetails,omsProductionOrderDetail);
+            OmsRawMaterialFeedback omsRawMaterialFeedback = getFeedback(value,omsProductionOrderDetails,omsProductionOrderDetail,ProductOrderConstants.STATUS_ONE);
             omsRawMaterialFeedbacks.add(omsRawMaterialFeedback);
         });
         if (ObjectUtil.isEmpty(omsRawMaterialFeedbacks) || omsRawMaterialFeedbacks.size() <= 0) {
@@ -290,7 +292,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
      */
     private OmsRawMaterialFeedback getFeedback(List<OmsProductionOrder> omsProductionOrders,
                                                List<OmsProductionOrderDetail> omsProductionOrderDetails,
-                                               OmsProductionOrderDetail omsProductionOrderDetail){
+                                               OmsProductionOrderDetail omsProductionOrderDetail,String status){
         //成品排产量
         BigDecimal productNum = omsProductionOrders.stream()
                 .map(OmsProductionOrder::getProductNum).reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -319,11 +321,23 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
                     .bomVersion(omsProductionOrder.getBomVersion())
                     .productNum(productNum)
                     .rawMaterialNum(rawMaterialNum)
-                    .status((StrUtil.isNotBlank(omsProductionOrder.getStatus())
-                            && !ProductOrderConstants.STATUS_ZERO.equals(omsProductionOrder.getStatus())
-                            && !ProductOrderConstants.STATUS_ONE.equals(omsProductionOrder.getStatus())) ? "1" : "")
+                    .status(status)
                     .productStartDate(omsProductionOrder.getProductStartDate())
                     .build();
+        } else {
+            omsRawMaterialFeedback.setStatus(status);
+            if (ProductOrderConstants.STATUS_ONE.equals(status)) {
+                omsRawMaterialFeedback = OmsRawMaterialFeedback.builder()
+                        .ids(omsProductionOrder.getProductMaterialCode() + omsProductionOrder.getBomVersion())
+                        .productMaterialCode(omsProductionOrder.getProductMaterialCode())
+                        .productMaterialDesc(omsProductionOrder.getProductMaterialDesc())
+                        .bomVersion(omsProductionOrder.getBomVersion())
+                        .productNum(productNum)
+                        .rawMaterialNum(rawMaterialNum)
+                        .status(status)
+                        .productStartDate(omsProductionOrder.getProductStartDate())
+                        .build();
+            }
         }
         return omsRawMaterialFeedback;
     }

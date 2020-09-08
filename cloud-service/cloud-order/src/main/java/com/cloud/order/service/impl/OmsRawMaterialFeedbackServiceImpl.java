@@ -434,6 +434,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             criteria.andEqualTo("productStartDate", f.getProductStartDate());
             criteria.andEqualTo("productMaterialCode", f.getProductMaterialCode());
             criteria.andEqualTo("bomVersion", f.getBomVersion());
+            criteria.andEqualTo("status",FEEDBACK_STATUS_ZERO);
             OmsRawMaterialFeedback omsRawMaterialFeedback = omsRawMaterialFeedbackMapper.selectOneByExample(example);
             if (BeanUtil.isNotEmpty(omsRawMaterialFeedback)) {
                 log.error("数据库中存在了相同的反馈记录！");
