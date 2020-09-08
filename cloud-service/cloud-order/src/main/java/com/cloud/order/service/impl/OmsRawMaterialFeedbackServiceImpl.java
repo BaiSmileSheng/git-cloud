@@ -160,6 +160,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             omsProductionOrder.setProductMaterialCode(o.getProductMaterialCode());
             omsProductionOrder.setProductStartDate(o.getProductStartDate()) ;
             omsProductionOrder.setBomVersion(o.getBomVersion());
+            omsProductionOrder.setStatus(ProductOrderConstants.STATUS_ONE);
             return omsProductionOrder;
         }).collect(Collectors.toList());
         //根据专用号、生产工厂、基本开始日期查询排产订单
@@ -358,6 +359,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             omsProductionOrder.setProductMaterialCode(o.getProductMaterialCode());
             omsProductionOrder.setProductStartDate(o.getProductStartDate());
             omsProductionOrder.setBomVersion(o.getBomVersion());
+            omsProductionOrder.setStatus(ProductOrderConstants.STATUS_ONE);
             return omsProductionOrder;
         }).collect(Collectors.toList());
         //根据专用号、生产工厂、基本开始日期、bom版本查询排产订单
