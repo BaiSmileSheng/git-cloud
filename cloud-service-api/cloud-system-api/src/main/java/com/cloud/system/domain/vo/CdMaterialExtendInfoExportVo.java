@@ -113,14 +113,14 @@ public class CdMaterialExtendInfoExportVo {
     /**
      * 创建者
      */
-    @ExcelProperty(value = "操作人",index = 6)
+    @ExcelProperty(value = "操作人",index = 7)
     private String createBy;
 
     /**
      * 创建时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @ExcelProperty(value = "操作时间",index = 7)
+    @ExcelProperty(value = "操作时间",index = 8)
     private Date createTime;
 
 }
