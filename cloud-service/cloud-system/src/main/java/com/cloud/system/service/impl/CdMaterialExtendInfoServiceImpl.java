@@ -323,7 +323,7 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
                 String isGetStock = cdMaterialExtendInfo.getIsGetStock();
                 String isGetStockCode = GetStockEnum.getCodeByMsg(isGetStock);
                 if (StringUtils.isBlank(isGetStockCode) || isGetStock.equals(isGetStockCode)) {
-                    errMsgBuffer.append("获取库存不存在;");
+                    errMsgBuffer.append("获取库存不存在,请填写是或否;");
                 }
                 cdMaterialExtendInfoReq.setIsGetStock(isGetStockCode);
             }
