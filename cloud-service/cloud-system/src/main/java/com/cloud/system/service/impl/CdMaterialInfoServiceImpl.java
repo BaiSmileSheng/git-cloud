@@ -3,6 +3,7 @@ package com.cloud.system.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.domain.R;
@@ -13,6 +14,7 @@ import com.cloud.system.config.MdmConnConfig;
 import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.system.domain.entity.CdMaterialInfo;
+import com.cloud.system.enums.PuttingOutEnum;
 import com.cloud.system.mapper.CdMaterialInfoMapper;
 import com.cloud.system.service.ICdFactoryInfoService;
 import com.cloud.system.service.ICdMaterialExtendInfoService;
@@ -55,6 +57,10 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
     private ICdMaterialExtendInfoService cdMaterialExtendInfoService;
     @Autowired
     private ICdFactoryInfoService cdFactoryInfoService;
+    //成品物料的MRP组
+    private static final String[] PRODUCT_MATERIAL_MRP = new String[]{"Z001"};
+    //删除标识：0可用
+    private static final String DELETE_FLAG = "0";
 
     /**
      * @Description: 保存MDM接口获取的物料信息数据
@@ -75,6 +81,8 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
             if (ObjectUtil.isNotEmpty(list) && list.size() > 0) {
                 //新增
                 List<CdMaterialInfo> cdMaterialInfosInsertOrUpdate = new ArrayList<>();
+                //成品物料扩展信息
+                List<CdMaterialExtendInfo> cdMaterialExtendInfosInsertOrUpdate = new ArrayList<>();
                 list.forEach(rowRisk -> {
                     CdMaterialInfo cdMaterialInfo = new CdMaterialInfo();
                     cdMaterialInfo.setMaterialCode(rowRisk.getMATERIAL_CODE());
@@ -91,10 +99,26 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
                     cdMaterialInfo.setCreateBy("systemJob");
                     cdMaterialInfo.setMdmDeleteFlag(rowRisk.getDELETE_FLAG());
                     cdMaterialInfo.setDepartment(rowRisk.getDEPARTMENT());
+                    cdMaterialInfo.setMrpGrpCode(rowRisk.getMRP_GRP_CODE());
                     cdMaterialInfosInsertOrUpdate.add(cdMaterialInfo);
-
+                    //TODO 物料主数据增加MRP组字段，可以判断出成品和原材料，现根据该字段区分成品并存入成品扩展信息表中
+                    if (ArrayUtil.contains(PRODUCT_MATERIAL_MRP,rowRisk.getMRP_GRP_CODE())
+                            && rowRisk.getDELETE_FLAG().equals(DELETE_FLAG)) {
+                        CdMaterialExtendInfo cdMaterialExtendInfo = new CdMaterialExtendInfo();
+                        cdMaterialExtendInfo.setMaterialCode(rowRisk.getMATERIAL_CODE());
+                        cdMaterialExtendInfo.setMaterialDesc(rowRisk.getMATERIAL_DESCRITION());
+                        cdMaterialExtendInfo.setEstablishDate(StrUtil.isNotBlank(rowRisk.getCREATED()) ? DateUtil.parse(rowRisk.getCREATED(),"yyyy-MM-dd HH:mm:ss") : null);
+                        cdMaterialExtendInfo.setDelFlag("0");
+                        cdMaterialExtendInfo.setIsPuttingOut(PuttingOutEnum.IS_PUTTING_OUT_1.getCode());
+                        cdMaterialExtendInfo.setCreateBy("systemJob");
+                        cdMaterialExtendInfo.setUpdateBy("systemJob");
+                        cdMaterialExtendInfosInsertOrUpdate.add(cdMaterialExtendInfo);
+                    }
                 });
                 cdMaterialInfoMapper.batchInsetOrUpdate(cdMaterialInfosInsertOrUpdate);
+                if (cdMaterialExtendInfosInsertOrUpdate.size() > 0) {
+                    cdMaterialExtendInfoService.batchInsetOrUpdate(cdMaterialExtendInfosInsertOrUpdate);
+                }
             } else {
                 log.error("接口获取物料主数据为空！");
                 return R.error("接口获取物料主数据为空！");

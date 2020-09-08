@@ -210,28 +210,34 @@
     </select>
 
     <select id="selectByFactoryDateMaterialList" resultMap="OmsProductionOrderDetailResult" parameterType="list">
-        <include refid="selectOmsProductionOrderDetailVo"/>
+        select detail.id, detail.product_order_code,detail.product_factory_code, detail.material_code,detail.material_desc,
+        detail.product_start_date,detail.bom_num, detail.basic_num, detail.raw_material_product_num, detail.unit,
+        detail.bom_version,detail.purchase_group, detail.storage_point, detail.status,
+        detail.del_flag, detail.remark, detail.create_time, detail.create_by, detail.update_time, detail.update_by
+        from oms_production_order_detail detail,oms_production_order o
         <where>
+            o.audit_status = '0' or o.audit_status = '2' and
             <foreach collection="list" item="item" separator="or" open="(" close=")">
-                1=1
+                (1=1
                 <if test="item.productFactoryCode != null and item.productFactoryCode != ''">
-                    and product_factory_code = #{item.productFactoryCode,jdbcType=VARCHAR}
+                    and detail.product_factory_code = #{item.productFactoryCode,jdbcType=VARCHAR}
                 </if>
                 <if test="item.productStartDate != null and item.productStartDate != ''">
-                    and product_start_date = #{item.productStartDate,jdbcType=VARCHAR}
+                    and detail.product_start_date = #{item.productStartDate,jdbcType=VARCHAR}
                 </if>
                 <if test="item.materialCode != null and item.materialCode != ''">
-                    and material_code = #{item.materialCode,jdbcType=VARCHAR}
+                    and detail.material_code = #{item.materialCode,jdbcType=VARCHAR}
                 </if>
                 <if test="item.productFactoryQuery != null and item.productFactoryQuery != ''">
-                    and product_factory_code in (${item.productFactoryQuery})
+                    and detail.product_factory_code in (${item.productFactoryQuery})
                 </if>
                 <if test="item.purchaseGroupQuery != null and item.purchaseGroupQuery != ''">
-                    and purchase_group in (${item.purchaseGroupQuery})
+                    and detail.purchase_group in (${item.purchaseGroupQuery})
                 </if>
                 <if test="item.status != null and item.status != ''">
-                    and status = #{item.status,jdbcType=VARCHAR}
+                    and detail.status = #{item.status,jdbcType=VARCHAR}
                 </if>
+                )
             </foreach>
         </where>
     </select>

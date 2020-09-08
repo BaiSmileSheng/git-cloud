@@ -123,13 +123,6 @@ public class OmsProductionOrderAnalysis extends BaseEntity {
     private String unit;
 
     /**
-     * 交付日期
-     */
-    @ExcelProperty(value = "交付日期")
-    @ApiModelProperty(value = "交付日期")
-    private String deliveryDate;
-
-    /**
      * 生产日期
      */
     @ExcelProperty(value = "生产日期")

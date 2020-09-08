@@ -218,7 +218,6 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
                         totalCustomer(customerTotal).
                         surplusNum(allowance).
                         unit(realOrder.getUnit()).
-                        deliveryDate(realOrder.getDeliveryDate()).
                         productDate(realOrder.getProductDate()).
                         delFlag("0").stockNum(stockNumSum).build();
                 omsProductionOrderAnalysis.setCreateBy("定时任务");
