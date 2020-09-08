@@ -18,7 +18,6 @@
                     <result property="surplusNum" column="surplus_num"/>
                     <result property="stockNum" column="stock_num"/>
                     <result property="unit" column="unit"/>
-                    <result property="deliveryDate" column="delivery_date"/>
                     <result property="productDate" column="product_date"/>
                     <result property="delFlag" column="del_flag"/>
                     <result property="remark" column="remark"/>
@@ -35,7 +34,7 @@
     </resultMap>
 
     <sql id="selectOmsProductionOrderAnalysisVo">
-        select id, order_from, product_material_code, product_material_desc, product_factory_code, product_factory_desc, demand_order_num, customer_breach_num, gap_customer, total_customer, surplus_num,stock_num, delivery_date, product_date, del_flag, remark, create_time, create_by, update_time, update_by from oms_production_order_analysis
+        select id, order_from, product_material_code, product_material_desc, product_factory_code, product_factory_desc, demand_order_num, customer_breach_num, gap_customer, total_customer, surplus_num,stock_num, product_date, del_flag, remark, create_time, create_by, update_time, update_by from oms_production_order_analysis
     </sql>
     <delete id="deleteAll">
         delete from oms_production_order_analysis

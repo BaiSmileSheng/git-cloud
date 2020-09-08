@@ -230,6 +230,17 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
         }
         return R.ok();
     }
+    /**
+     * Description:  批量新增或更新
+     * Param: [cdMaterialExtendInfos]
+     * return:
+     * Author: ltq
+     * Date: 2020/9/7
+     */
+    @Override
+    public void batchInsetOrUpdate(List<CdMaterialExtendInfo> cdMaterialExtendInfos) {
+       cdMaterialExtendInfoMapper.batchInsertOrUpdate(cdMaterialExtendInfos);
+    }
 
     @Override
     public <T> ExcelImportResult checkImportExcel(List<T> objects) {

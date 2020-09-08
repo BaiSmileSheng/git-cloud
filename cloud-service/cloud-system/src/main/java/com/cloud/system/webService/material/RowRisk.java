@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "ROW")
 public class RowRisk {
 
+    private String MRP_GRP_CODE;
     private String CREATED;
     private String MATERIAL_CODE;
     private String MATERIAL_DESCRITION;
@@ -18,6 +19,14 @@ public class RowRisk {
     private String DEPARTMENT;
 
     private String DELETE_FLAG;
+
+    public String getMRP_GRP_CODE() {
+        return MRP_GRP_CODE;
+    }
+
+    public void setMRP_GRP_CODE(String MRP_GRP_CODE) {
+        this.MRP_GRP_CODE = MRP_GRP_CODE;
+    }
 
     public String getDEPARTMENT() {
         return DEPARTMENT;

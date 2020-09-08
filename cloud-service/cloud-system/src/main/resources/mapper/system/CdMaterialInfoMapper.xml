@@ -19,6 +19,7 @@
                     <result property="uph" column="uph"/>
                     <result property="department" column="department"/>
                     <result property="mdmDeleteFlag" column="mdm_delete_flag"/>
+                    <result property="mrpGrpCode" column="mrp_grp_code"/>
                     <result property="delFlag" column="del_flag"/>
                     <result property="remark" column="remark"/>
                     <result property="createTime" column="create_time"/>
@@ -28,7 +29,7 @@
                     </resultMap>
 
     <sql id="selectCdMaterialInfoVo">
-        select id, material_code, material_desc, material_type, primary_uom, mtl_group_code, purchase_group_code, plant_code, rounding_quantit,mdm_create_time, last_update,uph,department,mdm_delete_flag, del_flag, remark, create_time, create_by, update_time, update_by from cd_material_info
+        select id, material_code, material_desc, material_type, primary_uom, mtl_group_code, purchase_group_code, plant_code, rounding_quantit,mdm_create_time,mrp_grp_code, last_update,uph,department,mdm_delete_flag, del_flag, remark, create_time, create_by, update_time, update_by from cd_material_info
     </sql>
 
     <update id="updateBatchByFactoryAndMaterial" parameterType="list">
@@ -113,6 +114,7 @@
           plant_code,
           rounding_quantit,
           mdm_create_time,
+          mrp_grp_code,
           last_update,
           department,
           mdm_delete_flag,
@@ -132,6 +134,7 @@
             #{item.plantCode},
             #{item.roundingQuantit},
             #{item.mdmCreateTime},
+            #{item.mrpGrpCode},
             #{item.lastUpdate},
             #{item.department},
             #{item.mdmDeleteFlag},
@@ -151,6 +154,7 @@
         plant_code = values(plant_code),
         rounding_quantit = values(rounding_quantit),
         mdm_create_time = values(mdm_create_time),
+        mrp_grp_code = values(mrp_grp_code),
         last_update = values(last_update),
         department = values(department),
         mdm_delete_flag = values(mdm_delete_flag),
