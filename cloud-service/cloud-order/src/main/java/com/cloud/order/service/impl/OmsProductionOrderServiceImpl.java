@@ -386,13 +386,17 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 .collect(toList());
         //1-2、UPH节拍：根据导入信息的成品物料号、生产工厂获取物料信息表（cd_material_info）中对应的UPH节拍；
         //匹配UPH节拍数据
-        listImport.forEach(o -> materialInfoList.forEach(m -> {
-            if (o.getProductFactoryCode().equals(m.getPlantCode())
-                    && o.getProductMaterialCode().equals(m.getMaterialCode())) {
-                o.setRhythm(m.getUph());
-                o.setProductMaterialDesc(m.getMaterialDesc());
-            }
-        }));
+        listImport.forEach(o -> {
+            //物料号大写
+            o.setProductMaterialCode(o.getProductMaterialCode().toUpperCase());
+            materialInfoList.forEach(m -> {
+                if (o.getProductFactoryCode().equals(m.getPlantCode())
+                        && o.getProductMaterialCode().equals(m.getMaterialCode())) {
+                    o.setRhythm(m.getUph());
+                    o.setProductMaterialDesc(m.getMaterialDesc());
+                }
+            });
+        });
         //计算用时：排产量/UPH节拍
         listImport.forEach(o -> {
             if (o.getRhythm() != null && o.getRhythm().compareTo(BigDecimal.ZERO) > 0) {
@@ -1514,7 +1518,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         //ZN 认证邮件通知
         if (znOrderList.size() > 0) {
             //获取权限用户列表
-            R userRightsMap = userService.selectUserRights(RoleConstants.ROLE_KEY_ZLGCS);
+            R userRightsMap = userService.selectUserRights(RoleConstants.ROLE_KEY_ZLPTSJTXGCS);
             Set<SysUser> userSet = new HashSet<>();
             if (!userRightsMap.isSuccess()) {
                 log.error("ZN认证审批流程-获取质量工程师列表失败：" + userRightsMap.get("msg"));
