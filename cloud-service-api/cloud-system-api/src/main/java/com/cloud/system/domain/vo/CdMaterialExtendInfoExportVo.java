@@ -3,6 +3,7 @@ package com.cloud.system.domain.vo;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
+import com.cloud.system.converter.GetStockConverter;
 import com.cloud.system.converter.LifeCycleConverter;
 import com.cloud.system.converter.ProductTypeConverter;
 import com.cloud.system.converter.PuttingOutConverter;
@@ -89,12 +90,19 @@ public class CdMaterialExtendInfoExportVo {
     private String isZnAttestation;
 
     /**
+     * 获取库存
+     */
+    @ExcelProperty(value = "获取库存",index = 5,converter = GetStockConverter.class)
+    @ApiModelProperty(value = "获取库存")
+    private String isGetStock;
+
+    /**
      * 建立日期
      */
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     @ApiModelProperty(value = "建立日期")
-    @ExcelProperty(value = "建立日期",index = 5)
+    @ExcelProperty(value = "建立日期",index = 6)
     private Date establishDate;
 
     /**
