@@ -82,6 +82,7 @@
         from oms_production_order_detail detail , oms_production_order o
         <where>
             detail.product_order_code = o.order_code
+            and o.status != '3'
             and (o.audit_status = '0' or o.audit_status = '2')
             and detail.product_start_date <![CDATA[ >= ]]> DATE_FORMAT(now(),'%Y-%m-%d')
             and detail.product_start_date <![CDATA[ < ]]> DATE_FORMAT(DATE_ADD(now(),INTERVAL 14 day),'%Y-%m-%d')
@@ -185,8 +186,8 @@
         detail.update_by
         from oms_production_order_detail detail,oms_production_order o
         <where>
-            <foreach collection="list" item="item" separator="or" open="(" close=")">
-                detail.product_order_code = o.order_code
+            <foreach collection="list" item="item" separator="or">
+                (detail.product_order_code = o.order_code
                 <if test="item.productMaterialCode != null and item.productMaterialCode != ''">
                     and o.product_material_code = #{item.productMaterialCode,jdbcType=VARCHAR}
                 </if>
@@ -205,6 +206,7 @@
                 <if test="item.status != null and item.status != ''">
                     and detail.status = #{item.status,jdbcType=VARCHAR}
                 </if>
+                )
             </foreach>
         </where>
     </select>
@@ -216,7 +218,8 @@
         detail.del_flag, detail.remark, detail.create_time, detail.create_by, detail.update_time, detail.update_by
         from oms_production_order_detail detail,oms_production_order o
         <where>
-            o.audit_status = '0' or o.audit_status = '2' and
+            detail.product_order_code = o.order_code
+            and (o.audit_status = '0' or o.audit_status = '2') and
             <foreach collection="list" item="item" separator="or" open="(" close=")">
                 (1=1
                 <if test="item.productFactoryCode != null and item.productFactoryCode != ''">
