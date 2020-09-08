@@ -18,6 +18,7 @@ import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.CdMaterialExtendInfoImportErrorVo;
 import com.cloud.system.domain.vo.CdMaterialExtendInfoImportVo;
+import com.cloud.system.enums.GetStockEnum;
 import com.cloud.system.enums.LifeCycleEnum;
 import com.cloud.system.enums.ProductTypeEnum;
 import com.cloud.system.enums.PuttingOutEnum;
@@ -78,6 +79,7 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
         //1.查cd_material_extend_info 所有物料号
         Example example = new Example(CdMaterialExtendInfo.class);
         Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("isGetStock",GetStockEnum.IS_GET_STOCK_1.getCode());
         List<CdMaterialExtendInfo> cdMaterialExtendInfoList = selectByExample(example);
         List<String> materialCodeList = cdMaterialExtendInfoList.stream().map(cdMaterialExtendInfo -> {
             return cdMaterialExtendInfo.getMaterialCode();
@@ -238,8 +240,8 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
      * Date: 2020/9/7
      */
     @Override
-    public void batchInsetOrUpdate(List<CdMaterialExtendInfo> cdMaterialExtendInfos) {
-       cdMaterialExtendInfoMapper.batchInsertOrUpdate(cdMaterialExtendInfos);
+    public void batchMaterialInsertOrUpdate(List<CdMaterialExtendInfo> cdMaterialExtendInfos) {
+       cdMaterialExtendInfoMapper.batchMaterialInsertOrUpdate(cdMaterialExtendInfos);
     }
 
     @Override
@@ -314,6 +316,16 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
                     errMsgBuffer.append("是否ZN认证方式不存在;");
                 }
                 cdMaterialExtendInfoReq.setIsZnAttestation(isZnAttestatioCode);
+            }
+            if(StringUtils.isBlank(cdMaterialExtendInfo.getIsGetStock())){
+                cdMaterialExtendInfoReq.setIsGetStock(GetStockEnum.IS_GET_STOCK_0.getCode());
+            }else {
+                String isGetStock = cdMaterialExtendInfo.getIsGetStock();
+                String isGetStockCode = GetStockEnum.getCodeByMsg(isGetStock);
+                if (StringUtils.isBlank(isGetStockCode) || isGetStock.equals(isGetStockCode)) {
+                    errMsgBuffer.append("获取库存不存在;");
+                }
+                cdMaterialExtendInfoReq.setLifeCycle(isGetStockCode);
             }
 
             String errMsgBufferString = errMsgBuffer.toString();

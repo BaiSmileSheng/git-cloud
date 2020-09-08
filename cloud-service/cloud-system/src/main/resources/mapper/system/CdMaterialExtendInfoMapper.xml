@@ -13,6 +13,7 @@
             life_cycle,
             is_putting_out,
             is_zn_attestation,
+            is_get_stock,
             establish_date,
             del_flag,
             remark,
@@ -30,6 +31,7 @@
         <result property="lifeCycle" column="life_cycle"/>
         <result property="isPuttingOut" column="is_putting_out"/>
         <result property="isZnAttestation" column="is_zn_attestation"/>
+        <result property="isGetStock" column="is_get_stock"/>
         <result property="establishDate" column="establish_date"/>
         <result property="delFlag" column="del_flag"/>
         <result property="remark" column="remark"/>
@@ -48,6 +50,7 @@
                life_cycle,
                is_putting_out,
                is_zn_attestation,
+               is_get_stock,
                establish_date,
                del_flag,
                remark,
@@ -100,6 +103,7 @@
         life_cycle,
         is_putting_out,
         is_zn_attestation,
+        is_get_stock,
         establish_date,
         del_flag,
         remark,
@@ -115,6 +119,7 @@
             #{item.lifeCycle},
             #{item.isPuttingOut},
             #{item.isZnAttestation},
+            #{item.isGetStock},
             #{item.establishDate},
             ifnull(#{item.delFlag}, '0'),
             ifnull(#{item.remark}, ''),
@@ -130,7 +135,49 @@
         life_cycle = VALUES(life_cycle),
         is_putting_out = VALUES(is_putting_out),
         is_zn_attestation = VALUES(is_zn_attestation),
+        is_get_stock = VALUES(is_get_stock),
         establish_date = VALUES(establish_date),
+        del_flag = VALUES(del_flag),
+        remark = VALUES(remark),
+        update_by = VALUES(update_by),
+        update_time = now()
+    </insert>
+    <insert id="batchMaterialInsertOrUpdate" parameterType="list">
+        insert into cd_material_extend_info (
+        material_code,
+        material_desc,
+        product_type,
+        life_cycle,
+        is_putting_out,
+        is_zn_attestation,
+        is_get_stock,
+        establish_date,
+        del_flag,
+        remark,
+        create_by,
+        update_by,
+        update_time)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.materialCode},
+            #{item.materialDesc},
+            #{item.productType},
+            #{item.lifeCycle},
+            #{item.isPuttingOut},
+            #{item.isZnAttestation},
+            #{item.isGetStock},
+            #{item.establishDate},
+            ifnull(#{item.delFlag}, '0'),
+            ifnull(#{item.remark}, ''),
+            ifnull(#{item.createBy}, ''),
+            ifnull(#{item.updateBy}, ''),
+            now()
+            )
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        material_code = VALUES(material_code),
+        material_desc = VALUES(material_desc),
         del_flag = VALUES(del_flag),
         remark = VALUES(remark),
         update_by = VALUES(update_by),

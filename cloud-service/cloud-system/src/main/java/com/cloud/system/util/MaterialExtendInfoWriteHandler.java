@@ -3,6 +3,7 @@ package com.cloud.system.util;
 import com.alibaba.excel.write.handler.AbstractRowWriteHandler;
 import com.alibaba.excel.write.metadata.holder.WriteSheetHolder;
 import com.alibaba.excel.write.metadata.holder.WriteTableHolder;
+import com.cloud.system.enums.GetStockEnum;
 import com.cloud.system.enums.LifeCycleEnum;
 import com.cloud.system.enums.ProductTypeEnum;
 import com.cloud.system.enums.ZnAttestationEnum;
@@ -53,7 +54,7 @@ public class MaterialExtendInfoWriteHandler extends AbstractRowWriteHandler {
             // 将批注添加到单元格对象中 从0开始计算 第1行第3列
             sheet.getRow(0).getCell(2).setCellComment(comment);
 
-            //在第一行 第四列创建一个可否加工承揽的批注
+            //在第一行 第四列创建一个可否zn认证的批注
             StringBuffer znAttestationBuffer = new StringBuffer("请填写:");
             for (ZnAttestationEnum pt : ZnAttestationEnum.values()) {
                 znAttestationBuffer.append(pt.getMsg()).append(",");
@@ -64,8 +65,23 @@ public class MaterialExtendInfoWriteHandler extends AbstractRowWriteHandler {
             Comment comment3 = drawingPatriarch.createCellComment(xssfClientAnchor3);
             // 输入批注信息
             comment3.setString(new XSSFRichTextString(znAttestation));
-            // 将批注添加到单元格对象中 从0开始计算 第1行第5列
+            // 将批注添加到单元格对象中 从0开始计算 第1行第4列
             sheet.getRow(0).getCell(3).setCellComment(comment);
+
+
+            //在第一行 第五列创建一个获取库存的批注
+            StringBuffer getStockBuffer = new StringBuffer("请填写:");
+            for (GetStockEnum gs : GetStockEnum.values()) {
+                getStockBuffer.append(gs.getMsg()).append(",");
+            }
+            String getStockString = (null == getStockBuffer) ? " " : getStockBuffer.toString();
+            String getStock = getStockString.substring(0,getStockString.length()-1);
+            XSSFClientAnchor xssfClientAnchor4 = new XSSFClientAnchor(0, 0, 0, 0, (short)4, 0, (short)6, 2);
+            Comment comment4 = drawingPatriarch.createCellComment(xssfClientAnchor4);
+            // 输入批注信息
+            comment4.setString(new XSSFRichTextString(getStock));
+            // 将批注添加到单元格对象中 从0开始计算 第1行第5列
+            sheet.getRow(0).getCell(4).setCellComment(comment);
 
         }
     }

@@ -3,6 +3,7 @@ package com.cloud.system.domain.vo;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
+import com.cloud.system.converter.GetStockConverter;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -84,6 +85,13 @@ public class CdMaterialExtendInfoImportErrorVo{
     private String isZnAttestation;
 
     /**
+     * 获取库存
+     */
+    @ExcelProperty(value = "获取库存",index = 4,converter = GetStockConverter.class)
+    @ApiModelProperty(value = "获取库存")
+    private String isGetStock;
+
+    /**
      * 建立日期
      */
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
@@ -99,7 +107,7 @@ public class CdMaterialExtendInfoImportErrorVo{
     /**
      * 错误信息
      */
-    @ExcelProperty(value = "错误信息",index = 4)
+    @ExcelProperty(value = "错误信息",index = 5)
     @ApiModelProperty(value = "错误信息")
     private String errorMessage;
 
