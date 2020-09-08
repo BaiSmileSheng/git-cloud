@@ -1004,11 +1004,16 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     public R exportSAP(OmsProductionOrder omsProductionOrder, SysUser sysUser) {
         Example example = checkParams(omsProductionOrder, sysUser);
         List<OmsProductionOrder> productionOrderVos = omsProductionOrderMapper.selectByExample(example);
-        List<OmsProductionOrderMailVo> productionOrderMailVoList = productionOrderVos.stream().map(omsProductionOrde ->
-                BeanUtil.copyProperties(omsProductionOrde, OmsProductionOrderMailVo.class)).collect(Collectors.toList());
-        Collections.sort(productionOrderMailVoList, Comparator.comparing(OmsProductionOrderMailVo::getProductStartDate));
-        String productStartDateMin = productionOrderMailVoList.get(0).getProductStartDate();
-        String productStartDateMax = productionOrderMailVoList.get(productionOrderVos.size()-1).getProductStartDate();
+        String productStartDateMin = null;
+        String productStartDateMax = null;
+        List<OmsProductionOrderMailVo> productionOrderMailVoList = new ArrayList<>();
+        if(!CollectionUtils.isEmpty(productionOrderVos)){
+            productionOrderMailVoList = productionOrderVos.stream().map(omsProductionOrde ->
+                    BeanUtil.copyProperties(omsProductionOrde, OmsProductionOrderMailVo.class)).collect(Collectors.toList());
+            Collections.sort(productionOrderMailVoList, Comparator.comparing(OmsProductionOrderMailVo::getProductStartDate));
+            productStartDateMin = productionOrderMailVoList.get(0).getProductStartDate();
+            productStartDateMax = productionOrderMailVoList.get(productionOrderVos.size()-1).getProductStartDate();
+        }
         List<List<String>> excellHeader = mailPushExcellHeader(productStartDateMin,productStartDateMax);
         return EasyExcelUtilOSS.writeExcelWithHead(productionOrderMailVoList, "排产订单已下达SAP信息.xlsx", "排产订单已下达SAP信息",
                 new OmsProductionOrderMailVo(), excellHeader);
