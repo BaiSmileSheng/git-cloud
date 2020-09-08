@@ -177,15 +177,17 @@ public class CdSettleProductMaterialServiceImpl extends BaseServiceImpl<CdSettle
         List<CdSettleProductMaterialExcelImportVo> listImport = (List<CdSettleProductMaterialExcelImportVo>) objects;
 
         //查到所有的可加工承揽的物料扩展信息
-        Example exampleMaterialExtendInfo = new Example(CdMaterialExtendInfo.class);
-        Example.Criteria criteriaMaterialExtendInfo = exampleMaterialExtendInfo.createCriteria();
-        criteriaMaterialExtendInfo.andEqualTo("isPuttingOut", PuttingOutEnum.IS_PUTTING_OUT_1.getCode());
-        List<CdMaterialExtendInfo> materialExtendInfoList = cdMaterialExtendInfoMapper.selectByExample(exampleMaterialExtendInfo);
-        if(CollectionUtils.isEmpty(materialExtendInfoList)){
-            log.error("查可加工承揽的物料扩展信息失败");
-            throw new BusinessException("查可加工承揽的物料扩展信息不存在,请维护物料扩展表信息");
+        List<Dict> paramsMaterialMapList = listImport.stream().map(omsProductionOrder ->
+                new Dict().set(PRODUCT_MATERIAL_CODE, omsProductionOrder.getProductMaterialCode())
+        ).distinct().collect(toList());
+        R cdMaterialListR = cdMaterialInfoService.selectListByMaterialCodeList(paramsMaterialMapList);
+        if(!cdMaterialListR.isSuccess()){
+            log.error("在物料主数据表查专用号异常 res:{}",JSONObject.toJSONString(cdMaterialListR));
+            throw new BusinessException("在物料主数据表查专用号异常");
         }
-        Map<String,CdMaterialExtendInfo> materialExtendInfoMap = materialExtendInfoList.stream().collect(Collectors.toMap(
+        List<CdMaterialInfo> cdMaterialInfoMaterialCodeList = cdMaterialListR.getCollectData(new TypeReference<List<CdMaterialInfo>>() {});
+
+        Map<String,CdMaterialInfo> cdMaterialInfoMaterialCodeMap = cdMaterialInfoMaterialCodeList.stream().collect(Collectors.toMap(
                 cdMaterialExtendInfo ->cdMaterialExtendInfo.getMaterialCode(),cdMaterialExtendInfo ->cdMaterialExtendInfo,
                 (key1,key2) ->key2));
         //根据加工费号查物料主数据表 存在
@@ -228,12 +230,12 @@ public class CdSettleProductMaterialServiceImpl extends BaseServiceImpl<CdSettle
                 errMsgBuffer.append("专用号不能为空;");
             }
             if(StringUtils.isNotBlank(cdSettleProductMaterialExcelImportVo.getProductMaterialCode())){
-                CdMaterialExtendInfo cdMaterialExtendInfo = materialExtendInfoMap.get(cdSettleProductMaterialExcelImportVo.getProductMaterialCode());
-                if(null == cdMaterialExtendInfo ||StringUtils.isBlank(cdMaterialExtendInfo.getMaterialDesc())){
-                    errMsgBuffer.append(StrUtil.format("专用号:{}不存在请去成品物料信息维护;",
+                CdMaterialInfo cdMaterialInfo = cdMaterialInfoMaterialCodeMap.get(cdSettleProductMaterialExcelImportVo.getProductMaterialCode());
+                if(null == cdMaterialInfo ||StringUtils.isBlank(cdMaterialInfo.getMaterialDesc())){
+                    errMsgBuffer.append(StrUtil.format("专用号:{}不存在请去物料主数据维护;",
                             cdSettleProductMaterialExcelImportVo.getProductMaterialCode()));
                 }  else {
-                    cdSettleProductMaterialReq.setProductMaterialDesc(cdMaterialExtendInfo.getMaterialDesc());
+                    cdSettleProductMaterialReq.setProductMaterialDesc(cdMaterialInfo.getMaterialDesc());
                 }
             }
             if (StringUtils.isBlank(cdSettleProductMaterialExcelImportVo.getRawMaterialCode())) {
