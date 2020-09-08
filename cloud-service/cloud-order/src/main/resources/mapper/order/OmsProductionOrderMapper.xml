@@ -193,6 +193,7 @@
             and product_material_code=#{item.productMaterialCode}
             and product_start_date=#{item.productStartDate}
             and bom_version=#{item.bomVersion,jdbcType=VARCHAR}
+            and status = #{item.status,jdbcType=VARCHAR}
         </foreach>
     </select>
 
