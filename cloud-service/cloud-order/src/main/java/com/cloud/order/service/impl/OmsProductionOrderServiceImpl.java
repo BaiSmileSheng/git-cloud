@@ -1514,7 +1514,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         //ZN 认证邮件通知
         if (znOrderList.size() > 0) {
             //获取权限用户列表
-            R userRightsMap = userService.selectUserRights(RoleConstants.ROLE_KEY_ZLGCS);
+            R userRightsMap = userService.selectUserRights(RoleConstants.ROLE_KEY_DDLRY);
             Set<SysUser> userSet = new HashSet<>();
             if (!userRightsMap.isSuccess()) {
                 log.error("ZN认证审批流程-获取质量工程师列表失败：" + userRightsMap.get("msg"));
