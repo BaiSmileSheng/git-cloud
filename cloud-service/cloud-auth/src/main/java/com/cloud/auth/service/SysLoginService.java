@@ -2,6 +2,7 @@ package com.cloud.auth.service;
 
 import cn.hutool.core.util.StrUtil;
 import com.cloud.auth.form.HucProperties;
+import com.cloud.auth.form.LoginProperties;
 import com.cloud.auth.form.UucProperties;
 import com.cloud.common.constant.Constants;
 import com.cloud.common.constant.UserConstants;
@@ -44,6 +45,9 @@ public class SysLoginService {
     @Autowired
     private HucProperties hucProperties;
 
+    @Autowired
+    private LoginProperties loginProperties;
+
     /**
      * 登录
      */
@@ -78,6 +82,10 @@ public class SysLoginService {
                     MessageUtils.message("user.password.not.match"));
             throw new UserPasswordNotMatchException();
         }
+        if (!loginProperties.getIsLogin()) {
+            throw new BusinessException(loginProperties.getErrMsg());
+        }
+
         // 查询用户信息
         SysUser user = userService.selectSysUserByUsername(username);
 
