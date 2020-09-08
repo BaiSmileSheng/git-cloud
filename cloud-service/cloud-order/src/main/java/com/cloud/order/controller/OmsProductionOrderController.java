@@ -16,7 +16,6 @@ import com.cloud.common.exception.BusinessException;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
-import com.cloud.order.domain.entity.OmsDemandOrderGatherEditImport;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderExportVo;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderImportVo;
@@ -427,8 +426,7 @@ public class OmsProductionOrderController extends BaseController {
     @HasPermissions("order:productionOrder:exportSAP")
     public R exportSAP(@ApiIgnore() OmsProductionOrder omsProductionOrder) {
         SysUser sysUser = getUserInfo(SysUser.class);
-        List<OmsProductionOrder> productionOrderVos = omsProductionOrderService.exportAll(omsProductionOrder,sysUser);
-        return EasyExcelUtilOSS.writeExcel(productionOrderVos, "排产订单.xlsx", "sheet", new OmsProductionOrder());
+        return omsProductionOrderService.exportSAP(omsProductionOrder,sysUser);
     }
 
     /**
