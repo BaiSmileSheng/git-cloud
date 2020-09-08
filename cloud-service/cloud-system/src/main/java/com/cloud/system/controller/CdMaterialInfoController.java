@@ -199,4 +199,23 @@ public class CdMaterialInfoController extends BaseController {
     public R selectListByMaterialCodeList(@RequestBody List<Dict> list){
         return cdMaterialInfoService.selectListByMaterialCodeList(list);
     }
+
+    /**
+     * 按专用号模糊查询,返回对象集合
+     */
+    @GetMapping("objectSelectByLikeCode")
+    @ApiOperation(value = "按专用号模糊查询,返回对象集合", response = CdMaterialInfo.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "materialCode", value = "专用号", required = false, paramType = "query", dataType = "String")
+    })
+    public R objectSelectByLikeCode(@RequestParam(value = "materialCode") String materialCode){
+        Example example = new Example(CdMaterialInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andLike("materialCode",materialCode + "%");
+        startPage();
+        List<CdMaterialInfo> cdMaterialInfoList = cdMaterialInfoService.selectByExample(example);
+        return R.data(cdMaterialInfoList);
+    }
 }
