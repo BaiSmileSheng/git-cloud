@@ -331,7 +331,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         logger.info("定时任务每天在获取到PO信息后 进行需求汇总  结束");
         //5.发送维护交货提前量的邮件
         if(sendEmailMap.size() > 0){
-            R userListR = remoteUserService.selectUserByRoleKey(RoleConstants.ROLE_KEY_DDLRY);
+            R userListR = remoteUserService.selectUserByRoleKey(RoleConstants.ROLE_KEY_DDTJ);
             if(!userListR.isSuccess()){
                 logger.error("汇总po数据时获取订单录入员信息失败 res:{}",JSONObject.toJSONString(userListR));
                 return R.ok("汇总po数据时获取角色用户失败");
