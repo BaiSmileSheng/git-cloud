@@ -134,14 +134,14 @@ public class OmsRealOrderExcelExportVo {
      */
     @ExcelProperty(value = "已交货数量",index = 10)
     @ApiModelProperty(value = "已交货数量")
-    private BigDecimal deliveryNum;
+    private String deliveryNum;
 
     /**
      * 未交货数量
      */
     @ExcelProperty(value = "未交货数量",index = 11)
     @ApiModelProperty(value = "未交货数量")
-    private BigDecimal undeliveryNum;
+    private String undeliveryNum;
 
     /**
      * 单位
