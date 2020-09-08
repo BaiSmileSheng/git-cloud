@@ -425,10 +425,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 bomInfoList.stream().collect(Collectors.groupingBy((bom) -> getBomGroupKey(bom)));
         listImport.forEach(o -> {
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
-            //应王福丽要求8310工厂36号线不用校验是否可以加工承揽   2020-09-08
-            if ((!o.getProductFactoryCode().equals(ProductOrderConstants.NEW_FACTORY_CODE)
-                    || !o.getProductLineCode().equals(ProductOrderConstants.NEW_LINE_CODE))
-                    && (PUTTING_OUT_ZERO.equals(o.getOutsourceType())
+            if ((PUTTING_OUT_ZERO.equals(o.getOutsourceType())
                     || PUTTING_OUT_ONE.equals(o.getOutsourceType()))
                     && noMaterialList.contains(o.getProductMaterialCode())) {
                 String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "，";
@@ -449,10 +446,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 o.setExportRemark(exportRemark + NO_QUOTA_REMARK);
             }
             //筛选没有生命周期的数据
-            //应王福丽要求8310工厂36号线不用校验生命周期  2020-09-08
-            if ((!o.getProductFactoryCode().equals(ProductOrderConstants.NEW_FACTORY_CODE)
-                    || !o.getProductLineCode().equals(ProductOrderConstants.NEW_LINE_CODE))
-                    && StringUtils.isBlank(o.getLifeCycle())) {
+            if (StringUtils.isBlank(o.getLifeCycle())) {
                 String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "，";
                 o.setExportRemark(exportRemark + NO_LIFECYCLE_REMARK);
             }
@@ -1073,10 +1067,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     private List<OmsProductionOrder> checkThreeVersion(List<OmsProductionOrder> list, SysUser sysUser) {
         Set<OmsProductionOrder> checkList = new HashSet<>();
         list.forEach(o -> {
-            //应王福丽要求8310工厂36号线不用校验3版本   2020-09-08
-            if ((!o.getProductFactoryCode().equals(ProductOrderConstants.NEW_FACTORY_CODE)
-                    || !o.getProductLineCode().equals(ProductOrderConstants.NEW_LINE_CODE))
-                    && ProductOrderConstants.BOM_VERSION_THREE.equals(o.getBomVersion())
+            if (ProductOrderConstants.BOM_VERSION_THREE.equals(o.getBomVersion())
                     && o.getProductNum().compareTo(ProductOrderConstants.BOM_VERSION_THREE_NUM) > 0) {
                 o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_ONE);
                 checkList.add(o);
@@ -1138,10 +1129,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     private List<OmsProductionOrder> checkOverdueNotCloseOrder(List<OmsProductionOrder> list, SysUser sysUser) {
         List<OmsProductionOrder> omsProductionOrders = omsProductionOrderMapper.selectByFactoryAndMaterialAndLine(list);
         Set<OmsProductionOrder> checkOrders = new HashSet<>();
-        list.forEach(o -> {
-            //应王福丽要求8310工厂36号线不用校验超期未关闭订单   2020-09-08
-            if (!o.getProductFactoryCode().equals(ProductOrderConstants.NEW_FACTORY_CODE)
-                    || !o.getProductLineCode().equals(ProductOrderConstants.NEW_LINE_CODE)) {
+        list.forEach(o ->
                 omsProductionOrders.forEach(order -> {
                     if (o.getProductFactoryCode().equals(order.getProductFactoryCode())
                             && o.getProductMaterialCode().equals(order.getProductMaterialCode())
@@ -1149,9 +1137,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                         o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_ONE);
                         checkOrders.add(o);
                     }
-                });
-            }
-        });
+                })
+        );
         if (checkOrders.size() > 0) {
             //获取权限用户列表
             R userRightsMap = userService.selectUserRights(RoleConstants.ROLE_KEY_ORDER);
@@ -1213,26 +1200,22 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         Set<String> userFactoryCodeSet = new HashSet<>();
         Map<String,Set<String>> map = new HashMap<>();
         list.forEach(o -> {
-            //应王福丽要求8310工厂36号线不用校验超期库存   2020-09-08
-            if (!o.getProductFactoryCode().equals(ProductOrderConstants.NEW_FACTORY_CODE)
-                    || !o.getProductLineCode().equals(ProductOrderConstants.NEW_LINE_CODE)) {
-                R overStockMap = remoteCdProductOverdueService.selectOverStockByFactoryAndMaterial(CdProductOverdue
-                        .builder()
-                        .productMaterialCode(o.getProductMaterialCode()).build());
-                if (!overStockMap.isSuccess()) {
-                    log.info("根据成品物料号查询超期库存" + overStockMap.get("msg"));
-                }
-                List<CdProductOverdue> productOverdues =
-                        overStockMap.getCollectData(new TypeReference<List<CdProductOverdue>>() {
-                        });
-                if (BeanUtil.isNotEmpty(productOverdues) && productOverdues.size() > 0) {
-                    Set<String> overduesFactoryCodes = productOverdues.stream().map(CdProductOverdue::getProductFactoryCode).collect(Collectors.toSet());
-                    userFactoryCodeSet.addAll(overduesFactoryCodes);
-                    userFactoryCodeSet.add(o.getProductFactoryCode());
-                    map.put(o.getProductMaterialCode(), userFactoryCodeSet);
-                    o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_ONE);
-                    omsProductionOrders.add(o);
-                }
+            R overStockMap = remoteCdProductOverdueService.selectOverStockByFactoryAndMaterial(CdProductOverdue
+                    .builder()
+                    .productMaterialCode(o.getProductMaterialCode()).build());
+            if (!overStockMap.isSuccess()) {
+                log.info("根据成品物料号查询超期库存" + overStockMap.get("msg"));
+            }
+            List<CdProductOverdue> productOverdues =
+                    overStockMap.getCollectData(new TypeReference<List<CdProductOverdue>>() {
+                    });
+            if (BeanUtil.isNotEmpty(productOverdues) && productOverdues.size() > 0) {
+                Set<String> overduesFactoryCodes = productOverdues.stream().map(CdProductOverdue::getProductFactoryCode).collect(Collectors.toSet());
+                userFactoryCodeSet.addAll(overduesFactoryCodes);
+                userFactoryCodeSet.add(o.getProductFactoryCode());
+                map.put(o.getProductMaterialCode(),userFactoryCodeSet);
+                o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_ONE);
+                omsProductionOrders.add(o);
             }
         });
         if (omsProductionOrders.size() > 0) {
@@ -1514,7 +1497,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         //ZN 认证邮件通知
         if (znOrderList.size() > 0) {
             //获取权限用户列表
-            R userRightsMap = userService.selectUserRights(RoleConstants.ROLE_KEY_DDLRY);
+            R userRightsMap = userService.selectUserRights(RoleConstants.ROLE_KEY_ZLGCS);
             Set<SysUser> userSet = new HashSet<>();
             if (!userRightsMap.isSuccess()) {
                 log.error("ZN认证审批流程-获取质量工程师列表失败：" + userRightsMap.get("msg"));

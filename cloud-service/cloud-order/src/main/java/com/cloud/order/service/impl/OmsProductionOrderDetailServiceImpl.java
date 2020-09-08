@@ -321,7 +321,9 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
                     .bomVersion(omsProductionOrder.getBomVersion())
                     .productNum(productNum)
                     .rawMaterialNum(rawMaterialNum)
-                    .status(status)
+                    .status((StrUtil.isNotBlank(omsProductionOrder.getStatus())
+                            && !ProductOrderConstants.STATUS_ZERO.equals(omsProductionOrder.getStatus())
+                            && !ProductOrderConstants.STATUS_ONE.equals(omsProductionOrder.getStatus())) ? "1" : "")
                     .productStartDate(omsProductionOrder.getProductStartDate())
                     .build();
         } else {
