@@ -439,19 +439,22 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             CdMaterialExtendInfo extendInfo = materialExtendInfoMap.get(weeksDemandOrderEdit.getProductMaterialCode());
             String productType = new String();
             String lifeCyle = new String();
-            if (extendInfo==null) {
-                errMsg.append(StrUtil.format("物料号{}：无生命周期信息！",weeksDemandOrderEdit.getProductMaterialCode()));
-            }else{
+            if (extendInfo != null) {
                 productType = extendInfo.getProductType();
                 lifeCyle = extendInfo.getLifeCycle();
+            }
+//            if (extendInfo==null) {
+//                errMsg.append(StrUtil.format("物料号{}：无生命周期信息！",weeksDemandOrderEdit.getProductMaterialCode()));
+//            }else{
+
                 //2020/09/09 王姐要求放开
 //                if (StrUtil.isEmpty(productType)) {
 //                    errMsg.append(StrUtil.format("物料号{}：无产品类别信息！",weeksDemandOrderEdit.getProductMaterialCode()));
 //                }
-                if (StrUtil.isEmpty(lifeCyle)) {
-                    errMsg.append(StrUtil.format("物料号{}：无生命周期信息！",weeksDemandOrderEdit.getProductMaterialCode()));
-                }
-            }
+//                if (StrUtil.isEmpty(lifeCyle)) {
+//                    errMsg.append(StrUtil.format("物料号{}：无生命周期信息！",weeksDemandOrderEdit.getProductMaterialCode()));
+//                }
+//            }
             if (StrUtil.isNotEmpty(errMsg)) {
                 errObjectDto.setObject(weeksDemandOrderEdit);
                 errObjectDto.setErrMsg(errMsg.toString());
@@ -576,7 +579,18 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 criteria.andEqualTo("orderFrom", OrderFromEnum.OUT_SOURCE_TYPE_QWW.getCode());
             }
             listCondition(oms2weeksDemandOrderEditVo,criteria);
-            criteria.andEqualTo("status", Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode());
+            List<String> canStatus = CollectionUtil.newArrayList(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getCode(),
+                    Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode(),
+                    Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());
+            if (StrUtil.isNotEmpty(oms2weeksDemandOrderEditVo.getStatus())) {
+                if (canStatus.contains(oms2weeksDemandOrderEditVo.getStatus())) {
+                    criteria.andEqualTo("status", oms2weeksDemandOrderEditVo.getStatus());
+                }else{
+                    throw new BusinessException(StrUtil.format("不允许删除{}状态数据！",Weeks2DemandOrderEditStatusEnum.getMsgByCode(oms2weeksDemandOrderEditVo.getStatus())));
+                }
+            } else {
+                criteria.andIn("status", canStatus);
+            }
             oms2weeksDemandOrderEditList = selectByExample(example);
             if (CollectionUtil.isEmpty(oms2weeksDemandOrderEditList)) {
                 return R.error("无可删除数据！");

@@ -442,8 +442,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 o.setExportRemark(exportRemark + NO_UPH_REMARK);
             }*/
             //筛选没有产品定员、分公司主管、班长的信息
-            if ((StringUtils.isBlank(String.valueOf(o.getProductQuota()))
-                    || o.getProductQuota() == 0)
+            if (StringUtils.isBlank(String.valueOf(o.getProductQuota()))
                     || (StringUtils.isBlank(o.getBranchOffice())
                     && StringUtils.isBlank(o.getMonitor()))) {
                 String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "，";
@@ -451,12 +450,12 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }
             //筛选没有生命周期的数据
             //应王福丽要求8310工厂36号线不用校验生命周期  2020-09-08
-            if ((!o.getProductFactoryCode().equals(ProductOrderConstants.NEW_FACTORY_CODE)
-                    || !o.getProductLineCode().equals(ProductOrderConstants.NEW_LINE_CODE))
-                    && StringUtils.isBlank(o.getLifeCycle())) {
-                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "，";
-                o.setExportRemark(exportRemark + NO_LIFECYCLE_REMARK);
-            }
+//            if ((!o.getProductFactoryCode().equals(ProductOrderConstants.NEW_FACTORY_CODE)
+//                    || !o.getProductLineCode().equals(ProductOrderConstants.NEW_LINE_CODE))
+//                    && StringUtils.isBlank(o.getLifeCycle())) {
+//                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "，";
+//                o.setExportRemark(exportRemark + NO_LIFECYCLE_REMARK);
+//            }
             //筛选没有bom清单的数据
             List<CdBomInfo> bomInfos =
                     bomMap.get(StrUtil.concat(true, o.getProductMaterialCode(), o.getProductFactoryCode(), o.getBomVersion()));

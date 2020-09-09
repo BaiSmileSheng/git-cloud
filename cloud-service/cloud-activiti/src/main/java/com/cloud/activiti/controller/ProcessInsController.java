@@ -1,10 +1,18 @@
 package com.cloud.activiti.controller;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import cn.hutool.core.util.StrUtil;
+import com.cloud.activiti.consts.ActivitiConstant;
+import com.cloud.activiti.domain.BizBusiness;
+import com.cloud.activiti.service.IBizBusinessService;
+import com.cloud.activiti.service.IHistoryInfoService;
+import com.cloud.activiti.vo.HiProcInsVo;
+import com.cloud.activiti.vo.ProcessInsVo;
+import com.cloud.activiti.vo.RuTask;
+import com.cloud.common.core.controller.BaseController;
+import com.cloud.common.core.domain.R;
+import com.cloud.common.core.page.PageDomain;
+import com.cloud.system.feign.RemoteUserService;
+import lombok.extern.slf4j.Slf4j;
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -18,20 +26,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cloud.activiti.consts.ActivitiConstant;
-import com.cloud.activiti.domain.BizBusiness;
-import com.cloud.activiti.service.IBizBusinessService;
-import com.cloud.activiti.service.IHistoryInfoService;
-import com.cloud.activiti.vo.HiProcInsVo;
-import com.cloud.activiti.vo.ProcessInsVo;
-import com.cloud.activiti.vo.RuTask;
-import com.cloud.common.core.controller.BaseController;
-import com.cloud.common.core.domain.R;
-import com.cloud.common.core.page.PageDomain;
-import com.cloud.system.feign.RemoteUserService;
-
-import cn.hutool.core.util.StrUtil;
-import lombok.extern.slf4j.Slf4j;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>File：ProcessInsController.java</p>
@@ -130,9 +128,9 @@ public class ProcessInsController extends BaseController {
                 }
             }
             // 关联当前任务
-            Task task = taskService.createTaskQuery().processInstanceId(e.getId()).singleResult();
-            if (task != null) {
-                e.setCurrTaskName(task.getName());
+            List<Task> taskList = taskService.createTaskQuery().processInstanceId(e.getId()).list();
+            if (taskList != null) {
+                e.setCurrTaskName(taskList.get(0).getName());
             }
         });
         Map<String, Object> m = new HashMap<String, Object>();
