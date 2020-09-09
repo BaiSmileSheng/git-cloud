@@ -576,7 +576,18 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 criteria.andEqualTo("orderFrom", OrderFromEnum.OUT_SOURCE_TYPE_QWW.getCode());
             }
             listCondition(oms2weeksDemandOrderEditVo,criteria);
-            criteria.andEqualTo("status", Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode());
+            List<String> canStatus = CollectionUtil.newArrayList(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getCode(),
+                    Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode(),
+                    Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());
+            if (StrUtil.isNotEmpty(oms2weeksDemandOrderEditVo.getStatus())) {
+                if (canStatus.contains(oms2weeksDemandOrderEditVo.getStatus())) {
+                    criteria.andEqualTo("status", oms2weeksDemandOrderEditVo.getStatus());
+                }else{
+                    throw new BusinessException(StrUtil.format("不允许删除{}状态数据！",Weeks2DemandOrderEditStatusEnum.getMsgByCode(oms2weeksDemandOrderEditVo.getStatus())));
+                }
+            } else {
+                criteria.andIn("status", canStatus);
+            }
             oms2weeksDemandOrderEditList = selectByExample(example);
             if (CollectionUtil.isEmpty(oms2weeksDemandOrderEditList)) {
                 return R.error("无可删除数据！");
