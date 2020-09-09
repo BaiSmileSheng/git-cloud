@@ -120,7 +120,6 @@ public class OmsProductionOrderImportVo {
     @ExcelProperty(value = "事业部T-1交货日期", index = 10)
     @DateTimeFormat("yyyy-MM-dd")
     @ApiModelProperty(value = "事业部T-1交货日期")
-    @NotBlank(message = "不能为空")
     private String deliveryDate;
 
     /**
@@ -135,7 +134,6 @@ public class OmsProductionOrderImportVo {
      */
     @ExcelProperty(value = "发往地", index = 12)
     @ApiModelProperty(value = "发往地")
-    @NotBlank(message = "不能为空")
     private String destination;
 
     /**
