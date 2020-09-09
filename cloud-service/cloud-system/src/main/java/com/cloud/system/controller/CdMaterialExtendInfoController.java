@@ -177,6 +177,9 @@ public class CdMaterialExtendInfoController extends BaseController {
     public R editSave(@RequestBody CdMaterialExtendInfo cdMaterialExtendInfo) {
         SysUser sysUser = getUserInfo(SysUser.class);
         cdMaterialExtendInfo.setUpdateBy(sysUser.getLoginName());
+        if(StringUtils.isBlank(cdMaterialExtendInfo.getProductType())){
+            cdMaterialExtendInfo.setProductType("   ");
+        }
         return toAjax(cdMaterialExtendInfoService.updateByPrimaryKeySelective(cdMaterialExtendInfo));
     }
 

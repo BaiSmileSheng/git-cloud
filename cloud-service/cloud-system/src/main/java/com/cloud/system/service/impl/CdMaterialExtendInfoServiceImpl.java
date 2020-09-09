@@ -281,9 +281,6 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
                 }
             }
 
-            if (StringUtils.isBlank(cdMaterialExtendInfo.getProductType())) {
-                errMsgBuffer.append("产品类别不能为空;");
-            }
             if(StringUtils.isNotBlank(cdMaterialExtendInfo.getProductType())){
                 String productType = cdMaterialExtendInfo.getProductType();
                 ProductTypeEnum.init();
