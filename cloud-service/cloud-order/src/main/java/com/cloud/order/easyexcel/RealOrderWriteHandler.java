@@ -65,6 +65,14 @@ public class RealOrderWriteHandler extends AbstractRowWriteHandler {
             commentRelation.setString(new XSSFRichTextString("交货库位"));
             // 将批注添加到单元格对象中 从0开始计算 第1行第12列
             sheet.getRow(0).getCell(12).setCellComment(commentRelation);
+
+            // 在第一行 第7列 地点 批注
+            XSSFClientAnchor xssfClientMRP = new XSSFClientAnchor(0, 0, 0, 0, (short)6, 0, (short)8, 1);
+            Comment commentMRP  = drawingPatriarch.createCellComment(xssfClientMRP);
+            // 输入批注信息
+            commentMRP.setString(new XSSFRichTextString("例如:8310,8710"));
+            // 将批注添加到单元格对象中 从0开始计算 第1行第7列
+            sheet.getRow(0).getCell(7).setCellComment(commentMRP);
         }
     }
 }
