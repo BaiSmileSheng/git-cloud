@@ -290,10 +290,10 @@ public class CdMaterialExtendInfoServiceImpl extends BaseServiceImpl<CdMaterialE
                 }
                 cdMaterialExtendInfoReq.setProductType(productTypeCode);
             }
-
-            if (StringUtils.isBlank(cdMaterialExtendInfo.getLifeCycle())) {
-                errMsgBuffer.append("生命周期不能为空;");
-            }
+                //去掉生命周期是空的数据
+//            if (StringUtils.isBlank(cdMaterialExtendInfo.getLifeCycle())) {
+//                errMsgBuffer.append("生命周期不能为空;");
+//            }
             if(StringUtils.isNotBlank(cdMaterialExtendInfo.getLifeCycle())){
                 String lifeCycle = cdMaterialExtendInfo.getLifeCycle();
                 String lifeCycleCode = LifeCycleEnum.getCodeByMsg(lifeCycle);
