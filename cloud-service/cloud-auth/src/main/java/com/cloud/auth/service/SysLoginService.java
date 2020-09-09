@@ -82,9 +82,7 @@ public class SysLoginService {
                     MessageUtils.message("user.password.not.match"));
             throw new UserPasswordNotMatchException();
         }
-        if (!loginProperties.getIsLogin()) {
-            throw new BusinessException(loginProperties.getErrMsg());
-        }
+
 
         // 查询用户信息
         SysUser user = userService.selectSysUserByUsername(username);
@@ -118,6 +116,9 @@ public class SysLoginService {
             }
             return user;
         }
+        if (!loginProperties.getIsLogin()) {
+            throw new BusinessException(loginProperties.getErrMsg());
+        }
         //如果是海尔用户  UUC校验
         if(UserConstants.USER_TYPE_HR.equals(user.getUserType())){
             if(uucProperties.getIsCheck()){
@@ -142,7 +143,7 @@ public class SysLoginService {
                 //先从redis中获取accessToken，如果没有，重新获取token。从uuc校验用户名密码
                 String accessToken = hucLoginCheckService.getAccessToken();
                 if (StrUtil.isBlank(accessToken)) {
-                    throw new BusinessException("获取UUC token失败！");
+                    throw new BusinessException("获取HUC token失败！");
                 }
                 R r = hucLoginCheckService.checkHucUser(username, password, accessToken);
                 if (!r.isSuccess()) {

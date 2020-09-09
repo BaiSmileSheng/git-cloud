@@ -440,13 +440,15 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             String productType = new String();
             String lifeCyle = new String();
             if (extendInfo==null) {
-                errMsg.append(StrUtil.format("物料号{}：无生命周期及产品类别信息！",weeksDemandOrderEdit.getProductMaterialCode()));
+                errMsg.append(StrUtil.format("物料号{}：无生命周期信息！",weeksDemandOrderEdit.getProductMaterialCode()));
             }else{
                 productType = extendInfo.getProductType();
                 lifeCyle = extendInfo.getLifeCycle();
-                if (StrUtil.isEmpty(productType)) {
-                    errMsg.append(StrUtil.format("物料号{}：无产品类别信息！",weeksDemandOrderEdit.getProductMaterialCode()));
-                } else if (StrUtil.isEmpty(lifeCyle)) {
+                //2020/09/09 王姐要求放开
+//                if (StrUtil.isEmpty(productType)) {
+//                    errMsg.append(StrUtil.format("物料号{}：无产品类别信息！",weeksDemandOrderEdit.getProductMaterialCode()));
+//                }
+                if (StrUtil.isEmpty(lifeCyle)) {
                     errMsg.append(StrUtil.format("物料号{}：无生命周期信息！",weeksDemandOrderEdit.getProductMaterialCode()));
                 }
             }
@@ -1081,6 +1083,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                     if (SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(flag)) {
                         oms2weeksDemandOrderEdit.setPlanOrderOrder(outTableOutput.getString("AUFNR"));//计划订单号
                         oms2weeksDemandOrderEdit.setStatus(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode());//已传SAP
+                        oms2weeksDemandOrderEdit.setSapMessages("SAP获取生产订单号成功！");
                     }else if(SapConstants.SAP_RESULT_TYPE_ING.equals(flag)){
                         oms2weeksDemandOrderEdit.setSapMessages("SAP正在创建！");//传SAP异常
                     }else{
