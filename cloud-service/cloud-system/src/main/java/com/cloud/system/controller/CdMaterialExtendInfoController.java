@@ -180,6 +180,9 @@ public class CdMaterialExtendInfoController extends BaseController {
         if(StringUtils.isBlank(cdMaterialExtendInfo.getProductType())){
             cdMaterialExtendInfo.setProductType("   ");
         }
+        if(StringUtils.isBlank(cdMaterialExtendInfo.getLifeCycle())){
+            cdMaterialExtendInfo.setLifeCycle("   ");
+        }
         return toAjax(cdMaterialExtendInfoService.updateByPrimaryKeySelective(cdMaterialExtendInfo));
     }
 

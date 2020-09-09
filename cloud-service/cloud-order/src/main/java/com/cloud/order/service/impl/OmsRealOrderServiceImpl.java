@@ -736,14 +736,6 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                         omsRealOrderReq.setProductDate(productDate);
                     }
                 }
-                //如果生产日期<今天,将生产日期改为今天
-                Date today = new Date();
-                String productDate = omsRealOrderReq.getProductDate();
-                Date productDateDate = DateUtils.dateTime(YYYY_MM_DD, productDate);
-                if(productDateDate.before(today)){
-                    String todayString = DateUtils.parseDateToStr(YYYY_MM_DD,today);
-                    omsRealOrderReq.setProductDate(todayString);
-                }
             }
             String errMsgBufferString = errMsgBuffer.toString();
             if(StringUtils.isNotBlank(errMsgBufferString)){
@@ -751,6 +743,14 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 errObjectDto.setErrMsg(errMsgBufferString);
                 errDtos.add(errObjectDto);
                 continue;
+            }
+            //如果生产日期<今天,将生产日期改为今天
+            Date today = new Date();
+            String productDate = omsRealOrderReq.getProductDate();
+            Date productDateDate = DateUtils.dateTime(YYYY_MM_DD, productDate);
+            if(productDateDate.before(today)){
+                String todayString = DateUtils.parseDateToStr(YYYY_MM_DD,today);
+                omsRealOrderReq.setProductDate(todayString);
             }
             omsRealOrderReq.setStatus(RealOrderStatusEnum.STATUS_0.getCode());
             omsRealOrderReq.setCreateTime(date);
