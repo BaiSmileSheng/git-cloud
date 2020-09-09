@@ -93,8 +93,6 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     private static final String PRODUCT_MATERIAL_CODE = "productMaterialCode";
     private static final String PRODUCT_LINE_CODE = "productLineCode";
     private static final String BOM_VERSION = "bomVersion";
-    private static final String PRODUCT_MATERIAL = "materialType";
-    private static final String PRODUCT_MATERIAL_TYPE = "HALB";
 
     private static final String PRODUCT_ORDER_SEQ = "product_order_seq";
     private static final int PRODUCT_ORDER_LENGTH = 4;
@@ -315,7 +313,6 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                         .set(PRODUCT_MATERIAL_CODE, omsProductionOrder.getProductMaterialCode())
                         .set(PRODUCT_LINE_CODE, omsProductionOrder.getProductLineCode())
                         .set(BOM_VERSION, omsProductionOrder.getBomVersion())
-                        .set(PRODUCT_MATERIAL, PRODUCT_MATERIAL_TYPE)
         ).distinct().collect(toList());
         List<CdSettleProductMaterial> settleProductMaterials = listImport.stream()
                 .filter(o -> !OutSourceTypeEnum.OUT_SOURCE_TYPE_ZZ.getCode().equals(o.getOutsourceType()))
