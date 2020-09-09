@@ -441,13 +441,14 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             String productType = new String();
             String lifeCyle = new String();
             if (extendInfo==null) {
-                errMsg.append(StrUtil.format("物料号{}：无生命周期及产品类别信息！",demandOrderGatherEdit.getProductMaterialCode()));
+                errMsg.append(StrUtil.format("物料号{}：无生命周期信息！",demandOrderGatherEdit.getProductMaterialCode()));
             }else{
                 productType = extendInfo.getProductType();
                 lifeCyle = extendInfo.getLifeCycle();
-                if (StrUtil.isEmpty(productType)) {
-                    errMsg.append(StrUtil.format("物料号{}：无产品类别信息！", demandOrderGatherEdit.getProductMaterialCode()));
-                }
+                //2020/09/09 王姐要求放开
+//                if (StrUtil.isEmpty(productType)) {
+//                    errMsg.append(StrUtil.format("物料号{}：无产品类别信息！", demandOrderGatherEdit.getProductMaterialCode()));
+//                }
                 if (StrUtil.isEmpty(lifeCyle)) {
                     errMsg.append(StrUtil.format("物料号{}：无生命周期信息！", demandOrderGatherEdit.getProductMaterialCode()));
                 }
