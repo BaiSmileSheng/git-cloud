@@ -1081,6 +1081,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                     if (SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(flag)) {
                         oms2weeksDemandOrderEdit.setPlanOrderOrder(outTableOutput.getString("AUFNR"));//计划订单号
                         oms2weeksDemandOrderEdit.setStatus(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode());//已传SAP
+                        oms2weeksDemandOrderEdit.setSapMessages("SAP获取生产订单号成功！");
                     }else if(SapConstants.SAP_RESULT_TYPE_ING.equals(flag)){
                         oms2weeksDemandOrderEdit.setSapMessages("SAP正在创建！");//传SAP异常
                     }else{
