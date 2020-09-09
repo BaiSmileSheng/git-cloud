@@ -711,11 +711,11 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             if(null == omsRealOrder.getOrderNum()){
                 errMsgBuffer.append("订单不能为空;");
             }
-            //地点
-            String place = omsRealOrder.getPlace();
-            if(StringUtils.isBlank(place)){
-                errMsgBuffer.append("地点不能为空;");
-            }
+            //交货地点
+//            String place = omsRealOrder.getPlace();
+//            if(StringUtils.isBlank(place)){
+//                errMsgBuffer.append("地点不能为空;");
+//            }
             if(StringUtils.isNotBlank(omsRealOrder.getCustomerCode())
                     && StringUtils.isNotBlank(omsRealOrder.getProductFactoryCode())
                     && StringUtils.isNotBlank(omsRealOrder.getDeliveryDate())){
