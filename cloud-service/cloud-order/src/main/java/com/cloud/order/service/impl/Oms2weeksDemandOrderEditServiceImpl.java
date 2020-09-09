@@ -439,19 +439,22 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             CdMaterialExtendInfo extendInfo = materialExtendInfoMap.get(weeksDemandOrderEdit.getProductMaterialCode());
             String productType = new String();
             String lifeCyle = new String();
-            if (extendInfo==null) {
-                errMsg.append(StrUtil.format("物料号{}：无生命周期信息！",weeksDemandOrderEdit.getProductMaterialCode()));
-            }else{
+            if (extendInfo != null) {
                 productType = extendInfo.getProductType();
                 lifeCyle = extendInfo.getLifeCycle();
+            }
+//            if (extendInfo==null) {
+//                errMsg.append(StrUtil.format("物料号{}：无生命周期信息！",weeksDemandOrderEdit.getProductMaterialCode()));
+//            }else{
+
                 //2020/09/09 王姐要求放开
 //                if (StrUtil.isEmpty(productType)) {
 //                    errMsg.append(StrUtil.format("物料号{}：无产品类别信息！",weeksDemandOrderEdit.getProductMaterialCode()));
 //                }
-                if (StrUtil.isEmpty(lifeCyle)) {
-                    errMsg.append(StrUtil.format("物料号{}：无生命周期信息！",weeksDemandOrderEdit.getProductMaterialCode()));
-                }
-            }
+//                if (StrUtil.isEmpty(lifeCyle)) {
+//                    errMsg.append(StrUtil.format("物料号{}：无生命周期信息！",weeksDemandOrderEdit.getProductMaterialCode()));
+//                }
+//            }
             if (StrUtil.isNotEmpty(errMsg)) {
                 errObjectDto.setObject(weeksDemandOrderEdit);
                 errObjectDto.setErrMsg(errMsg.toString());
