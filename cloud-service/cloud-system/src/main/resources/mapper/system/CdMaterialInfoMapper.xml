@@ -86,10 +86,10 @@
     <select id="selectListByMaterialList" parameterType="list" resultMap="CdMaterialInfoResult">
       <include refid="selectCdMaterialInfoVo"/>
         <where>
-            <foreach collection="list" index="index" separator="or" open="(" close=")" item="item">
-               material_code = #{item.productMaterialCode,jdbcType=VARCHAR}
+            <foreach collection="list" index="index" separator="or" item="item">
+               (material_code = #{item.productMaterialCode,jdbcType=VARCHAR}
                 and plant_code = #{item.productFactoryCode,jdbcType=VARCHAR}
-                and material_type = #{item.materialType,jdbcType=VARCHAR}
+                )
             </foreach>
         </where>
     </select>
