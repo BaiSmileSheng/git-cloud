@@ -271,13 +271,47 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
 
         List<OmsRawMaterialFeedback> omsRawMaterialFeedbacks = new ArrayList<>();
         mapOne.forEach((key, value) -> {
-            OmsRawMaterialFeedback omsRawMaterialFeedback = getFeedback(value,omsProductionOrderDetails,omsProductionOrderDetail,ProductOrderConstants.STATUS_ZERO);
-            omsRawMaterialFeedbacks.add(omsRawMaterialFeedback);
+            List<OmsRawMaterialFeedback> omsRawMaterialFeedbackList = getFeedback(value,omsProductionOrderDetails,omsProductionOrderDetail,ProductOrderConstants.STATUS_ZERO);
+            omsRawMaterialFeedbacks.addAll(omsRawMaterialFeedbackList);
         });
         mapThree.forEach((key, value) -> {
-            OmsRawMaterialFeedback omsRawMaterialFeedback = getFeedback(value,omsProductionOrderDetails,omsProductionOrderDetail,ProductOrderConstants.STATUS_ONE);
-            omsRawMaterialFeedbacks.add(omsRawMaterialFeedback);
+            List<OmsRawMaterialFeedback> omsRawMaterialFeedbackList = getFeedback(value,omsProductionOrderDetails,omsProductionOrderDetail,ProductOrderConstants.STATUS_ONE);
+            omsRawMaterialFeedbacks.addAll(omsRawMaterialFeedbackList);
         });
+        //排产订单状态待评审、反馈中的分组
+        Map<String, List<OmsProductionOrder>> map = orderList.stream().collect(Collectors.groupingBy((o) -> fetchGroupKey(o)));
+        map.forEach((key,value) -> {
+            OmsProductionOrder omsProductionOrder = value.get(0);
+            List<String> orderCodes = value.stream()
+                    .map(OmsProductionOrder::getOrderCode).collect(Collectors.toList());
+            List<OmsProductionOrderDetail> list = omsProductionOrderDetails.stream()
+                    .filter(detail -> orderCodes.contains(detail.getProductOrderCode())
+                            && detail.getStatus().equals(ProductOrderConstants.DETAIL_STATUS_ONE))
+                    .collect(Collectors.toList());
+            if (list.size() > 0) {
+                List<String> detialOrderCodes = list.stream().map(OmsProductionOrderDetail::getProductOrderCode).distinct().collect(Collectors.toList());
+                //原材料排产量
+                BigDecimal rawMaterialNum = list.stream()
+                        .map(OmsProductionOrderDetail::getRawMaterialProductNum).reduce(BigDecimal.ZERO, BigDecimal::add);
+                //成品排产量
+                BigDecimal productNum = value.stream().filter(o -> detialOrderCodes.contains(o.getOrderCode()))
+                        .map(OmsProductionOrder::getProductNum).reduce(BigDecimal.ZERO, BigDecimal::add);
+                OmsRawMaterialFeedback omsRawMaterialFeedback = new OmsRawMaterialFeedback();
+                omsRawMaterialFeedback.setIds(omsProductionOrder.getProductMaterialCode() + omsProductionOrder.getBomVersion());
+                omsRawMaterialFeedback.setProductMaterialCode(omsProductionOrder.getProductMaterialCode());
+                omsRawMaterialFeedback.setProductMaterialDesc(omsProductionOrder.getProductMaterialDesc());
+                omsRawMaterialFeedback.setBomVersion(omsProductionOrder.getBomVersion());
+                omsRawMaterialFeedback.setProductNum(productNum);
+                omsRawMaterialFeedback.setRawMaterialNum(rawMaterialNum);
+                omsRawMaterialFeedback.setProductStartDate(omsProductionOrder.getProductStartDate());
+                omsRawMaterialFeedback.setStatus("3");
+                omsRawMaterialFeedbacks.add(omsRawMaterialFeedback);
+            }
+        });
+
+
+        //按照状态升序
+        omsRawMaterialFeedbacks.sort(Comparator.comparing(OmsRawMaterialFeedback::getStatus));
         if (ObjectUtil.isEmpty(omsRawMaterialFeedbacks) || omsRawMaterialFeedbacks.size() <= 0) {
             return R.ok();
         }
@@ -290,20 +324,23 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
      * Author: ltq
      * Date: 2020/8/13
      */
-    private OmsRawMaterialFeedback getFeedback(List<OmsProductionOrder> omsProductionOrders,
+    private List<OmsRawMaterialFeedback> getFeedback(List<OmsProductionOrder> omsProductionOrders,
                                                List<OmsProductionOrderDetail> omsProductionOrderDetails,
                                                OmsProductionOrderDetail omsProductionOrderDetail,String status){
-        //成品排产量
-        BigDecimal productNum = omsProductionOrders.stream()
-                .map(OmsProductionOrder::getProductNum).reduce(BigDecimal.ZERO, BigDecimal::add);
-        OmsProductionOrder omsProductionOrder = omsProductionOrders.get(0);
+
         List<String> orderCodes = omsProductionOrders.stream()
                 .map(OmsProductionOrder::getOrderCode).collect(Collectors.toList());
         List<OmsProductionOrderDetail> list = omsProductionOrderDetails.stream()
-                .filter(detail -> orderCodes.contains(detail.getProductOrderCode())).collect(Collectors.toList());
+                .filter(detail -> orderCodes.contains(detail.getProductOrderCode())
+                        && !detail.getStatus().equals(ProductOrderConstants.DETAIL_STATUS_ONE)).collect(Collectors.toList());
+        List<String> detialOrderCodes = list.stream().map(OmsProductionOrderDetail::getProductOrderCode).distinct().collect(Collectors.toList());
         //原材料排产量
         BigDecimal rawMaterialNum = list.stream()
                 .map(OmsProductionOrderDetail::getRawMaterialProductNum).reduce(BigDecimal.ZERO, BigDecimal::add);
+        //成品排产量
+        BigDecimal productNum = omsProductionOrders.stream().filter(o -> detialOrderCodes.contains(o.getOrderCode()))
+                .map(OmsProductionOrder::getProductNum).reduce(BigDecimal.ZERO, BigDecimal::add);
+        OmsProductionOrder omsProductionOrder = omsProductionOrders.get(0);
         //原材料评审-反馈按钮查询增加回显 2020-08-04  ltq
         Example example1 = new Example(OmsRawMaterialFeedback.class);
         Example.Criteria criteria1 = example1.createCriteria();
@@ -312,36 +349,86 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
         criteria1.andEqualTo("productStartDate", omsProductionOrderDetail.getProductStartDate());
         criteria1.andEqualTo("productMaterialCode", omsProductionOrder.getProductMaterialCode());
         criteria1.andEqualTo("bomVersion", omsProductionOrder.getBomVersion());
-        OmsRawMaterialFeedback omsRawMaterialFeedback = omsRawMaterialFeedbackService.findByExampleOne(example1);
-        if (BeanUtil.isEmpty(omsRawMaterialFeedback)) {
-            omsRawMaterialFeedback = OmsRawMaterialFeedback.builder()
-                    .ids(omsProductionOrder.getProductMaterialCode() + omsProductionOrder.getBomVersion())
-                    .productMaterialCode(omsProductionOrder.getProductMaterialCode())
-                    .productMaterialDesc(omsProductionOrder.getProductMaterialDesc())
-                    .bomVersion(omsProductionOrder.getBomVersion())
-                    .productNum(productNum)
-                    .rawMaterialNum(rawMaterialNum)
-                    .status((StrUtil.isNotBlank(omsProductionOrder.getStatus())
-                            && !ProductOrderConstants.STATUS_ZERO.equals(omsProductionOrder.getStatus())
-                            && !ProductOrderConstants.STATUS_ONE.equals(omsProductionOrder.getStatus())) ? "1" : "")
-                    .productStartDate(omsProductionOrder.getProductStartDate())
-                    .build();
+        List<OmsRawMaterialFeedback> omsRawMaterialFeedbacks = omsRawMaterialFeedbackService.selectByExample(example1);
+        List<OmsRawMaterialFeedback> returnOmsRawMaterialFeedbacks = new ArrayList<>();
+        //通过的反馈信息
+        List<OmsRawMaterialFeedback> omsRawMaterialFeedbacksPass = omsRawMaterialFeedbacks.stream()
+                .filter(r ->ProductOrderConstants.STATUS_ONE.equals(r.getStatus())).collect(Collectors.toList());
+        //通过的成品排产量
+        BigDecimal productNumPass = omsRawMaterialFeedbacksPass.stream()
+                .map(OmsRawMaterialFeedback::getProductNum).reduce(BigDecimal.ZERO,BigDecimal::add);
+        //通过的原材料排产量
+        BigDecimal rawMaterialNumPass = omsRawMaterialFeedbacksPass.stream()
+                .map(OmsRawMaterialFeedback::getRawMaterialNum).reduce(BigDecimal.ZERO,BigDecimal::add);
+        //驳回的反馈信息
+        List<OmsRawMaterialFeedback> omsRawMaterialFeedbacksRe = omsRawMaterialFeedbacks.stream()
+                .filter(r ->ProductOrderConstants.STATUS_TWO.equals(r.getStatus())).collect(Collectors.toList());
+        //驳回的成品排产量
+        BigDecimal productNumRe = omsRawMaterialFeedbacksRe.stream()
+                .map(OmsRawMaterialFeedback::getProductNum).reduce(BigDecimal.ZERO,BigDecimal::add);
+        //驳回的原材料排产量
+        BigDecimal rawMaterialNumRe = omsRawMaterialFeedbacksRe.stream()
+                .map(OmsRawMaterialFeedback::getRawMaterialNum).reduce(BigDecimal.ZERO,BigDecimal::add);
+        //未审核的反馈信息
+        List<OmsRawMaterialFeedback> omsRawMaterialFeedbacksZero = omsRawMaterialFeedbacks.stream()
+                .filter(r ->ProductOrderConstants.STATUS_ZERO.equals(r.getStatus())).collect(Collectors.toList());
+        if (ProductOrderConstants.STATUS_ZERO.equals(status)) {
+            if (omsRawMaterialFeedbacksZero.size() <= 0) {
+                OmsRawMaterialFeedback omsRawMaterialFeedback = new OmsRawMaterialFeedback();
+                omsRawMaterialFeedback.setIds(omsProductionOrder.getProductMaterialCode() + omsProductionOrder.getBomVersion());
+                omsRawMaterialFeedback.setProductMaterialCode(omsProductionOrder.getProductMaterialCode());
+                omsRawMaterialFeedback.setProductMaterialDesc(omsProductionOrder.getProductMaterialDesc());
+                omsRawMaterialFeedback.setBomVersion(omsProductionOrder.getBomVersion());
+                omsRawMaterialFeedback.setProductNum(productNum.subtract(productNumPass).subtract(productNumRe));
+                omsRawMaterialFeedback.setRawMaterialNum(rawMaterialNum.subtract(rawMaterialNumPass).subtract(rawMaterialNumRe));
+                omsRawMaterialFeedback.setProductStartDate(omsProductionOrder.getProductStartDate());
+                omsRawMaterialFeedback.setStatus("");
+                returnOmsRawMaterialFeedbacks.add(omsRawMaterialFeedback);
+            } else {
+                OmsRawMaterialFeedback omsRawMaterialFeedback = omsRawMaterialFeedbacksZero.get(0);
+                omsRawMaterialFeedback.setProductNum(productNum.subtract(productNumPass).subtract(productNumRe));
+                omsRawMaterialFeedback.setRawMaterialNum(rawMaterialNum.subtract(rawMaterialNumPass).subtract(rawMaterialNumRe));
+                returnOmsRawMaterialFeedbacks.add(omsRawMaterialFeedback);
+            }
         } else {
-            omsRawMaterialFeedback.setStatus(status);
-            if (ProductOrderConstants.STATUS_ONE.equals(status)) {
-                omsRawMaterialFeedback = OmsRawMaterialFeedback.builder()
-                        .ids(omsProductionOrder.getProductMaterialCode() + omsProductionOrder.getBomVersion())
+            if (omsRawMaterialFeedbacksPass.size() > 0) {
+                //原材料满足量
+                BigDecimal rawMaterialContentNumPass = omsRawMaterialFeedbacksPass.stream()
+                        .map(OmsRawMaterialFeedback::getRawMaterialContentNum).reduce(BigDecimal.ZERO,BigDecimal::add);
+                OmsRawMaterialFeedback omsRawMaterialFeedback = OmsRawMaterialFeedback.builder()
+                        .id(omsRawMaterialFeedbacksPass.get(0).getId())
                         .productMaterialCode(omsProductionOrder.getProductMaterialCode())
                         .productMaterialDesc(omsProductionOrder.getProductMaterialDesc())
                         .bomVersion(omsProductionOrder.getBomVersion())
-                        .productNum(productNum)
-                        .rawMaterialNum(rawMaterialNum)
-                        .status(status)
+                        .productNum(productNumPass)
+                        .rawMaterialNum(rawMaterialNumPass)
+                        .rawMaterialContentNum(rawMaterialContentNumPass)
                         .productStartDate(omsProductionOrder.getProductStartDate())
+                        .status(omsRawMaterialFeedbacksPass.get(0).getStatus())
                         .build();
+                omsRawMaterialFeedback.setRemark(omsRawMaterialFeedbacksPass.get(0).getRemark());
+                returnOmsRawMaterialFeedbacks.add(omsRawMaterialFeedback);
+            }
+            if (omsRawMaterialFeedbacksRe.size() > 0) {
+                //原材料满足量
+                BigDecimal rawMaterialContentNumRe = omsRawMaterialFeedbacksRe.stream()
+                        .map(OmsRawMaterialFeedback::getRawMaterialContentNum).reduce(BigDecimal.ZERO,BigDecimal::add);
+                OmsRawMaterialFeedback omsRawMaterialFeedback = OmsRawMaterialFeedback.builder()
+                        .id(omsRawMaterialFeedbacksRe.get(0).getId())
+                        .productMaterialCode(omsProductionOrder.getProductMaterialCode())
+                        .productMaterialDesc(omsProductionOrder.getProductMaterialDesc())
+                        .bomVersion(omsProductionOrder.getBomVersion())
+                        .productNum(productNumRe)
+                        .rawMaterialNum(rawMaterialNumRe)
+                        .rawMaterialContentNum(rawMaterialContentNumRe)
+                        .productStartDate(omsProductionOrder.getProductStartDate())
+                        .status(omsRawMaterialFeedbacksRe.get(0).getStatus())
+                        .build();
+                omsRawMaterialFeedback.setRemark(omsRawMaterialFeedbacksRe.get(0).getRemark());
+                returnOmsRawMaterialFeedbacks.add(omsRawMaterialFeedback);
             }
         }
-        return omsRawMaterialFeedback;
+        return returnOmsRawMaterialFeedbacks;
     }
 
     /**
