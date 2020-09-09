@@ -170,7 +170,6 @@ public class OmsProductionOrder extends BaseEntity {
     @DateTimeFormat("yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "交货日期")
-    @NotBlank
     private String deliveryDate;
 
 
@@ -248,7 +247,6 @@ public class OmsProductionOrder extends BaseEntity {
      */
     @ExcelProperty(value = "PCB专用号",index = 22)
     @ApiModelProperty(value = "PCB专用号")
-    @NotBlank
     private String pcbSpecialCode;
     /**
      * 委外方式 0：半委外，1：全委外，2：自制
@@ -287,7 +285,6 @@ public class OmsProductionOrder extends BaseEntity {
      * 发往地
      */
     @ApiModelProperty(value = "发往地")
-    @NotBlank
     private String destination;
 
     /**
