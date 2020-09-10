@@ -993,7 +993,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                     String messageOne = StrUtil.format("XQDDH:{},FLAG:{},MESSAGE:{},PLNUM:{};"
                             ,demandCode,flag,message,plnum);
                     sapBuffer.append(messageOne);
-                    if (SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(flag)) {
+                    if (SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(flag)||SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(flag)) {
                         //成功：状态改为已传SAP，更新计划订单号
                         OmsDemandOrderGatherEdit edit = new OmsDemandOrderGatherEdit().builder()
                                 .demandOrderCode(demandCode)
