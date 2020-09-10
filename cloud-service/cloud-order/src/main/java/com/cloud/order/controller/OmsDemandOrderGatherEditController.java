@@ -102,6 +102,9 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     Example listCondition(OmsDemandOrderGatherEdit omsDemandOrderGatherEdit){
         Example example = new Example(OmsDemandOrderGatherEdit.class);
         Example.Criteria criteria = example.createCriteria();
+        if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getDemandOrderCode())) {
+            criteria.andEqualTo("demandOrderCode",omsDemandOrderGatherEdit.getDemandOrderCode() );
+        }
         if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getProductMaterialCode())) {
             criteria.andEqualTo("productMaterialCode",omsDemandOrderGatherEdit.getProductMaterialCode() );
         }
