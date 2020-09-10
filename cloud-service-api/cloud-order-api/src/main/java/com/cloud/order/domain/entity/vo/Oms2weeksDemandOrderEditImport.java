@@ -97,7 +97,7 @@ public class Oms2weeksDemandOrderEditImport {
     /**
      * 地点
      */
-    @ExcelProperty(value = "地点")
+    @ExcelProperty(value = "接收库位")
     @NotBlank
     private String place;
 
