@@ -552,7 +552,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
      */
     private String getOrderCode() {
         StringBuffer orderCodeBuffer = new StringBuffer(ORDER_CODE_PRE);
-        orderCodeBuffer.append(DateUtils.getDate().replace("-", ""));
+        orderCodeBuffer.append(DateUtils.dateTimeNow());
         R seqResult = remoteSequeceService.selectSeq(OMS_REAL_ORDER_SEQ_NAME, OMS_REAL_ORDER_SEQ_LENGTH);
         if (!seqResult.isSuccess()) {
             logger.error("真单新增生成订单号时获取序列号异常 req:{},res:{}", OMS_REAL_ORDER_SEQ_NAME, JSONObject.toJSON(seqResult));
