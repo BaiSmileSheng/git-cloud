@@ -342,6 +342,12 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         Example example = new Example(OmsDemandOrderGatherEdit.class);
         example.and().andNotEqualTo("status",DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
         List<OmsDemandOrderGatherEdit> hisList = omsDemandOrderGatherEditMapper.selectByExample(example);
+        Set<String> randomSet = new HashSet<>();
+        for (int i = 0; i < list.size()*10; i++) {
+            randomSet.add(RandomUtil.randomNumbers(8));
+        }
+        List<String> randomList = CollectionUtil.newArrayList(randomSet);
+        int iRandom = 0;
         for(OmsDemandOrderGatherEdit demandOrderGatherEdit:list){
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
@@ -413,7 +419,8 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                     demandOrderGatherEdit.setUnit(cdMaterialInfo.getPrimaryUom());
                 }
             }
-            String seq = RandomUtil.randomNumbers(6)+ com.cloud.common.utils.RandomUtil.randomInt(2);
+            String seq = randomList.get(iRandom);
+            iRandom++;
             String demandOrderCode = StrUtil.concat(true, "DM", DateUtils.dateTime(), seq);
             demandOrderGatherEdit.setDemandOrderCode(demandOrderCode);
             //订单来源
@@ -483,15 +490,6 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         }
         return new ExcelImportResult(successDtos,errDtos,otherDtos);
     }
-
-//    public static void main(String[] args) {
-//        Set<String> s = new HashSet<>();
-//        ArrayUtil.rand
-//        for (int i = 0; i < 10500; i++) {
-//            s.add(RandomUtil.randomNumbers(6)+ com.cloud.common.utils.RandomUtil.randomInt(2));
-//        }
-//        Console.log(s.size());
-//    }
 
     /**
      * 需求数据导入
