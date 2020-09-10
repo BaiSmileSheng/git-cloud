@@ -711,11 +711,11 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             if(null == omsRealOrder.getOrderNum()){
                 errMsgBuffer.append("订单不能为空;");
             }
-            //地点
-            String place = omsRealOrder.getPlace();
-            if(StringUtils.isBlank(place)){
-                errMsgBuffer.append("地点不能为空;");
-            }
+            //交货地点
+//            String place = omsRealOrder.getPlace();
+//            if(StringUtils.isBlank(place)){
+//                errMsgBuffer.append("地点不能为空;");
+//            }
             if(StringUtils.isNotBlank(omsRealOrder.getCustomerCode())
                     && StringUtils.isNotBlank(omsRealOrder.getProductFactoryCode())
                     && StringUtils.isNotBlank(omsRealOrder.getDeliveryDate())){
@@ -736,14 +736,6 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                         omsRealOrderReq.setProductDate(productDate);
                     }
                 }
-                //如果生产日期<今天,将生产日期改为今天
-                Date today = new Date();
-                String productDate = omsRealOrderReq.getProductDate();
-                Date productDateDate = DateUtils.dateTime(YYYY_MM_DD, productDate);
-                if(productDateDate.before(today)){
-                    String todayString = DateUtils.parseDateToStr(YYYY_MM_DD,today);
-                    omsRealOrderReq.setProductDate(todayString);
-                }
             }
             String errMsgBufferString = errMsgBuffer.toString();
             if(StringUtils.isNotBlank(errMsgBufferString)){
@@ -751,6 +743,14 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 errObjectDto.setErrMsg(errMsgBufferString);
                 errDtos.add(errObjectDto);
                 continue;
+            }
+            //如果生产日期<今天,将生产日期改为今天
+            Date today = new Date();
+            String productDate = omsRealOrderReq.getProductDate();
+            Date productDateDate = DateUtils.dateTime(YYYY_MM_DD, productDate);
+            if(productDateDate.before(today)){
+                String todayString = DateUtils.parseDateToStr(YYYY_MM_DD,today);
+                omsRealOrderReq.setProductDate(todayString);
             }
             omsRealOrderReq.setStatus(RealOrderStatusEnum.STATUS_0.getCode());
             omsRealOrderReq.setCreateTime(date);
