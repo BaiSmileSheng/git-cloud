@@ -95,6 +95,9 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
     Example listCondition(Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit){
         Example example = new Example(Oms2weeksDemandOrderEdit.class);
         Example.Criteria criteria = example.createCriteria();
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getDemandOrderCode())) {
+            criteria.andEqualTo("demandOrderCode",oms2weeksDemandOrderEdit.getDemandOrderCode() );
+        }
         if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getProductMaterialCode())) {
             criteria.andEqualTo("productMaterialCode",oms2weeksDemandOrderEdit.getProductMaterialCode() );
         }

@@ -442,9 +442,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 o.setExportRemark(exportRemark + NO_UPH_REMARK);
             }*/
             //筛选没有产品定员、分公司主管、班长的信息
-            if (StringUtils.isBlank(String.valueOf(o.getProductQuota()))
-                    || (StringUtils.isBlank(o.getBranchOffice())
-                    && StringUtils.isBlank(o.getMonitor()))) {
+            //应王福丽要求将产品产品定员的判断去除 2020-09-09  ltq
+            if (StringUtils.isBlank(o.getBranchOffice())
+                    || StringUtils.isBlank(o.getMonitor())) {
                 String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "，";
                 o.setExportRemark(exportRemark + NO_QUOTA_REMARK);
             }

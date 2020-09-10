@@ -351,7 +351,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                     && DateUtil.compare(s.getDeliveryDate(), weeksDemandOrderEdit.getDeliveryDate()) == 0);
             if (flag) {
                 errObjectDto.setObject(weeksDemandOrderEdit);
-                errObjectDto.setErrMsg("非初始状态数据不允许重复导入！");
+                errObjectDto.setErrMsg("非初始和传SAP异常状态数据不允许重复导入！");
                 errDtos.add(errObjectDto);
                 continue;
             }
@@ -574,14 +574,14 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
         Example example = new Example(Oms2weeksDemandOrderEdit.class);
         Example.Criteria criteria = example.createCriteria();
         List<Oms2weeksDemandOrderEdit> oms2weeksDemandOrderEditList ;
+        List<String> canStatus = CollectionUtil.newArrayList(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getCode(),
+                Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode(),
+                Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());
         if (StrUtil.isEmpty(ids)) {
             if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
                 criteria.andEqualTo("orderFrom", OrderFromEnum.OUT_SOURCE_TYPE_QWW.getCode());
             }
             listCondition(oms2weeksDemandOrderEditVo,criteria);
-            List<String> canStatus = CollectionUtil.newArrayList(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getCode(),
-                    Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode(),
-                    Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());
             if (StrUtil.isNotEmpty(oms2weeksDemandOrderEditVo.getStatus())) {
                 if (canStatus.contains(oms2weeksDemandOrderEditVo.getStatus())) {
                     criteria.andEqualTo("status", oms2weeksDemandOrderEditVo.getStatus());
@@ -605,9 +605,9 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 return R.error("无可删除数据！");
             }
             Boolean bo=listAll.stream()
-                    .anyMatch(s -> !s.getStatus().equals(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_YCSAP.getCode()));
+                    .anyMatch(s -> !canStatus.contains(s.getStatus()));
             if(bo){
-                return R.error("非[已传SAP]状态的数据不允许删除！");
+                return R.error("此状态的数据不允许删除！");
             }
         }
         deleteByIds(ids);
@@ -1003,8 +1003,10 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                         oms2weeksDemandOrderEdit.setStatus(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());
                     }
                     successList.add(oms2weeksDemandOrderEdit);
-                    String messageOne = StrUtil.format("ABLAD:{},MESSAGE:{};"
-                            ,outTableOutput.getString("ABLAD"),outTableOutput.getString("MESSAGE"));
+                    String type = outTableOutput.getString("TYPE");
+                    String flag = outTableOutput.getString("FLAG");
+                    String messageOne = StrUtil.format("ABLAD:{},MESSAGE:{};TPYE:{};FLAG:{}"
+                            ,outTableOutput.getString("ABLAD"),outTableOutput.getString("MESSAGE"),type,flag);
                     sapBuffer.append(messageOne);
                 }
                 sysInterfaceLog.setResults(sapBuffer.toString());

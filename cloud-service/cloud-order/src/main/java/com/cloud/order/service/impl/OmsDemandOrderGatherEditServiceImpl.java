@@ -8,6 +8,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.EasyExcel;
 import com.cloud.activiti.domain.entity.vo.OmsOrderMaterialOutVo;
@@ -24,10 +25,12 @@ import com.cloud.common.easyexcel.DTO.ExcelImportSucObjectDto;
 import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
-import com.cloud.common.utils.RandomUtil;
 import com.cloud.order.domain.entity.*;
 import com.cloud.order.domain.entity.vo.OmsDemandOrderGatherEditExport;
-import com.cloud.order.enums.*;
+import com.cloud.order.enums.DemandOrderGatherEditAuditStatusEnum;
+import com.cloud.order.enums.DemandOrderGatherEditStatusEnum;
+import com.cloud.order.enums.OrderFromEnum;
+import com.cloud.order.enums.ProductTypeOrderEnum;
 import com.cloud.order.mapper.OmsDemandOrderGatherEditMapper;
 import com.cloud.order.service.IOmsDemandOrderGatherEditHisService;
 import com.cloud.order.service.IOmsDemandOrderGatherEditImportService;
@@ -112,7 +115,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         if (StrUtil.equals(status, DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode())) {
             omsDemandOrderGatherEditNew.setStatus(DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getCode());
         }
-
+        omsDemandOrderGatherEditNew.setUpdateBy(omsDemandOrderGatherEdit.getUpdateBy());
         int i=updateByPrimaryKeySelective(omsDemandOrderGatherEditNew);
         return i > 0 ? R.ok() : R.error();
     }
@@ -230,6 +233,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 return R.error(StrUtil.format("此审核状态数据不允许确认下达！需求订单号：{}",omsDemandOrderGatherEdit.getDemandOrderCode()));
             }
             omsDemandOrderGatherEdit.setStatus(DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getCode());
+            omsDemandOrderGatherEdit.setUpdateBy(sysUser.getLoginName());
         }
         updateBatchByPrimaryKeySelective(list);
         return R.ok();
@@ -338,6 +342,12 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         Example example = new Example(OmsDemandOrderGatherEdit.class);
         example.and().andNotEqualTo("status",DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
         List<OmsDemandOrderGatherEdit> hisList = omsDemandOrderGatherEditMapper.selectByExample(example);
+        Set<String> randomSet = new HashSet<>();
+        for (int i = 0; i < list.size()*10; i++) {
+            randomSet.add(RandomUtil.randomNumbers(8));
+        }
+        List<String> randomList = CollectionUtil.newArrayList(randomSet);
+        int iRandom = 0;
         for(OmsDemandOrderGatherEdit demandOrderGatherEdit:list){
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
@@ -409,7 +419,8 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                     demandOrderGatherEdit.setUnit(cdMaterialInfo.getPrimaryUom());
                 }
             }
-            String seq = RandomUtil.randomInt(6);
+            String seq = randomList.get(iRandom);
+            iRandom++;
             String demandOrderCode = StrUtil.concat(true, "DM", DateUtils.dateTime(), seq);
             demandOrderGatherEdit.setDemandOrderCode(demandOrderCode);
             //订单来源
@@ -982,7 +993,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                     String messageOne = StrUtil.format("XQDDH:{},FLAG:{},MESSAGE:{},PLNUM:{};"
                             ,demandCode,flag,message,plnum);
                     sapBuffer.append(messageOne);
-                    if (SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(flag)) {
+                    if (SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(flag)||SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(flag)) {
                         //成功：状态改为已传SAP，更新计划订单号
                         OmsDemandOrderGatherEdit edit = new OmsDemandOrderGatherEdit().builder()
                                 .demandOrderCode(demandCode)
