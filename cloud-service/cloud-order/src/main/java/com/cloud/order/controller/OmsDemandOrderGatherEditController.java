@@ -321,6 +321,7 @@ public class OmsDemandOrderGatherEditController extends BaseController {
         if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
             example.and().andEqualTo("orderFrom", OrderFromEnum.OUT_SOURCE_TYPE_QWW.getCode());
         }
+        example.orderBy("deliveryDate").asc();
         startPage();
         List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList = omsDemandOrderGatherEditService.selectByExample(example);
         return getDataTable(omsDemandOrderGatherEditList);
