@@ -154,6 +154,7 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     @ApiOperation(value = "修改保存滚动计划需求操作 ", response = R.class)
     @HasPermissions("order:demandOrderGatherEdit:editSave")
     public R editSave(@RequestBody OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
+        omsDemandOrderGatherEdit.setUpdateBy(getLoginName());
         return omsDemandOrderGatherEditService.updateWithLimit(omsDemandOrderGatherEdit);
     }
 
@@ -321,6 +322,7 @@ public class OmsDemandOrderGatherEditController extends BaseController {
         if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
             example.and().andEqualTo("orderFrom", OrderFromEnum.OUT_SOURCE_TYPE_QWW.getCode());
         }
+        example.orderBy("deliveryDate").asc();
         startPage();
         List<OmsDemandOrderGatherEdit> omsDemandOrderGatherEditList = omsDemandOrderGatherEditService.selectByExample(example);
         return getDataTable(omsDemandOrderGatherEditList);

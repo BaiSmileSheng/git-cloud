@@ -13,7 +13,6 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
-import com.cloud.common.utils.RandomUtil;
 import com.cloud.order.domain.entity.*;
 import com.cloud.order.mapper.Oms2weeksDemandOrderMapper;
 import com.cloud.order.mapper.OmsDemandOrderGatherMapper;
@@ -289,7 +288,7 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
 //                throw new BusinessException("查序列号失败");
 //            }
 //            String seq = seqresult.getStr("data");
-            String seq = RandomUtil.randomInt(6);
+            String seq = cn.hutool.core.util.RandomUtil.randomNumbers(6)+ com.cloud.common.utils.RandomUtil.randomInt(2);
             //需求汇总单号
             String demandOrderCode = StrUtil.concat(true, "DM", DateUtils.dateTime(), seq);
             Date date = DateUtil.date();
