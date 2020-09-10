@@ -154,6 +154,7 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     @ApiOperation(value = "修改保存滚动计划需求操作 ", response = R.class)
     @HasPermissions("order:demandOrderGatherEdit:editSave")
     public R editSave(@RequestBody OmsDemandOrderGatherEdit omsDemandOrderGatherEdit) {
+        omsDemandOrderGatherEdit.setUpdateBy(getLoginName());
         return omsDemandOrderGatherEditService.updateWithLimit(omsDemandOrderGatherEdit);
     }
 
