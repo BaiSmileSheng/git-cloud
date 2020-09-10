@@ -214,7 +214,7 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
                 storeHouse=storeHouseMap.get("storehouseTo");
             }
             Oms2weeksDemandOrder oms2weeksDemandOrder = new Oms2weeksDemandOrder().builder()
-                    .orderType("LA").orderFrom("1")
+                    .orderType("GN00").orderFrom("1")
                     .productMaterialCode(res.getProductMaterialCode()).productMaterialDesc(res.getProductMaterialDesc())
                     .productFactoryCode(res.getProductFactoryCode()).productFactoryDesc(res.getProductFactoryDesc())
                     .customerCode(res.getCustomerCode()).customerDesc(res.getCustomerDesc())

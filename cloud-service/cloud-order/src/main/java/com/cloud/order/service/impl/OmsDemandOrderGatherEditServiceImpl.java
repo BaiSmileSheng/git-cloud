@@ -444,7 +444,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 errMsg.append(StrUtil.format("工厂：{}，客户编码{}无工厂库位信息！",demandOrderGatherEdit.getProductFactoryCode(),demandOrderGatherEdit.getCustomerCode()));
             }
             if (storeHouseMap != null && !StrUtil.equals(demandOrderGatherEdit.getPlace(), storeHouseMap.get("storehouseTo"))) {
-                errMsg.append(StrUtil.format("对应地点应为：{};", storeHouseMap.get("storehouseTo")));
+                errMsg.append(StrUtil.format("对应接收库位应为：{};", storeHouseMap.get("storehouseTo")));
             }
 
             //判断是否下市，下市则进入审批
