@@ -552,7 +552,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
      */
     private String getOrderCode() {
         StringBuffer orderCodeBuffer = new StringBuffer(ORDER_CODE_PRE);
-        orderCodeBuffer.append(DateUtils.getDate().replace("-", ""));
+        orderCodeBuffer.append(DateUtils.dateTimeNow());
         R seqResult = remoteSequeceService.selectSeq(OMS_REAL_ORDER_SEQ_NAME, OMS_REAL_ORDER_SEQ_LENGTH);
         if (!seqResult.isSuccess()) {
             logger.error("真单新增生成订单号时获取序列号异常 req:{},res:{}", OMS_REAL_ORDER_SEQ_NAME, JSONObject.toJSON(seqResult));
@@ -663,7 +663,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 errMsgBuffer.append("工厂编号不能为空;");
             }
             if(StringUtils.isNotBlank(factoryCode) && !companyCodeList.contains(factoryCode)){
-                errMsgBuffer.append(StrUtil.format("此工厂:{}不存在,请维护;",factoryCode));
+                errMsgBuffer.append(StrUtil.format("不存在此工厂:{};",factoryCode));
             }
 
             String productMaterialCode = omsRealOrder.getProductMaterialCode();
@@ -674,7 +674,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 //物料描述赋值
                 CdMaterialExtendInfo cdMaterialExtendInfo = materialExtendInfoMap.get(omsRealOrder.getProductMaterialCode());
                 if (null == cdMaterialExtendInfo || StringUtils.isBlank(cdMaterialExtendInfo.getMaterialDesc())) {
-                    errMsgBuffer.append(StrUtil.format("成品物料:{}不存在,请在成品物料信息中维护;",omsRealOrder.getProductMaterialCode()));
+                    errMsgBuffer.append(StrUtil.format("成品物料:{}不存在,请在MDM维护物料主数据;",omsRealOrder.getProductMaterialCode()));
                 } else {
                     omsRealOrderReq.setProductMaterialDesc(cdMaterialExtendInfo.getMaterialDesc());
                     String lifeCyle = cdMaterialExtendInfo.getLifeCycle();
@@ -687,17 +687,18 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 }
             }
 
+            //位姐要求 2020-09-10
             //客户编码
-            String customerCode = omsRealOrder.getCustomerCode();
-            if(StringUtils.isBlank(customerCode)){
-                errMsgBuffer.append("客户编码不存在,请维护;");
-            }
-            if(StringUtils.isNotBlank(customerCode) && !customerCodeList.contains(customerCode)){
-                errMsgBuffer.append(StrUtil.format("客户:{}不存在,请维护;",customerCode));
-            }
-            if(StringUtils.isBlank(omsRealOrder.getCustomerDesc())){
-                errMsgBuffer.append("客户名称不能为空;");
-            }
+//            String customerCode = omsRealOrder.getCustomerCode();
+//            if(StringUtils.isBlank(customerCode)){
+//                errMsgBuffer.append("客户编码不存在,请维护;");
+//            }
+//            if(StringUtils.isNotBlank(customerCode) && !customerCodeList.contains(customerCode)){
+//                errMsgBuffer.append(StrUtil.format("客户:{}不存在,请维护;",customerCode));
+//            }
+//            if(StringUtils.isBlank(omsRealOrder.getCustomerDesc())){
+//                errMsgBuffer.append("客户名称不能为空;");
+//            }
             if(StringUtils.isBlank(omsRealOrder.getMrpRange())){
                 errMsgBuffer.append("MRP范围不能为空;");
             }
@@ -709,9 +710,9 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             }
 
             if(null == omsRealOrder.getOrderNum()){
-                errMsgBuffer.append("订单不能为空;");
+                errMsgBuffer.append("订单数量不能为空;");
             }
-            //交货地点
+            //交货地点 王姐要求 2020-09-09
 //            String place = omsRealOrder.getPlace();
 //            if(StringUtils.isBlank(place)){
 //                errMsgBuffer.append("地点不能为空;");
