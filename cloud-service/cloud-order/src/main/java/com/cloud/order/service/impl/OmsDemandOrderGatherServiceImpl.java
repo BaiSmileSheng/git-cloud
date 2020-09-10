@@ -2,12 +2,14 @@ package com.cloud.order.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.Week;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
@@ -27,11 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -270,6 +270,11 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
         }
         //返回的汇总数据
         List<OmsDemandOrderGather> demandOrderGathers = new CollUtil().newArrayList();
+        Set<String> randomSet = new HashSet<>();
+        for (int i = 0; i < listRes.size()*10; i++) {
+            randomSet.add(RandomUtil.randomNumbers(8));
+        }
+        CopyOnWriteArrayList<String> randomList = CollectionUtil.newCopyOnWriteArrayList(randomSet);
         mapRes.forEach((keyCode, resList)->{
             //计算汇总订单数量
             BigDecimal orderNumTotal = resList.stream().map(OmsInternalOrderRes::getOrderNum).reduce(BigDecimal.ZERO,BigDecimal::add);
@@ -288,7 +293,8 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
 //                throw new BusinessException("查序列号失败");
 //            }
 //            String seq = seqresult.getStr("data");
-            String seq = cn.hutool.core.util.RandomUtil.randomNumbers(6)+ com.cloud.common.utils.RandomUtil.randomInt(2);
+            String seq = randomList.get(0);
+            randomList.remove(seq);
             //需求汇总单号
             String demandOrderCode = StrUtil.concat(true, "DM", DateUtils.dateTime(), seq);
             Date date = DateUtil.date();
