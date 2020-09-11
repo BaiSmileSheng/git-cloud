@@ -973,6 +973,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         if (StrUtil.isNotBlank(omsProductionOrder.getOrderType())) {
             criteria.andEqualTo("orderType", omsProductionOrder.getOrderType());
         }
+        if (StrUtil.isNotBlank(omsProductionOrder.getCreateBy())) {
+            criteria.andEqualTo("createBy", omsProductionOrder.getCreateBy());
+        }
         criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(",")));
         return example;
     }

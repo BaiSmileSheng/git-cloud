@@ -8,7 +8,6 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.EasyExcel;
 import com.cloud.activiti.domain.entity.vo.OmsOrderMaterialOutVo;
@@ -37,6 +36,7 @@ import com.cloud.order.service.IOmsDemandOrderGatherEditImportService;
 import com.cloud.order.service.IOmsDemandOrderGatherEditService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
+import com.cloud.order.util.OrderNoGenerateUtil;
 import com.cloud.system.domain.entity.*;
 import com.cloud.system.enums.LifeCycleEnum;
 import com.cloud.system.feign.*;
@@ -342,12 +342,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         Example example = new Example(OmsDemandOrderGatherEdit.class);
         example.and().andNotEqualTo("status",DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
         List<OmsDemandOrderGatherEdit> hisList = omsDemandOrderGatherEditMapper.selectByExample(example);
-        Set<String> randomSet = new HashSet<>();
-        for (int i = 0; i < list.size()*10; i++) {
-            randomSet.add(RandomUtil.randomNumbers(8));
-        }
-        List<String> randomList = CollectionUtil.newArrayList(randomSet);
-        int iRandom = 0;
+        List<String> randomList = OrderNoGenerateUtil.getOrderNos(list.size() * 2, "DM");
         for(OmsDemandOrderGatherEdit demandOrderGatherEdit:list){
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
@@ -419,9 +414,8 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                     demandOrderGatherEdit.setUnit(cdMaterialInfo.getPrimaryUom());
                 }
             }
-            String seq = randomList.get(iRandom);
-            iRandom++;
-            String demandOrderCode = StrUtil.concat(true, "DM", DateUtils.dateTime(), seq);
+            String demandOrderCode = randomList.get(0);
+            randomList.remove(0);
             demandOrderGatherEdit.setDemandOrderCode(demandOrderCode);
             //订单来源
             demandOrderGatherEdit.setOrderFrom(OrderFromEnum.getCodeByMsg(demandOrderGatherEdit.getOrderFrom()));
