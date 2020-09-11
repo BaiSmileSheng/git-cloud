@@ -2,14 +2,12 @@ package com.cloud.order.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.Week;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
@@ -19,6 +17,7 @@ import com.cloud.order.domain.entity.*;
 import com.cloud.order.mapper.Oms2weeksDemandOrderMapper;
 import com.cloud.order.mapper.OmsDemandOrderGatherMapper;
 import com.cloud.order.service.*;
+import com.cloud.order.util.OrderNoGenerateUtil;
 import com.cloud.system.feign.RemoteFactoryStorehouseInfoService;
 import com.cloud.system.feign.RemoteSequeceService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -29,9 +28,11 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -214,7 +215,7 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
                 storeHouse=storeHouseMap.get("storehouseTo");
             }
             Oms2weeksDemandOrder oms2weeksDemandOrder = new Oms2weeksDemandOrder().builder()
-                    .orderType("LA").orderFrom("1")
+                    .orderType("GN00").orderFrom("1")
                     .productMaterialCode(res.getProductMaterialCode()).productMaterialDesc(res.getProductMaterialDesc())
                     .productFactoryCode(res.getProductFactoryCode()).productFactoryDesc(res.getProductFactoryDesc())
                     .customerCode(res.getCustomerCode()).customerDesc(res.getCustomerDesc())
@@ -270,11 +271,7 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
         }
         //返回的汇总数据
         List<OmsDemandOrderGather> demandOrderGathers = new CollUtil().newArrayList();
-        Set<String> randomSet = new HashSet<>();
-        for (int i = 0; i < listRes.size()*10; i++) {
-            randomSet.add(RandomUtil.randomNumbers(8));
-        }
-        CopyOnWriteArrayList<String> randomList = CollectionUtil.newCopyOnWriteArrayList(randomSet);
+        List<String> randomList = OrderNoGenerateUtil.getOrderNos(listRes.size() * 2, "DM");
         mapRes.forEach((keyCode, resList)->{
             //计算汇总订单数量
             BigDecimal orderNumTotal = resList.stream().map(OmsInternalOrderRes::getOrderNum).reduce(BigDecimal.ZERO,BigDecimal::add);
@@ -288,15 +285,10 @@ public class OmsDemandOrderGatherServiceImpl extends BaseServiceImpl<OmsDemandOr
             Date deliveryDate = DateUtil.parse(res.getDeliveryDate());
             String deliveryYear = StrUtil.toString(DateUtil.year(deliveryDate));//交付日期年
             String deliveryWeek = StrUtil.split(keyCode, StrUtil.COMMA)[1];//交付日期周数
-//            R seqresult = remoteSequeceService.selectSeq("demand_order_gather_seq", 4);
-//            if(!seqresult.isSuccess()){
-//                throw new BusinessException("查序列号失败");
-//            }
-//            String seq = seqresult.getStr("data");
-            String seq = randomList.get(0);
-            randomList.remove(seq);
+
+            String demandOrderCode = randomList.get(0);
+            randomList.remove(0);
             //需求汇总单号
-            String demandOrderCode = StrUtil.concat(true, "DM", DateUtils.dateTime(), seq);
             Date date = DateUtil.date();
             int thisWeek = NumberUtil.compare(flag , Week.FRIDAY.getValue()) == 0 ? DateUtil.weekOfYear(date) : DateUtil.weekOfYear(date) - 1;
             OmsDemandOrderGather omsDemandOrderGather = new OmsDemandOrderGather().builder()

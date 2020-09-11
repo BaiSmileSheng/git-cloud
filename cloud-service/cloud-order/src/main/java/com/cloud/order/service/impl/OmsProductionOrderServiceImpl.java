@@ -101,7 +101,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
     private static final String NO_UPH_REMARK = "缺少UPH节拍数据";
 
-    private static final String NO_QUOTA_REMARK = "缺少产品定员、分公司主管、班长信息";
+    private static final String NO_QUOTA_REMARK = "缺少分公司主管、班长信息";
 
     private static final String NO_LIFECYCLE_REMARK = "缺少生命周期信息";
 

@@ -433,7 +433,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 errMsg.append(StrUtil.format("工厂：{}，客户编码{}无工厂库位信息！",weeksDemandOrderEdit.getProductFactoryCode(),weeksDemandOrderEdit.getCustomerCode()));
             }
             if (storeHouseMap != null && !StrUtil.equals(weeksDemandOrderEdit.getPlace(), storeHouseMap.get("storehouseTo"))) {
-                errMsg.append(StrUtil.format("对应地点应为：{};",storeHouseMap.get("storehouseTo")));
+                errMsg.append(StrUtil.format("对应接收库位应为：{};",storeHouseMap.get("storehouseTo")));
             }
             //判断是否下市，下市则进入审批
             CdMaterialExtendInfo extendInfo = materialExtendInfoMap.get(weeksDemandOrderEdit.getProductMaterialCode());

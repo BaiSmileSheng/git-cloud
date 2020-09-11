@@ -85,7 +85,7 @@ public class OmsDemandOrderGatherEditImportTemplete {
     /**
      * 地点
      */
-    @ExcelProperty(value = "地点")
+    @ExcelProperty(value = "接收库位")
     private String place;
 
     /**
