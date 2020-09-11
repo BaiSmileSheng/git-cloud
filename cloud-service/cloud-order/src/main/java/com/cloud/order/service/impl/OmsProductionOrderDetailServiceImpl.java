@@ -374,16 +374,21 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
                 .filter(r ->ProductOrderConstants.STATUS_ZERO.equals(r.getStatus())).collect(Collectors.toList());
         if (ProductOrderConstants.STATUS_ZERO.equals(status)) {
             if (omsRawMaterialFeedbacksZero.size() <= 0) {
-                OmsRawMaterialFeedback omsRawMaterialFeedback = new OmsRawMaterialFeedback();
-                omsRawMaterialFeedback.setIds(omsProductionOrder.getProductMaterialCode() + omsProductionOrder.getBomVersion());
-                omsRawMaterialFeedback.setProductMaterialCode(omsProductionOrder.getProductMaterialCode());
-                omsRawMaterialFeedback.setProductMaterialDesc(omsProductionOrder.getProductMaterialDesc());
-                omsRawMaterialFeedback.setBomVersion(omsProductionOrder.getBomVersion());
-                omsRawMaterialFeedback.setProductNum(productNum.subtract(productNumPass).subtract(productNumRe));
-                omsRawMaterialFeedback.setRawMaterialNum(rawMaterialNum.subtract(rawMaterialNumPass).subtract(rawMaterialNumRe));
-                omsRawMaterialFeedback.setProductStartDate(omsProductionOrder.getProductStartDate());
-                omsRawMaterialFeedback.setStatus("");
-                returnOmsRawMaterialFeedbacks.add(omsRawMaterialFeedback);
+                BigDecimal productNumZero = productNum.subtract(productNumPass).subtract(productNumRe);
+                BigDecimal rawMatrialNumZero = rawMaterialNum.subtract(rawMaterialNumPass).subtract(rawMaterialNumRe);
+                //增加排产量、原材料排产量的值
+                if (productNumZero.compareTo(BigDecimal.ZERO) > 0 && rawMatrialNumZero.compareTo(BigDecimal.ZERO) > 0) {
+                    OmsRawMaterialFeedback omsRawMaterialFeedback = new OmsRawMaterialFeedback();
+                    omsRawMaterialFeedback.setIds(omsProductionOrder.getProductMaterialCode() + omsProductionOrder.getBomVersion());
+                    omsRawMaterialFeedback.setProductMaterialCode(omsProductionOrder.getProductMaterialCode());
+                    omsRawMaterialFeedback.setProductMaterialDesc(omsProductionOrder.getProductMaterialDesc());
+                    omsRawMaterialFeedback.setBomVersion(omsProductionOrder.getBomVersion());
+                    omsRawMaterialFeedback.setProductNum(productNumZero);
+                    omsRawMaterialFeedback.setRawMaterialNum(rawMatrialNumZero);
+                    omsRawMaterialFeedback.setProductStartDate(omsProductionOrder.getProductStartDate());
+                    omsRawMaterialFeedback.setStatus("");
+                    returnOmsRawMaterialFeedbacks.add(omsRawMaterialFeedback);
+                }
             } else {
                 OmsRawMaterialFeedback omsRawMaterialFeedback = omsRawMaterialFeedbacksZero.get(0);
                 omsRawMaterialFeedback.setProductNum(productNum.subtract(productNumPass).subtract(productNumRe));
