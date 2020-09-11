@@ -351,7 +351,8 @@ public class OmsProductionOrderController extends BaseController {
             @ApiImplicitParam(name = "orderType", value = "sap订单类型", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "dateType", value = "查询日期类型", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "productOrderCode", value = "生产订单号", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "orderCode", value = "排产订单号", required = false, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "orderCode", value = "排产订单号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "createBy", value = "创建人", required = false, paramType = "query", dataType = "String")
     })
     @HasPermissions("order:productionOrder:selectAllPage")
     public TableDataInfo selectAllPage(@ApiIgnore() OmsProductionOrder omsProductionOrder) {
