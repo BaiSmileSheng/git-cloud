@@ -1355,7 +1355,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                         .productStartDate(o.getProductStartDate())
                         .purchaseGroup(bom.getPurchaseGroup())
                         .storagePoint(bom.getStoragePoint())
-                        .status("0")
+                        .status(StrUtil.isNotBlank(bom.getPurchaseGroup())
+                                ? ProductOrderConstants.DETAIL_STATUS_ZERO : ProductOrderConstants.DETAIL_STATUS_ONE)//修改bom拆解，无采购组直接确认
                         .delFlag("0")
                         .build();
                 omsProductionOrderDetail.setCreateTime(new Date());
