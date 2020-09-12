@@ -161,5 +161,11 @@ public class OmsRawMaterialFeedback extends BaseEntity {
     @Transient
     @ApiModelProperty(value = "id字符串，逗号隔开")
     private String ids;
+    /**
+     * 排产员
+     */
+    @Transient
+    @ApiModelProperty(value = "排产员")
+    private String productPerson;
 
 }

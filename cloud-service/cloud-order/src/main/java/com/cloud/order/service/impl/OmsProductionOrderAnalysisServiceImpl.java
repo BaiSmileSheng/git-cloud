@@ -10,12 +10,10 @@ import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.OmsProductionOrderAnalysis;
-import com.cloud.order.domain.entity.OmsRawMaterialFeedback;
 import com.cloud.order.domain.entity.OmsRealOrder;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderAnalysisVo;
 import com.cloud.order.domain.entity.vo.OmsRealOrderVo;
 import com.cloud.order.mapper.OmsProductionOrderAnalysisMapper;
-import com.cloud.order.mapper.OmsRealOrderMapper;
 import com.cloud.order.service.IOmsProductionOrderAnalysisService;
 import com.cloud.order.service.IOmsRealOrderService;
 import com.cloud.system.domain.entity.CdProductPassage;
@@ -252,7 +250,7 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
             criteria.andLessThanOrEqualTo("productDate", omsRealOrder.getProductDate());
         }
         SimpleDateFormat sft = new SimpleDateFormat("yyyy-MM-dd");
-        criteria.andGreaterThan("productDate", sft.format(new Date()));
+        criteria.andGreaterThanOrEqualTo("productDate", sft.format(new Date()));
         List<OmsRealOrder> omsRealOrders = omsRealOrderService.selectByExample(example);
         //提取修改生产日期但没有填写备注的真单数据 2020-07-23 by ltq
         List<OmsRealOrder> omsRealOrderNoRemark = omsRealOrders.stream()
@@ -573,11 +571,24 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
             productPassageList = passageResult.getCollectData(new TypeReference<List<CdProductPassage>>() {
             });
         }
-        Map<String, BigDecimal> productPassageMap = productPassageList.stream().
-                collect(Collectors.toMap(k -> k.getProductFactoryCode() +
-                        k.getProductMaterialCode() + k.getStorehouseTo(), CdProductPassage::getPassageNum));
-        productWarehouseMap.forEach((key, value) -> productPassageMap.merge(key, value, BigDecimal::add));
+//        Map<String, BigDecimal> productPassageMap = productPassageList.stream().
+//                collect(Collectors.toMap(k -> k.getProductFactoryCode() +
+//                        k.getProductMaterialCode() + k.getStorehouseTo(), CdProductPassage::getPassageNum));
+        Map<Object, BigDecimal> productPassageMap = productPassageList.stream().
+                collect(Collectors.groupingBy(e -> fetchGroupKeyArtificial(e),Collectors.reducing(BigDecimal.ZERO,CdProductPassage::getPassageNum,BigDecimal::add)));
+
+//        productWarehouseMap.forEach((key, value) -> productPassageMap.merge(key, value, BigDecimal::add));
         return R.data(productPassageMap);
     }
 
+
+    /**
+     *  手工导入组合key
+     * @param cd
+     * @return
+     */
+    private static String fetchGroupKeyArtificial(CdProductPassage cd){
+        return StrUtil.concat(true, cd.getProductMaterialCode(), StrUtil.COMMA
+                ,cd.getProductFactoryCode(), StrUtil.COMMA,cd.getStorehouseTo());
+    }
 }
