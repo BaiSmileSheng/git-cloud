@@ -130,7 +130,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
         //可以导入的结果集 插入
         List<ExcelImportSucObjectDto> successList=easyExcelListener.getSuccessList();
         List<ExcelImportErrObjectDto> errList = easyExcelListener.getErrList();
-        if (CollectionUtil.isNotEmpty(successList) && CollectionUtil.isEmpty(errList)) {
+        if (CollectionUtil.isNotEmpty(successList) ) {
             List<Oms2weeksDemandOrderEdit> successResult = successList.stream().map(excelImportSucObjectDto -> {
                 Oms2weeksDemandOrderEdit weeksDemandOrderEdit = BeanUtil.copyProperties(excelImportSucObjectDto.getObject(), Oms2weeksDemandOrderEdit.class);
                 return weeksDemandOrderEdit;

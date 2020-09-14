@@ -617,7 +617,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         //可以导入的结果集 插入
         List<ExcelImportSucObjectDto> successList=easyExcelListener.getSuccessList();
         List<ExcelImportErrObjectDto> errList = easyExcelListener.getErrList();
-        if (CollectionUtil.isNotEmpty(successList) && CollectionUtil.isEmpty(errList)) {
+        if (CollectionUtil.isNotEmpty(successList) ) {
             List<OmsDemandOrderGatherEdit> successResult = successList.stream().map(excelImportSucObjectDto -> {
                 OmsDemandOrderGatherEdit demandOrderGatherEdit = BeanUtil.copyProperties(excelImportSucObjectDto.getObject(), OmsDemandOrderGatherEdit.class);
                 return demandOrderGatherEdit;
