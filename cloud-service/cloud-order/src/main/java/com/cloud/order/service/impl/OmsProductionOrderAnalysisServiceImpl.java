@@ -250,7 +250,7 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
             criteria.andLessThanOrEqualTo("productDate", omsRealOrder.getProductDate());
         }
         SimpleDateFormat sft = new SimpleDateFormat("yyyy-MM-dd");
-        criteria.andGreaterThan("productDate", sft.format(new Date()));
+        criteria.andGreaterThanOrEqualTo("productDate", sft.format(new Date()));
         List<OmsRealOrder> omsRealOrders = omsRealOrderService.selectByExample(example);
         //提取修改生产日期但没有填写备注的真单数据 2020-07-23 by ltq
         List<OmsRealOrder> omsRealOrderNoRemark = omsRealOrders.stream()

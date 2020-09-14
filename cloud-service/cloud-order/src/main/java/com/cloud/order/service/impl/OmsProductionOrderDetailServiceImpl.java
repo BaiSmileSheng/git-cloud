@@ -305,6 +305,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
                 omsRawMaterialFeedback.setRawMaterialNum(rawMaterialNum);
                 omsRawMaterialFeedback.setProductStartDate(omsProductionOrder.getProductStartDate());
                 omsRawMaterialFeedback.setStatus("3");
+                omsRawMaterialFeedback.setProductPerson(omsProductionOrder.getCreateBy());
                 omsRawMaterialFeedbacks.add(omsRawMaterialFeedback);
             }
         });
@@ -387,6 +388,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
                     omsRawMaterialFeedback.setRawMaterialNum(rawMatrialNumZero);
                     omsRawMaterialFeedback.setProductStartDate(omsProductionOrder.getProductStartDate());
                     omsRawMaterialFeedback.setStatus("");
+                    omsRawMaterialFeedback.setProductPerson(omsProductionOrder.getCreateBy());
                     returnOmsRawMaterialFeedbacks.add(omsRawMaterialFeedback);
                 }
             } else {
@@ -410,6 +412,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
                         .rawMaterialContentNum(rawMaterialContentNumPass)
                         .productStartDate(omsProductionOrder.getProductStartDate())
                         .status(omsRawMaterialFeedbacksPass.get(0).getStatus())
+                        .productPerson(omsProductionOrder.getCreateBy())
                         .build();
                 omsRawMaterialFeedback.setRemark(omsRawMaterialFeedbacksPass.get(0).getRemark());
                 returnOmsRawMaterialFeedbacks.add(omsRawMaterialFeedback);
@@ -428,6 +431,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
                         .rawMaterialContentNum(rawMaterialContentNumRe)
                         .productStartDate(omsProductionOrder.getProductStartDate())
                         .status(omsRawMaterialFeedbacksRe.get(0).getStatus())
+                        .productPerson(omsProductionOrder.getCreateBy())
                         .build();
                 omsRawMaterialFeedback.setRemark(omsRawMaterialFeedbacksRe.get(0).getRemark());
                 returnOmsRawMaterialFeedbacks.add(omsRawMaterialFeedback);

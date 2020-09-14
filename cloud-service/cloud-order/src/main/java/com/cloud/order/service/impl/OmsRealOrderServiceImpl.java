@@ -27,7 +27,12 @@ import com.cloud.order.domain.entity.OmsInternalOrderRes;
 import com.cloud.order.domain.entity.OmsRealOrder;
 import com.cloud.order.domain.entity.vo.OmsRealOrderExcelImportErrorVo;
 import com.cloud.order.domain.entity.vo.OmsRealOrderExcelImportVo;
-import com.cloud.order.enums.*;
+import com.cloud.order.enums.InternalOrderResEnum;
+import com.cloud.order.enums.RealOrderAduitStatusEnum;
+import com.cloud.order.enums.RealOrderClassEnum;
+import com.cloud.order.enums.RealOrderDataSourceEnum;
+import com.cloud.order.enums.RealOrderFromEnum;
+import com.cloud.order.enums.RealOrderStatusEnum;
 import com.cloud.order.mail.MailService;
 import com.cloud.order.mapper.OmsRealOrderMapper;
 import com.cloud.order.service.IOmsInternalOrderResService;
@@ -35,6 +40,7 @@ import com.cloud.order.service.IOmsRealOrderExcelImportService;
 import com.cloud.order.service.IOmsRealOrderService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
+import com.cloud.order.util.OrderNoGenerateUtil;
 import com.cloud.system.domain.entity.CdFactoryStorehouseInfo;
 import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.system.domain.entity.SysDictData;
@@ -45,7 +51,6 @@ import com.cloud.system.feign.RemoteDictDataService;
 import com.cloud.system.feign.RemoteFactoryInfoService;
 import com.cloud.system.feign.RemoteFactoryStorehouseInfoService;
 import com.cloud.system.feign.RemoteMaterialExtendInfoService;
-import com.cloud.system.feign.RemoteSequeceService;
 import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.seata.spring.annotation.GlobalTransactional;
@@ -63,7 +68,12 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -80,9 +90,6 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
     private static Logger logger = LoggerFactory.getLogger(OmsRealOrderServiceImpl.class);
     @Autowired
     private OmsRealOrderMapper omsRealOrderMapper;
-
-    @Autowired
-    private RemoteSequeceService remoteSequeceService;
 
     @Autowired
     private IOmsInternalOrderResService omsInternalOrderResService;
@@ -237,8 +244,10 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         if(CollectionUtils.isEmpty(successResult)){
             return R.error("无需要插入的数据");
         }
+        List<String> randomList = OrderNoGenerateUtil.getOrderNos(successResult.size() * 2, ORDER_CODE_PRE);
         successResult.forEach( omsRealOrder -> {
-            String orderCode = getOrderCode();
+            String orderCode = randomList.get(0);
+            randomList.remove(0);
             omsRealOrder.setOrderCode(orderCode);
             omsRealOrder.setDataSource(RealOrderDataSourceEnum.DATA_SOURCE_1.getCode());
             omsRealOrder.setOrderFrom(orderFrom);
@@ -456,6 +465,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
     private Map<String, OmsRealOrder> getStringOmsRealOrderMap(List<OmsInternalOrderRes> internalOrderResList,
                                                                Map<String, CdFactoryStorehouseInfo> factoryStorehouseInfoMap,
                                                               String createBy,Map<String,String> sendEmailMap) {
+        List<String> randomList = OrderNoGenerateUtil.getOrderNos(internalOrderResList.size() * 2, ORDER_CODE_PRE);
         Map<String, OmsRealOrder> omsRealOrderMap = new HashMap<>();
         internalOrderResList.forEach(internalOrderRes -> {
             String productMaterialCode = internalOrderRes.getProductMaterialCode();
@@ -478,8 +488,9 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 BigDecimal undeliveryNum = orderNumRealX.subtract(deliveryNumX);
                 omsRealOrder.setUndeliveryNum(undeliveryNum.toString());
             } else {
-                //1.订单号生成规则 ZD+年月日+4位顺序号，循序号每日清零
-                String orderCode = getOrderCode();
+                //1.订单号生成规则 ZD+年月日+4位顺序号
+                String orderCode = randomList.get(0);
+                randomList.remove(0);
                 OmsRealOrder omsRealOrder = new OmsRealOrder();
                 omsRealOrder.setOrderCode(orderCode);
                 //订单类型
@@ -544,23 +555,6 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
 
         });
         return omsRealOrderMap;
-    }
-
-    /**
-     * 生成订单号 订单号生成规则 ZD+年月日+4位顺序号，循序号每日清零
-     * @return
-     */
-    private String getOrderCode() {
-        StringBuffer orderCodeBuffer = new StringBuffer(ORDER_CODE_PRE);
-        orderCodeBuffer.append(DateUtils.getDate().replace("-", ""));
-        R seqResult = remoteSequeceService.selectSeq(OMS_REAL_ORDER_SEQ_NAME, OMS_REAL_ORDER_SEQ_LENGTH);
-        if (!seqResult.isSuccess()) {
-            logger.error("真单新增生成订单号时获取序列号异常 req:{},res:{}", OMS_REAL_ORDER_SEQ_NAME, JSONObject.toJSON(seqResult));
-            throw new BusinessException("获取序列号异常");
-        }
-        String seq = seqResult.getStr("data");
-        orderCodeBuffer.append(seq);
-        return orderCodeBuffer.toString();
     }
 
     /**
@@ -663,7 +657,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 errMsgBuffer.append("工厂编号不能为空;");
             }
             if(StringUtils.isNotBlank(factoryCode) && !companyCodeList.contains(factoryCode)){
-                errMsgBuffer.append(StrUtil.format("此工厂:{}不存在,请维护;",factoryCode));
+                errMsgBuffer.append(StrUtil.format("不存在此工厂:{};",factoryCode));
             }
 
             String productMaterialCode = omsRealOrder.getProductMaterialCode();
@@ -674,7 +668,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 //物料描述赋值
                 CdMaterialExtendInfo cdMaterialExtendInfo = materialExtendInfoMap.get(omsRealOrder.getProductMaterialCode());
                 if (null == cdMaterialExtendInfo || StringUtils.isBlank(cdMaterialExtendInfo.getMaterialDesc())) {
-                    errMsgBuffer.append(StrUtil.format("成品物料:{}不存在,请在成品物料信息中维护;",omsRealOrder.getProductMaterialCode()));
+                    errMsgBuffer.append(StrUtil.format("成品物料:{}不存在,请在MDM维护物料主数据;",omsRealOrder.getProductMaterialCode()));
                 } else {
                     omsRealOrderReq.setProductMaterialDesc(cdMaterialExtendInfo.getMaterialDesc());
                     String lifeCyle = cdMaterialExtendInfo.getLifeCycle();
@@ -687,17 +681,18 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 }
             }
 
+            //位姐要求 2020-09-10
             //客户编码
-            String customerCode = omsRealOrder.getCustomerCode();
-            if(StringUtils.isBlank(customerCode)){
-                errMsgBuffer.append("客户编码不存在,请维护;");
-            }
-            if(StringUtils.isNotBlank(customerCode) && !customerCodeList.contains(customerCode)){
-                errMsgBuffer.append(StrUtil.format("客户:{}不存在,请维护;",customerCode));
-            }
-            if(StringUtils.isBlank(omsRealOrder.getCustomerDesc())){
-                errMsgBuffer.append("客户名称不能为空;");
-            }
+//            String customerCode = omsRealOrder.getCustomerCode();
+//            if(StringUtils.isBlank(customerCode)){
+//                errMsgBuffer.append("客户编码不存在,请维护;");
+//            }
+//            if(StringUtils.isNotBlank(customerCode) && !customerCodeList.contains(customerCode)){
+//                errMsgBuffer.append(StrUtil.format("客户:{}不存在,请维护;",customerCode));
+//            }
+//            if(StringUtils.isBlank(omsRealOrder.getCustomerDesc())){
+//                errMsgBuffer.append("客户名称不能为空;");
+//            }
             if(StringUtils.isBlank(omsRealOrder.getMrpRange())){
                 errMsgBuffer.append("MRP范围不能为空;");
             }
@@ -709,9 +704,9 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             }
 
             if(null == omsRealOrder.getOrderNum()){
-                errMsgBuffer.append("订单不能为空;");
+                errMsgBuffer.append("订单数量不能为空;");
             }
-            //交货地点
+            //交货地点 王姐要求 2020-09-09
 //            String place = omsRealOrder.getPlace();
 //            if(StringUtils.isBlank(place)){
 //                errMsgBuffer.append("地点不能为空;");
