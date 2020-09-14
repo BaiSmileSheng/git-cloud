@@ -135,6 +135,9 @@ public class OmsDemandOrderGatherEditController extends BaseController {
         if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getEndTime())) {
             criteria.andLessThanOrEqualTo("deliveryDate", omsDemandOrderGatherEdit.getEndTime() );
         }
+        if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getCreateBy())) {
+            criteria.andEqualTo("createBy", omsDemandOrderGatherEdit.getCreateBy() );
+        }
         return example;
     }
 

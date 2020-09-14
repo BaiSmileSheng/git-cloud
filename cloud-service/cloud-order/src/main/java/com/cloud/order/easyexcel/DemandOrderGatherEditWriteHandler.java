@@ -4,10 +4,14 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.write.handler.AbstractRowWriteHandler;
 import com.alibaba.excel.write.metadata.holder.WriteSheetHolder;
 import com.alibaba.excel.write.metadata.holder.WriteTableHolder;
+import com.cloud.common.core.domain.R;
 import com.cloud.common.utils.spring.ApplicationContextUtil;
 import com.cloud.order.enums.OrderFromEnum;
+import com.cloud.system.domain.entity.CdFactoryStorehouseInfo;
 import com.cloud.system.domain.entity.SysDictData;
 import com.cloud.system.feign.RemoteDictDataService;
+import com.cloud.system.feign.RemoteFactoryStorehouseInfoService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Row;
@@ -44,6 +48,7 @@ public class DemandOrderGatherEditWriteHandler extends AbstractRowWriteHandler {
             sheet.getRow(0).getCell(1).setCellComment(commentOrderFrom);
 
             RemoteDictDataService remoteDictDataService = ApplicationContextUtil.getBean(RemoteDictDataService.class);
+            RemoteFactoryStorehouseInfoService remoteFactoryStorehouseInfoService = ApplicationContextUtil.getBean(RemoteFactoryStorehouseInfoService.class);
 
             // 在第一行 第二列 SAP订单类型 批注
             List<SysDictData> list = remoteDictDataService.getType("plan_order_type");
@@ -56,6 +61,21 @@ public class DemandOrderGatherEditWriteHandler extends AbstractRowWriteHandler {
             commentOrderType.setString(new XSSFRichTextString(orderTypeStr));
             // 将批注添加到单元格对象中 从0开始计算 第1行第2列
             sheet.getRow(0).getCell(2).setCellComment(commentOrderType);
+
+            // 在第一行 第五列 客户编码 批注
+            R rFactoryStore = remoteFactoryStorehouseInfoService.findByExample(new CdFactoryStorehouseInfo());
+            if (rFactoryStore.isSuccess()) {
+                List<CdFactoryStorehouseInfo> factoryStorehouseInfos=rFactoryStore.getCollectData(new TypeReference<List<CdFactoryStorehouseInfo>>() {});
+                String customers=factoryStorehouseInfos.stream()
+                        .map(t -> t.getCustomerCode()).distinct()
+                        .collect(Collectors.joining(StrUtil.COMMA));
+                XSSFClientAnchor xssfClientAnchorCustomers = new XSSFClientAnchor(0, 0, 0, 0, (short)4, 0, (short)11, 7);
+                Comment commentCustomers = drawingPatriarch.createCellComment(xssfClientAnchorCustomers);
+                // 输入批注信息
+                commentCustomers.setString(new XSSFRichTextString(customers));
+                // 将批注添加到单元格对象中 从0开始计算 第1行第2列
+                sheet.getRow(0).getCell(4).setCellComment(commentCustomers);
+            }
 
             // 在第一行 第10列 交付日期 批注
             XSSFClientAnchor xssfClientAnchorDate = new XSSFClientAnchor(0, 0, 0, 0, (short)9, 0, (short)12, 1);

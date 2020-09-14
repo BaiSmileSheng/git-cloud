@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 工厂库位 Feign服务层
@@ -30,6 +29,13 @@ public interface RemoteFactoryStorehouseInfoService {
      */
     @GetMapping("factoryStorehouse/findOneByExample")
     R findOneByExample(@RequestParam(value = "cdFactoryStorehouseInfo") CdFactoryStorehouseInfo cdFactoryStorehouseInfo);
+
+    /**
+     * 根据条件查询
+     */
+    @GetMapping("factoryStorehouse/findByExample")
+    R findByExample(@RequestParam(value = "cdFactoryStorehouseInfo") CdFactoryStorehouseInfo cdFactoryStorehouseInfo);
+
 
     /**
      * 根据工厂，客户编码分组取接收库位
