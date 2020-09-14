@@ -504,10 +504,11 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             Example example = checkParams(order,sysUser);
             //增加删除状态的判断  2020-08-17  ltq
             if (StrUtil.isNotBlank(order.getStatus())
-                    && ProductOrderConstants.STATUS_FIVE.equals(order.getStatus())
-                    && ProductOrderConstants.STATUS_SIX.equals(order.getStatus())) {
-                log.info("传SAP中、已传SAP的排产订单不可删除！");
-                return R.error("传SAP中、已传SAP的排产订单不可删除！");
+                    &&(ProductOrderConstants.STATUS_FIVE.equals(order.getStatus())
+                    || ProductOrderConstants.STATUS_SIX.equals(order.getStatus())
+                    || ProductOrderConstants.STATUS_EIGHT.equals(order.getStatus()))) {
+                log.info("传SAP中、已传SAP、已关单的排产订单不可删除！");
+                return R.error("传SAP中、已传SAP、已关单的排产订单不可删除！");
             } else if (!StrUtil.isNotBlank(order.getStatus())){
                 //默认删除待评审状态的排产订单  2020-09-04  ltq
                 example.getOredCriteria().get(0).andEqualTo("status",ProductOrderConstants.STATUS_ZERO);
@@ -531,9 +532,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         }
         for (OmsProductionOrder omsProductionOrder : omsProductionOrders) {
             if (ProductOrderConstants.STATUS_FIVE.equals(omsProductionOrder.getStatus())
-                    || ProductOrderConstants.STATUS_SIX.equals(omsProductionOrder.getStatus())) {
-                log.error("传SAP中、已传SAP的排产订单不可删除！");
-                return R.error("传SAP中、已传SAP的排产订单不可删除！");
+                    || ProductOrderConstants.STATUS_SIX.equals(omsProductionOrder.getStatus())
+                    || ProductOrderConstants.STATUS_EIGHT.equals(omsProductionOrder.getStatus())) {
+                log.error("传SAP中、已传SAP、已关单的排产订单不可删除！");
+                return R.error("传SAP中、已传SAP、已关单的排产订单不可删除！");
             }
         }
         StringBuffer orderCodeBuffer = new StringBuffer();
