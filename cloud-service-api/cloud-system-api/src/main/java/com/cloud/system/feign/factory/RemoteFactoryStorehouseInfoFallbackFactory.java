@@ -30,6 +30,16 @@ public class RemoteFactoryStorehouseInfoFallbackFactory implements FallbackFacto
                 log.error("RemoteFactoryStorehouseInfoService.findOneByExample错误信息：{}",throwable.getMessage());
                 return R.error("服务器拥挤，请稍后再试！");
             }
+
+            /**
+             * 根据条件查询
+             */
+            @Override
+            public R findByExample(CdFactoryStorehouseInfo cdFactoryStorehouseInfo) {
+                log.error("RemoteFactoryStorehouseInfoService.findByExample错误信息：{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
+            }
+
             /**
              * 根据工厂，客户编码分组取接收库位
              * @param dicts
