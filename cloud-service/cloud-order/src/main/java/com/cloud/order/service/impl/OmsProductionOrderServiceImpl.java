@@ -676,12 +676,18 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 omsProductionOrder.setUpdateBy(sysUser.getLoginName());
             }
         }
+        //重新校验3版本闸口
+        List<OmsProductionOrder> omsProductionOrders = new ArrayList<>();
+        omsProductionOrders.add(omsProductionOrder);
+        List<OmsProductionOrder> checkOmsProductList = checkThreeVersion(omsProductionOrders, sysUser);
+        OmsProductionOrder order = checkOmsProductList.get(0);
         //更新排产订单
-        int updateCount = omsProductionOrderMapper.updateByPrimaryKeySelective(omsProductionOrder);
+        int updateCount = omsProductionOrderMapper.updateByPrimaryKeySelective(order);
         if (updateCount <= 0) {
             log.error("更新排产订单失败！");
             throw new BusinessException("更新排产订单失败！");
         }
+
         //bom拆解
         //查询bom清单，根据生产工厂、成品专用号、bom版本
         Dict dict = new Dict();
