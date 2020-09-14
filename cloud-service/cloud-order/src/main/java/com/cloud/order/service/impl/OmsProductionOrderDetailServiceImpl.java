@@ -395,6 +395,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
                 OmsRawMaterialFeedback omsRawMaterialFeedback = omsRawMaterialFeedbacksZero.get(0);
                 omsRawMaterialFeedback.setProductNum(productNum.subtract(productNumPass).subtract(productNumRe));
                 omsRawMaterialFeedback.setRawMaterialNum(rawMaterialNum.subtract(rawMaterialNumPass).subtract(rawMaterialNumRe));
+                omsRawMaterialFeedback.setProductPerson(omsProductionOrder.getCreateBy());
                 returnOmsRawMaterialFeedbacks.add(omsRawMaterialFeedback);
             }
         } else {
