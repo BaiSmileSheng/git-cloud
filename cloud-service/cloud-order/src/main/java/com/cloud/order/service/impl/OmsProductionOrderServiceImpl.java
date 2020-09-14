@@ -504,10 +504,11 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             Example example = checkParams(order,sysUser);
             //增加删除状态的判断  2020-08-17  ltq
             if (StrUtil.isNotBlank(order.getStatus())
-                    && ProductOrderConstants.STATUS_FIVE.equals(order.getStatus())
-                    && ProductOrderConstants.STATUS_SIX.equals(order.getStatus())) {
-                log.info("传SAP中、已传SAP的排产订单不可删除！");
-                return R.error("传SAP中、已传SAP的排产订单不可删除！");
+                    &&(ProductOrderConstants.STATUS_FIVE.equals(order.getStatus())
+                    || ProductOrderConstants.STATUS_SIX.equals(order.getStatus())
+                    || ProductOrderConstants.STATUS_EIGHT.equals(order.getStatus()))) {
+                log.info("传SAP中、已传SAP、已关单的排产订单不可删除！");
+                return R.error("传SAP中、已传SAP、已关单的排产订单不可删除！");
             } else if (!StrUtil.isNotBlank(order.getStatus())){
                 //默认删除待评审状态的排产订单  2020-09-04  ltq
                 example.getOredCriteria().get(0).andEqualTo("status",ProductOrderConstants.STATUS_ZERO);
@@ -531,9 +532,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         }
         for (OmsProductionOrder omsProductionOrder : omsProductionOrders) {
             if (ProductOrderConstants.STATUS_FIVE.equals(omsProductionOrder.getStatus())
-                    || ProductOrderConstants.STATUS_SIX.equals(omsProductionOrder.getStatus())) {
-                log.error("传SAP中、已传SAP的排产订单不可删除！");
-                return R.error("传SAP中、已传SAP的排产订单不可删除！");
+                    || ProductOrderConstants.STATUS_SIX.equals(omsProductionOrder.getStatus())
+                    || ProductOrderConstants.STATUS_EIGHT.equals(omsProductionOrder.getStatus())) {
+                log.error("传SAP中、已传SAP、已关单的排产订单不可删除！");
+                return R.error("传SAP中、已传SAP、已关单的排产订单不可删除！");
             }
         }
         StringBuffer orderCodeBuffer = new StringBuffer();
@@ -1340,6 +1342,11 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             String key = o.getProductMaterialCode() + o.getProductFactoryCode() + o.getBomVersion();
             List<CdBomInfo> bomInfos = bomMap.get(key);
             bomInfos.forEach(bom -> {
+                //判断采购组是否为空，为空直接已确认
+                String status = ProductOrderConstants.DETAIL_STATUS_ZERO;
+                if (!StrUtil.isNotBlank(bom.getPurchaseGroup())) {
+                    status = ProductOrderConstants.DETAIL_STATUS_ONE;
+                }
                 //计算原材料排产量
                 BigDecimal rawMaterialProductNum = bom.getBomNum().multiply(o.getProductNum())
                         .divide(bom.getBasicNum(), 2, BigDecimal.ROUND_HALF_UP);
@@ -1356,8 +1363,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                         .productStartDate(o.getProductStartDate())
                         .purchaseGroup(bom.getPurchaseGroup())
                         .storagePoint(bom.getStoragePoint())
-                        .status(StrUtil.isNotBlank(bom.getPurchaseGroup())
-                                ? ProductOrderConstants.DETAIL_STATUS_ZERO : ProductOrderConstants.DETAIL_STATUS_ONE)//修改bom拆解，无采购组直接确认
+                        .status(status)
                         .delFlag("0")
                         .build();
                 omsProductionOrderDetail.setCreateTime(new Date());
@@ -2387,8 +2393,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
         OmsProductionOrder omsProductionOrders = omsProductionOrderMapper.selectByPrimaryKey(id);
         if(!ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode().equals(omsProductionOrders.getStatus())
-            && !ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPYC.getCode().equals(omsProductionOrders.getStatus())){
-            return R.error("只能删除已传SAP或传SAP异常的数据");
+            && !ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPYC.getCode().equals(omsProductionOrders.getStatus())
+            && !ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_DCSAP.equals(omsProductionOrders.getStatus())){
+            return R.error("只能删除待传SAP或已传SAP或传SAP异常的数据");
         }
         //1.按单号删除审批流
         Map<String,Object> map = new HashMap<>();
