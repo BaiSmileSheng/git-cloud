@@ -1638,8 +1638,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         if (CollectionUtils.isEmpty(list)) {
             //增加按照查询条件下达SAP的逻辑
             if (StrUtil.isNotBlank(order.getStatus())
-                    && (!ProductOrderConstants.STATUS_FOUR.equals(order.getStatus())
-                    || !ProductOrderConstants.STATUS_SEVEN.equals(order.getStatus()))) {
+                    && (!ProductOrderConstants.STATUS_FOUR.equals(order.getStatus()) &&!ProductOrderConstants.STATUS_SEVEN.equals(order.getStatus()))) {
                 log.error("下达SAP操作只可以下达待传SAP、传SAP异常的订单！");
                 return R.error("下达SAP操作只可以下达待传SAP、传SAP异常的订单！");
             }
