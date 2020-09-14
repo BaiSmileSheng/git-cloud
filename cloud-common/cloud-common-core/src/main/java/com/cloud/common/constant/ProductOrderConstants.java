@@ -73,8 +73,11 @@ public class ProductOrderConstants {
      */
     public final static String NEW_FACTORY_CODE = "8310";
     public final static String NEW_LINE_CODE = "36";
-
-
+    /**
+     * 是否小批
+     */
+    public final static String SMALL_BATCH_TRUE = "0";
+    public final static String SMALL_BATCH_FALSE = "1";
 
 
 

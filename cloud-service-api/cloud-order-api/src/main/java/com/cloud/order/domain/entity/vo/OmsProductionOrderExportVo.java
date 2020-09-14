@@ -5,6 +5,7 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.order.converter.OutSourceTypeConverter;
 import com.cloud.order.converter.ProductionOrderClassConverter;
+import com.cloud.order.converter.SmallBatchConverter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -179,9 +180,16 @@ public class OmsProductionOrderExportVo {
     private String orderClass;
 
     /**
+     * 是否小批
+     */
+    @ExcelProperty(value = "是否小批",index = 19,converter= SmallBatchConverter.class)
+    @ApiModelProperty(value = "是否小批")
+    private String isSmallBatch;
+
+    /**
      * 备注
      */
-    @ExcelProperty(value = "备注", index = 19)
+    @ExcelProperty(value = "备注", index = 20)
     private String remark;
 
     /**
@@ -237,7 +245,7 @@ public class OmsProductionOrderExportVo {
      */
     private String delFlag;
 
-    @ExcelProperty(value = "导入失败原因", index = 20)
+    @ExcelProperty(value = "导入失败原因", index = 21)
     private String exportRemark;
 
 

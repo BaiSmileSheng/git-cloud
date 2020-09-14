@@ -1357,7 +1357,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                         .productStartDate(o.getProductStartDate())
                         .purchaseGroup(bom.getPurchaseGroup())
                         .storagePoint(bom.getStoragePoint())
-                        .status("0")
+                        .status(StrUtil.isNotBlank(bom.getPurchaseGroup())
+                                ? ProductOrderConstants.DETAIL_STATUS_ZERO : ProductOrderConstants.DETAIL_STATUS_ONE)//修改bom拆解，无采购组直接确认
                         .delFlag("0")
                         .build();
                 omsProductionOrderDetail.setCreateTime(new Date());
@@ -1478,7 +1479,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             //应徐海萍要求，8310工厂36号线不校验ZN认证  2020-09-03 ltq
             if (cdMaterialExtendInfo.getIsZnAttestation().equals(ZN_ATTESTATION)
                     && (!o.getProductFactoryCode().equals(ProductOrderConstants.NEW_FACTORY_CODE)
-                    || !o.getProductLineCode().equals(ProductOrderConstants.NEW_LINE_CODE))) {
+                    || !o.getProductLineCode().equals(ProductOrderConstants.NEW_LINE_CODE))
+                    && !o.getIsSmallBatch().equals(ProductOrderConstants.SMALL_BATCH_TRUE)) {
+                //增加小批判断    2020-09-11  ltq  by  zhaoshun
                 znOrderList.add(o);
                 o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_ONE);
             }

@@ -6,6 +6,7 @@ import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
 import com.cloud.order.converter.OutSourceTypeConverter;
 import com.cloud.order.converter.ProductionOrderStatusConverter;
+import com.cloud.order.converter.SmallBatchConverter;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -269,6 +270,13 @@ public class OmsProductionOrder extends BaseEntity {
     private String sapMessages;
 
     /**
+     * 是否小批
+     */
+    @ExcelProperty(value = "是否小批",index = 26,converter= SmallBatchConverter.class)
+    @ApiModelProperty(value = "是否小批")
+    private String isSmallBatch;
+
+    /**
      * 交货量
      */
     @ApiModelProperty(value = "交货量")
@@ -414,4 +422,5 @@ public class OmsProductionOrder extends BaseEntity {
      */
     @Transient
     private String procName;
+
 }
