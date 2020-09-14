@@ -1002,6 +1002,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     @Override
     public R exportSAP(OmsProductionOrder omsProductionOrder, SysUser sysUser) {
         Example example = checkParams(omsProductionOrder, sysUser);
+        example.orderBy("productStartDate");
+        example.orderBy("productLineCode");
         List<OmsProductionOrder> productionOrderVos = omsProductionOrderMapper.selectByExample(example);
         String productStartDateMin = null;
         String productStartDateMax = null;
@@ -1969,6 +1971,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             return R.error("邮件推送只推送已传SAP的订单！");
         }
         Example example = getSAPExample(omsProductionOrderReq);
+        example.orderBy("productStartDate");
+        example.orderBy("productLineCode");
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderMapper.selectByExample(example);
         if(CollectionUtils.isEmpty(omsProductionOrderList)){
             return R.ok("没有需要邮件推送的数据");
