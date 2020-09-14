@@ -503,11 +503,11 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         } else {
             Example example = checkParams(order,sysUser);
             //增加删除状态的判断  2020-08-17  ltq
-            if (StrUtil.isNotBlank(order.getStatus()) && ProductOrderConstants.STATUS_FOUR.equals(order.getStatus())
+            if (StrUtil.isNotBlank(order.getStatus())
                     && ProductOrderConstants.STATUS_FIVE.equals(order.getStatus())
                     && ProductOrderConstants.STATUS_SIX.equals(order.getStatus())) {
-                log.info("待传SAP、传SAP中、已传SAP的排产订单不可删除！");
-                return R.error("待传SAP、传SAP中、已传SAP的排产订单不可删除！");
+                log.info("传SAP中、已传SAP的排产订单不可删除！");
+                return R.error("传SAP中、已传SAP的排产订单不可删除！");
             } else if (!StrUtil.isNotBlank(order.getStatus())){
                 //默认删除待评审状态的排产订单  2020-09-04  ltq
                 example.getOredCriteria().get(0).andEqualTo("status",ProductOrderConstants.STATUS_ZERO);

@@ -182,8 +182,8 @@ public class OmsProductionOrderImportVo {
     /**
      * 是否小批
      */
-    @ExcelProperty(value = "是否小批",index = 19,converter= SmallBatchConverter.class)
-    @ApiModelProperty(value = "是否小批")
+    @ExcelProperty(value = "是否内部小批",index = 19,converter= SmallBatchConverter.class)
+    @ApiModelProperty(value = "是否内部小批")
     private String isSmallBatch;
 
     /**
