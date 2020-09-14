@@ -46,6 +46,8 @@
         <result property="createBy" column="create_by"/>
         <result property="updateTime" column="update_time"/>
         <result property="updateBy" column="update_by"/>
+        <result property="confirmBy" column="confirm_by"/>
+        <result property="confirmTime" column="confirm_time"/>
     </resultMap>
 
     <resultMap type="OmsProductionOrderDetailVo" id="OmsProductionOrderDetailVoResult">
@@ -61,7 +63,7 @@
     </resultMap>
 
     <sql id="selectOmsProductionOrderDetailVo">
-        select id, product_order_code,product_factory_code, material_code, material_desc,product_start_date, bom_num, basic_num, raw_material_product_num, unit, bom_version, purchase_group, storage_point, status, del_flag, remark, create_time, create_by, update_time, update_by from oms_production_order_detail
+        select id, product_order_code,product_factory_code, material_code, material_desc,product_start_date, bom_num, basic_num, raw_material_product_num, unit, bom_version, purchase_group, storage_point, status, del_flag, remark, create_time, create_by, update_time, update_by,confirm_by,confirm_time from oms_production_order_detail
     </sql>
 
     <select id="selectListByOrderCodes" parameterType="String" resultMap="OmsProductionOrderDetailResult">

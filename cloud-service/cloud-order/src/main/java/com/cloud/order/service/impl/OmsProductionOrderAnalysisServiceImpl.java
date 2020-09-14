@@ -49,6 +49,8 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
     private static final String STOREHOUSE_NUM = "STOREHOUSE_NUM";
     private static final String PASSAGE_NUM = "PASSAGE_NUM";
     private static final int DAYS = 14;
+
+    private static final String DATA_SOURCE_INTERFACE = "0";
     @Autowired
     private OmsProductionOrderAnalysisMapper omsProductionOrderAnalysisMapper;
     @Autowired
@@ -90,8 +92,10 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
         List<OmsRealOrder> omsRealOrderList = omsRealOrders.stream()
                 .filter(o ->"1".equals(o.getStatus()) && StrUtil.isBlank(o.getRemark())).collect(Collectors.toList());
         //过滤掉修改生产日期但没有填写备注的真单数据，该类数据不允许后续流程 2020-07-23 by ltq
+        //去除内单接口接入的PO数据  2020-09-14  ltq
         List<OmsRealOrder> realOrders = omsRealOrders.stream()
-                .filter(o -> !omsRealOrderList.contains(o)).collect(Collectors.toList());
+                .filter(o -> !omsRealOrderList.contains(o)
+                        && !o.getDataSource().equals(DATA_SOURCE_INTERFACE)).collect(Collectors.toList());
         R r = analysisGather(realOrders);
         if (!r.isSuccess()) {
             log.error("待排产订单分析汇总失败，原因：" + r.get("msg"));
@@ -251,6 +255,7 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
         }
         SimpleDateFormat sft = new SimpleDateFormat("yyyy-MM-dd");
         criteria.andGreaterThanOrEqualTo("productDate", sft.format(new Date()));
+        criteria.andEqualTo("dataSource", "1");
         List<OmsRealOrder> omsRealOrders = omsRealOrderService.selectByExample(example);
         //提取修改生产日期但没有填写备注的真单数据 2020-07-23 by ltq
         List<OmsRealOrder> omsRealOrderNoRemark = omsRealOrders.stream()
@@ -409,6 +414,7 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
         if (StringUtils.isNotBlank(omsRealOrder.getProductDate())) {
             criteria.andEqualTo("productDate", omsRealOrder.getProductDate());
         }
+        criteria.andEqualTo("dataSource", "1");
         List<OmsRealOrder> omsRealOrderList = omsRealOrderService.selectByExample(example);
         return R.data(omsRealOrderList);
     }
@@ -573,11 +579,11 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
         }
 //        Map<String, BigDecimal> productPassageMap = productPassageList.stream().
 //                collect(Collectors.toMap(k -> k.getProductFactoryCode() +
-//                        k.getProductMaterialCode() + k.getStorehouseTo(), CdProductPassage::getPassageNum));
+//                        k.getProductMaterialCode() + k.getStorehouseTo(), CdProductPassage::getPassageNum,(key1,key2)->key2));
         Map<Object, BigDecimal> productPassageMap = productPassageList.stream().
                 collect(Collectors.groupingBy(e -> fetchGroupKeyArtificial(e),Collectors.reducing(BigDecimal.ZERO,CdProductPassage::getPassageNum,BigDecimal::add)));
 
-//        productWarehouseMap.forEach((key, value) -> productPassageMap.merge(key, value, BigDecimal::add));
+        productWarehouseMap.forEach((key, value) -> productPassageMap.merge(key, value, BigDecimal::add));
         return R.data(productPassageMap);
     }
 
@@ -588,7 +594,7 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
      * @return
      */
     private static String fetchGroupKeyArtificial(CdProductPassage cd){
-        return StrUtil.concat(true, cd.getProductMaterialCode(), StrUtil.COMMA
-                ,cd.getProductFactoryCode(), StrUtil.COMMA,cd.getStorehouseTo());
+        return StrUtil.concat(true,
+                cd.getProductFactoryCode(),cd.getProductMaterialCode(),cd.getStorehouseTo());
     }
 }
