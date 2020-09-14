@@ -153,6 +153,9 @@
             <if test="status != null and status != ''">
                 and detail.status = #{status,jdbcType=VARCHAR}
             </if>
+            <if test="purchaseGroup != null and purchaseGroup != ''">
+                and detail.purchase_group = #{purchaseGroup,jdbcType=VARCHAR}
+            </if>
             <if test="productFactoryQuery != null and productFactoryQuery != ''">
                 and detail.product_factory_code in (${productFactoryQuery})
             </if>
