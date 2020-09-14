@@ -530,11 +530,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             return R.error("删除审批流程失败，原因："+deleteActMap.get("msg"));
         }
         for (OmsProductionOrder omsProductionOrder : omsProductionOrders) {
-            if (ProductOrderConstants.STATUS_FOUR.equals(omsProductionOrder.getStatus())
-                    || ProductOrderConstants.STATUS_FIVE.equals(omsProductionOrder.getStatus())
+            if (ProductOrderConstants.STATUS_FIVE.equals(omsProductionOrder.getStatus())
                     || ProductOrderConstants.STATUS_SIX.equals(omsProductionOrder.getStatus())) {
-                log.error("待传SAP、传SAP中、已传SAP的排产订单不可删除！");
-                return R.error("待传SAP、传SAP中、已传SAP的排产订单不可删除！");
+                log.error("传SAP中、已传SAP的排产订单不可删除！");
+                return R.error("传SAP中、已传SAP的排产订单不可删除！");
             }
         }
         StringBuffer orderCodeBuffer = new StringBuffer();
