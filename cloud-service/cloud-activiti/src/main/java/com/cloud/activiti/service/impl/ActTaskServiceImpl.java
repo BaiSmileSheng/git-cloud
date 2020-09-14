@@ -4,7 +4,6 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.cloud.activiti.constant.ActProcessContants;
 import com.cloud.activiti.consts.ActivitiConstant;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
@@ -15,8 +14,6 @@ import com.cloud.activiti.service.IBizBusinessService;
 import com.cloud.activiti.vo.HiTaskVo;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
-import com.cloud.common.log.enums.BusinessStatus;
-import com.cloud.common.log.enums.BusinessType;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -105,12 +102,23 @@ public class ActTaskServiceImpl implements IActTaskService {
         // 审批
         taskService.complete(bizAudit.getTaskId(), variables);
         SysUser user = remoteUserService.selectSysUserByUserId(auditUserId);
-        bizAudit.setAuditor(user.getUserName() + "-" + user.getLoginName());
-        bizAudit.setAuditorId(user.getUserId());
-        //增加审批历史
-        bizAuditService.insertBizAudit(bizAudit);
+        BizAudit bizAuditUpdate = new BizAudit();
+        bizAuditUpdate.setTaskId(bizAudit.getTaskId());
+        List<BizAudit> bizAudits = bizAuditService.selectBizAuditList(bizAuditUpdate);
+        if (CollectionUtil.isNotEmpty(bizAudits)) {
+            bizAuditUpdate = bizAudits.get(0);
+            bizAuditUpdate.setAuditor(user.getUserName() + "-" + user.getLoginName());
+            bizAuditUpdate.setAuditorId(user.getUserId());
+            bizAuditUpdate.setResult(bizAudit.getResult());
+            bizAuditUpdate.setComment(bizAudit.getComment());
+            //更新审批历史
+            bizAuditService.updateBizAudit(bizAuditUpdate);
+        }
         BizBusiness bizBusiness = new BizBusiness().setId(bizAudit.getBusinessKey())
-                .setProcInstId(bizAudit.getProcInstId());
+                .setProcInstId(bizAudit.getProcInstId())
+                .setProcDefKey(bizAudit.getProcDefKey())
+                .setProcName(bizAudit.getProcName())
+                .setApplyer(bizAudit.getApplyer());
         //如果有下级，设置审批人并推进，没有则结束
         if (CollectionUtil.isEmpty(userIds)) {
             businessService.setAuditor(bizBusiness, ActivitiConstant.RESULT_SUSPEND, auditUserId);

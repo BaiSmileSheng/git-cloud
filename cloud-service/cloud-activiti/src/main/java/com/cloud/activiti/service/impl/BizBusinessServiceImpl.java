@@ -7,23 +7,19 @@ package com.cloud.activiti.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.consts.ActivitiConstant;
+import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.mapper.BizBusinessMapper;
+import com.cloud.activiti.service.IBizAuditService;
 import com.cloud.activiti.service.IBizBusinessService;
 import com.cloud.activiti.service.IBizNodeService;
-import com.cloud.common.exception.BusinessException;
-import com.google.common.collect.Lists;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import com.cloud.activiti.constant.ActProcessContants;
-import com.cloud.activiti.service.IBizAuditService;
 import com.cloud.activiti.vo.HiTaskVo;
+import com.cloud.common.exception.BusinessException;
+import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.feign.RemoteUserService;
+import com.google.common.collect.Lists;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -34,6 +30,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>File：BizBusinessServiceImpl.java</p>
@@ -63,6 +60,8 @@ public class BizBusinessServiceImpl implements IBizBusinessService {
     private IBizNodeService bizNodeService;
     @Autowired
     private IBizAuditService bizAuditService;
+    @Autowired
+    private RemoteUserService remoteUserService;
 
     /**
      * 查询流程业务
@@ -174,7 +173,9 @@ public class BizBusinessServiceImpl implements IBizBusinessService {
         // 设置流程实例名称
         runtimeService.setProcessInstanceName(pi.getId(), business.getTitle());
         BizBusiness bizBusiness = new BizBusiness().setId(business.getId()).setProcInstId(pi.getId())
-                .setProcDefKey(pi.getProcessDefinitionKey());
+                .setProcDefKey(pi.getProcessDefinitionKey())
+                .setProcName(business.getProcName())
+                .setApplyer(business.getApplyer());
         // 假如开始就没有任务，那就认为是中止的流程，通常是不存在的
         if (CollectionUtil.isEmpty(userIds)) {
             setAuditor(bizBusiness, ActivitiConstant.RESULT_SUSPEND, business.getUserId());
@@ -252,10 +253,24 @@ public class BizBusinessServiceImpl implements IBizBusinessService {
         if (null != tasks && tasks.size() > 0) {
             Task task = tasks.get(0);
             if (null != userIds && userIds.size() > 0) {
+                List<String> auditorNames = new ArrayList<>();
                 // 添加审核候选人
                 for (String auditor : userIds) {
+                    SysUser user = remoteUserService.selectSysUserByUserId(Long.valueOf(auditor));
+                    auditorNames.add(user.getLoginName());
                     taskService.addCandidateUser(task.getId(), auditor);
                 }
+                BizAudit bizAudit = new BizAudit();
+                bizAudit.setTaskId(task.getId());
+                bizAudit.setProcDefKey(business.getProcDefKey());
+                bizAudit.setProcName(business.getProcName());
+                bizAudit.setApplyer(business.getApplyer());
+                bizAudit.setAuditor(CollectionUtil.join(auditorNames, StrUtil.COMMA));
+                bizAudit.setAuditorId(0L);
+                bizAudit.setCreateTime(new Date());
+                bizAudit.setResult(1);
+                bizAuditService.insertBizAudit(bizAudit);
+
                 business.setCurrentTask(task.getName());
             } else {
                 runtimeService.deleteProcessInstance(task.getProcessInstanceId(),
