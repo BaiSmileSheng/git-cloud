@@ -163,7 +163,8 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
             //判断其他审批流程
             if (BeanUtil.isNotEmpty(bizBusinesses) && bizBusinesses.size() <= 1 && businesses.size() <= 0) {
                 omsProductionOrder.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_TWO);
-                if (bizBusiness.getProcDefKey().equals(ActProcessContants.ACTIVITI_ADD_REVIEW)) {
+                if (bizBusiness.getProcDefKey().equals(ActProcessContants.ACTIVITI_ADD_REVIEW)
+                        || bizBusiness.getProcDefKey().equals(ActProcessContants.ACTIVITI_ZN_REVIEW)) {
                     omsProductionOrder.setStatus(ProductOrderConstants.STATUS_FOUR);
                 }
             } else if (BeanUtil.isNotEmpty(bizBusinesses) && bizBusinesses.size() <= 1 && businesses.size() > 0){
