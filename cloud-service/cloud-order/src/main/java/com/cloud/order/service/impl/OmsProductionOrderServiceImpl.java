@@ -1483,9 +1483,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }
             //应徐海萍要求，8310工厂36号线不校验ZN认证  2020-09-03 ltq
             if (cdMaterialExtendInfo.getIsZnAttestation().equals(ZN_ATTESTATION)
-                    && (!o.getProductFactoryCode().equals(ProductOrderConstants.NEW_FACTORY_CODE)
-                    || !o.getProductLineCode().equals(ProductOrderConstants.NEW_LINE_CODE))
-                    && !o.getIsSmallBatch().equals(ProductOrderConstants.SMALL_BATCH_TRUE)) {
+                    && (!ProductOrderConstants.NEW_FACTORY_CODE.equals(o.getProductFactoryCode())
+                    || !ProductOrderConstants.NEW_LINE_CODE.equals(o.getProductLineCode()))
+                    && !ProductOrderConstants.SMALL_BATCH_TRUE.equals(o.getIsSmallBatch())) {
                 //增加小批判断    2020-09-11  ltq  by  zhaoshun
                 znOrderList.add(o);
                 o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_ONE);
