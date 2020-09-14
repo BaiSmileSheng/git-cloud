@@ -202,6 +202,8 @@ public class BizBusinessServiceImpl implements IBizBusinessService {
                 business.getId().toString(), variables);
         business.setProcDefKey(pi.getProcessDefinitionKey());
         business.setProcInstId(pi.getProcessInstanceId());
+        business.setProcName(business.getProcName());
+        business.setApplyer(business.getApplyer());
         // 设置流程实例名称
         runtimeService.setProcessInstanceName(pi.getId(), business.getTitle());
 
@@ -215,6 +217,26 @@ public class BizBusinessServiceImpl implements IBizBusinessService {
                     .setResult(ActivitiConstant.RESULT_SUSPEND);
         }
         updateBizBusiness(business);
+
+        Set<String> userIds = (Set<String>) variables.get("signList");
+        // 添加审核候选人展示
+        int index = 0;
+        for (String auditor : userIds) {
+            Task task = tasks.get(index);
+            SysUser user = remoteUserService.selectSysUserByUserId(Long.valueOf(auditor));
+            BizAudit bizAudit = new BizAudit();
+            bizAudit.setTaskId(task.getId());
+            bizAudit.setProcDefKey(business.getProcDefKey());
+            bizAudit.setProcName(business.getProcName());
+            bizAudit.setApplyer(business.getApplyer());
+            bizAudit.setAuditor(user.getLoginName());
+            bizAudit.setAuditorId(user.getUserId());
+            bizAudit.setCreateTime(new Date());
+            bizAudit.setResult(1);
+            bizAuditService.insertBizAudit(bizAudit);
+            index++;
+        }
+
     }
 
     /**
@@ -260,6 +282,25 @@ public class BizBusinessServiceImpl implements IBizBusinessService {
                 for (String auditor : auditors) {
                     taskService.addCandidateUser(task.getId(), auditor);
                 }
+
+                List<String> auditorNames = new ArrayList<>();
+                // 添加审核候选人
+                for (String auditor : auditors) {
+                    SysUser user = remoteUserService.selectSysUserByUserId(Long.valueOf(auditor));
+                    auditorNames.add(user.getLoginName());
+                    taskService.addCandidateUser(task.getId(), auditor);
+                }
+                BizAudit bizAudit = new BizAudit();
+                bizAudit.setTaskId(task.getId());
+                bizAudit.setProcDefKey(business.getProcDefKey());
+                bizAudit.setProcName(business.getProcName());
+                bizAudit.setApplyer(business.getApplyer());
+                bizAudit.setAuditor(CollectionUtil.join(auditorNames, StrUtil.COMMA));
+                bizAudit.setAuditorId(0L);
+                bizAudit.setCreateTime(new Date());
+                bizAudit.setResult(1);
+                bizAuditService.insertBizAudit(bizAudit);
+
                 business.setCurrentTask(task.getName());
             } else {
                 runtimeService.deleteProcessInstance(task.getProcessInstanceId(),

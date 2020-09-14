@@ -79,10 +79,18 @@ public class ActTaskServiceImpl implements IActTaskService {
         // 审批
         taskService.complete(bizAudit.getTaskId(), variables);
         SysUser user = remoteUserService.selectSysUserByUserId(auditUserId);
-        bizAudit.setAuditor(user.getUserName() + "-" + user.getLoginName());
-        bizAudit.setAuditorId(user.getUserId());
-        //增加审批历史
-        bizAuditService.insertBizAudit(bizAudit);
+        BizAudit bizAuditUpdate = new BizAudit();
+        bizAuditUpdate.setTaskId(bizAudit.getTaskId());
+        List<BizAudit> bizAudits = bizAuditService.selectBizAuditList(bizAuditUpdate);
+        if (CollectionUtil.isNotEmpty(bizAudits)) {
+            bizAuditUpdate = bizAudits.get(0);
+            bizAuditUpdate.setAuditor(user.getUserName() + "-" + user.getLoginName());
+            bizAuditUpdate.setAuditorId(user.getUserId());
+            bizAuditUpdate.setResult(bizAudit.getResult());
+            bizAuditUpdate.setComment(bizAudit.getComment());
+            //更新审批历史
+            bizAuditService.updateBizAudit(bizAuditUpdate);
+        }
         BizBusiness bizBusiness = new BizBusiness().setId(bizAudit.getBusinessKey())
                 .setProcInstId(bizAudit.getProcInstId());
         //如果有下级，设置审批人并推进，没有则结束
@@ -121,10 +129,19 @@ public class ActTaskServiceImpl implements IActTaskService {
     @Override
     public R audit(BizAudit bizAudit, long auditUserId, Set<String> signers) {
         SysUser user = remoteUserService.selectSysUserByUserId(auditUserId);
-        bizAudit.setAuditor(user.getUserName() + "-" + user.getLoginName());
-        bizAudit.setAuditorId(user.getUserId());
-        //增加审批历史
-        bizAuditService.insertBizAudit(bizAudit);
+        BizAudit bizAuditUpdate = new BizAudit();
+        bizAuditUpdate.setTaskId(bizAudit.getTaskId());
+        List<BizAudit> bizAudits = bizAuditService.selectBizAuditList(bizAuditUpdate).stream().filter(audit -> audit.getAuditorId().equals(auditUserId)).collect(Collectors.toList());
+        if (CollectionUtil.isNotEmpty(bizAudits)) {
+            bizAuditUpdate = bizAudits.get(0);
+            bizAuditUpdate.setAuditor(user.getUserName() + "-" + user.getLoginName());
+            bizAuditUpdate.setAuditorId(user.getUserId());
+            bizAuditUpdate.setResult(bizAudit.getResult());
+            bizAuditUpdate.setComment(bizAudit.getComment());
+            //更新审批历史
+            bizAuditService.updateBizAudit(bizAuditUpdate);
+        }
+
         // 审批
         Map<String, Object> variables = Maps.newHashMap();
         //如果审批驳回，则pass为false 将值传到监听类中
