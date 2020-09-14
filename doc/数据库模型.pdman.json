@@ -4908,6 +4908,18 @@
               "defaultValue": "''"
             },
             {
+              "name": "confirm_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "确认时间"
+            },
+            {
+              "name": "confirm_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "确认人"
+            },
+            {
               "name": "create_time",
               "type": "DateTime",
               "remark": "",
@@ -5085,13 +5097,6 @@
               "type": "IdOrKey",
               "remark": "",
               "chnname": "单位"
-            },
-            {
-              "name": "delivery_date",
-              "type": "DefaultString",
-              "remark": "",
-              "chnname": "交付日期",
-              "notNull": true
             },
             {
               "name": "product_date",
@@ -5874,6 +5879,18 @@
               "remark": "",
               "chnname": "备注",
               "defaultValue": "''"
+            },
+            {
+              "name": "confirm_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "确认时间"
+            },
+            {
+              "name": "confirm_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "确认人"
             },
             {
               "name": "create_time",
