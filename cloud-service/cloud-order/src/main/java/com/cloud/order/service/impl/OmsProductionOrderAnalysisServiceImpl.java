@@ -134,13 +134,11 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
         //2、获取生产工厂、成品专用号的可用总库存
         R productStock = queryProductStock(omsRealOrders);
         if (!productStock.isSuccess()) {
-            log.error("获取生产工厂、成品专用号可用库存失败");
-            return R.error(StrUtil.toString(productStock.get("msg")));
+            log.error("获取生产工厂、成品专用号可用库存失败:"+productStock.get("msg"));
         }
         R customerStock = queryCustomerStock(omsRealOrders);
         if (!customerStock.isSuccess()) {
-            log.error("获取客户可用库存失败");
-            return R.error(StrUtil.toString(customerStock.get("msg")));
+            log.error("获取客户可用库存失败:"+customerStock.get("msg"));
         }
         Map<String, BigDecimal> stockMap = productStock.getCollectData(new TypeReference<Map<String, BigDecimal>>() {
         });
@@ -150,7 +148,10 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
         for (String key : map.keySet()) {
             List<OmsRealOrder> omsRealOrderList = map.get(key);
             //生产工厂、成品专用号的可用总库存
-            BigDecimal stockNumSum = stockMap.get(key);
+            BigDecimal stockNumSum = BigDecimal.ZERO;
+            if (stockMap != null) {
+                stockNumSum = stockMap.get(key);
+            }
             log.info("========生产工厂、成品专用号" + key + "的可用总库存量为:" + stockNumSum + "==========");
             //判断可用总库存
             stockNumSum = stockNumSum == null ? BigDecimal.ZERO : stockNumSum;
@@ -190,7 +191,10 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
                     //获取客户库存 = 库位库存 + 在途
                     String customerStockKey = StrUtil.concat(true, omsRealOrder.getProductFactoryCode(),
                             omsRealOrder.getProductMaterialCode(), omsRealOrder.getPlace());
-                    BigDecimal customerStockNum = customerStockMap.get(customerStockKey);
+                    BigDecimal customerStockNum = BigDecimal.ZERO;
+                    if (customerStockMap != null) {
+                        customerStockNum = customerStockMap.get(customerStockKey);
+                    }
                     //判断客户库存量
                     customerStockNum = customerStockNum == null ? BigDecimal.ZERO : customerStockNum;
                     //定义成品客户可用库存库存
