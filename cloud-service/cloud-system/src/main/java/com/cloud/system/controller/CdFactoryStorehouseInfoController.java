@@ -177,6 +177,16 @@ public class CdFactoryStorehouseInfoController extends BaseController {
     }
 
     /**
+     * 根据条件查询
+     */
+    @GetMapping("findByExample")
+    public R findByExample(CdFactoryStorehouseInfo cdFactoryStorehouseInfo) {
+        Example example = assemblyConditions(cdFactoryStorehouseInfo);
+        List<CdFactoryStorehouseInfo> cdFactoryStorehouses = cdFactoryStorehouseInfoService.selectByExample(example);
+        return R.data(cdFactoryStorehouses);
+    }
+
+    /**
      * 根据工厂，客户编码分组取接收库位
      * @param dicts
      * @return
