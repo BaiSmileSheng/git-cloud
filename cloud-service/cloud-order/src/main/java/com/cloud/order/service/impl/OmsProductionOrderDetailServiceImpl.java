@@ -563,6 +563,8 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
             detail.setStatus(ProductOrderConstants.DETAIL_STATUS_ONE);
             detail.setUpdateBy(sysUser.getLoginName());
             detail.setUpdateTime(new Date());
+            detail.setConfirmBy(sysUser.getLoginName());
+            detail.setConfirmTime(new Date());
         });
         int updatDetailCount = omsProductionOrderDetailMapper.updateBatchByPrimaryKeySelective(omsProductionOrderDetails);
         if (updatDetailCount <= 0) {

@@ -16,6 +16,7 @@ import javax.persistence.Transient;
 import tk.mybatis.mapper.annotation.KeySql;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -166,5 +167,16 @@ public class OmsProductionOrderDetail extends BaseEntity {
     @Transient
     @ApiModelProperty(value = "实体list")
     private List<OmsProductionOrderDetail> orderDetailList;
-
+    /**
+     * 确认时间
+     */
+    @ExcelProperty(value = "确认时间")
+    @ApiModelProperty(value = "确认时间")
+    private Date confirmTime;
+    /**
+     * 确认人
+     */
+    @ExcelProperty(value = "确认人")
+    @ApiModelProperty(value = "确认人")
+    private String confirmBy;
 }
