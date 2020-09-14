@@ -65,7 +65,7 @@
     <select id="selectByList" resultMap="CdProductStockResult" parameterType="list">
         <include refid="selectCdProductStockVo"/>
         WHERE
-        <foreach collection="list" index="index" item="item" open="(" close=")" separator="or">
+        <foreach collection="list" index="index" item="item" separator="or">
             ( product_factory_code=#{item.productFactoryCode} and product_material_code=#{item.productMaterialCode} )
         </foreach>
     </select>
