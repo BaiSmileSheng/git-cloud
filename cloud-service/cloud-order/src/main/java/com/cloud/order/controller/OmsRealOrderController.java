@@ -132,6 +132,9 @@ public class OmsRealOrderController extends BaseController {
         if(StringUtils.isNotBlank(omsRealOrder.getEndTime())){
             criteria.andLessThanOrEqualTo("deliveryDate", omsRealOrder.getEndTime());
         }
+        if(StringUtils.isNotBlank(omsRealOrder.getCreateBy())){
+            criteria.andEqualTo("createBy", omsRealOrder.getCreateBy());
+        }
         example.orderBy("createTime").desc();
         return example;
     }
