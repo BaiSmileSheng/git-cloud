@@ -130,7 +130,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
         //可以导入的结果集 插入
         List<ExcelImportSucObjectDto> successList=easyExcelListener.getSuccessList();
         List<ExcelImportErrObjectDto> errList = easyExcelListener.getErrList();
-        if (CollectionUtil.isNotEmpty(successList) && CollectionUtil.isEmpty(errList)) {
+        if (CollectionUtil.isNotEmpty(successList) ) {
             List<Oms2weeksDemandOrderEdit> successResult = successList.stream().map(excelImportSucObjectDto -> {
                 Oms2weeksDemandOrderEdit weeksDemandOrderEdit = BeanUtil.copyProperties(excelImportSucObjectDto.getObject(), Oms2weeksDemandOrderEdit.class);
                 return weeksDemandOrderEdit;
@@ -623,6 +623,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
     public R confirmRelease(String ids,Oms2weeksDemandOrderEdit oms2weeksDemandOrderEditVo,SysUser sysUser) {
         Example example = new Example(Oms2weeksDemandOrderEdit.class);
         Example.Criteria criteria = example.createCriteria();
+        String createBy = sysUser.getCreateBy();
         //允许下达的审核状态
         List<String> auditStatusList = CollUtil.newArrayList(Weeks2DemandOrderEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_WXSH.getCode()
                 ,Weeks2DemandOrderEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHWC.getCode());
@@ -636,6 +637,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             //如果参数为空，则查询初始状态,无需审核、审核完成的数据
             criteria.andEqualTo("status", Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
             criteria.andIn("auditStatus", auditStatusList);
+            oms2weeksDemandOrderEditVo.setCreateBy(createBy);
             listCondition(oms2weeksDemandOrderEditVo,criteria);
         }else{
             //查询参数id的数据
@@ -646,6 +648,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
         if (CollUtil.isEmpty(list)) {
             return R.error("无数据需要下达！");
         }
+
         for (Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit : list) {
             String status = oms2weeksDemandOrderEdit.getStatus();
             String auditStatus = oms2weeksDemandOrderEdit.getAuditStatus();
@@ -653,6 +656,9 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 return R.error(StrUtil.format("此状态数据不允许确认下达！需求订单号：{}",oms2weeksDemandOrderEdit.getDemandOrderCode()));
             }else if(!CollUtil.contains(auditStatusList,auditStatus)) {
                 return R.error(StrUtil.format("此审核状态数据不允许确认下达！需求订单号：{}",oms2weeksDemandOrderEdit.getDemandOrderCode()));
+            }
+            if (!createBy.equals(oms2weeksDemandOrderEdit.getCreateBy())) {
+                return R.error(StrUtil.format("此数据非登录用户导入，不可下达！需求订单号：{}",oms2weeksDemandOrderEdit.getDemandOrderCode()));
             }
             oms2weeksDemandOrderEdit.setStatus(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getCode());
         }
@@ -698,6 +704,9 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
         }
         if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getEndTime())) {
             criteria.andLessThanOrEqualTo("deliveryDate", oms2weeksDemandOrderEdit.getEndTime() );
+        }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getCreateBy())) {
+            criteria.andEqualTo("createBy", oms2weeksDemandOrderEdit.getCreateBy() );
         }
     }
 
