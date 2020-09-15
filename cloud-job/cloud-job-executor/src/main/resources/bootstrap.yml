@@ -54,7 +54,6 @@ hystrix:
           thread:
             timeoutInMilliseconds: 600000 #断路器超时时间，默认1000ms
     RemoteSapSystemInterfaceService#sycBomInfo():
-      sycBomInfo:
         execution:
           timeout:
             enabled: true
@@ -62,7 +61,6 @@ hystrix:
             thread:
               timeoutInMilliseconds: 10000000 #断路器超时时间，默认1000ms
     RemoteProductStockService#timeSycProductStock():
-      sycBomInfo:
         execution:
           timeout:
             enabled: true
