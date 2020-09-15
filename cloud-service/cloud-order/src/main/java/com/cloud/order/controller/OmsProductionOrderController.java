@@ -369,6 +369,7 @@ public class OmsProductionOrderController extends BaseController {
     @GetMapping("exportTemplate")
     @HasPermissions("order:productionOrder:exportTemplate")
     @ApiOperation(value = "排产订单导入-导出模板", response = OmsProductionOrderExportVo.class)
+    @OperLog(title = "排产订单导入-导出模板 ", businessType = BusinessType.EXPORT)
     public R exportTemplate(){
         String fileName = "排产订单.xlsx";
         return EasyExcelUtilOSS.writePostilExcel(Arrays.asList(),fileName,fileName,new OmsProductionOrderImportVo(),new OmsProductOrderWriteHandler());
@@ -382,6 +383,7 @@ public class OmsProductionOrderController extends BaseController {
     @PostMapping("importProductOrder")
     @HasPermissions("order:productOrder:importProductOrder")
     @ApiOperation(value = "排产订单导入-导入", response = OmsProductionOrder.class)
+    @OperLog(title = "排产订单导入-导入 ", businessType = BusinessType.IMPORT)
     public R importProductOrder(@RequestParam("file") MultipartFile file) {
         SysUser sysUser = getUserInfo(SysUser.class);
         return omsProductionOrderService.importProductOrder(file, sysUser);
@@ -391,6 +393,7 @@ public class OmsProductionOrderController extends BaseController {
      * 查询排产订单导出 列表
      */
     @GetMapping("exportAll")
+    @OperLog(title = "排产订单导入-导出 ", businessType = BusinessType.EXPORT)
     @ApiOperation(value = "排产订单导入-导出功能", response = OmsProductionOrder.class)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "productMaterialCode", value = "专用号", required = false, paramType = "query", dataType = "String"),
