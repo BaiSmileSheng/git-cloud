@@ -78,6 +78,7 @@ public class OmsProductionOrderDetailController extends BaseController {
             @ApiImplicitParam(name = "materialCode", value = "原材料物料", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "purchaseGroup", value = "采购组", required = false, paramType = "query", dataType = "String")
     })
+    @OperLog(title = "原材料评审-导出 ", businessType = BusinessType.EXPORT)
     @HasPermissions("order:productOrderDetail:export")
     public R export(@ApiIgnore OmsProductionOrderDetail omsProductionOrderDetail) {
         SysUser sysUser = getUserInfo(SysUser.class);
@@ -135,6 +136,7 @@ public class OmsProductionOrderDetailController extends BaseController {
             @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = false, dataType = "String"),
             @ApiImplicitParam(name = "status", value = "状态", required = false, dataType = "String")
     })
+    @OperLog(title = "原材料确认-确认按钮 ", businessType = BusinessType.UPDATE)
     @HasPermissions("order:productOrderDetail:commitProductOrderDetail")
     public R commitProductOrderDetail(@RequestBody OmsProductionOrderDetail omsProductionOrderDetail){
         SysUser sysUser = getUserInfo(SysUser.class);
