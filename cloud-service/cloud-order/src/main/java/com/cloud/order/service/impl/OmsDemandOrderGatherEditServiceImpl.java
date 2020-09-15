@@ -187,7 +187,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
     public R confirmRelease(String ids,OmsDemandOrderGatherEdit omsDemandOrderGatherEditParam,SysUser sysUser) {
         Example example = new Example(OmsDemandOrderGatherEdit.class);
         Example.Criteria criteria = example.createCriteria();
-        String createBy = sysUser.getCreateBy();
+        String createBy = sysUser.getLoginName();
         //允许下达的审核状态
         List<String> auditStatusList = CollUtil.newArrayList(DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_WXSH.getCode()
                 ,DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHWC.getCode());
