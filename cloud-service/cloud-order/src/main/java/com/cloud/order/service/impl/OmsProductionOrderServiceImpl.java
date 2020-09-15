@@ -1483,7 +1483,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 log.error("根据成品专用号查询物料扩展信息记录为空！");
                 throw new BusinessException("根据成品专用号:"+o.getProductMaterialCode()+",查询物料扩展信息记录为空，请及时维护物料扩展信息数据！");
             }
-            if (StrUtil.isBlank(cdMaterialExtendInfo.getIsZnAttestation())) {
+            if (StrUtil.isBlank(cdMaterialExtendInfo.getIsZnAttestation())
+                    && (!ProductOrderConstants.NEW_FACTORY_CODE.equals(o.getProductFactoryCode())
+                    || !ProductOrderConstants.NEW_LINE_CODE.equals(o.getProductLineCode()))) {
                 log.error("根据成品专用号查询物料扩展信息记录,是否ZN认证信息为空！");
                 throw new BusinessException("根据成品专用号:"+o.getProductMaterialCode()+",查询物料扩展信息记录是否ZN认证信息为空，请及时维护物料扩展信息数据！");
             }
@@ -2338,7 +2340,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog();
         sysInterfaceLog.setAppId("wms");
         sysInterfaceLog.setInterfaceName("getQryPays");
-        sysInterfaceLog.setContent("调用wms系统获取入库数量");
+        sysInterfaceLog.setContent("调用wms系统获取入库生产订单号单号"+String.join(",",productOrderCodeList));
         /** url：webservice 服务端提供的服务地址，结尾必须加 "?wsdl"*/
         URL url = null;
         try {
@@ -2351,13 +2353,14 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             odsRawOrderOutStorageDTO.setSapFactoryCode(factoryCode);
             odsRawOrderOutStorageDTO.setPrdOrderNoList(productOrderCodeList);
             OutStorageResult outStorageResult = rfWebService.findAllCodeForJIT(odsRawOrderOutStorageDTO);
+            sysInterfaceLog.setResults(JSONObject.toJSONString(outStorageResult));
             return outStorageResult;
         } catch (Exception e) {
-            sysInterfaceLog.setResults("调用wms系统获取入库数量异常");
             StringWriter w = new StringWriter();
             e.printStackTrace(new PrintWriter(w));
             log.error(
                     "调用wms系统获取入库数量异常: {}", w.toString());
+            sysInterfaceLog.setResults("调用wms系统获取入库数量异常"+w.toString());
             throw new BusinessException("调用wms系统获取入库数量异常");
         } finally {
             remoteInterfaceLogService.saveInterfaceLog(sysInterfaceLog);
