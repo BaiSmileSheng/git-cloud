@@ -259,14 +259,14 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
         List<OmsProductionOrder> productionOrders = omsProductionOrderService.selectByOrderCode(orderCodeList);
         //只统计无需审核和审核完成的排产订单数据
         List<OmsProductionOrder> orderList = productionOrders.stream()
-                .filter(o -> o.getAuditStatus().equals(ProductOrderConstants.AUDIT_STATUS_ZERO)
-                        || o.getAuditStatus().equals(ProductOrderConstants.AUDIT_STATUS_TWO)).collect(Collectors.toList());
+                .filter(o -> ProductOrderConstants.AUDIT_STATUS_ZERO.equals(o.getAuditStatus())
+                        || ProductOrderConstants.AUDIT_STATUS_TWO.equals(o.getAuditStatus())).collect(Collectors.toList());
         //排产订单状态待评审、反馈中的分组
         Map<String, List<OmsProductionOrder>> mapOne = orderList.stream().filter(o -> o.getStatus().equals(ProductOrderConstants.STATUS_ZERO)
-                || o.getStatus().equals(ProductOrderConstants.STATUS_ONE)).collect(Collectors.groupingBy((o) -> fetchGroupKey(o)));
+                || ProductOrderConstants.STATUS_ONE.equals(o.getStatus())).collect(Collectors.groupingBy((o) -> fetchGroupKey(o)));
         //排产订单其他状态的分组
         Map<String, List<OmsProductionOrder>> mapThree = orderList.stream().filter(o -> !o.getStatus().equals(ProductOrderConstants.STATUS_ZERO)
-                && !o.getStatus().equals(ProductOrderConstants.STATUS_ONE)).collect(Collectors.groupingBy((o) -> fetchGroupKey(o)));
+                && !ProductOrderConstants.STATUS_ONE.equals(o.getStatus())).collect(Collectors.groupingBy((o) -> fetchGroupKey(o)));
         //按照成品专用号、bom版本进行分组
 
         List<OmsRawMaterialFeedback> omsRawMaterialFeedbacks = new ArrayList<>();
@@ -333,7 +333,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
                 .map(OmsProductionOrder::getOrderCode).collect(Collectors.toList());
         List<OmsProductionOrderDetail> list = omsProductionOrderDetails.stream()
                 .filter(detail -> orderCodes.contains(detail.getProductOrderCode())
-                        && !detail.getStatus().equals(ProductOrderConstants.DETAIL_STATUS_ONE)).collect(Collectors.toList());
+                        && !ProductOrderConstants.DETAIL_STATUS_ONE.equals(detail.getStatus())).collect(Collectors.toList());
         List<String> detialOrderCodes = list.stream().map(OmsProductionOrderDetail::getProductOrderCode).distinct().collect(Collectors.toList());
         //原材料排产量
         BigDecimal rawMaterialNum = list.stream()
@@ -395,6 +395,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
                 OmsRawMaterialFeedback omsRawMaterialFeedback = omsRawMaterialFeedbacksZero.get(0);
                 omsRawMaterialFeedback.setProductNum(productNum.subtract(productNumPass).subtract(productNumRe));
                 omsRawMaterialFeedback.setRawMaterialNum(rawMaterialNum.subtract(rawMaterialNumPass).subtract(rawMaterialNumRe));
+                omsRawMaterialFeedback.setProductPerson(omsProductionOrder.getCreateBy());
                 returnOmsRawMaterialFeedbacks.add(omsRawMaterialFeedback);
             }
         } else {
