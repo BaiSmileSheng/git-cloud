@@ -2340,7 +2340,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog();
         sysInterfaceLog.setAppId("wms");
         sysInterfaceLog.setInterfaceName("getQryPays");
-        sysInterfaceLog.setContent("调用wms系统获取入库数量");
+        sysInterfaceLog.setContent("调用wms系统获取入库生产订单号单号"+String.join(",",productOrderCodeList));
         /** url：webservice 服务端提供的服务地址，结尾必须加 "?wsdl"*/
         URL url = null;
         try {
@@ -2353,13 +2353,14 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             odsRawOrderOutStorageDTO.setSapFactoryCode(factoryCode);
             odsRawOrderOutStorageDTO.setPrdOrderNoList(productOrderCodeList);
             OutStorageResult outStorageResult = rfWebService.findAllCodeForJIT(odsRawOrderOutStorageDTO);
+            sysInterfaceLog.setResults(JSONObject.toJSONString(outStorageResult));
             return outStorageResult;
         } catch (Exception e) {
-            sysInterfaceLog.setResults("调用wms系统获取入库数量异常");
             StringWriter w = new StringWriter();
             e.printStackTrace(new PrintWriter(w));
             log.error(
                     "调用wms系统获取入库数量异常: {}", w.toString());
+            sysInterfaceLog.setResults("调用wms系统获取入库数量异常"+w.toString());
             throw new BusinessException("调用wms系统获取入库数量异常");
         } finally {
             remoteInterfaceLogService.saveInterfaceLog(sysInterfaceLog);
