@@ -427,8 +427,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         listImport.forEach(o -> {
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
             //应王福丽要求8310工厂36号线不用校验是否可以加工承揽   2020-09-08
-            if ((!o.getProductFactoryCode().equals(ProductOrderConstants.NEW_FACTORY_CODE)
-                    || !o.getProductLineCode().equals(ProductOrderConstants.NEW_LINE_CODE))
+            if ((!ProductOrderConstants.NEW_FACTORY_CODE.equals(o.getProductFactoryCode())
+                    || !ProductOrderConstants.NEW_LINE_CODE.equals(o.getProductLineCode()))
                     && (PUTTING_OUT_ZERO.equals(o.getOutsourceType())
                     || PUTTING_OUT_ONE.equals(o.getOutsourceType()))
                     && noMaterialList.contains(o.getProductMaterialCode())) {
@@ -712,10 +712,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             //判断排产订单明细的状态
             String detailStatus = "";
             //如果已评审的排产订单修改订单量，并且向上调整，则排产订单明细状态为“未确认”
-            if (productionOrder.getStatus().equals(ProductOrderConstants.STATUS_THREE)
-                    && omsProductionOrder.getStatus().equals(ProductOrderConstants.STATUS_ZERO)) {
+            if (ProductOrderConstants.STATUS_THREE.equals(productionOrder.getStatus())
+                    && ProductOrderConstants.STATUS_ZERO.equals(omsProductionOrder.getStatus())) {
                 detailStatus = ProductOrderConstants.DETAIL_STATUS_ZERO;
-            }else if (productionOrder.getStatus().equals(ProductOrderConstants.STATUS_THREE)
+            }else if (ProductOrderConstants.STATUS_THREE.equals(productionOrder.getStatus())
                     && omsProductionOrder.getStatus().equals(productionOrder.getStatus())) {
                 detailStatus = ProductOrderConstants.DETAIL_STATUS_ONE;
             }else if (rawMaterialCodes.contains(bom.getRawMaterialCode())){
@@ -747,7 +747,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         });
         omsProductionOrderDetailService.delectByProductOrderCode(productionOrder.getOrderCode());
         omsProductionOrderDetailService.insertList(omsProductionOrderDetails);
-        if (omsProductionOrder.getStatus().equals(ProductOrderConstants.STATUS_ZERO)) {
+        if (ProductOrderConstants.STATUS_ZERO.equals(omsProductionOrder.getStatus())) {
             //获取权限用户列表
             R userRightsMap = userService.selectUserRights(RoleConstants.ROLE_KEY_JIT);
             if (!userRightsMap.isSuccess()) {
@@ -800,11 +800,11 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             if (StrUtil.isNotBlank(ids)) {
                 omsProductionOrderList = omsProductionOrderMapper.selectByIds(ids);
                 for (OmsProductionOrder productionOrder : omsProductionOrderList) {
-                    if (!productionOrder.getStatus().equals(ProductOrderConstants.STATUS_THREE)) {
+                    if (!ProductOrderConstants.STATUS_THREE.equals(productionOrder.getStatus())) {
                         return R.error("非“已评审”状态的排产订单不可确认下达！");
                     }
-                    if (productionOrder.getAuditStatus().equals(ProductOrderConstants.AUDIT_STATUS_ONE)
-                            || productionOrder.getAuditStatus().equals(ProductOrderConstants.AUDIT_STATUS_THREE)) {
+                    if (ProductOrderConstants.AUDIT_STATUS_ONE.equals(productionOrder.getAuditStatus())
+                            || ProductOrderConstants.AUDIT_STATUS_THREE.equals(productionOrder.getAuditStatus())) {
                         return R.error("审核中、审核驳回状态的排产订单不可确认下达！");
                     }
                 }
@@ -815,8 +815,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     return R.error("只可以下达已评审的排产订单！");
                 }
                 if (StrUtil.isNotBlank(omsProductionOrder.getAuditStatus())
-                        && (omsProductionOrder.getAuditStatus().equals(ProductOrderConstants.AUDIT_STATUS_ONE)
-                        || omsProductionOrder.getAuditStatus().equals(ProductOrderConstants.AUDIT_STATUS_THREE))) {
+                        && (ProductOrderConstants.AUDIT_STATUS_ONE.equals(omsProductionOrder.getAuditStatus())
+                        || ProductOrderConstants.AUDIT_STATUS_THREE.equals(omsProductionOrder.getAuditStatus()))) {
                     log.error("确认下达传入排产订单审核状态为审核中，不可下达！");
                     return R.error("只可以下达非审核中、审核驳回的排产订单！");
                 }
@@ -1111,8 +1111,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         Set<OmsProductionOrder> checkList = new HashSet<>();
         list.forEach(o -> {
             //应王福丽要求8310工厂36号线不用校验3版本   2020-09-08
-            if ((!o.getProductFactoryCode().equals(ProductOrderConstants.NEW_FACTORY_CODE)
-                    || !o.getProductLineCode().equals(ProductOrderConstants.NEW_LINE_CODE))
+            if ((!ProductOrderConstants.NEW_FACTORY_CODE.equals(o.getProductFactoryCode())
+                    || !ProductOrderConstants.NEW_LINE_CODE.equals(o.getProductLineCode()))
                     && ProductOrderConstants.BOM_VERSION_THREE.equals(o.getBomVersion())
                     && o.getProductNum().compareTo(ProductOrderConstants.BOM_VERSION_THREE_NUM) > 0) {
                 o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_ONE);
@@ -1177,8 +1177,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         Set<OmsProductionOrder> checkOrders = new HashSet<>();
         list.forEach(o -> {
             //应王福丽要求8310工厂36号线不用校验超期未关闭订单   2020-09-08
-            if (!o.getProductFactoryCode().equals(ProductOrderConstants.NEW_FACTORY_CODE)
-                    || !o.getProductLineCode().equals(ProductOrderConstants.NEW_LINE_CODE)) {
+            if (!ProductOrderConstants.NEW_FACTORY_CODE.equals(o.getProductFactoryCode())
+                    || !ProductOrderConstants.NEW_LINE_CODE.equals(o.getProductLineCode())) {
                 omsProductionOrders.forEach(order -> {
                     if (o.getProductFactoryCode().equals(order.getProductFactoryCode())
                             && o.getProductMaterialCode().equals(order.getProductMaterialCode())
@@ -1251,8 +1251,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         Map<String,Set<String>> map = new HashMap<>();
         list.forEach(o -> {
             //应王福丽要求8310工厂36号线不用校验超期库存   2020-09-08
-            if (!o.getProductFactoryCode().equals(ProductOrderConstants.NEW_FACTORY_CODE)
-                    || !o.getProductLineCode().equals(ProductOrderConstants.NEW_LINE_CODE)) {
+            if (!ProductOrderConstants.NEW_FACTORY_CODE.equals(o.getProductFactoryCode())
+                    || !ProductOrderConstants.NEW_LINE_CODE.equals(o.getProductLineCode())) {
                 R overStockMap = remoteCdProductOverdueService.selectOverStockByFactoryAndMaterial(CdProductOverdue
                         .builder()
                         .productMaterialCode(o.getProductMaterialCode()).build());
@@ -1490,7 +1490,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 throw new BusinessException("根据成品专用号:"+o.getProductMaterialCode()+",查询物料扩展信息记录是否ZN认证信息为空，请及时维护物料扩展信息数据！");
             }
             //应徐海萍要求，8310工厂36号线不校验ZN认证  2020-09-03 ltq
-            if (cdMaterialExtendInfo.getIsZnAttestation().equals(ZN_ATTESTATION)
+            if (ZN_ATTESTATION.equals(cdMaterialExtendInfo.getIsZnAttestation())
                     && (!ProductOrderConstants.NEW_FACTORY_CODE.equals(o.getProductFactoryCode())
                     || !ProductOrderConstants.NEW_LINE_CODE.equals(o.getProductLineCode()))
                     && !ProductOrderConstants.SMALL_BATCH_TRUE.equals(o.getIsSmallBatch())) {
