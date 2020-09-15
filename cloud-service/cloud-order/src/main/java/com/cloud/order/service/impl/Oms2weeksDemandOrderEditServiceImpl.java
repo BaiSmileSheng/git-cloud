@@ -623,7 +623,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
     public R confirmRelease(String ids,Oms2weeksDemandOrderEdit oms2weeksDemandOrderEditVo,SysUser sysUser) {
         Example example = new Example(Oms2weeksDemandOrderEdit.class);
         Example.Criteria criteria = example.createCriteria();
-        String createBy = sysUser.getCreateBy();
+        String createBy = sysUser.getLoginName();
         //允许下达的审核状态
         List<String> auditStatusList = CollUtil.newArrayList(Weeks2DemandOrderEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_WXSH.getCode()
                 ,Weeks2DemandOrderEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHWC.getCode());
