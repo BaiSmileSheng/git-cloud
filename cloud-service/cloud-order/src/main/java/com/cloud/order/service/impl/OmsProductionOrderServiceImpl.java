@@ -1247,9 +1247,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      */
     private List<OmsProductionOrder> checkOverStock(List<OmsProductionOrder> list, SysUser sysUser) {
         Set<OmsProductionOrder> omsProductionOrders = new HashSet<>();
-        Set<String> userFactoryCodeSet = new HashSet<>();
         Map<String,Set<String>> map = new HashMap<>();
         list.forEach(o -> {
+            Set<String> userFactoryCodeSet = new HashSet<>();
             //应王福丽要求8310工厂36号线不用校验超期库存   2020-09-08
             if (!ProductOrderConstants.NEW_FACTORY_CODE.equals(o.getProductFactoryCode())
                     || !ProductOrderConstants.NEW_LINE_CODE.equals(o.getProductLineCode())) {
@@ -1316,8 +1316,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     .processVoList(processVos).build();
             R r = remoteActOmsProductionOrderService.startActProcess(actBusinessVo);
             if (!r.isSuccess()) {
-                log.error("开启排产订单超期未关闭订单审批流程失败，原因：" + r.get("msg"));
-                throw new BusinessException("开启排产订单超期未关闭订单审批流程失败!");
+                log.error("开启排产订单超期库存批流程失败，原因：" + r.get("msg"));
+                throw new BusinessException("开启排产订单超期库存审批流程失败，原因：" + r.get("msg"));
             }
             //发送邮件
             sysUsers.forEach(u -> {
@@ -2392,6 +2392,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             dateStr = StrUtil.replace(dateStr, ".", "-");
             dateStr = StrUtil.replace(dateStr, "/", "-");
         }
+        dateStr = DateUtil.format(DateUtil.parse(dateStr),"yyyy-MM-dd");
         return dateStr;
     }
 
