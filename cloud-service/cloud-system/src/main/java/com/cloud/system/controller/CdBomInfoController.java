@@ -9,7 +9,9 @@ import com.cloud.common.exception.BusinessException;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.StringUtils;
+import com.cloud.common.utils.ValidatorUtils;
 import com.cloud.system.domain.entity.CdBomInfo;
+import com.cloud.system.domain.vo.CdBomInfoOtherSysVo;
 import com.cloud.system.service.ICdBomInfoService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -194,5 +196,19 @@ public class CdBomInfoController extends BaseController {
     @PostMapping("selectBomList")
     public R selectBomList(@RequestBody List<Dict> list){
         return cdBomInfoService.selectBomList(list);
+    }
+
+    /**
+     * 实时更新bom信息
+     * @param cdBomInfoOtherSysVo
+     * @return
+     */
+    @PostMapping("pbomUpdateBom")
+    @OperLog(title = "实时更新bom信息", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "实时更新bom信息", response = R.class)
+    public R pbomUpdateBom(@RequestBody CdBomInfoOtherSysVo cdBomInfoOtherSysVo){
+        //校验入参
+        ValidatorUtils.validateEntity(cdBomInfoOtherSysVo);
+        return cdBomInfoService.pbomUpdateBom(cdBomInfoOtherSysVo);
     }
 }

@@ -4,6 +4,8 @@ import cn.hutool.core.lang.Dict;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.system.domain.entity.CdBomInfo;
+import com.cloud.system.domain.vo.CdBomInfoOtherSysVo;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.Map;
@@ -53,4 +55,11 @@ public interface ICdBomInfoService extends BaseService<CdBomInfo> {
      * Date: 2020/6/18
      */
     R selectBomList(List<Dict> list);
+
+    /**
+     * 实时更新bom信息
+     * @param cdBomInfoOtherSysVo
+     * @return
+     */
+    R pbomUpdateBom(@RequestBody CdBomInfoOtherSysVo cdBomInfoOtherSysVo);
 }
