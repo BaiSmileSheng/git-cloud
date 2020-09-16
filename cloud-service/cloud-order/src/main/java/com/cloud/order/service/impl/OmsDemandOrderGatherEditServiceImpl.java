@@ -187,7 +187,6 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
     public R confirmRelease(String ids,OmsDemandOrderGatherEdit omsDemandOrderGatherEditParam,SysUser sysUser) {
         Example example = new Example(OmsDemandOrderGatherEdit.class);
         Example.Criteria criteria = example.createCriteria();
-        String createBy = sysUser.getCreateBy();
         //允许下达的审核状态
         List<String> auditStatusList = CollUtil.newArrayList(DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_WXSH.getCode()
                 ,DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHWC.getCode());
@@ -215,7 +214,6 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             } else {
                 criteria.andIn("auditStatus", auditStatusList);
             }
-            omsDemandOrderGatherEditParam.setCreateBy(createBy);
             listCondition(omsDemandOrderGatherEditParam,criteria);
         }else{
             //查询参数id的数据
@@ -233,9 +231,6 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 return R.error(StrUtil.format("此状态数据不允许确认下达！需求订单号：{}",omsDemandOrderGatherEdit.getDemandOrderCode()));
             }else if(!CollUtil.contains(auditStatusList,auditStatus)) {
                 return R.error(StrUtil.format("此审核状态数据不允许确认下达！需求订单号：{}",omsDemandOrderGatherEdit.getDemandOrderCode()));
-            }
-            if (!createBy.equals(omsDemandOrderGatherEdit.getCreateBy())) {
-                return R.error(StrUtil.format("此数据非登录用户导入，不可下达！需求订单号：{}",omsDemandOrderGatherEdit.getDemandOrderCode()));
             }
             omsDemandOrderGatherEdit.setStatus(DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_DCSAP.getCode());
             omsDemandOrderGatherEdit.setUpdateBy(sysUser.getLoginName());
