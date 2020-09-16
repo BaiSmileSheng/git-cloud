@@ -23,8 +23,6 @@ import com.cloud.common.easyexcel.DTO.ExcelImportResult;
 import com.cloud.common.easyexcel.DTO.ExcelImportSucObjectDto;
 import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
-import com.cloud.common.utils.DateUtils;
-import com.cloud.common.utils.RandomUtil;
 import com.cloud.order.domain.entity.Oms2weeksDemandOrder;
 import com.cloud.order.domain.entity.Oms2weeksDemandOrderEdit;
 import com.cloud.order.domain.entity.Oms2weeksDemandOrderEditHis;
@@ -43,6 +41,7 @@ import com.cloud.order.service.IOms2weeksDemandOrderEditService;
 import com.cloud.order.service.IOms2weeksDemandOrderService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
+import com.cloud.order.util.OrderNoGenerateUtil;
 import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.domain.entity.SysInterfaceLog;
@@ -337,6 +336,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
         Example example = new Example(Oms2weeksDemandOrderEdit.class);
         example.and().andNotEqualTo("status",Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
         List<Oms2weeksDemandOrderEdit> hisList = oms2weeksDemandOrderEditMapper.selectByExample(example);
+        List<String> randomList = OrderNoGenerateUtil.getOrderNos(list.size() * 2, "DM");
         for(Oms2weeksDemandOrderEdit weeksDemandOrderEdit:list){
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
@@ -410,7 +410,9 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 }
             }
             //需求订单号
-            String demandOrderCode = StrUtil.concat(true, "DM", DateUtils.dateTime(), RandomUtil.randomInt(6));
+//            String demandOrderCode = StrUtil.concat(true, "DM", DateUtils.dateTime(), RandomUtil.randomInt(6));
+            String demandOrderCode = randomList.get(0);
+            randomList.remove(0);
             weeksDemandOrderEdit.setDemandOrderCode(demandOrderCode);
             //订单来源
             weeksDemandOrderEdit.setOrderFrom(OrderFromEnum.getCodeByMsg(weeksDemandOrderEdit.getOrderFrom()));
