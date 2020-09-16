@@ -50,7 +50,7 @@ public class SmsSettleInfoServiceImpl extends BaseServiceImpl<SmsSettleInfo> imp
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("orderStatus", smsSettleInfoReq.getOrderStatus());
         List<SmsSettleInfo> smsSettleInfoList = this.selectByExample(example);
-        if(!CollectionUtils.isEmpty(smsSettleInfoList)){
+        if(CollectionUtils.isEmpty(smsSettleInfoList)){
             logger.info("加工费生成,无需要生成加工费的数据");
             return R.ok();
         }
