@@ -1012,10 +1012,10 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                         oms2weeksDemandOrderEdit.setStatus(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());
                     }
                     successList.add(oms2weeksDemandOrderEdit);
-                    String type = outTableOutput.getString("TYPE");
-                    String flag = outTableOutput.getString("FLAG");
-                    String messageOne = StrUtil.format("ABLAD:{},MESSAGE:{};TPYE:{};FLAG:{}"
-                            ,outTableOutput.getString("ABLAD"),outTableOutput.getString("MESSAGE"),type,flag);
+//                    String type = outTableOutput.getString("TYPE");
+//                    String flag = outTableOutput.getString("FLAG");
+                    String messageOne = StrUtil.format("ABLAD:{},MESSAGE:{};"
+                            ,outTableOutput.getString("ABLAD"),outTableOutput.getString("MESSAGE"));
                     sapBuffer.append(messageOne);
                 }
                 sysInterfaceLog.setResults(sapBuffer.toString());
