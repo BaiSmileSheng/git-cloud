@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 import tk.mybatis.mapper.annotation.KeySql;
 
 import javax.persistence.Id;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 /**
@@ -39,6 +41,7 @@ public class CdBomInfo extends BaseEntity {
     /**
      * 成品物料号
      */
+    @NotBlank(message = "成品物料号不能为空")
     @ExcelProperty(value = "成品物料号")
     @ApiModelProperty(value = "成品物料号")
     private String productMaterialCode;
@@ -46,6 +49,7 @@ public class CdBomInfo extends BaseEntity {
     /**
      * 成品物料描述
      */
+    @NotBlank(message = "成品物料描述不能为空")
     @ExcelProperty(value = "成品物料描述")
     @ApiModelProperty(value = "成品物料描述")
     private String productMaterialDesc;
@@ -53,6 +57,7 @@ public class CdBomInfo extends BaseEntity {
     /**
      * 生产工厂编码
      */
+    @NotBlank(message = "生产工厂编码不能为空")
     @ExcelProperty(value = "生产工厂编码")
     @ApiModelProperty(value = "生产工厂编码")
     private String productFactoryCode;
@@ -60,6 +65,7 @@ public class CdBomInfo extends BaseEntity {
     /**
      * 原材料物料号
      */
+    @NotBlank(message = "原材料物料号不能为空")
     @ExcelProperty(value = "原材料物料号")
     @ApiModelProperty(value = "原材料物料号")
     private String rawMaterialCode;
@@ -67,6 +73,7 @@ public class CdBomInfo extends BaseEntity {
     /**
      * 原材料物料描述
      */
+    @NotBlank(message = "原材料物料描述不能为空")
     @ExcelProperty(value = "原材料物料描述")
     @ApiModelProperty(value = "原材料物料描述")
     private String rawMaterialDesc;
@@ -74,6 +81,7 @@ public class CdBomInfo extends BaseEntity {
     /**
      * 基本数量
      */
+    @NotNull(message = "基本数量不能为空")
     @ExcelProperty(value = "基本数量")
     @ApiModelProperty(value = "基本数量")
     private BigDecimal basicNum;
@@ -81,6 +89,7 @@ public class CdBomInfo extends BaseEntity {
     /**
      * 单耗
      */
+    @NotNull(message = "单耗不能为空")
     @ExcelProperty(value = "单耗")
     @ApiModelProperty(value = "单耗")
     private BigDecimal bomNum;
@@ -88,6 +97,7 @@ public class CdBomInfo extends BaseEntity {
     /**
      * 成品单位
      */
+    @NotBlank(message = "成品单位不能为空")
     @ExcelProperty(value = "成品单位")
     @ApiModelProperty(value = "成品单位")
     private String productUnit;
@@ -95,6 +105,7 @@ public class CdBomInfo extends BaseEntity {
     /**
      * 组件单位
      */
+    @NotBlank(message = "组件单位不能为空")
     @ExcelProperty(value = "组件单位")
     @ApiModelProperty(value = "组件单位")
     private String componentUnit;
@@ -102,6 +113,7 @@ public class CdBomInfo extends BaseEntity {
     /**
      * 版本
      */
+    @NotBlank(message = "版本不能为空")
     @ExcelProperty(value = "版本")
     @ApiModelProperty(value = "版本")
     private String version;
