@@ -44,6 +44,7 @@
     sap_messages,
     settle_flag,
     settle_messages,
+    delays_flag,
     assign_sap_time,
     get_sap_time,
     is_small_batch,
@@ -94,6 +95,7 @@
         <result property="sapMessages" column="sap_messages"/>
         <result property="settleFlag" column="settle_flag"/>
         <result property="settleMessages" column="settle_messages"/>
+        <result property="delaysFlag" column="delays_flag"/>
         <result property="assignSapTime" column="assign_sap_time"/>
         <result property="getSapTime" column="get_sap_time"/>
         <result property="isSmallBatch" column="is_small_batch"/>
@@ -145,6 +147,7 @@
                sap_messages,
                settle_flag,
                settle_messages,
+               delays_flag
                assign_sap_time,
                get_sap_time,
                is_small_batch,
@@ -287,6 +290,9 @@
                 </if>
                 <if test="item.actualEndDate != null">
                     actual_end_date = #{item.actualEndDate},
+                </if>
+                <if test="item.delaysFlag != null and item.delaysFlag != ''">
+                    delays_flag = #{item.delaysFlag},
                 </if>
                 <if test="item.updateBy != null and item.updateBy != ''">
                     update_by = #{item.updateBy},
