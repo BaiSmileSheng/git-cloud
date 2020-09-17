@@ -161,6 +161,9 @@ public class SmsSettleInfoController extends BaseController {
         if(StringUtils.isNotBlank(smsSettleInfo.getProductMaterialCode())){
             criteria.andEqualTo("productMaterialCode",smsSettleInfo.getProductMaterialCode());
         }
+        if(StringUtils.isNotBlank(smsSettleInfo.getFactoryCode())){
+            criteria.andEqualTo("factoryCode",smsSettleInfo.getFactoryCode());
+        }
         if(TimeTypeEnum.BASIC_BEGIN_TIME_TYPE.getCode().equals(smsSettleInfo.getTimeType())){
             if(StringUtils.isNotBlank(smsSettleInfo.getBeginTime())){
                 criteria.andGreaterThanOrEqualTo("productStartDate",smsSettleInfo.getBeginTime());
