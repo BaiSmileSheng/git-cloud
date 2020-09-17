@@ -11,6 +11,7 @@ import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
+import com.cloud.order.enums.ProductionOrderDelaysFlagEnum;
 import com.cloud.order.feign.RemoteProductionOrderService;
 import com.cloud.settle.domain.entity.SmsDelaysDelivery;
 import com.cloud.settle.enums.DeplayStatusEnum;
@@ -213,11 +214,8 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
      * @return
      */
     private List<SmsDelaysDelivery> changeOmsProductionOrder(Set<String> supplierSet){
-        //每天凌晨获取昨天关单,基本结束时间<昨天的
-        //获取昨天时间
-        String date = DateUtils.getDaysTimeString(dateBeforeOne);
         List<SmsDelaysDelivery> smsDelaysDeliveryList = new ArrayList<>();
-        R rRes = remoteProductionOrderService.listForDelays(date,date,DateUtils.getDate());
+        R rRes = remoteProductionOrderService.listForDelays();
         if (!rRes.isSuccess()) {
             logger.error("获取排产订单信息失败res:{}",JSONObject.toJSONString(rRes));
             throw new BusinessException("获取排产订单信息失败" + rRes.get("msg").toString());
@@ -286,8 +284,25 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
                 throw new BusinessException("请维护工厂"+ cdFactoryInfo.getCompanyCode() +"对应的付款公司");
             }
             smsDelaysDelivery.setCompanyCode(cdFactoryInfo.getCompanyCode());
+            smsDelaysDelivery.setCreateBy("定时任务");
+            smsDelaysDelivery.setUpdateBy("定时任务");
             smsDelaysDeliveryList.add(smsDelaysDelivery);
             supplierSet.add(smsDelaysDelivery.getSupplierCode());
+        }
+
+        //更新排产订单生成延期索赔标记
+        List<OmsProductionOrder> listReq = new ArrayList<>();
+        listRes.forEach(omsProductionOrder -> {
+            OmsProductionOrder omsProductionOrder1 = new OmsProductionOrder();
+            omsProductionOrder1.setId(omsProductionOrder.getId());
+            omsProductionOrder1.setDelaysFlag(ProductionOrderDelaysFlagEnum.PRODUCTION_ORDER_DELAYS_FLAG_2.getCode());
+            omsProductionOrder1.setUpdateBy("延期索赔定时任务");
+            listReq.add(omsProductionOrder1);
+        });
+        R resultUpdate = remoteProductionOrderService.updateBatchByPrimary(listReq);
+        if(!resultUpdate.isSuccess()){
+            logger.error("修改排产订单延期索赔标记失败:{}",resultUpdate.getStr("msg"));
+            throw new BusinessException("修改排产订单延期索赔标记失败"+resultUpdate.getStr("msg"));
         }
         return smsDelaysDeliveryList;
     }
