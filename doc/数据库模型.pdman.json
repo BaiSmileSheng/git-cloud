@@ -10077,7 +10077,7 @@
               "type": "DefaultString",
               "remark": "",
               "chnname": "采购组",
-              "notNull": true
+              "notNull": false
             },
             {
               "name": "storage_point",

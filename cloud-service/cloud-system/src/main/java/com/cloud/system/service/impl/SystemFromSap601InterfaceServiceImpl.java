@@ -90,7 +90,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
     private String password;
 
     private static final Integer MAX_SAP_RAW_MATERIAL_STOCK = 2000000;//sap原材料库存目前有78万数据,不会超过200万
-    private static final double SMALL_SIZE = 100;//获取bom数据每次传输物料号最大数量
+    private static final double SMALL_SIZE = 500;//获取bom数据每次传输物料号最大数量
 
     private static final int SAP_RAW_MATERIAL_SIZE = 10000;//获取原材料库存数据每次获取数量
 
