@@ -6,6 +6,7 @@ import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.metadata.Table;
 import com.alibaba.excel.read.metadata.ReadSheet;
 import com.alibaba.excel.write.handler.AbstractRowWriteHandler;
+import com.alibaba.excel.write.handler.CellWriteHandler;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.alibaba.excel.write.metadata.style.WriteCellStyle;
 import com.alibaba.excel.write.metadata.style.WriteFont;
@@ -113,6 +114,33 @@ public class EasyExcelUtil {
         }
     }
 
+    /**
+     * 导出 Excel ：一个 sheet，带表头,表头含有批注
+     *
+     * @param list      数据 list，要导出的实体
+     * @param fileName  导出的文件名，需要加后缀
+     * @param sheetName 导入文件的 sheet 名
+     * @param object    映射对象
+     */
+    public static R writePostilExcel(List<?> list, String fileName, String sheetName, Object object, CellWriteHandler cellWriteHandler) {
+        fileName = getAbsoluteFile(DateUtils.dateTimeNow() + fileName);
+        ExcelWriter excelWriter = EasyExcel.write(fileName, object.getClass())
+                .registerWriteHandler(setHorizontalCellStyleStrategy(13, 11))
+                .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy())
+                .registerWriteHandler(cellWriteHandler)
+                .build();
+        try {
+            WriteSheet writeSheet = EasyExcel.writerSheet(sheetName).build();
+            excelWriter.write(list, writeSheet);
+            return R.ok(fileName);
+        } catch (Exception e) {
+            throw new BusinessException("导出Excel失败，请联系网站管理员！");
+        } finally {
+            if (excelWriter != null) {
+                excelWriter.finish();
+            }
+        }
+    }
     /**
      * 导出 Excel ：一个 sheet，带表头,表头含有批注
      *
