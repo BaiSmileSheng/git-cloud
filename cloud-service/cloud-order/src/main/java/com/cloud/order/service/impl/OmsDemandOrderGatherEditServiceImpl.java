@@ -923,6 +923,9 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getEndTime())) {
                 criteria.andLessThanOrEqualTo("deliveryDate", omsDemandOrderGatherEdit.getEndTime() );
             }
+            if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getCreateBy())) {
+                criteria.andEqualTo("createBy", omsDemandOrderGatherEdit.getCreateBy() );
+            }
         }else{
             example.and().andIn("id", ids);
         }

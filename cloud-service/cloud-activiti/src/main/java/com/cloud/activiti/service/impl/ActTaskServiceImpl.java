@@ -2,6 +2,7 @@ package com.cloud.activiti.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.consts.ActivitiConstant;
@@ -19,6 +20,7 @@ import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
@@ -81,7 +83,7 @@ public class ActTaskServiceImpl implements IActTaskService {
         List<BizAudit> bizAudits = bizAuditService.selectBizAuditList(bizAuditUpdate);
         if (CollectionUtil.isNotEmpty(bizAudits)) {
             bizAuditUpdate = bizAudits.get(0);
-            bizAuditUpdate.setAuditor(user.getUserName() + "-" + user.getLoginName());
+            bizAuditUpdate.setAuditor(user.getUserName());
             bizAuditUpdate.setAuditorId(user.getUserId());
             bizAuditUpdate.setResult(bizAudit.getResult());
             bizAuditUpdate.setComment(bizAudit.getComment());
@@ -107,7 +109,7 @@ public class ActTaskServiceImpl implements IActTaskService {
         List<BizAudit> bizAudits = bizAuditService.selectBizAuditList(bizAuditUpdate);
         if (CollectionUtil.isNotEmpty(bizAudits)) {
             bizAuditUpdate = bizAudits.get(0);
-            bizAuditUpdate.setAuditor(user.getUserName() + "-" + user.getLoginName());
+            bizAuditUpdate.setAuditor(user.getUserName());
             bizAuditUpdate.setAuditorId(user.getUserId());
             bizAuditUpdate.setResult(bizAudit.getResult());
             bizAuditUpdate.setComment(bizAudit.getComment());
@@ -142,7 +144,7 @@ public class ActTaskServiceImpl implements IActTaskService {
         List<BizAudit> bizAudits = bizAuditService.selectBizAuditList(bizAuditUpdate).stream().filter(audit -> audit.getAuditorId().equals(auditUserId)).collect(Collectors.toList());
         if (CollectionUtil.isNotEmpty(bizAudits)) {
             bizAuditUpdate = bizAudits.get(0);
-            bizAuditUpdate.setAuditor(user.getUserName() + "-" + user.getLoginName());
+            bizAuditUpdate.setAuditor(user.getUserName());
             bizAuditUpdate.setAuditorId(user.getUserId());
             bizAuditUpdate.setResult(bizAudit.getResult());
             bizAuditUpdate.setComment(bizAudit.getComment());
@@ -211,6 +213,7 @@ public class ActTaskServiceImpl implements IActTaskService {
      * @return 是否成功
      */
     @Override
+    @GlobalTransactional
     public R auditBatch(BizAudit bizAudit, long auditUserId) {
         SysUser user = remoteUserService.selectSysUserByUserId(auditUserId);
         for (String taskId : bizAudit.getTaskIds()) {
@@ -221,15 +224,18 @@ public class ActTaskServiceImpl implements IActTaskService {
             if (null != bizBusiness) {
                 Map<String, Object> variables = Maps.newHashMap();
                 variables.put("result", bizAudit.getResult());
+                variables.put("taskIdVar", taskId);
+//                variables.put("auditUserIdVal", auditUserId);
                 // 审批
                 taskService.complete(taskId, variables);
+                Console.log(taskService.getVariable(taskId,"test"));
                 // 构建插入审批记录
-                BizAudit audit = new BizAudit().setTaskId(taskId).setResult(bizAudit.getResult())
-                        .setProcName(bizBusiness.getProcName()).setProcDefKey(bizBusiness.getProcDefKey())
-                        .setApplyer(bizBusiness.getApplyer()).setAuditor(user.getUserName() + "-" + user.getLoginName())
-                        .setAuditorId(user.getUserId());
-                bizAuditService.insertBizAudit(audit);
-                businessService.setAuditor(bizBusiness, audit.getResult(), auditUserId);
+//                BizAudit audit = new BizAudit().setTaskId(taskId).setResult(bizAudit.getResult())
+//                        .setProcName(bizBusiness.getProcName()).setProcDefKey(bizBusiness.getProcDefKey())
+//                        .setApplyer(bizBusiness.getApplyer()).setAuditor(user.getUserName() + "-" + user.getLoginName())
+//                        .setAuditorId(user.getUserId());
+//                bizAuditService.insertBizAudit(audit);
+//                businessService.setAuditor(bizBusiness, audit.getResult(), auditUserId);
             }
         }
         return R.ok();

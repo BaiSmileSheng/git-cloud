@@ -230,7 +230,7 @@ public class BizBusinessServiceImpl implements IBizBusinessService {
             bizAudit.setProcDefKey(business.getProcDefKey());
             bizAudit.setProcName(business.getProcName());
             bizAudit.setApplyer(business.getApplyer());
-            bizAudit.setAuditor(user.getLoginName());
+            bizAudit.setAuditor(user.getUserName());
             bizAudit.setAuditorId(user.getUserId());
             bizAudit.setCreateTime(new Date());
             bizAudit.setResult(1);
@@ -257,7 +257,7 @@ public class BizBusinessServiceImpl implements IBizBusinessService {
                 // 添加审核候选人
                 for (String auditor : userIds) {
                     SysUser user = remoteUserService.selectSysUserByUserId(Long.valueOf(auditor));
-                    auditorNames.add(user.getLoginName());
+                    auditorNames.add(user.getUserName());
                     taskService.addCandidateUser(task.getId(), auditor);
                 }
                 BizAudit bizAudit = new BizAudit();
@@ -302,7 +302,7 @@ public class BizBusinessServiceImpl implements IBizBusinessService {
                 // 添加审核候选人
                 for (String auditor : auditors) {
                     SysUser user = remoteUserService.selectSysUserByUserId(Long.valueOf(auditor));
-                    auditorNames.add(user.getLoginName());
+                    auditorNames.add(user.getUserName());
                     taskService.addCandidateUser(task.getId(), auditor);
                 }
                 BizAudit bizAudit = new BizAudit();
