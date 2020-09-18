@@ -3,6 +3,7 @@ package com.cloud.order.domain.entity.vo;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
+import com.cloud.order.converter.CsdFlagConverter;
 import com.cloud.order.converter.OutSourceTypeConverter;
 import com.cloud.order.converter.ProductionOrderClassConverter;
 import com.cloud.order.converter.SmallBatchConverter;
@@ -160,7 +161,7 @@ public class OmsProductionOrderExportVo {
     /**
      * 是否卡萨帝 0：否，1：是
      */
-    @ExcelProperty(value = "是否卡萨帝", index = 16)
+    @ExcelProperty(value = "是否卡萨帝", index = 16,converter = CsdFlagConverter.class)
     @ApiModelProperty(value = "是否卡萨帝 0：否，1：是")
     private String csdFlag;
     /**

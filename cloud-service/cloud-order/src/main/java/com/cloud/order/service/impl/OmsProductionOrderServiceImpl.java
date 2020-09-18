@@ -723,6 +723,13 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 //如果是反馈信息处理-快捷修改，即排产订单是反馈中状态，根据原材料反馈信息中未审核的原材料状态进行判断
                 detailStatus = ProductOrderConstants.DETAIL_STATUS_TWO;
             }
+            //判断采购组是否为空，为空直接已确认
+            //N99、C44采购组为半成品采购组，直接确认
+            if (!StrUtil.isNotBlank(bom.getPurchaseGroup())
+                    || "N99".equals(bom.getPurchaseGroup().toUpperCase())
+                    || "C44".equals(bom.getPurchaseGroup().toUpperCase())) {
+                detailStatus = ProductOrderConstants.DETAIL_STATUS_ONE;
+            }
             //计算原材料排产量
             BigDecimal rawMaterialProductNum = bom.getBomNum().multiply(omsProductionOrder.getProductNum())
                     .divide(bom.getBasicNum(), 2, BigDecimal.ROUND_HALF_UP);
