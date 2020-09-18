@@ -1349,8 +1349,11 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             List<CdBomInfo> bomInfos = bomMap.get(key);
             bomInfos.forEach(bom -> {
                 //判断采购组是否为空，为空直接已确认
+                //N99、C44采购组为半成品采购组，直接确认
                 String status = ProductOrderConstants.DETAIL_STATUS_ZERO;
-                if (!StrUtil.isNotBlank(bom.getPurchaseGroup())) {
+                if (!StrUtil.isNotBlank(bom.getPurchaseGroup())
+                        || "N99".equals(bom.getPurchaseGroup().toUpperCase())
+                        || "C44".equals(bom.getPurchaseGroup().toUpperCase())) {
                     status = ProductOrderConstants.DETAIL_STATUS_ONE;
                 }
                 //计算原材料排产量
