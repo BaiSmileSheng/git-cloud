@@ -711,7 +711,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         List<OmsProductionOrderDetail> omsProductionOrderDetails = new ArrayList<>();
         bomInfos.forEach(bom -> {
             //判断排产订单明细的状态
-            String detailStatus = "";
+            String detailStatus = ProductOrderConstants.DETAIL_STATUS_ZERO;
             //如果已评审的排产订单修改订单量，并且向上调整，则排产订单明细状态为“未确认”
             if (ProductOrderConstants.STATUS_THREE.equals(productionOrder.getStatus())
                     && ProductOrderConstants.STATUS_ZERO.equals(omsProductionOrder.getStatus())) {
@@ -719,7 +719,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }else if (ProductOrderConstants.STATUS_THREE.equals(productionOrder.getStatus())
                     && omsProductionOrder.getStatus().equals(productionOrder.getStatus())) {
                 detailStatus = ProductOrderConstants.DETAIL_STATUS_ONE;
-            }else if (rawMaterialCodes.contains(bom.getRawMaterialCode())){
+            }else if (rawMaterialCodes.contains(bom.getRawMaterialCode())) {
                 //如果是反馈信息处理-快捷修改，即排产订单是反馈中状态，根据原材料反馈信息中未审核的原材料状态进行判断
                 detailStatus = ProductOrderConstants.DETAIL_STATUS_TWO;
             }
@@ -961,6 +961,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 criteria.andGreaterThanOrEqualTo("assignSapTime", omsProductionOrder.getCheckDateStart());
             }else if(ProductOrderConstants.DATE_TYPE_FIVE.equals(omsProductionOrder.getDateType())){
                 criteria.andGreaterThanOrEqualTo("getSapTime", omsProductionOrder.getCheckDateStart());
+            }else if(ProductOrderConstants.DATE_TYPE_SIX.equals(omsProductionOrder.getDateType())){
+                criteria.andGreaterThanOrEqualTo("createTime",DateUtil.parse(omsProductionOrder.getCheckDateStart()));
             }
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getCheckDateEnd())) {
@@ -976,6 +978,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 criteria.andLessThan("assignSapTime", checkDateEnd);
             }else if(ProductOrderConstants.DATE_TYPE_FIVE.equals(omsProductionOrder.getDateType())){
                 criteria.andLessThan("getSapTime", checkDateEnd);
+            }else if (ProductOrderConstants.DATE_TYPE_SIX.equals(omsProductionOrder.getDateType())) {
+                criteria.andLessThan("createTime", DateUtil.parse(omsProductionOrder.getCheckDateEnd()).offset(DateField.DAY_OF_MONTH,1));
             }
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getOrderType())) {
@@ -1350,8 +1354,11 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             List<CdBomInfo> bomInfos = bomMap.get(key);
             bomInfos.forEach(bom -> {
                 //判断采购组是否为空，为空直接已确认
+                //N99、C44采购组为半成品采购组，直接确认
                 String status = ProductOrderConstants.DETAIL_STATUS_ZERO;
-                if (!StrUtil.isNotBlank(bom.getPurchaseGroup())) {
+                if (!StrUtil.isNotBlank(bom.getPurchaseGroup())
+                        || "N99".equals(bom.getPurchaseGroup().toUpperCase())
+                        || "C44".equals(bom.getPurchaseGroup().toUpperCase())) {
                     status = ProductOrderConstants.DETAIL_STATUS_ONE;
                 }
                 //计算原材料排产量
@@ -2354,6 +2361,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         sysInterfaceLog.setAppId("wms");
         sysInterfaceLog.setInterfaceName("findAllCodeForJIT");
         sysInterfaceLog.setContent("调用wms系统获取入库生产订单号单号"+String.join(",",productOrderCodeList));
+        sysInterfaceLog.setCreateTime(new Date());
         /** url：webservice 服务端提供的服务地址，结尾必须加 "?wsdl"*/
         URL url = null;
         try {
