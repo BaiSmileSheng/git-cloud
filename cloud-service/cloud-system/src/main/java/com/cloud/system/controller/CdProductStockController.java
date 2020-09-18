@@ -5,18 +5,15 @@ import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.easyexcel.SheetExcelData;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
-import com.cloud.system.domain.entity.CdProductInProduction;
-import com.cloud.system.domain.entity.CdProductPassage;
 import com.cloud.system.domain.entity.CdProductStock;
-import com.cloud.system.domain.entity.CdProductWarehouse;
 import com.cloud.system.domain.entity.SysUser;
-import com.cloud.system.domain.vo.CdProductStockDetailVo;
+import com.cloud.system.domain.vo.CdProductStockExportVo;
 import com.cloud.system.service.ICdProductStockService;
 import com.cloud.system.util.EasyExcelUtilOSS;
+import com.cloud.system.util.ExcelStockCellMergeStrategy;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +22,6 @@ import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -89,42 +85,10 @@ public class CdProductStockController extends BaseController {
     })
     public R export(@ApiIgnore CdProductStock cdProductStock) {
 
-        R result = cdProductStockService.export(cdProductStock);
-        if(!result.isSuccess()){
-            return result;
-        }
-        CdProductStockDetailVo cdProductStockDetail = (CdProductStockDetailVo)result.get("data");
-        List<SheetExcelData>  sheetExcelDataList= new ArrayList<>();
-        SheetExcelData sheetExcelDataZ = new SheetExcelData();
-        sheetExcelDataZ.setDataList(cdProductStockDetail.getCdProductStockList());
-        sheetExcelDataZ.setSheetName("汇总数据");
-        sheetExcelDataZ.setTClass(CdProductStock.class);
-        sheetExcelDataList.add(sheetExcelDataZ);
-        SheetExcelData sheetExcelDataL = new SheetExcelData();
-        sheetExcelDataL.setDataList(cdProductStockDetail.getCdProductWarehouseListL());
-        sheetExcelDataL.setSheetName("在库库存");
-        sheetExcelDataL.setTClass(CdProductWarehouse.class);
-        sheetExcelDataList.add(sheetExcelDataL);
-
-        SheetExcelData sheetExcelDataT = new SheetExcelData();
-        sheetExcelDataT.setDataList(cdProductStockDetail.getCdProductPassageList());
-        sheetExcelDataT.setSheetName("在途库存");
-        sheetExcelDataT.setTClass(CdProductPassage.class);
-        sheetExcelDataList.add(sheetExcelDataT);
-
-        SheetExcelData sheetExcelDataC = new SheetExcelData();
-        sheetExcelDataC.setDataList(cdProductStockDetail.getCdProductInProductionList());
-        sheetExcelDataC.setSheetName("在产库存");
-        sheetExcelDataC.setTClass(CdProductInProduction.class);
-        sheetExcelDataList.add(sheetExcelDataC);
-
-        SheetExcelData sheetExcelDataB = new SheetExcelData();
-        sheetExcelDataB.setDataList(cdProductStockDetail.getCdProductWarehouseListB());
-        sheetExcelDataB.setSheetName("不良库存");
-        sheetExcelDataB.setTClass(CdProductWarehouse.class);
-        sheetExcelDataList.add(sheetExcelDataB);
-
-        return EasyExcelUtilOSS.writeMultiExcel("成品库存.xlsx", sheetExcelDataList);
+        List<CdProductStockExportVo> list = cdProductStockService.export(cdProductStock);
+        int[] mergeColumnIndex = {0,1,2,3};
+        return EasyExcelUtilOSS.writePostilExcel(list,"成品库存.xlsx", "成品库存.xlsx",new CdProductStockExportVo(),
+                new ExcelStockCellMergeStrategy(2,mergeColumnIndex));
     }
 
     /**

@@ -21,6 +21,7 @@ import javax.xml.namespace.QName;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
+import java.util.Date;
 
 /**
  * 报账单创建接口
@@ -62,7 +63,8 @@ public class BaseMutilItemServiceImpl implements IBaseMutilItemService {
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog();
         sysInterfaceLog.setAppId("KMS");
         sysInterfaceLog.setInterfaceName("createMultiItemClaim");
-        sysInterfaceLog.setContent("创建报账单接口");
+        sysInterfaceLog.setContent("创建报账单接口:"+JSONObject.toJSONString(baseMultiItemClaimSaveRequest));
+        sysInterfaceLog.setCreateTime(new Date());
         /** url：webservice 服务端提供的服务地址，结尾必须加 "?wsdl"*/
         URL url = null;
         try {
@@ -82,9 +84,8 @@ public class BaseMutilItemServiceImpl implements IBaseMutilItemService {
                 throw new BusinessException("在字典表中获取申请人信息失败");
             }
             baseMultiItemClaimSaveRequest.setUserNo(userNo);
-            logger.info("单据创建接口（支持多明细）req:{}", JSONObject.toJSONString(baseMultiItemClaimSaveRequest));
             BaseClaimResponse result = ifBaseClaimService.createMultiItemClaim(baseMultiItemClaimSaveRequest);
-            logger.info("单据创建接口（支持多明细）res:{}", JSONObject.toJSONString(result));
+            sysInterfaceLog.setResults(JSONObject.toJSONString(result));
             return result;
         }catch (Exception e){
             sysInterfaceLog.setResults("单据创建接口异常");
