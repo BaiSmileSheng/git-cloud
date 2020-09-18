@@ -5,6 +5,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.system.domain.entity.CdProductStock;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.CdProductStockExportVo;
 
 import java.util.List;
 
@@ -42,7 +43,7 @@ public interface ICdProductStockService extends BaseService<CdProductStock> {
      * @param cdProductStock  成品库存主表信息
      * @return
      */
-    R export(CdProductStock cdProductStock);
+    List<CdProductStockExportVo> export(CdProductStock cdProductStock);
 
     /**
      * 根据工厂，专用号分组取成品库存
