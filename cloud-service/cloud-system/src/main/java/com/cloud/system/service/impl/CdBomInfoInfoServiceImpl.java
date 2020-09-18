@@ -142,12 +142,15 @@ public class CdBomInfoInfoServiceImpl extends BaseServiceImpl<CdBomInfo> impleme
         sysInterfaceLog.setAppId(cdBomInfoOtherSysVo.getAppId());
         sysInterfaceLog.setInterfaceName(cdBomInfoOtherSysVo.getInterfaceName());
         sysInterfaceLog.setContent(JSONObject.toJSONString(cdBomInfoOtherSysVo));
+        sysInterfaceLog.setCreateBy(cdBomInfoOtherSysVo.getAppId());
+        sysInterfaceLog.setCreateTime(new Date());
         try{
             Example exampleDelete = new Example(CdBomInfo.class);
             Example.Criteria criteriaDelete = exampleDelete.createCriteria();
             criteriaDelete.andEqualTo("productMaterialCode",cdBomInfoOtherSysVo.getProductMaterialCode());
             criteriaDelete.andEqualTo("productFactoryCode",cdBomInfoOtherSysVo.getProductFactoryCode());
-            criteriaDelete.andEqualTo("version",cdBomInfoOtherSysVo.getVersion());
+            String version = cdBomInfoOtherSysVo.getVersion().replaceAll("^(0+)", "");
+            criteriaDelete.andEqualTo("version",version);
             cdBomInfoMapper.deleteByExample(exampleDelete);
             if(!PBOM_FLAG_1.equals(cdBomInfoOtherSysVo.getPbomFlag())){
                 List<CdBomInfo> cdBomInfoList = new ArrayList<>();
@@ -175,7 +178,6 @@ public class CdBomInfoInfoServiceImpl extends BaseServiceImpl<CdBomInfo> impleme
                     cdBomInfo.setProductMaterialCode(cdBomInfoOtherSysVo.getProductMaterialCode());
                     cdBomInfo.setProductMaterialDesc(cdBomInfoOtherSysVo.getProductMaterialDesc());
                     cdBomInfo.setProductFactoryCode(cdBomInfoOtherSysVo.getProductFactoryCode());
-                    String version = cdBomInfoOtherSysVo.getVersion().replaceAll("^(0+)", "");
                     cdBomInfo.setVersion(version);
                     cdBomInfo.setCreateBy(cdBomInfoOtherSysVo.getAppId());
                     cdBomInfo.setCreateTime(new Date());
