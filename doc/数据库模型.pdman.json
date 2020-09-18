@@ -4677,6 +4677,18 @@
               "chnname": "生成加工结算错误信息"
             },
             {
+              "name": "delays_flag",
+              "type": "DefaultString",
+              "remark": "0:无需生成,1:待生成,2.已生成",
+              "chnname": "生成延期索赔标记"
+            },
+            {
+              "name": "delays_messages",
+              "type": "VARCHAR_1000",
+              "remark": "",
+              "chnname": "生成延期索赔错误信息"
+            },
+            {
               "name": "assign_sap_time",
               "type": "DefaultString",
               "remark": "",

@@ -124,7 +124,6 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
      * 物料下市审核 真单审核开启流程
      * @return 成功或失败
      */
-    @Transactional(rollbackFor=Exception.class)
     @Override
     public R addSave(OmsOrderMaterialOutVo omsOrderMaterialOutVo) {
         List<OmsOrderMaterialOutVo> list = omsOrderMaterialOutVo.getOmsOrderMaterialOutVoList();

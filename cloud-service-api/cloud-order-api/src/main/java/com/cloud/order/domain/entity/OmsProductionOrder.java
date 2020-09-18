@@ -339,6 +339,11 @@ public class OmsProductionOrder extends BaseEntity {
     @ApiModelProperty(value = "生成加工结算错误信息")
     private String settleMessages;
 
+    /**
+     * 生成延期索赔标记
+     */
+    @ApiModelProperty(value = "生成延期索赔标记",notes = "0:无需生成,1:待生成,2.已生成")
+    private String delaysFlag;
 
     /**
      * 是否删除 0：有效，1：删除
