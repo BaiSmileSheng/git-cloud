@@ -2361,6 +2361,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         sysInterfaceLog.setAppId("wms");
         sysInterfaceLog.setInterfaceName("findAllCodeForJIT");
         sysInterfaceLog.setContent("调用wms系统获取入库生产订单号单号"+String.join(",",productOrderCodeList));
+        sysInterfaceLog.setCreateTime(new Date());
         /** url：webservice 服务端提供的服务地址，结尾必须加 "?wsdl"*/
         URL url = null;
         try {

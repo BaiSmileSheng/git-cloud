@@ -1,5 +1,6 @@
 package com.cloud.settle.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
@@ -133,20 +134,19 @@ public class QryPaysSoapServiceImpl implements IQryPaysSoapService {
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog();
         sysInterfaceLog.setAppId("KMS");
         sysInterfaceLog.setInterfaceName("getQryPays");
-        sysInterfaceLog.setContent("查询付款结果");
+        sysInterfaceLog.setContent("查询付款结果入参:"+ inXml);
+        sysInterfaceLog.setCreateTime(new Date());
         try{
             QName qName = new QName(namespaceURL, localPart);
             QryPaysSoapBindingStub generalMDMDataReleaseBindingStub =
                     (QryPaysSoapBindingStub) new ErpPayoutReceiveServiceServiceLocator(urlClaim,qName).getQryPays();
-            logger.info("调用付款接口入参 req:{}",inXml);
             String outXml = generalMDMDataReleaseBindingStub.queryBill(inXml);
-            logger.info("调用付款接口出参 res:{}",outXml);
-
             JAXBContext context = JAXBContext.newInstance(QryPaysSoapResponse.class);
             Unmarshaller unmarshaller = context.createUnmarshaller();
             qryPaysSoapResponse = (QryPaysSoapResponse)unmarshaller.unmarshal(new StringReader(outXml));
             //冗余kms单号
             qryPaysSoapResponse.setKmsNo(qryPaysSoapRequest.getDOC_NO());
+            sysInterfaceLog.setResults("调用付款接口出参:"+ outXml);
         }catch (Exception e){
             sysInterfaceLog.setResults("调用付款接口异常");
             StringWriter w = new StringWriter();
