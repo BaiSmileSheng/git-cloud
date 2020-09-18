@@ -124,6 +124,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     private static final int WMS_PRODUCT_ORDER_LENGTH = 12;//向wms传生产订单号长度
 
     private static final String[] parsePatterns = {"yyyy.MM.dd", "yyyy/MM/dd"};
+    //无需评审采购组
+    private static final String[] PURCHASE_GROUP = {"N99","C44","M02","N21"};
 
     @Value("${webService.findAllCodeForJIT.urlClaim}")
     private String urlClaim;
@@ -274,6 +276,18 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             log.error("BOM拆解流程失败，原因：" + bomDisassemblyResult.get("msg"));
             return R.error("BOM拆解流程失败!");
         }
+        //bom拆解判断排产订单明细的状态，设置排产订单的状态
+        Map<String,List<OmsProductionOrderDetail>> detailMap =
+                bomDisassemblyResult.getCollectData(new TypeReference<Map<String, List<OmsProductionOrderDetail>>>() {});
+        omsProductionOrders.forEach(o ->{
+            List<OmsProductionOrderDetail> detailList = detailMap.get(o.getOrderCode());
+            int statusSize = detailList.stream().filter(detail ->
+                    !ProductOrderConstants.DETAIL_STATUS_ZERO.equals(detail.getStatus()))
+                    .collect(Collectors.toList()).size();
+            if (statusSize == 0) {
+                o.setStatus(ProductOrderConstants.STATUS_THREE);
+            }
+        });
         // 还原先插入排产订单，在进行校验订单导入的闸口的顺序
         if (omsProductionOrders.size() > 0) {
             omsProductionOrderMapper.insertList(omsProductionOrders);
@@ -724,10 +738,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 detailStatus = ProductOrderConstants.DETAIL_STATUS_TWO;
             }
             //判断采购组是否为空，为空直接已确认
-            //N99、C44采购组为半成品采购组，直接确认
+            //N99、C44、M02、N21采购组为半成品采购组，直接确认
             if (!StrUtil.isNotBlank(bom.getPurchaseGroup())
-                    || "N99".equals(bom.getPurchaseGroup().toUpperCase())
-                    || "C44".equals(bom.getPurchaseGroup().toUpperCase())) {
+                    || Arrays.asList(PURCHASE_GROUP).contains(bom.getPurchaseGroup())) {
                 detailStatus = ProductOrderConstants.DETAIL_STATUS_ONE;
             }
             //计算原材料排产量
@@ -753,6 +766,14 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             omsProductionOrderDetail.setCreateBy(sysUser.getLoginName());
             omsProductionOrderDetails.add(omsProductionOrderDetail);
         });
+        //拆解BOM判断排产订单明细状态，设置排产订单状态
+        int statusSize = omsProductionOrderDetails.stream().filter(detail ->
+                !ProductOrderConstants.DETAIL_STATUS_ZERO.equals(detail.getStatus()))
+                .collect(Collectors.toList()).size();
+        if (statusSize == 0) {
+            order.setStatus(ProductOrderConstants.STATUS_THREE);
+            omsProductionOrderMapper.updateByPrimaryKeySelective(order);
+        }
         omsProductionOrderDetailService.delectByProductOrderCode(productionOrder.getOrderCode());
         omsProductionOrderDetailService.insertList(omsProductionOrderDetails);
         if (ProductOrderConstants.STATUS_ZERO.equals(omsProductionOrder.getStatus())) {
@@ -1356,16 +1377,16 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 .collect(Collectors.groupingBy((bom) -> fetchGroupKey(bom)));
         //2-2、计算排产订单原材料排产量
         List<OmsProductionOrderDetail> omsProductionOrderDetails = new ArrayList<>();
+        Map<String,List<OmsProductionOrderDetail>> map = new HashMap<>();
         omsProductionOrders.forEach(o -> {
             String key = o.getProductMaterialCode() + o.getProductFactoryCode() + o.getBomVersion();
             List<CdBomInfo> bomInfos = bomMap.get(key);
             bomInfos.forEach(bom -> {
                 //判断采购组是否为空，为空直接已确认
-                //N99、C44采购组为半成品采购组，直接确认
+                //N99、C44、M02、N21采购组为半成品采购组，直接确认
                 String status = ProductOrderConstants.DETAIL_STATUS_ZERO;
                 if (!StrUtil.isNotBlank(bom.getPurchaseGroup())
-                        || "N99".equals(bom.getPurchaseGroup().toUpperCase())
-                        || "C44".equals(bom.getPurchaseGroup().toUpperCase())) {
+                        || Arrays.asList(PURCHASE_GROUP).contains(bom.getPurchaseGroup())) {
                     status = ProductOrderConstants.DETAIL_STATUS_ONE;
                 }
                 //计算原材料排产量
@@ -1391,6 +1412,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 omsProductionOrderDetail.setCreateBy(sysUser.getLoginName());
                 omsProductionOrderDetails.add(omsProductionOrderDetail);
             });
+            map.put(o.getOrderCode(),omsProductionOrderDetails);
         });
         if (omsProductionOrderDetails.size() <= 0) {
             log.info("无拆解后的排产订单明细！");
@@ -1433,7 +1455,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 mailService.sendTextMail(email, EmailConstants.TITLE_RAW_MATERIAL_REVIEW, contexts);
             });
         }
-        return R.ok();
+        return R.data(map);
     }
 
     /**
