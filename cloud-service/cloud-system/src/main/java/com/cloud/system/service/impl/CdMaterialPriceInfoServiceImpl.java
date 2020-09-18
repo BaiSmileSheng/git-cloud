@@ -197,7 +197,7 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog();
         sysInterfaceLog.setAppId("SAP");
         sysInterfaceLog.setInterfaceName(SapConstants.ZMM_INT_DDPS_01);
-        sysInterfaceLog.setContent("查加工费/原材料价格");
+        sysInterfaceLog.setContent("查加工费/原材料价格标记:"+lifnr+";物料号集合:"+String.join(",",materialCodeList));
         try {
             //创建与SAP的连接
             destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP601);

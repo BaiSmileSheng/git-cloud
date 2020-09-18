@@ -19,6 +19,7 @@ import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderExportVo;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderImportVo;
+import com.cloud.order.enums.ProductionOrderDelaysFlagEnum;
 import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.service.IOmsProductionOrderService;
 import com.cloud.order.util.DataScopeUtil;
@@ -149,12 +150,7 @@ public class OmsProductionOrderController extends BaseController {
     }
 
     /**
-     * 查询排产订单 列表
-     *
-     * @param productEndDateEnd  基本结束时间 结束值
-     * @param actualEndDateStart 实际结束时间 起始值
-     * @param actualEndDateEnd   实际结束时间 结束值
-     * @return 排产订单 列表
+     * 查询延期标记排产订单 列表
      */
     @GetMapping("listForDelays")
     @ApiOperation(value = "查询延期关单的排产订单", response = OmsProductionOrder.class)
@@ -163,25 +159,10 @@ public class OmsProductionOrderController extends BaseController {
             @ApiImplicitParam(name = "actualEndDateStart", value = "实际开始日期起始值", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "actualEndDateEnd", value = "实际开始日期结束值", required = true, paramType = "query", dataType = "String")
     })
-    public R listForDelays(@RequestParam("productEndDateEnd") String productEndDateEnd,
-                                                  @RequestParam("actualEndDateStart") String actualEndDateStart,
-                                                  @RequestParam("actualEndDateEnd") String actualEndDateEnd){
+    public R listForDelays(){
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();
-        if(StringUtils.isNotBlank(productEndDateEnd)){
-            criteria.andLessThan("productEndDate",productEndDateEnd);
-        }
-        if(StringUtils.isNotBlank(actualEndDateStart)){
-            criteria.andGreaterThanOrEqualTo("actualEndDate", actualEndDateStart);
-        }
-        if(StringUtils.isNotBlank(actualEndDateEnd)){
-            criteria.andLessThan("actualEndDate", actualEndDateEnd);
-        }
-        criteria.andEqualTo("status",ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
-        List<String> outsourceTypeList = new ArrayList<>();
-        outsourceTypeList.add(OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode());
-        outsourceTypeList.add(OutSourceTypeEnum.OUT_SOURCE_TYPE_QWW.getCode());
-        criteria.andIn("outsourceType",outsourceTypeList);
+        criteria.andEqualTo("delaysFlag", ProductionOrderDelaysFlagEnum.PRODUCTION_ORDER_DELAYS_FLAG_1.getCode());
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderService.selectByExample(example);
         //避免没有数据报错
         R result = new R();
@@ -595,5 +576,15 @@ public class OmsProductionOrderController extends BaseController {
     public R deleteSAP(@RequestParam("id") String id) {
         SysUser sysUser = getUserInfo(SysUser.class);
         return omsProductionOrderService.deleteSAP(id,sysUser);
+    }
+
+    /**
+     * 根据主键批量修改保存排产订单
+     */
+    @PostMapping("updateBatchByPrimary")
+    @OperLog(title = "根据主键批量修改保存排产订单", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "根据主键批量修改保存排产订单", response = R.class)
+    public R updateBatchByPrimary(@RequestBody List<OmsProductionOrder> omsProductionOrderList) {
+        return toAjax(omsProductionOrderService.updateBatchByPrimaryKeySelective(omsProductionOrderList));
     }
 }

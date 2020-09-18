@@ -7,6 +7,8 @@ import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Slf4j
 @Component
 public class RemoteProductionOrderFallbackFactory implements FallbackFactory<RemoteProductionOrderService> {
@@ -30,13 +32,10 @@ public class RemoteProductionOrderFallbackFactory implements FallbackFactory<Rem
 
             /**
              * 查询排产订单 列表
-             * @param productEndDateEnd  基本结束时间 结束值
-             * @param actualEndDateStart 实际结束时间 起始值
-             * @param actualEndDateEnd 实际结束时间 结束值
              * @return 排产订单 列表
              */
             @Override
-            public R listForDelays(String productEndDateEnd, String actualEndDateStart, String actualEndDateEnd) {
+            public R listForDelays() {
                 log.error("RemoteProductionOrderService.listForDelays(生产订单)错误信息：{}",throwable.getMessage());
                 return R.error("服务拥挤请稍后再试");
             }
@@ -76,6 +75,12 @@ public class RemoteProductionOrderFallbackFactory implements FallbackFactory<Rem
             @Override
             public R timeGetConfirmAmont() {
                 log.error("RemoteProductionOrderService.timeGetConfirmAmont：{}",throwable.getMessage());
+                return R.error("服务拥挤请稍后再试");
+            }
+
+            @Override
+            public R updateBatchByPrimary(List<OmsProductionOrder> omsProductionOrderList) {
+                log.error("RemoteProductionOrderService.updateBatchByPrimary：{}",throwable.getMessage());
                 return R.error("服务拥挤请稍后再试");
             }
 

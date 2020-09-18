@@ -32,6 +32,7 @@ import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.*;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderExportVo;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderMailVo;
+import com.cloud.order.enums.ProductionOrderDelaysFlagEnum;
 import com.cloud.order.enums.ProductionOrderSettleFlagEnum;
 import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.mail.MailService;
@@ -2319,6 +2320,18 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 smsSettleInfo.setActualEndDate(omsProductionOrder.getActualEndDate());
                 smsSettleInfo.setOrderStatus(SettleInfoOrderStatusEnum.ORDER_STATUS_2.getCode());
                 omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
+
+                Date productEndDate = StringUtils.isBlank(omsProductionOrderRes.getProductEndDate()) ?
+                        null : DateUtils.dateTime(YYYY_MM_DD,omsProductionOrderRes.getProductEndDate());
+                if(productEndDate.before(omsProductionOrder.getActualEndDate())
+                        && !OutSourceTypeEnum.OUT_SOURCE_TYPE_ZZ.getCode().equals(
+                omsProductionOrderRes.getOutsourceType())){
+                    omsProductionOrder.setDelaysFlag(ProductionOrderDelaysFlagEnum.PRODUCTION_ORDER_DELAYS_FLAG_1.getCode());
+                }else{
+                    omsProductionOrder.setDelaysFlag(ProductionOrderDelaysFlagEnum.PRODUCTION_ORDER_DELAYS_FLAG_0.getCode());
+                }
+            }else{
+                omsProductionOrder.setActualEndDate(null);
             }
             smsSettleInfoList.add(smsSettleInfo);
         });
@@ -2342,7 +2355,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         log.info("调用wms系统获取入库数量");
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog();
         sysInterfaceLog.setAppId("wms");
-        sysInterfaceLog.setInterfaceName("getQryPays");
+        sysInterfaceLog.setInterfaceName("findAllCodeForJIT");
         sysInterfaceLog.setContent("调用wms系统获取入库生产订单号单号"+String.join(",",productOrderCodeList));
         /** url：webservice 服务端提供的服务地址，结尾必须加 "?wsdl"*/
         URL url = null;
