@@ -126,6 +126,7 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
      */
     @Override
     public R addSave(OmsOrderMaterialOutVo omsOrderMaterialOutVo) {
+        String roleKey = RoleConstants.ROLE_KEY_ORDER;
         List<OmsOrderMaterialOutVo> list = omsOrderMaterialOutVo.getOmsOrderMaterialOutVoList();
 
         List<OmsOrderMaterialOutVo> listAdd = new ArrayList<>();
@@ -151,60 +152,51 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
             }
         }
 
-        //key工厂,value用户
-        Map<String,List<SysUserVo>> map = new HashMap<>();
         if(!CollectionUtils.isEmpty(listAdd)){
+            //key工厂,value用户
+            Map<String,List<SysUserVo>> mapFactoryUser = new HashMap<>();
+            //将需要下市审批的listAdd 按工厂分组查邮箱
+            Map<String,List<OmsOrderMaterialOutVo>> listAddMap = listAdd.stream().collect(Collectors.groupingBy(OmsOrderMaterialOutVo ::getFactoryCode));
+            listAddMap.keySet().forEach(factoryCode ->{
+                R sysUserR = remoteUserService.selectUserByMaterialCodeAndRoleKey(factoryCode,roleKey);
+                if(!sysUserR.isSuccess()){
+                    logger.error("获取对应的负责人邮箱失败 factoryCode:{},roleKey:{}",factoryCode,roleKey);
+                    throw new BusinessException("获取对应的负责人邮箱失败工厂:" + factoryCode + "角色:" + roleKey + sysUserR.get("msg").toString());
+                }
+                List<SysUserVo> sysUserVoList = sysUserR.getCollectData(new TypeReference<List<SysUserVo>>() {});
+                mapFactoryUser.put(factoryCode,sysUserVoList);
+            });
             listAdd.forEach(omsOrderMaterialOutVoReq ->{
                 String factoryCode = omsOrderMaterialOutVoReq.getFactoryCode();
-                String roleKey = RoleConstants.ROLE_KEY_ORDER;
                 //1.构造下市审核流程信息
                 BizBusiness business = initBusiness(omsOrderMaterialOutVoReq);
                 //新增下市审核流程
                 bizBusinessService.insertBizBusiness(business);
                 Map<String, Object> variables = Maps.newHashMap();
                 //启动下市审核流程
-                R sysUserR = remoteUserService.selectUserByMaterialCodeAndRoleKey(factoryCode,roleKey);
-                if(!sysUserR.isSuccess()){
-                    logger.error("获取对应的负责人邮箱失败 factoryCode:{},roleKey:{}",factoryCode,roleKey);
-                    throw new BusinessException("获取对应的负责人邮箱失败" + sysUserR.get("msg").toString());
-                }
-                List<SysUserVo> sysUserVoList = sysUserR.getCollectData(new TypeReference<List<SysUserVo>>() {});
+                List<SysUserVo> sysUserVoList = mapFactoryUser.get(factoryCode);
                 Set<String> userIdSet = sysUserVoList.stream().map(sysUserVo -> sysUserVo.getUserId().toString()).collect(Collectors.toSet());
                 bizBusinessService.startProcess(business, variables,userIdSet);
-                //4.校验发送人邮箱是否存在
-                verifyEmail(factoryCode,sysUserVoList,map);
             });
             //发送邮件
-            list.forEach(omsOrderMaterialOutVoReq ->{
-                List<SysUserVo> sysUserVoList = map.get(omsOrderMaterialOutVoReq.getFactoryCode());
+            listAddMap.keySet().forEach(factoryCode ->{
+                List<OmsOrderMaterialOutVo> omsOrderMaterialOutVoList = listAddMap.get(factoryCode);
+                List<String> orderCodeList = omsOrderMaterialOutVoList.stream().map(OmsOrderMaterialOutVo::getOrderCode).collect(Collectors.toList());
+                List<SysUserVo> sysUserVoList = mapFactoryUser.get(factoryCode);
                 //发送邮件
                 for(SysUserVo sysUserVo : sysUserVoList){
                     String email = sysUserVo.getEmail();
-                    String subject = "物料下市审批";
-                    String content = "您有一条待办消息要处理！" + "单号：" + omsOrderMaterialOutVoReq.getOrderCode()
-                            + "物料已下市需要审批。" + EmailConstants.ORW_URL;
-                    mailService.sendTextMail(email,subject,content);
+                    if(StringUtils.isNotBlank(email)){
+                        String subject = "物料下市审批";
+                        String contentReq = "您有一些待办消息要处理:\n单号:";
+                        String contentList = String.join("\n单号:",orderCodeList);
+                        String content = contentReq + contentList + "\n物料已下市需要审批。" + EmailConstants.ORW_URL;
+                        mailService.sendTextMail(email,subject,content);
+                    }
                 }
             });
         }
         return R.ok();
-    }
-
-    /**
-     * 校验发送人邮箱是否存在
-     * @param factoryCode
-     * @param sysUserVoList
-     * @param map
-     */
-    private void verifyEmail(String factoryCode,List<SysUserVo> sysUserVoList,Map<String,List<SysUserVo>> map) {
-        //校验邮箱
-        for(SysUserVo sysUserVo : sysUserVoList){
-            String email = sysUserVo.getEmail();
-            if(StringUtils.isBlank(email)){
-                throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
-            }
-        }
-        map.put(factoryCode,sysUserVoList);
     }
 
     /**
