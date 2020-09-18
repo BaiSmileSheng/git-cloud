@@ -962,7 +962,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }else if(ProductOrderConstants.DATE_TYPE_FIVE.equals(omsProductionOrder.getDateType())){
                 criteria.andGreaterThanOrEqualTo("getSapTime", omsProductionOrder.getCheckDateStart());
             }else if(ProductOrderConstants.DATE_TYPE_SIX.equals(omsProductionOrder.getDateType())){
-                criteria.andGreaterThanOrEqualTo("createTime", omsProductionOrder.getCheckDateStart());
+                criteria.andGreaterThanOrEqualTo("createTime",DateUtil.parse(omsProductionOrder.getCheckDateStart()));
             }
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getCheckDateEnd())) {
@@ -979,7 +979,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }else if(ProductOrderConstants.DATE_TYPE_FIVE.equals(omsProductionOrder.getDateType())){
                 criteria.andLessThan("getSapTime", checkDateEnd);
             }else if (ProductOrderConstants.DATE_TYPE_SIX.equals(omsProductionOrder.getDateType())) {
-                criteria.andLessThanOrEqualTo("createTime", omsProductionOrder.getCheckDateEnd());
+                criteria.andLessThan("createTime", DateUtil.parse(omsProductionOrder.getCheckDateEnd()).offset(DateField.DAY_OF_MONTH,1));
             }
         }
         if (StrUtil.isNotBlank(omsProductionOrder.getOrderType())) {

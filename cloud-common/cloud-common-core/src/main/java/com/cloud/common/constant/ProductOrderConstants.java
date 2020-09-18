@@ -50,13 +50,14 @@ public class ProductOrderConstants {
 
     /**
      * 日期查询类型
-     * 1：T-1交付日期，2：基本开始日期，3：基本结束日期',4:下达SAP时间,5:已传SAP时间
+     * 1：T-1交付日期，2：基本开始日期，3：基本结束日期',4:下达SAP时间,5:已传SAP时间,6:创建日期
      */
     public final static String DATE_TYPE_ONE = "1";
     public final static String DATE_TYPE_TWO = "2";
     public final static String DATE_TYPE_THREE = "3";
     public final static String DATE_TYPE_FOUR= "4";
     public final static String DATE_TYPE_FIVE= "5";
+    public final static String DATE_TYPE_SIX= "6";
 
     /**
      * 订单分类
