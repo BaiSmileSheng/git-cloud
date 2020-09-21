@@ -18,7 +18,7 @@ public class ToolUtil {
      * @author zmr
      */
     public static String getTempPath() {
-        return System.getProperty("java.io.tmpdir");
+        return java.text.Normalizer.normalize(System.getProperty("java.io.tmpdir"),java.text.Normalizer.Form.NFKD);
     }
 
     /**
@@ -28,7 +28,7 @@ public class ToolUtil {
      * @author zmr
      */
     public static String getUserDir() {
-        return System.getProperty("user.dir");
+        return java.text.Normalizer.normalize(System.getProperty("user.dir"),java.text.Normalizer.Form.NFKD);
     }
 
     /**

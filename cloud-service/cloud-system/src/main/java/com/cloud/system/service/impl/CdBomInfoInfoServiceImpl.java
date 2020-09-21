@@ -160,7 +160,7 @@ public class CdBomInfoInfoServiceImpl extends BaseServiceImpl<CdBomInfo> impleme
                 }
                 List<Dict> paramsMapList = bomDetailList.stream().map(cdBomInfo ->
                                 new Dict().set("productFactoryCode", cdBomInfo.getProductFactoryCode())
-                                        .set("productMaterialCode", cdBomInfo.getProductMaterialCode()))
+                                        .set("productMaterialCode", cdBomInfo.getRawMaterialCode()))
                         .distinct().collect(toList());
                 R materialInfoR = cdMaterialInfoService.selectListByMaterialList(paramsMapList);
                 List<CdMaterialInfo> materialInfoList = new ArrayList<>();
@@ -184,7 +184,7 @@ public class CdBomInfoInfoServiceImpl extends BaseServiceImpl<CdBomInfo> impleme
                     cdBomInfo.setUpdateBy(cdBomInfoOtherSysVo.getAppId());
                     cdBomInfo.setUpdateTime(new Date());
 
-                    String key = cdBomInfoOtherSysVo.getProductMaterialCode() + cdBomInfoOtherSysVo.getProductFactoryCode();
+                    String key = cdBomInfo.getRawMaterialCode() + cdBomInfoOtherSysVo.getProductFactoryCode();
                     CdMaterialInfo cdMaterialInfo = materialInfoMap.get(key);
                     if(null != cdMaterialInfo){
                         cdBomInfo.setPurchaseGroup(cdMaterialInfo.getPurchaseGroupCode());
