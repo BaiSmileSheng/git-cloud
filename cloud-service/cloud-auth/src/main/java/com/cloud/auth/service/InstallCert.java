@@ -17,15 +17,15 @@ public class InstallCert {
 
         String host;
         int port;
-        char[] passphrase;
+        char[] psphrase;
         if ((args.length == 1) || (args.length == 2)) {
             String[] c = args[0].split(":");
             host = c[0];
             port = (c.length == 1) ? 443 : Integer.parseInt(c[1]);
             String p = (args.length == 1) ? "changeit" : args[1];
-            passphrase = p.toCharArray();
+            psphrase = p.toCharArray();
         } else {
-            System.out.println("Usage: java InstallCert <host>[:port] [passphrase]");
+            System.out.println("Usage: java InstallCert <host>[:port] [psphrase]");
             return;
         }
 
@@ -41,7 +41,7 @@ public class InstallCert {
         System.out.println("Loading KeyStore " + file + "...");
         InputStream in = new FileInputStream(file);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-        ks.load(in, passphrase);
+        ks.load(in, psphrase);
         in.close();
 
         SSLContext context = SSLContext.getInstance("TLS");
@@ -105,7 +105,7 @@ public class InstallCert {
         ks.setCertificateEntry(alias, cert);
 
         OutputStream out = new FileOutputStream("jssecacerts");
-        ks.store(out, passphrase);
+        ks.store(out, psphrase);
         out.close();
 
         System.out.println();

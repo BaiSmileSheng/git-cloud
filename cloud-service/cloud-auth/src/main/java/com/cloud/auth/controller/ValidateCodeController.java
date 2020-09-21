@@ -9,6 +9,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -35,7 +36,8 @@ public class ValidateCodeController {
     @ApiOperation(value = "获取验证码", notes = "获取验证码接口")
     public R validateCode(){
         // 生成验证码
-        Random random = new Random();
+        //Random random = new Random();
+        SecureRandom random = new SecureRandom();
         String code = Math.abs(random.nextInt()%10)+"";
         // 保存验证码信息
         String randomStr = UUID.randomUUID().toString().replaceAll("-", "");
