@@ -463,13 +463,14 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         int applyNum = smsSupplementaryOrder.getStuffAmount();//申请量
         //最小包装量
         Double minUnit = Double.valueOf(cdMaterialInfo.getRoundingQuantit() == null ? "0" : cdMaterialInfo.getRoundingQuantit().toString());
-        if (minUnit == 0) {
-            return R.error(StrUtil.format("{}最小包装量不正确！",smsSupplementaryOrder.getRawMaterialCode()));
-        }
-        if (applyNum % minUnit != 0) {
-            log.error(StrUtil.format("(物耗)申请量必须是最小包装量的整数倍参数为{},{}", applyNum,minUnit));
-            return R.error(StrUtil.format("{}申请量必须是最小包装量({})的整数倍！",smsSupplementaryOrder.getRawMaterialCode(),minUnit));
-        }
+        //20200922王福丽提出 去除最小包装量限制
+//        if (minUnit == 0) {
+//            return R.error(StrUtil.format("{}最小包装量不正确！",smsSupplementaryOrder.getRawMaterialCode()));
+//        }
+//        if (applyNum % minUnit != 0) {
+//            log.error(StrUtil.format("(物耗)申请量必须是最小包装量的整数倍参数为{},{}", applyNum,minUnit));
+//            return R.error(StrUtil.format("{}申请量必须是最小包装量({})的整数倍！",smsSupplementaryOrder.getRawMaterialCode(),minUnit));
+//        }
         //3、校验申请数量是否是单耗的整数倍
         //生产单号获取排产订单信息
         R omsProductionOrderResult = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
