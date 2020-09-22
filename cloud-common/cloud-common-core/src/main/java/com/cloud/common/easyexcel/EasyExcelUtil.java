@@ -115,7 +115,7 @@ public class EasyExcelUtil {
     }
 
     /**
-     * 导出 Excel ：一个 sheet，带表头,表头含有批注
+     * 导出 Excel ：一个 sheet，带表头,合并单元格
      *
      * @param list      数据 list，要导出的实体
      * @param fileName  导出的文件名，需要加后缀
