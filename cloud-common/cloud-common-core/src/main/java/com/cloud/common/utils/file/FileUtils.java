@@ -113,7 +113,7 @@ public class FileUtils {
      * @return
      */
     public static String getTemp() {
-        return System.getProperty("java.io.tmpdir");
+        return java.text.Normalizer.normalize(System.getProperty("java.io.tmpdir"),java.text.Normalizer.Form.NFKD);
     }
 
     /**

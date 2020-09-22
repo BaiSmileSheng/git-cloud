@@ -936,6 +936,9 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             if (StrUtil.isNotEmpty(weeksDemandOrderEdit.getEndTime())) {
                 criteria.andLessThanOrEqualTo("deliveryDate", weeksDemandOrderEdit.getEndTime() );
             }
+            if (StrUtil.isNotEmpty(weeksDemandOrderEdit.getCreateBy())) {
+                criteria.andEqualTo("createBy", weeksDemandOrderEdit.getCreateBy() );
+            }
         }else{
             example.and().andIn("id", ids);
         }
@@ -1009,10 +1012,10 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                         oms2weeksDemandOrderEdit.setStatus(Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());
                     }
                     successList.add(oms2weeksDemandOrderEdit);
-//                    String type = outTableOutput.getString("TYPE");
+                    String type = outTableOutput.getString("TYPE");
 //                    String flag = outTableOutput.getString("FLAG");
-                    String messageOne = StrUtil.format("ABLAD:{},MESSAGE:{};"
-                            ,outTableOutput.getString("ABLAD"),outTableOutput.getString("MESSAGE"));
+                    String messageOne = StrUtil.format("ABLAD:{},MESSAGE:{},TYPE{};"
+                            ,outTableOutput.getString("ABLAD"),outTableOutput.getString("MESSAGE"),type);
                     sapBuffer.append(messageOne);
                 }
                 sysInterfaceLog.setResults(sapBuffer.toString());

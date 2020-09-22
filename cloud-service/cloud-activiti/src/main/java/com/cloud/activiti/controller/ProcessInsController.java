@@ -103,7 +103,7 @@ public class ProcessInsController extends BaseController {
     }
 
     @RequestMapping(value = "runs")
-    public R getList(PageDomain page, String name, String key) {
+    public R getList(PageDomain page, String name, String key, String processInstanceId) {
         List<ProcessInsVo> list = new ArrayList<>();
         ProcessInstanceQuery query = runtimeService.createProcessInstanceQuery().orderByProcessInstanceId().desc();
         if (StrUtil.isNotBlank(name)) {
@@ -111,6 +111,9 @@ public class ProcessInsController extends BaseController {
         }
         if (StrUtil.isNotBlank(key)) {
             query.processDefinitionKey(key);
+        }
+        if (StrUtil.isNotBlank(processInstanceId)) {
+            query.processInstanceId(processInstanceId);
         }
         long count = query.count();
         int first = (page.getPageNum() - 1) * page.getPageSize();
