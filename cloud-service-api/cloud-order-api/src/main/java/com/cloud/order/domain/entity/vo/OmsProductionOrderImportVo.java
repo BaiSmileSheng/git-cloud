@@ -117,9 +117,30 @@ public class OmsProductionOrderImportVo {
     private String productEndTime;
 
     /**
+     * 节拍
+     */
+    @ApiModelProperty(value = "节拍")
+    @ExcelProperty(value = "节拍", index = 10)
+    private BigDecimal rhythm;
+
+    /**
+     * 产品定员
+     */
+    @ApiModelProperty(value = "产品定员")
+    @ExcelProperty(value = "产品定员", index = 11)
+    private int productQuota;
+
+    /**
+     * 用时
+     */
+    @ApiModelProperty(value = "用时")
+    @ExcelProperty(value = "用时", index = 12)
+    private BigDecimal useTime;
+
+    /**
      * 交货日期
      */
-    @ExcelProperty(value = "事业部T-1交货日期", index = 10)
+    @ExcelProperty(value = "事业部T-1交货日期", index = 13)
     @DateTimeFormat("yyyy-MM-dd")
     @ApiModelProperty(value = "事业部T-1交货日期")
     private String deliveryDate;
@@ -127,47 +148,47 @@ public class OmsProductionOrderImportVo {
     /**
      * 顺序
      */
-    @ExcelProperty(value = "顺序/备件", index = 11)
+    @ExcelProperty(value = "顺序/备件", index = 14)
     @ApiModelProperty(value = "顺序/备件")
     private String sequence;
 
     /**
      * 发往地
      */
-    @ExcelProperty(value = "发往地", index = 12)
+    @ExcelProperty(value = "发往地", index = 15)
     @ApiModelProperty(value = "发往地")
     private String destination;
 
     /**
      * 产品状态
      */
-    @ExcelProperty(value = "产品状态", index = 13)
+    @ExcelProperty(value = "产品状态", index = 16)
     @ApiModelProperty(value = "产品状态")
     private String productStatus;
 
     /**
      * 老品/新品
      */
-    @ExcelProperty(value = "老品/新品", index = 14)
+    @ExcelProperty(value = "老品/新品", index = 17)
     @ApiModelProperty(value = "老品/新品")
     private String oldNew;
 
     /**
      * PCB专用号
      */
-    @ExcelProperty(value = "PCB专用号", index = 15)
+    @ExcelProperty(value = "PCB专用号", index = 18)
     @ApiModelProperty(value = "PCB专用号")
     private String pcbSpecialCode;
     /**
      * 是否卡萨帝 0：否，1：是
      */
-    @ExcelProperty(value = "是否卡萨帝", index = 16,converter = CsdFlagConverter.class)
+    @ExcelProperty(value = "是否卡萨帝", index = 19,converter = CsdFlagConverter.class)
     @ApiModelProperty(value = "是否卡萨帝 0：否，1：是")
     private String csdFlag;
     /**
      * 加工承揽方式 0：半成品，1：成品，2：自制
      */
-    @ExcelProperty(value = "加工承揽方式", index = 17, converter = OutSourceTypeConverter.class)
+    @ExcelProperty(value = "加工承揽方式", index = 20, converter = OutSourceTypeConverter.class)
     @ApiModelProperty(value = "加工承揽方式 0：半成品，1：成品，2：自制")
     @NotBlank(message = "不能为空")
     private String outsourceType;
@@ -175,7 +196,7 @@ public class OmsProductionOrderImportVo {
     /**
      * 订单种类 1：正常，2：追加，3：储备，4：新品，5：返修
      */
-    @ExcelProperty(value = "订单分类", index = 18,converter= ProductionOrderClassConverter.class)
+    @ExcelProperty(value = "订单分类", index = 21,converter= ProductionOrderClassConverter.class)
     @ApiModelProperty(value = "订单种类 1：正常，2：追加，3：储备，4：新品，5：返修")
     @NotBlank(message = "不能为空")
     private String orderClass;
@@ -183,14 +204,14 @@ public class OmsProductionOrderImportVo {
     /**
      * 是否小批
      */
-    @ExcelProperty(value = "是否内部小批",index = 19,converter= SmallBatchConverter.class)
+    @ExcelProperty(value = "是否内部小批",index = 22,converter= SmallBatchConverter.class)
     @ApiModelProperty(value = "是否内部小批")
     private String isSmallBatch;
 
     /**
      * 备注
      */
-    @ExcelProperty(value = "备注", index = 20)
+    @ExcelProperty(value = "备注", index = 23)
     private String remark;
 
     /**
@@ -204,23 +225,6 @@ public class OmsProductionOrderImportVo {
      */
     @ApiModelProperty(value = "班长")
     private String monitor;
-    /**
-     * 用时
-     */
-    @ApiModelProperty(value = "用时")
-    private BigDecimal useTime;
-
-    /**
-     * 节拍
-     */
-    @ApiModelProperty(value = "节拍")
-    private BigDecimal rhythm;
-
-    /**
-     * 产品定员
-     */
-    @ApiModelProperty(value = "产品定员")
-    private int productQuota;
 
     /**
      * 生命周期
