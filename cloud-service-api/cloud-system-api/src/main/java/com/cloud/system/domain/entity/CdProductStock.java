@@ -90,14 +90,14 @@ public class CdProductStock extends BaseEntity {
     /**
      * 寄售不足
      */
-    @ExcelProperty(value = "寄售不足",index = 8)
+    @ExcelProperty(value = "寄售不足",index = 7)
     @ApiModelProperty(value = "寄售不足")
     private BigDecimal stockKNum = BigDecimal.ZERO;
 
     /**
      * 不良品库存
      */
-    @ExcelProperty(value = "不良品库存",index = 9)
+    @ExcelProperty(value = "不良品库存",index = 8)
     @ApiModelProperty(value = "不良品库存")
     private BigDecimal rejectsNum = BigDecimal.ZERO;
 
@@ -116,7 +116,7 @@ public class CdProductStock extends BaseEntity {
     /**
      * 库存总量
      */
-    @ExcelProperty(value = "库存总量",index = 10)
+    @ExcelProperty(value = "库存总量",index = 9)
     @ApiModelProperty(value = "库存总量")
     private BigDecimal sumNum;
 

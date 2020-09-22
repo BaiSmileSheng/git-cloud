@@ -1,11 +1,18 @@
 package com.cloud.system.service.impl;
 
 import cn.hutool.core.lang.Dict;
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.metadata.WriteSheet;
+import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
+import com.cloud.common.easyexcel.EasyExcelUtil;
+import com.cloud.common.easyexcel.SheetExcelData;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.common.utils.DateUtils;
 import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.system.domain.entity.CdProductInProduction;
@@ -28,6 +35,8 @@ import com.cloud.system.service.ICdProductStockService;
 import com.cloud.system.service.ICdProductWarehouseService;
 import com.cloud.system.service.ISysDictDataService;
 import com.cloud.system.service.ISysInterfaceLogService;
+import com.cloud.system.util.EasyExcelUtilOSS;
+import com.cloud.system.util.ExcelStockCellMergeStrategy;
 import com.sap.conn.jco.JCoContext;
 import com.sap.conn.jco.JCoDestination;
 import com.sap.conn.jco.JCoDestinationManager;
@@ -136,7 +145,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
      * @return
      */
     @Override
-    public List<CdProductStockExportVo> export(CdProductStock cdProductStock) {
+    public R export(CdProductStock cdProductStock) {
 
         List<String> productMaterialCodeList = new ArrayList<>();
         if(StringUtils.isNotBlank(cdProductStock.getProductMaterialCode())){
@@ -240,7 +249,41 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
                 cdProductStockExportVoList.add(cdProductStockExportVo);
             }
         }
-        return cdProductStockExportVoList;
+
+        return exportExcel(cdProductStockList, cdProductStockExportVoList);
+    }
+
+    private R exportExcel(List<CdProductStock> cdProductStockList,List<CdProductStockExportVo> cdProductStockExportVoList){
+        String fileName = EasyExcelUtil.getAbsoluteFile(DateUtils.dateTimeNow() + "成品库存.xlsx");
+        ExcelWriter excelWriter = EasyExcel.write(fileName).build();
+        R r = new R();
+        try{
+            WriteSheet writeSheet1 = EasyExcel.writerSheet(1, "成品库存")
+                    .head(CdProductStock.class)
+                    .registerWriteHandler(EasyExcelUtil.setHorizontalCellStyleStrategy(13, 11))
+                    .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()).build();
+
+            int[] mergeColumnIndex = {0,1,2,3};
+            WriteSheet writeSheet2 = EasyExcel.writerSheet(2,"成品库存详情")
+                    .head(CdProductStockExportVo.class)
+                    .registerWriteHandler(EasyExcelUtil.setHorizontalCellStyleStrategy(13, 11))
+                    .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy())
+                    .registerWriteHandler(new ExcelStockCellMergeStrategy(2,mergeColumnIndex)).build();
+
+            excelWriter.write(cdProductStockList, writeSheet1);
+            excelWriter.write(cdProductStockExportVoList, writeSheet2);
+        }catch (Exception e){
+            throw new BusinessException("导出Excel失败，请联系网站管理员！");
+        }finally {
+            if (excelWriter != null) {
+                excelWriter.finish();
+            }
+        }
+        if (!r.isSuccess()) {
+            return r;
+        }
+        String path = fileName;
+        return EasyExcelUtilOSS.uplloadExcel(path,"成品库存");
     }
 
     /**
