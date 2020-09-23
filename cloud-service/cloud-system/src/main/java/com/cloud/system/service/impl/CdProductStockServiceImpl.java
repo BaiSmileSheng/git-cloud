@@ -283,7 +283,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
             return r;
         }
         String path = fileName;
-        return EasyExcelUtilOSS.uplloadExcel(path,"成品库存");
+        return EasyExcelUtilOSS.uplloadExcel(path,"成品库存.xlsx");
     }
 
     /**
