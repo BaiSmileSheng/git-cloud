@@ -109,7 +109,7 @@ public class EasyExcelUtilOSS {
      * @param fileName
      * @return
      */
-    static R uplloadExcel(String path, String fileName) {
+    public static R uplloadExcel(String path, String fileName) {
         File file = FileUtil.file(path);
         String suffix = path.substring(path.lastIndexOf("."));
         CloudStorageService storage = OSSFactory.build();

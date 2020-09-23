@@ -43,7 +43,7 @@ public interface ICdProductStockService extends BaseService<CdProductStock> {
      * @param cdProductStock  成品库存主表信息
      * @return
      */
-    List<CdProductStockExportVo> export(CdProductStock cdProductStock);
+    R export(CdProductStock cdProductStock);
 
     /**
      * 根据工厂，专用号分组取成品库存
