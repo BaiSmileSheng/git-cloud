@@ -197,5 +197,175 @@ public class OmsProductionOrderDetailExportVo {
      */
     @ExcelProperty(value = "T+14天缺口量")
     private BigDecimal day14Gap;
+    /**
+     * T+15天
+     */
+    @ExcelProperty(value = "T+15天")
+    private BigDecimal day15;
+    /**
+     * T+15天缺口量
+     */
+    @ExcelProperty(value = "T+15天缺口量")
+    private BigDecimal day15Gap;
+    /**
+     * T+16天
+     */
+    @ExcelProperty(value = "T+16天")
+    private BigDecimal day16;
+    /**
+     * T+16天缺口量
+     */
+    @ExcelProperty(value = "T+16天缺口量")
+    private BigDecimal day16Gap;
+    /**
+     * T+17天
+     */
+    @ExcelProperty(value = "T+17天")
+    private BigDecimal day17;
+    /**
+     * T+17天缺口量
+     */
+    @ExcelProperty(value = "T+17天缺口量")
+    private BigDecimal day17Gap;
+    /**
+     * T+18天
+     */
+    @ExcelProperty(value = "T+18天")
+    private BigDecimal day18;
+    /**
+     * T+18天缺口量
+     */
+    @ExcelProperty(value = "T+18天缺口量")
+    private BigDecimal day18Gap;
+    /**
+     * T+19天
+     */
+    @ExcelProperty(value = "T+19天")
+    private BigDecimal day19;
+    /**
+     * T+19天缺口量
+     */
+    @ExcelProperty(value = "T+19天缺口量")
+    private BigDecimal day19Gap;
+    /**
+     * T+20天
+     */
+    @ExcelProperty(value = "T+20天")
+    private BigDecimal day20;
+    /**
+     * T+20天缺口量
+     */
+    @ExcelProperty(value = "T+20天缺口量")
+    private BigDecimal day20Gap;
+    /**
+     * T+21天
+     */
+    @ExcelProperty(value = "T+21天")
+    private BigDecimal day21;
+    /**
+     * T+21天缺口量
+     */
+    @ExcelProperty(value = "T+21天缺口量")
+    private BigDecimal day21Gap;
+    /**
+     * T+22天
+     */
+    @ExcelProperty(value = "T+22天")
+    private BigDecimal day22;
+    /**
+     * T+22天缺口量
+     */
+    @ExcelProperty(value = "T+22天缺口量")
+    private BigDecimal day22Gap;
+    /**
+     * T+23天
+     */
+    @ExcelProperty(value = "T+23天")
+    private BigDecimal day23;
+    /**
+     * T+23天缺口量
+     */
+    @ExcelProperty(value = "T+23天缺口量")
+    private BigDecimal day23Gap;
+    /**
+     * T+24天
+     */
+    @ExcelProperty(value = "T+24天")
+    private BigDecimal day24;
+    /**
+     * T+24天缺口量
+     */
+    @ExcelProperty(value = "T+24天缺口量")
+    private BigDecimal day24Gap;
+    /**
+     * T+25天
+     */
+    @ExcelProperty(value = "T+25天")
+    private BigDecimal day25;
+    /**
+     * T+25天缺口量
+     */
+    @ExcelProperty(value = "T+25天缺口量")
+    private BigDecimal day25Gap;
+    /**
+     * T+26天
+     */
+    @ExcelProperty(value = "T+26天")
+    private BigDecimal day26;
+    /**
+     * T+26天缺口量
+     */
+    @ExcelProperty(value = "T+26天缺口量")
+    private BigDecimal day26Gap;
+    /**
+     * T+27天
+     */
+    @ExcelProperty(value = "T+27天")
+    private BigDecimal day27;
+    /**
+     * T+27天缺口量
+     */
+    @ExcelProperty(value = "T+27天缺口量")
+    private BigDecimal day27Gap;
+    /**
+     * T+28天
+     */
+    @ExcelProperty(value = "T+28天")
+    private BigDecimal day28;
+    /**
+     * T+28天缺口量
+     */
+    @ExcelProperty(value = "T+28天缺口量")
+    private BigDecimal day28Gap;
 
+    /**
+     * T+29天
+     */
+    @ExcelProperty(value = "T+29天")
+    private BigDecimal day29;
+    /**
+     * T+29天缺口量
+     */
+    @ExcelProperty(value = "T+29天缺口量")
+    private BigDecimal day29Gap;
+    /**
+     * T+30天
+     */
+    @ExcelProperty(value = "T+30天")
+    private BigDecimal day30;
+    /**
+     * T+30天缺口量
+     */
+    @ExcelProperty(value = "T+30天缺口量")
+    private BigDecimal day30Gap;
+    /**
+     * T+31天
+     */
+    @ExcelProperty(value = "T+31天")
+    private BigDecimal day31;
+    /**
+     * T+31天缺口量
+     */
+    @ExcelProperty(value = "T+31天缺口量")
+    private BigDecimal day31Gap;
 }
