@@ -102,8 +102,8 @@ spring:
                   demandOrderGather-gatherDemandOrderMonday: 60000
                   demandOrderGatherEdit-importExcel: 60000
                   oms2weeksDemandOrderEdit-importExcel: 100000
-                  demandOrderGatherEdit-toSAP: 15000
-                  oms2weeksDemandOrderEdit-toSAP: 15000
+                  demandOrderGatherEdit-toSAP: 20000
+                  oms2weeksDemandOrderEdit-toSAP: 20000
                   actOmsOrderMaterialOut-save: 30000
         #settle 模块
         - id: cloud-settle
