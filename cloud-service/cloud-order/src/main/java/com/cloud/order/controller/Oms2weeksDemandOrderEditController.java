@@ -142,6 +142,7 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
     @PostMapping("importExcel")
     @ApiOperation(value = "T+1、T+2草稿计划导入 ", response = R.class)
     @HasPermissions("order:oms2weeksDemandOrderEdit:importExcel")
+    @OperLog(title = "草稿计划导入", businessType = BusinessType.IMPORT)
     public R importExcel(MultipartFile file) {
         return oms2weeksDemandOrderEditService.import2weeksDemandEdit(file,getUserInfo(SysUser.class));
     }
@@ -246,6 +247,7 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
     @ApiOperation(value = "确认下达 ", response = R.class)
     @ApiParam(name = "ids", value = "需确认下达数据的id")
     @HasPermissions("order:oms2weeksDemandOrderEdit:confirmRelease")
+    @OperLog(title = "草稿计划确认下达", businessType = BusinessType.OTHER)
     public R confirmRelease(@RequestBody @ApiIgnore Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit){
         SysUser sysUser = getUserInfo(SysUser.class);
         return oms2weeksDemandOrderEditService.confirmRelease(oms2weeksDemandOrderEdit==null?null:oms2weeksDemandOrderEdit.getIds(),oms2weeksDemandOrderEdit,sysUser);
@@ -333,6 +335,7 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
     @PostMapping("toSAP")
     @ApiOperation(value = "下达SAP")
     @HasPermissions("order:oms2weeksDemandOrderEdit:toSAP")
+    @OperLog(title = "草稿计划下达SAP", businessType = BusinessType.OTHER)
     public R toSAP(@RequestParam("ids") List<Long> ids,@ApiIgnore Oms2weeksDemandOrderEdit oms2weeksDemandOrderEdit){
         SysUser sysUser = getUserInfo(SysUser.class);
         return oms2weeksDemandOrderEditService.toSAP(ids,sysUser,oms2weeksDemandOrderEdit);
