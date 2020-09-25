@@ -23,6 +23,7 @@ import com.cloud.system.domain.entity.SysInterfaceLog;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.CdProductStockDetailVo;
 import com.cloud.system.domain.vo.CdProductStockExportVo;
+import com.cloud.system.enums.GetStockEnum;
 import com.cloud.system.mapper.CdProductInProductionMapper;
 import com.cloud.system.mapper.CdProductPassageMapper;
 import com.cloud.system.mapper.CdProductStockMapper;
@@ -624,6 +625,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
         }).collect(Collectors.toList());
         //2.获取成品物料编号
         Example example = new Example(CdMaterialExtendInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("isGetStock", GetStockEnum.IS_GET_STOCK_1.getCode());
         List<CdMaterialExtendInfo> cdMaterialExtendInfoList = cdMaterialExtendInfoService.selectByExample(example);
         List<String> materialCodeList = cdMaterialExtendInfoList.stream().map(cdMaterialExtendInfo ->{
             return cdMaterialExtendInfo.getMaterialCode().toUpperCase();
