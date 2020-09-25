@@ -71,6 +71,7 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
      * Date: 2020/6/24
      */
     @Override
+    @GlobalTransactional
     public R startActProcess(ActBusinessVo actBusinessVo) {
         if (BeanUtil.isNotEmpty(actBusinessVo)) {
             R keyMap = getByKey(actBusinessVo.getKey());
