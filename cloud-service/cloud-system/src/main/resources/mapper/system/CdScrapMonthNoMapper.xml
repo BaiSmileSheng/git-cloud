@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.system.mapper.CdScrapMonthNoMapper">
+    <resultMap type="CdScrapMonthNo" id="CdScrapMonthNoResult">
+        <result property="id" column="id"/>
+        <result property="yearMouth" column="year_mouth"/>
+        <result property="factoryCode" column="factory_code"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+    </resultMap>
+
+    <sql id="selectCdScrapMonthNoVo">
+        select id,
+               year_mouth,
+               factory_code,
+               order_no,
+               remark,
+               del_flag,
+               create_time,
+               create_by,
+               update_time,
+               update_by
+        from cd_scrap_month_no
+    </sql>
+</mapper>
