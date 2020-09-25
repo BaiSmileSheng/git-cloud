@@ -84,11 +84,7 @@ public class CdProductStockController extends BaseController {
             @ApiImplicitParam(name = "productMaterialCode", value = "专用号", required = false, paramType = "query", dataType = "String")
     })
     public R export(@ApiIgnore CdProductStock cdProductStock) {
-
-        List<CdProductStockExportVo> list = cdProductStockService.export(cdProductStock);
-        int[] mergeColumnIndex = {0,1,2,3};
-        return EasyExcelUtilOSS.writePostilExcel(list,"成品库存.xlsx", "成品库存.xlsx",new CdProductStockExportVo(),
-                new ExcelStockCellMergeStrategy(2,mergeColumnIndex));
+        return cdProductStockService.export(cdProductStock);
     }
 
     /**

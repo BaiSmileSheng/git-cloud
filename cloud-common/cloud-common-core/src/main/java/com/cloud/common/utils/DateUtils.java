@@ -343,4 +343,17 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         String firstDay = format.format(calendar.getTime())+" 00:00:00";
         return firstDay;
     }
+
+    /**
+     * 获取所在月
+     * @param date
+     * @return
+     */
+    public static int getMonth(Date date){
+        Calendar calendar=Calendar.getInstance();
+        calendar.setTime(date);
+        //计算月份从0开始，需要加1
+        int month = calendar.get(Calendar.MONTH) + 1;
+        return month;
+    }
 }
