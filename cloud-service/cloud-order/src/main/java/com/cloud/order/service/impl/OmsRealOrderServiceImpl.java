@@ -339,7 +339,8 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         omsRealOrderMapper.batchInsetOrUpdate(omsRealOrdersList);
         logger.info("定时任务每天在获取到PO信息后 进行需求汇总  结束");
         //5.发送维护交货提前量的邮件
-        if(sendEmailMap.size() > 0){
+        //应王福丽要求，去除交货提前量维护的邮件通知  ltq 2020-09-25
+        /*if(sendEmailMap.size() > 0){
             R userListR = remoteUserService.selectUserByRoleKey(RoleConstants.ROLE_KEY_DDTJ);
             if(!userListR.isSuccess()){
                 logger.error("汇总po数据时获取订单录入员信息失败 res:{}",JSONObject.toJSONString(userListR));
@@ -354,7 +355,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                 mailService.sendTextMail(sysUserRights.getEmail(),subject,content);
             });
 
-        }
+        }*/
         return R.ok();
     }
 
