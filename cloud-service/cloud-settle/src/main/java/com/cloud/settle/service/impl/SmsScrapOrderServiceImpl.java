@@ -23,6 +23,7 @@ import com.cloud.system.feign.*;
 import com.sap.conn.jco.*;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,6 +64,8 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
     private RemoteInterfaceLogService remoteInterfaceLogService;
     @Autowired
     private RemoteCdProductWarehouseService remoteCdProductWarehouseService;
+    @Autowired
+    private RemoteCdScrapMonthNoService remoteCdScrapMonthNoService;
 
 
 
@@ -453,6 +456,12 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         }else{
             lgort = "0188";
         }
+        String yearMouth = DateFormatUtils.format(date, "yyyyMM");
+        R rNo = remoteCdScrapMonthNoService.findOne(yearMouth,smsScrapOrder.getFactoryCode());
+        if (!rNo.isSuccess()) {
+            throw new BusinessException("请维护本月订单号！");
+        }
+        CdScrapMonthNo cdScrapMonthNo = rNo.getData(CdScrapMonthNo.class);
 
         //发送SAP
         JCoDestination destination =null;
@@ -479,7 +488,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             inputTable.setValue("MATNR", smsScrapOrder.getProductMaterialCode().toUpperCase());//物料号
             inputTable.setValue("ERFME", smsScrapOrder.getMeasureUnit());//基本计量单位
             inputTable.setValue("ERFMG", smsScrapOrder.getScrapAmount());//数量
-            inputTable.setValue("AUFNR", smsScrapOrder.getProductOrderCode());//生产订单号
+            inputTable.setValue("AUFNR", cdScrapMonthNo.getOrderNo());//每月维护一次订单号
             String content = StrUtil.format("BWARTWA:{},BKTXT:{},WERKS:{},LGORT:{},MATNR:{}" +
                     ",ERFME:{},ERFMG:{},AUFNR:{}","261",
                     StrUtil.concat(true,smsScrapOrder.getSupplierCode(),smsScrapOrder.getScrapNo()),
