@@ -167,14 +167,15 @@
                 and product_material_code = #{item.productMaterialCode,jdbcType=VARCHAR}
                 and product_line_code = #{item.productLineCode,jdbcType=VARCHAR}
                 and (outsource_type = '0' or outsource_type = '1')
-                and datediff(DATE_FORMAT(now(),'%Y-%m-%d'),delivery_date) > 7)
+                and datediff(DATE_FORMAT(now(),'%Y-%m-%d'),product_start_date) > 7)
                 or
                 (product_factory_code = #{item.productFactoryCode,jdbcType=VARCHAR}
                 and product_material_code = #{item.productMaterialCode,jdbcType=VARCHAR}
                 and product_line_code = #{item.productLineCode,jdbcType=VARCHAR}
                 and outsource_type = '2'
-                and datediff(DATE_FORMAT(now(),'%Y-%m-%d'),delivery_date) > 3)
+                and datediff(DATE_FORMAT(now(),'%Y-%m-%d'),product_start_date) > 3)
             </foreach>
+            and status != '8'
         </where>
     </select>
 
