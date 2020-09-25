@@ -1215,7 +1215,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 omsProductionOrders.forEach(order -> {
                     if (o.getProductFactoryCode().equals(order.getProductFactoryCode())
                             && o.getProductMaterialCode().equals(order.getProductMaterialCode())
-                            && o.getProductLineCode().equals(order.getProductLineCode())) {
+                            && o.getProductLineCode().equals(order.getProductLineCode())
+                            && !DateUtil.today().equals(DateUtil.format(order.getCreateTime(),"yyyy-MM-dd"))) {
                         o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_ONE);
                         checkOrders.add(o);
                     }
