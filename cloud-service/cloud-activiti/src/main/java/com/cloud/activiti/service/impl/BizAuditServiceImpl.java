@@ -9,6 +9,7 @@ import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.mapper.BizAuditMapper;
 import com.cloud.activiti.service.IBizAuditService;
 import com.cloud.activiti.vo.HiTaskVo;
+import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -58,6 +59,7 @@ public class BizAuditServiceImpl implements IBizAuditService {
      * @return 结果
      */
     @Override
+    @GlobalTransactional
     public int insertBizAudit(BizAudit bizAudit) {
         return auditMapper.insertSelective(bizAudit);
     }
