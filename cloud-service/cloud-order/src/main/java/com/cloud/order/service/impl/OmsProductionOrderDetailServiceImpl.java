@@ -626,7 +626,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
     }
 
     /**
-     * Description:  获取14天日期数组
+     * Description:  获取31天日期数组
      * Param: []
      * return: java.lang.String[]
      * Author: ltq
@@ -634,7 +634,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
      */
     private String[] getDays() {
         int[] days = NumberUtil.range(0, 30);
-        String[] dates = new String[31];
+        String[] dates = new String[days.length];
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         for (int i : days) {
             String day = dateTimeFormatter.format(LocalDate.now().plusDays(i));
