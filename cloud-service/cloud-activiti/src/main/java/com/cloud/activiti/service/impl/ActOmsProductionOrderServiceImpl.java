@@ -161,7 +161,7 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
         List<Task> tasks = taskService.createTaskQuery().processInstanceId(bizBusiness.getProcInstId()).list();
         if (null == tasks || tasks.size() <= 0) {
             //判断其他审批流程
-            if (BeanUtil.isNotEmpty(bizBusinesses) && bizBusinesses.size() <= 1 && businesses.size() <= 0) {
+            if (BeanUtil.isNotEmpty(bizBusinesses) && bizBusinesses.size() <= 0 && businesses.size() <= 0) {
                 omsProductionOrder.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_TWO);
                 if (bizBusiness.getProcDefKey().equals(ActProcessContants.ACTIVITI_ADD_REVIEW)
                         || bizBusiness.getProcDefKey().equals(ActProcessContants.ACTIVITI_ZN_REVIEW)) {
