@@ -20,6 +20,7 @@ import com.cloud.common.exception.BusinessException;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteUserService;
 import com.google.common.collect.Lists;
+import io.seata.spring.annotation.GlobalTransactional;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -92,6 +93,7 @@ public class BizBusinessServiceImpl implements IBizBusinessService {
      * @return 结果
      */
     @Override
+    @GlobalTransactional
     public int insertBizBusiness(BizBusiness bizBusiness) {
         return businessMapper.insertSelective(bizBusiness);
     }
@@ -103,6 +105,7 @@ public class BizBusinessServiceImpl implements IBizBusinessService {
      * @return 结果
      */
     @Override
+    @GlobalTransactional
     public int updateBizBusiness(BizBusiness bizBusiness) {
         return businessMapper.updateByPrimaryKeySelective(bizBusiness);
     }
