@@ -31,6 +31,7 @@ import com.cloud.common.utils.ListCommonUtil;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.*;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderExportVo;
+import com.cloud.order.domain.entity.vo.OmsProductionOrderExportVoTest;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderMailVo;
 import com.cloud.order.enums.ProductionOrderDelaysFlagEnum;
 import com.cloud.order.enums.ProductionOrderSettleFlagEnum;
@@ -309,6 +310,76 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         } else {
             return R.ok();
         }
+    }
+
+    /**
+     * 线下导入刷数据  关单
+     * @param file
+     * @return
+     */
+    @Override
+    @SneakyThrows
+    @GlobalTransactional
+    public R importProductOrderTest(MultipartFile file) {
+        List<OmsProductionOrder> omsProductionOrderListGet = new ArrayList<>();
+        List<OmsProductionOrderExportVoTest> userPOList = (List<OmsProductionOrderExportVoTest>) EasyExcelUtil.readSingleExcel(file,new OmsProductionOrderExportVoTest(),0);
+        userPOList.forEach(dto -> {
+            OmsProductionOrder omsProductionOrder = new OmsProductionOrder();
+            Date actualEndDate = DateUtil.parseDate(dto.getActEndDate());
+            omsProductionOrder.setActualEndDate(actualEndDate);//最后入库时间
+            omsProductionOrder.setProductOrderCode("00"+dto.getProductCode());//生产订单号
+            omsProductionOrder.setDeliveryNum(new BigDecimal(dto.getProductNum()));//入库数量
+            omsProductionOrderListGet.add(omsProductionOrder);
+        });
+        List<SmsSettleInfo> smsSettleInfoList = new ArrayList<>();
+        omsProductionOrderListGet.forEach(omsProductionOrder -> {
+            SmsSettleInfo smsSettleInfo = new SmsSettleInfo();
+            smsSettleInfo.setProductOrderCode(omsProductionOrder.getProductOrderCode());
+            int confirmAmont = (omsProductionOrder.getDeliveryNum() == null) ? 0 : omsProductionOrder.getDeliveryNum().intValueExact();
+            smsSettleInfo.setConfirmAmont(confirmAmont);
+            smsSettleInfo.setUpdateBy("定时任务");
+
+            omsProductionOrder.setUpdateBy("定时任务");
+            Example example = new Example(OmsProductionOrder.class);
+            example.and().andEqualTo("productOrderCode",omsProductionOrder.getProductOrderCode());
+            OmsProductionOrder omsProductionOrderRes = selectOneByExample(example);
+            //交货数量与订单数量相等
+            if (omsProductionOrder.getDeliveryNum().compareTo(omsProductionOrderRes.getProductNum()) == 0
+                    || omsProductionOrder.getDeliveryNum().compareTo(omsProductionOrderRes.getProductNum()) == 1) {
+                smsSettleInfo.setActualEndDate(omsProductionOrder.getActualEndDate());
+                smsSettleInfo.setOrderStatus(SettleInfoOrderStatusEnum.ORDER_STATUS_2.getCode());
+                omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
+
+                if(OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode().equals(omsProductionOrderRes.getOutsourceType())
+                        ||OutSourceTypeEnum.OUT_SOURCE_TYPE_QWW.getCode().equals(omsProductionOrderRes.getOutsourceType())){
+                    Date productStartDate = StringUtils.isBlank(omsProductionOrderRes.getProductStartDate()) ?
+                            null : DateUtils.dateTime(YYYY_MM_DD,omsProductionOrderRes.getProductStartDate());
+                    Date productStartDateAfter7 = DateUtils.dayOffset(productStartDate,7);
+                    //延期索赔标记  更改2020-09-18 wangfuli    基本开始日期+7 < 实际结束时间  或 基本开始日期与实际结束时间不是同一个月
+                    int productStartDateMouth = DateUtils.getMonth(productStartDate);
+                    int actualEndDateMouth = DateUtils.getMonth(omsProductionOrder.getActualEndDate());
+                    Boolean flag = productStartDateAfter7.before(omsProductionOrder.getActualEndDate()) || productStartDateMouth != actualEndDateMouth;
+                    if(flag){
+                        omsProductionOrder.setDelaysFlag(ProductionOrderDelaysFlagEnum.PRODUCTION_ORDER_DELAYS_FLAG_1.getCode());
+                    }else {
+                        omsProductionOrder.setDelaysFlag(ProductionOrderDelaysFlagEnum.PRODUCTION_ORDER_DELAYS_FLAG_0.getCode());
+                    }
+                }else{
+                    omsProductionOrder.setDelaysFlag(ProductionOrderDelaysFlagEnum.PRODUCTION_ORDER_DELAYS_FLAG_0.getCode());
+                }
+            }else{
+                omsProductionOrder.setActualEndDate(null);
+            }
+            smsSettleInfoList.add(smsSettleInfo);
+        });
+        //4.修改排产订单入库数量,完成时间
+        omsProductionOrderMapper.batchUpdateByProductOrderCode(omsProductionOrderListGet);
+        //根据生产订单号更新排产订单和加工费结算
+        R result = remoteSettleInfoService.batchUpdateByProductOrderCode(smsSettleInfoList);
+        if (!result.isSuccess()) {
+            throw new BusinessException(result.get("msg").toString());
+        }
+        return R.ok();
     }
 
     @Override
