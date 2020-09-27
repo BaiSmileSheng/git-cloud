@@ -370,7 +370,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 }
                 int subNum=deliveryWeekNum - nowWeekNum;
                 Boolean bo = false;
-                if (subNum >= 3) {
+                if (subNum >= 5) {
                     bo = true;
                 }
                 if (bo) {
