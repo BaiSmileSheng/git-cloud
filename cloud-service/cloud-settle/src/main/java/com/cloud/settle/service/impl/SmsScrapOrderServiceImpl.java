@@ -493,7 +493,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
                     ",ERFME:{},ERFMG:{},AUFNR:{}","261",
                     StrUtil.concat(true,smsScrapOrder.getSupplierCode(),smsScrapOrder.getScrapNo()),
                     smsScrapOrder.getFactoryCode(),lgort,smsScrapOrder.getProductMaterialCode(),
-                    smsScrapOrder.getMeasureUnit(),smsScrapOrder.getScrapAmount(),smsScrapOrder.getProductOrderCode());
+                    smsScrapOrder.getMeasureUnit(),smsScrapOrder.getScrapAmount(),cdScrapMonthNo.getOrderNo());
             sysInterfaceLog.setContent(content);
             //执行函数
             JCoContext.begin(destination);

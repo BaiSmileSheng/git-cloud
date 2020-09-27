@@ -5,6 +5,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Console;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.NumberUtil;
@@ -370,6 +371,13 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             if (dateDelivery.compareTo(date) > 0) {
                 int nowWeekNum = DateUtil.weekOfYear(date);
                 int deliveryWeekNum = DateUtil.weekOfYear(dateDelivery);
+                int deliveryYear = DateUtil.year(dateDelivery);
+                if (deliveryYear > nowYear) {
+                    deliveryWeekNum += DateUtil.endOfYear(date).offset(DateField.DAY_OF_YEAR, -7).weekOfYear();
+                }
+                if (deliveryWeekNum == 1 && DateUtil.month(dateDelivery) == 11) {
+                    deliveryWeekNum += DateUtil.endOfYear(date).offset(DateField.DAY_OF_YEAR, -7).weekOfYear();
+                }
                 if (DateUtil.dayOfWeek(dateDelivery)==1) {
                     deliveryWeekNum += 1;
                 }
@@ -486,6 +494,15 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             successDtos.add(sucObjectDto);
         }
         return new ExcelImportResult(successDtos,errDtos,otherDtos);
+    }
+
+    public static void main(String[] args) {
+        Date date1 = DateUtil.parseDate("2020-11-25");
+        Date date2 = DateUtil.parseDate("2020-12-30");
+        Console.log(DateUtil.month(date2));
+        Console.log(DateUtil.endOfYear(date1).offset(DateField.DAY_OF_YEAR,-7).weekOfYear());
+        Console.log(DateUtil.betweenWeek(date1,date2,true));
+
     }
 
     /**

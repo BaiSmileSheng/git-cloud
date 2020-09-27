@@ -362,6 +362,13 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             if (dateDelivery.compareTo(date) > 0) {
                 int nowWeekNum = DateUtil.weekOfYear(date);
                 int deliveryWeekNum = DateUtil.weekOfYear(dateDelivery);
+                int deliveryYear = DateUtil.year(dateDelivery);
+                if (deliveryYear > nowYear) {
+                    deliveryWeekNum += DateUtil.endOfYear(date).offset(DateField.DAY_OF_YEAR, -7).weekOfYear();
+                }
+                if (deliveryWeekNum == 1 && DateUtil.month(dateDelivery) == 11) {
+                    deliveryWeekNum += DateUtil.endOfYear(date).offset(DateField.DAY_OF_YEAR, -7).weekOfYear();
+                }
                 if (DateUtil.dayOfWeek(dateDelivery)==1) {
                     deliveryWeekNum += 1;
                 }
