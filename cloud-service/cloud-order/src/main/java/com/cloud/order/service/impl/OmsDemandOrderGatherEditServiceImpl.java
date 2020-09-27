@@ -540,12 +540,12 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             String versionOld = demandOrderGatherEditOld.getVersion();
             if (StrUtil.equals(version, versionOld)) {
                 //相同周：根据登录人、客户编码删除原有的，插入新的
-                List<String> customerList = successList.stream()
-                        .filter(dto -> StrUtil.equals(sysUser.getLoginName(), dto.getCreateBy()))
-                        .map(dtoMap-> dtoMap.getCustomerCode()).distinct().collect(Collectors.toList());
-                if (CollectionUtil.isNotEmpty(customerList)) {
-                    deleteByCreateByAndCustomerCode(sysUser.getLoginName(), customerList,DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
-                }
+//                List<String> customerList = successList.stream()
+//                        .filter(dto -> StrUtil.equals(sysUser.getLoginName(), dto.getCreateBy()))
+//                        .map(dtoMap-> dtoMap.getCustomerCode()).distinct().collect(Collectors.toList());
+//                if (CollectionUtil.isNotEmpty(customerList)) {
+//                    deleteByCreateByAndCustomerCode(sysUser.getLoginName(), customerList,DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
+//                }
             }else{
                 //上周：全部插入历史表，删除原有的，插入新的
                 List<OmsDemandOrderGatherEditHis> listHis= demandOrderGatherEditOlds.stream().map(demandOrderGatherEdit ->
