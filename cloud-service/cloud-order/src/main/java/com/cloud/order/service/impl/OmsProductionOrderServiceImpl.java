@@ -559,8 +559,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             OmsProductionOrderDel omsProductionOrderDel = new OmsProductionOrderDel();
             BeanUtils.copyProperties(o, omsProductionOrderDel);
             omsProductionOrderDel.setId(null);
-            omsProductionOrderDel.setCreateBy(sysUser.getLoginName());
-            omsProductionOrderDel.setCreateTime(new Date());
+            omsProductionOrderDel.setUpdateBy(sysUser.getLoginName());
+            omsProductionOrderDel.setUpdateTime(new Date());
             return omsProductionOrderDel;
         }).collect(toList());
         String orderCodes = orderCodeBuffer.substring(0, orderCodeBuffer.length() - 1);
@@ -582,8 +582,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                         OmsProductionOrderDetailDel omsProductionOrderDetailDel = new OmsProductionOrderDetailDel();
                         BeanUtils.copyProperties(d, omsProductionOrderDetailDel);
                         omsProductionOrderDetailDel.setId(null);
-                        omsProductionOrderDetailDel.setCreateBy(sysUser.getLoginName());
-                        omsProductionOrderDetailDel.setCreateTime(new Date());
+                        omsProductionOrderDetailDel.setUpdateBy(sysUser.getLoginName());
+                        omsProductionOrderDetailDel.setUpdateTime(new Date());
                         return omsProductionOrderDetailDel;
                     }).collect(toList());
             String detailIds = detailIdBuffer.substring(0, detailIdBuffer.length() - 1);
@@ -2479,8 +2479,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         OmsProductionOrderDel omsProductionOrderDels = new OmsProductionOrderDel();
         BeanUtils.copyProperties(omsProductionOrders, omsProductionOrderDels);
         omsProductionOrderDels.setId(null);
-        omsProductionOrderDels.setCreateBy(sysUser.getLoginName());
-        omsProductionOrderDels.setCreateTime(new Date());
+        omsProductionOrderDels.setUpdateBy(sysUser.getLoginName());
+        omsProductionOrderDels.setUpdateTime(new Date());
         //查询明细数据
         R detailMap = omsProductionOrderDetailService.selectListByOrderCodes("\"" + omsProductionOrders.getOrderCode() + "\"");
         if (!detailMap.isSuccess()) {
@@ -2499,8 +2499,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                         OmsProductionOrderDetailDel omsProductionOrderDetailDel = new OmsProductionOrderDetailDel();
                         BeanUtils.copyProperties(d, omsProductionOrderDetailDel);
                         omsProductionOrderDetailDel.setId(null);
-                        omsProductionOrderDetailDel.setCreateBy(sysUser.getLoginName());
-                        omsProductionOrderDetailDel.setCreateTime(new Date());
+                        omsProductionOrderDetailDel.setUpdateBy(sysUser.getLoginName());
+                        omsProductionOrderDetailDel.setUpdateTime(new Date());
                         return omsProductionOrderDetailDel;
                     }).collect(toList());
             String detailIds = detailIdBuffer.substring(0, detailIdBuffer.length() - 1);

@@ -125,6 +125,7 @@ public class ActOmsOrderMaterialOutServiceImpl implements IActOmsOrderMaterialOu
      * @return 成功或失败
      */
     @Override
+    @GlobalTransactional
     public R addSave(OmsOrderMaterialOutVo omsOrderMaterialOutVo) {
         String roleKey = RoleConstants.ROLE_KEY_ORDER;
         List<OmsOrderMaterialOutVo> list = omsOrderMaterialOutVo.getOmsOrderMaterialOutVoList();
