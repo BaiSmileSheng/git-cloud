@@ -3,19 +3,15 @@ package com.cloud.order.controller;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.excel.EasyExcel;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.easyexcel.EasyExcelUtil;
-import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
-import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderExportVo;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderImportVo;
@@ -27,7 +23,6 @@ import com.cloud.order.util.EasyExcelUtilOSS;
 import com.cloud.order.util.OmsProductOrderWriteHandler;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.SysUser;
-import com.cloud.system.enums.OutSourceTypeEnum;
 import com.cloud.system.feign.RemoteFactoryLineInfoService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.*;
@@ -37,7 +32,6 @@ import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -564,6 +558,17 @@ public class OmsProductionOrderController extends BaseController {
     public R timeGetConfirmAmont(){
         R result = omsProductionOrderService.timeGetConfirmAmont();
         return result;
+    }
+
+    /**
+     * 线下导入刷数据  关单
+     *
+     * @return
+     */
+    @PostMapping("importProductOrderTest")
+    @ApiOperation(value = "线下导入刷数据  关单")
+    public R importProductOrderTest(@RequestParam("file") MultipartFile file) {
+        return omsProductionOrderService.importProductOrderTest(file);
     }
 
     /**
