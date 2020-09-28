@@ -5,6 +5,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.constant.ProductOrderConstants;
+import com.cloud.common.constant.RawMaterialFeedbackConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.domain.R;
@@ -101,6 +102,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
                 criteria.andEqualTo("createBy", sysUser.getLoginName());
             }
         }
+        criteria.andEqualTo("delFlag", RawMaterialFeedbackConstants.DEL_FLAG_TRUE);
         return omsRawMaterialFeedbackMapper.selectByExample(example);
     }
 
