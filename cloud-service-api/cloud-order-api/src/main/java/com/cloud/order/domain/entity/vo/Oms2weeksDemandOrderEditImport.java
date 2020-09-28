@@ -3,6 +3,7 @@ package com.cloud.order.domain.entity.vo;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
+import com.cloud.order.converter.OrderFromConverter;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,7 +29,12 @@ public class Oms2weeksDemandOrderEditImport {
     private static final long serialVersionUID = 1L;
 
 
-
+    /**
+     * 订单来源 1：内单，2：外单
+     */
+    @ExcelProperty(value = "订单来源",converter = OrderFromConverter.class)
+    @NotBlank
+    private String orderFrom;
 
     /**
      * 订单类型
@@ -37,12 +43,6 @@ public class Oms2weeksDemandOrderEditImport {
     @NotBlank
     private String orderType;
 
-    /**
-     * 订单来源 1：内单，2：外单
-     */
-    @ExcelProperty(value = "订单来源")
-    @NotBlank
-    private String orderFrom;
 
     /**
      * 成品物料号

@@ -184,12 +184,12 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             String versionOld = weeksDemandOrderEditOld.getVersion();
             if (StrUtil.equals(version, versionOld)) {
                 //相同周：根据登录人、客户编码删除原有的，插入新的
-                List<String> customerList = successList.stream()
-                        .filter(dto -> StrUtil.equals(sysUser.getLoginName(), dto.getCreateBy()))
-                        .map(dtoMap-> dtoMap.getCustomerCode()).distinct().collect(Collectors.toList());
-                if (CollectionUtil.isNotEmpty(customerList)) {
-                    deleteByCreateByAndCustomerCode(sysUser.getLoginName(), customerList,Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
-                }
+//                List<String> customerList = successList.stream()
+//                        .filter(dto -> StrUtil.equals(sysUser.getLoginName(), dto.getCreateBy()))
+//                        .map(dtoMap-> dtoMap.getCustomerCode()).distinct().collect(Collectors.toList());
+//                if (CollectionUtil.isNotEmpty(customerList)) {
+//                    deleteByCreateByAndCustomerCode(sysUser.getLoginName(), customerList,Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
+//                }
             }else{
                 //上周：全部插入历史表，删除原有的，插入新的
                 List<Oms2weeksDemandOrderEditHis> listHis= oms2weeksDemandOrderEdits.stream().map(weeksDemandOrderEdit ->
@@ -362,6 +362,13 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             if (dateDelivery.compareTo(date) > 0) {
                 int nowWeekNum = DateUtil.weekOfYear(date);
                 int deliveryWeekNum = DateUtil.weekOfYear(dateDelivery);
+                int deliveryYear = DateUtil.year(dateDelivery);
+                if (deliveryYear > nowYear) {
+                    deliveryWeekNum += DateUtil.endOfYear(date).offset(DateField.DAY_OF_YEAR, -7).weekOfYear();
+                }
+                if (deliveryWeekNum == 1 && DateUtil.month(dateDelivery) == 11) {
+                    deliveryWeekNum += DateUtil.endOfYear(date).offset(DateField.DAY_OF_YEAR, -7).weekOfYear();
+                }
                 if (DateUtil.dayOfWeek(dateDelivery)==1) {
                     deliveryWeekNum += 1;
                 }
@@ -370,7 +377,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 }
                 int subNum=deliveryWeekNum - nowWeekNum;
                 Boolean bo = false;
-                if (subNum >= 3) {
+                if (subNum >= 5) {
                     bo = true;
                 }
                 if (bo) {
