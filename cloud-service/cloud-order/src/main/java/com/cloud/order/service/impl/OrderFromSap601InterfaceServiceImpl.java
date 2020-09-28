@@ -1,6 +1,7 @@
 package com.cloud.order.service.impl;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
@@ -88,7 +89,7 @@ public class OrderFromSap601InterfaceServiceImpl implements IOrderFromSap601Inte
                     omsProductionOrder.setProductEndDate(outTableOutput.getString("GLTRP"));//基本结束日期
                     omsProductionOrder.setProductNum(outTableOutput.getBigDecimal("GAMNG"));//订单数量
                     omsProductionOrder.setDestination(outTableOutput.getString("LGORT"));//地点、发往地
-                    omsProductionOrder.setProductLineCode(outTableOutput.getString("CY_SEQNR"));//线体
+                    omsProductionOrder.setProductLineCode(StrUtil.toString(outTableOutput.getInt("CY_SEQNR")));//线体
                     omsProductionOrder.setBomVersion(outTableOutput.getString("VERID"));//BOM版本
                     omsProductionOrder.setSapMessages(outTableOutput.getString("MESSAGE"));
                     omsProductionOrder.setSapFlag(outTableOutput.getString("FLAG"));
