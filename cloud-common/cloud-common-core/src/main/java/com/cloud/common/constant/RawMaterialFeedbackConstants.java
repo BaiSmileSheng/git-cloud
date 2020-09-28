@@ -9,4 +9,10 @@ public class RawMaterialFeedbackConstants {
     public final static String STATUS_ONE = "1";
     public final static String STATUS_TWO = "2";
 
+    /**
+     * 删除标识
+     * 删除标识：0：有效，1：删除
+     */
+    public final static String DEL_FLAG_TRUE = "0";
+    public final static String DEL_FLAG_FALSE = "1";
 }

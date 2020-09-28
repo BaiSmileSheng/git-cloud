@@ -274,6 +274,9 @@
                 <if test="item.updateBy != null and item.updateBy != ''">
                     update_by = #{item.updateBy},
                 </if>
+                <if test="item.productLineCode != null and item.productLineCode != ''">
+                    product_line_code = #{item.productLineCode},
+                </if>
             </trim>
             where order_code=#{item.orderCode}
         </foreach>

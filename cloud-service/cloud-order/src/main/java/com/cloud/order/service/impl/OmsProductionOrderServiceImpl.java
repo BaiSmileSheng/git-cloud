@@ -667,6 +667,18 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         omsProductionOrderDelService.insertList(omsProductionOrderDels);
         //删除排产订单表数据
         omsProductionOrderMapper.deleteByIds(ids);
+        //删除成品专用号、生产工厂、基本开始日期、BOM版本对应的原材料反馈信息记录
+        omsProductionOrders.forEach(o ->{
+            Example example = new Example(OmsRawMaterialFeedback.class);
+            Example.Criteria criteria = example.createCriteria();
+            criteria.andEqualTo("productMaterialCode",o.getProductMaterialCode());
+            criteria.andEqualTo("productFactoryCode",o.getProductFactoryCode());
+            criteria.andEqualTo("productStartDate",o.getProductStartDate());
+            criteria.andEqualTo("bomVersion",o.getBomVersion());
+            OmsRawMaterialFeedback omsRawMaterialFeedback  = new OmsRawMaterialFeedback();
+            omsRawMaterialFeedback.setDelFlag(RawMaterialFeedbackConstants.DEL_FLAG_FALSE);
+            omsRawMaterialFeedbackService.updateByExampleSelective(omsRawMaterialFeedback,example);
+        });
 
         return R.ok();
     }
