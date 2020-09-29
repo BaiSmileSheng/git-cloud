@@ -1,6 +1,7 @@
 package com.cloud.activiti.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.constant.ActProcessContants;
 import com.cloud.activiti.consts.ActivitiConstant;
@@ -32,6 +33,7 @@ import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
 import java.util.List;
@@ -83,21 +85,28 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
             List<ActStartProcessVo> list = actBusinessVo.getProcessVoList();
             //插入流程物业表  并开启流程
             list.forEach(a ->{
-                BizBusiness business =
-                        initBusiness(processDefinitionAct.getId()
-                                ,processDefinitionAct.getName(),a.getOrderId(),a.getOrderCode()
-                                , actBusinessVo.getUserId(),actBusinessVo.getTitle(),actBusinessVo.getUserName());
-                bizBusinessService.insertBizBusiness(business);
-                if (actBusinessVo.getKey().equals(ActProcessContants.ACTIVITI_ADD_REVIEW)
-                        || actBusinessVo.getKey().equals(ActProcessContants.ACTIVITI_OVERDUE_STOCK_ORDER_REVIEW)) {
-                    //会签流程,暂时只有T+2追加订单、超期库存是会签
-                    Map<String, Object> variables = Maps.newHashMap();
-                    variables.put("signList",a.getUserIds());
-                    bizBusinessService.startProcessForHuiQian(business, variables);
-                } else {
-                    //非会签
-                    Map<String, Object> variables = Maps.newHashMap();
-                    bizBusinessService.startProcess(business, variables,a.getUserIds());
+                Example example = new Example(BizBusiness.class);
+                Example.Criteria criteria = example.createCriteria();
+                criteria.andEqualTo("orderNo",a.getOrderCode());
+                criteria.andEqualTo("procDefKey",actBusinessVo.getKey());
+                List<BizBusiness> businesses = bizBusinessService.selectByExample(example);
+                if (!ObjectUtil.isNotEmpty(businesses) && businesses.size() <= 0) {
+                    BizBusiness business =
+                            initBusiness(processDefinitionAct.getId()
+                                    ,processDefinitionAct.getName(),a.getOrderId(),a.getOrderCode()
+                                    , actBusinessVo.getUserId(),actBusinessVo.getTitle(),actBusinessVo.getUserName());
+                    bizBusinessService.insertBizBusiness(business);
+                    if (actBusinessVo.getKey().equals(ActProcessContants.ACTIVITI_ADD_REVIEW)
+                            || actBusinessVo.getKey().equals(ActProcessContants.ACTIVITI_OVERDUE_STOCK_ORDER_REVIEW)) {
+                        //会签流程,暂时只有T+2追加订单、超期库存是会签
+                        Map<String, Object> variables = Maps.newHashMap();
+                        variables.put("signList",a.getUserIds());
+                        bizBusinessService.startProcessForHuiQian(business, variables);
+                    } else {
+                        //非会签
+                        Map<String, Object> variables = Maps.newHashMap();
+                        bizBusinessService.startProcess(business, variables,a.getUserIds());
+                    }
                 }
             });
         } else {
