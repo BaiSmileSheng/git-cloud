@@ -82,7 +82,6 @@ public class ProcessInsController extends BaseController {
     /**
      * 获取任务列表
      *
-     * @param rowSize
      * @param page
      * @return
      */
@@ -132,7 +131,7 @@ public class ProcessInsController extends BaseController {
             }
             // 关联当前任务
             List<Task> taskList = taskService.createTaskQuery().processInstanceId(e.getId()).list();
-            if (taskList != null) {
+            if (taskList != null&&taskList.size()>0) {
                 e.setCurrTaskName(taskList.get(0).getName());
             }
         });
