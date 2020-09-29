@@ -62,4 +62,6 @@ public class CdScrapMonthNo extends BaseEntity {
      */
     private String delFlag;
 
+    private String remark;
+
 }
