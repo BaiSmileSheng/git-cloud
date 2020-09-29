@@ -60,6 +60,7 @@ public class CdScrapMonthNoController extends BaseController {
         if (StrUtil.isNotEmpty(cdScrapMonthNo.getFactoryCode())) {
             criteria.andEqualTo("factoryCode", cdScrapMonthNo.getFactoryCode());
         }
+        example.orderBy("yearMouth").desc();
         startPage();
         List<CdScrapMonthNo> cdScrapMonthNoList = cdScrapMonthNoService.selectByExample(example);
         return getDataTable(cdScrapMonthNoList);
