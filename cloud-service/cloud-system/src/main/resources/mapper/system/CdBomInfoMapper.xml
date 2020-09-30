@@ -61,4 +61,14 @@
             </foreach>
         </where>
     </select>
+
+    <delete id="deleteBomListByMap">
+        delete from cd_bom_info
+        <where>
+            <foreach collection="list" index="index" item="item" separator="or">
+                (product_material_code = #{item.productMaterialCode}
+                and product_factory_code = #{item.productFactoryCode})
+            </foreach>
+        </where>
+    </delete>
 </mapper>

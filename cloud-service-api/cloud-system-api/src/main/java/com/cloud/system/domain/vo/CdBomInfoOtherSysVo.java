@@ -1,7 +1,6 @@
 package com.cloud.system.domain.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
-import com.alibaba.excel.annotation.ExcelProperty;
 import com.cloud.common.core.domain.BaseEntity;
 import com.cloud.system.domain.entity.CdBomInfo;
 import io.swagger.annotations.ApiModel;
@@ -10,11 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tk.mybatis.mapper.annotation.KeySql;
 
-import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -35,14 +31,12 @@ public class CdBomInfoOtherSysVo extends BaseEntity {
     /**
      * 调用系统编码
      */
-    @NotBlank(message = "调用系统编码不能为空")
     @ApiModelProperty(value = "appId")
     private String appId;
 
     /**
      * 接口名称
      */
-    @NotBlank(message = "接口名称不能为空")
     @ApiModelProperty(value = "接口名称")
     private String interfaceName;
 
@@ -56,7 +50,6 @@ public class CdBomInfoOtherSysVo extends BaseEntity {
     /**
      * 成品物料描述
      */
-    @NotBlank(message = "成品物料描述不能为空")
     @ApiModelProperty(value = "成品物料描述")
     private String productMaterialDesc;
 
@@ -70,7 +63,6 @@ public class CdBomInfoOtherSysVo extends BaseEntity {
     /**
      * 版本
      */
-    @NotBlank(message = "版本不能为空")
     @ApiModelProperty(value = "版本")
     private String version;
 
