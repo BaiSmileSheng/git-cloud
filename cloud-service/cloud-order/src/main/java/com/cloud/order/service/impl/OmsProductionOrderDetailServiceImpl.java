@@ -23,6 +23,7 @@ import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteCdRawMaterialStockService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.seata.core.context.RootContext;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -484,8 +485,9 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
      * Date: 2020/6/29
      */
     @Override
-    @Transactional(rollbackFor=Exception.class)
+    @GlobalTransactional
     public R commitProductOrderDetail(List<OmsProductionOrderDetail> list, OmsProductionOrderDetail omsProductionOrderDetail, SysUser sysUser) {
+        String result = "";
         if (ObjectUtil.isEmpty(list) || list.size() <= 0) {
             if (!BeanUtils.checkObjAllFieldsIsNull(omsProductionOrderDetail)) {
                 if (StrUtil.isNotBlank(omsProductionOrderDetail.getStatus())
@@ -546,18 +548,13 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
         if (ObjectUtil.isNotEmpty(productionOrders) && productionOrders.size() > 0) {
             List<String> orderCodeList = productionOrders.stream()
                     .map(OmsProductionOrder::getOrderCode).collect(Collectors.toList());
+            log.info("以下排产订单尚未调整["+StrUtil.join(",",orderCodeList)+"]请联系排产员调整后再确认！");
+            result = "以下排产订单尚未调整["+StrUtil.join(",",orderCodeList)+"]请联系排产员调整后再确认！";
             omsProductionOrderDetails = omsProductionOrderDetails.stream()
                     .filter(o -> !orderCodeList.contains(o.getProductOrderCode())).collect(Collectors.toList());
         }
         if (omsProductionOrderDetails.size() <= 0) {
-            if (ObjectUtil.isNotEmpty(productionOrders) && productionOrders.size() > 0) {
-                String orderCodeStr = productionOrders.stream()
-                        .map(OmsProductionOrder::getOrderCode).distinct().collect(Collectors.joining(","));
-                log.info("确认通过部分数据，以下排产订单尚未调整，请联系排产员调整后再确认！"+orderCodeStr);
-                return R.error("确认通过部分数据，以下排产订单尚未调整，请联系排产员调整后再确认！"+orderCodeStr);
-            }
-            log.info("无可更新排产订单明细数据！");
-            return R.ok();
+            return R.error(result);
         }
         //设置排产订单明细状态为“已确认”
         omsProductionOrderDetails.forEach(detail -> {
@@ -603,7 +600,7 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
         if (ObjectUtil.isNotEmpty(productionOrders) && productionOrders.size() > 0) {
             String orderCodeStr = productionOrders.stream()
                     .map(OmsProductionOrder::getOrderCode).distinct().collect(Collectors.joining(","));
-            return R.error("确认通过部分数据，以下排产订单尚未调整，请联系排产员调整后再确认！"+orderCodeStr);
+            return R.error("确认通过部分数据，以下排产订单尚未调整["+orderCodeStr+"]请联系排产员调整后再确认！");
         }
         return R.ok();
     }
