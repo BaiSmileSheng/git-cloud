@@ -6,27 +6,10 @@ import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
-import com.cloud.system.domain.entity.CdBomInfo;
-import com.cloud.system.domain.entity.CdFactoryInfo;
-import com.cloud.system.domain.entity.CdFactoryLineInfo;
-import com.cloud.system.domain.entity.CdMaterialExtendInfo;
-import com.cloud.system.domain.entity.CdMaterialInfo;
-import com.cloud.system.domain.entity.CdRawMaterialStock;
-import com.cloud.system.domain.entity.SysUser;
-import com.cloud.system.service.ICdBomInfoService;
-import com.cloud.system.service.ICdFactoryInfoService;
-import com.cloud.system.service.ICdMaterialExtendInfoService;
-import com.cloud.system.service.ICdRawMaterialStockService;
-import com.cloud.system.service.SystemFromSap601InterfaceService;
-import com.sap.conn.jco.JCoContext;
-import com.sap.conn.jco.JCoDestination;
-import com.sap.conn.jco.JCoDestinationManager;
-import com.sap.conn.jco.JCoFunction;
-import com.sap.conn.jco.JCoParameterList;
-import com.sap.conn.jco.JCoRepository;
-import com.sap.conn.jco.JCoTable;
+import com.cloud.system.domain.entity.*;
+import com.cloud.system.service.*;
+import com.sap.conn.jco.*;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -324,7 +307,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
      * @Date: 2020/6/5
      */
     @Override
-    public R queryBomInfoFromSap601(List<String> factorys, List<String> materials) {
+    public R queryBomInfoFromSap601(List<String> factorys, List<String> materials,String flag) {
         JCoDestination destination = null;
         if (factorys.size() <= 0) {
             log.info("============获取BOM清单数据接口传入工厂参数为空！===========");
@@ -345,7 +328,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             }
             //获取输入参数
             JCoParameterList inputParams = fm.getImportParameterList();
-//            inputParams.setValue("S_DATUM", new Date());//当前日期，可填可不填
+            inputParams.setValue("IFLAG", flag);//标记
 //            inputParams.setValue("E_DATUM", new Date());//当前日期，可填可不填
             //获取输入表参数
             JCoTable inputTableWerks = fm.getTableParameterList().getTable("WERKS");
@@ -362,6 +345,8 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                     inputTableMatnr.setValue("MATNR", materialCode.toUpperCase());
                 }
             }
+
+
             //执行函数
             JCoContext.begin(destination);
             fm.execute(destination);
@@ -511,7 +496,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                     endCount = materialExtendInfoList.size();
                 }
                 List<String> materials = materialCodeList.subList(startCont,endCount);
-                R result = queryBomInfoFromSap601(Arrays.asList(factoryCode), materials);
+                R result = queryBomInfoFromSap601(Arrays.asList(factoryCode), materials,SapConstants.ABAP_AS_SAP601_MUL);
                 if (!result.isSuccess()) {
                     log.error("连接SAP获取BOM数据异常 factoryCode:{},materials:{},res:{}", factoryCode, materials, JSONObject.toJSON(result));
                     continue;

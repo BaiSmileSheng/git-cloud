@@ -25,6 +25,8 @@ public class SapConstants {
      * 卡奥斯SAP系统连接
      * */
     public static final String ABAP_AS_SAP601 = "ABAP_AS_SAP601";
+    public static final String ABAP_AS_SAP601_SINGLE = "R";
+    public static final String ABAP_AS_SAP601_MUL = "I";
     /**
      * 获取uph数据接口函数
      * */

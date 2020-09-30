@@ -1,5 +1,6 @@
 package com.cloud.system.controller;
 
+import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.system.service.SystemFromSap601InterfaceService;
 import io.swagger.annotations.Api;
@@ -55,7 +56,7 @@ public class SapSystemInterfaceController {
     public R queryBomInfo(@RequestParam String factorys, @RequestParam("materials") String materials) {
         List<String> factoryList = Arrays.asList(factorys.split(","));
         List<String> materialList = Arrays.asList(materials.split(","));
-        return systemFromSap601InterfaceService.queryBomInfoFromSap601(factoryList,materialList);
+        return systemFromSap601InterfaceService.queryBomInfoFromSap601(factoryList,materialList, SapConstants.ABAP_AS_SAP601_SINGLE);
     }
 
     /**
