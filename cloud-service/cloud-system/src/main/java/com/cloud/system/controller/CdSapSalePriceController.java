@@ -95,8 +95,6 @@ public class CdSapSalePriceController extends BaseController {
      * 新增保存成品销售价格
      */
     @PostMapping("save")
-    @OperLog(title = "新增保存成品销售价格 ", businessType = BusinessType.INSERT)
-    @ApiOperation(value = "新增保存成品销售价格 ", response = R.class)
     public R addSave(@RequestBody CdSapSalePrice cdSapSalePrice) {
         cdSapSalePriceService.insertSelective(cdSapSalePrice);
         return R.data(cdSapSalePrice.getId());
@@ -106,8 +104,6 @@ public class CdSapSalePriceController extends BaseController {
      * 修改保存成品销售价格
      */
     @PostMapping("update")
-    @OperLog(title = "修改保存成品销售价格 ", businessType = BusinessType.UPDATE)
-    @ApiOperation(value = "修改保存成品销售价格 ", response = R.class)
     public R editSave(@RequestBody CdSapSalePrice cdSapSalePrice) {
         return toAjax(cdSapSalePriceService.updateByPrimaryKeySelective(cdSapSalePrice));
     }
