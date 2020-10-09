@@ -7457,6 +7457,165 @@
             }
           ],
           "chnname": "T-1交付考核报表"
+        },
+        {
+          "title": "oms_product_difference",
+          "fields": [
+            {
+              "name": "id",
+              "type": "BigInt",
+              "remark": "",
+              "chnname": "主键",
+              "pk": true,
+              "notNull": true,
+              "relationNoShow": false,
+              "autoIncrement": true
+            },
+            {
+              "name": "product_factory_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "工厂",
+              "notNull": true
+            },
+            {
+              "name": "product_type",
+              "type": "DefaultString",
+              "remark": "1:空调内板,2:空调外板,3:空调模块,4:空调显示,5:波轮显示,6:波轮电源驱动,7:滚筒显示,8:滚筒电源驱动,9:冰箱显示,10:冰箱主控,11:电热显示,12:电热主控,13:厨电显示,14:厨电主控,15:洗碗机,16:液晶模组,17:云单（购销业务）,18:海达维B2C,19:海达维照明模块,20:海达维杀菌模块,21:海达维购销物料,22:HMI,23:物联网模块,24:半成品",
+              "chnname": "产品类别"
+            },
+            {
+              "name": "product_material_code",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "专用号",
+              "notNull": true
+            },
+            {
+              "name": "weeks",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "周数",
+              "notNull": true
+            },
+            {
+              "name": "real_order_num",
+              "type": "Double",
+              "remark": "",
+              "chnname": "应排T+1周订单",
+              "notNull": true
+            },
+            {
+              "name": "product_num",
+              "type": "Double",
+              "remark": "",
+              "chnname": "实际排产数",
+              "notNull": true
+            },
+            {
+              "name": "difference_num",
+              "type": "Double",
+              "remark": "",
+              "chnname": "差异量",
+              "notNull": true
+            },
+            {
+              "name": "productivity",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "排产率",
+              "notNull": true
+            },
+            {
+              "name": "del_flag",
+              "type": "Char",
+              "remark": "",
+              "chnname": "是否删除0：有效，1：删除",
+              "defaultValue": "0"
+            },
+            {
+              "name": "remark",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "备注"
+            },
+            {
+              "name": "create_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "创建时间",
+              "notNull": true
+            },
+            {
+              "name": "create_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "创建人",
+              "notNull": true
+            },
+            {
+              "name": "update_time",
+              "type": "DateTime",
+              "remark": "",
+              "chnname": "更新时间",
+              "defaultValue": "NULL ON UPDATE CURRENT_TIMESTAMP"
+            },
+            {
+              "name": "update_by",
+              "type": "DefaultString",
+              "remark": "",
+              "chnname": "更新人",
+              "defaultValue": "''"
+            }
+          ],
+          "indexs": [],
+          "headers": [
+            {
+              "fieldName": "chnname",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "name",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "type",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "dataType",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "remark",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "pk",
+              "relationNoShow": false
+            },
+            {
+              "fieldName": "notNull",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "autoIncrement",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "defaultValue",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "relationNoShow",
+              "relationNoShow": true
+            },
+            {
+              "fieldName": "uiHint",
+              "relationNoShow": true
+            }
+          ],
+          "chnname": "外单排产差异报表"
         }
       ],
       "graphCanvas": {
