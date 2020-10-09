@@ -283,7 +283,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         omsProductionOrders.forEach(o ->{
             List<OmsProductionOrderDetail> detailList = detailMap.get(o.getOrderCode());
             int statusSize = detailList.stream().filter(detail ->
-                    !ProductOrderConstants.DETAIL_STATUS_ZERO.equals(detail.getStatus()))
+                    ProductOrderConstants.DETAIL_STATUS_ZERO.equals(detail.getStatus()))
                     .collect(Collectors.toList()).size();
             if (statusSize == 0) {
                 o.setStatus(ProductOrderConstants.STATUS_THREE);
@@ -851,7 +851,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         });
         //拆解BOM判断排产订单明细状态，设置排产订单状态
         int statusSize = omsProductionOrderDetails.stream().filter(detail ->
-                !ProductOrderConstants.DETAIL_STATUS_ZERO.equals(detail.getStatus()))
+                ProductOrderConstants.DETAIL_STATUS_ZERO.equals(detail.getStatus()))
                 .collect(Collectors.toList()).size();
         if (statusSize == 0) {
             order.setStatus(ProductOrderConstants.STATUS_THREE);
