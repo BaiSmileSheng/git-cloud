@@ -29,4 +29,6 @@ public interface CdBomInfoMapper extends BaseMapper<CdBomInfo>{
     int deleteAll();
 
     List<CdBomInfo> selectBomList(@Param(value = "list") List<Dict> list);
+
+    int deleteBomListByMap(@Param(value = "list") List<Dict> list);
 }
