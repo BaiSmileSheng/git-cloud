@@ -126,7 +126,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
     private static final String[] parsePatterns = {"yyyy.MM.dd", "yyyy/MM/dd"};
     //无需评审采购组
-    private static final String[] PURCHASE_GROUP = {"N99","C44","M02","N21"};
+    private static final String[] PURCHASE_GROUP = {"N99","C44","M02","N21","N97"};
 
     @Value("${webService.findAllCodeForJIT.urlClaim}")
     private String urlClaim;
