@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 /**
  * 生产管理 Feign服务层
  *
@@ -28,15 +30,10 @@ public interface RemoteProductionOrderService {
 
     /**
      * 查询排产订单 列表
-     * @param productEndDateEnd  基本结束时间 结束值
-     * @param actualEndDateStart 实际结束时间 起始值
-     * @param actualEndDateEnd 实际结束时间 结束值
      * @return 排产订单 列表
      */
     @GetMapping("productionOrder/listForDelays")
-    R listForDelays(@RequestParam("productEndDateEnd") String productEndDateEnd,
-                                           @RequestParam("actualEndDateStart") String actualEndDateStart,
-                                           @RequestParam("actualEndDateEnd") String actualEndDateEnd);
+    R listForDelays();
     /**
      * 根据ID查询
      * @param id
@@ -69,4 +66,12 @@ public interface RemoteProductionOrderService {
      */
     @PostMapping("productionOrder/timeGetConfirmAmont")
     R timeGetConfirmAmont();
+
+    /**
+     * 根据主键修改排产订单
+     * @param omsProductionOrderList
+     * @return
+     */
+    @PostMapping("productionOrder/updateBatchByPrimary")
+    R updateBatchByPrimary(@RequestBody List<OmsProductionOrder> omsProductionOrderList);
 }

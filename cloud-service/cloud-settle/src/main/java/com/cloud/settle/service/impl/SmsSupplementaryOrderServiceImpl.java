@@ -213,11 +213,17 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         }
         R rBom = remoteBomService.listByProductAndMaterial(productMaterialCode, rawMaterialCode,omsProductionOrder.getBomVersion(),omsProductionOrder.getProductFactoryCode());
         if (!rBom.isSuccess()) {
-            return rBom;
+            R rMaterial = remoteMaterialService.getByMaterialCode(smsSupplementaryOrder.getRawMaterialCode(), smsSupplementaryOrder.getFactoryCode());
+            if (!rMaterial.isSuccess()) {
+                throw new BusinessException("无采购组信息，不允许保存！");
+            }
+            CdMaterialInfo cdMaterialInfo = rMaterial.getData(CdMaterialInfo.class);
+            smsSupplementaryOrder.setPurchaseGroupCode(cdMaterialInfo.getPurchaseGroupCode());
+        }else{
+            CdBomInfo cdBom = rBom.getData(CdBomInfo.class);
+            smsSupplementaryOrder.setSapStoreage(cdBom.getStoragePoint());
+            smsSupplementaryOrder.setPurchaseGroupCode(cdBom.getProductFactoryCode());
         }
-        CdBomInfo cdBom = rBom.getData(CdBomInfo.class);
-        smsSupplementaryOrder.setSapStoreage(cdBom.getStoragePoint());
-        smsSupplementaryOrder.setPurchaseGroupCode(cdBom.getPurchaseGroup());
         smsSupplementaryOrder.setDelFlag("0");
         smsSupplementaryOrder.setCreateTime(DateUtils.getNowDate());
         smsSupplementaryOrder.setCreateBy(sysUser.getLoginName());
@@ -463,13 +469,14 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         int applyNum = smsSupplementaryOrder.getStuffAmount();//申请量
         //最小包装量
         Double minUnit = Double.valueOf(cdMaterialInfo.getRoundingQuantit() == null ? "0" : cdMaterialInfo.getRoundingQuantit().toString());
-        if (minUnit == 0) {
-            return R.error(StrUtil.format("{}最小包装量不正确！",smsSupplementaryOrder.getRawMaterialCode()));
-        }
-        if (applyNum % minUnit != 0) {
-            log.error(StrUtil.format("(物耗)申请量必须是最小包装量的整数倍参数为{},{}", applyNum,minUnit));
-            return R.error(StrUtil.format("{}申请量必须是最小包装量({})的整数倍！",smsSupplementaryOrder.getRawMaterialCode(),minUnit));
-        }
+        //20200922王福丽提出 去除最小包装量限制
+//        if (minUnit == 0) {
+//            return R.error(StrUtil.format("{}最小包装量不正确！",smsSupplementaryOrder.getRawMaterialCode()));
+//        }
+//        if (applyNum % minUnit != 0) {
+//            log.error(StrUtil.format("(物耗)申请量必须是最小包装量的整数倍参数为{},{}", applyNum,minUnit));
+//            return R.error(StrUtil.format("{}申请量必须是最小包装量({})的整数倍！",smsSupplementaryOrder.getRawMaterialCode(),minUnit));
+//        }
         //3、校验申请数量是否是单耗的整数倍
         //生产单号获取排产订单信息
         R omsProductionOrderResult = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
@@ -479,8 +486,8 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         }
         OmsProductionOrder omsProductionOrder = omsProductionOrderResult.getData(OmsProductionOrder.class);
 ////        //根据成品物料号和原材料物料号取bom单耗
-        String productMaterialCode = omsProductionOrder.getProductMaterialCode();
-        String rawMaterialCode = smsSupplementaryOrder.getRawMaterialCode();
+//        String productMaterialCode = omsProductionOrder.getProductMaterialCode();
+//        String rawMaterialCode = smsSupplementaryOrder.getRawMaterialCode();
 //        R rBomNum = remoteBomService.checkBomNum(productMaterialCode, rawMaterialCode, applyNum);
 //        if (!rBomNum.isSuccess()) {
 //            return rBomNum;
@@ -491,25 +498,25 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         if (StrUtil.isEmpty(omsProductionOrder.getProductFactoryCode())) {
             return R.error("生产订单无生产工厂");
         }
-        R rBom = remoteBomService.listByProductAndMaterial(productMaterialCode, rawMaterialCode,omsProductionOrder.getBomVersion(),omsProductionOrder.getProductFactoryCode());
-        if (!rBom.isSuccess()) {
-            return R.error("申请物料不在使用范围内！");
-        }
-        CdBomInfo cdBom = rBom.getData(CdBomInfo.class);
-        if (cdBom.getBomNum() == null) {
-            return R.error("申请物料的单耗信息为空！");
-        }
+//        R rBom = remoteBomService.listByProductAndMaterial(productMaterialCode, rawMaterialCode,omsProductionOrder.getBomVersion(),omsProductionOrder.getProductFactoryCode());
+//        if (!rBom.isSuccess()) {
+//            return R.error("申请物料不在使用范围内！");
+//        }
+//        CdBomInfo cdBom = rBom.getData(CdBomInfo.class);
+//        if (cdBom.getBomNum() == null) {
+//            return R.error("申请物料的单耗信息为空！");
+//        }
         //5、校验申请量是否大于订单量*单耗,如果大于单耗，则判断超出部分是否大于最小包装量，大于则返回错误
-        BigDecimal productNum = omsProductionOrder.getProductNum();
-        BigDecimal applyNumBig = new BigDecimal(applyNum);
-        BigDecimal bomNum = cdBom.getBomNum().divide(cdBom.getBasicNum());
-        if (applyNumBig.compareTo(productNum.multiply(bomNum)) >= 0) {
-            //差值
-            BigDecimal sub = applyNumBig.subtract(productNum.multiply(bomNum));
-            if (sub.compareTo(new BigDecimal(minUnit)) > 0) {
-                R.error(StrUtil.format("{}申请量大于订单量*单耗({})时，超出部分不得大于最小包装量！",productOrderCode,bomNum));
-            }
-        }
+//        BigDecimal productNum = omsProductionOrder.getProductNum();
+//        BigDecimal applyNumBig = new BigDecimal(applyNum);
+//        BigDecimal bomNum = cdBom.getBomNum().divide(cdBom.getBasicNum());
+//        if (applyNumBig.compareTo(productNum.multiply(bomNum)) >= 0) {
+//            //差值
+//            BigDecimal sub = applyNumBig.subtract(productNum.multiply(bomNum));
+//            if (sub.compareTo(new BigDecimal(minUnit)) > 0) {
+//                R.error(StrUtil.format("{}申请量大于订单量*单耗({})时，超出部分不得大于最小包装量！",productOrderCode,bomNum));
+//            }
+//        }
         return R.ok();
     }
 

@@ -44,6 +44,7 @@
     sap_messages,
     settle_flag,
     settle_messages,
+    delays_flag,
     assign_sap_time,
     get_sap_time,
     is_small_batch,
@@ -94,6 +95,7 @@
         <result property="sapMessages" column="sap_messages"/>
         <result property="settleFlag" column="settle_flag"/>
         <result property="settleMessages" column="settle_messages"/>
+        <result property="delaysFlag" column="delays_flag"/>
         <result property="assignSapTime" column="assign_sap_time"/>
         <result property="getSapTime" column="get_sap_time"/>
         <result property="isSmallBatch" column="is_small_batch"/>
@@ -145,6 +147,7 @@
                sap_messages,
                settle_flag,
                settle_messages,
+               delays_flag
                assign_sap_time,
                get_sap_time,
                is_small_batch,
@@ -164,14 +167,15 @@
                 and product_material_code = #{item.productMaterialCode,jdbcType=VARCHAR}
                 and product_line_code = #{item.productLineCode,jdbcType=VARCHAR}
                 and (outsource_type = '0' or outsource_type = '1')
-                and datediff(DATE_FORMAT(now(),'%Y-%m-%d'),delivery_date) > 7)
+                and datediff(DATE_FORMAT(now(),'%Y-%m-%d'),product_start_date) > 7)
                 or
                 (product_factory_code = #{item.productFactoryCode,jdbcType=VARCHAR}
                 and product_material_code = #{item.productMaterialCode,jdbcType=VARCHAR}
                 and product_line_code = #{item.productLineCode,jdbcType=VARCHAR}
                 and outsource_type = '2'
-                and datediff(DATE_FORMAT(now(),'%Y-%m-%d'),delivery_date) > 3)
+                and datediff(DATE_FORMAT(now(),'%Y-%m-%d'),product_start_date) > 3)
             </foreach>
+            and status != '8'
         </where>
     </select>
 
@@ -252,9 +256,6 @@
                 <if test="item.productNum != null and item.productNum != ''">
                     product_num = #{item.productNum},
                 </if>
-                <if test="item.destination != null and item.destination != ''">
-                    destination = #{item.destination},
-                </if>
                 <if test="item.newVersion != null and item.newVersion != ''">
                     new_version = #{item.newVersion},
                 </if>
@@ -273,6 +274,9 @@
                 <if test="item.updateBy != null and item.updateBy != ''">
                     update_by = #{item.updateBy},
                 </if>
+                <if test="item.productLineCode != null and item.productLineCode != ''">
+                    product_line_code = #{item.productLineCode},
+                </if>
             </trim>
             where order_code=#{item.orderCode}
         </foreach>
@@ -290,6 +294,9 @@
                 </if>
                 <if test="item.actualEndDate != null">
                     actual_end_date = #{item.actualEndDate},
+                </if>
+                <if test="item.delaysFlag != null and item.delaysFlag != ''">
+                    delays_flag = #{item.delaysFlag},
                 </if>
                 <if test="item.updateBy != null and item.updateBy != ''">
                     update_by = #{item.updateBy},

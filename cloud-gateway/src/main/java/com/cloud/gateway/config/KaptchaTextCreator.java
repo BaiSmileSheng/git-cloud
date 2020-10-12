@@ -1,5 +1,6 @@
 package com.cloud.gateway.config;
 
+import java.security.SecureRandom;
 import java.util.Random;
 
 import com.google.code.kaptcha.text.impl.DefaultTextCreator;
@@ -10,7 +11,8 @@ public class KaptchaTextCreator extends DefaultTextCreator {
     @Override
     public String getText() {
         Integer result = 0;
-        Random random = new Random();
+        //Random random = new Random();
+        SecureRandom random = new SecureRandom();
         int x = random.nextInt(10);
         int y = random.nextInt(10);
         StringBuilder suChinese = new StringBuilder();

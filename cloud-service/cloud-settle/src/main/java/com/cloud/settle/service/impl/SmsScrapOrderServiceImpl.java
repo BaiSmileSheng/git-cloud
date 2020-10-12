@@ -11,7 +11,6 @@ import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
-import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.feign.RemoteProductionOrderService;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
 import com.cloud.settle.enums.CurrencyEnum;
@@ -24,6 +23,7 @@ import com.cloud.system.feign.*;
 import com.sap.conn.jco.*;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,6 +64,8 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
     private RemoteInterfaceLogService remoteInterfaceLogService;
     @Autowired
     private RemoteCdProductWarehouseService remoteCdProductWarehouseService;
+    @Autowired
+    private RemoteCdScrapMonthNoService remoteCdScrapMonthNoService;
 
 
 
@@ -106,10 +108,20 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             throw new BusinessException(omsProductionOrderResult.get("msg").toString());
         }
         OmsProductionOrder omsProductionOrder = omsProductionOrderResult.getData(OmsProductionOrder.class);
-        if (!StrUtil.equals(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode()
-                , omsProductionOrder.getStatus())) {
-            return R.error(StrUtil.format("只允许{}状态申请报废单！", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getMsg()));
+        //20200917 王福丽提出去除状态限制  基本开始日期<=今天就可以申请
+//        if (!StrUtil.equals(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode()
+//                , omsProductionOrder.getStatus())) {
+//            return R.error(StrUtil.format("只允许{}状态申请报废单！", ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getMsg()));
+//        }
+        String productStartDateStr = omsProductionOrder.getProductStartDate();
+        if (StrUtil.isEmpty(productStartDateStr)) {
+            throw new BusinessException("订单基本开始日期为空,不允许申请报废！");
         }
+        Date productStartDate = DateUtils.parseDate(productStartDateStr);
+        if (DateUtil.compare(DateUtil.date(), productStartDate) < 0) {
+            throw new BusinessException("未到达订单基本开始日期,不允许申请报废！");
+        }
+
         Example example = new Example(SmsScrapOrder.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("productOrderCode", productOrderCode);
@@ -444,6 +456,12 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         }else{
             lgort = "0188";
         }
+        String yearMouth = DateFormatUtils.format(date, "yyyyMM");
+        R rNo = remoteCdScrapMonthNoService.findOne(yearMouth,smsScrapOrder.getFactoryCode());
+        if (!rNo.isSuccess()) {
+            throw new BusinessException("请维护本月订单号！");
+        }
+        CdScrapMonthNo cdScrapMonthNo = rNo.getData(CdScrapMonthNo.class);
 
         //发送SAP
         JCoDestination destination =null;
@@ -470,12 +488,12 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             inputTable.setValue("MATNR", smsScrapOrder.getProductMaterialCode().toUpperCase());//物料号
             inputTable.setValue("ERFME", smsScrapOrder.getMeasureUnit());//基本计量单位
             inputTable.setValue("ERFMG", smsScrapOrder.getScrapAmount());//数量
-            inputTable.setValue("AUFNR", smsScrapOrder.getProductOrderCode());//生产订单号
+            inputTable.setValue("AUFNR", cdScrapMonthNo.getOrderNo());//每月维护一次订单号
             String content = StrUtil.format("BWARTWA:{},BKTXT:{},WERKS:{},LGORT:{},MATNR:{}" +
                     ",ERFME:{},ERFMG:{},AUFNR:{}","261",
                     StrUtil.concat(true,smsScrapOrder.getSupplierCode(),smsScrapOrder.getScrapNo()),
                     smsScrapOrder.getFactoryCode(),lgort,smsScrapOrder.getProductMaterialCode(),
-                    smsScrapOrder.getMeasureUnit(),smsScrapOrder.getScrapAmount(),smsScrapOrder.getProductOrderCode());
+                    smsScrapOrder.getMeasureUnit(),smsScrapOrder.getScrapAmount(),cdScrapMonthNo.getOrderNo());
             sysInterfaceLog.setContent(content);
             //执行函数
             JCoContext.begin(destination);

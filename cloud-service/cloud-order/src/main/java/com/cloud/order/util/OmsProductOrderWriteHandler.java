@@ -53,19 +53,19 @@ public class OmsProductOrderWriteHandler extends AbstractRowWriteHandler {
             // 输入批注信息
             comment1.setString(new XSSFRichTextString(dateStr));
             sheet.getRow(0).getCell(8).setCellComment(comment1);
-            XSSFClientAnchor xssfClientAnchor2 = new XSSFClientAnchor(0, 0, 0, 0, (short)10, 0, (short)11, 2);
+            XSSFClientAnchor xssfClientAnchor2 = new XSSFClientAnchor(0, 0, 0, 0, (short)13, 0, (short)14, 2);
             Comment comment2 = drawingPatriarch.createCellComment(xssfClientAnchor2);
             // 输入批注信息
             comment2.setString(new XSSFRichTextString(dateStr));
             sheet.getRow(0).getCell(10).setCellComment(comment2);
             String outTypeStr = "加工承揽方式：成品、半成品、自制";
-            XSSFClientAnchor xssfClientAnchor3 = new XSSFClientAnchor(0, 0, 0, 0, (short)17, 0, (short)18, 2);
+            XSSFClientAnchor xssfClientAnchor3 = new XSSFClientAnchor(0, 0, 0, 0, (short)20, 0, (short)21, 2);
             Comment comment3 = drawingPatriarch.createCellComment(xssfClientAnchor3);
             // 输入批注信息
             comment3.setString(new XSSFRichTextString(outTypeStr));
             sheet.getRow(0).getCell(17).setCellComment(comment3);
             String orderType = "订单分类：正常、追加、储备、、新品、返修";
-            XSSFClientAnchor xssfClientAnchor4 = new XSSFClientAnchor(0, 0, 0, 0, (short)18, 0, (short)19, 2);
+            XSSFClientAnchor xssfClientAnchor4 = new XSSFClientAnchor(0, 0, 0, 0, (short)21, 0, (short)22, 2);
             Comment comment4 = drawingPatriarch.createCellComment(xssfClientAnchor4);
             // 输入批注信息
             comment4.setString(new XSSFRichTextString(orderType));

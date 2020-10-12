@@ -5,6 +5,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
 import com.cloud.system.domain.entity.CdProductStock;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.CdProductStockExportVo;
 
 import java.util.List;
 

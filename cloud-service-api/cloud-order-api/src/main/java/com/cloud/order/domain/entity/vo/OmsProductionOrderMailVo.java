@@ -4,6 +4,7 @@ import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
+import com.cloud.order.converter.CsdFlagConverter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -259,7 +260,7 @@ public class OmsProductionOrderMailVo {
     /**
      * 是否卡萨帝 0：否，1：是
      */
-    @ExcelProperty(value = "是否卡萨帝",index = 18)
+    @ExcelProperty(value = "是否卡萨帝",index = 18,converter = CsdFlagConverter.class)
     @ApiModelProperty(value = "是否卡萨帝 0：否，1：是")
     private String csdFlag;
 

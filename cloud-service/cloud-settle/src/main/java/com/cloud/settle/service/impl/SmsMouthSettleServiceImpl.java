@@ -1257,10 +1257,6 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
     private R createMultiItemClaim(SmsMouthSettle smsMouthSettle){
         //1.创建报账单
         BaseMultiItemClaimSaveRequest baseMultiItemClaimSaveRequest = getBaseMultiItemClaimSaveRequest(smsMouthSettle);
-        SysInterfaceLog sysInterfaceLog = new SysInterfaceLog();
-        sysInterfaceLog.setAppId("KMS");
-        sysInterfaceLog.setInterfaceName("createMultiItemClaim");
-        sysInterfaceLog.setContent("创建报账单");
         BaseClaimResponse baseClaimResponse;
         try{
             baseClaimResponse = baseMutilItemService.createMultiItemClaim(baseMultiItemClaimSaveRequest);
@@ -1276,16 +1272,12 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
                 throw new BusinessException("调用创建报账单接口失败" + failReason);
             }
         }catch (Exception e){
-            sysInterfaceLog.setResults("调用创建报账单接口失败");
             StringWriter w = new StringWriter();
             e.printStackTrace(new PrintWriter(w));
             log.error(
                     "调用创建报账单接口失败 : {}", w.toString());
             throw new BusinessException(e.getMessage());
-        }finally {
-            remoteInterfaceLogService.saveInterfaceLog(sysInterfaceLog);
         }
-
         //2.创建报账单成功后修改月度结算状态回填kems单号
         SmsMouthSettle smsMouthSettleReq = new SmsMouthSettle();
         smsMouthSettleReq.setId(smsMouthSettle.getId());

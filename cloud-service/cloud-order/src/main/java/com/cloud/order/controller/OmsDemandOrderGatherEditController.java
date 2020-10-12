@@ -195,6 +195,7 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     @ApiOperation(value = "确认下达 ", response = R.class)
     @ApiParam(name = "ids", value = "需确认下达数据的id")
     @HasPermissions("order:demandOrderGatherEdit:confirmRelease")
+    @OperLog(title = "周计划确认下达", businessType = BusinessType.OTHER)
     public R confirmRelease(@RequestBody @ApiIgnore OmsDemandOrderGatherEdit omsDemandOrderGatherEdit){
         SysUser sysUser = getUserInfo(SysUser.class);
         return omsDemandOrderGatherEditService.confirmRelease(omsDemandOrderGatherEdit==null?null:omsDemandOrderGatherEdit.getIds(),omsDemandOrderGatherEdit,sysUser);
@@ -208,6 +209,7 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     @PostMapping("importExcel")
     @ApiOperation(value = "滚动计划需求操作导入 ", response = R.class)
     @HasPermissions("order:demandOrderGatherEdit:importExcel")
+    @OperLog(title = "周计划需求操作导入", businessType = BusinessType.IMPORT)
     public R importExcel(MultipartFile file) {
         return omsDemandOrderGatherEditService.importDemandGatherEdit(file,getUserInfo(SysUser.class));
     }
@@ -342,6 +344,7 @@ public class OmsDemandOrderGatherEditController extends BaseController {
     @PostMapping("toSAP")
     @ApiOperation(value = "下达SAP")
     @HasPermissions("order:demandOrderGatherEdit:toSAP")
+    @OperLog(title = "周计划下达SAP", businessType = BusinessType.OTHER)
     public R toSAP(@RequestParam("ids") List<Long> ids,@ApiIgnore OmsDemandOrderGatherEdit omsDemandOrderGatherEdit){
         SysUser sysUser = getUserInfo(SysUser.class);
         return omsDemandOrderGatherEditService.toSAP(ids,sysUser,omsDemandOrderGatherEdit);

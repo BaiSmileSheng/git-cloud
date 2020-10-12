@@ -5,6 +5,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Console;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.NumberUtil;
@@ -370,6 +371,13 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             if (dateDelivery.compareTo(date) > 0) {
                 int nowWeekNum = DateUtil.weekOfYear(date);
                 int deliveryWeekNum = DateUtil.weekOfYear(dateDelivery);
+                int deliveryYear = DateUtil.year(dateDelivery);
+                if (deliveryYear > nowYear) {
+                    deliveryWeekNum += DateUtil.endOfYear(date).offset(DateField.DAY_OF_YEAR, -7).weekOfYear();
+                }
+                if (deliveryWeekNum == 1 && DateUtil.month(dateDelivery) == 11) {
+                    deliveryWeekNum += DateUtil.endOfYear(date).offset(DateField.DAY_OF_YEAR, -7).weekOfYear();
+                }
                 if (DateUtil.dayOfWeek(dateDelivery)==1) {
                     deliveryWeekNum += 1;
                 }
@@ -488,6 +496,15 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         return new ExcelImportResult(successDtos,errDtos,otherDtos);
     }
 
+    public static void main(String[] args) {
+        Date date1 = DateUtil.parseDate("2020-11-25");
+        Date date2 = DateUtil.parseDate("2020-12-30");
+        Console.log(DateUtil.month(date2));
+        Console.log(DateUtil.endOfYear(date1).offset(DateField.DAY_OF_YEAR,-7).weekOfYear());
+        Console.log(DateUtil.betweenWeek(date1,date2,true));
+
+    }
+
     /**
      * 需求数据导入
      * @param successList 成功结果集
@@ -523,12 +540,12 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             String versionOld = demandOrderGatherEditOld.getVersion();
             if (StrUtil.equals(version, versionOld)) {
                 //相同周：根据登录人、客户编码删除原有的，插入新的
-                List<String> customerList = successList.stream()
-                        .filter(dto -> StrUtil.equals(sysUser.getLoginName(), dto.getCreateBy()))
-                        .map(dtoMap-> dtoMap.getCustomerCode()).distinct().collect(Collectors.toList());
-                if (CollectionUtil.isNotEmpty(customerList)) {
-                    deleteByCreateByAndCustomerCode(sysUser.getLoginName(), customerList,DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
-                }
+//                List<String> customerList = successList.stream()
+//                        .filter(dto -> StrUtil.equals(sysUser.getLoginName(), dto.getCreateBy()))
+//                        .map(dtoMap-> dtoMap.getCustomerCode()).distinct().collect(Collectors.toList());
+//                if (CollectionUtil.isNotEmpty(customerList)) {
+//                    deleteByCreateByAndCustomerCode(sysUser.getLoginName(), customerList,DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
+//                }
             }else{
                 //上周：全部插入历史表，删除原有的，插入新的
                 List<OmsDemandOrderGatherEditHis> listHis= demandOrderGatherEditOlds.stream().map(demandOrderGatherEdit ->
@@ -923,6 +940,9 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getEndTime())) {
                 criteria.andLessThanOrEqualTo("deliveryDate", omsDemandOrderGatherEdit.getEndTime() );
             }
+            if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getCreateBy())) {
+                criteria.andEqualTo("createBy", omsDemandOrderGatherEdit.getCreateBy() );
+            }
         }else{
             example.and().andIn("id", ids);
         }
@@ -990,7 +1010,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                     String messageOne = StrUtil.format("XQDDH:{},FLAG:{},MESSAGE:{},PLNUM:{};"
                             ,demandCode,flag,message,plnum);
                     sapBuffer.append(messageOne);
-                    if (SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(flag)||SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(flag)) {
+                    if (SapConstants.SAP_RESULT_TYPE_SUCCESS.equals(flag)||SapConstants.SAP_RESULT_TYPE_REPEAT.equals(flag)) {
                         //成功：状态改为已传SAP，更新计划订单号
                         OmsDemandOrderGatherEdit edit = new OmsDemandOrderGatherEdit().builder()
                                 .demandOrderCode(demandCode)

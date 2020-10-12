@@ -3,22 +3,19 @@ package com.cloud.order.controller;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.excel.EasyExcel;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
-import com.cloud.common.easyexcel.EasyExcelUtil;
-import com.cloud.common.easyexcel.listener.EasyWithErrorExcelListener;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
-import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderExportVo;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderImportVo;
+import com.cloud.order.enums.ProductionOrderDelaysFlagEnum;
 import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.service.IOmsProductionOrderService;
 import com.cloud.order.util.DataScopeUtil;
@@ -26,7 +23,6 @@ import com.cloud.order.util.EasyExcelUtilOSS;
 import com.cloud.order.util.OmsProductOrderWriteHandler;
 import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.SysUser;
-import com.cloud.system.enums.OutSourceTypeEnum;
 import com.cloud.system.feign.RemoteFactoryLineInfoService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.*;
@@ -36,7 +32,6 @@ import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -149,12 +144,7 @@ public class OmsProductionOrderController extends BaseController {
     }
 
     /**
-     * 查询排产订单 列表
-     *
-     * @param productEndDateEnd  基本结束时间 结束值
-     * @param actualEndDateStart 实际结束时间 起始值
-     * @param actualEndDateEnd   实际结束时间 结束值
-     * @return 排产订单 列表
+     * 查询延期标记排产订单 列表
      */
     @GetMapping("listForDelays")
     @ApiOperation(value = "查询延期关单的排产订单", response = OmsProductionOrder.class)
@@ -163,25 +153,10 @@ public class OmsProductionOrderController extends BaseController {
             @ApiImplicitParam(name = "actualEndDateStart", value = "实际开始日期起始值", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "actualEndDateEnd", value = "实际开始日期结束值", required = true, paramType = "query", dataType = "String")
     })
-    public R listForDelays(@RequestParam("productEndDateEnd") String productEndDateEnd,
-                                                  @RequestParam("actualEndDateStart") String actualEndDateStart,
-                                                  @RequestParam("actualEndDateEnd") String actualEndDateEnd){
+    public R listForDelays(){
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();
-        if(StringUtils.isNotBlank(productEndDateEnd)){
-            criteria.andLessThan("productEndDate",productEndDateEnd);
-        }
-        if(StringUtils.isNotBlank(actualEndDateStart)){
-            criteria.andGreaterThanOrEqualTo("actualEndDate", actualEndDateStart);
-        }
-        if(StringUtils.isNotBlank(actualEndDateEnd)){
-            criteria.andLessThan("actualEndDate", actualEndDateEnd);
-        }
-        criteria.andEqualTo("status",ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
-        List<String> outsourceTypeList = new ArrayList<>();
-        outsourceTypeList.add(OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode());
-        outsourceTypeList.add(OutSourceTypeEnum.OUT_SOURCE_TYPE_QWW.getCode());
-        criteria.andIn("outsourceType",outsourceTypeList);
+        criteria.andEqualTo("delaysFlag", ProductionOrderDelaysFlagEnum.PRODUCTION_ORDER_DELAYS_FLAG_1.getCode());
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderService.selectByExample(example);
         //避免没有数据报错
         R result = new R();
@@ -586,6 +561,17 @@ public class OmsProductionOrderController extends BaseController {
     }
 
     /**
+     * 线下导入刷数据  关单
+     *
+     * @return
+     */
+    @PostMapping("importProductOrderTest")
+    @ApiOperation(value = "线下导入刷数据  关单")
+    public R importProductOrderTest(@RequestParam("file") MultipartFile file) {
+        return omsProductionOrderService.importProductOrderTest(file);
+    }
+
+    /**
      * 排产订单下达SAP删除排产订单
      */
     @PostMapping("deleteSAP")
@@ -595,5 +581,15 @@ public class OmsProductionOrderController extends BaseController {
     public R deleteSAP(@RequestParam("id") String id) {
         SysUser sysUser = getUserInfo(SysUser.class);
         return omsProductionOrderService.deleteSAP(id,sysUser);
+    }
+
+    /**
+     * 根据主键批量修改保存排产订单
+     */
+    @PostMapping("updateBatchByPrimary")
+    @OperLog(title = "根据主键批量修改保存排产订单", businessType = BusinessType.UPDATE)
+    @ApiOperation(value = "根据主键批量修改保存排产订单", response = R.class)
+    public R updateBatchByPrimary(@RequestBody List<OmsProductionOrder> omsProductionOrderList) {
+        return toAjax(omsProductionOrderService.updateBatchByPrimaryKeySelective(omsProductionOrderList));
     }
 }

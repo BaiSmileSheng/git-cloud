@@ -33,6 +33,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -197,7 +198,9 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog();
         sysInterfaceLog.setAppId("SAP");
         sysInterfaceLog.setInterfaceName(SapConstants.ZMM_INT_DDPS_01);
-        sysInterfaceLog.setContent("查加工费/原材料价格");
+        sysInterfaceLog.setContent("查加工费/原材料价格标记:"+lifnr+";物料号集合:"+String.join(",",materialCodeList));
+        sysInterfaceLog.setCreateBy("定时任务");
+        sysInterfaceLog.setCreateTime(new Date());
         try {
             //创建与SAP的连接
             destination = JCoDestinationManager.getDestination(SapConstants.ABAP_AS_SAP601);
@@ -243,6 +246,7 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
                     chargsList.add(cdMaterialPriceInfo);
                 }
             }
+            sysInterfaceLog.setResults("调SAP接口查加工费/原材料价格成功");
         } catch (Exception e) {
             sysInterfaceLog.setResults("调SAP接口查加工费/原材料价格异常");
             StringWriter w = new StringWriter();

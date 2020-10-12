@@ -2,6 +2,7 @@ package com.cloud.system.util;
 
 import cn.hutool.core.io.FileUtil;
 import com.alibaba.excel.write.handler.AbstractRowWriteHandler;
+import com.alibaba.excel.write.handler.CellWriteHandler;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.easyexcel.EasyExcelUtil;
 import com.cloud.common.easyexcel.SheetExcelData;
@@ -34,6 +35,23 @@ public class EasyExcelUtilOSS {
         return uplloadExcel(path,fileName);
     }
 
+    /**
+     * 导出 Excel ：一个 sheet，合并行单元格
+     *
+     * @param list      数据 list，要导出的实体
+     * @param fileName  导出的文件名，需要加后缀
+     * @param sheetName 导入文件的 sheet 名
+     * @param object    映射对象
+     * @param cellWriteHandler    行合并
+     */
+    public static R writePostilExcel(List<?> list, String fileName, String sheetName, Object object, CellWriteHandler cellWriteHandler) {
+        R r = EasyExcelUtil.writePostilExcel(list, fileName, sheetName, object,cellWriteHandler);
+        if (!r.isSuccess()) {
+            return r;
+        }
+        String path = r.getStr("msg");
+        return uplloadExcel(path,fileName);
+    }
     /**
      * 导出 Excel ：一个 sheet，带表头,表头含有批注
      *
@@ -91,7 +109,7 @@ public class EasyExcelUtilOSS {
      * @param fileName
      * @return
      */
-    static R uplloadExcel(String path, String fileName) {
+    public static R uplloadExcel(String path, String fileName) {
         File file = FileUtil.file(path);
         String suffix = path.substring(path.lastIndexOf("."));
         CloudStorageService storage = OSSFactory.build();

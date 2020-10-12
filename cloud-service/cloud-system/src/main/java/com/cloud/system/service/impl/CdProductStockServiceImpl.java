@@ -1,11 +1,18 @@
 package com.cloud.system.service.impl;
 
 import cn.hutool.core.lang.Dict;
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.metadata.WriteSheet;
+import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
+import com.cloud.common.easyexcel.EasyExcelUtil;
+import com.cloud.common.easyexcel.SheetExcelData;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.common.utils.DateUtils;
 import com.cloud.system.domain.entity.CdFactoryInfo;
 import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.system.domain.entity.CdProductInProduction;
@@ -15,6 +22,8 @@ import com.cloud.system.domain.entity.CdProductWarehouse;
 import com.cloud.system.domain.entity.SysInterfaceLog;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.CdProductStockDetailVo;
+import com.cloud.system.domain.vo.CdProductStockExportVo;
+import com.cloud.system.enums.GetStockEnum;
 import com.cloud.system.mapper.CdProductInProductionMapper;
 import com.cloud.system.mapper.CdProductPassageMapper;
 import com.cloud.system.mapper.CdProductStockMapper;
@@ -27,6 +36,8 @@ import com.cloud.system.service.ICdProductStockService;
 import com.cloud.system.service.ICdProductWarehouseService;
 import com.cloud.system.service.ISysDictDataService;
 import com.cloud.system.service.ISysInterfaceLogService;
+import com.cloud.system.util.EasyExcelUtilOSS;
+import com.cloud.system.util.ExcelStockCellMergeStrategy;
 import com.sap.conn.jco.JCoContext;
 import com.sap.conn.jco.JCoDestination;
 import com.sap.conn.jco.JCoDestinationManager;
@@ -51,6 +62,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -135,8 +148,6 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
     @Override
     public R export(CdProductStock cdProductStock) {
 
-        CdProductStockDetailVo cdProductStockDetail = new CdProductStockDetailVo();
-
         List<String> productMaterialCodeList = new ArrayList<>();
         if(StringUtils.isNotBlank(cdProductStock.getProductMaterialCode())){
             String[] productMaterialCodeS = cdProductStock.getProductMaterialCode().split(",");
@@ -148,25 +159,203 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
                 productMaterialCodeList.add(productMaterialCodeReq);
             }
         }
-        //1.查询主表数据
-        List<CdProductStock> cdProductStockList = listByCondition(cdProductStock,productMaterialCodeList);
-        cdProductStockDetail.setCdProductStockList(cdProductStockList);
-        //2.在产信息
-        List<CdProductInProduction> cdProductInProductionList = listProductInProduction(cdProductStock,productMaterialCodeList);
-        cdProductStockDetail.setCdProductInProductionList(cdProductInProductionList);
+        List<CdProductStock> cdProductStockList = listByCondition(cdProductStock,productMaterialCodeList);//主数据
 
-        //3.在途信息
-        List<CdProductPassage> cdProductPassageList = listProductPassage(cdProductStock,productMaterialCodeList);
-        cdProductStockDetail.setCdProductPassageList(cdProductPassageList);
+        List<CdProductInProduction>  cdProductInProductionList = listProductInProduction(cdProductStock,productMaterialCodeList);//在产
+        //key 专用号+工厂号
+        Map<String,List<CdProductInProduction>> productInProductionMap = new HashMap<>();
+        for(CdProductInProduction cdProductInProduction : cdProductInProductionList){
+            String key = cdProductInProduction.getProductMaterialCode() + cdProductInProduction.getProductFactoryCode();
+            if(productInProductionMap.containsKey(key)){
+                List<CdProductInProduction> list = productInProductionMap.get(key);
+                list.add(cdProductInProduction);
+            }else {
+                List<CdProductInProduction> list = new ArrayList<>();
+                list.add(cdProductInProduction);
+                productInProductionMap.put(key,list);
+            }
+        }
 
-        //4.在库信息(良品)
-        List<CdProductWarehouse> cdProductWarehouseListL = listProductWarehouse(cdProductStock,STOCK_TYPE,productMaterialCodeList);
-        cdProductStockDetail.setCdProductWarehouseListL(cdProductWarehouseListL);
-        //4.不良信息
-        List<CdProductWarehouse> cdProductWarehouseListB = listProductWarehouse(cdProductStock,NO_STOCK_TYPE,productMaterialCodeList);
-        cdProductStockDetail.setCdProductWarehouseListB(cdProductWarehouseListB);
+        List<CdProductPassage> cdProductPassageList = listProductPassage(cdProductStock,productMaterialCodeList);//在途
+        //key 专用号+工厂号
+        Map<String,List<CdProductPassage>> productPassageMap = new HashMap<>();
+        for(CdProductPassage cdProductPassage : cdProductPassageList){
+            String key = cdProductPassage.getProductMaterialCode() + cdProductPassage.getProductFactoryCode();
+            if(productPassageMap.containsKey(key)){
+                List<CdProductPassage> list = productPassageMap.get(key);
+                list.add(cdProductPassage);
+            }else {
+                List<CdProductPassage> list = new ArrayList<>();
+                list.add(cdProductPassage);
+                productPassageMap.put(key,list);
+            }
+        }
 
-        return R.data(cdProductStockDetail);
+        List<CdProductWarehouse> cdProductWarehouseList = listProductWarehouse(cdProductStock,STOCK_TYPE,productMaterialCodeList);//在库
+        //key 专用号+工厂号
+        Map<String,List<CdProductWarehouse>> productWarehouseMap = new HashMap<>();
+        for(CdProductWarehouse cdProductWarehouse : cdProductWarehouseList){
+            String key = cdProductWarehouse.getProductMaterialCode() + cdProductWarehouse.getProductFactoryCode();
+            if(productWarehouseMap.containsKey(key)){
+                List<CdProductWarehouse> list = productWarehouseMap.get(key);
+                list.add(cdProductWarehouse);
+            }else {
+                List<CdProductWarehouse> list = new ArrayList<>();
+                list.add(cdProductWarehouse);
+                productWarehouseMap.put(key,list);
+            }
+        }
+
+        List<CdProductWarehouse>  cdProductWarehouseListB = listProductWarehouse(cdProductStock,NO_STOCK_TYPE,productMaterialCodeList);//不良
+        //key 专用号+工厂号
+        Map<String,List<CdProductWarehouse>> productWarehouseMapB = new HashMap<>();
+        for(CdProductWarehouse cdProductWarehouse : cdProductWarehouseListB){
+            String key = cdProductWarehouse.getProductMaterialCode() + cdProductWarehouse.getProductFactoryCode();
+            if(productWarehouseMapB.containsKey(key)){
+                List<CdProductWarehouse> list = productWarehouseMapB.get(key);
+                list.add(cdProductWarehouse);
+            }else {
+                List<CdProductWarehouse> list = new ArrayList<>();
+                list.add(cdProductWarehouse);
+                productWarehouseMapB.put(key,list);
+            }
+        }
+        List<CdProductStockExportVo> cdProductStockExportVoList = new ArrayList<>();
+        for(CdProductStock cdProductStock1 : cdProductStockList){
+            String key = cdProductStock1.getProductMaterialCode() + cdProductStock1.getProductFactoryCode();
+            List<CdProductInProduction> productInProductionList = productInProductionMap.get(key);
+            List<CdProductPassage> productPassageList = productPassageMap.get(key);
+            List<CdProductWarehouse> productWarehouseList = productWarehouseMap.get(key);
+            List<CdProductWarehouse> productWarehouseListB = productWarehouseMapB.get(key);
+            //找出当前物料号+工厂号 最多的数据
+            List<Integer> sizeList = new ArrayList<>();
+            int inSize = CollectionUtils.isEmpty(productInProductionList) ? 0 : productInProductionList.size();
+            sizeList.add(inSize);
+            int passageSize = CollectionUtils.isEmpty(productPassageList) ? 0 : productPassageList.size();
+            sizeList.add(passageSize);
+            int warehouseSize = CollectionUtils.isEmpty(productWarehouseList) ? 0 : productWarehouseList.size();
+            sizeList.add(warehouseSize);
+            int warehouseSizeB = CollectionUtils.isEmpty(productWarehouseListB) ? 0 : productWarehouseListB.size();
+            sizeList.add(warehouseSizeB);
+            Collections.sort(sizeList);
+            Integer maxSizeValue = sizeList.get(sizeList.size()-1);
+            for(int i = 0; i < maxSizeValue; i++){
+                CdProductStockExportVo cdProductStockExportVo = new CdProductStockExportVo();
+                //构造数据
+                setStockMessage(cdProductStock1, cdProductStockExportVo);
+                setInProductionMessage(inSize,productInProductionList,i,cdProductStockExportVo);
+                setPassageMessage(passageSize,productPassageList, i, cdProductStockExportVo);
+                setWarehouseMessage(warehouseSize,productWarehouseList, i, cdProductStockExportVo);
+                setWarehouseBMessage(warehouseSizeB,productWarehouseListB, i, cdProductStockExportVo);
+                cdProductStockExportVoList.add(cdProductStockExportVo);
+            }
+        }
+
+        return exportExcel(cdProductStockList, cdProductStockExportVoList);
+    }
+
+    private R exportExcel(List<CdProductStock> cdProductStockList,List<CdProductStockExportVo> cdProductStockExportVoList){
+        String fileName = EasyExcelUtil.getAbsoluteFile(DateUtils.dateTimeNow() + "成品库存.xlsx");
+        ExcelWriter excelWriter = EasyExcel.write(fileName).build();
+        R r = new R();
+        try{
+            WriteSheet writeSheet1 = EasyExcel.writerSheet(1, "成品库存")
+                    .head(CdProductStock.class)
+                    .registerWriteHandler(EasyExcelUtil.setHorizontalCellStyleStrategy(13, 11))
+                    .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()).build();
+
+            int[] mergeColumnIndex = {0,1,2,3};
+            WriteSheet writeSheet2 = EasyExcel.writerSheet(2,"成品库存详情")
+                    .head(CdProductStockExportVo.class)
+                    .registerWriteHandler(EasyExcelUtil.setHorizontalCellStyleStrategy(13, 11))
+                    .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy())
+                    .registerWriteHandler(new ExcelStockCellMergeStrategy(2,mergeColumnIndex)).build();
+
+            excelWriter.write(cdProductStockList, writeSheet1);
+            excelWriter.write(cdProductStockExportVoList, writeSheet2);
+        }catch (Exception e){
+            throw new BusinessException("导出Excel失败，请联系网站管理员！");
+        }finally {
+            if (excelWriter != null) {
+                excelWriter.finish();
+            }
+        }
+        if (!r.isSuccess()) {
+            return r;
+        }
+        String path = fileName;
+        return EasyExcelUtilOSS.uplloadExcel(path,"成品库存.xlsx");
+    }
+
+    /**
+     * 导出数据 加主数据信息
+     * @param cdProductStock1
+     * @param cdProductStockExportVo
+     */
+    private void setStockMessage(CdProductStock cdProductStock1, CdProductStockExportVo cdProductStockExportVo) {
+        cdProductStockExportVo.setProductMaterialCode(cdProductStock1.getProductMaterialCode());
+        cdProductStockExportVo.setProductMaterialDesc(cdProductStock1.getProductMaterialDesc());
+        cdProductStockExportVo.setProductFactoryCode(cdProductStock1.getProductFactoryCode());
+        cdProductStockExportVo.setSumNum(cdProductStock1.getSumNum());
+        cdProductStockExportVo.setStockKNum(cdProductStock1.getStockKNum());
+        cdProductStockExportVo.setCreateTime(cdProductStock1.getCreateTime());
+    }
+
+    /**
+     * 导出数据 加在产信息
+     * @param productInProductionList
+     * @param i
+     * @param cdProductStockExportVo
+     */
+    private void setInProductionMessage(int inSize,List<CdProductInProduction> productInProductionList,
+                                        int i, CdProductStockExportVo cdProductStockExportVo) {
+        if(inSize > i){
+            cdProductStockExportVo.setInProductionVersion(productInProductionList.get(i).getInProductionVersion());
+            cdProductStockExportVo.setInProductionNum(productInProductionList.get(i).getInProductionNum());
+        }
+    }
+
+    /**
+     * 导出数据 加不良信息
+     * @param productWarehouseListB
+     * @param i
+     * @param cdProductStockExportVo
+     */
+    private void setWarehouseBMessage(int warehouseSizeB,List<CdProductWarehouse> productWarehouseListB, int i,
+                                      CdProductStockExportVo cdProductStockExportVo) {
+        if(warehouseSizeB > i){
+            cdProductStockExportVo.setStorehouseB(productWarehouseListB.get(i).getStorehouse());
+            cdProductStockExportVo.setWarehouseNumB(productWarehouseListB.get(i).getWarehouseNum());
+        }
+    }
+
+    /**
+     * 导出数据 加在库信息
+     * @param productWarehouseList
+     * @param i
+     * @param cdProductStockExportVo
+     */
+    private void setWarehouseMessage(int warehouseSize,List<CdProductWarehouse> productWarehouseList,
+                                     int i, CdProductStockExportVo cdProductStockExportVo) {
+        if(warehouseSize > i){
+            cdProductStockExportVo.setStorehouse(productWarehouseList.get(i).getStorehouse());
+            cdProductStockExportVo.setWarehouseNum(productWarehouseList.get(i).getWarehouseNum());
+        }
+    }
+
+    /**
+     * 导出数据 加在途信息
+     * @param productPassageList
+     * @param i
+     * @param cdProductStockExportVo
+     */
+    private void setPassageMessage(int passageSize,List<CdProductPassage> productPassageList, int i,
+                                   CdProductStockExportVo cdProductStockExportVo) {
+        if(passageSize > i){
+            cdProductStockExportVo.setStorehouseFrom(productPassageList.get(i).getStorehouseFrom());
+            cdProductStockExportVo.setStorehouseTo(productPassageList.get(i).getStorehouseTo());
+            cdProductStockExportVo.setPassageNum(productPassageList.get(i).getPassageNum());
+        }
     }
 
     @Override
@@ -219,6 +408,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
         if(StringUtils.isNotBlank(cdProductStock.getProductMaterialCode())){
             criteria.andIn("productMaterialCode", productMaterialCodeList);
         }
+        criteria.andGreaterThan("inProductionNum",0);
         List<CdProductInProduction> cdProductInProductionList = cdProductInProductionService.selectByExample(example);
         return cdProductInProductionList;
     }
@@ -238,6 +428,7 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
         if(StringUtils.isNotBlank(cdProductStock.getProductMaterialCode())){
             criteria.andIn("productMaterialCode", productMaterialCodeList);
         }
+        criteria.andGreaterThan("passageNum",0);
         List<CdProductPassage> productPassageList = cdProductPassageService.selectByExample(example);
         return productPassageList;
     }
@@ -434,6 +625,8 @@ public class CdProductStockServiceImpl extends BaseServiceImpl<CdProductStock> i
         }).collect(Collectors.toList());
         //2.获取成品物料编号
         Example example = new Example(CdMaterialExtendInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("isGetStock", GetStockEnum.IS_GET_STOCK_1.getCode());
         List<CdMaterialExtendInfo> cdMaterialExtendInfoList = cdMaterialExtendInfoService.selectByExample(example);
         List<String> materialCodeList = cdMaterialExtendInfoList.stream().map(cdMaterialExtendInfo ->{
             return cdMaterialExtendInfo.getMaterialCode().toUpperCase();
