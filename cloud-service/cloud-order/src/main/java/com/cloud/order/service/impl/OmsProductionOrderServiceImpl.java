@@ -126,7 +126,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
     private static final String[] parsePatterns = {"yyyy.MM.dd", "yyyy/MM/dd"};
     //无需评审采购组
-    private static final String[] PURCHASE_GROUP = {"N99","C44","M02","N21"};
+    private static final String[] PURCHASE_GROUP = {"N99","C44","M02","N21","N97"};
 
     @Value("${webService.findAllCodeForJIT.urlClaim}")
     private String urlClaim;
@@ -283,7 +283,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         omsProductionOrders.forEach(o ->{
             List<OmsProductionOrderDetail> detailList = detailMap.get(o.getOrderCode());
             int statusSize = detailList.stream().filter(detail ->
-                    !ProductOrderConstants.DETAIL_STATUS_ZERO.equals(detail.getStatus()))
+                    ProductOrderConstants.DETAIL_STATUS_ZERO.equals(detail.getStatus()))
                     .collect(Collectors.toList()).size();
             if (statusSize == 0) {
                 o.setStatus(ProductOrderConstants.STATUS_THREE);
@@ -586,6 +586,11 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         List<OmsProductionOrder> omsProductionOrders = new ArrayList<>();
         if (StrUtil.isNotBlank(ids)) {
             omsProductionOrders = omsProductionOrderMapper.selectByIds(ids);
+            for (OmsProductionOrder omsProductionOrder : omsProductionOrders) {
+                if (!omsProductionOrder.getCreateBy().equals(sysUser.getLoginName())) {
+                    return R.error("只允许删除自己导入的排产订单！");
+                }
+            }
         } else {
             Example example = checkParams(order,sysUser);
             //增加删除状态的判断  2020-08-17  ltq
@@ -598,6 +603,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             } else if (!StrUtil.isNotBlank(order.getStatus())){
                 //默认删除待评审状态的排产订单  2020-09-04  ltq
                 example.getOredCriteria().get(0).andEqualTo("status",ProductOrderConstants.STATUS_ZERO);
+                example.getOredCriteria().get(0).andEqualTo("createBy",sysUser.getLoginName());
             }
             omsProductionOrders = omsProductionOrderMapper.selectByExample(example);
             ids= omsProductionOrders.stream().map(o ->o.getId().toString()).collect(Collectors.joining(","));
@@ -606,6 +612,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             log.info("根据前台传参未查询出排产订单数据，直接返回成功！");
             return R.ok();
         }
+
         List<String> orderCodeList = omsProductionOrders.stream()
                 .map(OmsProductionOrder::getOrderCode).collect(toList());
         Map<String,Object> map = new HashMap<>();
@@ -629,7 +636,6 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             orderCodeBuffer.append("\'").append(o.getOrderCode()).append("\',");
             OmsProductionOrderDel omsProductionOrderDel = new OmsProductionOrderDel();
             BeanUtils.copyProperties(o, omsProductionOrderDel);
-            omsProductionOrderDel.setId(null);
             omsProductionOrderDel.setUpdateBy(sysUser.getLoginName());
             omsProductionOrderDel.setUpdateTime(new Date());
             return omsProductionOrderDel;
@@ -652,7 +658,6 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                         detailIdBuffer.append("\'").append(d.getId()).append("\',");
                         OmsProductionOrderDetailDel omsProductionOrderDetailDel = new OmsProductionOrderDetailDel();
                         BeanUtils.copyProperties(d, omsProductionOrderDetailDel);
-                        omsProductionOrderDetailDel.setId(null);
                         omsProductionOrderDetailDel.setUpdateBy(sysUser.getLoginName());
                         omsProductionOrderDetailDel.setUpdateTime(new Date());
                         return omsProductionOrderDetailDel;
@@ -851,7 +856,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         });
         //拆解BOM判断排产订单明细状态，设置排产订单状态
         int statusSize = omsProductionOrderDetails.stream().filter(detail ->
-                !ProductOrderConstants.DETAIL_STATUS_ZERO.equals(detail.getStatus()))
+                ProductOrderConstants.DETAIL_STATUS_ZERO.equals(detail.getStatus()))
                 .collect(Collectors.toList()).size();
         if (statusSize == 0) {
             order.setStatus(ProductOrderConstants.STATUS_THREE);
