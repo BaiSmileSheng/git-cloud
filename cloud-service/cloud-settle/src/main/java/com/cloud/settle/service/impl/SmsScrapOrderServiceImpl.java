@@ -145,8 +145,8 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         //WH+年月日+4位顺序号
         scrapNo.append("BF").append(DateUtils.dateTime()).append(seq);
         smsScrapOrder.setScrapNo(scrapNo.toString());
-
-        smsScrapOrder.setMachiningPrice(omsProductionOrder.getProcessCost());
+        //加工费总额
+        smsScrapOrder.setMachiningPrice(omsProductionOrder.getProcessCost().multiply(BigDecimal.valueOf(smsScrapOrder.getScrapAmount())));
         //根据线体号查询供应商编码
         R rFactoryLineInfo=remotefactoryLineInfoService.selectInfoByCodeLineCode(omsProductionOrder.getProductLineCode(),
                 omsProductionOrder.getProductFactoryCode());
@@ -309,8 +309,8 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
                 BigDecimal materialPrice = smsScrapOrder.getMaterialPrice();//成品物料销售价格
 
                 BigDecimal ratio = cdSettleRatioBF.getRatio();//报废索赔系数
-                BigDecimal machiningPrice = smsScrapOrder.getMachiningPrice();//加工费单价
-                scrapPrice = (materialPrice.multiply(scrapAmount.multiply(ratio))).add(scrapAmount.multiply(machiningPrice));
+                BigDecimal machiningPrice = smsScrapOrder.getMachiningPrice();//加工费总额
+                scrapPrice = (materialPrice.multiply(scrapAmount.multiply(ratio))).add(machiningPrice);
                 //如果是外币，还要 除以数额*汇率
                 if (StrUtil.isEmpty(smsScrapOrder.getCurrency())) {
                     throw new BusinessException(StrUtil.format("{}报废单未维护币种", smsScrapOrder.getScrapNo()));
@@ -391,8 +391,8 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
                             .conditionsType(outTableOutput.getString("KSCHL"))
                             .marketingOrganization(outTableOutput.getString("VKORG"))
                             .materialCode(outTableOutput.getString("MATNR"))
-                            .beginDate(outTableOutput.getDate("DATBI"))
-                            .endDate(outTableOutput.getDate("DATAB"))
+                            .beginDate(outTableOutput.getDate("DATAB"))
+                            .endDate(outTableOutput.getDate("DATBI"))
                             .pricingRecordNo(outTableOutput.getString("KNUMH"))
                             .salePrice(outTableOutput.getString("KBETR"))
                             .conditionsMonetary(outTableOutput.getString("KONWA"))
