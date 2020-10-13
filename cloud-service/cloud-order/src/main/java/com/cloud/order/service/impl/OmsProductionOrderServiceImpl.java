@@ -570,6 +570,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                                     .orElse(BigDecimal.ZERO);
                             o.setProcessCost(netWorth);
                         }
+                    } else {
+                        o.setExportRemark(exportRemark + NO_MATERIAL_RRICE);
                     }
                 }
             }
