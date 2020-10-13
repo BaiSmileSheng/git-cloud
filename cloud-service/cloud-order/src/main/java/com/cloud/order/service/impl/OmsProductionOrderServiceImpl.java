@@ -562,6 +562,13 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                         CdSettleProductMaterial cdSettleProductMaterial = productMaterialMap.getData(CdSettleProductMaterial.class);
                         if (!materialCode.contains(cdSettleProductMaterial.getRawMaterialCode())) {
                             o.setExportRemark(exportRemark + NO_MATERIAL_RRICE);
+                        } else {
+                            BigDecimal netWorth = materialPriceInfos.stream()
+                                    .filter(m -> cdSettleProductMaterial.getRawMaterialCode().equals(m.getMaterialCode()))
+                                    .findFirst()
+                                    .map(CdMaterialPriceInfo::getNetWorth)
+                                    .orElse(BigDecimal.ZERO);
+                            o.setProcessCost(netWorth);
                         }
                     }
                 }
