@@ -373,6 +373,10 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                     logger.error("非人工导入数据不可删除 订单号:{}",omsRealOrder1.getOrderCode());
                     throw new BusinessException("非人工导入数据不可删除");
                 }
+                if (!omsRealOrder1.getCreateBy().equals(sysUser.getLoginName())) {
+                    logger.error("只能删除自己导入的订单！");
+                    throw new BusinessException("只能删除自己导入的订单！");
+                }
             });
             int count = omsRealOrderMapper.deleteByIds(ids);
             orderCodeList = omsRealOrderSelectList.stream()
@@ -391,6 +395,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             if (StringUtils.isBlank(omsRealOrder.getProductFactoryCode())) {
                 example.and().andIn("productFactoryCode", Arrays.asList(
                         DataScopeUtil.getUserFactoryScopes(currentUserId).split(",")));
+                example.and().andEqualTo("createBy", sysUser.getLoginName());
             }
         } else if(CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
             example.and().andEqualTo("createBy", sysUser.getLoginName());
