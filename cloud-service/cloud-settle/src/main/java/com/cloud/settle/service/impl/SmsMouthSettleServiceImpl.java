@@ -19,9 +19,7 @@ import com.cloud.settle.mapper.SmsDelaysDeliveryMapper;
 import com.cloud.settle.mapper.SmsMouthSettleMapper;
 import com.cloud.settle.mapper.SmsQualityOrderMapper;
 import com.cloud.settle.service.*;
-import com.cloud.system.domain.entity.SysInterfaceLog;
 import com.cloud.system.enums.SettleRatioEnum;
-import com.cloud.settle.enums.SettleUpdateFlagEnum;
 import com.cloud.system.feign.RemoteInterfaceLogService;
 import com.cloud.system.feign.RemoteSequeceService;
 import lombok.extern.slf4j.Slf4j;
@@ -35,13 +33,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -219,7 +211,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
                     .claimAmount(claimPrice).noCashAmount(noCashAmount)
                     .cashAmount(cashAmount).excludingFee(excludingFee)
                     .includeTaxeFee(excludingFee.multiply(BigDecimal.valueOf(1.13)))
-                    .settleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_DFPLR.getCode()).build();
+                    .settleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_NKDQR.getCode()).build();
             smsMouthSettle.setDelFlag("0");
             smsMouthSettle.setCreateBy("定时任务");
             smsMouthSettle.setCreateTime(date);
@@ -1112,19 +1104,19 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         }
         if(MonthSettleStatusEnum.YD_SETTLE_STATUS_NKDQR.getCode().equals(settleStatus)){
             //内控确认
-            BigDecimal includeTaxeFee = smsMouthSettle.getIncludeTaxeFee();
-            BigDecimal invoiceFee = smsMouthSettle.getInvoiceFee();
-            if ((includeTaxeFee.subtract(invoiceFee).abs()).compareTo(BigDecimal.ONE)>0) {
-                return R.error("含税金额与发票金额不等，不允许提交！");
-            }
+//            BigDecimal includeTaxeFee = smsMouthSettle.getIncludeTaxeFee();
+//            BigDecimal invoiceFee = smsMouthSettle.getInvoiceFee();
+//            if ((includeTaxeFee.subtract(invoiceFee).abs()).compareTo(BigDecimal.ONE)>0) {
+//                return R.error("含税金额与发票金额不等，不允许提交！");
+//            }
             smsMouthSettle.setSettleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_XWZDQR.getCode());
             updateByPrimaryKeySelective(smsMouthSettle);
         }else if(MonthSettleStatusEnum.YD_SETTLE_STATUS_XWZDQR.getCode().equals(settleStatus)){
             //小微主确认
-            smsMouthSettle.setSettleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_DFK.getCode());
+            smsMouthSettle.setSettleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_DFPLR.getCode());
             updateByPrimaryKeySelective(smsMouthSettle);
             //传KMS
-            createMultiItemClaim(smsMouthSettle);
+//            createMultiItemClaim(smsMouthSettle);
 
         }else{
             return R.error("状态错误！");
@@ -1254,7 +1246,8 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
      * @return
      * @throws Exception
      */
-    private R createMultiItemClaim(SmsMouthSettle smsMouthSettle){
+    @Override
+    public void createMultiItemClaim(SmsMouthSettle smsMouthSettle){
         //1.创建报账单
         BaseMultiItemClaimSaveRequest baseMultiItemClaimSaveRequest = getBaseMultiItemClaimSaveRequest(smsMouthSettle);
         BaseClaimResponse baseClaimResponse;
@@ -1284,7 +1277,6 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         smsMouthSettleReq.setSettleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_DFK.getCode());
         smsMouthSettleReq.setKmsNo(baseClaimResponse.getGemsDocNo());
         smsMouthSettleMapper.updateByPrimaryKeySelective(smsMouthSettleReq);
-        return R.ok();
     }
 
     /**
