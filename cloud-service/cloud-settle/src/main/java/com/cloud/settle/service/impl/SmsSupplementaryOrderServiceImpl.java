@@ -419,7 +419,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             }
         } catch (JCoException e) {
             log.error("Connect SAP fault, error msg: " + e.toString());
-            throw new BusinessException(e.getMessage());
+            return R.error(e.getMessage());
         }finally {
             sysInterfaceLog.setDelFlag("0");
             sysInterfaceLog.setCreateBy("定时任务");
