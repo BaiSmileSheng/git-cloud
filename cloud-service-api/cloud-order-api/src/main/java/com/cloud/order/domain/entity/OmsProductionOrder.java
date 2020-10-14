@@ -223,56 +223,70 @@ public class OmsProductionOrder extends BaseEntity {
     private String oldNew;
 
     /**
+     * 顺序
+     */
+    @ExcelProperty(value = "顺序",index = 19)
+    @ApiModelProperty(value = "顺序")
+    private String sequence;
+
+    /**
+     * 发往地
+     */
+    @ExcelProperty(value = "发往地",index = 20)
+    @ApiModelProperty(value = "发往地")
+    private String destination;
+
+    /**
      * 用时
      */
-    @ExcelProperty(value = "用时",index = 19)
+    @ExcelProperty(value = "用时",index = 21)
     @ApiModelProperty(value = "用时")
     private BigDecimal useTime;
 
     /**
      * 节拍
      */
-    @ExcelProperty(value = "节拍",index = 20)
+    @ExcelProperty(value = "节拍",index = 22)
     @ApiModelProperty(value = "节拍")
     private BigDecimal rhythm;
 
     /**
      * 产品定员
      */
-    @ExcelProperty(value = "产品定员",index = 21)
+    @ExcelProperty(value = "产品定员",index = 23)
     @ApiModelProperty(value = "产品定员")
     private Integer productQuota;
 
     /**
      * PCB专用号
      */
-    @ExcelProperty(value = "PCB专用号",index = 22)
+    @ExcelProperty(value = "PCB专用号",index = 24)
     @ApiModelProperty(value = "PCB专用号")
     private String pcbSpecialCode;
     /**
      * 委外方式 0：半委外，1：全委外，2：自制
      */
-    @ExcelProperty(value = "加工承揽方式" ,index = 23,converter = OutSourceTypeConverter.class)
+    @ExcelProperty(value = "加工承揽方式" ,index = 25,converter = OutSourceTypeConverter.class)
     @ApiModelProperty(value = "委外方式 0：半委外，1：全委外，2：自制")
     @NotBlank
     private String outsourceType;
     /**
      * 状态 0：待评审，1：反馈中，2：待调整，3：已评审，4：待传SAP，5：传SAP中，6：已传SAP，7：传SAP异常，8：已关单
      */
-    @ExcelProperty(value = "状态 ",index=24,converter = ProductionOrderStatusConverter.class)
+    @ExcelProperty(value = "状态 ",index=26,converter = ProductionOrderStatusConverter.class)
     @ApiModelProperty(value = "状态 0：待评审，1：反馈中，2：待调整，3：已评审，4：待传SAP，5：传SAP中，6：已传SAP，7：传SAP异常，8：已关单")
     private String status;
     /**
      * sap返回信息
      */
-    @ExcelProperty(value = "sap返回信息",index = 25)
+    @ExcelProperty(value = "sap返回信息",index = 27)
     @ApiModelProperty(value = "sap返回信息")
     private String sapMessages;
 
     /**
      * 是否小批
      */
-    @ExcelProperty(value = "是否内部小批",index = 26,converter= SmallBatchConverter.class)
+    @ExcelProperty(value = "是否内部小批",index = 28,converter= SmallBatchConverter.class)
     @ApiModelProperty(value = "是否内部小批")
     private String isSmallBatch;
 
@@ -282,18 +296,6 @@ public class OmsProductionOrder extends BaseEntity {
     @ApiModelProperty(value = "交货量")
     private BigDecimal deliveryNum;
 
-
-    /**
-     * 顺序
-     */
-    @ApiModelProperty(value = "顺序")
-    private String sequence;
-
-    /**
-     * 发往地
-     */
-    @ApiModelProperty(value = "发往地")
-    private String destination;
 
     /**
      * 加工费
