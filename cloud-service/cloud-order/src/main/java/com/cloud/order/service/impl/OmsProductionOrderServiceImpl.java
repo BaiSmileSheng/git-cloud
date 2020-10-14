@@ -396,6 +396,14 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         //其他导入数据
         List<ExcelImportOtherObjectDto> otherDtos = new ArrayList<>();
         List<OmsProductionOrderExportVo> listImport = (List<OmsProductionOrderExportVo>) objects;
+        //去除前后空格
+        listImport.forEach(o -> {
+            o.setProductMaterialCode(o.getProductMaterialCode().trim());
+            o.setProductFactoryCode(o.getProductFactoryCode().trim());
+            o.setProductLineCode(o.getProductLineCode().trim());
+            o.setBomVersion(o.getBomVersion());
+            o.setProductStartDate(o.getProductStartDate());
+        });
         List<Dict> paramsMapList = listImport.stream().map(omsProductionOrder ->
                 new Dict().set(PRODUCT_FACTORY_CODE, omsProductionOrder.getProductFactoryCode())
                         .set(PRODUCT_MATERIAL_CODE, omsProductionOrder.getProductMaterialCode())
