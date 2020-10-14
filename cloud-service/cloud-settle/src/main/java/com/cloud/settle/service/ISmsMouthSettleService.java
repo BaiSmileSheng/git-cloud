@@ -27,6 +27,12 @@ public interface ISmsMouthSettleService extends BaseService<SmsMouthSettle>{
     R confirm(Long id,String settleStatus);
 
     /**
+     * 传KMS
+     * @param smsMouthSettle
+     */
+    void createMultiItemClaim(SmsMouthSettle smsMouthSettle);
+
+    /**
      * 打印结算
      * @param settleNo
      * @return
