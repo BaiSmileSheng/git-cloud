@@ -111,6 +111,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
     private static final String NO_MATERIAL_RRICE = "缺少SAP成本价格";
 
+    private static final String DATE_EXCEPTON = "基本开始日期不能大于基本结束日期";
+
     private final static String YYYY_MM_DD = "yyyy-MM-dd";//时间格式
 
     public final static String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
@@ -518,9 +520,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     && (PUTTING_OUT_ZERO.equals(o.getOutsourceType())
                     || PUTTING_OUT_ONE.equals(o.getOutsourceType()))
                     && noMaterialList.contains(o.getProductMaterialCode())) {
-                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "，";
+                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "；";
                 o.setExportRemark(exportRemark + NO_OUTSOURCE_REMARK);
             }
+
             //TODO 应王福丽要求将UPH数据的校验去除 2020-08-31  ltq
             /*if (o.getRhythm() == null || StringUtils.isBlank(o.getRhythm().toString())
                     || o.getRhythm().compareTo(BigDecimal.ZERO) == 0) {
@@ -531,7 +534,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             //应王福丽要求将产品产品定员的判断去除 2020-09-09  ltq
             if (StringUtils.isBlank(o.getBranchOffice())
                     || StringUtils.isBlank(o.getMonitor())) {
-                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "，";
+                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "；";
                 o.setExportRemark(exportRemark + NO_QUOTA_REMARK);
             }
             //筛选没有生命周期的数据
@@ -539,18 +542,18 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 //            if ((!o.getProductFactoryCode().equals(ProductOrderConstants.NEW_FACTORY_CODE)
 //                    || !o.getProductLineCode().equals(ProductOrderConstants.NEW_LINE_CODE))
 //                    && StringUtils.isBlank(o.getLifeCycle())) {
-//                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "，";
+//                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "；";
 //                o.setExportRemark(exportRemark + NO_LIFECYCLE_REMARK);
 //            }
             //筛选没有bom清单的数据
             List<CdBomInfo> bomInfos =
                     bomMap.get(StrUtil.concat(true, o.getProductMaterialCode(), o.getProductFactoryCode(), o.getBomVersion()));
             if (ObjectUtil.isEmpty(bomInfos) || bomInfos.size() <= 0) {
-                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "，";
+                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "；";
                 o.setExportRemark(exportRemark + NO_BOM_REMARK);
             }
             if (!OutSourceTypeEnum.OUT_SOURCE_TYPE_ZZ.getCode().equals(o.getOutsourceType())) {
-                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "，";
+                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "；";
                 if (ObjectUtil.isEmpty(materialPriceInfos) || materialPriceInfos.size() <= 0) {
                     o.setExportRemark(exportRemark + NO_MATERIAL_RRICE);
                 } else {
@@ -574,6 +577,15 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                         o.setExportRemark(exportRemark + NO_MATERIAL_RRICE);
                     }
                 }
+            }
+            //校验基本开始日期和基本结束日期
+            String startDateStr = formatDateString(o.getProductStartDate());
+            String endDateStr = formatDateString(o.getProductEndDate());
+            Date startDate = DateUtil.parseDate(startDateStr);
+            Date endDate = DateUtil.parseDate(endDateStr);
+            if (DateUtil.compare(startDate,endDate) > 0) {
+                String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "；";
+                o.setExportRemark(exportRemark + DATE_EXCEPTON);
             }
             sucObjectDto.setObject(o);
             successDtos.add(sucObjectDto);
