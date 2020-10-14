@@ -413,7 +413,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
                     }else {
                         //获取失败
                         sysInterfaceLog.setResults(StrUtil.format("SAP返回错误信息：{}",outTableOutput.getString("MESSAGE")));
-                        throw new BusinessException(StrUtil.format("发送SAP失败！原因：{}",outTableOutput.getString("MESSAGE")));
+                        return R.error(StrUtil.format("发送SAP失败！原因：{}",outTableOutput.getString("MESSAGE")));
                     }
                 }
             }
