@@ -940,6 +940,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(",")));
             criteria.andEqualTo("status", ProductOrderConstants.STATUS_THREE);
             criteria.andNotEqualTo("auditStatus", ProductOrderConstants.AUDIT_STATUS_ONE);
+            criteria.andEqualTo("createBy",sysUser.getLoginName());
             omsProductionOrderList = omsProductionOrderMapper.selectByExample(example);
         } else {
             String ids = omsProductionOrder.getIds();
