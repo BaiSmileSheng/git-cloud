@@ -217,7 +217,7 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
                 if (!r.isSuccess()) {
                     throw new BusinessException(r.getStr("msg"));
                 }
-                smsSupplementaryOrder = (SmsSupplementaryOrder) r.get("data");
+                smsSupplementaryOrder = r.getData(SmsSupplementaryOrder.class);
             } else {
                 log.error(StrUtil.format("(物耗)物耗审批通过状态错误：{}", smsSupplementaryOrder.getStuffStatus()));
                 throw new BusinessException("此状态数据不允许审核！");
