@@ -88,6 +88,9 @@ public class OmsDemandOrderGatherController extends BaseController {
         if (StrUtil.isNotEmpty(omsDemandOrderGather.getEndTime())) {
             criteria.andLessThanOrEqualTo("deliveryDate", omsDemandOrderGather.getEndTime() );
         }
+        if (StrUtil.isNotEmpty(omsDemandOrderGather.getCustomerCode())) {
+            criteria.andEqualTo("customerCode", omsDemandOrderGather.getCustomerCode() );
+        }
         return example;
     }
 
