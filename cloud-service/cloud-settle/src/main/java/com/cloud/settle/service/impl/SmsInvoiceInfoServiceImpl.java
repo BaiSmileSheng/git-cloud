@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
@@ -43,6 +44,7 @@ public class SmsInvoiceInfoServiceImpl extends BaseServiceImpl<SmsInvoiceInfo> i
      * @param smsInvoiceInfoS 发票信息集合
      */
     @Override
+    @Transactional(rollbackFor=Exception.class)
     public R batchAddSaveOrUpdate(SmsInvoiceInfoSVo smsInvoiceInfoS) {
         String mouthSettleId = smsInvoiceInfoS.getMouthSettleId();
         logger.info("批量新增或修改保存发票信息 结算单号:{}",mouthSettleId);
@@ -84,8 +86,11 @@ public class SmsInvoiceInfoServiceImpl extends BaseServiceImpl<SmsInvoiceInfo> i
         SmsMouthSettle smsMouthSettleReq = new SmsMouthSettle();
         smsMouthSettleReq.setId(smsMouthSettle.getId());
         smsMouthSettleReq.setInvoiceFee(invoiceFeeAll);
-        smsMouthSettleReq.setSettleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_NKDQR.getCode());
+        smsMouthSettleReq.setSettleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_DFK.getCode());
         smsMouthSettleService.updateByPrimaryKeySelective(smsMouthSettleReq);
+
+        //传KMS
+        smsMouthSettleService.createMultiItemClaim(smsMouthSettle);
         return R.ok();
     }
 
