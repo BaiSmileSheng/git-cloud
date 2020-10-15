@@ -2632,6 +2632,11 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         omsProductionOrderDelService.insertSelective(omsProductionOrderDels);
         //删除排产订单表数据
         omsProductionOrderMapper.deleteByIds(id);
+        //删除加工结算信息
+        String productOrderCode = omsProductionOrders.getProductOrderCode();
+        if (StrUtil.isNotBlank(productOrderCode)) {
+            remoteSettleInfoService.deleteByProductOrderCode(productOrderCode);
+        }
         return R.ok();
     }
 }

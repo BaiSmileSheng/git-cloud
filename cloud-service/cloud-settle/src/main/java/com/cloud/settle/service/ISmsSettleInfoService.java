@@ -55,4 +55,13 @@ public interface ISmsSettleInfoService extends BaseService<SmsSettleInfo> {
      */
     R batchUpdateByProductOrderCode(List<SmsSettleInfo> list);
 
+    /**
+     * Description:  根据生产订单号删除加工结算
+     * Param: [productOrderCode]
+     * return: int
+     * Author: ltq
+     * Date: 2020/10/15
+     */
+    int delectByProductOrderCode(String productOrderCode);
+
 }

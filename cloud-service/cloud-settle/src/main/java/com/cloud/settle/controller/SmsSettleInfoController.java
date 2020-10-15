@@ -2,6 +2,7 @@ package com.cloud.settle.controller;
 
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
@@ -269,5 +270,16 @@ public class SmsSettleInfoController extends BaseController {
     @PostMapping("batchUpdateByProductOrderCode")
     public R batchUpdateByProductOrderCode(@RequestBody List<SmsSettleInfo> smsSettleInfoList){
         return smsSettleInfoService.batchUpdateByProductOrderCode(smsSettleInfoList);
+    }
+    /**
+     * Description: 根据生产订单号删除加工结算信息
+     * Param: [productOrderCode]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/10/15
+     */
+    @PostMapping("deleteByProductOrderCode")
+    public R deleteByProductOrderCode(String productOrderCode){
+        return toAjax(smsSettleInfoService.delectByProductOrderCode(productOrderCode));
     }
 }

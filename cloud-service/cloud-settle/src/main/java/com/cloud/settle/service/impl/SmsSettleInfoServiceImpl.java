@@ -3,6 +3,7 @@ package com.cloud.settle.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.settle.domain.entity.SmsSettleInfo;
@@ -127,5 +128,21 @@ public class SmsSettleInfoServiceImpl extends BaseServiceImpl<SmsSettleInfo> imp
     public R batchUpdateByProductOrderCode(List<SmsSettleInfo> list){
         int count = smsSettleInfoMapper.batchUpdateByProductOrderCode(list);
         return R.data(count);
+    }
+    /**
+     * Description:  根据生产订单号删除加工结算
+     * Param: [productOrderCode]
+     * return: int
+     * Author: ltq
+     * Date: 2020/10/15
+     */
+    @Override
+    public int delectByProductOrderCode(String productOrderCode) {
+        Example example = new Example(SmsSettleInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        if (StrUtil.isNotBlank(productOrderCode)) {
+            criteria.andEqualTo("productOrderCode",productOrderCode);
+        }
+        return smsSettleInfoMapper.deleteByExample(example);
     }
 }
