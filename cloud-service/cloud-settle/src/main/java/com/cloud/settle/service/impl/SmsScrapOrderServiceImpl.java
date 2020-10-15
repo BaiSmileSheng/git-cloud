@@ -126,6 +126,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("productOrderCode", productOrderCode);
         criteria.andNotEqualTo("scrapStatus", ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKBH.getCode());
+        criteria.andEqualTo("delFlag", "0");
         int num = selectCountByExample(example);
         if (num > 0) {
             return R.error(StrUtil.format("订单：{}已申请过报废单，请到报废管理进行修改！",productOrderCode));
