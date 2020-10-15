@@ -352,11 +352,11 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         Date date = DateUtil.date();
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog().builder()
                 .appId("SAP").interfaceName(SapConstants.ZESP_IM_001).build();
-        //根据公司取库位
-        String lgort = remoteDictDataService.getLabel("company_storage_relation", smsSupplementaryOrder.getCompanyCode());
-        if (StrUtil.isEmpty(lgort)) {
-            return R.error(StrUtil.format("请维护公司：{}对应库位",smsSupplementaryOrder.getCompanyCode()));
-        }
+//        //根据公司取库位
+//        String lgort = remoteDictDataService.getLabel("company_storage_relation", smsSupplementaryOrder.getCompanyCode());
+//        if (StrUtil.isEmpty(lgort)) {
+//            return R.error(StrUtil.format("请维护公司：{}对应库位",smsSupplementaryOrder.getCompanyCode()));
+//        }
         //发送SAP
         JCoDestination destination =null;
         try {
@@ -378,7 +378,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             inputTable.setValue("BWARTWA","Y61");//移动类型（库存管理）  261/Y61
             inputTable.setValue("BKTXT", StrUtil.concat(true,smsSupplementaryOrder.getSupplierCode(),smsSupplementaryOrder.getStuffNo()));//凭证抬头文本  V码+物耗单号
             inputTable.setValue("WERKS", smsSupplementaryOrder.getFactoryCode());//工厂
-            inputTable.setValue("LGORT", lgort);//库存地点
+            inputTable.setValue("LGORT", smsSupplementaryOrder.getStation());//库存地点/工位
             inputTable.setValue("MATNR", smsSupplementaryOrder.getRawMaterialCode().toUpperCase());//物料号
             inputTable.setValue("ERFME", smsSupplementaryOrder.getStuffUnit());//基本计量单位
             inputTable.setValue("ERFMG", smsSupplementaryOrder.getStuffAmount());//数量
@@ -386,7 +386,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             String content = StrUtil.format("BWARTWA:{},BKTXT:{},WERKS:{},LGORT:{},MATNR:{}" +
                             ",ERFME:{},ERFMG:{},AUFNR:{}","261",
                     StrUtil.concat(true,smsSupplementaryOrder.getSupplierCode(),smsSupplementaryOrder.getStuffNo()),
-                    smsSupplementaryOrder.getFactoryCode(),lgort,smsSupplementaryOrder.getRawMaterialCode(),
+                    smsSupplementaryOrder.getFactoryCode(),smsSupplementaryOrder.getStation(),smsSupplementaryOrder.getRawMaterialCode(),
                     smsSupplementaryOrder.getStuffUnit(),smsSupplementaryOrder.getStuffAmount(),smsSupplementaryOrder.getProductOrderCode());
             sysInterfaceLog.setContent(content);
             //执行函数
