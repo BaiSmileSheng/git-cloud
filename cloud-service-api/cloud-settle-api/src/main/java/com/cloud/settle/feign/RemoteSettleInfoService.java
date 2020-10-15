@@ -60,4 +60,11 @@ public interface RemoteSettleInfoService {
      */
     @PostMapping("/smsSettleInfo/batchUpdateByProductOrderCode")
     R batchUpdateByProductOrderCode(@RequestBody List<SmsSettleInfo> smsSettleInfoList);
+    /**
+     * 根据生产订单号删除
+     * @param productOrderCode
+     * @return
+     */
+    @PostMapping("/smsSettleInfo/deleteByProductOrderCode")
+    R deleteByProductOrderCode(@RequestParam("productOrderCode") String productOrderCode);
 }
