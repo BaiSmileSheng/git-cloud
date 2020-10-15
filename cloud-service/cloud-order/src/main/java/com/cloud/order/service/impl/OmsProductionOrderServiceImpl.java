@@ -1011,6 +1011,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     criteria.andEqualTo("orderType", omsProductionOrder.getOrderType());
                 }
                 criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(",")));
+                criteria.andEqualTo("createBy",sysUser.getLoginName());
                 omsProductionOrderList = omsProductionOrderMapper.selectByExample(example);
             }
         }
