@@ -432,6 +432,10 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
         Example example = new Example(OmsRawMaterialFeedback.class);
         Example.Criteria criteria = example.createCriteria();
         omsRawMaterialFeedbacks.forEach(f -> {
+            if (!StrUtil.isNotBlank(f.getRemark())) {
+                log.error("备注不能为空！");
+                throw new BusinessException("备注不能为空！");
+            }
             //增加重复数据校验  2020-08-04  ltq
             criteria.andEqualTo("productFactoryCode", f.getProductFactoryCode());
             criteria.andEqualTo("rawMaterialCode", f.getRawMaterialCode());
