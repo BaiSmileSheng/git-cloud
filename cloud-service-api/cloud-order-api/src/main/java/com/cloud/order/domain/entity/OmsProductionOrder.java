@@ -223,6 +223,20 @@ public class OmsProductionOrder extends BaseEntity {
     private String oldNew;
 
     /**
+     * 顺序
+     */
+    @ExcelProperty(value = "顺序",index = 19)
+    @ApiModelProperty(value = "顺序")
+    private String sequence;
+
+    /**
+     * 发往地
+     */
+    @ExcelProperty(value = "发往地",index = 20)
+    @ApiModelProperty(value = "发往地")
+    private String destination;
+
+    /**
      * 用时
      */
     @ExcelProperty(value = "用时",index = 20)
@@ -283,18 +297,6 @@ public class OmsProductionOrder extends BaseEntity {
     @ApiModelProperty(value = "交货量")
     private BigDecimal deliveryNum;
 
-
-    /**
-     * 顺序
-     */
-    @ApiModelProperty(value = "顺序")
-    private String sequence;
-
-    /**
-     * 发往地
-     */
-    @ApiModelProperty(value = "发往地")
-    private String destination;
 
     /**
      * 加工费

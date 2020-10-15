@@ -267,5 +267,11 @@ public class OmsProductionOrderExportVo {
     @ExcelProperty(value = "导入失败原因", index = 24)
     private String exportRemark;
 
+    /**
+     * 加工费
+     */
+    @ApiModelProperty(value = "加工费")
+    private BigDecimal processCost;
+
 
 }
