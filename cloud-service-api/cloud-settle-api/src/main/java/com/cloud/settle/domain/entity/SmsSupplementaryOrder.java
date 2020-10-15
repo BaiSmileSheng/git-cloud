@@ -69,6 +69,12 @@ public class SmsSupplementaryOrder extends BaseEntity {
     private String factoryCode;
 
     /**
+     * 工位
+     */
+    @ApiModelProperty(value = "工位")
+    private String station;
+
+    /**
      * 付款公司
      */
     @ApiModelProperty(value = "付款公司")
