@@ -164,7 +164,6 @@ public class OmsRawMaterialFeedback extends BaseEntity {
     /**
      * 排产员
      */
-    @Transient
     @ApiModelProperty(value = "排产员")
     private String productPerson;
 
