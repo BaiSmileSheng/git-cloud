@@ -147,6 +147,9 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         scrapNo.append("BF").append(DateUtils.dateTime()).append(seq);
         smsScrapOrder.setScrapNo(scrapNo.toString());
         //加工费总额
+        if (omsProductionOrder.getProcessCost() == null) {
+            throw new BusinessException(StrUtil.format("生产订单：{}无加工费单价！",omsProductionOrder.getProductOrderCode()));
+        }
         smsScrapOrder.setMachiningPrice(omsProductionOrder.getProcessCost().multiply(BigDecimal.valueOf(smsScrapOrder.getScrapAmount())));
         //根据线体号查询供应商编码
         R rFactoryLineInfo=remotefactoryLineInfoService.selectInfoByCodeLineCode(omsProductionOrder.getProductLineCode(),
