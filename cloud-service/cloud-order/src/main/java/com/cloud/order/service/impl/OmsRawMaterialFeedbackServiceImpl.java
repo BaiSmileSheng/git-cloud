@@ -407,11 +407,11 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
         if (ObjectUtil.isNotEmpty(productionOrders) && productionOrders.size() > 0) {
            omsProductionOrderService.updateBatchByPrimaryKeySelective(productionOrders);
         }
-        int deleteCount = omsRawMaterialFeedbackMapper.deleteByIds(ids);
-        if (deleteCount <= 0) {
-            log.error("删除原材料反馈信息失败！");
-            return R.error("删除原材料反馈信息失败!");
-        }
+        List<String> idList = Arrays.asList(ids.split(","));
+        OmsRawMaterialFeedback feedback = OmsRawMaterialFeedback.builder().delFlag("1").build();
+        feedback.setUpdateTime(new Date());
+        feedback.setUpdateBy(sysUser.getLoginName());
+        idList.forEach(id ->omsRawMaterialFeedbackMapper.updateById(feedback,Long.valueOf(id)));
         return R.ok();
     }
 
