@@ -862,7 +862,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }
             //计算原材料排产量
             BigDecimal rawMaterialProductNum = bom.getBomNum().multiply(omsProductionOrder.getProductNum())
-                    .divide(bom.getBasicNum(), 2, BigDecimal.ROUND_HALF_UP);
+                    .divide(bom.getBasicNum(), 0, BigDecimal.ROUND_UP);
             OmsProductionOrderDetail omsProductionOrderDetail = OmsProductionOrderDetail.builder()
                     .productOrderCode(omsProductionOrder.getOrderCode())
                     .productFactoryCode(omsProductionOrder.getProductFactoryCode())
@@ -1511,7 +1511,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 }
                 //计算原材料排产量
                 BigDecimal rawMaterialProductNum = bom.getBomNum().multiply(o.getProductNum())
-                        .divide(bom.getBasicNum(), 2, BigDecimal.ROUND_HALF_UP);
+                        .divide(bom.getBasicNum(), 0, BigDecimal.ROUND_UP);
                 OmsProductionOrderDetail omsProductionOrderDetail = OmsProductionOrderDetail.builder()
                         .productOrderCode(o.getOrderCode())
                         .productFactoryCode(o.getProductFactoryCode())

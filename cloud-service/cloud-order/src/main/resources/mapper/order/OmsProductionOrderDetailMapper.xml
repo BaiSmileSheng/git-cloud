@@ -85,7 +85,7 @@
         <where>
             detail.product_order_code = o.order_code
             and (o.audit_status = '0' or o.audit_status = '2')
-            and detail.product_start_date <![CDATA[ >= ]]> DATE_FORMAT(now(),'%Y-%m-%d')
+            and detail.product_start_date <![CDATA[ > ]]> DATE_FORMAT(now(),'%Y-%m-%d')
             and detail.product_start_date <![CDATA[ < ]]> DATE_FORMAT(DATE_ADD(now(),INTERVAL 31 day),'%Y-%m-%d')
             <if test="productFactoryCode != null and productFactoryCode != ''">
                 and detail.product_factory_code = #{productFactoryCode,jdbcType=VARCHAR}
@@ -115,7 +115,7 @@
         <where>
             detail.product_order_code = o.order_code
             and (o.audit_status = '0' or o.audit_status = '2')
-            and detail.product_start_date <![CDATA[ >= ]]> DATE_FORMAT(now(),'%Y-%m-%d')
+            and detail.product_start_date <![CDATA[ > ]]> DATE_FORMAT(now(),'%Y-%m-%d')
             and detail.product_start_date <![CDATA[ < ]]> DATE_FORMAT(DATE_ADD(now(),INTERVAL 31 day),'%Y-%m-%d')
             and detail.product_factory_code = #{productFactoryCode,jdbcType=VARCHAR}
             and detail.material_code = #{materialCode,jdbcType=VARCHAR}
@@ -136,7 +136,7 @@
         <where>
             detail.product_order_code = o.order_code
             and (o.audit_status = '0' or o.audit_status = '2')
-            and detail.product_start_date <![CDATA[ >= ]]> DATE_FORMAT(now(),'%Y-%m-%d')
+            and detail.product_start_date <![CDATA[ > ]]> DATE_FORMAT(now(),'%Y-%m-%d')
             and detail.product_start_date <![CDATA[ < ]]> DATE_FORMAT(DATE_ADD(now(),INTERVAL 31 day),'%Y-%m-%d')
             <if test="productFactoryCode != null and productFactoryCode != ''">
                 and detail.product_factory_code = #{productFactoryCode,jdbcType=VARCHAR}
