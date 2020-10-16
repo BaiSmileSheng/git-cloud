@@ -297,6 +297,7 @@ public class ActTaskServiceImpl implements IActTaskService {
      * Date: 2020/8/12
      */
     @Override
+    @GlobalTransactional
     public R deleteByOrderCode(Map<String,Object> map) {
         log.info("删除审批流程方法-开始执行！");
         ObjectMapper objectMapper = new ObjectMapper();
