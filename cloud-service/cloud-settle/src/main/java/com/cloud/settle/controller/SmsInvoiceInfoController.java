@@ -1,29 +1,20 @@
 package com.cloud.settle.controller;
 
 import com.cloud.common.auth.annotation.HasPermissions;
+import com.cloud.common.core.controller.BaseController;
+import com.cloud.common.core.domain.R;
+import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.ValidatorUtils;
-import com.cloud.settle.domain.entity.vo.SmsInvoiceInfoSVo;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.web.bind.annotation.RequestParam;
-import tk.mybatis.mapper.entity.Example;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.cloud.common.core.domain.R;
-import com.cloud.common.core.controller.BaseController;
 import com.cloud.settle.domain.entity.SmsInvoiceInfo;
+import com.cloud.settle.domain.entity.vo.SmsInvoiceInfoSVo;
 import com.cloud.settle.service.ISmsInvoiceInfoService;
-import com.cloud.common.core.page.TableDataInfo;
+import io.swagger.annotations.*;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
 
@@ -111,6 +102,17 @@ public class SmsInvoiceInfoController extends BaseController {
             return R.error("批量新增发票信息入参为空");
         }
         return smsInvoiceInfoService.batchAddSaveOrUpdate(smsInvoiceInfoS);
+    }
+
+    /**
+     * 发票提交  传KEMS
+     * @param smsInvoiceInfoS 发票信息集合
+     */
+    @PostMapping("commit")
+    @OperLog(title = "发票提交  传KEMS ", businessType = BusinessType.INSERT)
+    @ApiOperation(value = "发票提交  传KEMS  ", response = R.class)
+    public R commit(@RequestBody SmsInvoiceInfoSVo smsInvoiceInfoS) {
+        return smsInvoiceInfoService.commit(smsInvoiceInfoS);
     }
 
     /**

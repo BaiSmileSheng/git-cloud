@@ -71,9 +71,11 @@ public class SmsInvoiceInfoServiceImpl extends BaseServiceImpl<SmsInvoiceInfo> i
         BigDecimal includeTaxeFeeX = includeTaxeFee.subtract(BigDecimal.ONE);
         BigDecimal includeTaxeFeeD = includeTaxeFee.add(BigDecimal.ONE);
         //如果比最小值小 比最大值大,则不允许修改
-        if(invoiceFeeAll.compareTo(includeTaxeFeeX) == -1
-                || invoiceFeeAll.compareTo(includeTaxeFeeD) == 1){
-            throw new BusinessException("请确认填写发票总金额和月度结算含税金额相差不到1");
+        if ("2".equals(smsInvoiceInfoS.getTypeFlag())) {//2、提交
+            if(invoiceFeeAll.compareTo(includeTaxeFeeX) == -1
+                    || invoiceFeeAll.compareTo(includeTaxeFeeD) == 1){
+                throw new BusinessException("请确认填写发票总金额和月度结算含税金额相差不到1");
+            }
         }
         Example exampleInvoiceInfo = new Example(SmsInvoiceInfo.class);
         Example.Criteria criteriaInvoiceInfo = exampleInvoiceInfo.createCriteria();
@@ -86,9 +88,23 @@ public class SmsInvoiceInfoServiceImpl extends BaseServiceImpl<SmsInvoiceInfo> i
         SmsMouthSettle smsMouthSettleReq = new SmsMouthSettle();
         smsMouthSettleReq.setId(smsMouthSettle.getId());
         smsMouthSettleReq.setInvoiceFee(invoiceFeeAll);
-        smsMouthSettleReq.setSettleStatus(MonthSettleStatusEnum.YD_SETTLE_STATUS_DFK.getCode());
         smsMouthSettleService.updateByPrimaryKeySelective(smsMouthSettleReq);
+        return R.data(smsMouthSettle);
+    }
 
+    /**
+     * 发票提交传kems
+     * @param smsInvoiceInfoS 发票信息集合
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor=Exception.class)
+    public R commit(SmsInvoiceInfoSVo smsInvoiceInfoS) {
+        R r = batchAddSaveOrUpdate(smsInvoiceInfoS);
+        if (!r.isSuccess()) {
+            throw new BusinessException(r.get("msg").toString());
+        }
+        SmsMouthSettle smsMouthSettle = r.getData(SmsMouthSettle.class);
         //传KMS
         smsMouthSettleService.createMultiItemClaim(smsMouthSettle);
         return R.ok();
