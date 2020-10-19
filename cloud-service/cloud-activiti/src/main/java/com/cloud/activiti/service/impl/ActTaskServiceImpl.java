@@ -318,7 +318,7 @@ public class ActTaskServiceImpl implements IActTaskService {
         }
         String ids = businesses.stream().map(b -> b.getId().toString()).collect(Collectors.joining(","));
         businesses = businesses.stream()
-                .filter(o -> StrUtil.isNotBlank(o.getProcInstId()) && StrUtil.equals("1",o.getStatus().toString())).collect(Collectors.toList());
+                .filter(o -> StrUtil.isNotBlank(o.getProcInstId())).collect(Collectors.toList());
         businesses.forEach(b -> {
             String id  = b.getProcInstId();
             runtimeService.deleteProcessInstance(id, userId);
