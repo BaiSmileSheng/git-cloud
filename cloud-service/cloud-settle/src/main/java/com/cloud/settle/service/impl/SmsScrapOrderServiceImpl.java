@@ -86,6 +86,17 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         if (!rCheck.isSuccess()) {
             throw new BusinessException(rCheck.getStr("msg"));
         }
+        String productOrderCode = smsScrapOrderCheck.getProductOrderCode();
+        R omsProductionOrderResult = remoteProductionOrderService.selectByProdctOrderCode(productOrderCode);
+        if(!omsProductionOrderResult.isSuccess()){
+            log.error("根据生产单号获取排产订单信息失败 productOrderCode:{},res:{}",productOrderCode, JSONObject.toJSON(omsProductionOrderResult));
+            throw new BusinessException(omsProductionOrderResult.get("msg").toString());
+        }
+        OmsProductionOrder omsProductionOrder = omsProductionOrderResult.getData(OmsProductionOrder.class);
+        if (omsProductionOrder.getProcessCost() == null) {
+            throw new BusinessException(StrUtil.format("生产订单：{}无加工费单价！",omsProductionOrder.getProductOrderCode()));
+        }
+        smsScrapOrder.setMachiningPrice(omsProductionOrder.getProcessCost().multiply(BigDecimal.valueOf(smsScrapOrder.getScrapAmount())));
         int rows = updateByPrimaryKeySelective(smsScrapOrder);
         return rows > 0 ? R.ok() : R.error("更新错误！");
     }
@@ -122,15 +133,15 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             throw new BusinessException("未到达订单基本开始日期,不允许申请报废！");
         }
 
-        Example example = new Example(SmsScrapOrder.class);
-        Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("productOrderCode", productOrderCode);
-        criteria.andNotEqualTo("scrapStatus", ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKBH.getCode());
-        criteria.andEqualTo("delFlag", "0");
-        int num = selectCountByExample(example);
-        if (num > 0) {
-            return R.error(StrUtil.format("订单：{}已申请过报废单，请到报废管理进行修改！",productOrderCode));
-        }
+//        Example example = new Example(SmsScrapOrder.class);
+//        Example.Criteria criteria = example.createCriteria();
+//        criteria.andEqualTo("productOrderCode", productOrderCode);
+//        criteria.andNotEqualTo("scrapStatus", ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKBH.getCode());
+//        criteria.andEqualTo("delFlag", "0");
+//        int num = selectCountByExample(example);
+//        if (num > 0) {
+//            return R.error(StrUtil.format("订单：{}已申请过报废单，请到报废管理进行修改！",productOrderCode));
+//        }
 
         //校验
         R rCheck = checkScrapOrderCondition(smsScrapOrder,productOrderCode);
@@ -210,7 +221,25 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         //5、校验申请量是否大于订单量
         BigDecimal productNum = omsProductionOrder.getProductNum();
         if (new BigDecimal(applyNum).compareTo(productNum) > 0) {
-            return R.error("申请量不得大于订单量");
+            return R.error("本次申请量不得大于订单量");
+        }
+        //查找已申请的报废量
+        Example example = new Example(SmsScrapOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("productOrderCode", productOrderCode);
+        List<String> cannotStatus = CollUtil.newArrayList(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKBH.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYBH.getCode());
+        criteria.andNotIn("scrapStatus", cannotStatus);
+        if (smsScrapOrder.getId() != null) {
+            criteria.andNotEqualTo("id", smsScrapOrder.getId());
+        }
+        List<SmsScrapOrder> smsScrapOrders = selectByExample(example);
+        if (CollUtil.isNotEmpty(smsScrapOrders)) {
+            int amount=smsScrapOrders.stream().mapToInt(t -> t.getScrapAmount()).sum();
+            applyNum += amount;
+        }
+        if (new BigDecimal(applyNum).compareTo(productNum) > 0) {
+            return R.error("申请量总额不得大于订单量");
         }
         return R.ok();
     }
