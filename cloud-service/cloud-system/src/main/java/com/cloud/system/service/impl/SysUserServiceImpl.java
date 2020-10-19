@@ -17,6 +17,7 @@ import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.mapper.*;
 import com.cloud.system.service.ISysConfigService;
 import com.cloud.system.service.ISysUserService;
+import io.seata.spring.annotation.GlobalTransactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,6 +101,7 @@ public class SysUserServiceImpl implements ISysUserService {
      * @return 用户对象信息
      */
     @Override
+    @GlobalTransactional
     public SysUser selectUserByLoginName(String userName) {
         return userMapper.selectUserByLoginName(userName);
     }

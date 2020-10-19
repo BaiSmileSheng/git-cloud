@@ -34,4 +34,13 @@ public interface RemoteActOmsProductionOrderService {
      */
     @PostMapping("actOmsProductionOrder/startActProcess")
     R startActProcess(@RequestBody ActBusinessVo actBusinessVo);
+    /**
+     * Description:  定时任务开启排产订单审批流程
+     * Param: []
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/10/19
+     */
+    @PostMapping("actOmsProductionOrder/timeCheckProductOrderAct")
+    R timeCheckProductOrderAct();
 }

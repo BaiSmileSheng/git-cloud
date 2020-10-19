@@ -94,6 +94,12 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
                 log.error("根据角色查对应的用户名,邮箱失败,原因{}："+throwable.getMessage());
                 return R.error("根据角色查对应的用户名,邮箱失败,原因{}："+throwable.getMessage());
             }
+
+            @Override
+            public R selectUserByLoginName(String loginNames) {
+                log.error("根据登录名查询用户失败,原因{}："+throwable.getMessage());
+                return R.error("根据登录名查询用户失败,原因{}："+throwable.getMessage());
+            }
         };
     }
 }

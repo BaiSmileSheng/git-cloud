@@ -90,4 +90,11 @@ public interface RemoteUserService {
      */
     @GetMapping("user/selectUserByRoleKey")
     R selectUserByRoleKey(@RequestParam("roleKey")String roleKey);
+    /**
+     * 根据登录名查询用户
+     * @param
+     * @return
+     */
+    @GetMapping("user/selectUserByLoginName")
+    R selectUserByLoginName(@RequestParam("loginNames")String loginNames);
 }
