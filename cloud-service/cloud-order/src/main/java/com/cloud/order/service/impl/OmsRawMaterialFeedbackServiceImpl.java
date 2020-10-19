@@ -96,8 +96,10 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
         }
         if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
             //排产员根据生产工厂权限查询
-            if (CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)) {
+            if (CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)
+                    || CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_ORDER)) {
                 criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(",")));
+                criteria.andEqualTo("productPerson", sysUser.getLoginName());
             } else if (CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_JIT)) {
                 criteria.andEqualTo("createBy", sysUser.getLoginName());
             }
@@ -143,6 +145,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             if (StrUtil.isNotBlank(omsRawMaterialFeedback.getStatus())) {
                 criteria.andEqualTo("status", omsRawMaterialFeedback.getStatus());
             }
+            criteria.andEqualTo("productPerson", sysUser.getLoginName());
         }
         //根据id查询原材料反馈信息
         List<OmsRawMaterialFeedback> omsRawMaterialFeedbacks = omsRawMaterialFeedbackMapper.selectByExample(example);
