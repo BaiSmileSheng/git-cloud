@@ -1,8 +1,9 @@
 package com.cloud.settle.service;
+
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.BaseService;
-import com.cloud.settle.domain.entity.vo.SmsInvoiceInfoSVo;
 import com.cloud.settle.domain.entity.SmsInvoiceInfo;
+import com.cloud.settle.domain.entity.vo.SmsInvoiceInfoSVo;
 
 import java.util.List;
 
@@ -19,6 +20,12 @@ public interface ISmsInvoiceInfoService extends BaseService<SmsInvoiceInfo> {
      * @param smsInvoiceInfoS 发票信息集合
      */
     R batchAddSaveOrUpdate(SmsInvoiceInfoSVo smsInvoiceInfoS);
+
+    /**
+     * 发票提交  传KEMS
+     * @param smsInvoiceInfoS 发票信息集合
+     */
+    R commit(SmsInvoiceInfoSVo smsInvoiceInfoS);
 
 
     /**

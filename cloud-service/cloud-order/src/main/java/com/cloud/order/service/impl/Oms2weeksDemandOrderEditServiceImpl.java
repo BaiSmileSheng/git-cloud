@@ -146,7 +146,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             //导出excel
             return EasyExcelUtilOSS.writeExcel(errorResults, "T+1、T+2草稿计划导入错误信息.xlsx", "sheet", new Oms2weeksDemandOrderEditImport());
         }
-        return R.ok();
+        return R.ok(StrUtil.format("成功导入{}条数据！",successList==null?0:successList.size()));
     }
 
     /**
