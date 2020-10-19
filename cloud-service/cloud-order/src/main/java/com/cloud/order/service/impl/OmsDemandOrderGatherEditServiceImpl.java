@@ -654,7 +654,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             //导出excel
             return EasyExcelUtilOSS.writeExcel(errorResults, "需求导入错误信息.xlsx", "sheet", new OmsDemandOrderGatherEditImport());
         }
-        return R.ok();
+        return R.ok(StrUtil.format("成功导入{}条数据！",successList==null?0:successList.size()));
     }
 
     /**
