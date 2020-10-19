@@ -21,6 +21,8 @@ import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.order.domain.entity.OmsProductionOrder;
+import com.cloud.order.domain.entity.OmsProductionOrderDetail;
+import com.cloud.order.feign.RemoteProductionOrderDetailService;
 import com.cloud.order.feign.RemoteProductionOrderService;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
@@ -33,6 +35,7 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.task.Task;
+import org.apache.xmlbeans.impl.common.ConcurrentReaderHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -64,6 +67,8 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
     private RemoteUserService remoteUserService;
     @Autowired
     private MailService mailService;
+    @Autowired
+    private RemoteProductionOrderDetailService remoteProductionOrderDetailService;
     /**
      * Description:  开启审批流
      * Param: [key, orderId, orderCode, userId, title]
@@ -137,6 +142,20 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
             log.info("本次初始化排产订单状态-获取排产订单数据为空！");
             return R.ok("本次初始化排产订单状态-获取排产订单数据为空！");
         }
+        //获取排产订单明细，设置排产订单的状态
+        String orderCodes = omsProductionOrders
+                .stream().map(OmsProductionOrder::getOrderCode).collect(Collectors.joining(","));
+        R detailMap = remoteProductionOrderDetailService.selectDetailByOrderAct(orderCodes);
+        List<OmsProductionOrderDetail> detailList = new ArrayList<>();
+        if (!detailMap.isSuccess()) {
+            log.info("定时任务开启排产订单审批流程，查询排产订单明细失败！");
+            return R.error("定时任务开启排产订单审批流程，查询排产订单明细失败！");
+        }
+        List<OmsProductionOrderDetail> omsProductionOrderDetails =
+                detailMap.getCollectData(new TypeReference<List<OmsProductionOrderDetail>>() {});
+        Map<String,List<OmsProductionOrderDetail>> orderDetailMap =
+                omsProductionOrderDetails.stream().collect(Collectors.groupingBy(OmsProductionOrderDetail :: getProductOrderCode));
+
         //2、调用order服务，校验排产订单的审批流
         R businessVoMap = remoteProductionOrderService.checkProductOrderAct(omsProductionOrders);
         if (!businessVoMap.isSuccess()) {
@@ -162,10 +181,17 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
             emailUserVos.addAll(b.getProcessEmailUserVoList());
         });
         omsProductionOrders.forEach(o -> {
-            o.setStatus(ProductOrderConstants.STATUS_ZERO);
-            o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_ZERO);
+            List<OmsProductionOrderDetail> details = orderDetailMap.get(o.getOrderCode());
+            if (ObjectUtil.isEmpty(details) || details.size() <= 0) {
+                o.setStatus(ProductOrderConstants.STATUS_THREE);
+            } else {
+                o.setStatus(ProductOrderConstants.STATUS_ZERO);
+            }
+
             if (orderIdSet.contains(o.getId().toString())) {
                 o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_ONE);
+            } else {
+                o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_ZERO);
             }
         });
         R updateOrderMap = remoteProductionOrderService.updateBatchByPrimary(omsProductionOrders);
