@@ -94,7 +94,7 @@ spring:
                 id: SpecialHystrix
                 fallbackUri: 'forward:/fallback'
                 timeout:
-                  productionOrder-importProductOrder: 60000
+                  productionOrder-importProductOrder: 120000
                   productOrderDetail-export: 60000
                   demand-queryAndInsertDemandPRFromSap800Friday: 120000
                   demand-queryDemandPRFromSap800: 120000
@@ -105,6 +105,8 @@ spring:
                   demandOrderGatherEdit-toSAP: 60000
                   oms2weeksDemandOrderEdit-toSAP: 60000
                   actOmsOrderMaterialOut-save: 30000
+                  productionOrder-confirmRelease: 60000
+                  productionOrder-delete: 60000
         #settle 模块
         - id: cloud-settle
           uri: lb://cloud-settle
