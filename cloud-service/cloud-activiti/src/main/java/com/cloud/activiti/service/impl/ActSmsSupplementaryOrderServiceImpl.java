@@ -9,12 +9,15 @@ import com.cloud.activiti.consts.ActivitiTableNameConstants;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
+import com.cloud.activiti.mail.MailService;
 import com.cloud.activiti.service.IActSmsSupplementaryOrderService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
+import com.cloud.common.constant.EmailConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
 import com.cloud.settle.enums.SupplementaryOrderStatusEnum;
 import com.cloud.settle.feign.RemoteSmsSupplementaryOrderService;
@@ -46,6 +49,8 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
     private RemoteSmsSupplementaryOrderService remoteSmsSupplementaryOrderService;
     @Autowired
     private IActTaskService actTaskService;
+    @Autowired
+    private MailService mailService;
 
 
     /**
@@ -95,9 +100,33 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
             throw new BusinessException("物耗审批开启失败，下一级审核人为空！");
         }
         List<SysUserVo> users=rUser.getCollectData(new TypeReference<List<SysUserVo>>() {});
+        //发送邮件通知
+        sendEmail(smsSupplementaryOrder.getStuffNo(),users);
         Set<String> userIds = users.stream().map(user->user.getUserId().toString()).collect(Collectors.toSet());
         bizBusinessService.startProcess(business, variables,userIds);
         return R.ok("提交成功！");
+    }
+
+    /**
+     * 发送邮件
+     * @param stuffNo
+     * @param sysUserVoList
+     */
+    private void sendEmail(String stuffNo, List<SysUserVo> sysUserVoList) {
+        //校验邮件
+        for(SysUserVo sysUserVo : sysUserVoList){
+            String email = sysUserVo.getEmail();
+            if(StringUtils.isBlank(email)){
+                throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
+            }
+        }
+        //发送邮件
+        for(SysUserVo sysUserVo : sysUserVoList){
+            String email = sysUserVo.getEmail();
+            String subject = "物耗申请单审批";
+            String content = "您有一条待办消息要处理!" + "物耗申请单 单号:" + stuffNo +  EmailConstants.ORW_URL;
+            mailService.sendTextMail(email,subject,content);
+        }
     }
 
     @Override
@@ -245,6 +274,8 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
             }
             List<SysUserVo> users = rUser.getCollectData(new TypeReference<List<SysUserVo>>() {
             });
+            //发送邮件通知
+            sendEmail(smsSupplementaryOrder.getStuffNo(),users);
             Set<String> userIds = users.stream().map(user -> user.getUserId().toString()).collect(Collectors.toSet());
             return actTaskService.auditCandidateUser(bizAudit, userId,userIds);
         }else{
