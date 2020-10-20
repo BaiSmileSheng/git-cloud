@@ -101,7 +101,6 @@ public class SysUserServiceImpl implements ISysUserService {
      * @return 用户对象信息
      */
     @Override
-    @GlobalTransactional
     public SysUser selectUserByLoginName(String userName) {
         return userMapper.selectUserByLoginName(userName);
     }
