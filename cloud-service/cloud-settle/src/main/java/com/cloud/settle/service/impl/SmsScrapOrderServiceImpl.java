@@ -459,7 +459,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         if(StrUtil.isEmpty(error)){
             return R.ok();
         }else {
-            return R.error(error.toString());
+            throw new BusinessException(error.toString());
         }
 
     }

@@ -97,7 +97,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         //指定下一审批人
         R omsProductionOrderResult = remoteProductionOrderService.selectByProdctOrderCode(smsScrapOrderCheck.getProductOrderCode());
         if (!omsProductionOrderResult.isSuccess()) {
-            return R.error("订单信息不存在！");
+            throw new BusinessException("订单信息不存在");
         }
         OmsProductionOrder omsProductionOrder = omsProductionOrderResult.getData(OmsProductionOrder.class);
         String createBy = omsProductionOrder.getCreateBy();
@@ -148,7 +148,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         //指定下一审批人
         R omsProductionOrderResult = remoteProductionOrderService.selectByProdctOrderCode(smsScrapOrderCheck.getProductOrderCode());
         if (!omsProductionOrderResult.isSuccess()) {
-            return R.error("订单信息不存在！");
+            throw new BusinessException("订单信息不存在！");
         }
         OmsProductionOrder omsProductionOrder = omsProductionOrderResult.getData(OmsProductionOrder.class);
         String createBy = omsProductionOrder.getCreateBy();

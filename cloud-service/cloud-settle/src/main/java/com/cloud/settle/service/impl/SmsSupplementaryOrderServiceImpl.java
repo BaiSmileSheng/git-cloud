@@ -297,7 +297,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
                 R rFactoryInfo= remoteFactoryInfoService.selectOneByFactory(factCode);
                 if(!rFactoryInfo.isSuccess()){
                     log.error(StrUtil.format("(物耗)物耗更新价格定时任务：公司信息为空参数为{}", factCode));
-                    return R.error(StringUtils.format("{}公司信息为空！",factCode));
+                    throw new BusinessException(StringUtils.format("{}公司信息为空！",factCode));
                 }
                 CdFactoryInfo cdFactoryInfo = rFactoryInfo.getData(CdFactoryInfo.class);
                 CdMaterialPriceInfo cdMaterialPriceInfo = mapMaterialPrice.get(smsSupplementaryOrder.getRawMaterialCode()+cdFactoryInfo.getPurchaseOrg()+smsSupplementaryOrder.getSupplierCode()+PriceTypeEnum.PRICE_TYPE_0.getCode());
