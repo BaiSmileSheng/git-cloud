@@ -146,7 +146,6 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
         String orderCodes = omsProductionOrders
                 .stream().map(OmsProductionOrder::getOrderCode).collect(Collectors.joining(","));
         R detailMap = remoteProductionOrderDetailService.selectDetailByOrderAct(orderCodes);
-        List<OmsProductionOrderDetail> detailList = new ArrayList<>();
         if (!detailMap.isSuccess()) {
             log.info("定时任务开启排产订单审批流程，查询排产订单明细失败！");
             return R.error("定时任务开启排产订单审批流程，查询排产订单明细失败！");

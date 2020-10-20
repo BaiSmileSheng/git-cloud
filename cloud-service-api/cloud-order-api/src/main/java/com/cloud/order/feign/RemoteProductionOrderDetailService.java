@@ -29,5 +29,5 @@ public interface RemoteProductionOrderDetailService {
      * Date: 2020/10/19
      */
     @PostMapping("productOrderDetail/selectDetailByOrderAct")
-    public R selectDetailByOrderAct(@RequestParam("orderCodes") String orderCodes);
+    R selectDetailByOrderAct(@RequestParam("orderCodes") String orderCodes);
 }
