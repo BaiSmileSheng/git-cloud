@@ -222,7 +222,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 return EasyExcelUtilOSS.writeExcel(errorResults, "排产订单导入失败数据.xlsx", "sheet", new OmsProductionOrderExportVo());
             }
             log.error("未解析出导入数据，请核实排产订单导入文件！");
-            return R.error("未解析出导入数据，请核实排产订单导入文件！");
+            throw new BusinessException("未解析出导入数据，请核实排产订单导入文件！");
         }
         List<OmsProductionOrderExportVo> list = new ArrayList<>();
         if (excelList.size() > 0) {
@@ -279,7 +279,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         R bomDisassemblyResult = bomDisassembly(omsProductionOrders, bomInfoList, sysUser);
         if (!bomDisassemblyResult.isSuccess()) {
             log.error("BOM拆解流程失败，原因：" + bomDisassemblyResult.get("msg"));
-            return R.error("BOM拆解流程失败!");
+            throw new BusinessException("BOM拆解流程失败!");
         }
         //bom拆解判断排产订单明细的状态，设置排产订单的状态
        /* Map<String,List<OmsProductionOrderDetail>> detailMap =
@@ -620,7 +620,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             omsProductionOrders = omsProductionOrderMapper.selectByIds(ids);
             for (OmsProductionOrder omsProductionOrder : omsProductionOrders) {
                 if (!omsProductionOrder.getCreateBy().equals(sysUser.getLoginName())) {
-                    return R.error("只允许删除自己导入的排产订单！");
+                    throw new BusinessException("只允许删除自己导入的排产订单！");
                 }
             }
         } else {
@@ -631,7 +631,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     || ProductOrderConstants.STATUS_SIX.equals(order.getStatus())
                     || ProductOrderConstants.STATUS_EIGHT.equals(order.getStatus()))) {
                 log.info("传SAP中、已传SAP、已关单的排产订单不可删除！");
-                return R.error("传SAP中、已传SAP、已关单的排产订单不可删除！");
+                throw new BusinessException("传SAP中、已传SAP、已关单的排产订单不可删除！");
             } else if (!StrUtil.isNotBlank(order.getStatus())){
                 //默认删除待评审状态的排产订单  2020-09-04  ltq
                 example.getOredCriteria().get(0).andEqualTo("status",ProductOrderConstants.STATUS_ZERO);
@@ -644,23 +644,12 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             log.info("根据前台传参未查询出排产订单数据，直接返回成功！");
             return R.ok();
         }
-
-        List<String> orderCodeList = omsProductionOrders.stream()
-                .map(OmsProductionOrder::getOrderCode).collect(toList());
-        Map<String,Object> map = new HashMap<>();
-        map.put("userName",sysUser.getLoginName());
-        map.put("orderCodeList",orderCodeList);
-        R deleteActMap = remoteActTaskService.deleteByOrderCode(map);
-        if (!deleteActMap.isSuccess()){
-            log.error("删除审批流程失败，原因："+deleteActMap.get("msg"));
-            return R.error("删除审批流程失败，原因："+deleteActMap.get("msg"));
-        }
         for (OmsProductionOrder omsProductionOrder : omsProductionOrders) {
             if (ProductOrderConstants.STATUS_FIVE.equals(omsProductionOrder.getStatus())
                     || ProductOrderConstants.STATUS_SIX.equals(omsProductionOrder.getStatus())
                     || ProductOrderConstants.STATUS_EIGHT.equals(omsProductionOrder.getStatus())) {
                 log.error("传SAP中、已传SAP、已关单的排产订单不可删除！");
-                return R.error("传SAP中、已传SAP、已关单的排产订单不可删除！");
+                throw new BusinessException("传SAP中、已传SAP、已关单的排产订单不可删除！");
             }
         }
         StringBuffer orderCodeBuffer = new StringBuffer();
@@ -677,7 +666,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         R detailMap = omsProductionOrderDetailService.selectListByOrderCodes(orderCodes);
         if (!detailMap.isSuccess()) {
             log.error("查询明细数据失败！");
-            return R.error("查询明细数据失败!");
+            throw new BusinessException("查询明细数据失败!");
         }
         List<OmsProductionOrderDetail> omsProductionOrderDetails =
                 detailMap.getCollectData(new TypeReference<List<OmsProductionOrderDetail>>() {
@@ -716,7 +705,16 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             omsRawMaterialFeedback.setDelFlag(RawMaterialFeedbackConstants.DEL_FLAG_FALSE);
             omsRawMaterialFeedbackService.updateByExampleSelective(omsRawMaterialFeedback,example);
         });
-
+        List<String> orderCodeList = omsProductionOrders.stream()
+                .map(OmsProductionOrder::getOrderCode).collect(toList());
+        Map<String,Object> map = new HashMap<>();
+        map.put("userName",sysUser.getLoginName());
+        map.put("orderCodeList",orderCodeList);
+        R deleteActMap = remoteActTaskService.deleteByOrderCode(map);
+        if (!deleteActMap.isSuccess()){
+            log.error("删除审批流程失败，原因："+deleteActMap.get("msg"));
+            throw new BusinessException("删除审批流程失败，原因："+deleteActMap.get("msg"));
+        }
         return R.ok();
     }
 
@@ -734,7 +732,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         OmsProductionOrder productionOrder = omsProductionOrderMapper.selectByPrimaryKey(omsProductionOrder.getId());
         if (productionOrder == null) {
             log.error("根据排产订单ID查询数据为空！");
-            return R.error("根据排产订单ID查询数据为空！");
+            throw new BusinessException("根据排产订单ID查询数据为空！");
         }
         omsProductionOrder.setOrderCode(productionOrder.getOrderCode());
         omsProductionOrder.setProductMaterialCode(productionOrder.getProductMaterialCode());
@@ -749,7 +747,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 || ProductOrderConstants.STATUS_SEVEN.equals(productionOrder.getStatus())
                 || ProductOrderConstants.STATUS_EIGHT.equals(productionOrder.getStatus())) {
             log.info("待传SAP、传SAP中、已传SAP、传SAP异常、已关单状态的记录不可修改！");
-            return R.error("待传SAP、传SAP中、已传SAP、传SAP异常、已关单状态的记录不可修改！");
+            throw new BusinessException("待传SAP、传SAP中、已传SAP、传SAP异常、已关单状态的记录不可修改！");
         }
         List<String> rawMaterialCodes = new ArrayList<>();
         if (ProductOrderConstants.STATUS_ONE.equals(productionOrder.getStatus())
@@ -951,24 +949,24 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 omsProductionOrderList = omsProductionOrderMapper.selectByIds(ids);
                 for (OmsProductionOrder productionOrder : omsProductionOrderList) {
                     if (!ProductOrderConstants.STATUS_THREE.equals(productionOrder.getStatus())) {
-                        return R.error("非“已评审”状态的排产订单不可确认下达！");
+                        throw new BusinessException("非“已评审”状态的排产订单不可确认下达！");
                     }
                     if (ProductOrderConstants.AUDIT_STATUS_ONE.equals(productionOrder.getAuditStatus())
                             || ProductOrderConstants.AUDIT_STATUS_THREE.equals(productionOrder.getAuditStatus())) {
-                        return R.error("审核中、审核驳回状态的排产订单不可确认下达！");
+                        throw new BusinessException("审核中、审核驳回状态的排产订单不可确认下达！");
                     }
                 }
             } else if (BeanUtil.isNotEmpty(omsProductionOrder)) {
                 if (StrUtil.isNotBlank(omsProductionOrder.getStatus())
                         && !ProductOrderConstants.STATUS_THREE.equals(omsProductionOrder.getStatus())) {
                     log.error("确认下达传入排产订单状态非已评审！");
-                    return R.error("只可以下达已评审的排产订单！");
+                    throw new BusinessException("只可以下达已评审的排产订单！");
                 }
                 if (StrUtil.isNotBlank(omsProductionOrder.getAuditStatus())
                         && (ProductOrderConstants.AUDIT_STATUS_ONE.equals(omsProductionOrder.getAuditStatus())
                         || ProductOrderConstants.AUDIT_STATUS_THREE.equals(omsProductionOrder.getAuditStatus()))) {
                     log.error("确认下达传入排产订单审核状态为审核中，不可下达！");
-                    return R.error("只可以下达非审核中、审核驳回的排产订单！");
+                    throw new BusinessException("只可以下达非审核中、审核驳回的排产订单！");
                 }
                 if (StrUtil.isNotBlank(omsProductionOrder.getProductFactoryCode())) {
                     criteria.andEqualTo("productFactoryCode", omsProductionOrder.getProductFactoryCode());
@@ -1874,7 +1872,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 }
             });
             if (stringBuffer.length() > 0) {
-                return R.error(stringBuffer.toString());
+                throw new BusinessException(stringBuffer.toString());
             }
         }
         //1.获取list
@@ -1883,7 +1881,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             if (StrUtil.isNotBlank(order.getStatus())
                     && (!ProductOrderConstants.STATUS_FOUR.equals(order.getStatus()) &&!ProductOrderConstants.STATUS_SEVEN.equals(order.getStatus()))) {
                 log.error("下达SAP操作只可以下达待传SAP、传SAP异常的订单！");
-                return R.error("下达SAP操作只可以下达待传SAP、传SAP异常的订单！");
+                throw new BusinessException("下达SAP操作只可以下达待传SAP、传SAP异常的订单！");
             }
             Example example = getSAPExample(order);
             if(StrUtil.isBlank(order.getStatus())){
@@ -2212,7 +2210,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         if (StrUtil.isNotBlank(omsProductionOrderReq.getStatus())
                 && (!ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode().equals(omsProductionOrderReq.getStatus()))) {
             log.error("邮件推送只推送已传SAP的订单！");
-            return R.error("邮件推送只推送已传SAP的订单！");
+            throw new BusinessException("邮件推送只推送已传SAP的订单！");
         }
         Example example = getSAPExample(omsProductionOrderReq);
         example.orderBy("productStartDate");
@@ -2654,7 +2652,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         if(!ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode().equals(omsProductionOrders.getStatus())
             && !ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPYC.getCode().equals(omsProductionOrders.getStatus())
             && !ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_DCSAP.getCode().equals(omsProductionOrders.getStatus())){
-            return R.error("只能删除待传SAP或已传SAP或传SAP异常的数据");
+            throw new BusinessException("只能删除待传SAP或已传SAP或传SAP异常的数据");
         }
         //1.按单号删除审批流
         Map<String,Object> map = new HashMap<>();
@@ -2663,7 +2661,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         R deleteActMap = remoteActTaskService.deleteByOrderCode(map);
         if (!deleteActMap.isSuccess()){
             log.error("删除审批流程失败，原因："+deleteActMap.get("msg"));
-            return R.error("删除审批流程失败，原因："+deleteActMap.get("msg"));
+            throw new BusinessException("删除审批流程失败，原因："+deleteActMap.get("msg"));
         }
 
         //2.排产明细转删除
@@ -2676,7 +2674,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         R detailMap = omsProductionOrderDetailService.selectListByOrderCodes("\"" + omsProductionOrders.getOrderCode() + "\"");
         if (!detailMap.isSuccess()) {
             log.error("查询明细数据失败！");
-            return R.error("查询明细数据失败!");
+            throw new BusinessException("查询明细数据失败!");
         }
         List<OmsProductionOrderDetail> omsProductionOrderDetails =
                 detailMap.getCollectData(new TypeReference<List<OmsProductionOrderDetail>>() {
@@ -2728,7 +2726,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         R userListMap = userService.selectUserByLoginName(loginNames);
         if (!userListMap.isSuccess()) {
             log.error("初始化排产订单状态-获取排产订单导入用户信息失败，原因："+userListMap.get("msg"));
-            return R.error("初始化排产订单状态-获取排产订单导入用户信息失败，原因："+userListMap.get("msg"));
+            throw new BusinessException("初始化排产订单状态-获取排产订单导入用户信息失败，原因："+userListMap.get("msg"));
         }
         List<SysUserVo> sysUserList = userListMap.getCollectData(new TypeReference<List<SysUserVo>>() {});
         Map<String,SysUserVo> userMap = sysUserList.stream().collect(Collectors.toMap(SysUserVo::getLoginName, a -> a,(k1,k2)->k1));
