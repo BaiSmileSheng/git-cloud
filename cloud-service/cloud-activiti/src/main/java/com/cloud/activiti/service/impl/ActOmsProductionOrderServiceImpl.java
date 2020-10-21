@@ -159,11 +159,28 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
         R businessVoMap = remoteProductionOrderService.checkProductOrderAct(omsProductionOrders);
         if (!businessVoMap.isSuccess()) {
             log.error("调用order服务，校验排产订单的审批闸口失败，原因："+businessVoMap.get("msg"));
-            return R.error("调用order服务，校验排产订单的审批闸口失败，原因："+businessVoMap.get("msg"));
         }
         List<ActBusinessVo> businessVoList =
                 businessVoMap.getCollectData(new TypeReference<List<ActBusinessVo>>() {});
         //3、开启审批流程
+        //判断是否有排产订单进入审批流，没有直接更新状态
+        if (ObjectUtil.isEmpty(businessVoList) || businessVoList.size() <= 0) {
+            omsProductionOrders.forEach(o -> {
+                List<OmsProductionOrderDetail> details = orderDetailMap.get(o.getOrderCode());
+                if (ObjectUtil.isEmpty(details) || details.size() <= 0) {
+                    o.setStatus(ProductOrderConstants.STATUS_THREE);
+                } else {
+                    o.setStatus(ProductOrderConstants.STATUS_ZERO);
+                }
+                o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_ZERO);
+            });
+            R updateOrderMap = remoteProductionOrderService.updateBatchByPrimary(omsProductionOrders);
+            if (!updateOrderMap.isSuccess()) {
+                log.error("定时任务开启排产订单审批流程，更新排产订单状态失败，原因："+updateOrderMap.get("msg"));
+                throw new BusinessException("定时任务开启排产订单审批流程，更新排产订单状态失败，原因："+updateOrderMap.get("msg"));
+            }
+            return R.ok();
+        }
         R startActMap = startActProcessAct(businessVoList);
         if (!startActMap.isSuccess()) {
             log.error("定时任务开启排产订单审批流程失败，原因："+startActMap.get("msg"));
