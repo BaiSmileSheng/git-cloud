@@ -222,7 +222,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         }else{
             CdBomInfo cdBom = rBom.getData(CdBomInfo.class);
             smsSupplementaryOrder.setSapStoreage(cdBom.getStoragePoint());
-            smsSupplementaryOrder.setPurchaseGroupCode(cdBom.getProductFactoryCode());
+            smsSupplementaryOrder.setPurchaseGroupCode(cdBom.getPurchaseGroup());
         }
         smsSupplementaryOrder.setDelFlag("0");
         smsSupplementaryOrder.setCreateTime(DateUtils.getNowDate());
