@@ -159,6 +159,7 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
         R businessVoMap = remoteProductionOrderService.checkProductOrderAct(omsProductionOrders);
         if (!businessVoMap.isSuccess()) {
             log.error("调用order服务，校验排产订单的审批闸口失败，原因："+businessVoMap.get("msg"));
+            return R.error("调用order服务，校验排产订单的审批闸口失败，原因："+businessVoMap.get("msg"));
         }
         List<ActBusinessVo> businessVoList =
                 businessVoMap.getCollectData(new TypeReference<List<ActBusinessVo>>() {});
