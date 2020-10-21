@@ -14,6 +14,7 @@ import com.alibaba.excel.EasyExcel;
 import com.cloud.activiti.domain.entity.vo.OmsOrderMaterialOutVo;
 import com.cloud.activiti.feign.RemoteActOmsOrderMaterialOutService;
 import com.cloud.activiti.feign.RemoteActTaskService;
+import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
@@ -345,13 +346,26 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         //查询已导入数据
         Example example = new Example(OmsDemandOrderGatherEdit.class);
         example.and().andNotEqualTo("status",DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
+        example.and().andEqualTo("delFlag", DeleteFlagConstants.NO_DELETED);
         List<OmsDemandOrderGatherEdit> hisList = omsDemandOrderGatherEditMapper.selectByExample(example);
         List<String> randomList = OrderNoGenerateUtil.getOrderNos(list.size() * 2, "DM");
+        Map<String, String> mapCheckRepeat = new HashMap<>();
         for(OmsDemandOrderGatherEdit demandOrderGatherEdit:list){
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
             ExcelImportOtherObjectDto othObjectDto = new ExcelImportOtherObjectDto();
             StringBuffer errMsg = new StringBuffer();
+
+            String unionKey = StrUtil.concat(true,demandOrderGatherEdit.getProductMaterialCode(),
+                    demandOrderGatherEdit.getCustomerCode(),demandOrderGatherEdit.getDeliveryDate().toString(),
+                    demandOrderGatherEdit.getProductFactoryCode(),demandOrderGatherEdit.getBomVersion());
+            String v = mapCheckRepeat.putIfAbsent(unionKey, "1");
+            if (v != null) {
+                errObjectDto.setObject(demandOrderGatherEdit);
+                errObjectDto.setErrMsg("excel中存在重复数据！");
+                errDtos.add(errObjectDto);
+                continue;
+            }
 
             boolean flag = hisList.stream().anyMatch(s -> StrUtil.equals(s.getProductMaterialCode(), demandOrderGatherEdit.getProductMaterialCode())
                     && StrUtil.equals(s.getCustomerCode(), demandOrderGatherEdit.getCustomerCode())

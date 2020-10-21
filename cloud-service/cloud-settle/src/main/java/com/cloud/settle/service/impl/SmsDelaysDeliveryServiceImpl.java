@@ -425,6 +425,7 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
         criteria.andEqualTo("delaysStatus",DeplayStatusEnum.DELAYS_STATUS_1);
         criteria.andGreaterThanOrEqualTo("submitDate",submitDateStart);
         criteria.andLessThan("submitDate",submitDateEnd);
+        criteria.andEqualTo("delFlag", DeleteFlagConstants.NO_DELETED);
         List<SmsDelaysDelivery> smsDelaysDeliveryList = smsDelaysDeliveryMapper.selectByExample(example);
         return smsDelaysDeliveryList;
     }
