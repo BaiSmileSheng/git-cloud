@@ -5,41 +5,30 @@ import com.cloud.activiti.feign.RemoteBizBusinessService;
 import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.constant.EmailConstants;
 import com.cloud.common.core.domain.R;
+import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
 import com.cloud.common.utils.StringUtils;
+import com.cloud.settle.domain.entity.SmsClaimOther;
 import com.cloud.settle.enums.ClaimOtherStatusEnum;
 import com.cloud.settle.mail.MailService;
+import com.cloud.settle.mapper.SmsClaimOtherMapper;
+import com.cloud.settle.service.ISmsClaimOtherService;
 import com.cloud.system.domain.entity.CdFactoryInfo;
-import com.cloud.system.domain.entity.CdSupplierInfo;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
-import com.cloud.system.feign.RemoteFactoryInfoService;
-import com.cloud.system.feign.RemoteOssService;
-import com.cloud.system.feign.RemoteSequeceService;
-import com.cloud.system.feign.RemoteSupplierInfoService;
-import com.cloud.system.feign.RemoteUserService;
+import com.cloud.system.feign.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.cloud.settle.mapper.SmsClaimOtherMapper;
-import com.cloud.settle.domain.entity.SmsClaimOther;
-import com.cloud.settle.service.ISmsClaimOtherService;
-import com.cloud.common.core.service.impl.BaseServiceImpl;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 其他索赔Service业务层处理
@@ -544,6 +533,7 @@ public class SmsClaimOtherServiceImpl extends BaseServiceImpl<SmsClaimOther> imp
         criteria.andEqualTo("claimOtherStatus",ClaimOtherStatusEnum.CLAIM_OTHER_STATUS_1);
         criteria.andGreaterThanOrEqualTo("submitDate",submitDateStart);
         criteria.andLessThan("submitDate",submitDateEnd);
+        criteria.andEqualTo("delFlag", DeleteFlagConstants.NO_DELETED);
         List<SmsClaimOther> smsQualityOrderList = smsClaimOtherMapper.selectByExample(example);
         return smsQualityOrderList;
     }
