@@ -2765,9 +2765,6 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         if (BeanUtil.isNotEmpty(businessVoOverStock)) {
             actBusinessVoList.add(businessVoOverStock);
         }
-        if (ObjectUtil.isEmpty(actBusinessVoList) || actBusinessVoList.size() <= 0) {
-            return R.ok();
-        }
         return R.data(actBusinessVoList);
     }
 }
