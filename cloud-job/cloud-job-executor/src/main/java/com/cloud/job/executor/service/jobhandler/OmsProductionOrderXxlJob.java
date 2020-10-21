@@ -1,6 +1,7 @@
 package com.cloud.job.executor.service.jobhandler;
 
 import cn.hutool.core.util.StrUtil;
+import com.cloud.activiti.feign.RemoteActOmsProductionOrderService;
 import com.cloud.common.core.domain.R;
 import com.cloud.order.feign.RemoteOmsRealOrderService;
 import com.cloud.order.feign.RemoteProductionOrderService;
@@ -24,6 +25,8 @@ public class OmsProductionOrderXxlJob {
 
     @Autowired
     private RemoteProductionOrderService remoteProductionOrderService;
+    @Autowired
+    private RemoteActOmsProductionOrderService remoteActOmsProductionOrderService;
 
 
     /**
@@ -76,5 +79,20 @@ public class OmsProductionOrderXxlJob {
             return ReturnT.FAIL;
         }
     }
-
+    /**
+     * 定时任务开启排产订单审批流程
+     * 0 0/2 * * * ?
+     */
+    @XxlJob("timeCheckProductOrderActHandler")
+    public ReturnT<String> timeCheckProductOrderActHandler(String param) {
+        XxlJobLogger.log("--------------定时任务开启排产订单审批流程开始----------");
+        R r=remoteActOmsProductionOrderService.timeCheckProductOrderAct();
+        if (!r.isSuccess()) {
+            XxlJobLogger.log("定时任务开启排产订单审批流程失败，原因："+r.get("msg"));
+            return ReturnT.FAIL;
+        }
+        XxlJobLogger.log(r.get("msg").toString());
+        XxlJobLogger.log("--------------定时任务开启排产订单审批流程结束------------");
+        return ReturnT.SUCCESS;
+    }
 }

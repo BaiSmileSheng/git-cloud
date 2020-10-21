@@ -2,8 +2,10 @@ package com.cloud.order.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Dict;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
+import com.cloud.common.constant.ProductOrderConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.controller.BaseController;
@@ -591,5 +593,34 @@ public class OmsProductionOrderController extends BaseController {
     @ApiOperation(value = "根据主键批量修改保存排产订单", response = R.class)
     public R updateBatchByPrimary(@RequestBody List<OmsProductionOrder> omsProductionOrderList) {
         return toAjax(omsProductionOrderService.updateBatchByPrimaryKeySelective(omsProductionOrderList));
+    }
+    /**
+     * Description: 查询初始化中状态的排产订单
+     * Param: []
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/10/16
+     */
+    @PostMapping("selectByStatusAct")
+    public R selectByStatusAct(){
+        Example example = new Example(OmsProductionOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("status", ProductOrderConstants.STATUS_INIT);
+        List<OmsProductionOrder> omsProductionOrders = omsProductionOrderService.selectByExample(example);
+        if (ObjectUtil.isEmpty(omsProductionOrders) || omsProductionOrders.size() <= 0) {
+            return R.ok();
+        }
+        return R.data(omsProductionOrders);
+    }
+    /**
+     * Description:  定时任务校验排产订单审批流
+     * Param: [list]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/10/19
+     */
+    @PostMapping("checkProductOrderAct")
+    public R checkProductOrderAct(@RequestBody List<OmsProductionOrder> list){
+        return omsProductionOrderService.checkProductOrderAct(list);
     }
 }

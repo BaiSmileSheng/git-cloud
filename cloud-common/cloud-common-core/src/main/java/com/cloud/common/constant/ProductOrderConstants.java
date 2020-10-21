@@ -5,8 +5,9 @@ import java.math.BigDecimal;
 public class ProductOrderConstants {
     /**
      * 状态
-     * 状态：0：待评审，1：反馈中，2：待调整，3：已评审，4：待传SAP，5：传SAP中，6：已传SAP，7：传SAP异常，8：已关单',
+     * 状态：-1:初始化中，0：待评审，1：反馈中，2：待调整，3：已评审，4：待传SAP，5：传SAP中，6：已传SAP，7：传SAP异常，8：已关单',
      */
+    public final static String STATUS_INIT = "-1";
     public final static String STATUS_ZERO = "0";
     public final static String STATUS_ONE = "1";
     public final static String STATUS_TWO = "2";
@@ -19,8 +20,9 @@ public class ProductOrderConstants {
 
 
     /**
-     * 审核状态 0：无需审核，1：审核中，2：审核完成，3：驳回作废'
+     * 审核状态 -1:初始化中，0：无需审核，1：审核中，2：审核完成，3：驳回作废'
      * */
+    public final static String AUDIT_STATUS_INIT = "-1";
     public final static String AUDIT_STATUS_ZERO = "0";
     public final static String AUDIT_STATUS_ONE = "1";
     public final static String AUDIT_STATUS_TWO = "2";

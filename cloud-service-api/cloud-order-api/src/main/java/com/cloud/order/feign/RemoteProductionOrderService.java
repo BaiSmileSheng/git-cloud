@@ -74,4 +74,18 @@ public interface RemoteProductionOrderService {
      */
     @PostMapping("productionOrder/updateBatchByPrimary")
     R updateBatchByPrimary(@RequestBody List<OmsProductionOrder> omsProductionOrderList);
+    /**
+     * 获取初始化中状态的排产订单
+     * @param
+     * @return
+     */
+    @PostMapping("productionOrder/selectByStatusAct")
+    R selectByStatusAct();
+    /**
+     * 定时任务校验排产订单审批流
+     * @param
+     * @return
+     */
+    @PostMapping("productionOrder/checkProductOrderAct")
+    R checkProductOrderAct(@RequestBody List<OmsProductionOrder> list);
 }
