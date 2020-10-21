@@ -30,6 +30,18 @@ public class RemoteActOmsProductionOrderFallbackFactory implements FallbackFacto
                 log.error("开启排产订单审批流程失败，原因{}：" + throwable.getMessage());
                 return R.error("服务拥挤，请稍后再试！");
             }
+            /**
+             * Description:  定时任务开启排产订单审批流程
+             * Param: []
+             * return: com.cloud.common.core.domain.R
+             * Author: ltq
+             * Date: 2020/10/19
+             */
+            @Override
+            public R timeCheckProductOrderAct() {
+                log.error("定时任务开启排产订单审批流程失败，原因{}：" + throwable.getMessage());
+                return R.error("服务拥挤，请稍后再试！");
+            }
         };
     }
 }

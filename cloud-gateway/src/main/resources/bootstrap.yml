@@ -94,7 +94,7 @@ spring:
                 id: SpecialHystrix
                 fallbackUri: 'forward:/fallback'
                 timeout:
-                  productionOrder-importProductOrder: 60000
+                  productionOrder-importProductOrder: 120000
                   productOrderDetail-export: 60000
                   demand-queryAndInsertDemandPRFromSap800Friday: 120000
                   demand-queryDemandPRFromSap800: 120000
@@ -105,6 +105,8 @@ spring:
                   demandOrderGatherEdit-toSAP: 60000
                   oms2weeksDemandOrderEdit-toSAP: 60000
                   actOmsOrderMaterialOut-save: 30000
+                  productionOrder-confirmRelease: 60000
+                  productionOrder-delete: 60000
         #settle 模块
         - id: cloud-settle
           uri: lb://cloud-settle
@@ -125,8 +127,8 @@ spring:
                 fallbackUri: 'forward:/fallback'
 ribbon:
   OkToRetryOnAllOperations: false #对所有操作请求都进行重试,默认false
-  ReadTimeout: 5000   #负载均衡超时时间，默认值5000
-  ConnectTimeout: 2000 #ribbon请求连接的超时时间，默认值2000
+  ReadTimeout: 10000   #负载均衡超时时间，默认值5000
+  ConnectTimeout: 5000 #ribbon请求连接的超时时间，默认值2000
   MaxAutoRetries: 0     #对当前实例的重试次数，默认0
   MaxAutoRetriesNextServer: 1 #对切换实例的重试次数，默认1
 hystrix:
@@ -137,4 +139,4 @@ hystrix:
           enabled: true
         isolation:
           thread:
-            timeoutInMilliseconds: 10000 #断路器超时时间，默认1000ms
+            timeoutInMilliseconds: 20000 #断路器超时时间，默认1000ms

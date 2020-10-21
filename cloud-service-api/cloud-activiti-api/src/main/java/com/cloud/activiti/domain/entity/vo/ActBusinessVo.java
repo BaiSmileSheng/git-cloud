@@ -28,4 +28,6 @@ public class ActBusinessVo {
     private String title;
     @ApiModelProperty(value = "审批流业务数据List")
     private List<ActStartProcessVo> processVoList;
+    @ApiModelProperty(value = "审批通知邮件List")
+    private List<ActProcessEmailUserVo> processEmailUserVoList;
 }

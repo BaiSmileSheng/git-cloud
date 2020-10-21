@@ -51,6 +51,13 @@
             <version>${cloud.version}</version>
         </dependency>
 
+        <!-- 审批流模块-->
+        <dependency>
+            <groupId>com.cloud</groupId>
+            <artifactId>cloud-activiti-api</artifactId>
+            <version>${cloud.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>

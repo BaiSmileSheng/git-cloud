@@ -1,6 +1,9 @@
 package com.cloud.order.controller;
 
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
+import com.cloud.common.constant.ProductOrderConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -173,5 +177,25 @@ public class OmsProductionOrderDetailController extends BaseController {
     public R remove(@RequestBody String ids) {
         return toAjax(omsProductionOrderDetailService.deleteByIds(ids));
     }
-
+    /**
+     * Description:  排产订单审批流程校验查询明细
+     * Param: [orderCodes]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/10/19
+     */
+    @PostMapping("selectDetailByOrderAct")
+    public R selectDetailByOrderAct(String orderCodes){
+        Example example = new Example(OmsProductionOrderDetail.class);
+        Example.Criteria criteria = example.createCriteria();
+       if (StrUtil.isNotBlank(orderCodes)) {
+           criteria.andIn("productOrderCode", Arrays.asList(orderCodes.split(",")));
+       }
+        criteria.andEqualTo("status", ProductOrderConstants.DETAIL_STATUS_ZERO);
+       List<OmsProductionOrderDetail> list = omsProductionOrderDetailService.selectByExample(example);
+       if (ObjectUtil.isEmpty(list) || list.size() <= 0) {
+           return R.ok();
+       }
+       return R.data(list);
+    }
 }

@@ -41,4 +41,13 @@ public interface IActOmsProductionOrderService {
      */
     R startActProcess(ActBusinessVo actBusinessVo);
 
+    /**
+     * Description:  定时任务开启排产订单审批流程
+     * Param: []
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/10/19
+     */
+    R timeCheckProductOrderAct();
+
 }

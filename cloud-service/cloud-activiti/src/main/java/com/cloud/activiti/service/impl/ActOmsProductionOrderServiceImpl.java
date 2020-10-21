@@ -9,6 +9,7 @@ import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
 import com.cloud.activiti.domain.entity.vo.ActBusinessVo;
+import com.cloud.activiti.domain.entity.vo.ActProcessEmailUserVo;
 import com.cloud.activiti.domain.entity.vo.ActStartProcessVo;
 import com.cloud.activiti.mail.MailService;
 import com.cloud.activiti.service.IActOmsProductionOrderService;
@@ -20,7 +21,10 @@ import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.order.domain.entity.OmsProductionOrder;
+import com.cloud.order.domain.entity.OmsProductionOrderDetail;
+import com.cloud.order.feign.RemoteProductionOrderDetailService;
 import com.cloud.order.feign.RemoteProductionOrderService;
+import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -31,14 +35,12 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.task.Task;
+import org.apache.xmlbeans.impl.common.ConcurrentReaderHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -65,6 +67,8 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
     private RemoteUserService remoteUserService;
     @Autowired
     private MailService mailService;
+    @Autowired
+    private RemoteProductionOrderDetailService remoteProductionOrderDetailService;
     /**
      * Description:  开启审批流
      * Param: [key, orderId, orderCode, userId, title]
@@ -90,7 +94,7 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
                 criteria.andEqualTo("orderNo",a.getOrderCode());
                 criteria.andEqualTo("procDefKey",actBusinessVo.getKey());
                 List<BizBusiness> businesses = bizBusinessService.selectByExample(example);
-                if (!ObjectUtil.isNotEmpty(businesses) && businesses.size() <= 0) {
+                if (!ObjectUtil.isNotEmpty(businesses) || businesses.size() <= 0) {
                     BizBusiness business =
                             initBusiness(processDefinitionAct.getId()
                                     ,processDefinitionAct.getName(),a.getOrderId(),a.getOrderCode()
@@ -113,6 +117,135 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
             log.error("开启审批流失败，传入参数为空！");
             throw new BusinessException("开启审批流失败，传入参数为空！");
         }
+        return R.ok("提交成功！");
+    }
+
+    /**
+     * Description:  定时任务开启排产订单审批流程
+     * Param: []
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/10/19
+     */
+    @Override
+    @GlobalTransactional
+    public R timeCheckProductOrderAct() {
+        //1、获取初始化中的排产订单数据
+        R productOrderMap = remoteProductionOrderService.selectByStatusAct();
+        if (!productOrderMap.isSuccess()) {
+            log.error("初始化排产订单状态-获取排产订单数据失败，原因："+productOrderMap.get("msg"));
+            return R.error("初始化排产订单状态-获取排产订单数据失败，原因："+productOrderMap.get("msg"));
+        }
+        List<OmsProductionOrder> omsProductionOrders =
+                productOrderMap.getCollectData(new TypeReference<List<OmsProductionOrder>>() {});
+        if (ObjectUtil.isEmpty(omsProductionOrders) || omsProductionOrders.size() <= 0) {
+            log.info("本次初始化排产订单状态-获取排产订单数据为空！");
+            return R.ok("本次初始化排产订单状态-获取排产订单数据为空！");
+        }
+        //获取排产订单明细，设置排产订单的状态
+        String orderCodes = omsProductionOrders
+                .stream().map(OmsProductionOrder::getOrderCode).collect(Collectors.joining(","));
+        R detailMap = remoteProductionOrderDetailService.selectDetailByOrderAct(orderCodes);
+        if (!detailMap.isSuccess()) {
+            log.info("定时任务开启排产订单审批流程，查询排产订单明细失败！");
+            return R.error("定时任务开启排产订单审批流程，查询排产订单明细失败！");
+        }
+        List<OmsProductionOrderDetail> omsProductionOrderDetails =
+                detailMap.getCollectData(new TypeReference<List<OmsProductionOrderDetail>>() {});
+        Map<String,List<OmsProductionOrderDetail>> orderDetailMap =
+                omsProductionOrderDetails.stream().collect(Collectors.groupingBy(OmsProductionOrderDetail :: getProductOrderCode));
+
+        //2、调用order服务，校验排产订单的审批流
+        R businessVoMap = remoteProductionOrderService.checkProductOrderAct(omsProductionOrders);
+        if (!businessVoMap.isSuccess()) {
+            log.error("调用order服务，校验排产订单的审批闸口失败，原因："+businessVoMap.get("msg"));
+            return R.error("调用order服务，校验排产订单的审批闸口失败，原因："+businessVoMap.get("msg"));
+        }
+        List<ActBusinessVo> businessVoList =
+                businessVoMap.getCollectData(new TypeReference<List<ActBusinessVo>>() {});
+        //3、开启审批流程
+        R startActMap = startActProcessAct(businessVoList);
+        if (!startActMap.isSuccess()) {
+            log.error("定时任务开启排产订单审批流程失败，原因："+startActMap.get("msg"));
+            return R.error("定时任务开启排产订单审批流程失败，原因："+startActMap.get("msg"));
+        }
+        //4、更新排产订单的状态
+        Set<String> orderIdSet = new HashSet<>();
+        List<ActProcessEmailUserVo> emailUserVos = new ArrayList<>();
+        businessVoList.forEach(b -> {
+            List<ActStartProcessVo> processVos = b.getProcessVoList();
+            Set<String> orderIds = processVos.stream().map(ActStartProcessVo::getOrderId).collect(Collectors.toSet());
+            orderIdSet.addAll(orderIds);
+            //获取邮件通知内容
+            emailUserVos.addAll(b.getProcessEmailUserVoList());
+        });
+        omsProductionOrders.forEach(o -> {
+            List<OmsProductionOrderDetail> details = orderDetailMap.get(o.getOrderCode());
+            if (ObjectUtil.isEmpty(details) || details.size() <= 0) {
+                o.setStatus(ProductOrderConstants.STATUS_THREE);
+            } else {
+                o.setStatus(ProductOrderConstants.STATUS_ZERO);
+            }
+
+            if (orderIdSet.contains(o.getId().toString())) {
+                o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_ONE);
+            } else {
+                o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_ZERO);
+            }
+        });
+        R updateOrderMap = remoteProductionOrderService.updateBatchByPrimary(omsProductionOrders);
+        if (!updateOrderMap.isSuccess()) {
+            log.error("定时任务开启排产订单审批流程，更新排产订单状态失败，原因："+updateOrderMap.get("msg"));
+            throw new BusinessException("定时任务开启排产订单审批流程，更新排产订单状态失败，原因："+updateOrderMap.get("msg"));
+        }
+        //5、邮件通知
+//        emailUserVos.forEach(e ->
+//            //mailService.sendTextMail(e.getEmail(), e.getTitle(), e.getContext())
+//        );
+        return R.ok();
+    }
+
+    public R startActProcessAct(List<ActBusinessVo> actBusinessVoList) {
+        actBusinessVoList.forEach(actBusinessVo -> {
+            if (BeanUtil.isNotEmpty(actBusinessVo)) {
+                R keyMap = getByKey(actBusinessVo.getKey());
+                if (!keyMap.isSuccess()) {
+                    log.error("根据Key获取最新版流程实例失败："+keyMap.get("msg"));
+                    throw new BusinessException("根据Key获取最新版流程实例失败!");
+                }
+                ProcessDefinitionAct processDefinitionAct = keyMap.getData(ProcessDefinitionAct.class);
+                List<ActStartProcessVo> list = actBusinessVo.getProcessVoList();
+                //插入流程物业表  并开启流程
+                list.forEach(a ->{
+                    Example example = new Example(BizBusiness.class);
+                    Example.Criteria criteria = example.createCriteria();
+                    criteria.andEqualTo("orderNo",a.getOrderCode());
+                    criteria.andEqualTo("procDefKey",actBusinessVo.getKey());
+                    List<BizBusiness> businesses = bizBusinessService.selectByExample(example);
+                    if (!ObjectUtil.isNotEmpty(businesses) || businesses.size() <= 0) {
+                        BizBusiness business =
+                                initBusiness(processDefinitionAct.getId()
+                                        ,processDefinitionAct.getName(),a.getOrderId(),a.getOrderCode()
+                                        , a.getUserId(),actBusinessVo.getTitle(),a.getUserName());
+                        bizBusinessService.insertBizBusiness(business);
+                        if (actBusinessVo.getKey().equals(ActProcessContants.ACTIVITI_ADD_REVIEW)
+                                || actBusinessVo.getKey().equals(ActProcessContants.ACTIVITI_OVERDUE_STOCK_ORDER_REVIEW)) {
+                            //会签流程,暂时只有T+2追加订单、超期库存是会签
+                            Map<String, Object> variables = Maps.newHashMap();
+                            variables.put("signList",a.getUserIds());
+                            bizBusinessService.startProcessForHuiQian(business, variables);
+                        } else {
+                            //非会签
+                            Map<String, Object> variables = Maps.newHashMap();
+                            bizBusinessService.startProcess(business, variables,a.getUserIds());
+                        }
+                    }
+                });
+            } else {
+                log.error("开启审批流失败，传入参数为空！");
+                throw new BusinessException("开启审批流失败，传入参数为空！");
+            }
+        });
         return R.ok("提交成功！");
     }
 

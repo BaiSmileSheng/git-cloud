@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
+import org.activiti.engine.HistoryService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -64,6 +65,9 @@ public class ActTaskServiceImpl implements IActTaskService {
     private IBizBusinessService businessService;
     @Autowired
     private RepositoryService repositoryService;
+
+    @Autowired
+    private HistoryService historyService;
 
     /**
      * 审批通用方法  推进流程  设置下一审批人
@@ -274,7 +278,7 @@ public class ActTaskServiceImpl implements IActTaskService {
                 .createProcessDefinitionQuery().processDefinitionKey(key).latestVersion().singleResult();
         if (BeanUtil.isEmpty(processDefinition)) {
             log.error("根据Key值查询流程实例失败!");
-            return R.error("根据Key值查询流程实例失败！");
+            throw new BusinessException("根据Key值查询流程实例失败！");
         }
         ProcessDefinitionAct processDefinitionAct =
                 ProcessDefinitionAct.builder()
@@ -306,7 +310,7 @@ public class ActTaskServiceImpl implements IActTaskService {
                 objectMapper.convertValue(map.get("orderCodeList"), new TypeReference<List<String>>() {});
         if (ObjectUtil.isEmpty(orderCodeList) || orderCodeList.size() <= 0) {
             log.info("执行删除审批流程方法，传入的业务订单号为空！");
-            return R.error("执行删除审批流程方法，传入的业务订单号为空！");
+            throw new BusinessException("执行删除审批流程方法，传入的业务订单号为空！");
         }
         Example example = new Example(BizBusiness.class);
         Example.Criteria criteria = example.createCriteria();
@@ -317,12 +321,27 @@ public class ActTaskServiceImpl implements IActTaskService {
             return R.ok();
         }
         String ids = businesses.stream().map(b -> b.getId().toString()).collect(Collectors.joining(","));
-        businesses = businesses.stream()
-                .filter(o -> StrUtil.isNotBlank(o.getProcInstId())).collect(Collectors.toList());
-        businesses.forEach(b -> {
-            String id  = b.getProcInstId();
-            runtimeService.deleteProcessInstance(id, userId);
-        });
+        List<BizBusiness> businessesDealing = businesses.stream()
+                .filter(o -> StrUtil.isNotBlank(o.getProcInstId())
+                        && ActivitiConstant.RESULT_DEALING.equals(o.getResult())).collect(Collectors.toList());
+        List<BizBusiness> businessesPass = businesses.stream()
+                .filter(o -> StrUtil.isNotBlank(o.getProcInstId())
+                        && !ActivitiConstant.RESULT_DEALING.equals(o.getResult())).collect(Collectors.toList());
+        try {
+            //删除运行中的流程
+            businessesDealing.forEach(b -> {
+                String id = b.getProcInstId();
+                runtimeService.deleteProcessInstance(id, userId);
+            });
+            //删除结束的流程
+            businessesPass.forEach(b -> {
+                String id = b.getProcInstId();
+                historyService.deleteHistoricProcessInstance(id);
+            });
+        }catch (Exception e) {
+            log.error("删除审批流程失败："+e);
+            throw new BusinessException("删除审批流程失败，原因："+e.getMessage());
+        }
         businessService.deleteBizBusinessByIds(ids);
         log.info("删除审批流程方法-执行结束！");
         return R.ok();

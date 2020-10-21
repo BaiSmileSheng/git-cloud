@@ -25,4 +25,8 @@ public class ActStartProcessVo {
     private String orderCode;
     @ApiModelProperty(value = "审批人Set")
     private Set<String> userIds;
+    @ApiModelProperty(value = "申请人ID")
+    private Long userId;
+    @ApiModelProperty(value = "申请人用户名")
+    private String userName;
 }
