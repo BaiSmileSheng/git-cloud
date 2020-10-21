@@ -13,6 +13,7 @@ import com.alibaba.excel.EasyExcel;
 import com.cloud.activiti.domain.entity.vo.OmsOrderMaterialOutVo;
 import com.cloud.activiti.feign.RemoteActOmsOrderMaterialOutService;
 import com.cloud.activiti.feign.RemoteActTaskService;
+import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
@@ -335,6 +336,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
         //查询已导入数据
         Example example = new Example(Oms2weeksDemandOrderEdit.class);
         example.and().andNotEqualTo("status",Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
+        example.and().andEqualTo("delFlag", DeleteFlagConstants.NO_DELETED);
         List<Oms2weeksDemandOrderEdit> hisList = oms2weeksDemandOrderEditMapper.selectByExample(example);
         List<String> randomList = OrderNoGenerateUtil.getOrderNos(list.size() * 2, "DM");
         for(Oms2weeksDemandOrderEdit weeksDemandOrderEdit:list){

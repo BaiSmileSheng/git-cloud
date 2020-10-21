@@ -5,6 +5,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
@@ -1325,6 +1326,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         Example exampleMouthSettle = new Example(SmsMouthSettle.class);
         Example.Criteria criteriaMouthSettle = exampleMouthSettle.createCriteria();
         criteriaMouthSettle.andEqualTo("updateSettleFlag", SettleUpdateFlagEnum.UPDATE_FLAG_0.getCode());
+        criteriaMouthSettle.andEqualTo("delFlag", DeleteFlagConstants.NO_DELETED);
         List<SmsMouthSettle> smsMouthSettleList = smsMouthSettleMapper.selectByExample(exampleMouthSettle);
         if(CollectionUtils.isEmpty(smsMouthSettleList)){
             return R.ok("无需更新数据");

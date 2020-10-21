@@ -14,6 +14,7 @@ import com.alibaba.excel.EasyExcel;
 import com.cloud.activiti.domain.entity.vo.OmsOrderMaterialOutVo;
 import com.cloud.activiti.feign.RemoteActOmsOrderMaterialOutService;
 import com.cloud.activiti.feign.RemoteActTaskService;
+import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
@@ -345,6 +346,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         //查询已导入数据
         Example example = new Example(OmsDemandOrderGatherEdit.class);
         example.and().andNotEqualTo("status",DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
+        example.and().andEqualTo("delFlag", DeleteFlagConstants.NO_DELETED);
         List<OmsDemandOrderGatherEdit> hisList = omsDemandOrderGatherEditMapper.selectByExample(example);
         List<String> randomList = OrderNoGenerateUtil.getOrderNos(list.size() * 2, "DM");
         for(OmsDemandOrderGatherEdit demandOrderGatherEdit:list){
