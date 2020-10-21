@@ -1036,7 +1036,14 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     @Override
     public List<OmsProductionOrder> selectPageInfo(OmsProductionOrder omsProductionOrder, SysUser sysUser) {
         Example example = checkParams(omsProductionOrder, sysUser);
-        return omsProductionOrderMapper.selectByExample(example);
+        List<OmsProductionOrder> orderList = omsProductionOrderMapper.selectByExample(example);
+        orderList.forEach(o -> {
+            //判断是否有新bom版本
+            if (StrUtil.isNotBlank(o.getNewVersion())) {
+                o.setBomVersion(o.getNewVersion());
+            }
+        });
+        return orderList;
     }
     /**
      * Description:  组织参数
@@ -1150,7 +1157,14 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     @Override
     public List<OmsProductionOrder> exportAll(OmsProductionOrder omsProductionOrder, SysUser sysUser) {
         Example example = checkParams(omsProductionOrder, sysUser);
-        return omsProductionOrderMapper.selectByExample(example);
+        List<OmsProductionOrder> orderList = omsProductionOrderMapper.selectByExample(example);
+        orderList.forEach(o -> {
+            //判断是否有新bom版本
+            if (StrUtil.isNotBlank(o.getNewVersion())) {
+                o.setBomVersion(o.getNewVersion());
+            }
+        });
+        return orderList;
     }
 
     /**
@@ -1169,8 +1183,13 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         String productStartDateMax = null;
         List<OmsProductionOrderMailVo> productionOrderMailVoList = new ArrayList<>();
         if(!CollectionUtils.isEmpty(productionOrderVos)){
-            productionOrderMailVoList = productionOrderVos.stream().map(omsProductionOrde ->
-                    BeanUtil.copyProperties(omsProductionOrde, OmsProductionOrderMailVo.class)).collect(Collectors.toList());
+            productionOrderMailVoList = productionOrderVos.stream().map(omsProductionOrde ->{
+                //判断是否有新bom版本
+                if (StrUtil.isNotBlank(omsProductionOrde.getNewVersion())) {
+                    omsProductionOrde.setBomVersion(omsProductionOrde.getNewVersion());
+                }
+                return BeanUtil.copyProperties(omsProductionOrde, OmsProductionOrderMailVo.class);
+            }).collect(Collectors.toList());
             Collections.sort(productionOrderMailVoList, Comparator.comparing(OmsProductionOrderMailVo::getProductStartDate));
             productStartDateMin = productionOrderMailVoList.get(0).getProductStartDate();
             productStartDateMax = productionOrderMailVoList.get(productionOrderVos.size()-1).getProductStartDate();
