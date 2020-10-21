@@ -199,9 +199,9 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
             throw new BusinessException("定时任务开启排产订单审批流程，更新排产订单状态失败，原因："+updateOrderMap.get("msg"));
         }
         //5、邮件通知
-//        emailUserVos.forEach(e ->
-//            //mailService.sendTextMail(e.getEmail(), e.getTitle(), e.getContext())
-//        );
+        emailUserVos.forEach(e ->
+            mailService.sendTextMail(e.getEmail(), e.getTitle(), e.getContext())
+        );
         return R.ok();
     }
 
