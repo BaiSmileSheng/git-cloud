@@ -115,6 +115,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
     private static final String DATE_EXCEPTON = "基本开始日期不能大于基本结束日期";
 
+    private static final String OUTSOURCE_ERROR_REMARK = "加工承揽方式与线体属性不匹配";
+
     private final static String YYYY_MM_DD = "yyyy-MM-dd";//时间格式
 
     public final static String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
@@ -131,7 +133,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     private static final String[] parsePatterns = {"yyyy.MM.dd", "yyyy/MM/dd"};
     //无需评审采购组
     private static final String[] PURCHASE_GROUP = {"N99","C44","M02","N21","N97","N05"};
-
+    //工厂线体信息属性-OEM
+    private static final String FACOTRY_LINE_OUT_OEM = "3";
+    //工厂线体信息属性-自制
+    private static final String FACOTRY_LINE_OUT_ZZ = "1";
     @Value("${webService.findAllCodeForJIT.urlClaim}")
     private String urlClaim;
 
@@ -519,7 +524,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 o.setLifeCycle(m.getLifeCycle());
             }
         }));
-
+        //key 工厂+线体
+        Map<String, CdFactoryLineInfo> supplierMap = cdFactoryLineInfoList.stream().collect(toMap(cdFactoryLineInfo ->
+                        cdFactoryLineInfo.getProductFactoryCode() + cdFactoryLineInfo.getProduceLineCode(), cdFactoryLineInfo -> cdFactoryLineInfo,
+                (key1, key2) -> key2));
         //校验导入字段数据，设置导入失败原因
         Map<String, List<CdBomInfo>> bomMap =
                 bomInfoList.stream().collect(Collectors.groupingBy((bom) -> getBomGroupKey(bom)));
@@ -597,6 +605,20 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             if (DateUtil.compare(startDate,endDate) > 0) {
                 String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "；";
                 o.setExportRemark(exportRemark + DATE_EXCEPTON);
+            }
+            //校验加工承揽方式和线体属性是否匹配
+            String factoryLineKey = o.getProductFactoryCode() + o.getProductLineCode();
+            CdFactoryLineInfo factoryLineInfo = supplierMap.get(factoryLineKey);
+            String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "；";
+            if (FACOTRY_LINE_OUT_OEM.equals(factoryLineInfo.getAttribute())) {
+                if (!OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode().equals(o.getOutsourceType())
+                        && !OutSourceTypeEnum.OUT_SOURCE_TYPE_QWW.equals(o.getOutsourceType())){
+                    o.setExportRemark(exportRemark + OUTSOURCE_ERROR_REMARK);
+                }
+            } else if (FACOTRY_LINE_OUT_ZZ.equals(factoryLineInfo.getAttribute())) {
+                if (!OutSourceTypeEnum.OUT_SOURCE_TYPE_ZZ.getCode().equals(o.getOutsourceType())) {
+                    o.setExportRemark(exportRemark + OUTSOURCE_ERROR_REMARK);
+                }
             }
             sucObjectDto.setObject(o);
             successDtos.add(sucObjectDto);
