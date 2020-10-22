@@ -610,16 +610,16 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             String factoryLineKey = o.getProductFactoryCode() + o.getProductLineCode();
             CdFactoryLineInfo factoryLineInfo = supplierMap.get(factoryLineKey);
             String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "；";
-            if (FACOTRY_LINE_OUT_OEM.equals(factoryLineInfo.getAttribute())) {
-                if (!OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode().equals(o.getOutsourceType())
-                        && !OutSourceTypeEnum.OUT_SOURCE_TYPE_QWW.equals(o.getOutsourceType())){
-                    o.setExportRemark(exportRemark + OUTSOURCE_ERROR_REMARK);
-                }
-            } else if (FACOTRY_LINE_OUT_ZZ.equals(factoryLineInfo.getAttribute())) {
-                if (!OutSourceTypeEnum.OUT_SOURCE_TYPE_ZZ.getCode().equals(o.getOutsourceType())) {
-                    o.setExportRemark(exportRemark + OUTSOURCE_ERROR_REMARK);
-                }
-            }
+//            if (FACOTRY_LINE_OUT_OEM.equals(factoryLineInfo.getAttribute())) {
+//                if (!OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode().equals(o.getOutsourceType())
+//                        && !OutSourceTypeEnum.OUT_SOURCE_TYPE_QWW.equals(o.getOutsourceType())){
+//                    o.setExportRemark(exportRemark + OUTSOURCE_ERROR_REMARK);
+//                }
+//            } else if (FACOTRY_LINE_OUT_ZZ.equals(factoryLineInfo.getAttribute())) {
+//                if (!OutSourceTypeEnum.OUT_SOURCE_TYPE_ZZ.getCode().equals(o.getOutsourceType())) {
+//                    o.setExportRemark(exportRemark + OUTSOURCE_ERROR_REMARK);
+//                }
+//            }
             sucObjectDto.setObject(o);
             successDtos.add(sucObjectDto);
         });
