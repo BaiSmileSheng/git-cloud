@@ -136,7 +136,7 @@ public class OmsProductDifferenceServiceImpl extends BaseServiceImpl<OmsProductD
             //计算差异量
             BigDecimal differenceNum = productNum.subtract(realOrderNum);
             //排产率
-            String productivity = productNum.divide(realOrderNum,2,BigDecimal.ROUND_DOWN) + "%";
+            String productivity = productNum.divide(realOrderNum,2,BigDecimal.ROUND_DOWN).multiply(new BigDecimal("100")) + "%";
             OmsProductDifference omsProductDifference = OmsProductDifference.builder()
                     .productFactoryCode(omsRealOrder.getProductFactoryCode())
                     .productMaterialCode(omsRealOrder.getProductMaterialCode())
