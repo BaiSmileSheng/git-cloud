@@ -379,7 +379,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             inputTable.setValue("BKTXT", StrUtil.concat(true,smsSupplementaryOrder.getSupplierCode(),smsSupplementaryOrder.getStuffNo()));//凭证抬头文本  V码+物耗单号
             inputTable.setValue("WERKS", smsSupplementaryOrder.getFactoryCode());//工厂
             inputTable.setValue("LGORT", smsSupplementaryOrder.getStation());//库存地点/工位
-//            inputTable.setValue("CHARG", smsSupplementaryOrder.getAssessType());//批号/评估类型
+            inputTable.setValue("CHARG", smsSupplementaryOrder.getAssessType());//批号/评估类型
             inputTable.setValue("MATNR", smsSupplementaryOrder.getRawMaterialCode().toUpperCase());//物料号
             inputTable.setValue("ERFME", smsSupplementaryOrder.getStuffUnit());//基本计量单位
             inputTable.setValue("ERFMG", smsSupplementaryOrder.getStuffAmount());//数量
