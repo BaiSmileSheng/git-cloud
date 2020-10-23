@@ -101,7 +101,7 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
         }
         List<SysUserVo> users=rUser.getCollectData(new TypeReference<List<SysUserVo>>() {});
         //发送邮件通知
-//        sendEmail(smsSupplementaryOrder.getStuffNo(),users);
+        sendEmail(smsSupplementaryOrder.getStuffNo(),users);
         Set<String> userIds = users.stream().map(user->user.getUserId().toString()).collect(Collectors.toSet());
         bizBusinessService.startProcess(business, variables,userIds);
         return R.ok("提交成功！");
@@ -275,7 +275,7 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
             List<SysUserVo> users = rUser.getCollectData(new TypeReference<List<SysUserVo>>() {
             });
             //发送邮件通知
-//            sendEmail(smsSupplementaryOrder.getStuffNo(),users);
+            sendEmail(smsSupplementaryOrder.getStuffNo(),users);
             Set<String> userIds = users.stream().map(user -> user.getUserId().toString()).collect(Collectors.toSet());
             return actTaskService.auditCandidateUser(bizAudit, userId,userIds);
         }else{
