@@ -1,5 +1,6 @@
 package com.cloud.job.executor.service.jobhandler;
 
+import com.cloud.common.exception.BusinessException;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteUserService;
 import com.xxl.job.core.biz.model.ReturnT;
@@ -74,8 +75,7 @@ public class SampleXxlJob {
                 XxlJobLogger.log("第 {} 片, 忽略", i);
             }
         }
-
-        return ReturnT.SUCCESS;
+        throw new BusinessException("测试错误！");
     }
 
 
