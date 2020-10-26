@@ -60,6 +60,8 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
     @Autowired
     private DataSourceTransactionManager dstManager;
 
+
+
     @Value("${spring.datasource.driverClassName}")
     private String driverClassName;
 
@@ -467,6 +469,8 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
     @Transactional
     @Override
     public R sycBomInfo() {
+        //记录信息
+        StringBuffer msg = new StringBuffer("bom获取成功！");
         //1.获取工厂全部信息cd_factory_info
         Example exampleFactoryInfo = new Example(CdFactoryInfo.class);
         List<CdFactoryInfo> cdFactoryInfoList = cdFactoryInfoService.selectByExample(exampleFactoryInfo);
@@ -499,10 +503,12 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                 R result = queryBomInfoFromSap601(Arrays.asList(factoryCode), materials,SapConstants.ABAP_AS_SAP601_MUL);
                 if (!result.isSuccess()) {
                     log.error("连接SAP获取BOM数据异常 factoryCode:{},materials:{},res:{}", factoryCode, materials, JSONObject.toJSON(result));
+                    msg.append(StrUtil.format("连接SAP获取BOM数据异常 factoryCode:{},materials:{},res:{}", factoryCode, materials, JSONObject.toJSON(result)));
                     continue;
                 }
                 List<CdBomInfo> cdBomInfoList = (List<CdBomInfo>) result.get("data");
                 log.info("获取SAP的bom数据size:{}",cdBomInfoList.size());
+                msg.append(StrUtil.format("获取SAP的bom数据size:{}",cdBomInfoList.size()));
                 deleteFlag++;
                 if (deleteFlag == 1) {
                     insertBomDb(cdBomInfoList, Boolean.TRUE);
@@ -512,7 +518,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
             }
         }
         log.info("定时获取BOM清单数据结束");
-        return R.ok();
+        return R.ok(msg.toString());
     }
 
 
