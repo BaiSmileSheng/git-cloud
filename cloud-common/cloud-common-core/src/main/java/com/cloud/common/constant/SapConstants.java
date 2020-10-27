@@ -20,6 +20,14 @@ public class SapConstants {
     public static final String SAP_RESULT_TYPE_FAIL = "E";
 
 
+    /**
+     * Y61接口 0 校验  1过账
+     */
+    public static final String SAP_Y61_FLAG_JY = "0";
+
+    public static final String SAP_Y61_FLAG_GZ = "1";
+
+
     /**================卡奥斯SAP系统连接  start====================**/
     /**
      * 卡奥斯SAP系统连接

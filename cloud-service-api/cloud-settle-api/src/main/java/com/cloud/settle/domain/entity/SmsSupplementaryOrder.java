@@ -231,4 +231,10 @@ public class SmsSupplementaryOrder extends BaseEntity {
     @Transient
     private String procName;
 
+    /**
+     * 传Y61 0、校验  1、过账
+     */
+    @Transient
+    private String sapFlag;
+
 }
