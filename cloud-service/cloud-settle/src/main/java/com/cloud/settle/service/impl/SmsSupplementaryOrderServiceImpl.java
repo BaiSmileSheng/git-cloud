@@ -370,7 +370,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
                 throw new RuntimeException("Function does not exists in SAP system.");
             }
             JCoParameterList input = fm.getImportParameterList();
-            input.setValue("FLAG_GZ","1");
+            input.setValue("FLAG_GZ",smsSupplementaryOrder.getSapFlag());//0 校验  1过账
             //获取输入参数
             JCoTable inputTable = fm.getTableParameterList().getTable("T_INPUT");
             //附加表的最后一个新行,行指针,它指向新添加的行。
