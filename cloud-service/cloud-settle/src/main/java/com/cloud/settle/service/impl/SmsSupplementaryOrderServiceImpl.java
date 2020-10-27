@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.cloud.activiti.feign.RemoteActTaskService;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
@@ -23,6 +24,7 @@ import com.cloud.system.enums.PriceTypeEnum;
 import com.cloud.system.enums.SettleRatioEnum;
 import com.cloud.system.feign.*;
 import com.sap.conn.jco.*;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -67,7 +70,11 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
     @Autowired
     private RemoteInterfaceLogService remoteInterfaceLogService;
     @Autowired
-    private RemoteDictDataService remoteDictDataService;
+    private RemoteActTaskService remoteActTaskService;
+
+
+
+
     /**
      * 编辑保存物耗申请单功能  --有逻辑校验
      * @param smsSupplementaryOrder
@@ -79,7 +86,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         Long id = smsSupplementaryOrder.getId();
         log.info(StrUtil.format("物耗申请修改保存开始：参数为{}", smsSupplementaryOrder.toString()));
         //校验状态是否是未提交
-        R rCheckStatus = checkCondition(id);
+        R rCheckStatus = checkConditionCommit(id);
         SmsSupplementaryOrder smsSupplementaryOrderCheck = (SmsSupplementaryOrder) rCheckStatus.get("data");
         //校验
         R rCheck = checkSmsSupplementaryOrderCondition(smsSupplementaryOrder, smsSupplementaryOrderCheck.getProductOrderCode(),smsSupplementaryOrderCheck.getFactoryCode());
@@ -112,14 +119,31 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
      * @return
      */
     @Override
+    @GlobalTransactional
     public R remove(String ids) {
         log.info(StrUtil.format("物耗申请删除开始：id为{}", ids));
         if (StringUtils.isBlank(ids)) {
             throw new BusinessException("传入参数不能为空！");
         }
+        //如果已生成审批流信息需删除
+        List<String> shStatus = CollUtil.newArrayList(
+                SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode(),
+                SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode());
         for (String id : ids.split(",")) {
-            //校验状态是否是未提交
-            checkCondition(Long.valueOf(id));
+            //校验状态是否已传SAP
+            R rCheck = checkConditionRemove(Long.valueOf(id));
+            SmsSupplementaryOrder supplementaryOrder = rCheck.getData(SmsSupplementaryOrder.class);
+            if (CollUtil.contains(shStatus, supplementaryOrder.getStuffStatus())) {
+                //删除审批信息
+                Map<String,Object> map = new HashMap<>();
+                List<String> orderCodeList = CollUtil.newArrayList(supplementaryOrder.getStuffNo());
+                map.put("userName","物耗删除同时删除审批流");
+                map.put("orderCodeList",orderCodeList);
+                R deleteActMap = remoteActTaskService.deleteByOrderCode(map);
+                if (!deleteActMap.isSuccess()){
+                    throw new BusinessException("删除审批流程失败，原因："+deleteActMap.get("msg"));
+                }
+            }
         }
         int rows = deleteByIds(ids);
         return rows > 0 ? R.ok() : R.error("删除错误！");
@@ -529,7 +553,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
      * @param id
      * @return 返回SmsSupplementaryOrder信息
      */
-    public R checkCondition(Long id) {
+    public R checkConditionCommit(Long id) {
         if (id == null) {
             throw new BusinessException("ID不能为空！");
         }
@@ -539,6 +563,31 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         }
         if (!SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DTJ.getCode().equals(smsSupplementaryOrderCheck.getStuffStatus())) {
             throw new BusinessException("已提交的数据不能操作！");
+        }
+        return R.data(smsSupplementaryOrderCheck);
+    }
+
+    /**
+     * 校验状态是否已传SAP，如果是则抛出错误
+     *
+     * @param id
+     * @return 返回SmsSupplementaryOrder信息
+     */
+    public R checkConditionRemove(Long id) {
+        if (id == null) {
+            throw new BusinessException("ID不能为空！");
+        }
+        SmsSupplementaryOrder smsSupplementaryOrderCheck = selectByPrimaryKey(id);
+        if (smsSupplementaryOrderCheck == null) {
+            throw new BusinessException("未查询到此数据！");
+        }
+        List<String> canStatus = CollUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DTJ.getCode(),
+                SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode(),
+                SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITBH.getCode(),
+                SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode(),
+                SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZBH.getCode());
+        if (!CollUtil.contains(canStatus,smsSupplementaryOrderCheck.getStuffStatus())) {
+            throw new BusinessException("已传SAP的数据不能操作！");
         }
         return R.data(smsSupplementaryOrderCheck);
     }
