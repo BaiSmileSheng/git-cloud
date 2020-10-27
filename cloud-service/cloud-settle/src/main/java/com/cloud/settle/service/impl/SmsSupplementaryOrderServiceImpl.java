@@ -435,7 +435,6 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
                         smsSupplementaryOrder.setSapResult(outTableOutput.getString("FLAG"));
                         smsSupplementaryOrder.setSapDate(date);
                         smsSupplementaryOrder.setSapRemark(outTableOutput.getString("MESSAGE"));
-                        smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode());
                         return R.data(smsSupplementaryOrder);
                     }else {
                         //获取失败
