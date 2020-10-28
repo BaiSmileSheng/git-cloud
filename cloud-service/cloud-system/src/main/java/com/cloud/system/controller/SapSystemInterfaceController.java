@@ -78,13 +78,6 @@ public class SapSystemInterfaceController {
         } catch (Exception e) {
             msg.append("bom获取失败："+e.getMessage());
             throw e;
-        }finally {
-            List<String> emailList = CollUtil.newArrayList("721666450@qq.com","litq@mvasoft.com","houzj@mvasoft.com");
-            for(String email : emailList){
-                String subject = "BOM定时任务执行情况";
-                String content = msg.toString();
-                mailService.sendTextMail(email,subject,content);
-            }
         }
         return r;
     }
