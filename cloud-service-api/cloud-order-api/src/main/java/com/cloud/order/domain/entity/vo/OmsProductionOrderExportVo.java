@@ -273,5 +273,11 @@ public class OmsProductionOrderExportVo {
     @ApiModelProperty(value = "加工费")
     private BigDecimal processCost;
 
+    /**
+     * 生成延期索赔标记
+     */
+    @ApiModelProperty(value = "生成延期索赔标记",notes = "0:无需生成,1:待生成,2.已生成")
+    private String delaysFlag;
+
 
 }

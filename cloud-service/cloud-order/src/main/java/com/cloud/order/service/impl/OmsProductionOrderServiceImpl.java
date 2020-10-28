@@ -533,6 +533,14 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         Map<String, List<CdBomInfo>> bomMap =
                 bomInfoList.stream().collect(Collectors.groupingBy((bom) -> getBomGroupKey(bom)));
         listImport.forEach(o -> {
+            //更新排产订单的延期索赔状态
+            //自制的排产订单更新成无需生成（0）
+            if (OutSourceTypeEnum.OUT_SOURCE_TYPE_ZZ.getCode().equals(o.getOutsourceType())){
+                o.setDelaysFlag(ProductionOrderDelaysFlagEnum.PRODUCTION_ORDER_DELAYS_FLAG_0.getCode());
+            } else {
+                //加工承揽的排产订单更新成初始（3）
+                o.setDelaysFlag(ProductionOrderDelaysFlagEnum.PRODUCTION_ORDER_DELAYS_FLAG_3.getCode());
+            }
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
             //应王福丽要求8310工厂36号线不用校验是否可以加工承揽   2020-09-08
             if ((!ProductOrderConstants.NEW_FACTORY_CODE.equals(o.getProductFactoryCode())
