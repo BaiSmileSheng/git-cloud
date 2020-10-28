@@ -304,6 +304,8 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
             logger.error("修改排产订单延期索赔标记失败:{}",resultUpdate.getStr("msg"));
             throw new BusinessException("修改排产订单延期索赔标记失败"+resultUpdate.getStr("msg"));
         }
+        //把delaysFlag=3、已关单、实际结束日期与基本开始日期小于等于7的数据更改把delaysFlag为0
+        remoteProductionOrderService.updateNoNeedDelays();
         return smsDelaysDeliveryList;
     }
 

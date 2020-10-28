@@ -39,6 +39,16 @@ public class RemoteProductionOrderFallbackFactory implements FallbackFactory<Rem
                 log.error("RemoteProductionOrderService.listForDelays(生产订单)错误信息：{}",throwable.getMessage());
                 return R.error("服务拥挤请稍后再试");
             }
+
+            /**
+             * 把delaysFlag=3、已关单、实际结束日期与基本开始日期小于等于7的数据更改把delaysFlag为0
+             */
+            @Override
+            public R updateNoNeedDelays() {
+                log.error("RemoteProductionOrderService.updateNoNeedDelays错误信息：{}",throwable.getMessage());
+                return R.error("服务拥挤请稍后再试");
+            }
+
             /**
              * Description:  根据id查询排产订单
              * Param: [id]
