@@ -79,6 +79,7 @@ public class ActSmsSupplementaryOrderActController extends BaseController {
     @PostMapping("audit")
     @ApiOperation(value = "物耗流程审批 ", response = R.class)
     @HasPermissions("settle:supplementary:audit")
+    @OperLog(title = "物耗审核审批", businessType = BusinessType.UPDATE)
     public R audit(@RequestBody BizAudit bizAudit) {
         return actSmsSupplementaryOrderService.audit(bizAudit,getCurrentUserId());
     }

@@ -76,6 +76,7 @@ public class ActSmsScrapOrderActController extends BaseController {
     @PostMapping("audit")
     @ApiOperation(value = "报废流程审批 ", response = R.class)
     @HasPermissions("settle:scrapOrder:audit")
+    @OperLog(title = "报废审核开启流程(列表提交)", businessType = BusinessType.UPDATE)
     public R audit(@RequestBody BizAudit bizAudit) {
         //审核
         return actSmsScrapOrderService.audit(bizAudit,getCurrentUserId());
