@@ -1,6 +1,8 @@
 package com.cloud.order.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -36,6 +38,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 排产订单  提供者
@@ -158,12 +161,35 @@ public class OmsProductionOrderController extends BaseController {
     public R listForDelays(){
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("delaysFlag", ProductionOrderDelaysFlagEnum.PRODUCTION_ORDER_DELAYS_FLAG_1.getCode());
+        //查询delaysFlag为3的数据
+        //关单：判断实际结束日期与开始日期是否同月或是否大于7天
+        //未关单：判断当前日期与开始日期是否同月或是否大于7天
+        criteria.andEqualTo("delaysFlag", ProductionOrderDelaysFlagEnum.PRODUCTION_ORDER_DELAYS_FLAG_3.getCode());
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderService.selectByExample(example);
-        //避免没有数据报错
-        R result = new R();
-        result.put("data",omsProductionOrderList);
-        return result;
+        List<OmsProductionOrder> listGD = omsProductionOrderList.stream().filter(o ->
+                ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode().equals(o.getStatus()))
+                .collect(Collectors.toList());
+        List<OmsProductionOrder> listGDDelays=listGD.stream().filter(o ->
+                        DateUtil.between(o.getActualEndDate(), DateUtil.parseDate(o.getProductStartDate()), DateUnit.DAY) > 7
+                                || DateUtil.month(o.getActualEndDate()) != DateUtil.month(DateUtil.parseDate(o.getProductStartDate())))
+                .collect(Collectors.toList());
+        List<OmsProductionOrder> listWGD = omsProductionOrderList.stream().filter(o ->
+                !ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode().equals(o.getStatus()) &&
+                        (DateUtil.between(DateUtil.date(), DateUtil.parseDate(o.getProductStartDate()), DateUnit.DAY) > 7
+                                || DateUtil.thisMonth() != DateUtil.month(DateUtil.parseDate(o.getProductStartDate()))))
+                .collect(Collectors.toList());
+        listGDDelays.addAll(listWGD);
+        return R.data(listGDDelays);
+    }
+
+    /**
+     * 把delaysFlag=3、已关单、实际结束日期与基本开始日期小于等于7的数据更改把delaysFlag为0
+     * @return
+     */
+    @GetMapping("updateNoNeedDelays")
+    @ApiOperation(value = "更新不需要延期索赔的生产订单flag", response = OmsProductionOrder.class)
+    public R updateNoNeedDelays(){
+        return toAjax(omsProductionOrderService.updateDelaysFlag());
     }
 
     /**

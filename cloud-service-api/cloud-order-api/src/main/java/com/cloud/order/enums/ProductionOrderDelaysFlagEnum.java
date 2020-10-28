@@ -11,6 +11,7 @@ public enum ProductionOrderDelaysFlagEnum {
     PRODUCTION_ORDER_DELAYS_FLAG_0("0","无需生成"),
     PRODUCTION_ORDER_DELAYS_FLAG_1("1","待生成"),
     PRODUCTION_ORDER_DELAYS_FLAG_2("2","已生成"),
+    PRODUCTION_ORDER_DELAYS_FLAG_3("3","初始"),
     ;
     private String code;
     private String msg;

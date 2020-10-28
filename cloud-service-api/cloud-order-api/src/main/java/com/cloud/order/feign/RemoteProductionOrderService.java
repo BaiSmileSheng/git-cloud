@@ -34,6 +34,13 @@ public interface RemoteProductionOrderService {
      */
     @GetMapping("productionOrder/listForDelays")
     R listForDelays();
+
+    /**
+     * 把delaysFlag=3、已关单、实际结束日期与基本开始日期小于等于7的数据更改把delaysFlag为0
+     */
+    @GetMapping("productionOrder/updateNoNeedDelays")
+    R updateNoNeedDelays();
+
     /**
      * 根据ID查询
      * @param id

@@ -1,4 +1,5 @@
 package com.cloud.order.service.impl;
+import java.util.List;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
@@ -2562,24 +2563,6 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 smsSettleInfo.setActualEndDate(omsProductionOrder.getActualEndDate());
                 smsSettleInfo.setOrderStatus(SettleInfoOrderStatusEnum.ORDER_STATUS_2.getCode());
                 omsProductionOrder.setStatus(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
-
-                if(OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode().equals(omsProductionOrderRes.getOutsourceType())
-                    ||OutSourceTypeEnum.OUT_SOURCE_TYPE_QWW.getCode().equals(omsProductionOrderRes.getOutsourceType())){
-                    Date productStartDate = StringUtils.isBlank(omsProductionOrderRes.getProductStartDate()) ?
-                            null : DateUtils.dateTime(YYYY_MM_DD,omsProductionOrderRes.getProductStartDate());
-                    Date productStartDateAfter7 = DateUtils.dayOffset(productStartDate,7);
-                    //延期索赔标记  更改2020-09-18 wangfuli    基本开始日期+7 < 实际结束时间  或 基本开始日期与实际结束时间不是同一个月
-                    int productStartDateMouth = DateUtils.getMonth(productStartDate);
-                    int actualEndDateMouth = DateUtils.getMonth(omsProductionOrder.getActualEndDate());
-                    Boolean flag = productStartDateAfter7.before(omsProductionOrder.getActualEndDate()) || productStartDateMouth != actualEndDateMouth;
-                    if(flag){
-                        omsProductionOrder.setDelaysFlag(ProductionOrderDelaysFlagEnum.PRODUCTION_ORDER_DELAYS_FLAG_1.getCode());
-                    }else {
-                        omsProductionOrder.setDelaysFlag(ProductionOrderDelaysFlagEnum.PRODUCTION_ORDER_DELAYS_FLAG_0.getCode());
-                    }
-                }else{
-                    omsProductionOrder.setDelaysFlag(ProductionOrderDelaysFlagEnum.PRODUCTION_ORDER_DELAYS_FLAG_0.getCode());
-                }
             }else{
                 omsProductionOrder.setActualEndDate(null);
             }
@@ -2770,4 +2753,16 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         }
         return R.data(actBusinessVoList);
     }
+
+    /**
+     * 把delaysFlag=3、已关单、实际结束日期与基本开始日期小于等于7的数据更改把delaysFlag为0
+     * @return
+     */
+	@Override
+	public int updateDelaysFlag(){
+		 return omsProductionOrderMapper.updateDelaysFlag();
+	}
+
+
+
 }
