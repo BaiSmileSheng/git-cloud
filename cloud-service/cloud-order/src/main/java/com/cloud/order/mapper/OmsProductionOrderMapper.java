@@ -72,4 +72,12 @@ public interface OmsProductionOrderMapper extends BaseMapper<OmsProductionOrder>
      * @return
      */
     int batchUpdateByProductOrderCode(List<OmsProductionOrder> list);
+
+    /**
+     * 把delaysFlag=3、已关单、实际结束日期与基本开始日期小于等于7的数据更改把delaysFlag为0
+     * @return
+     */
+    int updateDelaysFlag();
+
+
 }

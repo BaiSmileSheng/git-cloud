@@ -10,12 +10,15 @@ import com.cloud.activiti.consts.ActivitiTableNameConstants;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
+import com.cloud.activiti.mail.MailService;
 import com.cloud.activiti.service.IActSmsScrapOrderService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
+import com.cloud.common.constant.EmailConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.common.utils.StringUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.feign.RemoteProductionOrderService;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
@@ -51,6 +54,8 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
     private IActTaskService actTaskService;
     @Autowired
     private RemoteProductionOrderService remoteProductionOrderService;
+    @Autowired
+    private MailService mailService;
 
 
     /**
@@ -104,6 +109,8 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         SysUser createUser=remoteUserService.selectSysUserByUsername(createBy);
         Set<String> userIds = CollectionUtil.set(false, createUser.getUserId().toString());
         bizBusinessService.startProcess(business, variables,userIds);
+        //发送邮件通知
+        sendEmail(smsScrapOrder.getScrapNo(),CollectionUtil.newArrayList(createUser));
 //        bizBusinessService.startProcess(business, variables);
         return R.ok("提交成功！");
     }
@@ -155,6 +162,9 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         SysUser createUser=remoteUserService.selectSysUserByUsername(createBy);
         Set<String> userIds = CollectionUtil.set(false, createUser.getUserId().toString());
         bizBusinessService.startProcess(business, variables,userIds);
+
+        //发送邮件通知
+        sendEmail(smsScrapOrder.getScrapNo(),CollectionUtil.newArrayList(createUser));
 //        bizBusinessService.startProcess(business, variables);
         return R.ok("提交成功！");
     }
@@ -192,17 +202,38 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         if (result) {
             //审批通过
             if (ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode().equals(smsScrapOrder.getScrapStatus())) {
-                //业务科审核通过传SAP
-                R r = remoteSmsScrapOrderService.autidSuccessToSAP261(smsScrapOrder);
-                if (!r.isSuccess()) {
-                    throw new BusinessException(r.getStr("msg"));
+                smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_DJS.getCode());
+                R rTask = actTaskService.audit(bizAudit, userId);
+                if (!rTask.isSuccess()) {
+                    throw new BusinessException(rTask.getStr("msg"));
                 }
             }else if(ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYSH.getCode().equals(smsScrapOrder.getScrapStatus())){
                 //排产员审核通过至业务科审核
                 smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode());
-                R r = remoteSmsScrapOrderService.update(smsScrapOrder);
-                if (!r.isSuccess()) {
-                    throw new BusinessException(r.getStr("msg"));
+                //审批 推进工作流
+                //指定下一审批人
+                R rUser = remoteUserService.selectUserByMaterialCodeAndRoleKey(smsScrapOrder.getFactoryCode()
+                        ,  RoleConstants.ROLE_KEY_YWK);
+                if (!rUser.isSuccess()) {
+                    log.error("报废审批失败，下一级审核人为空！");
+                    throw new BusinessException("报废审批失败，下一级审核人为空！");
+                }
+                List<SysUserVo> users = rUser.getCollectData(new TypeReference<List<SysUserVo>>() {
+                });
+                //发送邮件通知
+                try {
+                    sendEmail(smsScrapOrder.getScrapNo(),users.stream().map(o-> {
+                        SysUser sysUser = new SysUser();
+                        sysUser.setEmail(o.getEmail());
+                        return sysUser;
+                            }).collect(Collectors.toList()));
+                } catch (Exception e) {
+                    log.error("物耗审批发送邮件失败!{}", e);
+                }
+                Set<String> userIds = users.stream().map(user -> user.getUserId().toString()).collect(Collectors.toSet());
+                R rTask = actTaskService.auditCandidateUser(bizAudit, userId,userIds);
+                if (!rTask.isSuccess()) {
+                    throw new BusinessException(rTask.getStr("msg"));
                 }
             }else {
                 log.error(StrUtil.format("(报废)此状态数据不允许审核：{}", smsScrapOrder.getScrapStatus()));
@@ -212,33 +243,51 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
             //审批驳回
             if (ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode().equals(smsScrapOrder.getScrapStatus())) {
                 smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKBH.getCode());
-                R r = remoteSmsScrapOrderService.update(smsScrapOrder);
-                if (!r.isSuccess()) {
-                    throw new BusinessException(r.getStr("msg"));
-                }
             }else if(ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYSH.getCode().equals(smsScrapOrder.getScrapStatus())) {
                 smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYBH.getCode());
-                R r = remoteSmsScrapOrderService.update(smsScrapOrder);
-                if (!r.isSuccess()) {
-                    throw new BusinessException(r.getStr("msg"));
-                }
             } else {
                 log.error(StrUtil.format("(报废)此状态数据不允许审核：{}", smsScrapOrder.getScrapStatus()));
                 return R.error("此状态数据不允许审核！");
             }
+            R rTask = actTaskService.audit(bizAudit, userId);
+            if (!rTask.isSuccess()) {
+                throw new BusinessException(rTask.getStr("msg"));
+            }
         }
-        //审批 推进工作流
-        //指定下一审批人
-        R rUser = remoteUserService.selectUserByMaterialCodeAndRoleKey(smsScrapOrder.getFactoryCode()
-                ,  RoleConstants.ROLE_KEY_YWK);
-        if (!rUser.isSuccess()) {
-            log.error("报废审批失败，下一级审核人为空！");
-            throw new BusinessException("报废审批失败，下一级审核人为空！");
+        if (ScrapOrderStatusEnum.BF_ORDER_STATUS_DJS.getCode().equals(smsScrapOrder.getScrapStatus())) {
+            //业务科审核通过传SAP
+            R r = remoteSmsScrapOrderService.autidSuccessToSAP261(smsScrapOrder);
+            if (!r.isSuccess()) {
+                throw new BusinessException(r.getStr("msg"));
+            }
         }
-        List<SysUserVo> users = rUser.getCollectData(new TypeReference<List<SysUserVo>>() {
-        });
-        Set<String> userIds = users.stream().map(user -> user.getUserId().toString()).collect(Collectors.toSet());
-        return actTaskService.auditCandidateUser(bizAudit, userId,userIds);
+        R r = remoteSmsScrapOrderService.update(smsScrapOrder);
+        if (!r.isSuccess()) {
+            throw new BusinessException(r.getStr("msg"));
+        }
+        return R.ok();
+    }
+
+    /**
+     * 发送邮件
+     * @param scrapNo
+     * @param sysUserVoList
+     */
+    private void sendEmail(String scrapNo, List<SysUser> sysUserVoList) {
+        //校验邮件
+        for(SysUser sysUserVo : sysUserVoList){
+            String email = sysUserVo.getEmail();
+            if(StringUtils.isBlank(email)){
+                throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
+            }
+        }
+        //发送邮件
+        for(SysUser sysUserVo : sysUserVoList){
+            String email = sysUserVo.getEmail();
+            String subject = "报废申请单审批";
+            String content = "您有一条待办消息要处理!" + "报废申请单 单号:" + scrapNo +  EmailConstants.ORW_URL;
+            mailService.sendTextMail(email,subject,content);
+        }
     }
 
     /**
