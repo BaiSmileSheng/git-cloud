@@ -337,15 +337,16 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
                     //审批驳回
                     omsProductionOrder.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_THREE);
                 }
+                //更新排产订单的状态
+                R r = remoteProductionOrderService.editSave(omsProductionOrder);
+                if (!r.isSuccess()) {
+                    log.error("排产订单审批流程更新排产订单的状态失败，原因："+r.get("msg"));
+                    throw new BusinessException("排产订单审批流程更新排产订单的状态失败，原因："+r.get("msg"));
+                }
             }
         }
-        //更新
-        R r = remoteProductionOrderService.editSave(omsProductionOrder);
-        if (r.isSuccess()) {
-            return R.ok();
-        } else {
-            throw new BusinessException(r.getStr("msg"));
-        }
+        return R.ok();
+
     }
 
     @Override
