@@ -550,13 +550,13 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
                     }else {
                         //获取失败
                         sysInterfaceLog.setResults(StrUtil.format("SAP返回错误信息：{}",outTableOutput.getString("MESSAGE")));
-                        throw new BusinessException(StrUtil.format("发送SAP失败！原因：{}",outTableOutput.getString("MESSAGE")));
+                        return R.error(StrUtil.format("发送SAP失败！原因：{}",outTableOutput.getString("MESSAGE")));
                     }
                 }
             }
         } catch (JCoException e) {
             log.error("Connect SAP fault, error msg: " + e.toString());
-            throw new BusinessException(e.getMessage());
+            return R.error(e.getMessage());
         }finally {
             sysInterfaceLog.setDelFlag("0");
             sysInterfaceLog.setCreateBy("定时任务");
