@@ -52,6 +52,14 @@ spring:
             - Path=/act/**,/static/**
           filters:
             - StripPrefix=1
+              # 降级配置
+            - name: SpecialHystrix
+              args:
+                id: SpecialHystrix
+                fallbackUri: 'forward:/fallback'
+                timeout:
+                  actScrapOrder-audit: 10000
+                  actSmsSupplementaryOrder-audit: 10000
         #system 模块
         - id: cloud-system
           uri: lb://cloud-system
