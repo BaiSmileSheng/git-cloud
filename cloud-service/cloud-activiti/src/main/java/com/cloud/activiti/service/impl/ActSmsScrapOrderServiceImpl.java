@@ -110,7 +110,11 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         Set<String> userIds = CollectionUtil.set(false, createUser.getUserId().toString());
         bizBusinessService.startProcess(business, variables,userIds);
         //发送邮件通知
-        sendEmail(smsScrapOrder.getScrapNo(),CollectionUtil.newArrayList(createUser));
+        try {
+            sendEmail(smsScrapOrder.getScrapNo(),CollectionUtil.newArrayList(createUser));
+        } catch (Exception e) {
+            log.error("物耗审批发送邮件失败!{}", e);
+        }
 //        bizBusinessService.startProcess(business, variables);
         return R.ok("提交成功！");
     }
@@ -164,7 +168,11 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         bizBusinessService.startProcess(business, variables,userIds);
 
         //发送邮件通知
-        sendEmail(smsScrapOrder.getScrapNo(),CollectionUtil.newArrayList(createUser));
+        try {
+            sendEmail(smsScrapOrder.getScrapNo(),CollectionUtil.newArrayList(createUser));
+        } catch (Exception e) {
+            log.error("物耗审批发送邮件失败!{}", e);
+        }
 //        bizBusinessService.startProcess(business, variables);
         return R.ok("提交成功！");
     }
@@ -228,7 +236,7 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
                         return sysUser;
                             }).collect(Collectors.toList()));
                 } catch (Exception e) {
-                    log.error("物耗审批发送邮件失败!{}", e);
+                    log.error("报废发送邮件失败!{}", e);
                 }
                 Set<String> userIds = users.stream().map(user -> user.getUserId().toString()).collect(Collectors.toSet());
                 R rTask = actTaskService.auditCandidateUser(bizAudit, userId,userIds);
