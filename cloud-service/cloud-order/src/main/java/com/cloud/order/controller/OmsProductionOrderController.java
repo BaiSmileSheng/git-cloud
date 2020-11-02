@@ -170,13 +170,13 @@ public class OmsProductionOrderController extends BaseController {
                 ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode().equals(o.getStatus()))
                 .collect(Collectors.toList());
         List<OmsProductionOrder> listGDDelays=listGD.stream().filter(o ->
-                        DateUtil.between(o.getActualEndDate(), DateUtil.parseDate(o.getProductStartDate()), DateUnit.DAY) > 7
-                                || DateUtil.month(o.getActualEndDate()) != DateUtil.month(DateUtil.parseDate(o.getProductStartDate())))
+                        DateUtil.between(o.getActualEndDate(), DateUtil.parseDate(o.getProductStartDate()), DateUnit.DAY) > 6
+                                || DateUtil.month(o.getActualEndDate()) > DateUtil.month(DateUtil.parseDate(o.getProductStartDate())))
                 .collect(Collectors.toList());
         List<OmsProductionOrder> listWGD = omsProductionOrderList.stream().filter(o ->
                 !ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode().equals(o.getStatus()) &&
-                        (DateUtil.between(DateUtil.date(), DateUtil.parseDate(o.getProductStartDate()), DateUnit.DAY) > 7
-                                || DateUtil.thisMonth() != DateUtil.month(DateUtil.parseDate(o.getProductStartDate()))))
+                        (DateUtil.between(DateUtil.date(), DateUtil.parseDate(o.getProductStartDate()), DateUnit.DAY) > 6
+                                || DateUtil.thisMonth() > DateUtil.month(DateUtil.parseDate(o.getProductStartDate()))))
                 .collect(Collectors.toList());
         listGDDelays.addAll(listWGD);
         return R.data(listGDDelays);

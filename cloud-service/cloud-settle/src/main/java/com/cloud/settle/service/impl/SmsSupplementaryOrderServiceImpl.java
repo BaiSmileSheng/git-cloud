@@ -128,6 +128,8 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         //如果已生成审批流信息需删除
         List<String> shStatus = CollUtil.newArrayList(
                 SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode(),
+                SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITBH.getCode(),
+                SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZBH.getCode(),
                 SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode());
         for (String id : ids.split(",")) {
             //校验状态是否已传SAP
