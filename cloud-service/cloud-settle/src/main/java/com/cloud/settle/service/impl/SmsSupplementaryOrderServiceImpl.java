@@ -319,14 +319,14 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         if (smsSupplementaryOrderList != null) {
             for (SmsSupplementaryOrder smsSupplementaryOrder : smsSupplementaryOrderList) {
                 //根据工厂查询采购组织
-                String factCode = smsSupplementaryOrder.getFactoryCode();
-                R rFactoryInfo= remoteFactoryInfoService.selectOneByFactory(factCode);
-                if(!rFactoryInfo.isSuccess()){
-                    log.error(StrUtil.format("(物耗)物耗更新价格定时任务：公司信息为空参数为{}", factCode));
-                    throw new BusinessException(StringUtils.format("{}公司信息为空！",factCode));
-                }
-                CdFactoryInfo cdFactoryInfo = rFactoryInfo.getData(CdFactoryInfo.class);
-                CdMaterialPriceInfo cdMaterialPriceInfo = mapMaterialPrice.get(smsSupplementaryOrder.getRawMaterialCode()+cdFactoryInfo.getPurchaseOrg()+smsSupplementaryOrder.getSupplierCode()+PriceTypeEnum.PRICE_TYPE_0.getCode());
+//                String factCode = smsSupplementaryOrder.getFactoryCode();
+//                R rFactoryInfo= remoteFactoryInfoService.selectOneByFactory(factCode);
+//                if(!rFactoryInfo.isSuccess()){
+//                    log.error(StrUtil.format("(物耗)物耗更新价格定时任务：公司信息为空参数为{}", factCode));
+//                    throw new BusinessException(StringUtils.format("{}公司信息为空！",factCode));
+//                }
+//                CdFactoryInfo cdFactoryInfo = rFactoryInfo.getData(CdFactoryInfo.class);
+                CdMaterialPriceInfo cdMaterialPriceInfo = mapMaterialPrice.get(smsSupplementaryOrder.getRawMaterialCode()+PriceTypeEnum.PRICE_TYPE_0.getCode());
                 if (cdMaterialPriceInfo == null) {
                     //如果没有找到SAP价格，则更新备注
                     log.info(StrUtil.format("(月度结算定时任务)SAP价格未同步的物料号:{}", smsSupplementaryOrder.getRawMaterialCode()));

@@ -72,7 +72,7 @@
         purchasing_group,
         purchasing_organization,
         tax_code,
-        net_worth,
+        max(net_worth),
         kbetr,
         currency,
         price_unit,
@@ -87,7 +87,7 @@
         create_by,
         create_time,
         update_by,
-        update_time,CONCAT(material_code,purchasing_organization,member_code,price_type) as mapKey
+        update_time,CONCAT(material_code,price_type) as mapKey
         from cd_material_price_info
         where
         del_flag='0' and
