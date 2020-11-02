@@ -122,8 +122,8 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
                     cdMaterialExtendInfoService.batchMaterialInsertOrUpdate(cdMaterialExtendInfosInsertOrUpdate);
                 }
             } else {
-                log.error("接口获取物料主数据为空！");
-                return R.error("接口获取物料主数据为空！");
+                log.info("接口获取物料主数据为空！");
+                return R.ok("接口获取物料主数据为空！");
             }
         } else {
             log.error(r.get("msg").toString());
