@@ -210,6 +210,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             omsRawMaterialFeedbacks.forEach(f -> {
                 f.setStatus(FEEDBACK_STATUS_ONE);
                 f.setUpdateBy(sysUser.getLoginName());
+                f.setUpdateTime(new Date());
             });
         } else if (APPROVAL_FLAG_REJECT.equals(approvalFlag)) {
             //驳回
@@ -247,6 +248,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             omsRawMaterialFeedbacks.forEach(f -> {
                 f.setStatus(FEEDBACK_STATUS_TWO);
                 f.setUpdateBy(sysUser.getLoginName());
+                f.setUpdateTime(new Date());
             });
         }
         //更新排产订单明细状态
@@ -297,6 +299,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
                     && updateSum.compareTo(omsRawMaterialFeedback.getProductContentNum()) <= 0) {
                 omsRawMaterialFeedback.setUpdateBy(sysUser.getLoginName());
                 omsRawMaterialFeedback.setStatus(FEEDBACK_STATUS_ONE);
+                omsRawMaterialFeedback.setUpdateTime(new Date());
                 omsRawMaterialFeedbackMapper.updateByPrimaryKeySelective(omsRawMaterialFeedback);
             }
         }

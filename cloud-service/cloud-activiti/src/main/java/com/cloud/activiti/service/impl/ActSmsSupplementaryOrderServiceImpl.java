@@ -108,7 +108,11 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
         }
         List<SysUserVo> users=rUser.getCollectData(new TypeReference<List<SysUserVo>>() {});
         //发送邮件通知
-        sendEmail(smsSupplementaryOrder.getStuffNo(),users);
+        try {
+            sendEmail(smsSupplementaryOrder.getStuffNo(),users);
+        } catch (Exception e) {
+            log.error("物耗审批发送邮件失败!{}", e);
+        }
         Set<String> userIds = users.stream().map(user->user.getUserId().toString()).collect(Collectors.toSet());
         bizBusinessService.startProcess(business, variables,userIds);
         return R.ok("提交成功！");
@@ -213,7 +217,12 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
             throw new BusinessException("物耗审批开启失败，下一级审核人为空！");
         }
         List<SysUserVo> users=rUser.getCollectData(new TypeReference<List<SysUserVo>>() {});
-        sendEmail(smsSupplementaryOrderCheck.getStuffNo(),users);
+        try {
+            sendEmail(smsSupplementaryOrderCheck.getStuffNo(),users);
+        } catch (Exception e) {
+            log.error("物耗审批发送邮件失败!{}", e);
+        }
+
         Set<String> userIds = users.stream().map(user->user.getUserId().toString()).collect(Collectors.toSet());
         bizBusinessService.startProcess(business, variables,userIds);
         return R.ok("提交成功！");
