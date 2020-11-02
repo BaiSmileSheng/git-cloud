@@ -99,6 +99,7 @@
         <![CDATA[
         begin_date <= #{beginDate} and end_date>=#{endDate}
         ]]>
+        GROUP BY material_code
     </select>
     <delete id="deleteAll">
         DELETE FROM cd_material_price_info;
