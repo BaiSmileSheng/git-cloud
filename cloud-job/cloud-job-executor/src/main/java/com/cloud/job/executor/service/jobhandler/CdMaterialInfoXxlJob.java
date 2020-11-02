@@ -30,6 +30,7 @@ public class CdMaterialInfoXxlJob {
                 XxlJobLogger.log("==============定时任务执行异常============:"+r.get("msg"));
                 return ReturnT.FAIL;
             }
+            XxlJobLogger.log("=============="+r.get("msg")+"================");
             XxlJobLogger.log("==============调用保存物料主数据服务结束============");
         } catch (Exception e) {
             XxlJobLogger.log("定时任务执行异常："+e);
