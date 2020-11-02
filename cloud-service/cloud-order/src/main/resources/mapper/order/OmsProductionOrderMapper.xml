@@ -277,6 +277,9 @@
                 <if test="item.productLineCode != null and item.productLineCode != ''">
                     product_line_code = #{item.productLineCode},
                 </if>
+                <if test="item.remark != null and item.remark != ''">
+                    remark = CONCAT(remark,#{item.remark,jdbcType=VARCHAR},''),
+                </if>
             </trim>
             where order_code=#{item.orderCode}
         </foreach>

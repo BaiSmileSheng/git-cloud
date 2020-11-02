@@ -2504,14 +2504,31 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         if (CollectionUtils.isEmpty(listSapRes)) {
             return R.ok("订单刷新无需更新数据");
         }
+        List<SmsSettleInfo> smsSettleInfos = new ArrayList<>();
         listSapRes.forEach(omsProductionOrder -> {
             if ("S".equals(omsProductionOrder.getSapFlag())) {
                 omsProductionOrder.setNewVersion(omsProductionOrder.getBomVersion());
                 omsProductionOrder.setBomVersion("");
+                omsProductionOrder.setRemark(DateUtil.now() + "-订单刷新;");
+                SmsSettleInfo smsSettleInfo = SmsSettleInfo.builder()
+                        .productOrderCode(omsProductionOrder.getProductOrderCode())
+                        .productStartDate(DateUtil.parseDate(omsProductionOrder.getProductStartDate()))
+                        .productEndDate(DateUtil.parseDate(omsProductionOrder.getProductEndDate()))
+                        .bomVersion(omsProductionOrder.getNewVersion())
+                        .orderAmount(Integer.parseInt(omsProductionOrder.getProductNum().toString()))
+                        .build();
+                smsSettleInfo.setRemark(DateUtil.now() + "-订单刷新;");
+                smsSettleInfos.add(smsSettleInfo);
             }
         });
         //修改数据
         omsProductionOrderMapper.batchUpdateByOrderCode(listSapRes);
+        //更新加工结算信息表的数，根据生产订单号更新基本开始日期、基本结束日期
+        R r = remoteSettleInfoService.batchUpdateByProductOrderCode(smsSettleInfos);
+        if (!r.isSuccess()) {
+            log.error("====订单刷新更新加工结算表数据失败！====");
+            throw new BusinessException("订单刷新更新加工结算表数据失败！");
+        }
         return R.ok();
     }
 
