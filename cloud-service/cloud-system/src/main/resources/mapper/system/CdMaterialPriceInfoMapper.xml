@@ -72,7 +72,7 @@
         purchasing_group,
         purchasing_organization,
         tax_code,
-        max(net_worth),
+        max(net_worth) as net_worth,
         kbetr,
         currency,
         price_unit,
