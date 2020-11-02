@@ -42,8 +42,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class OmsProductDifferenceServiceImpl extends BaseServiceImpl<OmsProductDifference> implements IOmsProductDifferenceService {
     private static final String WEEK_TWO = "2";
-    private static final String WEEK_THREE = "3";
-    private static final String WEEK_SIX = "6";
+    private static final String WEEK_THREE = "4";
+    private static final String WEEK_SIX = "7";
     @Autowired
     private OmsProductDifferenceMapper omsProductDifferenceMapper;
     @Autowired
@@ -83,7 +83,7 @@ public class OmsProductDifferenceServiceImpl extends BaseServiceImpl<OmsProductD
         Example exampleReal = new Example(OmsRealOrder.class);
         Example.Criteria criteriaReal = exampleReal.createCriteria();
         criteriaReal.andGreaterThanOrEqualTo("createTime",weekTwo);
-        criteriaReal.andLessThanOrEqualTo("createTime",weekThree);
+        criteriaReal.andLessThan("createTime",weekThree);
         criteriaReal.andEqualTo("orderFrom","2");
         List<OmsRealOrder> omsRealOrderList = omsRealOrderService.selectByExample(exampleReal);
         if (ObjectUtil.isEmpty(omsRealOrderList) && omsRealOrderList.size() <= 0) {
@@ -101,7 +101,7 @@ public class OmsProductDifferenceServiceImpl extends BaseServiceImpl<OmsProductD
         Example exampleProd = new Example(OmsProductionOrder.class);
         Example.Criteria criteriaProd = exampleProd.createCriteria();
         criteriaProd.andGreaterThanOrEqualTo("createTime",weekTwo);
-        criteriaReal.andLessThanOrEqualTo("createTime",weekSix);
+        criteriaReal.andLessThan("createTime",weekSix);
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderService.selectByExample(exampleProd);
         //（3）根据生产工厂、专用号进行汇总
         Map<String, List<OmsProductionOrder>> prodGroupMap = omsProductionOrderList.stream().collect(Collectors.groupingBy(o ->fetchGroupKeyProd(o)));
@@ -140,7 +140,7 @@ public class OmsProductDifferenceServiceImpl extends BaseServiceImpl<OmsProductD
             OmsProductDifference omsProductDifference = OmsProductDifference.builder()
                     .productFactoryCode(omsRealOrder.getProductFactoryCode())
                     .productMaterialCode(omsRealOrder.getProductMaterialCode())
-                    .productType(productType)
+                    .productType(StrUtil.isNotBlank(productType) ? productType : null)
                     .weeks(StrUtil.toString(weeks))
                     .realOrderNum(realOrderNum)
                     .productNum(productNum)
