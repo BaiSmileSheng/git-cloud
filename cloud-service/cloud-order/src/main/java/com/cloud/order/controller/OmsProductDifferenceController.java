@@ -1,30 +1,30 @@
 package com.cloud.order.controller;
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.util.ObjectUtil;
+
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
+import com.cloud.common.constant.RoleConstants;
+import com.cloud.common.core.controller.BaseController;
+import com.cloud.common.core.domain.R;
+import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.order.domain.entity.OmsProductDifference;
 import com.cloud.order.domain.entity.vo.OmsProductDifferenceExportVo;
-import com.cloud.order.domain.entity.vo.OmsProductStatementExportVo;
+import com.cloud.order.service.IOmsProductDifferenceService;
+import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
-import io.swagger.annotations.*;
+import com.cloud.system.domain.entity.SysUser;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.cloud.common.core.domain.R;
-import com.cloud.common.core.controller.BaseController;
-import com.cloud.order.domain.entity.OmsProductDifference;
-import com.cloud.order.service.IOmsProductDifferenceService;
-import com.cloud.common.core.page.TableDataInfo;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 /**
  * 外单排产差异报表  提供者
@@ -66,7 +66,13 @@ public class OmsProductDifferenceController extends BaseController {
     })
     @HasPermissions("order:difference:list")
     public TableDataInfo list(OmsProductDifference omsProductDifference) {
+        SysUser sysUser = getUserInfo(SysUser.class);
         Example example = new Example(OmsProductDifference.class);
+        if (CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)
+                || CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_ORDER)
+                || CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_DDPT)) {
+            example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
+        }
         checkParams(example,omsProductDifference);
         startPage();
         List<OmsProductDifference> omsProductDifferenceList = omsProductDifferenceService.selectByExample(example);
