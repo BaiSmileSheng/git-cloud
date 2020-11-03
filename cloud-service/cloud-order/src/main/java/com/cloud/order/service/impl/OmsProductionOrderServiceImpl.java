@@ -2515,7 +2515,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                         .productStartDate(DateUtil.parseDate(omsProductionOrder.getProductStartDate()))
                         .productEndDate(DateUtil.parseDate(omsProductionOrder.getProductEndDate()))
                         .bomVersion(omsProductionOrder.getNewVersion())
-                        .orderAmount(Integer.parseInt(StrUtil.toString(omsProductionOrder.getProductNum())))
+                        .orderAmount(omsProductionOrder.getProductNum().intValue())
                         .build();
                 smsSettleInfo.setRemark(DateUtil.now() + "-订单刷新;");
                 smsSettleInfos.add(smsSettleInfo);
