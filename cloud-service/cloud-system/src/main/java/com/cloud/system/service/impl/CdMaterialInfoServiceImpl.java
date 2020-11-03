@@ -111,7 +111,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
                         cdMaterialExtendInfo.setEstablishDate(StrUtil.isNotBlank(rowRisk.getCREATED()) ? DateUtil.parse(rowRisk.getCREATED(),"yyyy-MM-dd HH:mm:ss") : null);
                         cdMaterialExtendInfo.setDelFlag("0");
                         cdMaterialExtendInfo.setIsPuttingOut(PuttingOutEnum.IS_PUTTING_OUT_1.getCode());
-                        cdMaterialExtendInfo.setIsGetStock(GetStockEnum.IS_GET_STOCK_0.getCode());
+                        cdMaterialExtendInfo.setIsGetStock(GetStockEnum.IS_GET_STOCK_1.getCode());
                         cdMaterialExtendInfo.setCreateBy("systemJob");
                         cdMaterialExtendInfo.setUpdateBy("systemJob");
                         cdMaterialExtendInfosInsertOrUpdate.add(cdMaterialExtendInfo);
