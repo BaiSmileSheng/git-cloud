@@ -83,8 +83,9 @@
     <select id="selectByMonthAndStatus" resultMap="SmsSupplementaryOrderResult">
         <include refid="selectSmsSupplementaryOrderVo"/>
         <where>
+            stuff_price = 0
             <if test="month != null">
-                DATE_FORMAT(sap_date, '%Y%m') = #{month}
+                AND DATE_FORMAT(sap_date, '%Y%m') = #{month}
             </if>
             AND stuff_status in
             <foreach collection="stuffStatus" item="status" open="(" separator="," close=")">
@@ -99,8 +100,9 @@
         DISTINCT raw_material_code
         from sms_supplementary_order
         <where>
+            stuff_price = 0
             <if test="month != null">
-                DATE_FORMAT(sap_date, '%Y%m') = #{month}
+                AND  DATE_FORMAT(sap_date, '%Y%m') = #{month}
             </if>
             AND stuff_status in
             <foreach collection="stuffStatus" item="status" open="(" separator="," close=")">
