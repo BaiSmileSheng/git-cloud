@@ -218,11 +218,12 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
         R rRes = remoteProductionOrderService.listForDelays();
         if (!rRes.isSuccess()) {
             logger.error("获取排产订单信息失败res:{}",JSONObject.toJSONString(rRes));
-            throw new BusinessException("获取排产订单信息失败" + rRes.get("msg").toString());
+            return new ArrayList<>();
+//            throw new BusinessException("获取排产订单信息失败" + rRes.get("msg").toString());
         }
         List<OmsProductionOrder> listRes = rRes.getCollectData(new TypeReference<List<OmsProductionOrder>>() {});
         if(CollectionUtils.isEmpty(listRes)){
-            return null;
+            return new ArrayList<>();
         }
         //获取付款公司
         R resultFactory = remoteFactoryInfoService.listAll();
