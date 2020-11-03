@@ -68,12 +68,7 @@ public class OmsProductDifferenceController extends BaseController {
     public TableDataInfo list(OmsProductDifference omsProductDifference) {
         SysUser sysUser = getUserInfo(SysUser.class);
         Example example = new Example(OmsProductDifference.class);
-        if (CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)
-                || CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_ORDER)
-                || CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_DDPT)) {
-            example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
-        }
-        checkParams(example,omsProductDifference);
+        checkParams(example,omsProductDifference,sysUser);
         startPage();
         List<OmsProductDifference> omsProductDifferenceList = omsProductDifferenceService.selectByExample(example);
         return getDataTable(omsProductDifferenceList);
@@ -126,8 +121,9 @@ public class OmsProductDifferenceController extends BaseController {
     })
     @HasPermissions("order:difference:export")
     public R export(@ApiIgnore OmsProductDifference omsProductDifference) {
+        SysUser sysUser = getUserInfo(SysUser.class);
         Example example = new Example(OmsProductDifference.class);
-        checkParams(example,omsProductDifference);
+        checkParams(example,omsProductDifference,sysUser);
         List<OmsProductDifference> omsProductDifferenceList = omsProductDifferenceService.selectByExample(example);
         String fileName = "外单排产差异报表.xlsx";
         return EasyExcelUtilOSS.writeExcel(omsProductDifferenceList, fileName, "sheet", new OmsProductDifferenceExportVo());
@@ -139,7 +135,7 @@ public class OmsProductDifferenceController extends BaseController {
     * Author: ltq
     * Date: 2020/9/30
     */
-    public void checkParams(Example example,OmsProductDifference omsProductDifference){
+    public void checkParams(Example example,OmsProductDifference omsProductDifference,SysUser sysUser){
         Example.Criteria criteria = example.createCriteria();
         if (StrUtil.isNotBlank(omsProductDifference.getProductFactoryCode())) {
             criteria.andEqualTo("productFactoryCode",omsProductDifference.getProductFactoryCode());
@@ -152,6 +148,11 @@ public class OmsProductDifferenceController extends BaseController {
         }
         if (StrUtil.isNotBlank(omsProductDifference.getWeeks())) {
             criteria.andEqualTo("weeks",omsProductDifference.getWeeks());
+        }
+        if (CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)
+                || CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_ORDER)
+                || CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_DDPT)) {
+            example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
         }
         example.orderBy("differenceNum").asc();
     }
