@@ -2,6 +2,7 @@ package com.cloud.system.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.cloud.common.config.thread.ThreadPoolConfig;
 import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 /**
@@ -53,9 +55,6 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
 
     @Autowired
     private ICdMaterialExtendInfoService cdMaterialExtendInfoService;
-
-    @Autowired
-    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @Autowired
     private DataSourceTransactionManager dstManager;
@@ -490,6 +489,10 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
         int materialExtendInfoCount = (int) Math.ceil(size / smallSize);
         //3.连接SAP获取数据
         int deleteFlag = 0; //删除bom表标记
+        ThreadPoolConfig config = new ThreadPoolConfig();
+        ThreadPoolTaskExecutor threadPoolTaskExecutor = config.threadPoolTaskExecutor();
+        threadPoolTaskExecutor.initialize();
+        final CountDownLatch countDownLatch = new CountDownLatch(cdFactoryInfoList.size()*materialExtendInfoCount);
         for (int z = 0; z < cdFactoryInfoList.size(); z++) {
             String factoryCode = cdFactoryInfoList.get(z).getFactoryCode();
             for (int i = 0; i < materialExtendInfoCount; i++) {
@@ -513,9 +516,26 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                 if (deleteFlag == 1) {
                     insertBomDb(cdBomInfoList, Boolean.TRUE);
                 } else {
-                    insertBomDb(cdBomInfoList, Boolean.FALSE);
+                    threadPoolTaskExecutor.newThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                insertBomDb(cdBomInfoList, Boolean.FALSE);
+                            } catch (Exception e) {
+                                StringWriter w = new StringWriter();
+                                e.printStackTrace(new PrintWriter(w));
+                                log.error("插入bom清单异常 e:{}", w.toString());
+                            }
+                        }
+                    }).start();
+//                    taskInsertBomDb(cdBomInfoList, Boolean.FALSE);
                 }
             }
+        }
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            throw new BusinessException("获取bom定时任务多线程错误！");
         }
         log.info("定时获取BOM清单数据结束");
         return R.ok(msg.toString());
@@ -528,20 +548,20 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
      * @param cdBomInfoList
      * @param flag
      */
-    private void taskInsertBomDb(final List<CdBomInfo> cdBomInfoList, final Boolean flag) {
-        threadPoolTaskExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    insertBomDb(cdBomInfoList, flag);
-                } catch (Exception e) {
-                    StringWriter w = new StringWriter();
-                    e.printStackTrace(new PrintWriter(w));
-                    log.error("插入bom清单异常 e:{}", w.toString());
-                }
-            }
-        });
-    }
+//    private void taskInsertBomDb(final List<CdBomInfo> cdBomInfoList, final Boolean flag) {
+//        threadPoolTaskExecutor.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    insertBomDb(cdBomInfoList, flag);
+//                } catch (Exception e) {
+//                    StringWriter w = new StringWriter();
+//                    e.printStackTrace(new PrintWriter(w));
+//                    log.error("插入bom清单异常 e:{}", w.toString());
+//                }
+//            }
+//        });
+//    }
 
     /**
      * 插入数据库
