@@ -297,7 +297,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
     @Transactional(rollbackFor=Exception.class)
     public R updatePriceEveryMonth(String month) {
         //查询指定月、待结算的物耗申请中的物料号  用途是查询SAP成本价 更新到物耗表
-        List<String> materialCodeList = smsSupplementaryOrderMapper.selectMaterialByMonthAndStatus(month, CollUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode()));
+        List<String> materialCodeList = smsSupplementaryOrderMapper.selectMaterialByMonthAndStatus(null, CollUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode()));
         Map<String, CdMaterialPriceInfo> mapMaterialPrice = new ConcurrentHashMap<>();
         if (materialCodeList != null) {
             log.info(StrUtil.format("(定时任务)物耗申请需要更新成本价格的物料号:{}", materialCodeList.toString()));
@@ -314,7 +314,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             throw new BusinessException("物耗索赔系数未维护！");
         }
         //取得计算月份、待结算的物耗申请数据
-        List<SmsSupplementaryOrder> smsSupplementaryOrderList = selectByMonthAndStatus(month, CollUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode()));
+        List<SmsSupplementaryOrder> smsSupplementaryOrderList = selectByMonthAndStatus(null, CollUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode()));
         //循环物耗，更新成本价格，计算索赔金额
         if (smsSupplementaryOrderList != null) {
             for (SmsSupplementaryOrder smsSupplementaryOrder : smsSupplementaryOrderList) {
