@@ -513,7 +513,7 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                 if (deleteFlag == 1) {
                     insertBomDb(cdBomInfoList, Boolean.TRUE);
                 } else {
-                    taskInsertBomDb(cdBomInfoList, Boolean.FALSE);
+                    insertBomDb(cdBomInfoList, Boolean.FALSE);
                 }
             }
         }
