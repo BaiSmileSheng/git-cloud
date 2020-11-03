@@ -227,7 +227,7 @@ public class SmsClaimOtherController extends BaseController {
      * @param ids 主键id
      * @return 提交结果成功或失败
      */
-    @HasPermissions("settle:claimOther:submit")
+    @HasPermissions("settle:claimOther:save")
     @PostMapping("submit")
     @OperLog(title = "提交其他索赔单", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "提交其他索赔单", response = R.class)

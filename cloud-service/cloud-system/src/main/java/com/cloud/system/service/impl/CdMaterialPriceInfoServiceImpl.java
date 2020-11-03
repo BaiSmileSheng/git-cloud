@@ -1,6 +1,7 @@
 package com.cloud.system.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.constant.SapConstants;
@@ -123,7 +124,7 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
 
         //1.查询sms_supplementary_order 待结算状态的物料编号 调SAP接口查原材料价格
         String createTimeStart = DateUtils.getMonthFirstTime(-1);
-        String createTimeEnd = DateUtils.getDate();
+        String createTimeEnd = DateUtil.now();
         R rMaterialList= remoteSmsSupplementaryOrderService.listByTime(createTimeStart,createTimeEnd);
         if (!rMaterialList.isSuccess()) {
             return rMaterialList;
