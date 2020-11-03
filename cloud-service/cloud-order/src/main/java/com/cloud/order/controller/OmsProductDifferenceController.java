@@ -1,13 +1,18 @@
 package com.cloud.order.controller;
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
+import com.cloud.common.constant.RoleConstants;
+import com.cloud.common.constant.UserConstants;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.order.domain.entity.vo.OmsProductDifferenceExportVo;
 import com.cloud.order.domain.entity.vo.OmsProductStatementExportVo;
+import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
+import com.cloud.system.domain.entity.SysUser;
 import io.swagger.annotations.*;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
@@ -25,6 +30,7 @@ import com.cloud.order.service.IOmsProductDifferenceService;
 import com.cloud.common.core.page.TableDataInfo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 /**
  * 外单排产差异报表  提供者
@@ -67,7 +73,8 @@ public class OmsProductDifferenceController extends BaseController {
     @HasPermissions("order:difference:list")
     public TableDataInfo list(OmsProductDifference omsProductDifference) {
         Example example = new Example(OmsProductDifference.class);
-        checkParams(example,omsProductDifference);
+        SysUser sysUser = getUserInfo(SysUser.class);
+        checkParams(example,omsProductDifference,sysUser);
         startPage();
         List<OmsProductDifference> omsProductDifferenceList = omsProductDifferenceService.selectByExample(example);
         return getDataTable(omsProductDifferenceList);
@@ -121,7 +128,8 @@ public class OmsProductDifferenceController extends BaseController {
     @HasPermissions("order:difference:export")
     public R export(@ApiIgnore OmsProductDifference omsProductDifference) {
         Example example = new Example(OmsProductDifference.class);
-        checkParams(example,omsProductDifference);
+        SysUser sysUser = getUserInfo(SysUser.class);
+        checkParams(example,omsProductDifference,sysUser);
         List<OmsProductDifference> omsProductDifferenceList = omsProductDifferenceService.selectByExample(example);
         String fileName = "外单排产差异报表.xlsx";
         return EasyExcelUtilOSS.writeExcel(omsProductDifferenceList, fileName, "sheet", new OmsProductDifferenceExportVo());
@@ -133,7 +141,7 @@ public class OmsProductDifferenceController extends BaseController {
     * Author: ltq
     * Date: 2020/9/30
     */
-    public void checkParams(Example example,OmsProductDifference omsProductDifference){
+    public void checkParams(Example example,OmsProductDifference omsProductDifference,SysUser sysUser){
         Example.Criteria criteria = example.createCriteria();
         if (StrUtil.isNotBlank(omsProductDifference.getProductFactoryCode())) {
             criteria.andEqualTo("productFactoryCode",omsProductDifference.getProductFactoryCode());
@@ -146,6 +154,12 @@ public class OmsProductDifferenceController extends BaseController {
         }
         if (StrUtil.isNotBlank(omsProductDifference.getWeeks())) {
             criteria.andEqualTo("weeks",omsProductDifference.getWeeks());
+        }
+        //排产员、订单经理、订单平台按照生产工厂查询
+        if (CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)
+                || CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_ORDER)
+                || CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_DDPT)) {
+            criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
         }
         example.orderBy("differenceNum").asc();
     }
