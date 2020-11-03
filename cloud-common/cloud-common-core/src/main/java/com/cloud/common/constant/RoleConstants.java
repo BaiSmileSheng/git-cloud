@@ -26,6 +26,7 @@ public class RoleConstants {
     public final static String ROLE_KEY_DDLRY = "DDLRY";//订单录入员
     public final static String ROLE_KEY_ZLPTSJTXGCS = "ZLPTSJTXGCS";//质量平台设计体系工程师
     public final static String ROLE_KEY_DDTJ = "DDTJ";//订单推进
+    public final static String ROLE_KEY_DDPT = "DDPT";//订单平台
 
 
 
