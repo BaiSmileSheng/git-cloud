@@ -487,55 +487,46 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
         double size = materialCodeList.size();
         double smallSize = SMALL_SIZE;
         int materialExtendInfoCount = (int) Math.ceil(size / smallSize);
+        insertBomDb(null, Boolean.TRUE);
         //3.连接SAP获取数据
-        int deleteFlag = 0; //删除bom表标记
         ThreadPoolConfig config = new ThreadPoolConfig();
         ThreadPoolTaskExecutor threadPoolTaskExecutor = config.threadPoolTaskExecutor();
         threadPoolTaskExecutor.initialize();
-        final CountDownLatch countDownLatch = new CountDownLatch(cdFactoryInfoList.size()*materialExtendInfoCount);
+        final CountDownLatch countDownLatch = new CountDownLatch(cdFactoryInfoList.size());
         for (int z = 0; z < cdFactoryInfoList.size(); z++) {
             String factoryCode = cdFactoryInfoList.get(z).getFactoryCode();
-            for (int i = 0; i < materialExtendInfoCount; i++) {
-                int startCont = (int) (i * SMALL_SIZE);
-                int nextI = i + 1;
-                int endCount = (int) (nextI * SMALL_SIZE);
-                if (endCount > materialExtendInfoList.size()) {
-                    endCount = materialExtendInfoList.size();
-                }
-                List<String> materials = materialCodeList.subList(startCont,endCount);
-                R result = queryBomInfoFromSap601(Arrays.asList(factoryCode), materials,SapConstants.ABAP_AS_SAP601_MUL);
-                if (!result.isSuccess()) {
-                    log.error("连接SAP获取BOM数据异常 factoryCode:{},materials:{},res:{}", factoryCode, materials, JSONObject.toJSON(result));
-                    msg.append(StrUtil.format("连接SAP获取BOM数据异常 factoryCode:{},materials:{},res:{}", factoryCode, materials, JSONObject.toJSON(result)));
-                    continue;
-                }
-                List<CdBomInfo> cdBomInfoList = (List<CdBomInfo>) result.get("data");
-                log.info("获取SAP的bom数据size:{}",cdBomInfoList.size());
-                msg.append(StrUtil.format("获取SAP的bom数据size:{}",cdBomInfoList.size()));
-                deleteFlag++;
-                if (deleteFlag == 1) {
-                    insertBomDb(cdBomInfoList, Boolean.TRUE);
-                } else {
-                    threadPoolTaskExecutor.newThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                insertBomDb(cdBomInfoList, Boolean.FALSE);
-                            } catch (Exception e) {
-                                StringWriter w = new StringWriter();
-                                e.printStackTrace(new PrintWriter(w));
-                                log.error("插入bom清单异常 e:{}", w.toString());
-                            }
+            threadPoolTaskExecutor.newThread(new Runnable() {
+                @Override
+                public void run() {
+                    log.info("获取bom数据工厂为:{}", factoryCode);
+                    for (int i = 0; i < materialExtendInfoCount; i++) {
+                        int startCont = (int) (i * SMALL_SIZE);
+                        int nextI = i + 1;
+                        int endCount = (int) (nextI * SMALL_SIZE);
+                        if (endCount > materialExtendInfoList.size()) {
+                            endCount = materialExtendInfoList.size();
                         }
-                    }).start();
-//                    taskInsertBomDb(cdBomInfoList, Boolean.FALSE);
+                        List<String> materials = materialCodeList.subList(startCont,endCount);
+                        R result = queryBomInfoFromSap601(Arrays.asList(factoryCode), materials,SapConstants.ABAP_AS_SAP601_MUL);
+                        if (!result.isSuccess()) {
+                            log.error("连接SAP获取BOM数据异常 factoryCode:{},materials:{},res:{}", factoryCode, materials, JSONObject.toJSON(result));
+                            msg.append(StrUtil.format("连接SAP获取BOM数据异常 factoryCode:{},materials:{},res:{}", factoryCode, materials, JSONObject.toJSON(result)));
+                            continue;
+                        }
+                        List<CdBomInfo> cdBomInfoList = (List<CdBomInfo>) result.get("data");
+                        log.info("获取SAP的bom数据size:{}",cdBomInfoList.size());
+                        msg.append(StrUtil.format("获取SAP的bom数据size:{}",cdBomInfoList.size()));
+                        insertBomDb(cdBomInfoList, Boolean.FALSE);
+                    }
+                    countDownLatch.countDown();
+                    log.info("工厂{}bom获取完成!", factoryCode);
                 }
-            }
+            }).start();
         }
         try {
             countDownLatch.await();
         } catch (InterruptedException e) {
-            throw new BusinessException("获取bom定时任务多线程错误！");
+            throw new BusinessException("bom定时任务多线程错误！");
         }
         log.info("定时获取BOM清单数据结束");
         return R.ok(msg.toString());
@@ -572,17 +563,12 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
     private void insertBomDb(final List<CdBomInfo> cdBomInfoList, final Boolean flag) {
 
         if (flag) {
-            DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW); // 事物隔离级别，开启新事务，这样会比较安全些。
-            TransactionStatus transaction = dstManager.getTransaction(def); // 获得事务状态
             try{
                 cdBomInfoService.deleteAll();
-                dstManager.commit(transaction);
             }catch (Exception e){
                 StringWriter w = new StringWriter();
                 e.printStackTrace(new PrintWriter(w));
                 log.error("删除bom清单异常 e:{}", w.toString());
-                dstManager.rollback(transaction);
                 throw new BusinessException("删除bom清单异常");
             }
         }
@@ -596,17 +582,12 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
                     endList = (int) length;
                 }
                 List<CdBomInfo> cdBomInfoListSub = cdBomInfoList.subList(startList,endList);
-                DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-                def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW); // 事物隔离级别，开启新事务，这样会比较安全些。
-                TransactionStatus transaction = dstManager.getTransaction(def); // 获得事务状态
                 try{
                     cdBomInfoService.insertList(cdBomInfoListSub);
-                    dstManager.commit(transaction);
                 }catch (Exception e){
                     StringWriter w = new StringWriter();
                     e.printStackTrace(new PrintWriter(w));
                     log.error("插入bom清单异常 e:{}", w.toString());
-                    dstManager.rollback(transaction);
                 }
             }
         }
