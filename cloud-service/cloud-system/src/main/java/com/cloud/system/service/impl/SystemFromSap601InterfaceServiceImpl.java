@@ -563,12 +563,17 @@ public class SystemFromSap601InterfaceServiceImpl implements SystemFromSap601Int
     private void insertBomDb(final List<CdBomInfo> cdBomInfoList, final Boolean flag) {
 
         if (flag) {
+            DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW); // 事物隔离级别，开启新事务，这样会比较安全些。
+            TransactionStatus transaction = dstManager.getTransaction(def); // 获得事务状态
             try{
                 cdBomInfoService.deleteAll();
+                dstManager.commit(transaction);
             }catch (Exception e){
                 StringWriter w = new StringWriter();
                 e.printStackTrace(new PrintWriter(w));
                 log.error("删除bom清单异常 e:{}", w.toString());
+                dstManager.rollback(transaction);
                 throw new BusinessException("删除bom清单异常");
             }
         }
