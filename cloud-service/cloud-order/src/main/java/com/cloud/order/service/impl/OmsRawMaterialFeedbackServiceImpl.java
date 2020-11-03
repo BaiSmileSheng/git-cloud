@@ -4,10 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.cloud.common.constant.ProductOrderConstants;
-import com.cloud.common.constant.RawMaterialFeedbackConstants;
-import com.cloud.common.constant.RoleConstants;
-import com.cloud.common.constant.UserConstants;
+import com.cloud.common.constant.*;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
@@ -15,6 +12,7 @@ import com.cloud.common.utils.bean.BeanUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.domain.entity.OmsProductionOrderDetail;
 import com.cloud.order.domain.entity.OmsRawMaterialFeedback;
+import com.cloud.order.mail.MailService;
 import com.cloud.order.mapper.OmsRawMaterialFeedbackMapper;
 import com.cloud.order.service.IOmsProductionOrderDetailService;
 import com.cloud.order.service.IOmsProductionOrderService;
@@ -22,7 +20,10 @@ import com.cloud.order.service.IOmsRawMaterialFeedbackService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.system.domain.entity.CdBomInfo;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteBomService;
+import com.cloud.system.feign.RemoteUserService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.index.qual.GTENegativeOne;
@@ -33,10 +34,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -63,7 +61,10 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
     private IOmsProductionOrderDetailService omsProductionOrderDetailService;
     @Autowired
     private RemoteBomService remoteBomService;
-
+    @Autowired
+    private RemoteUserService remoteUserService;
+    @Autowired
+    private MailService mailService;
 
     /**
      * Description:  反馈信息处理-分页查询
@@ -209,6 +210,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             omsRawMaterialFeedbacks.forEach(f -> {
                 f.setStatus(FEEDBACK_STATUS_ONE);
                 f.setUpdateBy(sysUser.getLoginName());
+                f.setUpdateTime(new Date());
             });
         } else if (APPROVAL_FLAG_REJECT.equals(approvalFlag)) {
             //驳回
@@ -246,6 +248,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             omsRawMaterialFeedbacks.forEach(f -> {
                 f.setStatus(FEEDBACK_STATUS_TWO);
                 f.setUpdateBy(sysUser.getLoginName());
+                f.setUpdateTime(new Date());
             });
         }
         //更新排产订单明细状态
@@ -296,6 +299,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
                     && updateSum.compareTo(omsRawMaterialFeedback.getProductContentNum()) <= 0) {
                 omsRawMaterialFeedback.setUpdateBy(sysUser.getLoginName());
                 omsRawMaterialFeedback.setStatus(FEEDBACK_STATUS_ONE);
+                omsRawMaterialFeedback.setUpdateTime(new Date());
                 omsRawMaterialFeedbackMapper.updateByPrimaryKeySelective(omsRawMaterialFeedback);
             }
         }
@@ -446,6 +450,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             criteria.andEqualTo("productMaterialCode", f.getProductMaterialCode());
             criteria.andEqualTo("bomVersion", f.getBomVersion());
             criteria.andEqualTo("status",FEEDBACK_STATUS_ZERO);
+            criteria.andEqualTo("delFlag",DeleteFlagConstants.NO_DELETED);
             OmsRawMaterialFeedback omsRawMaterialFeedback = omsRawMaterialFeedbackMapper.selectOneByExample(example);
             if (BeanUtil.isNotEmpty(omsRawMaterialFeedback)) {
                 log.error("数据库中存在了相同的反馈记录！");
@@ -511,6 +516,22 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             log.error("原材料反馈信息新增失败！");
             return R.error("原材料反馈信息新增失败!");
         }
+        //邮件通知对应排产员
+        String loginNames = omsRawMaterialFeedbacks
+                .stream().map(OmsRawMaterialFeedback::getProductPerson).distinct().collect(Collectors.joining(","));
+        //根据排产员工号查询用户信息
+        R userMap = remoteUserService.selectUserByLoginName(loginNames);
+        if (!userMap.isSuccess()){
+            log.error("JIT原材料反馈根据排产员工号查询用户信息失败，原因："+userMap.get("msg"));
+            throw new BusinessException("JIT原材料反馈根据排产员工号查询用户信息失败，原因："+userMap.get("msg"));
+        }
+        List<SysUserVo> sysUserList = userMap.getCollectData(new TypeReference<List<SysUserVo>>() {});
+        sysUserList.forEach(user ->{
+            log.info("JIT原材料反馈邮件通知开始~");
+            String email = user.getEmail();
+            String context = user.getUserName() + EmailConstants.RAW_FEEDBACK_CONTEXT + EmailConstants.ORW_URL;
+            mailService.sendTextMail(email, EmailConstants.TITLE_RAW_FEEDBACK, context);
+        });
         return R.ok();
     }
     /**

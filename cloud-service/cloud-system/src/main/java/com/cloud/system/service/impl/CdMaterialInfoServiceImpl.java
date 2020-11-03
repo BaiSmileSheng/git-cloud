@@ -111,7 +111,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
                         cdMaterialExtendInfo.setEstablishDate(StrUtil.isNotBlank(rowRisk.getCREATED()) ? DateUtil.parse(rowRisk.getCREATED(),"yyyy-MM-dd HH:mm:ss") : null);
                         cdMaterialExtendInfo.setDelFlag("0");
                         cdMaterialExtendInfo.setIsPuttingOut(PuttingOutEnum.IS_PUTTING_OUT_1.getCode());
-                        cdMaterialExtendInfo.setIsGetStock(GetStockEnum.IS_GET_STOCK_0.getCode());
+                        cdMaterialExtendInfo.setIsGetStock(GetStockEnum.IS_GET_STOCK_1.getCode());
                         cdMaterialExtendInfo.setCreateBy("systemJob");
                         cdMaterialExtendInfo.setUpdateBy("systemJob");
                         cdMaterialExtendInfosInsertOrUpdate.add(cdMaterialExtendInfo);
@@ -122,8 +122,8 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
                     cdMaterialExtendInfoService.batchMaterialInsertOrUpdate(cdMaterialExtendInfosInsertOrUpdate);
                 }
             } else {
-                log.error("接口获取物料主数据为空！");
-                return R.error("接口获取物料主数据为空！");
+                log.info("接口获取物料主数据为空！");
+                return R.ok("接口获取物料主数据为空！");
             }
         } else {
             log.error(r.get("msg").toString());
@@ -171,8 +171,13 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
                     outPage, outResult, outRetcode, outAllNum, outPageCon, pageAll, outRetmsg, onBatchId);
             //判断返回的状态
             if (!"S".equals(outRetcode.value)) {
-                log.error("获取物料主数据接口调用失败:" + outRetmsg.value);
-                return R.error("获取物料主数据接口调用失败:" + outRetmsg.value);
+                if (!outRetmsg.value.contains("无数据")) {
+                    log.error("获取物料主数据接口调用失败:" + outRetmsg.value);
+                    return R.error("获取物料主数据接口调用失败:" + outRetmsg.value);
+                } else {
+                    log.info("获取物料主数据接口执行结束:" + outRetmsg.value);
+                    return R.ok("获取物料主数据接口执行结束:" + outRetmsg.value);
+                }
             }
             //处理返回的xml字符串
             String xml1 = outResult.value.substring(0, outResult.value.indexOf("<NAME>"))

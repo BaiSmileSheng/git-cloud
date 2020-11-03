@@ -116,6 +116,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
     private static final String DATE_EXCEPTON = "基本开始日期不能大于基本结束日期";
 
+    private static final String OUTSOURCE_ERROR_REMARK = "加工承揽方式与线体属性不匹配";
+
     private final static String YYYY_MM_DD = "yyyy-MM-dd";//时间格式
 
     public final static String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
@@ -132,7 +134,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     private static final String[] parsePatterns = {"yyyy.MM.dd", "yyyy/MM/dd"};
     //无需评审采购组
     private static final String[] PURCHASE_GROUP = {"N99","C44","M02","N21","N97","N05"};
-
+    //工厂线体信息属性-OEM
+    private static final String FACOTRY_LINE_OUT_OEM = "3";
+    //工厂线体信息属性-自制
+    private static final String FACOTRY_LINE_OUT_ZZ = "1";
     @Value("${webService.findAllCodeForJIT.urlClaim}")
     private String urlClaim;
 
@@ -520,11 +525,22 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 o.setLifeCycle(m.getLifeCycle());
             }
         }));
-
+        //key 工厂+线体
+        Map<String, CdFactoryLineInfo> supplierMap = cdFactoryLineInfoList.stream().collect(toMap(cdFactoryLineInfo ->
+                        cdFactoryLineInfo.getProductFactoryCode() + cdFactoryLineInfo.getProduceLineCode(), cdFactoryLineInfo -> cdFactoryLineInfo,
+                (key1, key2) -> key2));
         //校验导入字段数据，设置导入失败原因
         Map<String, List<CdBomInfo>> bomMap =
                 bomInfoList.stream().collect(Collectors.groupingBy((bom) -> getBomGroupKey(bom)));
         listImport.forEach(o -> {
+            //更新排产订单的延期索赔状态
+            //自制的排产订单更新成无需生成（0）
+            if (OutSourceTypeEnum.OUT_SOURCE_TYPE_ZZ.getCode().equals(o.getOutsourceType())){
+                o.setDelaysFlag(ProductionOrderDelaysFlagEnum.PRODUCTION_ORDER_DELAYS_FLAG_0.getCode());
+            } else {
+                //加工承揽的排产订单更新成初始（3）
+                o.setDelaysFlag(ProductionOrderDelaysFlagEnum.PRODUCTION_ORDER_DELAYS_FLAG_3.getCode());
+            }
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
             //应王福丽要求8310工厂36号线不用校验是否可以加工承揽   2020-09-08
             if ((!ProductOrderConstants.NEW_FACTORY_CODE.equals(o.getProductFactoryCode())
@@ -598,6 +614,20 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             if (DateUtil.compare(startDate,endDate) > 0) {
                 String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "；";
                 o.setExportRemark(exportRemark + DATE_EXCEPTON);
+            }
+            //校验加工承揽方式和线体属性是否匹配
+            String factoryLineKey = o.getProductFactoryCode() + o.getProductLineCode();
+            CdFactoryLineInfo factoryLineInfo = supplierMap.get(factoryLineKey);
+            String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "；";
+            if (FACOTRY_LINE_OUT_OEM.equals(factoryLineInfo.getAttribute())) {
+                if (!OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode().equals(o.getOutsourceType())
+                        && !OutSourceTypeEnum.OUT_SOURCE_TYPE_QWW.getCode().equals(o.getOutsourceType())){
+                    o.setExportRemark(exportRemark + OUTSOURCE_ERROR_REMARK);
+                }
+            } else if (FACOTRY_LINE_OUT_ZZ.equals(factoryLineInfo.getAttribute())) {
+                if (!OutSourceTypeEnum.OUT_SOURCE_TYPE_ZZ.getCode().equals(o.getOutsourceType())) {
+                    o.setExportRemark(exportRemark + OUTSOURCE_ERROR_REMARK);
+                }
             }
             sucObjectDto.setObject(o);
             successDtos.add(sucObjectDto);
@@ -2474,14 +2504,31 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         if (CollectionUtils.isEmpty(listSapRes)) {
             return R.ok("订单刷新无需更新数据");
         }
+        List<SmsSettleInfo> smsSettleInfos = new ArrayList<>();
         listSapRes.forEach(omsProductionOrder -> {
             if ("S".equals(omsProductionOrder.getSapFlag())) {
                 omsProductionOrder.setNewVersion(omsProductionOrder.getBomVersion());
                 omsProductionOrder.setBomVersion("");
+                omsProductionOrder.setRemark(DateUtil.now() + "-订单刷新;");
+                SmsSettleInfo smsSettleInfo = SmsSettleInfo.builder()
+                        .productOrderCode(omsProductionOrder.getProductOrderCode())
+                        .productStartDate(DateUtil.parseDate(omsProductionOrder.getProductStartDate()))
+                        .productEndDate(DateUtil.parseDate(omsProductionOrder.getProductEndDate()))
+                        .bomVersion(omsProductionOrder.getNewVersion())
+                        .orderAmount(Integer.parseInt(omsProductionOrder.getProductNum().toString()))
+                        .build();
+                smsSettleInfo.setRemark(DateUtil.now() + "-订单刷新;");
+                smsSettleInfos.add(smsSettleInfo);
             }
         });
         //修改数据
         omsProductionOrderMapper.batchUpdateByOrderCode(listSapRes);
+        //更新加工结算信息表的数，根据生产订单号更新基本开始日期、基本结束日期
+        R r = remoteSettleInfoService.batchUpdateByProductOrderCode(smsSettleInfos);
+        if (!r.isSuccess()) {
+            log.error("====订单刷新更新加工结算表数据失败！====");
+            throw new BusinessException("订单刷新更新加工结算表数据失败！");
+        }
         return R.ok();
     }
 
@@ -2589,7 +2636,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog();
         sysInterfaceLog.setAppId("wms");
         sysInterfaceLog.setInterfaceName("findAllCodeForJIT");
-        sysInterfaceLog.setContent("调用wms系统获取入库生产订单号单号"+String.join(",",productOrderCodeList));
+        sysInterfaceLog.setContent("调用wms系统获取入库工厂入参:"+factoryCode+"，生产订单号单号:"+String.join(",",productOrderCodeList));
         sysInterfaceLog.setCreateTime(new Date());
         /** url：webservice 服务端提供的服务地址，结尾必须加 "?wsdl"*/
         URL url = null;

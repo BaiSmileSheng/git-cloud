@@ -1,6 +1,7 @@
 package com.cloud.activiti.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.constant.ActProcessContants;
@@ -89,28 +90,21 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
             List<ActStartProcessVo> list = actBusinessVo.getProcessVoList();
             //插入流程物业表  并开启流程
             list.forEach(a ->{
-                Example example = new Example(BizBusiness.class);
-                Example.Criteria criteria = example.createCriteria();
-                criteria.andEqualTo("orderNo",a.getOrderCode());
-                criteria.andEqualTo("procDefKey",actBusinessVo.getKey());
-                List<BizBusiness> businesses = bizBusinessService.selectByExample(example);
-                if (!ObjectUtil.isNotEmpty(businesses) || businesses.size() <= 0) {
-                    BizBusiness business =
-                            initBusiness(processDefinitionAct.getId()
-                                    ,processDefinitionAct.getName(),a.getOrderId(),a.getOrderCode()
-                                    , actBusinessVo.getUserId(),actBusinessVo.getTitle(),actBusinessVo.getUserName());
-                    bizBusinessService.insertBizBusiness(business);
-                    if (actBusinessVo.getKey().equals(ActProcessContants.ACTIVITI_ADD_REVIEW)
-                            || actBusinessVo.getKey().equals(ActProcessContants.ACTIVITI_OVERDUE_STOCK_ORDER_REVIEW)) {
-                        //会签流程,暂时只有T+2追加订单、超期库存是会签
-                        Map<String, Object> variables = Maps.newHashMap();
-                        variables.put("signList",a.getUserIds());
-                        bizBusinessService.startProcessForHuiQian(business, variables);
-                    } else {
-                        //非会签
-                        Map<String, Object> variables = Maps.newHashMap();
-                        bizBusinessService.startProcess(business, variables,a.getUserIds());
-                    }
+                BizBusiness business =
+                        initBusiness(processDefinitionAct.getId()
+                                ,processDefinitionAct.getName(),a.getOrderId(),a.getOrderCode()
+                                , actBusinessVo.getUserId(),actBusinessVo.getTitle(),actBusinessVo.getUserName());
+                bizBusinessService.insertBizBusiness(business);
+                if (actBusinessVo.getKey().equals(ActProcessContants.ACTIVITI_ADD_REVIEW)
+                        || actBusinessVo.getKey().equals(ActProcessContants.ACTIVITI_OVERDUE_STOCK_ORDER_REVIEW)) {
+                    //会签流程,暂时只有T+2追加订单、超期库存是会签
+                    Map<String, Object> variables = Maps.newHashMap();
+                    variables.put("signList",a.getUserIds());
+                    bizBusinessService.startProcessForHuiQian(business, variables);
+                } else {
+                    //非会签
+                    Map<String, Object> variables = Maps.newHashMap();
+                    bizBusinessService.startProcess(business, variables,a.getUserIds());
                 }
             });
         } else {
@@ -301,11 +295,11 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
             actTaskService.auditCandidateUser(bizAudit, userId,userIdSet);
             //邮件通知下一节点审批人
             //发送邮件
-            sysUserVoList.forEach(u -> {
-                String email = u.getEmail();
-                String context = u.getUserName() + EmailConstants.OVERDUE_NOT_CLOSE_ORDER_REVIEW_CONTEXT + EmailConstants.ORW_URL;
-                mailService.sendTextMail(email, EmailConstants.TITLE_OVERDUE_NOT_CLOSE_ORDER_REVIEW, context);
-            });
+//            sysUserVoList.forEach(u -> {
+//                String email = u.getEmail();
+//                String context = u.getUserName() + EmailConstants.OVERDUE_NOT_CLOSE_ORDER_REVIEW_CONTEXT + EmailConstants.ORW_URL;
+//                mailService.sendTextMail(email, EmailConstants.TITLE_OVERDUE_NOT_CLOSE_ORDER_REVIEW, context);
+//            });
         } else {
             //审批 推进工作流
             actTaskService.auditCandidateUser(bizAudit, userId,null);
@@ -320,26 +314,32 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
         //复查
         bizBusiness = bizBusinessService.selectBizBusinessById(bizAudit.getBusinessKey().toString());
         List<Task> tasks = taskService.createTaskQuery().processInstanceId(bizBusiness.getProcInstId()).list();
-        if (null == tasks || tasks.size() <= 0) {
+        if (!CollectionUtil.isNotEmpty(tasks)) {
+            log.info("排产订单："+bizBusiness.getOrderNo()+","+bizBusiness.getProcDefKey()+"审批流程最后一个节点！");
             //判断其他审批流程
-            if (BeanUtil.isNotEmpty(bizBusinesses) && bizBusinesses.size() <= 0 && businesses.size() <= 0) {
-                omsProductionOrder.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_TWO);
-                if (bizBusiness.getProcDefKey().equals(ActProcessContants.ACTIVITI_ADD_REVIEW)
-                        || bizBusiness.getProcDefKey().equals(ActProcessContants.ACTIVITI_ZN_REVIEW)) {
-                    omsProductionOrder.setStatus(ProductOrderConstants.STATUS_FOUR);
+            if (!CollectionUtil.isNotEmpty(bizBusinesses)) {
+                log.info("排产订单："+bizBusiness.getOrderNo()+"无进行中审批流！");
+                if (!CollectionUtil.isNotEmpty(businesses)) {
+                    log.info("排产订单："+bizBusiness.getOrderNo()+"无驳回审批流！");
+                    omsProductionOrder.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_TWO);
+                    if (bizBusiness.getProcDefKey().equals(ActProcessContants.ACTIVITI_ADD_REVIEW)
+                            || bizBusiness.getProcDefKey().equals(ActProcessContants.ACTIVITI_ZN_REVIEW)) {
+                        omsProductionOrder.setStatus(ProductOrderConstants.STATUS_FOUR);
+                    }
+                } else {
+                    //审批驳回
+                    omsProductionOrder.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_THREE);
                 }
-            } else if (BeanUtil.isNotEmpty(bizBusinesses) && bizBusinesses.size() <= 1 && businesses.size() > 0){
-                //审批驳回
-                omsProductionOrder.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_THREE);
+                //更新排产订单的状态
+                R r = remoteProductionOrderService.editSave(omsProductionOrder);
+                if (!r.isSuccess()) {
+                    log.error("排产订单审批流程更新排产订单的状态失败，原因："+r.get("msg"));
+                    throw new BusinessException("排产订单审批流程更新排产订单的状态失败，原因："+r.get("msg"));
+                }
             }
         }
-        //更新
-        R r = remoteProductionOrderService.editSave(omsProductionOrder);
-        if (r.isSuccess()) {
-            return R.ok();
-        } else {
-            throw new BusinessException(r.getStr("msg"));
-        }
+        return R.ok();
+
     }
 
     @Override

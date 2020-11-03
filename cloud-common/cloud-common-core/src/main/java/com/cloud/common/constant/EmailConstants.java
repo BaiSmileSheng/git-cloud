@@ -18,6 +18,8 @@ public class EmailConstants {
 
     public static final String TITLE_OVER_STOCK = "超期库存审批通知";
 
+    public static final String TITLE_RAW_FEEDBACK = "原材料反馈信息通知";
+
 
 
     /**
@@ -38,6 +40,8 @@ public class EmailConstants {
 
     public static final String ORW_URL = "\n外网地址：http://orw-khaos.cosmoplat.com/\n" +
             "内网地址：http://orw.khaos.cosmoplat.com/";
+
+    public static final String RAW_FEEDBACK_CONTEXT = "，您好！\n 订单评审系统有新的原材料反馈信息待处理，请及时处理！";
 
 
 }
