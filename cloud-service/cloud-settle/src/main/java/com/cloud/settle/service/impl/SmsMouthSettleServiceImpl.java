@@ -230,7 +230,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
             }
         });
         //更新状态还是11待结算的索赔数据为15未兑现
-        smsMouthSettleMapper.updateMouthSettleToUpdateStatus15();
+        smsMouthSettleMapper.updateMouthSettleToUpdateStatus15(lastMonth);
         return R.ok();
     }
 
