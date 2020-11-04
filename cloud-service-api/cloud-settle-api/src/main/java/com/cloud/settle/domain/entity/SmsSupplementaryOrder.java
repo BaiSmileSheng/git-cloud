@@ -202,7 +202,6 @@ public class SmsSupplementaryOrder extends BaseEntity {
     private BigDecimal settleFee;
 
     /** 兑现金额 */
-    @ExcelProperty(value = "兑现金额",index = 14)
     @ApiModelProperty(value = "兑现金额")
     private BigDecimal cashAmount;
 

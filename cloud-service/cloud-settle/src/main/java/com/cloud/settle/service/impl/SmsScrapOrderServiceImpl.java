@@ -333,7 +333,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
                     continue;
                 }
                 smsScrapOrder.setCurrency(cdSapSalePrice.getConditionsMonetary());
-                smsScrapOrder.setMaterialPrice(new BigDecimal(cdSapSalePrice.getSalePrice()).divide(new BigDecimal(cdSapSalePrice.getUnitPricing()),2));
+                smsScrapOrder.setMaterialPrice(new BigDecimal(cdSapSalePrice.getSalePrice()).divide(new BigDecimal(cdSapSalePrice.getUnitPricing()),6, BigDecimal.ROUND_HALF_UP));
                 smsScrapOrder.setMeasureUnit(cdSapSalePrice.getMeasureUnit());
                 smsScrapOrder.setScrapPrice(smsScrapOrder.getMaterialPrice().multiply(new BigDecimal(smsScrapOrder.getScrapAmount())));
                 //索赔金额=（Sap成品物料销售价格*报废数量*报废索赔系数）+（报废数量*生产订单加工费单价）
@@ -357,7 +357,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
                     CdMouthRate cdMouthRate = rRate.getData(CdMouthRate.class);
                     BigDecimal rate = cdMouthRate.getRate();//汇率
                     BigDecimal rateAmount = cdMouthRate.getAmount();//数额
-                    scrapPrice = scrapPrice.divide(rateAmount,2).multiply(rate);
+                    scrapPrice = scrapPrice.divide(rateAmount,6, BigDecimal.ROUND_HALF_UP).multiply(rate);
                 }
                 smsScrapOrder.setSettleFee(scrapPrice);
             }
