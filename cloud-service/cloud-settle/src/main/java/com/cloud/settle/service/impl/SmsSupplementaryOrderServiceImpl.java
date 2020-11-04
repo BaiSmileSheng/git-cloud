@@ -334,7 +334,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
                     updateByPrimaryKeySelective(smsSupplementaryOrder);
                     continue;
                 }
-                smsSupplementaryOrder.setStuffPrice(cdMaterialPriceInfo.getNetWorth().divide(new BigDecimal(cdMaterialPriceInfo.getPriceUnit()),2));//单价  取得materialPrice表的净价值
+                smsSupplementaryOrder.setStuffPrice(cdMaterialPriceInfo.getNetWorth().divide(new BigDecimal(cdMaterialPriceInfo.getPriceUnit()),6));//单价  取得materialPrice表的净价值
                 smsSupplementaryOrder.setStuffUnit(cdMaterialPriceInfo.getUnit());
                 smsSupplementaryOrder.setCurrency(cdMaterialPriceInfo.getCurrency());//币种
                 //索赔金额=物耗数量* 原材料单价*物耗申请系数
