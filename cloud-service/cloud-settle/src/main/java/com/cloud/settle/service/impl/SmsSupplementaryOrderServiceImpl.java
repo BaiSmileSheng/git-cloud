@@ -357,8 +357,8 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
                     BigDecimal rate = cdMouthRate.getRate();//汇率
                     BigDecimal rateAmount = cdMouthRate.getAmount();//数额
                     //如果是外币，还要 除以数额*汇率
-                    spPrice = spPrice.divide(rateAmount,2).multiply(rate);
-                    smsSupplementaryOrder.setRate(rate.divide(rateAmount,2));
+                    spPrice = spPrice.divide(rateAmount,6, BigDecimal.ROUND_HALF_UP).multiply(rate);
+                    smsSupplementaryOrder.setRate(rate.divide(rateAmount,2, BigDecimal.ROUND_HALF_UP));
                 }
                 smsSupplementaryOrder.setSettleFee(spPrice);
             }
