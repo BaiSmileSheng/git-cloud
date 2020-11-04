@@ -2,6 +2,8 @@ package com.cloud.settle.mapper;
 
 import com.cloud.settle.domain.entity.SmsMouthSettle;
 import com.cloud.common.core.dao.BaseMapper;
+import org.apache.ibatis.annotations.Param;
+
 /**
  * 月度结算信息 Mapper接口
  *
@@ -14,5 +16,5 @@ public interface SmsMouthSettleMapper extends BaseMapper<SmsMouthSettle>{
      * 月度结算  更新剩下的5个状态是11待结算索赔表状态为15
      * @return
      */
-    int updateMouthSettleToUpdateStatus15();
+    int updateMouthSettleToUpdateStatus15(@Param("month") String month);
 }

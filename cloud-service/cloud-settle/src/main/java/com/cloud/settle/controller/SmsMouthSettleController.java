@@ -137,9 +137,7 @@ public class SmsMouthSettleController extends BaseController {
         String lastMonth = DateUtil.format(DateUtil.lastMonth(), "yyyyMM");
         Example exampleSettle = new Example(SmsSettleInfo.class);
         Example.Criteria criteriaSettle = exampleSettle.createCriteria();
-        criteriaSettle.andEqualTo("supplierCode", smsMouthSettle.getSupplierCode())
-                .andEqualTo("companyCode", smsMouthSettle.getCompanyCode())
-                .andCondition("DATE_FORMAT(product_start_date, '%Y%m')='"+lastMonth+"'");
+        criteriaSettle.andEqualTo("settleNo", smsMouthSettle.getSettleNo());
         startPage();
         List<SmsSettleInfo> settleInfos=smsSettleInfoService.selectByExample(exampleSettle);
         dict.put("settleInfos", settleInfos);

@@ -83,7 +83,6 @@
     <select id="selectByMonthAndStatus" resultMap="SmsSupplementaryOrderResult">
         <include refid="selectSmsSupplementaryOrderVo"/>
         <where>
-            stuff_price = 0
             <if test="month != null">
                 AND DATE_FORMAT(sap_date, '%Y%m') = #{month}
             </if>
