@@ -359,7 +359,7 @@ public class SmsSupplementaryOrderController extends BaseController {
             BeanUtil.copyProperties(entity,vo);
             return vo;
         });
-        return EasyExcelUtilOSS.writeExcel(smsSupplementaryOrderZBList, "物耗申请总部.xlsx", "sheet", new SmsSupplementaryOrder());
+        return EasyExcelUtilOSS.writeExcel(smsSupplementaryOrderZBList, "物耗申请总部.xlsx", "sheet", new SmsSupplementaryOrderZB());
     }
 
     /**
