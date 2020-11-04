@@ -30,7 +30,7 @@ public class ProductOrderConstants {
     /**
      * 排产订单导入校验
      * */
-    public static final String BOM_VERSION_THREE = "3";
+    public static final String[] BOM_VERSION_THREE = {"3","13","23"};
 
     public static final BigDecimal BOM_VERSION_THREE_NUM = new BigDecimal("300");
 

@@ -1312,11 +1312,12 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      */
     private List<OmsProductionOrder> checkThreeVersion(List<OmsProductionOrder> list, SysUser sysUser) {
         Set<OmsProductionOrder> checkList = new HashSet<>();
+        List<String> bomVersionThrees = Arrays.asList(ProductOrderConstants.BOM_VERSION_THREE);
         list.forEach(o -> {
             //应王福丽要求8310工厂36号线不用校验3版本   2020-09-08
             if ((!ProductOrderConstants.NEW_FACTORY_CODE.equals(o.getProductFactoryCode())
                     || !ProductOrderConstants.NEW_LINE_CODE.equals(o.getProductLineCode()))
-                    && ProductOrderConstants.BOM_VERSION_THREE.equals(o.getBomVersion())
+                    && bomVersionThrees.contains(o.getBomVersion())
                     && o.getProductNum().compareTo(ProductOrderConstants.BOM_VERSION_THREE_NUM) > 0) {
                 o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_ONE);
                 checkList.add(o);
@@ -1377,11 +1378,12 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
      */
     private ActBusinessVo checkThreeVersionAct(List<OmsProductionOrder> list,Map<String,SysUserVo> userMap) {
         Set<OmsProductionOrder> checkList = new HashSet<>();
+        List<String> bomVersionThrees = Arrays.asList(ProductOrderConstants.BOM_VERSION_THREE);
         list.forEach(o -> {
             //应王福丽要求8310工厂36号线不用校验3版本   2020-09-08
             if ((!ProductOrderConstants.NEW_FACTORY_CODE.equals(o.getProductFactoryCode())
                     || !ProductOrderConstants.NEW_LINE_CODE.equals(o.getProductLineCode()))
-                    && ProductOrderConstants.BOM_VERSION_THREE.equals(o.getBomVersion())
+                    && bomVersionThrees.contains(o.getBomVersion())
                     && o.getProductNum().compareTo(ProductOrderConstants.BOM_VERSION_THREE_NUM) > 0) {
                 o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_ONE);
                 checkList.add(o);
