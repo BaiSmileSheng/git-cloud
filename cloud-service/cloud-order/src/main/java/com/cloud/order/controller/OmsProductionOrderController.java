@@ -162,20 +162,20 @@ public class OmsProductionOrderController extends BaseController {
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();
         //查询delaysFlag为3的数据
-        //关单：判断实际结束日期与开始日期是否同月或是否大于7天
-        //未关单：判断当前日期与开始日期是否同月或是否大于7天
+        //关单：判断实际结束日期与开始日期是否同月或是否大于8天
+        //未关单：判断当前日期与开始日期是否同月或是否大于8天
         criteria.andEqualTo("delaysFlag", ProductionOrderDelaysFlagEnum.PRODUCTION_ORDER_DELAYS_FLAG_3.getCode());
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderService.selectByExample(example);
         List<OmsProductionOrder> listGD = omsProductionOrderList.stream().filter(o ->
                 ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode().equals(o.getStatus()))
                 .collect(Collectors.toList());
         List<OmsProductionOrder> listGDDelays=listGD.stream().filter(o ->
-                        DateUtil.between(o.getActualEndDate(), DateUtil.parseDate(o.getProductStartDate()), DateUnit.DAY) > 6
+                        DateUtil.between(o.getActualEndDate(), DateUtil.parseDate(o.getProductStartDate()), DateUnit.DAY) > 7
                                 || DateUtil.month(o.getActualEndDate()) > DateUtil.month(DateUtil.parseDate(o.getProductStartDate())))
                 .collect(Collectors.toList());
         List<OmsProductionOrder> listWGD = omsProductionOrderList.stream().filter(o ->
                 !ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode().equals(o.getStatus()) &&
-                        (DateUtil.between(DateUtil.date(), DateUtil.parseDate(o.getProductStartDate()), DateUnit.DAY) > 6
+                        (DateUtil.between(DateUtil.date(), DateUtil.parseDate(o.getProductStartDate()), DateUnit.DAY) > 7
                                 || DateUtil.thisMonth() > DateUtil.month(DateUtil.parseDate(o.getProductStartDate()))))
                 .collect(Collectors.toList());
         listGDDelays.addAll(listWGD);
