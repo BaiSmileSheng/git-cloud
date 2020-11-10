@@ -10,6 +10,7 @@ import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.common.utils.ListCommonUtil;
 import com.cloud.common.utils.bean.BeanUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.domain.entity.OmsRawMaterialFeedback;
@@ -22,6 +23,7 @@ import com.cloud.system.domain.entity.CdRawMaterialStock;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteCdRawMaterialStockService;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.core.context.RootContext;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
@@ -564,11 +566,17 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
             detail.setConfirmBy(sysUser.getLoginName());
             detail.setConfirmTime(new Date());
         });
-        int updatDetailCount = omsProductionOrderDetailMapper.updateBatchByPrimaryKeySelective(omsProductionOrderDetails);
-        if (updatDetailCount <= 0) {
-            log.error("更新排产订单明细状态失败！");
-            return R.error("更新排产订单明细状态失败！");
-        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        //一次更新2000条
+        List<List<OmsProductionOrderDetail>> detailList =
+                objectMapper.convertValue(ListCommonUtil.subCollection(omsProductionOrderDetails, 2000), new TypeReference<List<List<OmsProductionOrderDetail>>>() {});
+        detailList.forEach(s -> {
+            int updatDetailCount = omsProductionOrderDetailMapper.updateBatchByPrimaryKeySelective(s);
+            if (updatDetailCount <= 0) {
+                log.error("更新排产订单明细状态失败！");
+                throw new BusinessException("更新排产订单明细状态失败！");
+            }
+        });
         //组织排产订单号
         List<String> orderCodes = omsProductionOrderDetails.stream()
                 .map(OmsProductionOrderDetail::getProductOrderCode).distinct().collect(Collectors.toList());
