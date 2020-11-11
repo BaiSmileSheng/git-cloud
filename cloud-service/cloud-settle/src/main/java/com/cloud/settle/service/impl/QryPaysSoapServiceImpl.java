@@ -138,7 +138,7 @@ public class QryPaysSoapServiceImpl implements IQryPaysSoapService {
         sysInterfaceLog.setCreateTime(new Date());
         try{
             QName qName = new QName(namespaceURL, localPart);
-            sysInterfaceLog.setOrderCode(StrUtil.format("{}",",","{}",namespaceURL,localPart));
+            sysInterfaceLog.setOrderCode(StrUtil.format("{}",",","{}",",","{}",urlClaim,namespaceURL,localPart));
             QryPaysSoapBindingStub generalMDMDataReleaseBindingStub =
                     (QryPaysSoapBindingStub) new ErpPayoutReceiveServiceServiceLocator(urlClaim,qName).getQryPays();
             String outXml = generalMDMDataReleaseBindingStub.queryBill(inXml);
