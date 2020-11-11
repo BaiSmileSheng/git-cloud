@@ -1,6 +1,6 @@
 package com.cloud.settle.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
+import cn.hutool.core.util.StrUtil;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
@@ -10,12 +10,12 @@ import com.cloud.settle.domain.webServicePO.QryPaysSoapRequest;
 import com.cloud.settle.domain.webServicePO.QryPaysSoapResponse;
 import com.cloud.settle.enums.MonthSettleStatusEnum;
 import com.cloud.settle.enums.QryPaysSoapStatusEnum;
+import com.cloud.settle.enums.SettleUpdateFlagEnum;
 import com.cloud.settle.service.IQryPaysSoapService;
 import com.cloud.settle.service.ISmsMouthSettleService;
 import com.cloud.settle.webService.fm.ErpPayoutReceiveServiceServiceLocator;
 import com.cloud.settle.webService.fm.QryPaysSoapBindingStub;
 import com.cloud.system.domain.entity.SysInterfaceLog;
-import com.cloud.settle.enums.SettleUpdateFlagEnum;
 import com.cloud.system.feign.RemoteInterfaceLogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,6 +138,7 @@ public class QryPaysSoapServiceImpl implements IQryPaysSoapService {
         sysInterfaceLog.setCreateTime(new Date());
         try{
             QName qName = new QName(namespaceURL, localPart);
+            sysInterfaceLog.setOrderCode(StrUtil.format("{}",",","{}",namespaceURL,localPart));
             QryPaysSoapBindingStub generalMDMDataReleaseBindingStub =
                     (QryPaysSoapBindingStub) new ErpPayoutReceiveServiceServiceLocator(urlClaim,qName).getQryPays();
             String outXml = generalMDMDataReleaseBindingStub.queryBill(inXml);
