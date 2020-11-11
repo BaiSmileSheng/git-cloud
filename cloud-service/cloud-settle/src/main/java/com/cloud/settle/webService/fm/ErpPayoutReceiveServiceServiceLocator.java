@@ -22,7 +22,7 @@ public class ErpPayoutReceiveServiceServiceLocator extends org.apache.axis.clien
     }
 
     // Use to get a proxy class for QryPays
-    private String QryPays_address = "http://10.133.28.51:8080/fm/services/QryPays";
+    private String QryPays_address = "http://10.202.88.22:8080/fm/services/QryPays";
 
     public String getQryPaysAddress() {
         return QryPays_address;
