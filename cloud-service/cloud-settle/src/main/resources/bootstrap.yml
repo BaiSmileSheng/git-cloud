@@ -11,7 +11,7 @@ spring:
   application:
     name: cloud-settle
   profiles:
-    active: prod
+    active: dev
   devtools:
     restart:
       enabled: true
