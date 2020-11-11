@@ -154,6 +154,9 @@ public class OmsProductDifferenceController extends BaseController {
                 || CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_DDPT)) {
             example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
         }
+        if (StrUtil.isNotBlank(omsProductDifference.getCreateBy())) {
+            criteria.andEqualTo("createBy",omsProductDifference.getCreateBy());
+        }
         example.orderBy("differenceNum").asc();
     }
     /**
