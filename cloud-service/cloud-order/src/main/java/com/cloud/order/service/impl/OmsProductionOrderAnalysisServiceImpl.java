@@ -1,6 +1,7 @@
 package com.cloud.order.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -82,20 +83,19 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
         //应韩宁韩工要求，待排产订单分析从当天开始  2020-09-03  ltq
         criteria.andGreaterThanOrEqualTo("productDate", sft.format(new Date()));
         criteria.andLessThan("productDate", sft.format(date.getTime()));
+        criteria.andNotEqualTo("dataSource",DATA_SOURCE_INTERFACE);
         List<OmsRealOrder> omsRealOrders = omsRealOrderService.selectByExample(example);
-        //增加数据空判断  2020-07-23 by ltq
-        if (ObjectUtil.isEmpty(omsRealOrders) || omsRealOrders.size() <= 0) {
-            log.error("待排产订单分析汇总查询真单记录为空！");
-            return R.ok();
-        }
         //提取修改生产日期但没有填写备注的真单数据 2020-07-23 by ltq
         List<OmsRealOrder> omsRealOrderList = omsRealOrders.stream()
                 .filter(o ->"1".equals(o.getStatus()) && StrUtil.isBlank(o.getRemark())).collect(Collectors.toList());
         //过滤掉修改生产日期但没有填写备注的真单数据，该类数据不允许后续流程 2020-07-23 by ltq
-        //去除内单接口接入的PO数据  2020-09-14  ltq
         List<OmsRealOrder> realOrders = omsRealOrders.stream()
-                .filter(o -> !omsRealOrderList.contains(o)
-                        && !o.getDataSource().equals(DATA_SOURCE_INTERFACE)).collect(Collectors.toList());
+                .filter(o -> !omsRealOrderList.contains(o)).collect(Collectors.toList());
+        //增加数据空判断  2020-07-23 by ltq
+        if (!CollectionUtil.isNotEmpty(realOrders)) {
+            log.error("待排产订单分析汇总查询真单记录为空！");
+            return R.ok("待排产订单分析汇总查询真单记录为空！");
+        }
         R r = analysisGather(realOrders);
         if (!r.isSuccess()) {
             log.error("待排产订单分析汇总失败，原因：" + r.get("msg"));
