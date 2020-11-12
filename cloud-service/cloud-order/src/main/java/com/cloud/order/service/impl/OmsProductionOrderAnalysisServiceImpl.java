@@ -84,7 +84,7 @@ public class OmsProductionOrderAnalysisServiceImpl extends BaseServiceImpl<OmsPr
         criteria.andLessThan("productDate", sft.format(date.getTime()));
         List<OmsRealOrder> omsRealOrders = omsRealOrderService.selectByExample(example);
         //增加数据空判断  2020-07-23 by ltq
-        if (ObjectUtil.isEmpty(omsRealOrders) && omsRealOrders.size() <= 0) {
+        if (ObjectUtil.isEmpty(omsRealOrders) || omsRealOrders.size() <= 0) {
             log.error("待排产订单分析汇总查询真单记录为空！");
             return R.ok();
         }
