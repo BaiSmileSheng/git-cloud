@@ -72,14 +72,17 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
      */
     @Override
     public R saveMaterialInfo() {
+        log.info("保存MDM接口获取的物料信息数据方法开始======"+DateUtil.now());
         List<RowRisk> list = new ArrayList<>();
         //接口获取物料数据
         R r = materialInfoInterface(list, 0, null);
+        log.info("保存MDM接口获取的物料信息数据方法-调用外部接口结束======"+DateUtil.now());
         if (r.isSuccess()) {
             ObjectMapper objectMapper = new ObjectMapper();
             list = objectMapper.convertValue(r.get("list"), new TypeReference<List<RowRisk>>() {
             });
             if (ObjectUtil.isNotEmpty(list) && list.size() > 0) {
+                log.info("调用MDM接口获取物料主数据条数："+list.size());
                 //新增
                 List<CdMaterialInfo> cdMaterialInfosInsertOrUpdate = new ArrayList<>();
                 //成品物料扩展信息
@@ -129,6 +132,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
             log.error(r.get("msg").toString());
             return R.error(r.get("msg").toString());
         }
+        log.info("保存MDM接口获取的物料信息数据方法结束======"+DateUtil.now());
         return R.ok();
     }
 
