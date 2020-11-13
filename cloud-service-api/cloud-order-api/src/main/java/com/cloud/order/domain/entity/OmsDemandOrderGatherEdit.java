@@ -195,6 +195,7 @@ public class OmsDemandOrderGatherEdit extends BaseEntity {
     /**
      * SAP返回信息 传SAP返回信息
      */
+    @ExcelProperty(value = "SAP返回信息",index = 17)
     @ApiModelProperty(value = "SAP返回信息 传SAP返回信息")
     private String sapMessages;
 

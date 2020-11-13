@@ -2246,6 +2246,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             smsSettleInfoList.add(smsSettleInfo);
             omsProductionOrder.setSettleFlag(ProductionOrderSettleFlagEnum.PRODUCTION_ORDER_SETTLE_FLAG_2.getCode());
             omsProductionOrder.setSettleMessages("已生成结算信息");
+            omsProductionOrder.setRemark(null);
         }
         return smsSettleInfoList;
     }

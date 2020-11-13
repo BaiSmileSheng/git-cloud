@@ -199,6 +199,7 @@ public class Oms2weeksDemandOrderEdit extends BaseEntity {
     /**
      * SAP返回信息 传SAP返回信息
      */
+    @ExcelProperty(value = "SAP返回信息",index = 18)
     @ApiModelProperty(value = "SAP返回信息 传SAP返回信息")
     private String sapMessages;
 
