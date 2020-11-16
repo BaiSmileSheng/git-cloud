@@ -114,6 +114,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
     private static final String NO_MATERIAL_RRICE = "缺少SAP成本价格";
 
+    private static final String NO_FACTORY_LINE = "缺少工厂线体信息数据";
+
     private static final String DATE_EXCEPTON = "基本开始日期不能大于基本结束日期";
 
     private static final String OUTSOURCE_ERROR_REMARK = "加工承揽方式与线体属性不匹配";
@@ -533,6 +535,12 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         Map<String, List<CdBomInfo>> bomMap =
                 bomInfoList.stream().collect(Collectors.groupingBy((bom) -> getBomGroupKey(bom)));
         listImport.forEach(o -> {
+            R factoryMap = remoteFactoryInfoService.selectOneByFactory(o.getProductFactoryCode());
+            if (!factoryMap.isSuccess()) {
+                log.error("查询工厂"+o.getProductFactoryCode()+"信息失败："+factoryMap.get("msg"));
+                throw new BusinessException("查询工厂"+o.getProductFactoryCode()+"信息失败："+factoryMap.get("msg"));
+            }
+            CdFactoryInfo cdFactoryInfo = factoryMap.getData(CdFactoryInfo.class);
             //更新排产订单的延期索赔状态
             //自制的排产订单更新成无需生成（0）
             if (OutSourceTypeEnum.OUT_SOURCE_TYPE_ZZ.getCode().equals(o.getOutsourceType())){
@@ -585,21 +593,27 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 if (ObjectUtil.isEmpty(materialPriceInfos) || materialPriceInfos.size() <= 0) {
                     o.setExportRemark(exportRemark + NO_MATERIAL_RRICE);
                 } else {
-                    List<String> materialCode = materialPriceInfos.stream().map(CdMaterialPriceInfo::getMaterialCode).collect(toList());
                     //根据成品物料号+加工承揽方式查询加工费号
                     R productMaterialMap =
                             remoteCdSettleProductMaterialService.selectOne(o.getProductMaterialCode(), o.getOutsourceType());
                     if (productMaterialMap.isSuccess()) {
                         CdSettleProductMaterial cdSettleProductMaterial = productMaterialMap.getData(CdSettleProductMaterial.class);
-                        if (!materialCode.contains(cdSettleProductMaterial.getRawMaterialCode())) {
-                            o.setExportRemark(exportRemark + NO_MATERIAL_RRICE);
-                        } else {
-                            BigDecimal netWorth = materialPriceInfos.stream()
-                                    .filter(m -> cdSettleProductMaterial.getRawMaterialCode().equals(m.getMaterialCode()))
+                        CdFactoryLineInfo factoryLineInfo = supplierMap.get(o.getProductFactoryCode() + o.getProductLineCode());
+                        if (factoryLineInfo != null) {
+                            CdMaterialPriceInfo cdMaterialPriceInfo = materialPriceInfos.stream()
+                                    .filter(m -> m.getMaterialCode().equals(cdSettleProductMaterial.getRawMaterialCode())
+                                            && m.getMemberCode().equals(factoryLineInfo.getSupplierCode())
+                                            && m.getPurchasingOrganization().equals(cdFactoryInfo.getPurchaseOrg()))
                                     .findFirst()
-                                    .map(CdMaterialPriceInfo::getNetWorth)
-                                    .orElse(BigDecimal.ZERO);
-                            o.setProcessCost(netWorth);
+                                    .orElse(null);
+                            if (cdMaterialPriceInfo == null) {
+                                o.setExportRemark(exportRemark + NO_MATERIAL_RRICE);
+                            } else {
+                                BigDecimal netWorth = cdMaterialPriceInfo.getNetWorth() == null ? BigDecimal.ZERO : cdMaterialPriceInfo.getNetWorth();
+                                o.setProcessCost(netWorth);
+                            }
+                        } else {
+                            o.setExportRemark(exportRemark + NO_FACTORY_LINE);
                         }
                     } else {
                         o.setExportRemark(exportRemark + NO_MATERIAL_RRICE);
