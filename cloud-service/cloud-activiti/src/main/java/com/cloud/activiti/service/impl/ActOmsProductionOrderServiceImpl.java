@@ -147,7 +147,8 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
         List<OmsProductionOrderDetail> omsProductionOrderDetails =
                 detailMap.getCollectData(new TypeReference<List<OmsProductionOrderDetail>>() {});
         Map<String,List<OmsProductionOrderDetail>> orderDetailMap =
-                omsProductionOrderDetails.stream().collect(Collectors.groupingBy(OmsProductionOrderDetail :: getProductOrderCode));
+                CollectionUtil.isEmpty(omsProductionOrderDetails) ? new HashMap<>() : omsProductionOrderDetails
+                        .stream().collect(Collectors.groupingBy(OmsProductionOrderDetail :: getProductOrderCode));
 
         //2、调用order服务，校验排产订单的审批流
         R businessVoMap = remoteProductionOrderService.checkProductOrderAct(omsProductionOrders);
