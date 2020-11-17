@@ -1,6 +1,7 @@
 package com.cloud.settle.service.impl;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.feign.RemoteBizBusinessService;
 import com.cloud.common.constant.DeleteFlagConstants;
@@ -23,11 +24,7 @@ import com.cloud.system.domain.entity.CdFactoryLineInfo;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
-import com.cloud.system.feign.RemoteFactoryInfoService;
-import com.cloud.system.feign.RemoteFactoryLineInfoService;
-import com.cloud.system.feign.RemoteOssService;
-import com.cloud.system.feign.RemoteSequeceService;
-import com.cloud.system.feign.RemoteUserService;
+import com.cloud.system.feign.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.slf4j.Logger;
@@ -38,13 +35,7 @@ import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -173,6 +164,9 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
         Map<String,SysUserVo> mapSysUser = new HashMap<>();
         //获取供应商信息
         for(String supplierCode : supplierSet){
+            if (StrUtil.isEmpty(supplierCode)) {
+                continue;
+            }
             logger.info("新增保存延期交付索赔时获取供应商信息 supplierCode:{}",supplierCode);
             R sysUserR = remoteUserService.findUserBySupplierCode(supplierCode);
             if(!sysUserR.isSuccess()){
@@ -193,6 +187,9 @@ public class SmsDelaysDeliveryServiceImpl extends BaseServiceImpl<SmsDelaysDeliv
         for(SmsDelaysDelivery smsDelaysDeliveryMail :smsDelaysDeliveryList ){
             String supplierCode = smsDelaysDeliveryMail.getSupplierCode();
             SysUserVo sysUser = mapSysUser.get(supplierCode);
+            if (sysUser == null) {
+                continue;
+            }
             StringBuffer mailTextBuffer = new StringBuffer();
             // 供应商名称 +V码+公司  您有一条延期交付订单，订单号XXXXX，请及时处理，如不处理，3天后系统自动确认，无法申诉
             mailTextBuffer.append(sysUser.getCorporation()).append(supplierCode)
