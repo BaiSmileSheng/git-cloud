@@ -140,6 +140,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     private static final String FACOTRY_LINE_OUT_OEM = "3";
     //工厂线体信息属性-自制
     private static final String FACOTRY_LINE_OUT_ZZ = "1";
+    //工厂线体信息属性-工序
+    private static final String FACOTRY_LINE_OUT_GX = "2";
     @Value("${webService.findAllCodeForJIT.urlClaim}")
     private String urlClaim;
 
@@ -638,7 +640,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                         && !OutSourceTypeEnum.OUT_SOURCE_TYPE_QWW.getCode().equals(o.getOutsourceType())){
                     o.setExportRemark(exportRemark + OUTSOURCE_ERROR_REMARK);
                 }
-            } else if (FACOTRY_LINE_OUT_ZZ.equals(factoryLineInfo.getAttribute())) {
+            } else if (FACOTRY_LINE_OUT_ZZ.equals(factoryLineInfo.getAttribute())
+                    || FACOTRY_LINE_OUT_GX.equals(factoryLineInfo.getAttribute())) {
                 if (!OutSourceTypeEnum.OUT_SOURCE_TYPE_ZZ.getCode().equals(o.getOutsourceType())) {
                     o.setExportRemark(exportRemark + OUTSOURCE_ERROR_REMARK);
                 }
