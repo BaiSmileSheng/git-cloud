@@ -58,15 +58,6 @@ public interface OmsProductionOrderDetailMapper extends BaseMapper<OmsProduction
     List<OmsProductionOrderDetail> selectCommitListPageInfo(OmsProductionOrderDetail omsProductionOrderDetail);
 
     /**
-     * Description: 原材料确认-列表查询条数
-     * Param:
-     * return:
-     * Author: cs
-     * Date: 2020/11/20
-     */
-    long selectCommitListPageInfo_COUNT(OmsProductionOrderDetail omsProductionOrderDetail);
-
-    /**
     * Description: 根据List查询
     * Param:
     * return:
