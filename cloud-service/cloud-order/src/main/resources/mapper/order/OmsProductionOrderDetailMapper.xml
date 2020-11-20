@@ -167,49 +167,7 @@
             </if>
         </where>
         group by detail.product_factory_code,detail.material_code,detail.material_desc,detail.product_start_date,detail.purchase_group,detail.unit,detail.status
-    </select>
-
-
-    <select id="selectCommitListPageInfo_COUNT" parameterType="OmsProductionOrderDetail"
-            resultType="Long">
-        SELECT count(1) count FROM (select
-        count(0)
-        from oms_production_order_detail detail, oms_production_order o
-        <where>
-            detail.product_order_code = o.order_code
-            and (o.audit_status = '0' or o.audit_status = '2')
-            and detail.product_start_date <![CDATA[ > ]]> DATE_FORMAT(now(),'%Y-%m-%d')
-            and detail.product_start_date <![CDATA[ < ]]> DATE_FORMAT(DATE_ADD(now(),INTERVAL 31 day),'%Y-%m-%d')
-            <if test="productFactoryCode != null and productFactoryCode != ''">
-                and detail.product_factory_code = #{productFactoryCode,jdbcType=VARCHAR}
-            </if>
-            <if test="materialCode != null and materialCode != ''">
-                and detail.material_code = #{materialCode,jdbcType=VARCHAR}
-            </if>
-            <if test="checkStartDate != null and checkStartDate != ''">
-                and detail.product_start_date >= #{checkStartDate,jdbcType=VARCHAR}
-            </if>
-            <if test="checkEndDate != null and checkEndDate != ''">
-                and detail.product_start_date <![CDATA[ <= ]]> #{checkEndDate,jdbcType=VARCHAR}
-            </if>
-            <if test="status != null and status != ''">
-                and detail.status = #{status,jdbcType=VARCHAR}
-            </if>
-            <if test="purchaseGroup != null and purchaseGroup != ''">
-                and detail.purchase_group = #{purchaseGroup,jdbcType=VARCHAR}
-            </if>
-            <if test="productFactoryQuery != null and productFactoryQuery != ''">
-                and detail.product_factory_code in (${productFactoryQuery})
-            </if>
-            <if test="purchaseGroupQuery != null and purchaseGroupQuery != ''">
-                and detail.purchase_group in (${purchaseGroupQuery})
-            </if>
-            <if test="createBy != null and createBy != ''">
-                and detail.create_by = #{createBy,jdbcType=VARCHAR}
-            </if>
-        </where>
-        group by detail.product_factory_code,detail.material_code,detail.material_desc,detail.product_start_date,detail.purchase_group,detail.unit,detail.status
-        ) temp
+        order by detail.status
     </select>
 
     <select id="selectListByList" resultMap="OmsProductionOrderDetailResult" parameterType="list">
