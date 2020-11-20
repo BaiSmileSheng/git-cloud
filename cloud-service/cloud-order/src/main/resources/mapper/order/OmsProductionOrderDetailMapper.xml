@@ -167,7 +167,6 @@
             </if>
         </where>
         group by detail.product_factory_code,detail.material_code,detail.material_desc,detail.product_start_date,detail.purchase_group,detail.unit,detail.status
-        order by detail.status
     </select>
 
 
@@ -210,7 +209,7 @@
             </if>
         </where>
         group by detail.product_factory_code,detail.material_code,detail.material_desc,detail.product_start_date,detail.purchase_group,detail.unit,detail.status
-        order by detail.status) temp
+        ) temp
     </select>
 
     <select id="selectListByList" resultMap="OmsProductionOrderDetailResult" parameterType="list">
