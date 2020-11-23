@@ -212,6 +212,14 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
                 f.setUpdateBy(sysUser.getLoginName());
                 f.setUpdateTime(new Date());
             });
+            //更新排产订单明细状态
+            if(omsProductionOrderDetails.size() > 0){
+                omsProductionOrderDetailService.updateBatchByProductOrderCode(omsProductionOrderDetails);
+            }
+            //更新排产订单状态
+            if (productionOrders.size() > 0) {
+                omsProductionOrderService.updateBatchByPrimaryKeySelective(productionOrders);
+            }
         } else if (APPROVAL_FLAG_REJECT.equals(approvalFlag)) {
             //驳回
             //1、更新排产订单的状态为"待评审"
@@ -238,7 +246,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
                         OmsProductionOrderDetail omsProductionOrderDetail = new OmsProductionOrderDetail();
                         omsProductionOrderDetail.setProductOrderCode(o.getOrderCode());
                         omsProductionOrderDetail.setMaterialCode(f.getRawMaterialCode());
-                        omsProductionOrderDetail.setStatus(ProductOrderConstants.DETAIL_STATUS_ZERO);
+//                        omsProductionOrderDetail.setStatus(ProductOrderConstants.DETAIL_STATUS_ZERO);
                         omsProductionOrderDetail.setUpdateBy(sysUser.getLoginName());
                         omsProductionOrderDetails.add(omsProductionOrderDetail);
                     }
@@ -250,24 +258,171 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
                 f.setUpdateBy(sysUser.getLoginName());
                 f.setUpdateTime(new Date());
             });
+            if (omsProductionOrderDetails.size() > 0) {
+                R updateOrderMap = omsProductionOrderDetailService.commitProductOrderDetail(omsProductionOrderDetails, new OmsProductionOrderDetail(), sysUser);
+                if (!updateOrderMap.isSuccess()) {
+                    log.error("反馈信息处理-驳回操作，更新排产订单及明细的状态失败，原因：" + updateOrderMap.get("msg"));
+                    throw new BusinessException("反馈信息处理-驳回操作，更新排产订单及明细的状态失败!");
+                }
+            }
+            //邮件通知JIT、JIT处长、毛部长
+            List<Map<String,String>> emailList = getEmailList(omsRawMaterialFeedbacks);
+            if (CollectionUtil.isNotEmpty(emailList)){
+                emailList.forEach(e -> {
+                    String email = e.get("email");
+                    String subject = e.get("subject");
+                    String content = e.get("content");
+                    try {
+                        mailService.sendHtmlMail(email, subject, content);
+                    } catch (Exception ex) {
+                        log.error("反馈信息处理-驳回操作，发送邮件异常，原因："+ex.getMessage());
+                    }
+                });
+            }
         }
         //更新排产订单明细状态
-        if(omsProductionOrderDetails.size() > 0){
-            omsProductionOrderDetailService.updateBatchByProductOrderCode(omsProductionOrderDetails);
-        }
+//        if(omsProductionOrderDetails.size() > 0){
+//            omsProductionOrderDetailService.updateBatchByProductOrderCode(omsProductionOrderDetails);
+//        }
         //更新排产订单状态
-        if (productionOrders.size() > 0) {
-            omsProductionOrderService.updateBatchByPrimaryKeySelective(productionOrders);
-        }
+//        if (productionOrders.size() > 0) {
+//            omsProductionOrderService.updateBatchByPrimaryKeySelective(productionOrders);
+//        }
         int feedbackUpdateCount = omsRawMaterialFeedbackMapper.updateBatchByPrimaryKeySelective(omsRawMaterialFeedbacks);
         if (feedbackUpdateCount <= 0) {
-            log.error("更细原材料反馈信息失败！");
-            return R.error("更细原材料反馈信息失败！");
+            log.error("更新原材料反馈信息失败！");
+            throw new BusinessException("更新原材料反馈信息失败！");
         }
         log.info("===========反馈信息处理-通过/驳回 end============");
         return R.ok();
     }
-
+    /**
+     * Description:  反馈信息处理-驳回,获取邮件内容
+     * Param: [omsRawMaterialFeedbacks]
+     * return: List<Map<String,String>>
+     * Author: ltq
+     * Date: 2020/11/23
+     */
+    public List<Map<String,String>> getEmailList(List<OmsRawMaterialFeedback> omsRawMaterialFeedbacks){
+        List<Map<String,String>> emailList = new ArrayList<>();
+        if (CollectionUtil.isEmpty(omsRawMaterialFeedbacks)) {
+            log.info("原材料反馈信息驳回，邮件处理方法，传入数据为空！");
+            return emailList;
+        }
+        String userJitStr =
+                omsRawMaterialFeedbacks.stream().map(OmsRawMaterialFeedback::getCreateBy).collect(Collectors.joining(","));
+        //查询JIT信息
+        log.info(">>>>>>>原材料反馈信息处理-驳回，处理JIT邮件信息>>>>>>>>>");
+        R userMap = remoteUserService.selectUserByLoginName(userJitStr);
+        if (!userMap.isSuccess()) {
+            log.error("原材料反馈信息驳回操作,根据反馈信息创建人查询用户信息失败："+userMap.get("msg"));
+        }
+        List<SysUserVo> sysUserList =
+                userMap.getCollectData(new TypeReference<List<SysUserVo>>() {});
+        if (CollectionUtil.isNotEmpty(sysUserList)) {
+            Map<String, List<SysUserVo>> map =sysUserList.stream().collect(Collectors.groupingBy(SysUserVo::getLoginName));
+            Map<String, List<OmsRawMaterialFeedback>> feedbackJitMap =
+                    omsRawMaterialFeedbacks.stream().collect(Collectors.groupingBy(OmsRawMaterialFeedback::getCreateBy));
+            feedbackJitMap.forEach((key, val) -> {
+                SysUserVo userVo = map.get(key).get(0);
+                Map<String, String> emailMap = new HashMap<>();
+                emailMap.put("email", userVo.getEmail());
+                emailMap.put("subject", EmailConstants.TITLE_RAW_MATERIAL);
+                emailMap.put("content", getEmailContent(val));
+                emailList.add(emailMap);
+            });
+        }
+        //查询JIT处长信息
+        log.info(">>>>>>>原材料反馈信息处理-驳回，处理JIT处长邮件信息>>>>>>>>>");
+        List<SysUserVo> sysUserVoList = new ArrayList<>();
+        //根据工厂、角色查询国产JIT处长信息
+        String productFactoryCode = omsRawMaterialFeedbacks.get(0).getProductFactoryCode();
+        R sysUserJitGC = remoteUserService.selectUserByMaterialCodeAndRoleKey(productFactoryCode,RoleConstants.ROLE_KEY_JITCZGC);
+        if (!sysUserJitGC.isSuccess()) {
+            log.error("原材料反馈信息驳回操作，根据工厂、角色查询国产JIT处长失败："+sysUserJitGC.get("msg"));
+        }
+        List<SysUserVo> sysUserVoListGC = sysUserJitGC.getCollectData(new TypeReference<List<SysUserVo>>() {});
+        if (CollectionUtil.isNotEmpty(sysUserVoListGC)) {
+            sysUserVoList.addAll(sysUserVoListGC);
+        }
+        R sysUserJitJK = remoteUserService.selectUserByMaterialCodeAndRoleKey(productFactoryCode,RoleConstants.ROLE_KEY_JITCZJK);
+        if (!sysUserJitJK.isSuccess()) {
+            log.error("原材料反馈信息驳回操作，根据工厂、角色查询进口JIT处长失败："+sysUserJitJK.get("msg"));
+        }
+        List<SysUserVo> sysUserVoListJK = sysUserJitJK.getCollectData(new TypeReference<List<SysUserVo>>() {});
+        if (CollectionUtil.isNotEmpty(sysUserVoListJK)) {
+            sysUserVoList.addAll(sysUserVoListJK);
+        }
+        if (CollectionUtil.isNotEmpty(sysUserVoList)) {
+            Map<String, List<SysUserVo>> userJitMap =
+                    sysUserVoList.stream().collect(Collectors.groupingBy(SysUserVo::getLoginName));
+            userJitMap.forEach((key, val) -> {
+                SysUserVo sysUserVo = val.get(0);
+                List<String> purchaseScopesList = Arrays.asList(DataScopeUtil.getUserPurchaseScopes(sysUserVo.getUserId()));
+                List<OmsRawMaterialFeedback> feedbackJITCZList = omsRawMaterialFeedbacks.stream()
+                        .filter(feedback -> purchaseScopesList.contains(feedback.getPurchaseGroup())).collect(Collectors.toList());
+                Map<String, String> emailMap = new HashMap<>();
+                emailMap.put("email", sysUserVo.getEmail());
+                emailMap.put("subject", EmailConstants.TITLE_RAW_MATERIAL);
+                emailMap.put("content", getEmailContent(feedbackJITCZList));
+                emailList.add(emailMap);
+            });
+        }
+        //查询毛部长信息
+        log.info(">>>>>>>原材料反馈信息处理-驳回，处理供应链部长信息>>>>>>>>>");
+        R sysUserGYLBZMap = remoteUserService.selectUserByRoleKey(RoleConstants.ROLE_KEY_GYLBZ);
+        if (!sysUserGYLBZMap.isSuccess()) {
+            log.error("原材料反馈信息驳回操作,查询供应链部长用户信息失败："+sysUserGYLBZMap.get("msg"));
+        }
+        List<SysUserVo> userGylbzList = sysUserGYLBZMap.getCollectData(new TypeReference<List<SysUserVo>>() {});
+        if (CollectionUtil.isNotEmpty(userGylbzList)) {
+            userGylbzList.forEach(u -> {
+                Map<String,String> emailMap = new HashMap<>();
+                emailMap.put("email",u.getEmail());
+                emailMap.put("subject",EmailConstants.TITLE_RAW_MATERIAL);
+                emailMap.put("content",getEmailContent(omsRawMaterialFeedbacks));
+                emailList.add(emailMap);
+            });
+        }
+        return emailList;
+    }
+    /**
+     * Description:  反馈信息处理-驳回,组织邮件内容
+     * Param: [list]
+     * return: String
+     * Author: ltq
+     * Date: 2020/11/23
+     */
+    public String getEmailContent(List<OmsRawMaterialFeedback> list){
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append(EmailConstants.RAW_MATERIAL_CONTEXT_FRONT);
+        if (CollectionUtil.isNotEmpty(list)) {
+            list.forEach(omsRawMaterialFeedback -> {
+                stringBuffer.append("<tr>");
+                stringBuffer.append("<td>");
+                stringBuffer.append(omsRawMaterialFeedback.getProductFactoryCode());
+                stringBuffer.append("</td>");
+                stringBuffer.append("<td>");
+                stringBuffer.append(omsRawMaterialFeedback.getProductMaterialCode());
+                stringBuffer.append("</td>");
+                stringBuffer.append("<td>");
+                stringBuffer.append(omsRawMaterialFeedback.getRawMaterialCode());
+                stringBuffer.append("</td>");
+                stringBuffer.append("<td>");
+                stringBuffer.append(omsRawMaterialFeedback.getProductPerson());
+                stringBuffer.append("</td>");
+                stringBuffer.append("<td>");
+                stringBuffer.append(omsRawMaterialFeedback.getCreateBy());
+                stringBuffer.append("</td>");
+                stringBuffer.append("<td>");
+                stringBuffer.append(omsRawMaterialFeedback.getRemark());
+                stringBuffer.append("</td>");
+                stringBuffer.append("</tr>");
+            });
+        }
+        stringBuffer.append(EmailConstants.RAW_MATERIAL_CONTEXT_AFTER);
+        return stringBuffer.toString();
+    }
     /**
      * Description:  快捷修改排产订单量
      * Param: [list, sysUser]
@@ -464,9 +619,9 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
                 throw new BusinessException("BOM信息为空！");
             }
             CdBomInfo cdBom = rBom.getData(CdBomInfo.class);
-            //计算成品满足量，原材料满足量 / 单耗 * 基本数量
-            BigDecimal productContentNum = f.getRawMaterialContentNum().divide(cdBom.getBomNum(), 0, BigDecimal.ROUND_HALF_DOWN)
-                    .multiply(cdBom.getBasicNum());
+            //计算成品满足量，原材料满足量 * 单耗 / 基本数量
+            BigDecimal productContentNum = f.getRawMaterialContentNum().multiply(cdBom.getBomNum())
+                    .divide(cdBom.getBasicNum(), 0, BigDecimal.ROUND_HALF_DOWN);
             f.setProductContentNum(productContentNum);
             f.setCreateBy(sysUser.getLoginName());
             f.setCreateTime(new Date());
