@@ -20,6 +20,8 @@ public class EmailConstants {
 
     public static final String TITLE_RAW_FEEDBACK = "原材料反馈信息通知";
 
+    public static final String TITLE_RAW_MATERIAL = "原材料反馈信息处理-驳回通知";
+
 
 
     /**
@@ -42,6 +44,21 @@ public class EmailConstants {
             "内网地址：http://orw.khaos.cosmoplat.com/";
 
     public static final String RAW_FEEDBACK_CONTEXT = "，您好！\n 订单评审系统有新的原材料反馈信息待处理，请及时处理！";
+
+    public static final String RAW_MATERIAL_CONTEXT_FRONT = "<p>订单评审系统，原材料反馈信息处理模块排产员驳回列表：</p><html> " +
+            "<body> " +
+            "<table border= \"1\" cellspacing=\"0\" style=\"border-color: grey\">" +
+            "<tr bgcolor=\"grey\">" +
+            "<th style=\"width: 100px\">生产工厂</th>" +
+            "<th style=\"width: 150px\">成品专用号</th>" +
+            "<th style=\"width: 150px\">原材料号</th>" +
+            "<th style=\"width: 150px\">排产员</th>" +
+            "<th style=\"width: 150px\">反馈JIT</th>" +
+            "<th style=\"width: 200px\">反馈原因</th>" +
+            "</tr>";
+    public static final String RAW_MATERIAL_CONTEXT_AFTER = "</table>" +
+            "</body>" +
+            "</html>";
 
 
 }
