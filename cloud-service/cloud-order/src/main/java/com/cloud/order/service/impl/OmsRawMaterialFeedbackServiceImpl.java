@@ -328,7 +328,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
                 Map<String, String> emailMap = new HashMap<>();
                 emailMap.put("email", userVo.getEmail());
                 emailMap.put("subject", EmailConstants.TITLE_RAW_MATERIAL);
-                emailMap.put("content", getEmailContent(val));
+                emailMap.put("content", userVo.getUserName() + getEmailContent(val));
                 emailList.add(emailMap);
             });
         }
@@ -365,7 +365,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
                     Map<String, String> emailMap = new HashMap<>();
                     emailMap.put("email", sysUserVo.getEmail());
                     emailMap.put("subject", EmailConstants.TITLE_RAW_MATERIAL);
-                    emailMap.put("content", getEmailContent(feedbackJITCZList));
+                    emailMap.put("content", sysUserVo.getUserName() + getEmailContent(feedbackJITCZList));
                     emailList.add(emailMap);
                 }
             });
@@ -382,7 +382,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
                 Map<String,String> emailMap = new HashMap<>();
                 emailMap.put("email",u.getEmail());
                 emailMap.put("subject",EmailConstants.TITLE_RAW_MATERIAL);
-                emailMap.put("content",getEmailContent(omsRawMaterialFeedbacks));
+                emailMap.put("content",u.getUserName() + getEmailContent(omsRawMaterialFeedbacks));
                 emailList.add(emailMap);
             });
         }
