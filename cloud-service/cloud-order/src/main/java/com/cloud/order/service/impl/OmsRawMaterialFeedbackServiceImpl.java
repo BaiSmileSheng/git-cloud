@@ -20,6 +20,7 @@ import com.cloud.order.service.IOmsRawMaterialFeedbackService;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.system.domain.entity.CdBomInfo;
 import com.cloud.system.domain.entity.SysUser;
+import com.cloud.system.domain.vo.SysUserRights;
 import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteBomService;
 import com.cloud.system.feign.RemoteUserService;
@@ -376,7 +377,7 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
         if (!sysUserGYLBZMap.isSuccess()) {
             log.error("原材料反馈信息驳回操作,查询供应链部长用户信息失败："+sysUserGYLBZMap.get("msg"));
         }
-        List<SysUserVo> userGylbzList = sysUserGYLBZMap.getCollectData(new TypeReference<List<SysUserVo>>() {});
+        List<SysUserRights> userGylbzList = sysUserGYLBZMap.getCollectData(new TypeReference<List<SysUserRights>>() {});
         if (CollectionUtil.isNotEmpty(userGylbzList)) {
             userGylbzList.forEach(u -> {
                 Map<String,String> emailMap = new HashMap<>();
