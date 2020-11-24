@@ -45,7 +45,7 @@ public class EmailConstants {
 
     public static final String RAW_FEEDBACK_CONTEXT = "，您好！\n 订单评审系统有新的原材料反馈信息待处理，请及时处理！";
 
-    public static final String RAW_MATERIAL_CONTEXT_FRONT = "<p>订单评审系统，原材料反馈信息处理模块排产员驳回列表：</p><html> " +
+    public static final String RAW_MATERIAL_CONTEXT_FRONT = "<p>订单评审系统，原材料反馈信息处理模块排产员驳回列表如下：</p><html> " +
             "<body> " +
             "<table border= \"1\" cellspacing=\"0\" style=\"border-color: grey\">" +
             "<tr bgcolor=\"grey\">" +

@@ -358,14 +358,16 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
                     sysUserVoList.stream().collect(Collectors.groupingBy(SysUserVo::getLoginName));
             userJitMap.forEach((key, val) -> {
                 SysUserVo sysUserVo = val.get(0);
-                List<String> purchaseScopesList = Arrays.asList(DataScopeUtil.getUserPurchaseScopes(sysUserVo.getUserId()));
+                List<String> purchaseScopesList = Arrays.asList(DataScopeUtil.getUserPurchaseScopes(sysUserVo.getUserId()).split(","));
                 List<OmsRawMaterialFeedback> feedbackJITCZList = omsRawMaterialFeedbacks.stream()
                         .filter(feedback -> purchaseScopesList.contains(feedback.getPurchaseGroup())).collect(Collectors.toList());
-                Map<String, String> emailMap = new HashMap<>();
-                emailMap.put("email", sysUserVo.getEmail());
-                emailMap.put("subject", EmailConstants.TITLE_RAW_MATERIAL);
-                emailMap.put("content", getEmailContent(feedbackJITCZList));
-                emailList.add(emailMap);
+                if (CollectionUtil.isNotEmpty(feedbackJITCZList)) {
+                    Map<String, String> emailMap = new HashMap<>();
+                    emailMap.put("email", sysUserVo.getEmail());
+                    emailMap.put("subject", EmailConstants.TITLE_RAW_MATERIAL);
+                    emailMap.put("content", getEmailContent(feedbackJITCZList));
+                    emailList.add(emailMap);
+                }
             });
         }
         //查询毛部长信息
