@@ -52,7 +52,7 @@ public class CdMaterialInfoXxlJob {
         XxlJobLogger.log("=================获取UPH数据定时任务开始==================");
         R r = remoteMaterialService.updateUphBySap();
         if (!r.isSuccess()) {
-            XxlJobLogger.log("==============获取UPH数据失败=============");
+            XxlJobLogger.log("==============获取UPH数据失败============="+r.get("msg"));
             return ReturnT.FAIL;
         }
         XxlJobLogger.log("=================获取UPH数据定时任务结束==================");
