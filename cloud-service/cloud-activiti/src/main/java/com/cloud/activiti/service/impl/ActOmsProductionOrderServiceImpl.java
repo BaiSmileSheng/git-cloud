@@ -212,9 +212,9 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
             throw new BusinessException("定时任务开启排产订单审批流程，更新排产订单状态失败，原因："+updateOrderMap.get("msg"));
         }
         //5、邮件通知
-//        emailUserVos.forEach(e ->
-//            mailService.sendTextMail(e.getEmail(), e.getTitle(), e.getContext())
-//        );
+        emailUserVos.forEach(e ->
+            mailService.sendTextMail(e.getEmail(), e.getTitle(), e.getContext())
+        );
         return R.ok();
     }
 
@@ -296,11 +296,11 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
             actTaskService.auditCandidateUser(bizAudit, userId,userIdSet);
             //邮件通知下一节点审批人
             //发送邮件
-//            sysUserVoList.forEach(u -> {
-//                String email = u.getEmail();
-//                String context = u.getUserName() + EmailConstants.OVERDUE_NOT_CLOSE_ORDER_REVIEW_CONTEXT + EmailConstants.ORW_URL;
-//                mailService.sendTextMail(email, EmailConstants.TITLE_OVERDUE_NOT_CLOSE_ORDER_REVIEW, context);
-//            });
+            sysUserVoList.forEach(u -> {
+                String email = u.getEmail();
+                String context = u.getUserName() + EmailConstants.OVERDUE_NOT_CLOSE_ORDER_REVIEW_CONTEXT + EmailConstants.ORW_URL;
+                mailService.sendTextMail(email, EmailConstants.TITLE_OVERDUE_NOT_CLOSE_ORDER_REVIEW, context);
+            });
         } else {
             //审批 推进工作流
             actTaskService.auditCandidateUser(bizAudit, userId,null);
