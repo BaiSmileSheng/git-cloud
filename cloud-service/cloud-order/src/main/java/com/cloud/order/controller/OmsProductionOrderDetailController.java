@@ -206,34 +206,6 @@ public class OmsProductionOrderDetailController extends BaseController {
         }
         return R.data(list);
     }
-
-    /**
-     * 原材料确认-导出
-     */
-    @GetMapping("commitExport")
-    @ApiOperation(value = "原材料确认-导出", response = OmsProductionOrderDetail.class)
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "materialCode", value = "原材料物料", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "checkStartDate", value = "查询开始日期", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "checkEndDate", value = "查询结束日期", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "status", value = "状态，0：未确认，1：已确认，2：反馈中'", required = false, paramType = "query", dataType = "String")
-    })
-    @OperLog(title = "原材料确认-导出 ", businessType = BusinessType.EXPORT)
-    @HasPermissions("order:productOrderDetail:commitExport")
-    public R commitExport(@ApiIgnore OmsProductionOrderDetail omsProductionOrderDetail) {
-        SysUser sysUser = getUserInfo(SysUser.class);
-        List<OmsProductionOrderDetail> list  =
-                omsProductionOrderDetailService.commitListPageInfo(omsProductionOrderDetail,sysUser);
-        List<OmsProductionOrderDetailCommitExportVo> omsProductionOrderDetailCommitExportVos = list.stream().map(detail ->{
-            OmsProductionOrderDetailCommitExportVo commitExportVo =
-                    BeanUtil.copyProperties(detail,OmsProductionOrderDetailCommitExportVo.class);
-            return commitExportVo;
-        }).collect(Collectors.toList());
-        String fileName = "原材料确认报表"+DateUtil.formatDate(new Date())+".xlsx";
-        return EasyExcelUtilOSS.writeExcel(omsProductionOrderDetailCommitExportVos, fileName, "sheet", new OmsProductionOrderDetailCommitExportVo());
-    }
-
     /**
      * 原材料确认-导出
      */
