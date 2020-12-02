@@ -120,6 +120,7 @@ spring:
                   productionOrder-confirmRelease: 60000
                   productionOrder-delete: 60000
                   productOrderDetail-commitProductOrderDetail: 60000
+                  feedback-approval: 120000
         #settle 模块
         - id: cloud-settle
           uri: lb://cloud-settle

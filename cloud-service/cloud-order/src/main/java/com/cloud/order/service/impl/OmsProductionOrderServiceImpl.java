@@ -833,6 +833,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     checkCount++;
                 } else {
                     rawMaterialCodes.add(omsRawMaterialFeedback.getRawMaterialCode());
+                    omsProductionOrder.setStatus(ProductOrderConstants.STATUS_ONE);
                 }
             }
             //如果满足数量的记录条数与反馈信息总条数相同，则排产订单状态为“待评审”
@@ -846,7 +847,6 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                     omsProductionOrderMapper.updateBatchByPrimaryKeySelective(omsProductionOrders);
                 }
             }
-            omsProductionOrder.setStatus(ProductOrderConstants.STATUS_ZERO);
             omsProductionOrder.setCreateBy(sysUser.getLoginName());
         } else if (ProductOrderConstants.STATUS_THREE.equals(productionOrder.getStatus())) {
             //“已评审”状态的排产订单
@@ -889,7 +889,21 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             throw new BusinessException("获取bom清单数据为空!");
         }
         List<OmsProductionOrderDetail> omsProductionOrderDetails = new ArrayList<>();
+        R detailMap = omsProductionOrderDetailService.selectListByOrderCodes("\'"+productionOrder.getOrderCode()+"\'");
+        if (!detailMap.isSuccess()) {
+            log.error("根据排产订单号查询排产订单明细数据异常，原因："+detailMap.get("msg"));
+            throw new BusinessException("根据排产订单号查询排产订单明细数据异常，原因："+detailMap.get("msg"));
+        }
+        List<OmsProductionOrderDetail> detailList =
+                detailMap.getCollectData(new TypeReference<List<OmsProductionOrderDetail>>() {});
+        Map<String,List<OmsProductionOrderDetail>> orderDetailMap =
+                detailList.stream().collect(Collectors.groupingBy(OmsProductionOrderDetail::getMaterialCode));
         bomInfos.forEach(bom -> {
+            List<OmsProductionOrderDetail> orderDetailList = orderDetailMap.get(bom.getRawMaterialCode());
+            OmsProductionOrderDetail orderDetail = null;
+            if (CollectionUtil.isNotEmpty(orderDetailList)) {
+                orderDetail = orderDetailList.get(0);
+            }
             //判断排产订单明细的状态
             String detailStatus = ProductOrderConstants.DETAIL_STATUS_ZERO;
             //如果已评审的排产订单修改订单量，并且向上调整，则排产订单明细状态为“未确认”
@@ -902,6 +916,12 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             }else if (rawMaterialCodes.contains(bom.getRawMaterialCode())) {
                 //如果是反馈信息处理-快捷修改，即排产订单是反馈中状态，根据原材料反馈信息中未审核的原材料状态进行判断
                 detailStatus = ProductOrderConstants.DETAIL_STATUS_TWO;
+            }else if (omsProductionOrder.getProductNum().compareTo(productionOrder.getProductNum()) <= 0) {
+                //如果排产订单状态为待评审状态，则判断排产订单明细的状态
+                if (BeanUtil.isNotEmpty(orderDetail)
+                        && ProductOrderConstants.DETAIL_STATUS_ONE.equals(orderDetail.getStatus())) {
+                    detailStatus = ProductOrderConstants.DETAIL_STATUS_ONE;
+                }
             }
             //判断采购组是否为空，为空直接已确认
             //N99、C44、M02、N21采购组为半成品采购组，直接确认

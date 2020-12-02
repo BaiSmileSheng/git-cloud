@@ -5,7 +5,7 @@ public enum ProductionOrderDetailStatusEnum {
     ORDER_CLASS_ONE("0","未确认"),
     ORDER_CLASS_TWO("1","已确认"),
     ORDER_CLASS_THREE("2","反馈中")
-    ;
+            ;
     private String code;
     private String msg;
     ProductionOrderDetailStatusEnum(String code, String msg) {

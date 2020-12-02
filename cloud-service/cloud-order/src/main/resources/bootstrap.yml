@@ -72,6 +72,13 @@ hystrix:
         isolation:
           thread:
             timeoutInMilliseconds: 30000 #断路器超时时间，默认1000ms
+    RemoteCdRawMaterialStockService#selectByList():
+      execution:
+        timeout:
+          enabled: true
+        isolation:
+          thread:
+            timeoutInMilliseconds: 200000 #断路器超时时间，默认1000ms
 
 # MyBatis
 mybatis:
