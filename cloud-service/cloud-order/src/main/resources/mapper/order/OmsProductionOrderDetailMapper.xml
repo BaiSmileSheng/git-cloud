@@ -262,6 +262,9 @@
                 <if test="item.checkEndDate != null and item.checkEndDate != ''">
                     and detail.product_start_date <![CDATA[ <= ]]> #{item.checkEndDate,jdbcType=VARCHAR}
                 </if>
+                <if test="item.productOrderCode != null and item.productOrderCode != ''">
+                    and detail.product_order_code = #{item.productOrderCode,jdbcType=VARCHAR}
+                </if>
                 )
             </foreach>
         </where>

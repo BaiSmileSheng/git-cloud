@@ -296,11 +296,11 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
             actTaskService.auditCandidateUser(bizAudit, userId,userIdSet);
             //邮件通知下一节点审批人
             //发送邮件
-//            sysUserVoList.forEach(u -> {
-//                String email = u.getEmail();
-//                String context = u.getUserName() + EmailConstants.OVERDUE_NOT_CLOSE_ORDER_REVIEW_CONTEXT + EmailConstants.ORW_URL;
-//                mailService.sendTextMail(email, EmailConstants.TITLE_OVERDUE_NOT_CLOSE_ORDER_REVIEW, context);
-//            });
+            sysUserVoList.forEach(u -> {
+                String email = u.getEmail();
+                String context = u.getUserName() + EmailConstants.OVERDUE_NOT_CLOSE_ORDER_REVIEW_CONTEXT + EmailConstants.ORW_URL;
+                mailService.sendTextMail(email, EmailConstants.TITLE_OVERDUE_NOT_CLOSE_ORDER_REVIEW, context);
+            });
         } else {
             //审批 推进工作流
             actTaskService.auditCandidateUser(bizAudit, userId,null);

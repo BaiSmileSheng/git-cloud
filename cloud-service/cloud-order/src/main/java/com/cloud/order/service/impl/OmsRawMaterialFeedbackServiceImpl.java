@@ -360,8 +360,10 @@ public class OmsRawMaterialFeedbackServiceImpl extends BaseServiceImpl<OmsRawMat
             userJitMap.forEach((key, val) -> {
                 SysUserVo sysUserVo = val.get(0);
                 List<String> purchaseScopesList = Arrays.asList(DataScopeUtil.getUserPurchaseScopes(sysUserVo.getUserId()).split(","));
+                List<String> factoryCodeList = Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUserVo.getUserId()).split(","));
                 List<OmsRawMaterialFeedback> feedbackJITCZList = omsRawMaterialFeedbacks.stream()
-                        .filter(feedback -> purchaseScopesList.contains(feedback.getPurchaseGroup())).collect(Collectors.toList());
+                        .filter(feedback -> purchaseScopesList.contains(feedback.getPurchaseGroup())
+                                && factoryCodeList.contains(feedback.getProductFactoryCode())).collect(Collectors.toList());
                 if (CollectionUtil.isNotEmpty(feedbackJITCZList)) {
                     Map<String, String> emailMap = new HashMap<>();
                     emailMap.put("email", sysUserVo.getEmail());
