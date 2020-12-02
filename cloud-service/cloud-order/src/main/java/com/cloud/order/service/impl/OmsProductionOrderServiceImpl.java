@@ -120,6 +120,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
     private static final String OUTSOURCE_ERROR_REMARK = "加工承揽方式与线体属性不匹配";
 
+    private static final String MATERIAL_REMARK = "物料主数据没有该物料";
+    private static final String SAP_TYPE_REMARK = "SAP订单类型无效";
+
     private final static String YYYY_MM_DD = "yyyy-MM-dd";//时间格式
 
     public final static String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
@@ -200,6 +203,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     private RemoteActTaskService remoteActTaskService;
     @Autowired
     private RemoteUserService remoteUserService;
+    @Autowired
+    private RemoteDictDataService remoteDictDataService;
 
     /**
      * Description:  排产订单导入
@@ -414,8 +419,9 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             o.setProductMaterialCode(o.getProductMaterialCode().trim());
             o.setProductFactoryCode(o.getProductFactoryCode().trim());
             o.setProductLineCode(o.getProductLineCode().trim());
-            o.setBomVersion(o.getBomVersion());
-            o.setProductStartDate(o.getProductStartDate());
+            o.setOrderType(o.getOrderType().trim());
+            o.setBomVersion(o.getBomVersion().trim());
+            o.setProductStartDate(o.getProductStartDate().trim());
         });
         List<Dict> paramsMapList = listImport.stream().map(omsProductionOrder ->
                 new Dict().set(PRODUCT_FACTORY_CODE, omsProductionOrder.getProductFactoryCode())
@@ -586,7 +592,11 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             //筛选没有bom清单的数据
             List<CdBomInfo> bomInfos =
                     bomMap.get(StrUtil.concat(true, o.getProductMaterialCode(), o.getProductFactoryCode(), o.getBomVersion()));
-            if (ObjectUtil.isEmpty(bomInfos) || bomInfos.size() <= 0) {
+            //校验物料主数据信息
+            if (!StrUtil.isNotBlank(o.getProductMaterialDesc())) {
+                String remark = o.getExportRemark() == null ? "" : o.getExportRemark() + "；";
+                o.setExportRemark(remark + MATERIAL_REMARK);
+            } else if (ObjectUtil.isEmpty(bomInfos) || bomInfos.size() <= 0) {
                 String exportRemark = o.getExportRemark() == null ? "" : o.getExportRemark() + "；";
                 o.setExportRemark(exportRemark + NO_BOM_REMARK);
             }
@@ -645,6 +655,13 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 if (!OutSourceTypeEnum.OUT_SOURCE_TYPE_ZZ.getCode().equals(o.getOutsourceType())) {
                     o.setExportRemark(exportRemark + OUTSOURCE_ERROR_REMARK);
                 }
+            }
+            //校验订单类型
+            List<SysDictData> listSysDictData = remoteDictDataService.getType("sap_order_type");
+            List<String> dictValueS = listSysDictData.stream().map(SysDictData::getDictValue).collect(Collectors.toList());
+            if(!dictValueS.contains(o.getOrderType())){
+                String remark = o.getExportRemark() == null ? "" : o.getExportRemark() + "；";
+                o.setExportRemark(remark + SAP_TYPE_REMARK);
             }
             sucObjectDto.setObject(o);
             successDtos.add(sucObjectDto);

@@ -592,15 +592,28 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
             long count = value.stream()
                     .filter(detail -> ProductOrderConstants.DETAIL_STATUS_ONE.equals(detail.getStatus())).count();
             long countAll = value.size();
+            OmsProductionOrder omsProductionOrder = OmsProductionOrder.builder()
+                    .orderCode(key)
+                    .build();
             //已确认条数和总条数如果一致，则排产订单已评审
             if (count == countAll) {
-                OmsProductionOrder omsProductionOrder = OmsProductionOrder.builder()
-                        .orderCode(key)
-                        .status(ProductOrderConstants.STATUS_THREE)
-                        .build();
+                omsProductionOrder.setStatus(ProductOrderConstants.STATUS_THREE);
                 omsProductionOrder.setUpdateBy(sysUser.getLoginName());
-                orderList.add(omsProductionOrder);
+            } else {
+                //统计排产订单明细数据反馈的条数
+                long countTwo = value.stream()
+                        .filter(detail -> ProductOrderConstants.DETAIL_STATUS_TWO.equals(detail.getStatus())).count();
+                if (countTwo > 0L) {
+                    //反馈的条数大于0，则更新排产订单的状态为反馈中
+                    omsProductionOrder.setStatus(ProductOrderConstants.STATUS_ONE);
+                    omsProductionOrder.setUpdateBy(sysUser.getLoginName());
+                } else {
+                    //反馈的条数小于等于0，则更新排产订单的状态为待评审
+                    omsProductionOrder.setStatus(ProductOrderConstants.STATUS_ZERO);
+                    omsProductionOrder.setUpdateBy(sysUser.getLoginName());
+                }
             }
+            orderList.add(omsProductionOrder);
         });
         if (orderList.size() > 0) {
             omsProductionOrderService.updateByOrderCode(orderList);
