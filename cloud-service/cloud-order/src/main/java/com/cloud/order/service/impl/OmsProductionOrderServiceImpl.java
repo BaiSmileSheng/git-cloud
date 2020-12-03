@@ -38,11 +38,13 @@ import com.cloud.order.domain.entity.vo.OmsProductionOrderMailVo;
 import com.cloud.order.enums.ProductionOrderDelaysFlagEnum;
 import com.cloud.order.enums.ProductionOrderSettleFlagEnum;
 import com.cloud.order.enums.ProductionOrderStatusEnum;
+import com.cloud.order.enums.SmallBatchEnum;
 import com.cloud.order.mail.MailService;
 import com.cloud.order.mapper.OmsProductionOrderMapper;
 import com.cloud.order.service.*;
 import com.cloud.order.util.DataScopeUtil;
 import com.cloud.order.util.EasyExcelUtilOSS;
+import com.cloud.order.util.OmsProductOrderWriteHandler;
 import com.cloud.order.webService.wms.OdsRawOrderOutStorageDTO;
 import com.cloud.order.webService.wms.OutStorageResult;
 import com.cloud.order.webService.wms.RfWebService;
@@ -122,6 +124,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 
     private static final String MATERIAL_REMARK = "物料主数据没有该物料";
     private static final String SAP_TYPE_REMARK = "SAP订单类型无效";
+    private static final String SMALL_BATCH_REMARK = "是否小批内容违规，请参照批注";
 
     private final static String YYYY_MM_DD = "yyyy-MM-dd";//时间格式
 
@@ -249,10 +252,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
         //无法导入数据
         List<OmsProductionOrderExportVo> exportList = list.stream().filter(o -> StrUtil.isNotBlank(o.getExportRemark())).collect(toList());
         list = list.stream().filter(o -> !exportList.contains(o)).collect(Collectors.toList());
+        exportList.addAll(errorResults);
         if ((ObjectUtil.isEmpty(list) || list.size() <= 0)
                 && (ObjectUtil.isNotEmpty(exportList) && exportList.size() > 0)) {
-            exportList.addAll(errorResults);
-            return EasyExcelUtilOSS.writeExcel(exportList, "排产订单导入失败数据.xlsx", "sheet", new OmsProductionOrderExportVo());
+            return EasyExcelUtilOSS.writePostilExcel(exportList, "排产订单导入失败数据.xlsx", "sheet", new OmsProductionOrderExportVo(),new OmsProductOrderWriteHandler());
         }
         //1-8、排产订单号：根据生成规则生成排产订单号；
         List<OmsProductionOrder> omsProductionOrders = list.stream().map(o -> {
@@ -326,7 +329,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 //            omsProductionOrderMapper.updateBatchByPrimaryKeySelective(insertProductOrderList);
 //        }
         if (exportList.size() > 0) {
-            return EasyExcelUtilOSS.writeExcel(exportList, "排产订单导入失败数据.xlsx", "sheet", new OmsProductionOrderExportVo());
+            return EasyExcelUtilOSS.writePostilExcel(exportList, "排产订单导入失败数据.xlsx", "sheet", new OmsProductionOrderExportVo(),new OmsProductOrderWriteHandler());
         } else {
             return R.ok("成功导入"+insertCount+"条！");
         }
@@ -662,6 +665,13 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             if(!dictValueS.contains(o.getOrderType())){
                 String remark = o.getExportRemark() == null ? "" : o.getExportRemark() + "；";
                 o.setExportRemark(remark + SAP_TYPE_REMARK);
+            }
+            if (StrUtil.isNotBlank(o.getIsSmallBatch())
+                    && !SmallBatchEnum.SMALL_BATCH_ZERO.getCode().equals(o.getIsSmallBatch())
+                    && !SmallBatchEnum.SMALL_BATCH_ONE.getCode().equals(o.getIsSmallBatch())
+                    && !SmallBatchEnum.SMALL_BATCH_TRUE.getCode().equals(o.getIsSmallBatch())) {
+                String remark = o.getExportRemark() == null ? "" : o.getExportRemark() + "；";
+                o.setExportRemark(remark + SMALL_BATCH_REMARK);
             }
             sucObjectDto.setObject(o);
             successDtos.add(sucObjectDto);
@@ -1830,7 +1840,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
             if (ZN_ATTESTATION.equals(cdMaterialExtendInfo.getIsZnAttestation())
                     && (!ProductOrderConstants.NEW_FACTORY_CODE.equals(o.getProductFactoryCode())
                     || !ProductOrderConstants.NEW_LINE_CODE.equals(o.getProductLineCode()))
-                    && !ProductOrderConstants.SMALL_BATCH_TRUE.equals(o.getIsSmallBatch())) {
+                    && !SmallBatchEnum.SMALL_BATCH_ONE.getCode().equals(o.getIsSmallBatch())
+                    && !SmallBatchEnum.SMALL_BATCH_ZERO.getCode().equals(o.getIsSmallBatch())) {
                 //增加小批判断    2020-09-11  ltq  by  zhaoshun
                 znOrderList.add(o);
                 o.setAuditStatus(ProductOrderConstants.AUDIT_STATUS_ONE);
