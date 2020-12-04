@@ -43,6 +43,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
@@ -141,9 +142,12 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
             log.info("本次初始化排产订单状态-获取排产订单数据为空！");
             return R.ok("本次初始化排产订单状态-获取排产订单数据为空！");
         }
+        BigDecimal countSum = new BigDecimal(omsProductionOrders.size());
+        BigDecimal size = new BigDecimal("3");
+        BigDecimal count = countSum.divide(size,BigDecimal.ROUND_UP);
         ObjectMapper objectMapper = new ObjectMapper();
         List<List<OmsProductionOrder>> orderList =
-                objectMapper.convertValue(ListCommonUtil.subCollection(omsProductionOrders, omsProductionOrders.size() / 3),
+                objectMapper.convertValue(ListCommonUtil.subCollection(omsProductionOrders, count.intValue()),
                         new TypeReference<List<List<OmsProductionOrder>>>() {
                         });
         ThreadPoolConfig config = new ThreadPoolConfig();
@@ -234,9 +238,9 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
                         throw new BusinessException("定时任务开启排产订单审批流程，更新排产订单状态失败，原因：" + updateOrderMap.get("msg"));
                     }
                     //5、邮件通知
-//        emailUserVos.forEach(e ->
-//            mailService.sendTextMail(e.getEmail(), e.getTitle(), e.getContext())
-//        );
+                    emailUserVos.forEach(e ->
+                            mailService.sendTextMail(e.getEmail(), e.getTitle(), e.getContext())
+                    );
                     countDownLatch.countDown();
                 }
             }).start();
