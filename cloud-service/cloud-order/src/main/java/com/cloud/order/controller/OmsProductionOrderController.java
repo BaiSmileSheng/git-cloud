@@ -646,10 +646,7 @@ public class OmsProductionOrderController extends BaseController {
      */
     @PostMapping("selectByStatusAct")
     public R selectByStatusAct(){
-        Example example = new Example(OmsProductionOrder.class);
-        Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("status", ProductOrderConstants.STATUS_INIT);
-        List<OmsProductionOrder> omsProductionOrders = omsProductionOrderService.selectByExample(example);
+        List<OmsProductionOrder> omsProductionOrders = omsProductionOrderService.selectByStatus(ProductOrderConstants.STATUS_INIT);
         if (ObjectUtil.isEmpty(omsProductionOrders) || omsProductionOrders.size() <= 0) {
             return R.ok();
         }
