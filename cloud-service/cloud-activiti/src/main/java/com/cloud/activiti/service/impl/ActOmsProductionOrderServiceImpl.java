@@ -16,21 +16,19 @@ import com.cloud.activiti.mail.MailService;
 import com.cloud.activiti.service.IActOmsProductionOrderService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
+import com.cloud.common.config.thread.ThreadPoolConfig;
 import com.cloud.common.constant.EmailConstants;
 import com.cloud.common.constant.ProductOrderConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
-import com.cloud.common.utils.ListCommonUtil;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.domain.entity.OmsProductionOrderDetail;
 import com.cloud.order.feign.RemoteProductionOrderDetailService;
 import com.cloud.order.feign.RemoteProductionOrderService;
-import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
@@ -38,17 +36,12 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.task.Task;
-import org.apache.xmlbeans.impl.common.ConcurrentReaderHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import tk.mybatis.mapper.entity.Example;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -78,8 +71,6 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
     private MailService mailService;
     @Autowired
     private RemoteProductionOrderDetailService remoteProductionOrderDetailService;
-    @Autowired
-    private DataSourceTransactionManager dstManager;
     /**
      * Description:  开启审批流
      * Param: [key, orderId, orderCode, userId, title]
@@ -229,6 +220,9 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
     }
 
     public R startActProcessAct(List<ActBusinessVo> actBusinessVoList) {
+        ThreadPoolConfig config = new ThreadPoolConfig();
+        ThreadPoolTaskExecutor threadPoolTaskExecutor = config.threadPoolTaskExecutor();
+        threadPoolTaskExecutor.initialize();
         actBusinessVoList.forEach(actBusinessVo -> {
             if (BeanUtil.isNotEmpty(actBusinessVo)) {
                 R keyMap = getByKey(actBusinessVo.getKey());
@@ -238,17 +232,10 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
                 }
                 ProcessDefinitionAct processDefinitionAct = keyMap.getData(ProcessDefinitionAct.class);
                 List<ActStartProcessVo> list = actBusinessVo.getProcessVoList();
-                ObjectMapper objectMapper = new ObjectMapper();
-                List<List<ActStartProcessVo>> processList =
-                        objectMapper.convertValue(ListCommonUtil.subCollection(list, 10),
-                                new TypeReference<List<List<ActStartProcessVo>>>() {});
-                processList.forEach(voList ->{
-                    //插入流程物业表  并开启流程
-                    DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-                    def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW); // 事物隔离级别，开启新事务，这样会比较安全些。
-                    TransactionStatus transaction = dstManager.getTransaction(def); // 获得事务状态
-                    try {
-                        voList.forEach(a -> {
+                threadPoolTaskExecutor.newThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        list.forEach(a -> {
                             Example example = new Example(BizBusiness.class);
                             Example.Criteria criteria = example.createCriteria();
                             criteria.andEqualTo("orderNo", a.getOrderCode());
@@ -273,16 +260,8 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
                                 }
                             }
                         });
-                        dstManager.commit(transaction);
-                    }catch (Exception e) {
-                        StringWriter w = new StringWriter();
-                        e.printStackTrace(new PrintWriter(w));
-                        log.error("排产订单开启审批流程失败 e:{}", w.toString());
-                        dstManager.rollback(transaction);
-                        throw new BusinessException("排产订单开启审批流程失败!");
                     }
-
-                });
+                }).start();
             } else {
                 log.error("开启审批流失败，传入参数为空！");
                 throw new BusinessException("开启审批流失败，传入参数为空！");
