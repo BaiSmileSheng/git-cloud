@@ -150,10 +150,11 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
         ThreadPoolTaskExecutor threadPoolTaskExecutor = config.threadPoolTaskExecutor();
         threadPoolTaskExecutor.initialize();
         final CountDownLatch countDownLatch = new CountDownLatch(orderList.size());
-        threadPoolTaskExecutor.newThread(new Runnable() {
-            @Override
-            public void run() {
-                for (List<OmsProductionOrder> orders : orderList) {
+
+        for (List<OmsProductionOrder> orders : orderList) {
+            threadPoolTaskExecutor.newThread(new Runnable() {
+                @Override
+                public void run() {
                     //获取排产订单明细，设置排产订单的状态
                     List<String> orderCodes = orders
                             .stream().map(OmsProductionOrder::getOrderCode).collect(Collectors.toList());
@@ -195,7 +196,8 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
                             log.error("定时任务开启排产订单审批流程，更新排产订单状态失败，原因：" + updateOrderMap.get("msg"));
                             throw new BusinessException("定时任务开启排产订单审批流程，更新排产订单状态失败，原因：" + updateOrderMap.get("msg"));
                         }
-                        continue;
+                        countDownLatch.countDown();
+                        return;
                     }
                     R startActMap = startActProcessAct(businessVoList);
                     if (!startActMap.isSuccess()) {
@@ -235,10 +237,10 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
 //        emailUserVos.forEach(e ->
 //            mailService.sendTextMail(e.getEmail(), e.getTitle(), e.getContext())
 //        );
+                    countDownLatch.countDown();
                 }
-                countDownLatch.countDown();
-            }
-        }).start();
+            }).start();
+        }
         try {
             countDownLatch.await();
         } catch (InterruptedException e) {
