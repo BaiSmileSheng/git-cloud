@@ -618,7 +618,8 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                             CdMaterialPriceInfo cdMaterialPriceInfo = materialPriceInfos.stream()
                                     .filter(m -> m.getMaterialCode().equals(cdSettleProductMaterial.getRawMaterialCode())
                                             && m.getMemberCode().equals(factoryLineInfo.getSupplierCode())
-                                            && m.getPurchasingOrganization().equals(cdFactoryInfo.getPurchaseOrg()))
+                                            && m.getPurchasingOrganization().equals(cdFactoryInfo.getPurchaseOrg())
+                                            && m.getUnit().equals(o.getUnit().trim().toUpperCase()))
                                     .findFirst()
                                     .orElse(null);
                             if (cdMaterialPriceInfo == null) {
@@ -1590,20 +1591,27 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
     private ActBusinessVo checkOverStock(List<OmsProductionOrder> list, Map<String,SysUserVo> userMap) {
         Set<OmsProductionOrder> omsProductionOrders = new HashSet<>();
         Map<String,Set<String>> map = new HashMap<>();
+        ActBusinessVo actBusinessVo = null;
+        List<String> productMaterialCodeList = list.stream().map(OmsProductionOrder::getProductMaterialCode).collect(toList());
+        R overStockMap = remoteCdProductOverdueService.selectOverStockByFactoryAndMaterial(productMaterialCodeList);
+        if (!overStockMap.isSuccess()) {
+            log.info("根据成品物料号查询超期库存" + overStockMap.get("msg"));
+            throw new BusinessException("根据成品物料号查询超期库存" + overStockMap.get("msg"));
+        }
+        List<CdProductOverdue> productOverdueList =
+                overStockMap.getCollectData(new TypeReference<List<CdProductOverdue>>() {
+                });
+        if (!CollectionUtil.isNotEmpty(productOverdueList)) {
+            return actBusinessVo;
+        }
+        Map<String,List<CdProductOverdue>> overMap =
+                productOverdueList.stream().collect(Collectors.groupingBy(CdProductOverdue::getProductMaterialCode));
         list.forEach(o -> {
             Set<String> userFactoryCodeSet = new HashSet<>();
             //应王福丽要求8310工厂36号线不用校验超期库存   2020-09-08
             if (!ProductOrderConstants.NEW_FACTORY_CODE.equals(o.getProductFactoryCode())
                     || !ProductOrderConstants.NEW_LINE_CODE.equals(o.getProductLineCode())) {
-                R overStockMap = remoteCdProductOverdueService.selectOverStockByFactoryAndMaterial(CdProductOverdue
-                        .builder()
-                        .productMaterialCode(o.getProductMaterialCode()).build());
-                if (!overStockMap.isSuccess()) {
-                    log.info("根据成品物料号查询超期库存" + overStockMap.get("msg"));
-                }
-                List<CdProductOverdue> productOverdues =
-                        overStockMap.getCollectData(new TypeReference<List<CdProductOverdue>>() {
-                        });
+                List<CdProductOverdue> productOverdues = overMap.get(o.getProductMaterialCode());
                 if (BeanUtil.isNotEmpty(productOverdues) && productOverdues.size() > 0) {
                     Set<String> overduesFactoryCodes = productOverdues.stream().map(CdProductOverdue::getProductFactoryCode).collect(Collectors.toSet());
                     userFactoryCodeSet.addAll(overduesFactoryCodes);
@@ -1614,7 +1622,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 }
             }
         });
-        ActBusinessVo actBusinessVo = null;
+
         if (omsProductionOrders.size() > 0) {
             actBusinessVo = ActBusinessVo.builder().build();
             //获取权限用户列表
@@ -2891,6 +2899,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 		 return omsProductionOrderMapper.updateDelaysFlag();
 	}
 
+    @Override
+    public List<OmsProductionOrder> selectByStatus(String status) {
+        return omsProductionOrderMapper.selectByStatus(status);
+    }
 
 
 }

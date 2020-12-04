@@ -6,6 +6,8 @@ import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Slf4j
 @Component
 public class RemoteProductionOrderDetailFallbackFactory implements FallbackFactory<RemoteProductionOrderDetailService> {
@@ -17,7 +19,7 @@ public class RemoteProductionOrderDetailFallbackFactory implements FallbackFacto
         return new RemoteProductionOrderDetailService(){
 
             @Override
-            public R selectDetailByOrderAct(String orderCodes) {
+            public R selectDetailByOrderAct(List<String> orderCodes) {
                 log.error("RemoteProductionOrderDetailService.selectDetailByOrderAct(生产订单明细)错误信息：{}",throwable.getMessage());
                 return R.error("服务拥挤请稍后再试");
             }
