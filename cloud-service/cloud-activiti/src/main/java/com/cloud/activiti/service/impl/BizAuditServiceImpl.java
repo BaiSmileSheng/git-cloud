@@ -71,6 +71,7 @@ public class BizAuditServiceImpl implements IBizAuditService {
      * @return 结果
      */
     @Override
+    @GlobalTransactional
     public int updateBizAudit(BizAudit bizAudit) {
         return auditMapper.updateByPrimaryKeySelective(bizAudit);
     }
