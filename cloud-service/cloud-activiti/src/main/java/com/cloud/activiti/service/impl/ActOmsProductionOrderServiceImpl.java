@@ -22,6 +22,7 @@ import com.cloud.common.constant.ProductOrderConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.common.utils.ListCommonUtil;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.domain.entity.OmsProductionOrderDetail;
 import com.cloud.order.feign.RemoteProductionOrderDetailService;
@@ -29,6 +30,7 @@ import com.cloud.order.feign.RemoteProductionOrderService;
 import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +45,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 /**
@@ -232,36 +235,49 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
                 }
                 ProcessDefinitionAct processDefinitionAct = keyMap.getData(ProcessDefinitionAct.class);
                 List<ActStartProcessVo> list = actBusinessVo.getProcessVoList();
-                threadPoolTaskExecutor.newThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        list.forEach(a -> {
-                            Example example = new Example(BizBusiness.class);
-                            Example.Criteria criteria = example.createCriteria();
-                            criteria.andEqualTo("orderNo", a.getOrderCode());
-                            criteria.andEqualTo("procDefKey", actBusinessVo.getKey());
-                            List<BizBusiness> businesses = bizBusinessService.selectByExample(example);
-                            if (!ObjectUtil.isNotEmpty(businesses) || businesses.size() <= 0) {
-                                BizBusiness business =
-                                        initBusiness(processDefinitionAct.getId()
-                                                , processDefinitionAct.getName(), a.getOrderId(), a.getOrderCode()
-                                                , a.getUserId(), actBusinessVo.getTitle(), a.getUserName());
-                                bizBusinessService.insertBizBusiness(business);
-                                if (actBusinessVo.getKey().equals(ActProcessContants.ACTIVITI_ADD_REVIEW)
-                                        || actBusinessVo.getKey().equals(ActProcessContants.ACTIVITI_OVERDUE_STOCK_ORDER_REVIEW)) {
-                                    //会签流程,暂时只有T+2追加订单、超期库存是会签
-                                    Map<String, Object> variables = Maps.newHashMap();
-                                    variables.put("signList", a.getUserIds());
-                                    bizBusinessService.startProcessForHuiQian(business, variables);
-                                } else {
-                                    //非会签
-                                    Map<String, Object> variables = Maps.newHashMap();
-                                    bizBusinessService.startProcess(business, variables, a.getUserIds());
+                ObjectMapper objectMapper = new ObjectMapper();
+                List<List<ActStartProcessVo>> processList =
+                        objectMapper.convertValue(ListCommonUtil.subCollection(list, 10),
+                                new TypeReference<List<List<ActStartProcessVo>>>() {});
+                final CountDownLatch countDownLatch = new CountDownLatch(processList.size());
+                processList.forEach(voList ->{
+                    threadPoolTaskExecutor.newThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            list.forEach(a -> {
+                                Example example = new Example(BizBusiness.class);
+                                Example.Criteria criteria = example.createCriteria();
+                                criteria.andEqualTo("orderNo", a.getOrderCode());
+                                criteria.andEqualTo("procDefKey", actBusinessVo.getKey());
+                                List<BizBusiness> businesses = bizBusinessService.selectByExample(example);
+                                if (!ObjectUtil.isNotEmpty(businesses) || businesses.size() <= 0) {
+                                    BizBusiness business =
+                                            initBusiness(processDefinitionAct.getId()
+                                                    , processDefinitionAct.getName(), a.getOrderId(), a.getOrderCode()
+                                                    , a.getUserId(), actBusinessVo.getTitle(), a.getUserName());
+                                    bizBusinessService.insertBizBusiness(business);
+                                    if (actBusinessVo.getKey().equals(ActProcessContants.ACTIVITI_ADD_REVIEW)
+                                            || actBusinessVo.getKey().equals(ActProcessContants.ACTIVITI_OVERDUE_STOCK_ORDER_REVIEW)) {
+                                        //会签流程,暂时只有T+2追加订单、超期库存是会签
+                                        Map<String, Object> variables = Maps.newHashMap();
+                                        variables.put("signList", a.getUserIds());
+                                        bizBusinessService.startProcessForHuiQian(business, variables);
+                                    } else {
+                                        //非会签
+                                        Map<String, Object> variables = Maps.newHashMap();
+                                        bizBusinessService.startProcess(business, variables, a.getUserIds());
+                                    }
                                 }
-                            }
-                        });
+                            });
+                            countDownLatch.countDown();
+                        }
+                    }).start();
+                    try {
+                        countDownLatch.await();
+                    } catch (InterruptedException e) {
+                        throw new BusinessException("开启审批流多线程失败！");
                     }
-                }).start();
+                });
             } else {
                 log.error("开启审批流失败，传入参数为空！");
                 throw new BusinessException("开启审批流失败，传入参数为空！");
