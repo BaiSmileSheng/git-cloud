@@ -194,7 +194,7 @@ public class OmsProductionOrderDetailController extends BaseController {
      * Date: 2020/10/19
      */
     @PostMapping("selectDetailByOrderAct")
-    public R selectDetailByOrderAct(List<String> orderCodes){
+    public R selectDetailByOrderAct(@RequestBody List<String> orderCodes){
         Example example = new Example(OmsProductionOrderDetail.class);
         Example.Criteria criteria = example.createCriteria();
         if (CollectionUtil.isNotEmpty(orderCodes)) {
