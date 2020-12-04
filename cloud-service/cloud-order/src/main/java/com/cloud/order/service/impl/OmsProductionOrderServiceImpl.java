@@ -2899,6 +2899,10 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
 		 return omsProductionOrderMapper.updateDelaysFlag();
 	}
 
+    @Override
+    public List<OmsProductionOrder> selectByStatus(String status) {
+        return omsProductionOrderMapper.selectByStatus(status);
+    }
 
 
 }
