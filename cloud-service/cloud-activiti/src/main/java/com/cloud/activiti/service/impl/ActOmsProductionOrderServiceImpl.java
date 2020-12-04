@@ -137,8 +137,8 @@ public class ActOmsProductionOrderServiceImpl implements IActOmsProductionOrderS
             return R.ok("本次初始化排产订单状态-获取排产订单数据为空！");
         }
         //获取排产订单明细，设置排产订单的状态
-        String orderCodes = omsProductionOrders
-                .stream().map(OmsProductionOrder::getOrderCode).collect(Collectors.joining(","));
+        List<String> orderCodes = omsProductionOrders
+                .stream().map(OmsProductionOrder::getOrderCode).collect(Collectors.toList());
         R detailMap = remoteProductionOrderDetailService.selectDetailByOrderAct(orderCodes);
         if (!detailMap.isSuccess()) {
             log.info("定时任务开启排产订单审批流程，查询排产订单明细失败！");
