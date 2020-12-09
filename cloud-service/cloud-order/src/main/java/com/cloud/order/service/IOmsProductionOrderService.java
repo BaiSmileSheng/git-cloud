@@ -167,5 +167,7 @@ public interface IOmsProductionOrderService extends BaseService<OmsProductionOrd
      */
 	int updateDelaysFlag();
 
+	List<OmsProductionOrder> selectByStatus(String status);
+
 
 }

@@ -79,5 +79,5 @@ public interface OmsProductionOrderMapper extends BaseMapper<OmsProductionOrder>
      */
     int updateDelaysFlag();
 
-
+    List<OmsProductionOrder> selectByStatus(@Param(value = "status") String status);
 }

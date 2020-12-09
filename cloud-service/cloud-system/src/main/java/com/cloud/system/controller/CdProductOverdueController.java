@@ -1,5 +1,6 @@
 package com.cloud.system.controller;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
@@ -7,6 +8,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.system.domain.entity.CdMaterialExtendInfo;
 import com.cloud.system.domain.entity.CdProductOverdue;
 import com.cloud.system.domain.vo.CdProductOverdueExportVo;
 import com.cloud.system.domain.vo.CdProductOverdueImportVo;
@@ -176,16 +178,17 @@ public class CdProductOverdueController extends BaseController {
      */
     @PostMapping("selectOverStockByFactoryAndMaterial")
     @ApiOperation(value = "根据工厂、物料号查询超期库存  ", response = R.class)
-    public R selectOverStockByFactoryAndMaterial(@RequestBody CdProductOverdue cdProductOverdue){
+    public R selectOverStockByFactoryAndMaterial(@RequestBody List<String> productMaterialCodeList){
 
         Example example = new Example(CdProductOverdue.class);
         Example.Criteria criteria = example.createCriteria();
-        if (StrUtil.isNotBlank(cdProductOverdue.getProductFactoryCode())) {
-            criteria.andEqualTo("productFactoryCode",cdProductOverdue.getProductFactoryCode());
+        if (CollectionUtil.isNotEmpty(productMaterialCodeList)) {
+            criteria.andIn("productMaterialCode",productMaterialCodeList);
         }
-        if (StrUtil.isNotBlank(cdProductOverdue.getProductMaterialCode())) {
-            criteria.andEqualTo("productMaterialCode",cdProductOverdue.getProductMaterialCode());
+        List<CdProductOverdue> list = cdProductOverdueService.selectByExample(example);
+        if (CollectionUtil.isEmpty(list)) {
+            return R.ok();
         }
-        return R.data(cdProductOverdueService.selectByExample(example));
+        return R.data(list);
     }
 }

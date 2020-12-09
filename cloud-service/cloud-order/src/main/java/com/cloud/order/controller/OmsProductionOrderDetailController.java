@@ -1,6 +1,7 @@
 package com.cloud.order.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -193,11 +194,11 @@ public class OmsProductionOrderDetailController extends BaseController {
      * Date: 2020/10/19
      */
     @PostMapping("selectDetailByOrderAct")
-    public R selectDetailByOrderAct(String orderCodes){
+    public R selectDetailByOrderAct(@RequestBody List<String> orderCodes){
         Example example = new Example(OmsProductionOrderDetail.class);
         Example.Criteria criteria = example.createCriteria();
-        if (StrUtil.isNotBlank(orderCodes)) {
-            criteria.andIn("productOrderCode", Arrays.asList(orderCodes.split(",")));
+        if (CollectionUtil.isNotEmpty(orderCodes)) {
+            criteria.andIn("productOrderCode", orderCodes);
         }
         criteria.andEqualTo("status", ProductOrderConstants.DETAIL_STATUS_ZERO);
         List<OmsProductionOrderDetail> list = omsProductionOrderDetailService.selectByExample(example);
@@ -206,7 +207,6 @@ public class OmsProductionOrderDetailController extends BaseController {
         }
         return R.data(list);
     }
-
     /**
      * 原材料确认-导出
      */

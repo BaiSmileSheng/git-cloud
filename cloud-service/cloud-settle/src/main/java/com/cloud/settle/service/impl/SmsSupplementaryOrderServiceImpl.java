@@ -334,6 +334,12 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
                     updateByPrimaryKeySelective(smsSupplementaryOrder);
                     continue;
                 }
+                if(!StrUtil.equals(cdMaterialPriceInfo.getUnit(),smsSupplementaryOrder.getStuffUnit())){
+                    log.info(StrUtil.format("(月度结算定时任务)申请时单位与价格表单位不一致:{}", smsSupplementaryOrder.getStuffNo()));
+                    smsSupplementaryOrder.setRemark("单位不一致！");
+                    updateByPrimaryKeySelective(smsSupplementaryOrder);
+                    continue;
+                }
                 smsSupplementaryOrder.setStuffPrice(cdMaterialPriceInfo.getNetWorth().divide(new BigDecimal(cdMaterialPriceInfo.getPriceUnit()),6,BigDecimal.ROUND_HALF_UP));//单价  取得materialPrice表的净价值
                 smsSupplementaryOrder.setStuffUnit(cdMaterialPriceInfo.getUnit());
                 smsSupplementaryOrder.setCurrency(cdMaterialPriceInfo.getCurrency());//币种
