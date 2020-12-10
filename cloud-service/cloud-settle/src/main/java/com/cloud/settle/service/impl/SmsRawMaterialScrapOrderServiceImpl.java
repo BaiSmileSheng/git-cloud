@@ -129,6 +129,22 @@ public class SmsRawMaterialScrapOrderServiceImpl extends BaseServiceImpl<SmsRawM
         }
         return R.ok();
     }
+    /**
+     * 原材料报废新增-多条
+     * @author ltq
+     * @date 2020-12-07
+     */
+    @Override
+    public R insetRawScrapList(List<SmsRawMaterialScrapOrder> smsRawMaterialScrapOrders, SysUser sysUser) {
+        smsRawMaterialScrapOrders.forEach(smsRawMaterialScrapOrder -> {
+            R r = insetRawScrap(smsRawMaterialScrapOrder,sysUser);
+            if(!r.isSuccess()){
+                throw new BusinessException(r.getStr("msg"));
+            }
+        });
+        return R.ok();
+    }
+
     public R insertRawScrapCheck(SmsRawMaterialScrapOrder smsRawMaterialScrapOrder){
         if (SAVE.equals(smsRawMaterialScrapOrder.getSaveOrSubmit())) { //保存
             smsRawMaterialScrapOrder.setScrapStatus(RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_DTJ.getCode());

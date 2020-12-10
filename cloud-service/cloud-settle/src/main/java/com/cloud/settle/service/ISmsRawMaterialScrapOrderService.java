@@ -23,6 +23,13 @@ public interface ISmsRawMaterialScrapOrderService extends BaseService<SmsRawMate
    R insetRawScrap(SmsRawMaterialScrapOrder smsRawMaterialScrapOrder, SysUser sysUser);
 
    /**
+    * 原材料报废新增-多条
+    * @author ltq
+    * @date 2020-12-07
+    */
+   R insetRawScrapList(List<SmsRawMaterialScrapOrder> smsRawMaterialScrapOrders, SysUser sysUser);
+
+   /**
     * 审批通过传SAP261
     * @param smsRawMaterialScrapOrder
     * @return
