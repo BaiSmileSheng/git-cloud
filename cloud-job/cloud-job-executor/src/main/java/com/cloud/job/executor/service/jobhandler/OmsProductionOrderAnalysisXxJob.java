@@ -34,6 +34,7 @@ public class OmsProductionOrderAnalysisXxJob {
             XxlJobLogger.log("待排产订单分析汇总定时任务执行失败，原因{}：" + r.get("msg"));
             return ReturnT.FAIL;
         }
+        XxlJobLogger.log(r.get("msg").toString());
         XxlJobLogger.log("=======待排产订单分析汇总定时任务结束======");
         return ReturnT.SUCCESS;
     }

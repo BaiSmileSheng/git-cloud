@@ -1,13 +1,14 @@
 package com.cloud.order.enums;
 
-public enum SmallBatchEnum {
+public enum ProductionOrderDetailStatusEnum {
 
-    SMALL_BATCH_ZERO("0","内部小批"),
-    SMALL_BATCH_ONE("1","生产小批"),
-    SMALL_BATCH_TRUE("2","否");
+    ORDER_CLASS_ONE("0","未确认"),
+    ORDER_CLASS_TWO("1","已确认"),
+    ORDER_CLASS_THREE("2","反馈中")
+            ;
     private String code;
     private String msg;
-    SmallBatchEnum(String code, String msg) {
+    ProductionOrderDetailStatusEnum(String code, String msg) {
         this.code = code;
         this.msg = msg;
     }
@@ -21,7 +22,7 @@ public enum SmallBatchEnum {
     }
 
     public static String getMsgByCode(String code) {
-        for (SmallBatchEnum bt : values()) {
+        for (ProductionOrderDetailStatusEnum bt : values()) {
             if (bt.code .equals(code) ) {
                 return bt.getMsg();
             }
@@ -30,7 +31,7 @@ public enum SmallBatchEnum {
     }
 
     public static String getCodeByMsg(String msg) {
-        for (SmallBatchEnum bt : values()) {
+        for (ProductionOrderDetailStatusEnum bt : values()) {
             if (bt.msg .equals(msg) ) {
                 return bt.getCode();
             }

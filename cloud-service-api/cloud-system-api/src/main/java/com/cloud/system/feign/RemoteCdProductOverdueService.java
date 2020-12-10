@@ -8,6 +8,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.List;
+
 @FeignClient(name = ServiceNameConstants.SYSTEM_SERVICE, fallbackFactory = RemoteCdProductOverdueFallbackFactory.class)
 public interface RemoteCdProductOverdueService {
 
@@ -19,5 +21,5 @@ public interface RemoteCdProductOverdueService {
      * Date: 2020/6/24
      */
     @PostMapping("productOverdue/selectOverStockByFactoryAndMaterial")
-    R selectOverStockByFactoryAndMaterial(@RequestBody CdProductOverdue cdProductOverdue);
+    R selectOverStockByFactoryAndMaterial(@RequestBody List<String> productMaterialCodeList);
 }

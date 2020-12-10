@@ -8,6 +8,7 @@ import com.cloud.activiti.consts.ActivitiConstant;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
+import com.cloud.activiti.mapper.ActRuTaskMapper;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizAuditService;
 import com.cloud.activiti.service.IBizBusinessService;
@@ -34,10 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -70,6 +68,8 @@ public class ActTaskServiceImpl implements IActTaskService {
 
     @Autowired
     private HistoryService historyService;
+    @Autowired
+    private ActRuTaskMapper actRuTaskMapper;
 
     @Autowired
     private IActTaskService actTaskService;
@@ -355,10 +355,12 @@ public class ActTaskServiceImpl implements IActTaskService {
         String ids = businesses.stream().map(b -> b.getId().toString()).collect(Collectors.joining(","));
         List<BizBusiness> businessesDealing = businesses.stream()
                 .filter(o -> StrUtil.isNotBlank(o.getProcInstId())
-                        && ActivitiConstant.RESULT_DEALING.equals(o.getResult())).collect(Collectors.toList());
+                        && ActivitiConstant.RESULT_DEALING.equals(o.getResult())
+                        && CollectionUtil.isNotEmpty(actRuTaskMapper.selectByProcInstId(Arrays.asList(o.getProcInstId())))).collect(Collectors.toList());
         List<BizBusiness> businessesPass = businesses.stream()
                 .filter(o -> StrUtil.isNotBlank(o.getProcInstId())
-                        && !ActivitiConstant.RESULT_DEALING.equals(o.getResult())).collect(Collectors.toList());
+                        && !ActivitiConstant.RESULT_DEALING.equals(o.getResult())
+                        && !CollectionUtil.isNotEmpty(actRuTaskMapper.selectByProcInstId(Arrays.asList(o.getProcInstId())))).collect(Collectors.toList());
         try {
             //删除运行中的流程
             businessesDealing.forEach(b -> {

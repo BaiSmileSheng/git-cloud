@@ -136,11 +136,13 @@ public class QryPaysSoapServiceImpl implements IQryPaysSoapService {
         sysInterfaceLog.setInterfaceName("getQryPays");
         sysInterfaceLog.setContent("查询付款结果入参:"+ inXml);
         sysInterfaceLog.setCreateTime(new Date());
+        sysInterfaceLog.setOrderCode(StrUtil.format("{},{},{}",urlClaim,namespaceURL,localPart));
         try{
             QName qName = new QName(namespaceURL, localPart);
-            sysInterfaceLog.setOrderCode(StrUtil.format("{}",",","{}",",","{}",urlClaim,namespaceURL,localPart));
+            ErpPayoutReceiveServiceServiceLocator erp=new ErpPayoutReceiveServiceServiceLocator(urlClaim,qName);
+            erp.setQryPaysEndpointAddress(namespaceURL);
             QryPaysSoapBindingStub generalMDMDataReleaseBindingStub =
-                    (QryPaysSoapBindingStub) new ErpPayoutReceiveServiceServiceLocator(urlClaim,qName).getQryPays();
+                    (QryPaysSoapBindingStub) erp.getQryPays();
             String outXml = generalMDMDataReleaseBindingStub.queryBill(inXml);
             JAXBContext context = JAXBContext.newInstance(QryPaysSoapResponse.class);
             Unmarshaller unmarshaller = context.createUnmarshaller();

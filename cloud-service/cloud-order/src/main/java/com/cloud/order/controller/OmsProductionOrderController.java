@@ -118,9 +118,26 @@ public class OmsProductionOrderController extends BaseController {
 //            criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
 //
             //查询订单状态已下达和已关单的两个状态的订单
-            List<String> statusList = CollectionUtil.toList(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode(),
+            //如果加工承揽方式是半成品，供应商也可以看到订单传SAP之前的状态
+            List<String> statusList = CollectionUtil.toList(
+                    ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode(),
                     ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
-            criteria.andIn("status", statusList);
+            Example.Criteria outSourceCriteria = example.createCriteria();
+            outSourceCriteria.orNotEqualTo("outsourceType",ProductOrderConstants.OUTSOURCE_TYPE_HALF_PRODUCT);
+            outSourceCriteria.andIn("status", statusList);
+
+            List<String> outSourceStatusList = CollectionUtil.toList(
+                    ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_DPS.getCode(),
+                    ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_FKZ.getCode(),
+                    ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_DTZ.getCode(),
+                    ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YTZ.getCode(),
+                    ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_DCSAP.getCode(),
+                    ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPZ.getCode(),
+                    ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode(),
+                    ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
+            outSourceCriteria.orEqualTo("outsourceType",ProductOrderConstants.OUTSOURCE_TYPE_HALF_PRODUCT);
+            outSourceCriteria.andIn("status", outSourceStatusList);
+            example.and(outSourceCriteria);
 
             CdFactoryLineInfo cdFactoryLineInfo = new CdFactoryLineInfo().builder()
                     .supplierCode(sysUser.getSupplierCode()).build();
@@ -629,10 +646,7 @@ public class OmsProductionOrderController extends BaseController {
      */
     @PostMapping("selectByStatusAct")
     public R selectByStatusAct(){
-        Example example = new Example(OmsProductionOrder.class);
-        Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("status", ProductOrderConstants.STATUS_INIT);
-        List<OmsProductionOrder> omsProductionOrders = omsProductionOrderService.selectByExample(example);
+        List<OmsProductionOrder> omsProductionOrders = omsProductionOrderService.selectByStatus(ProductOrderConstants.STATUS_INIT);
         if (ObjectUtil.isEmpty(omsProductionOrders) || omsProductionOrders.size() <= 0) {
             return R.ok();
         }
