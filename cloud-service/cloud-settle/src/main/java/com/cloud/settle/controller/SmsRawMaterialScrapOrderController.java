@@ -135,6 +135,18 @@ public class SmsRawMaterialScrapOrderController extends BaseController {
     }
 
     /**
+     * 新增保存原材料报废申请
+     */
+    @PostMapping("saveList")
+    @OperLog(title = "新增保存原材料报废申请-多条", businessType = BusinessType.INSERT)
+    @ApiOperation(value = "新增保存原材料报废申请-多条", response = R.class)
+    @HasPermissions("settle:rawMaterialScrapOrder:saveList")
+    public R addSaveList(@RequestBody List<SmsRawMaterialScrapOrder> smsRawMaterialScrapOrders) {
+        SysUser sysUser = getUserInfo(SysUser.class);
+        return smsRawMaterialScrapOrderService.insetRawScrapList(smsRawMaterialScrapOrders,sysUser);
+    }
+
+    /**
      * 修改保存原材料报废申请
      */
     @PostMapping("update")
