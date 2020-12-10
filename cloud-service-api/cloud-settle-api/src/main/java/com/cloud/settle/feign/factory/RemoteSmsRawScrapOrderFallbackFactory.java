@@ -25,6 +25,16 @@ public class RemoteSmsRawScrapOrderFallbackFactory implements FallbackFactory<Re
                 log.error("RemoteSmsRawScrapOrderService.listByTime错误：{}",throwable.getMessage());
                 return R.error("服务器拥挤：请稍后再试！");
             }
+            /**
+             * 定时任务更新价格
+             * @param
+             * @return
+             */
+            @Override
+            public R updateRawScrapJob() {
+                log.error("RemoteSmsRawScrapOrderService.updateRawScrapJob错误：{}",throwable.getMessage());
+                return R.error("服务器拥挤：请稍后再试！");
+            }
         };
     }
 }

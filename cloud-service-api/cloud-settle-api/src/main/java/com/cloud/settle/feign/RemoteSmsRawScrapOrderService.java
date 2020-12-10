@@ -27,4 +27,12 @@ public interface RemoteSmsRawScrapOrderService {
      */
     @GetMapping("rawMaterialScrapOrder/listByTime")
     R listByTime(@RequestParam("createTimeStart") String createTimeStart,@RequestParam("endTimeStart") String endTimeStart);
+
+    /**
+     * 定时任务更新价格
+     * @param
+     * @return
+     */
+    @PostMapping("rawMaterialScrapOrder/updateRawScrapJob")
+    public R updateRawScrapJob();
 }
