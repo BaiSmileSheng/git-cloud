@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.cloud.activiti.feign.RemoteActTaskService;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
@@ -15,16 +16,22 @@ import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.feign.RemoteProductionOrderService;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
 import com.cloud.settle.enums.CurrencyEnum;
+import com.cloud.settle.enums.IsEntityEnum;
+import com.cloud.settle.enums.IsPayEnum;
 import com.cloud.settle.enums.ScrapOrderStatusEnum;
 import com.cloud.settle.mapper.SmsScrapOrderMapper;
 import com.cloud.settle.service.ISmsScrapOrderService;
+import com.cloud.settle.util.OrderNoGenerateUtil;
 import com.cloud.system.domain.entity.*;
+import com.cloud.system.enums.OutSourceTypeEnum;
+import com.cloud.system.enums.PriceTypeEnum;
 import com.cloud.system.enums.SettleRatioEnum;
 import com.cloud.system.feign.*;
 import com.sap.conn.jco.*;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.assertj.core.util.Preconditions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +39,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,8 +62,6 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
     @Autowired
     private RemoteFactoryInfoService remoteFactoryInfoService;
     @Autowired
-    private RemoteSequeceService remoteSequeceService;
-    @Autowired
     private RemoteSettleRatioService remoteSettleRatioService;
     @Autowired
     private RemoteCdSapSalePriceInfoService remoteCdSapSalePriceInfoService;
@@ -67,6 +73,15 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
     private RemoteCdProductWarehouseService remoteCdProductWarehouseService;
     @Autowired
     private RemoteCdScrapMonthNoService remoteCdScrapMonthNoService;
+    @Autowired
+    private RemoteMaterialExtendInfoService remoteMaterialExtendInfoService;
+    @Autowired
+    private RemoteActTaskService remoteActTaskService;
+    @Autowired
+    private RemoteCdSettleProductMaterialService remoteCdSettleProductMaterialService;
+    @Autowired
+    private RemoteCdMaterialPriceInfoService remoteCdMaterialPriceInfoService;
+
 
 
 
@@ -80,7 +95,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         Long id = smsScrapOrder.getId();
         log.info(StrUtil.format("报废申请修改保存开始：参数为{}", smsScrapOrder.toString()));
         //校验状态是否是未提交
-        R rCheckStatus = checkCondition(id);
+        R rCheckStatus = checkConditionCommit(id);
         SmsScrapOrder smsScrapOrderCheck = (SmsScrapOrder) rCheckStatus.get("data");
         //校验
         R rCheck = checkScrapOrderCondition(smsScrapOrder,smsScrapOrderCheck.getProductOrderCode());
@@ -136,36 +151,15 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         if (DateUtil.compare(DateUtil.date(), productStartDate) < 0) {
             throw new BusinessException("未到达订单基本开始日期,不允许申请报废！");
         }
-
-//        Example example = new Example(SmsScrapOrder.class);
-//        Example.Criteria criteria = example.createCriteria();
-//        criteria.andEqualTo("productOrderCode", productOrderCode);
-//        criteria.andNotEqualTo("scrapStatus", ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKBH.getCode());
-//        criteria.andEqualTo("delFlag", "0");
-//        int num = selectCountByExample(example);
-//        if (num > 0) {
-//            return R.error(StrUtil.format("订单：{}已申请过报废单，请到报废管理进行修改！",productOrderCode));
-//        }
-
         //校验
         R rCheck = checkScrapOrderCondition(smsScrapOrder,productOrderCode);
         if (!rCheck.isSuccess()) {
             throw new BusinessException(rCheck.getStr("msg"));
         }
-        R seqResult = remoteSequeceService.selectSeq("scrap_seq", 4);
-        if(!seqResult.isSuccess()){
-            throw new BusinessException("获取序列号失败");
-        }
-        String seq = seqResult.getStr("data");
-        StringBuffer scrapNo = new StringBuffer();
-        //WH+年月日+4位顺序号
-        scrapNo.append("BF").append(DateUtils.dateTime()).append(seq);
-        smsScrapOrder.setScrapNo(scrapNo.toString());
-        //加工费总额
-        if (omsProductionOrder.getProcessCost() == null) {
-            throw new BusinessException(StrUtil.format("生产订单：{}无加工费单价！",omsProductionOrder.getProductOrderCode()));
-        }
-        smsScrapOrder.setMachiningPrice(omsProductionOrder.getProcessCost().multiply(BigDecimal.valueOf(smsScrapOrder.getScrapAmount())));
+        //订单号
+        List<String> randomList = OrderNoGenerateUtil.getOrderNos(1, "BF");
+        String scrapNo = randomList.get(0);
+        smsScrapOrder.setScrapNo(scrapNo);
         //根据线体号查询供应商编码
         R rFactoryLineInfo=remotefactoryLineInfoService.selectInfoByCodeLineCode(omsProductionOrder.getProductLineCode(),
                 omsProductionOrder.getProductFactoryCode());
@@ -173,21 +167,43 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             return rFactoryLineInfo;
         }
         CdFactoryLineInfo factoryLineInfo = rFactoryLineInfo.getData(CdFactoryLineInfo.class);
-         if (factoryLineInfo == null||StrUtil.isEmpty(factoryLineInfo.getSupplierCode())) {
-             return R.error(StrUtil.format("工厂：{}，线体{}，缺少供应商信息",omsProductionOrder.getProductFactoryCode(),
-                     omsProductionOrder.getProductLineCode()));
+        if (factoryLineInfo == null||StrUtil.isEmpty(factoryLineInfo.getSupplierCode())) {
+            return R.error(StrUtil.format("工厂：{}，线体{}，缺少供应商信息",omsProductionOrder.getProductFactoryCode(),
+                    omsProductionOrder.getProductLineCode()));
         }
         smsScrapOrder.setSupplierCode(factoryLineInfo.getSupplierCode());
         smsScrapOrder.setSupplierName(factoryLineInfo.getSupplierDesc());
-        smsScrapOrder.setFactoryCode(omsProductionOrder.getProductFactoryCode());
         R rFactory = remoteFactoryInfoService.selectOneByFactory(omsProductionOrder.getProductFactoryCode());
         if(!rFactory.isSuccess()){
             log.error(StrUtil.format("(报废)报废申请新增保存开始：公司信息为空参数为{}", omsProductionOrder.getProductFactoryCode()));
             return R.error("公司信息为空！");
         }
         CdFactoryInfo cdFactoryInfo = rFactory.getData(CdFactoryInfo.class);
-
         smsScrapOrder.setCompanyCode(cdFactoryInfo.getCompanyCode());
+        //加工费总额
+        BigDecimal machiningPrice = BigDecimal.ZERO;
+        if (OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode().equals(smsScrapOrder.getScrapType())) {
+            //半成品，按照成品加工费计算
+            R productMaterialMap =
+                    remoteCdSettleProductMaterialService.selectOne(smsScrapOrder.getProductMaterialCode(), smsScrapOrder.getScrapType());
+            Preconditions.checkArgument(productMaterialMap.isSuccess(),"加工费号查询失败！");
+            CdSettleProductMaterial cdSettleProductMaterial = productMaterialMap.getData(CdSettleProductMaterial.class);
+            String rawMaterialCode = cdSettleProductMaterial.getRawMaterialCode();
+            //根据加工费号,供应商,采购组织 查加工费
+            R maResult = remoteCdMaterialPriceInfoService.selectOneByCondition(rawMaterialCode, cdFactoryInfo.getPurchaseOrg(),
+                    smsScrapOrder.getSupplierCode(), PriceTypeEnum.PRICE_TYPE_1.getCode());
+            Preconditions.checkArgument(maResult.isSuccess(),"加工费查询失败！");
+            CdMaterialPriceInfo cdMaterialPriceInfo = maResult.getData(CdMaterialPriceInfo.class);
+            Preconditions.checkArgument(cdMaterialPriceInfo.getNetWorth() != null, "加工费查询失败！");
+            machiningPrice = cdMaterialPriceInfo.getNetWorth().multiply(BigDecimal.valueOf(smsScrapOrder.getScrapAmount()));
+        }else{
+            Preconditions.checkArgument(omsProductionOrder.getProcessCost() != null,StrUtil.format("生产订单：{}无加工费单价！",omsProductionOrder.getProductOrderCode()));
+            machiningPrice = omsProductionOrder.getProcessCost().multiply(BigDecimal.valueOf(smsScrapOrder.getScrapAmount()));
+        }
+        smsScrapOrder.setMachiningPrice(machiningPrice);
+
+        smsScrapOrder.setFactoryCode(omsProductionOrder.getProductFactoryCode());
+
         if (StrUtil.isBlank(smsScrapOrder.getScrapStatus())) {
             smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_DTJ.getCode());
         }
@@ -245,6 +261,24 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         if (new BigDecimal(applyNum).compareTo(productNum) > 0) {
             return R.error("申请量总额不得大于订单量");
         }
+
+        //校验半成品物料是否合法
+        String outsourceType = omsProductionOrder.getOutsourceType();
+        Preconditions.checkArgument(StrUtil.isNotEmpty(outsourceType),"生产订单无加工承揽方式，不能申请！");
+        if (OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode().equals(outsourceType)) {
+            //半成品：需要校验成品号
+            String productMaterialCode = smsScrapOrder.getProductMaterialCode();
+            Preconditions.checkArgument(StrUtil.isNotEmpty(productMaterialCode),"请填写正确的成品专用号！");
+            R rMate = remoteMaterialExtendInfoService.selectOneByMaterialCode(productMaterialCode);
+            Preconditions.checkArgument(rMate.isSuccess(),"无效成品专用号！");
+        }
+        //校验无实物时是否买单
+        Preconditions.checkArgument(StrUtil.isNotEmpty(smsScrapOrder.getIsPay()),"请选择是否买单！");
+        Preconditions.checkArgument(StrUtil.isNotEmpty(smsScrapOrder.getIsEntity()),"请选择有无实物！");
+        if (IsEntityEnum.IS_ENTITY_NO.getCode().equals(smsScrapOrder.getIsEntity())) {
+            Preconditions.checkArgument(IsPayEnum.IS_PAY_YES.getCode().equals(smsScrapOrder.getIsPay()),
+                    "无实物时必须买单！");
+        }
         return R.ok();
     }
 
@@ -259,9 +293,34 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         if(StringUtils.isBlank(ids)){
             throw new BusinessException("传入参数不能为空！");
         }
+        //如果已生成审批流信息需删除
+        List<String> shStatus = CollUtil.newArrayList(
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKBH.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYSH.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYBH.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_ZLJLSH.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_ZLJLBH.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_DDJLSH.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_DDJLBH.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSHBMD.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKBHBMD.getCode()
+        );
         for(String id:ids.split(",")){
             //校验状态是否是未提交
-            checkCondition(Long.valueOf(id));
+            R rCheckStatus = checkConditionRemove(Long.valueOf(id));
+            SmsScrapOrder smsScrapOrder = (SmsScrapOrder) rCheckStatus.get("data");
+            if (CollUtil.contains(shStatus, smsScrapOrder.getScrapStatus())) {
+                //删除审批信息
+                Map<String,Object> map = new HashMap<>();
+                List<String> orderCodeList = CollUtil.newArrayList(smsScrapOrder.getScrapNo());
+                map.put("userName","报废删除同时删除审批流");
+                map.put("orderCodeList",orderCodeList);
+                R deleteActMap = remoteActTaskService.deleteByOrderCode(map);
+                if (!deleteActMap.isSuccess()){
+                    throw new BusinessException("删除审批流程失败，原因："+deleteActMap.get("msg"));
+                }
+            }
         }
         int rows = deleteByIds(ids);
         return rows > 0 ? R.ok() : R.error("删除错误！");
@@ -272,7 +331,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
      * @param id
      * @return 返回SmsScrapOrder信息
      */
-    public R checkCondition(Long id){
+    public R checkConditionCommit(Long id){
         if (id==null) {
             throw new BusinessException("ID不能为空！");
         }
@@ -282,6 +341,38 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         }
         if (!ScrapOrderStatusEnum.BF_ORDER_STATUS_DTJ.getCode().equals(smsScrapOrder.getScrapStatus())) {
             throw new BusinessException("已提交的数据不能操作！");
+        }
+        return R.data(smsScrapOrder);
+    }
+
+    /**
+     * 删除校验
+     * @param id
+     * @return
+     */
+    public R checkConditionRemove(Long id){
+        if (id==null) {
+            throw new BusinessException("ID不能为空！");
+        }
+        SmsScrapOrder smsScrapOrder = selectByPrimaryKey(id);
+        if (smsScrapOrder == null) {
+            throw new BusinessException("未查询到此数据！");
+        }
+        List<String> shStatus = CollUtil.newArrayList(
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_DTJ.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSH.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKBH.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYSH.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYBH.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_ZLJLSH.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_ZLJLBH.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_DDJLSH.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_DDJLBH.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSHBMD.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKBHBMD.getCode()
+        );
+        if (!shStatus.contains(smsScrapOrder.getScrapStatus())) {
+            throw new BusinessException("已传SAP的数据不能操作！");
         }
         return R.data(smsScrapOrder);
     }
@@ -347,7 +438,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
 
                 BigDecimal ratio = cdSettleRatioBF.getRatio();//报废索赔系数
                 BigDecimal machiningPrice = smsScrapOrder.getMachiningPrice();//加工费总额
-                scrapPrice = (materialPrice.multiply(scrapAmount.multiply(ratio))).add(machiningPrice);
+                scrapPrice = materialPrice.multiply(scrapAmount.multiply(ratio));
                 //如果是外币，还要 除以数额*汇率
                 if (StrUtil.isEmpty(smsScrapOrder.getCurrency())) {
                     throw new BusinessException(StrUtil.format("{}报废单未维护币种", smsScrapOrder.getScrapNo()));
@@ -363,6 +454,8 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
                     BigDecimal rateAmount = cdMouthRate.getAmount();//数额
                     scrapPrice = scrapPrice.divide(rateAmount,6, BigDecimal.ROUND_HALF_UP).multiply(rate);
                 }
+                //因为加工费单价都是人民币，所以在计算汇率后再加
+                scrapPrice = scrapPrice.add(machiningPrice);
                 smsScrapOrder.setSettleFee(scrapPrice);
             }
             updateBatchByPrimaryKeySelective(smsScrapOrderList);
