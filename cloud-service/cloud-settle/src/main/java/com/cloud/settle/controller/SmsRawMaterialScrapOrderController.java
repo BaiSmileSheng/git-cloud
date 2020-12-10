@@ -32,6 +32,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("rawMaterialScrapOrder")
+@Api(tags = "原材料报废模块")
 public class SmsRawMaterialScrapOrderController extends BaseController {
 
     @Autowired
@@ -56,7 +57,16 @@ public class SmsRawMaterialScrapOrderController extends BaseController {
             @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required =true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true,paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "sortField", value = "排序列", required = false,paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false,paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "sortOrder", value = "排序的方向", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "rawScrapNo", value = "报废单号", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "supplierCode", value = "供应商编码", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "factoryCode", value = "生产工厂", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "rawMaterialCode", value = "原材料物料号", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "scrapStatus", value = "报废状态", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "isCheck", value = "是否买单", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "isMaterialObject", value = "有无实物", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "beginTime", value = "申请开始日期", required = false,paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "endTime", value = "申请结束日期", required = false,paramType = "query", dataType = "String")
     })
     @HasPermissions("settle:rawMaterialScrapOrder:list")
     public TableDataInfo list(SmsRawMaterialScrapOrder smsRawMaterialScrapOrder) {
