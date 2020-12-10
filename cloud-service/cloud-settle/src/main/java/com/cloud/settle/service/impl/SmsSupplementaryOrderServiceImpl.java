@@ -139,7 +139,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
                 //删除审批信息
                 Map<String,Object> map = new HashMap<>();
                 List<String> orderCodeList = CollUtil.newArrayList(supplementaryOrder.getStuffNo());
-                map.put("userName","物耗删除同时删除审批流");
+//                map.put("userName","物耗删除同时删除审批流");
                 map.put("orderCodeList",orderCodeList);
                 R deleteActMap = remoteActTaskService.deleteByOrderCode(map);
                 if (!deleteActMap.isSuccess()){
