@@ -15,6 +15,7 @@ import com.cloud.settle.domain.webServicePO.BaseClaimDetail;
 import com.cloud.settle.domain.webServicePO.BaseClaimResponse;
 import com.cloud.settle.domain.webServicePO.BaseMultiItemClaimSaveRequest;
 import com.cloud.settle.enums.*;
+import com.cloud.settle.feign.RemoteSmsRawScrapOrderService;
 import com.cloud.settle.mapper.SmsClaimOtherMapper;
 import com.cloud.settle.mapper.SmsDelaysDeliveryMapper;
 import com.cloud.settle.mapper.SmsMouthSettleMapper;
@@ -71,6 +72,8 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
     private ISmsInvoiceInfoService smsInvoiceInfoService;
     @Autowired
     private RemoteInterfaceLogService remoteInterfaceLogService;
+    @Autowired
+    private ISmsRawMaterialScrapOrderService smsRawMaterialScrapOrderService;
 
 
 
@@ -116,6 +119,12 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         Map<String, List<SmsClaimOther>> mapOther = otherGroup(lastMonth);
         Map<String, List<SmsClaimOther>> mapOtherLS = otherLSGroup();
         /**-------------------其他分组结束----------------------------------**/
+
+        /**-------------------原材料报废分组开始----------------------------------**/
+        //原材料报废及历史数据分组Map
+        Map<String,List<SmsRawMaterialScrapOrder>> mapRawScrap = rawScrapGroup(lastMonth);
+        Map<String,List<SmsRawMaterialScrapOrder>> mapRawScrapLS = rawScrapLSGroup();
+        /**-------------------原材料报废分组结束----------------------------------**/
 
         /**-------------------加工费分组开始----------------------------------**/
         //结算分组map
@@ -171,6 +180,9 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
             //其他索赔
             map = otherCompute(mapOther, keyCode, monthSettleNo.toString(), (BigDecimal) map.get("settlePrice"),
                     (BigDecimal) map.get("claimPrice"), lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
+            //原材料报废
+            map = rawScrapCompute(mapRawScrap,keyCode,monthSettleNo.toString(),(BigDecimal) map.get("settlePrice"),
+                    (BigDecimal) map.get("claimPrice"),lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
 
             claimPrice = (BigDecimal) map.get("claimPrice");
             /**-------------------------历史计算-------------------------**/
@@ -194,6 +206,9 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
             map = otherLSCompute(mapOtherLS, keyCode, monthSettleNo.toString(), (BigDecimal) map.get("settlePrice"),
                     (BigDecimal) map.get("unCashPrice"), lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
 
+            //原材料报废历史
+            map = rawScrapLSCompute(mapRawScrapLS,keyCode,monthSettleNo.toString(),(BigDecimal) map.get("settlePrice"),
+                    (BigDecimal) map.get("unCashPrice"), lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
 
             settlePrice = (BigDecimal) map.get("settlePrice");
             unCashPrice = (BigDecimal) map.get("unCashPrice");
@@ -1422,4 +1437,161 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
 
         });
     }
+    /**
+     * 原材料报废待结算分组
+     * @param lastMonth
+     */
+    public Map<String,List<SmsRawMaterialScrapOrder>> rawScrapGroup(String lastMonth){
+        String key;
+        Map<String, List<SmsRawMaterialScrapOrder>> mapRawScrap = new ConcurrentHashMap<>();
+        //取得计算月份、待结算的原材料报废记录
+        List<SmsRawMaterialScrapOrder> smsRawMaterialScrapOrders =
+                smsRawMaterialScrapOrderService.selectByMonthAndStatus(lastMonth,  CollUtil.newArrayList(RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_DJS.getCode()));
+        if (smsRawMaterialScrapOrders != null) {
+            for (SmsRawMaterialScrapOrder smsRawMaterialScrapOrder : smsRawMaterialScrapOrders) {
+                //下面开始分组：根据供应商和付款公司分组
+                key = smsRawMaterialScrapOrder.getSupplierCode() + smsRawMaterialScrapOrder.getComponyCode();
+                List<SmsRawMaterialScrapOrder> supplementList = mapRawScrap.getOrDefault(key, new ArrayList<>());
+                supplementList.add(smsRawMaterialScrapOrder);
+                mapRawScrap.put(key, supplementList);
+            }
+        }
+        return mapRawScrap;
+    }
+
+    /**
+     * 原材料报废待结算分组
+     * @param
+     */
+    public Map<String,List<SmsRawMaterialScrapOrder>> rawScrapLSGroup(){
+        String key;
+        Map<String, List<SmsRawMaterialScrapOrder>> mapRawScrap = new ConcurrentHashMap<>();
+        List<String> statusList = CollUtil.newArrayList(RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_WDX.getCode(),RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_BFDX.getCode());
+        //取得计算月份、待结算的原材料报废记录
+        List<SmsRawMaterialScrapOrder> smsRawMaterialScrapOrders =
+                smsRawMaterialScrapOrderService.selectByMonthAndStatus(null, statusList);
+        if (smsRawMaterialScrapOrders != null) {
+            for (SmsRawMaterialScrapOrder smsRawMaterialScrapOrder : smsRawMaterialScrapOrders) {
+                //下面开始分组：根据供应商和付款公司分组
+                key = smsRawMaterialScrapOrder.getSupplierCode() + smsRawMaterialScrapOrder.getComponyCode();
+                List<SmsRawMaterialScrapOrder> supplementList = mapRawScrap.getOrDefault(key, new ArrayList<>());
+                supplementList.add(smsRawMaterialScrapOrder);
+                mapRawScrap.put(key, supplementList);
+            }
+        }
+        return mapRawScrap;
+    }
+    /**
+     * 原材料报废计算
+     *
+     * @param mapRawScrap
+     * @param keyCode
+     * @param monthSettleNo
+     * @param settlePrice
+     * @param claimPrice
+     * @param lastMonth
+     * @param claimCashDetailList
+     * @return
+     */
+    Map<String, Object> rawScrapCompute(Map<String, List<SmsRawMaterialScrapOrder>> mapRawScrap, String keyCode, String monthSettleNo,
+                                     BigDecimal settlePrice, BigDecimal claimPrice, String lastMonth,
+                                     List<SmsClaimCashDetail> claimCashDetailList) {
+        //报废索赔
+        if (MapUtil.isNotEmpty(mapRawScrap) && CollUtil.isNotEmpty(mapRawScrap.get(keyCode))) {
+            for (SmsRawMaterialScrapOrder smsRawMaterialScrapOrder : mapRawScrap.get(keyCode)) {
+                smsRawMaterialScrapOrder.setSettleNo(monthSettleNo);//结算单号
+                if (settlePrice.compareTo(smsRawMaterialScrapOrder.getScrapPrice()) >= 0) {
+                    smsRawMaterialScrapOrder.setCashAmount(smsRawMaterialScrapOrder.getScrapPrice());
+                    smsRawMaterialScrapOrder.setUncashAmount(BigDecimal.ZERO);
+                    smsRawMaterialScrapOrder.setScrapStatus(RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_YDX.getCode());
+                    settlePrice = settlePrice.subtract(smsRawMaterialScrapOrder.getScrapPrice());
+                } else {
+                    if (settlePrice.compareTo(BigDecimal.ZERO) == 0) {
+                        smsRawMaterialScrapOrder.setCashAmount(BigDecimal.ZERO);
+                        smsRawMaterialScrapOrder.setUncashAmount(smsRawMaterialScrapOrder.getScrapPrice());
+                        smsRawMaterialScrapOrder.setScrapStatus(RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_WDX.getCode());
+                    } else {
+                        smsRawMaterialScrapOrder.setCashAmount(settlePrice);
+                        smsRawMaterialScrapOrder.setUncashAmount(smsRawMaterialScrapOrder.getScrapPrice().subtract(settlePrice));
+                        smsRawMaterialScrapOrder.setScrapStatus(RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_BFDX.getCode());
+                        settlePrice = BigDecimal.ZERO;
+                    }
+                }
+                claimPrice = claimPrice.add(smsRawMaterialScrapOrder.getScrapPrice());
+
+                //索赔明细
+                if (smsRawMaterialScrapOrder.getCashAmount().compareTo(BigDecimal.ZERO)>0) {
+                    SmsClaimCashDetail smsClaimCashDetail = SmsClaimCashDetail.builder()
+                            .claimNo(smsRawMaterialScrapOrder.getRawScrapNo()).claimType(SettleRatioEnum.SPLX_YCLBF.getCode())
+                            .cashAmount(smsRawMaterialScrapOrder.getCashAmount()).settleNo(monthSettleNo).delFlag("0")
+                            .shouldCashMounth(lastMonth).actualCashMounth(lastMonth).build();
+                    smsClaimCashDetail.setCreateTime(DateUtil.date());
+                    claimCashDetailList.add(smsClaimCashDetail);
+                }
+            }
+            smsRawMaterialScrapOrderService.updateBatchByPrimaryKeySelective(mapRawScrap.get(keyCode));
+        }
+        Map<String, Object> map = new ConcurrentHashMap<>();
+        map.put("settlePrice", settlePrice);
+        map.put("claimPrice", claimPrice);
+        map.put("claimCashDetailList", claimCashDetailList);
+        return map;
+    }
+
+    /**
+     * 原材料报废历史计算
+     *
+     * @param mapRawScrapLS
+     * @param keyCode
+     * @param monthSettleNo
+     * @param settlePrice
+     * @param unCashPrice
+     * @param lastMonth
+     * @param claimCashDetailList
+     * @return
+     */
+    Map<String, Object> rawScrapLSCompute(Map<String, List<SmsRawMaterialScrapOrder>> mapRawScrapLS, String keyCode, String monthSettleNo,
+                                       BigDecimal settlePrice, BigDecimal unCashPrice, String lastMonth,
+                                       List<SmsClaimCashDetail> claimCashDetailList) {
+        //报废索赔历史
+        if (MapUtil.isNotEmpty(mapRawScrapLS) && CollUtil.isNotEmpty(mapRawScrapLS.get(keyCode))) {
+            for (SmsRawMaterialScrapOrder smsRawMaterialScrapOrder : mapRawScrapLS.get(keyCode)) {
+                if (settlePrice.compareTo(BigDecimal.ZERO) < 0) {
+                    break;
+                }
+                BigDecimal cashAmount;
+                if (settlePrice.compareTo(smsRawMaterialScrapOrder.getUncashAmount()) >= 0) {
+                    cashAmount = smsRawMaterialScrapOrder.getUncashAmount();
+                    smsRawMaterialScrapOrder.setCashAmount(smsRawMaterialScrapOrder.getCashAmount().add(smsRawMaterialScrapOrder.getUncashAmount()));
+                    smsRawMaterialScrapOrder.setUncashAmount(BigDecimal.ZERO);
+                    smsRawMaterialScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YDX.getCode());
+                    settlePrice = settlePrice.subtract(smsRawMaterialScrapOrder.getUncashAmount());
+                } else {
+                    cashAmount = settlePrice;
+                    smsRawMaterialScrapOrder.setCashAmount(smsRawMaterialScrapOrder.getCashAmount().add(settlePrice));
+                    smsRawMaterialScrapOrder.setUncashAmount(smsRawMaterialScrapOrder.getUncashAmount().subtract(settlePrice));
+                    smsRawMaterialScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_BFDX.getCode());
+                    settlePrice = BigDecimal.ZERO;
+                }
+                unCashPrice = unCashPrice.add(smsRawMaterialScrapOrder.getUncashAmount());
+
+                //索赔明细
+                if (cashAmount.compareTo(BigDecimal.ZERO)>0) {
+                    SmsClaimCashDetail smsClaimCashDetail = new SmsClaimCashDetail().builder()
+                            .claimNo(smsRawMaterialScrapOrder.getRawScrapNo()).claimType(SettleRatioEnum.SPLX_BF.getCode())
+                            .cashAmount(cashAmount).settleNo(monthSettleNo).delFlag("0")
+                            .shouldCashMounth(DateUtil.format(smsRawMaterialScrapOrder.getSapTransDate(), "yyyyMM")).actualCashMounth(lastMonth).build();
+                    smsClaimCashDetail.setCreateTime(DateUtil.date());
+                    claimCashDetailList.add(smsClaimCashDetail);
+                }
+            }
+            smsRawMaterialScrapOrderService.updateBatchByPrimaryKeySelective(mapRawScrapLS.get(keyCode));
+        }
+        Map<String, Object> map = new ConcurrentHashMap<>();
+        map.put("settlePrice", settlePrice);
+        map.put("unCashPrice", unCashPrice);
+        map.put("claimCashDetailList", claimCashDetailList);
+        return map;
+    }
+
 }

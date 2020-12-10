@@ -147,6 +147,8 @@ public class SysUser extends BaseEntity {
      */
     private String supplierCode;
 
+    private String supplierName;
+
     /**
      * 法人公司
      */
@@ -335,6 +337,14 @@ public class SysUser extends BaseEntity {
 
     public String getSupplierCode() {
         return supplierCode;
+    }
+
+    public String getSupplierName() {
+        return supplierName;
+    }
+
+    public void setSupplierName(String supplierName) {
+        this.supplierName = supplierName;
     }
 
     public void setSupplierCode(String supplierCode) {

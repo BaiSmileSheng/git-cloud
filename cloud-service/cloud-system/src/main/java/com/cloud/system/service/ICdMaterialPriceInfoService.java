@@ -52,4 +52,12 @@ public interface ICdMaterialPriceInfoService extends BaseService<CdMaterialPrice
      * Date: 2020/8/3
      */
     R selectMaterialPrice(Map<String,List<CdSettleProductMaterial>> map);
+    /**
+     * Description:  根据原材料物料和供应商查询价格
+     * Param: [list]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/12/8
+     */
+    R selectBymaterialSupplierList(List<CdMaterialPriceInfo> list);
 }
