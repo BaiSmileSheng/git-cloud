@@ -29,12 +29,20 @@ public interface IActSmsScrapOrderService {
     R startActOnlyForList(SmsScrapOrder smsScrapOrder,long userId);
 
     /**
-     * 审批流程 报废申请单逻辑
+     * 审批流程
      * @param bizAudit
      * @param userId
      * @return R
      */
     R audit(BizAudit bizAudit,long userId);
+
+    /**
+     * 审批流程 报废申请单逻辑
+     * @param bizAudit
+     * @param userId
+     * @return R
+     */
+    R auditLogic(BizAudit bizAudit,long userId);
 
 
     R getBizInfoByTableId(String businessKey);
