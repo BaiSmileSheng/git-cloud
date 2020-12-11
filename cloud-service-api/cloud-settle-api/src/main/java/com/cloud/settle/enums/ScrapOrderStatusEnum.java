@@ -24,7 +24,8 @@ public enum ScrapOrderStatusEnum {
     BF_ORDER_STATUS_JSWC("12", "结算完成"),
     BF_ORDER_STATUS_YDX("13", "已兑现"),
     BF_ORDER_STATUS_BFDX("14", "部分兑现"),
-    BF_ORDER_STATUS_WDX("15", "未兑现");
+    BF_ORDER_STATUS_WDX("15", "未兑现"),
+    BF_ORDER_STATUS_WXJS("16", "无需结算");
     //质量经理审核-订单经理审核-业务科审核   不买单审批
     //业务科审核-排产员审核   买单审批
     private String code;

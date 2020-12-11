@@ -2,6 +2,7 @@ package com.cloud.activiti.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.consts.ActivitiConstant;
 import com.cloud.activiti.consts.ActivitiProDefKeyConstants;
@@ -38,6 +39,7 @@ import org.assertj.core.util.Preconditions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -236,7 +238,6 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
 
     /**
      * 买单报废审批流程 报废申请单逻辑
-     * 待加全局事务
      *
      * @param bizAudit
      * @param userId
@@ -326,10 +327,134 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         }
         if (ScrapOrderStatusEnum.BF_ORDER_STATUS_DJS.getCode().equals(smsScrapOrder.getScrapStatus())) {
             //业务科审核通过传SAP
-            R r = remoteSmsScrapOrderService.autidSuccessToSAP261(smsScrapOrder);
-            if (!r.isSuccess()) {
-                throw new BusinessException(r.getStr("msg"));
+//            R r = remoteSmsScrapOrderService.autidSuccessToSAP261(smsScrapOrder);
+//            if (!r.isSuccess()) {
+//                throw new BusinessException(r.getStr("msg"));
+//            }
+            Console.log("===========执行传SAP===========================");
+        }
+        R r = remoteSmsScrapOrderService.update(smsScrapOrder);
+        if (r.isSuccess()) {
+            //审批 推进工作流
+            R rResult = new R();
+            rResult.put("bizAudit",bizAudit);
+            rResult.put("userId",userId);
+            rResult.put("userIds",userIds);
+            return rResult;
+        }else{
+            throw new BusinessException(r.getStr("msg"));
+        }
+    }
+
+    /**
+     * 不买单报废审批流程 报废申请单逻辑
+     *
+     * @param bizAudit
+     * @param userId
+     * @return R
+     */
+    @Override
+    @GlobalTransactional
+    public R auditNoPay(BizAudit bizAudit, long userId) {
+        String taskId = bizAudit.getTaskId();
+        Map<String, Object> variables = Maps.newHashMap();
+        variables.put("result", bizAudit.getResult());
+        variables.put("comment", bizAudit.getComment());
+        variables.put("taskIdVar", taskId);
+        variables.put("bizBusinessId", bizAudit.getBusinessKey().toString());
+
+        taskService.complete(taskId, variables);
+        bizAudit = redisUtils.get(StrUtil.format("bizAudit{}{}", bizAudit.getBusinessKey().toString(), taskId),BizAudit.class);
+        Set<String> userIds = redisUtils.get(StrUtil.format("userIds{}{}", bizAudit.getBusinessKey().toString(), taskId), Set.class);
+        return actTaskService.auditCandidateUserMul(bizAudit, userId,userIds);
+    }
+
+
+    @Override
+    public R auditNoPayLogic(BizAudit bizAudit, long userId) {
+        log.info(StrUtil.format("报废不买单申请审核：参数为{}", bizAudit.toString()));
+        Set<String> userIds = new HashSet<>();
+        //流程审核业务表
+        BizBusiness bizBusiness = bizBusinessService.selectBizBusinessById(bizAudit.getBusinessKey().toString());
+        if (bizBusiness == null) {
+            log.error(StrUtil.format("(不买单报废)流程业务表数据为空：id{}", bizAudit.getBusinessKey()));
+            return R.error("流程业务表数据为空！");
+        }
+        //查询物耗表信息
+        SmsScrapOrder smsScrapOrder = remoteSmsScrapOrderService.get(Long.valueOf(bizBusiness.getTableId()));
+        if (smsScrapOrder == null) {
+            log.error(StrUtil.format("(不买单报废)未找到此报废数据：id{}", bizBusiness.getTableId()));
+            return R.error("未找到此业务数据！");
+        }
+        //审批结果
+        Boolean result = false;
+        if (bizAudit.getResult().intValue() == 2) {
+            result = true;
+        }
+        //判断下级审批  修改状态
+        if (result) {
+            //需要发送邮件的用户
+            List<SysUserVo> users = new ArrayList<>();
+            String roleKey = new String();//下一级审批角色
+            //审批通过
+            if (ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSHBMD.getCode().equals(smsScrapOrder.getScrapStatus())) {
+                //业务科审核通过
+                smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_WXJS.getCode());
+                smsScrapOrder.setSettleFee(BigDecimal.ZERO);
+            }else if(ScrapOrderStatusEnum.BF_ORDER_STATUS_ZLJLSH.getCode().equals(smsScrapOrder.getScrapStatus())){
+                //质量工程师审批至订单经理
+                smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_DDJLSH.getCode());
+                roleKey = RoleConstants.ROLE_KEY_ORDER;
+            }else if(ScrapOrderStatusEnum.BF_ORDER_STATUS_DDJLSH.getCode().equals(smsScrapOrder.getScrapStatus())){
+                //订单经理审核通过至业务科审核
+                smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSHBMD.getCode());
+                roleKey = RoleConstants.ROLE_KEY_YWK;
+            }else {
+                log.error(StrUtil.format("(报废)此状态数据不允许审核：{}", smsScrapOrder.getScrapStatus()));
+                return R.error("此状态数据不允许审核！");
             }
+            //指定下一审批人
+            if (StrUtil.isNotEmpty(roleKey)) {
+                R rUser = remoteUserService.selectUserByMaterialCodeAndRoleKey(smsScrapOrder.getFactoryCode()
+                        ,  roleKey);
+                if (!rUser.isSuccess()) {
+                    log.error("报废审批失败，下一级审核人为空！");
+                    throw new BusinessException("报废审批失败，下一级审核人为空！");
+                }
+                users = rUser.getCollectData(new TypeReference<List<SysUserVo>>() {
+                });
+                userIds = users.stream().map(user -> user.getUserId().toString()).collect(Collectors.toSet());
+                //发送邮件通知
+                try {
+                    sendEmail(smsScrapOrder.getScrapNo(),users.stream().map(o-> {
+                        SysUser sysUser = new SysUser();
+                        sysUser.setEmail(o.getEmail());
+                        return sysUser;
+                    }).collect(Collectors.toList()));
+                } catch (Exception e) {
+                    log.error("报废发送邮件失败!{}", e);
+                }
+            }
+        } else {
+            //审批驳回
+            if (ScrapOrderStatusEnum.BF_ORDER_STATUS_ZLJLSH.getCode().equals(smsScrapOrder.getScrapStatus())) {
+                smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_ZLJLBH.getCode());
+            }else if(ScrapOrderStatusEnum.BF_ORDER_STATUS_DDJLSH.getCode().equals(smsScrapOrder.getScrapStatus())) {
+                smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_DDJLBH.getCode());
+            } else if(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSHBMD.getCode().equals(smsScrapOrder.getScrapStatus())) {
+                smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKBHBMD.getCode());
+            }else {
+                log.error(StrUtil.format("(不买单报废)此状态数据不允许审核：{}", smsScrapOrder.getScrapStatus()));
+                return R.error("此状态数据不允许审核！");
+            }
+        }
+        if (ScrapOrderStatusEnum.BF_ORDER_STATUS_WXJS.getCode().equals(smsScrapOrder.getScrapStatus())) {
+            //业务科审核通过传SAP
+//            R r = remoteSmsScrapOrderService.autidSuccessToSAP261(smsScrapOrder);
+//            if (!r.isSuccess()) {
+//                throw new BusinessException(r.getStr("msg"));
+//            }
+            Console.log("===========执行传SAP===========================");
         }
         R r = remoteSmsScrapOrderService.update(smsScrapOrder);
         if (r.isSuccess()) {

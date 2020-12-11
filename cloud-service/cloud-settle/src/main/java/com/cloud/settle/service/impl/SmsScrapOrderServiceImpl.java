@@ -109,10 +109,24 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             throw new BusinessException(omsProductionOrderResult.get("msg").toString());
         }
         OmsProductionOrder omsProductionOrder = omsProductionOrderResult.getData(OmsProductionOrder.class);
-        if (omsProductionOrder.getProcessCost() == null) {
-            throw new BusinessException(StrUtil.format("生产订单：{}无加工费单价！",omsProductionOrder.getProductOrderCode()));
+        R rFactory = remoteFactoryInfoService.selectOneByFactory(omsProductionOrder.getProductFactoryCode());
+        if(!rFactory.isSuccess()){
+            log.error(StrUtil.format("(报废)报废申请新增保存开始：公司信息为空参数为{}", omsProductionOrder.getProductFactoryCode()));
+            return R.error("公司信息为空！");
         }
-        smsScrapOrder.setMachiningPrice(omsProductionOrder.getProcessCost().multiply(BigDecimal.valueOf(smsScrapOrder.getScrapAmount())));
+        CdFactoryInfo cdFactoryInfo = rFactory.getData(CdFactoryInfo.class);
+        smsScrapOrder.setCompanyCode(cdFactoryInfo.getCompanyCode());
+        //加工费总额
+        BigDecimal machiningPrice = BigDecimal.ZERO;
+        if (OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode().equals(smsScrapOrder.getScrapType())) {
+            //半成品，按照成品加工费计算
+            machiningPrice = getMachiningPrice(smsScrapOrder.getProductMaterialCode(),
+                    smsScrapOrder.getScrapType(),cdFactoryInfo.getPurchaseOrg(),smsScrapOrder.getSupplierCode(),smsScrapOrder.getScrapAmount());
+        }else{
+            Preconditions.checkArgument(omsProductionOrder.getProcessCost() != null,StrUtil.format("生产订单：{}无加工费单价！",omsProductionOrder.getProductOrderCode()));
+            machiningPrice = omsProductionOrder.getProcessCost().multiply(BigDecimal.valueOf(smsScrapOrder.getScrapAmount()));
+        }
+        smsScrapOrder.setMachiningPrice(machiningPrice);
         int rows = updateByPrimaryKeySelective(smsScrapOrder);
         return rows > 0 ? R.ok() : R.error("更新错误！");
     }
@@ -184,31 +198,18 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         BigDecimal machiningPrice = BigDecimal.ZERO;
         if (OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode().equals(smsScrapOrder.getScrapType())) {
             //半成品，按照成品加工费计算
-            R productMaterialMap =
-                    remoteCdSettleProductMaterialService.selectOne(smsScrapOrder.getProductMaterialCode(), smsScrapOrder.getScrapType());
-            Preconditions.checkArgument(productMaterialMap.isSuccess(),"加工费号查询失败！");
-            CdSettleProductMaterial cdSettleProductMaterial = productMaterialMap.getData(CdSettleProductMaterial.class);
-            String rawMaterialCode = cdSettleProductMaterial.getRawMaterialCode();
-            //根据加工费号,供应商,采购组织 查加工费
-            R maResult = remoteCdMaterialPriceInfoService.selectOneByCondition(rawMaterialCode, cdFactoryInfo.getPurchaseOrg(),
-                    smsScrapOrder.getSupplierCode(), PriceTypeEnum.PRICE_TYPE_1.getCode());
-            Preconditions.checkArgument(maResult.isSuccess(),"加工费查询失败！");
-            CdMaterialPriceInfo cdMaterialPriceInfo = maResult.getData(CdMaterialPriceInfo.class);
-            Preconditions.checkArgument(cdMaterialPriceInfo.getNetWorth() != null, "加工费查询失败！");
-            machiningPrice = cdMaterialPriceInfo.getNetWorth().multiply(BigDecimal.valueOf(smsScrapOrder.getScrapAmount()));
+            machiningPrice = getMachiningPrice(smsScrapOrder.getProductMaterialCode(),
+                    smsScrapOrder.getScrapType(),cdFactoryInfo.getPurchaseOrg(),smsScrapOrder.getSupplierCode(),smsScrapOrder.getScrapAmount());
         }else{
             Preconditions.checkArgument(omsProductionOrder.getProcessCost() != null,StrUtil.format("生产订单：{}无加工费单价！",omsProductionOrder.getProductOrderCode()));
             machiningPrice = omsProductionOrder.getProcessCost().multiply(BigDecimal.valueOf(smsScrapOrder.getScrapAmount()));
         }
         smsScrapOrder.setMachiningPrice(machiningPrice);
-
         smsScrapOrder.setFactoryCode(omsProductionOrder.getProductFactoryCode());
-
         if (StrUtil.isBlank(smsScrapOrder.getScrapStatus())) {
             smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_DTJ.getCode());
         }
         smsScrapOrder.setDelFlag("0");
-//        smsScrapOrder.setCreateBy(sysUser.getLoginName());
         smsScrapOrder.setCreateTime(DateUtils.getNowDate());
         int rows=insertSelective(smsScrapOrder);
         if (rows > 0) {
@@ -216,6 +217,32 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         }else{
             return R.error("报废申请插入失败！");
         }
+    }
+
+    /**
+     * 计算加工费
+     * @param productMaterialCode
+     * @param outSourceType
+     * @param purchaseOrg
+     * @param supplierCode
+     * @param amount
+     * @return
+     */
+    public BigDecimal getMachiningPrice(String productMaterialCode,String outSourceType,String purchaseOrg,String supplierCode,int amount){
+        BigDecimal machiningPrice = BigDecimal.ZERO;
+        R productMaterialMap =
+                remoteCdSettleProductMaterialService.selectOne(productMaterialCode, outSourceType);
+        Preconditions.checkArgument(productMaterialMap.isSuccess(),"加工费号查询失败！");
+        CdSettleProductMaterial cdSettleProductMaterial = productMaterialMap.getData(CdSettleProductMaterial.class);
+        String rawMaterialCode = cdSettleProductMaterial.getRawMaterialCode();
+        //根据加工费号,供应商,采购组织 查加工费
+        R maResult = remoteCdMaterialPriceInfoService.selectOneByCondition(rawMaterialCode, purchaseOrg,
+                supplierCode, PriceTypeEnum.PRICE_TYPE_1.getCode());
+        Preconditions.checkArgument(maResult.isSuccess(),"加工费查询失败！");
+        CdMaterialPriceInfo cdMaterialPriceInfo = maResult.getData(CdMaterialPriceInfo.class);
+        Preconditions.checkArgument(cdMaterialPriceInfo.getNetWorth() != null, "加工费查询失败！");
+        machiningPrice = cdMaterialPriceInfo.getNetWorth().multiply(BigDecimal.valueOf(amount));
+        return machiningPrice;
     }
 
     /**
@@ -398,11 +425,11 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
     public R updatePriceEveryMonth(String month) {
         //报废索赔系数
         CdSettleRatio cdSettleRatioBF = remoteSettleRatioService.selectByClaimType(SettleRatioEnum.SPLX_BF.getCode());
-        if (cdSettleRatioBF == null) {
-            log.error("(月度结算定时任务)报废索赔系数未维护！");
-            throw new BusinessException("报废索赔系数未维护！");
-        }
-
+        CdSettleRatio cdSettleRatioWSWBF = remoteSettleRatioService.selectByClaimType(SettleRatioEnum.SPLX_WSWBF.getCode());
+        Preconditions.checkArgument(cdSettleRatioBF!=null,"报废索赔系数未维护！");
+        Preconditions.checkArgument(cdSettleRatioWSWBF!=null,"无实物报废索赔系数未维护！");
+        BigDecimal ratio = cdSettleRatioBF.getRatio();//报废索赔系数
+        BigDecimal wswRatio = cdSettleRatioWSWBF.getRatio();//无实物报废索赔系数
         //从SAP销售价格表取值（销售组织、物料号、有效期）
         //查询上个月、待结算的物耗申请中的物料号  用途是查询SAP成本价 更新到物耗表
         List<String> materialCodeList = smsScrapOrderMapper.selectMaterialByMonthAndStatus(month, CollUtil.newArrayList(ScrapOrderStatusEnum.BF_ORDER_STATUS_DJS.getCode()));
@@ -436,9 +463,12 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
                 BigDecimal scrapAmount = new BigDecimal(smsScrapOrder.getScrapAmount());//报废数量
                 BigDecimal materialPrice = smsScrapOrder.getMaterialPrice();//成品物料销售价格
 
-                BigDecimal ratio = cdSettleRatioBF.getRatio();//报废索赔系数
                 BigDecimal machiningPrice = smsScrapOrder.getMachiningPrice();//加工费总额
                 scrapPrice = materialPrice.multiply(scrapAmount.multiply(ratio));
+                //如果无实物，还需乘无实物买单系数
+                if(IsEntityEnum.IS_ENTITY_NO.getCode().equals(smsScrapOrder.getIsEntity())){
+                    scrapPrice = scrapPrice.multiply(wswRatio);
+                }
                 //如果是外币，还要 除以数额*汇率
                 if (StrUtil.isEmpty(smsScrapOrder.getCurrency())) {
                     throw new BusinessException(StrUtil.format("{}报废单未维护币种", smsScrapOrder.getScrapNo()));
@@ -571,10 +601,14 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         Date date = DateUtil.date();
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog().builder()
                 .appId("SAP").interfaceName(SapConstants.ZESP_IM_001).build();
+        String productMaterialCode = smsScrapOrder.getProductMaterialCode();//传SAP专用号
+        if (OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode().equals(smsScrapOrder.getScrapType())) {
+            productMaterialCode = smsScrapOrder.getSemiFinishedCode();
+        }
         //成品报废库位默认0088，如果0088没有库存就选择0188
         String lgort = "0088";
         CdProductWarehouse cdProductWarehouse = new CdProductWarehouse().builder()
-                .productMaterialCode(smsScrapOrder.getProductMaterialCode())
+                .productMaterialCode(productMaterialCode)
                 .productFactoryCode(smsScrapOrder.getFactoryCode())
                 .storehouse(lgort).build();
         R rWare = remoteCdProductWarehouseService.queryOneByExample(cdProductWarehouse);
@@ -615,15 +649,15 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
             inputTable.setValue("BKTXT", StrUtil.concat(true,smsScrapOrder.getSupplierCode(),smsScrapOrder.getScrapNo()));//凭证抬头文本  V码+报废单号
             inputTable.setValue("WERKS", smsScrapOrder.getFactoryCode());//工厂
             inputTable.setValue("LGORT", lgort);//库存地点
-            inputTable.setValue("MATNR", smsScrapOrder.getProductMaterialCode().toUpperCase());//物料号
+            inputTable.setValue("MATNR", productMaterialCode.toUpperCase());//物料号
             inputTable.setValue("ERFME", smsScrapOrder.getMeasureUnit());//基本计量单位
             inputTable.setValue("ERFMG", smsScrapOrder.getScrapAmount());//数量
             inputTable.setValue("AUFNR", cdScrapMonthNo.getOrderNo());//每月维护一次订单号
             String content = StrUtil.format("BWARTWA:{},BKTXT:{},WERKS:{},LGORT:{},MATNR:{}" +
                     ",ERFME:{},ERFMG:{},AUFNR:{}","261",
                     StrUtil.concat(true,smsScrapOrder.getSupplierCode(),smsScrapOrder.getScrapNo()),
-                    smsScrapOrder.getFactoryCode(),lgort,smsScrapOrder.getProductMaterialCode(),
-                    smsScrapOrder.getMeasureUnit(),smsScrapOrder.getScrapAmount(),cdScrapMonthNo.getOrderNo());
+                    smsScrapOrder.getFactoryCode(),lgort,productMaterialCode,smsScrapOrder.getMeasureUnit(),
+                    smsScrapOrder.getScrapAmount(),cdScrapMonthNo.getOrderNo());
             sysInterfaceLog.setContent(content);
             //执行函数
             JCoContext.begin(destination);
