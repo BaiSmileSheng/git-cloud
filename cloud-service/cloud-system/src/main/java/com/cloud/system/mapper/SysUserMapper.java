@@ -149,14 +149,21 @@ public interface SysUserMapper {
 
     List<String> selectGroupCodesByUser(String userId);
 
-    List<SysUser> selectUserByMaterialCodeAndRoleKey(@Param("materialCode") String materialCode,@Param("roleKey")  String roleKey);
+    List<SysUser> selectUserByMaterialCodeAndRoleKey(@Param("materialCode") String materialCode, @Param("roleKey") String roleKey);
 
     /**
      * 根据角色、工厂、采购组查对应的用户信息
+     *
      * @param factoryCode
      * @param purchaseCode
      * @param roleKey
      * @return
      */
-    List<SysUser> selectUserByFactoryCodeAndPurchaseCodeAndRoleKey(@Param("factoryCode") String factoryCode,@Param("purchaseCode") String purchaseCode,@Param("roleKey")  String roleKey);
+    List<SysUser> selectUserByFactoryCodeAndPurchaseCodeAndRoleKey(@Param("factoryCode") String factoryCode, @Param("purchaseCode") String purchaseCode, @Param("roleKey") String roleKey);
+
+    /**
+     * 查询所有有效的登录名
+     * @return
+     */
+    List<String> selectDistinctLoginName();
 }

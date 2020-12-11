@@ -102,6 +102,12 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
                 log.error("根据登录名查询用户失败,原因{}："+throwable.getMessage());
                 return R.error("根据登录名查询用户失败,原因{}："+throwable.getMessage());
             }
+
+            @Override
+            public R selectDistinctLoginName() {
+                log.error("查询所有有效的登录名失败,原因{}："+throwable.getMessage());
+                return R.error("查询所有有效的登录名失败,原因{}："+throwable.getMessage());
+            }
         };
     }
 }

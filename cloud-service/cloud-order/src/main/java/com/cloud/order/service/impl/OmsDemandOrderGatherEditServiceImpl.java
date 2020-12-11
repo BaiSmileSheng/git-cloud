@@ -80,8 +80,6 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
     @Autowired
     private RemoteMaterialService remoteMaterialService;
     @Autowired
-    private RemoteSequeceService remoteSequeceService;
-    @Autowired
     private IOmsDemandOrderGatherEditHisService omsDemandOrderGatherEditHisService;
     @Autowired
     private IOmsDemandOrderGatherEditImportService omsDemandOrderGatherEditImportService;
@@ -95,6 +93,8 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
     private RemoteFactoryStorehouseInfoService remoteFactoryStorehouseInfoService;
     @Autowired
     private RemoteActTaskService remoteActTaskService;
+    @Autowired
+    private RemoteUserService remoteUserService;
 
     private static final String TABLE_NAME = "oms_demand_order_gather_edit";
 
@@ -137,6 +137,9 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());
         if (StrUtil.isEmpty(ids)) {
             if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
+                criteria.andEqualTo("receiveBy", sysUser.getLoginName());
+            }
+            if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_ORDER)){
                 criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(",")));
             }
             if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
@@ -194,6 +197,9 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 ,DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHWC.getCode());
         if (StrUtil.isEmpty(ids)) {
             if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
+                criteria.andEqualTo("receiveBy", sysUser.getLoginName());
+            }
+            if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_ORDER)){
                 criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(",")));
             }
             if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
@@ -336,6 +342,13 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             throw new BusinessException("获取接收库位失败！");
         }
 
+        //查询所有有效的登录名 校验接收人
+        R rLoginName = remoteUserService.selectDistinctLoginName();
+        if(!rLoginName.isSuccess()){
+            throw new BusinessException("查询所有有效的登录名失败！");
+        }
+        List<String> loginNames=rLoginName.getCollectData(new TypeReference<List<String>>() {});
+
         //数据版本
         int nowYear = DateUtil.year(date);
         int nowWeek = DateUtil.weekOfYear(date);
@@ -414,6 +427,12 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 errObjectDto.setErrMsg("交付日期不能是当前或历史周");
                 errDtos.add(errObjectDto);
                 continue;
+            }
+
+            //校验接收人
+            String loginName = demandOrderGatherEdit.getReceiveBy();
+            if (!CollUtil.contains(loginNames, loginName)) {
+                errMsg.append(StrUtil.format("不存在此接收人：{};", loginName));
             }
 
             String factoryCode = demandOrderGatherEdit.getProductFactoryCode();

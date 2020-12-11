@@ -97,4 +97,12 @@ public interface RemoteUserService {
      */
     @GetMapping("user/selectUserByLoginName")
     R selectUserByLoginName(@RequestParam("loginNames")String loginNames);
+
+    /**
+     * 查询所有有效的登录名
+     * @param
+     * @return
+     */
+    @GetMapping("user/selectDistinctLoginName")
+    R selectDistinctLoginName();
 }

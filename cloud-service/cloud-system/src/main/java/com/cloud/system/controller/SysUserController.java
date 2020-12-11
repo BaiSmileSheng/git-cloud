@@ -19,10 +19,8 @@ import com.cloud.system.util.PasswordUtil;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import tk.mybatis.mapper.entity.Example;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 用户 提供者
@@ -280,5 +278,15 @@ public class SysUserController extends BaseController {
         }
         List<SysUserVo> sysUserList = new ArrayList<>(sysUserSet);
         return R.data(sysUserList);
+    }
+
+    /**
+     * 查询所有有效的登录名
+     * @return
+     */
+    @GetMapping("selectDistinctLoginName")
+    public R selectDistinctLoginName() {
+        List<String> list = sysUserService.selectDistinctLoginName();
+        return R.data(list);
     }
 }

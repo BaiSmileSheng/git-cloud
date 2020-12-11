@@ -89,21 +89,19 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
     @Autowired
     private RemoteMaterialExtendInfoService remoteMaterialExtendInfoService;
     @Autowired
-    private RemoteSequeceService remoteSequeceService;
-    @Autowired
     private IOms2weeksDemandOrderEditHisService oms2weeksDemandOrderEditHisService;
     @Autowired
     private IOms2weeksDemandOrderService oms2weeksDemandOrderService;
-
     @Autowired
     private RemoteInterfaceLogService remoteInterfaceLogService;
-
     @Autowired
     private RemoteActOmsOrderMaterialOutService remoteActOmsOrderMaterialOutService;
     @Autowired
     private RemoteFactoryStorehouseInfoService remoteFactoryStorehouseInfoService;
     @Autowired
     private RemoteActTaskService remoteActTaskService;
+    @Autowired
+    private RemoteUserService remoteUserService;
 
     private static final String TABLE_NAME = "oms2weeks_demand_order_edit";//对应的表名
 
@@ -326,6 +324,13 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             throw new BusinessException("获取接收库位失败！");
         }
 
+        //查询所有有效的登录名 校验接收人
+        R rLoginName = remoteUserService.selectDistinctLoginName();
+        if(!rLoginName.isSuccess()){
+            throw new BusinessException("查询所有有效的登录名失败！");
+        }
+        List<String> loginNames=rLoginName.getCollectData(new TypeReference<List<String>>() {});
+
         //数据版本
         int nowYear = DateUtil.year(date);
         int nowWeek = DateUtil.weekOfYear(date);
@@ -406,6 +411,12 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 errObjectDto.setErrMsg("交付日期不能是当前或历史周");
                 errDtos.add(errObjectDto);
                 continue;
+            }
+
+            //校验接收人
+            String loginName = weeksDemandOrderEdit.getReceiveBy();
+            if (!CollUtil.contains(loginNames, loginName)) {
+                errMsg.append(StrUtil.format("不存在此接收人：{};", loginName));
             }
 
             String factoryCode = weeksDemandOrderEdit.getProductFactoryCode();
@@ -545,6 +556,9 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());
         if (StrUtil.isEmpty(ids)) {
             if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
+                criteria.andEqualTo("receiveBy", sysUser.getLoginName());
+            }
+            if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_ORDER)){
                 criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(",")));
             }
             if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
@@ -652,6 +666,9 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 ,Weeks2DemandOrderEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHWC.getCode());
         if (StrUtil.isEmpty(ids)) {
             if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
+                criteria.andEqualTo("receiveBy", sysUser.getLoginName());
+            }
+            if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_ORDER)){
                 criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(",")));
             }
             if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){

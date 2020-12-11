@@ -77,6 +77,9 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
         Example example = listCondition(oms2weeksDemandOrderEdit);
         SysUser sysUser = getUserInfo(SysUser.class);
         if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
+            example.and().andEqualTo("receiveBy", sysUser.getLoginName());
+        }
+        if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_ORDER)){
             example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
         }
         if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
@@ -229,6 +232,9 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
         Example example = listCondition(oms2weeksDemandOrderEdit);
         SysUser sysUser = getUserInfo(SysUser.class);
         if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
+            example.and().andEqualTo("receiveBy", sysUser.getLoginName());
+        }
+        if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_ORDER)){
             example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
         }
         if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
