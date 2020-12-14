@@ -88,39 +88,39 @@ public class SmsScrapOrderZB extends BaseEntity {
     private String semiFinishedName;
 
     /**
+     * 是否买单 0买单  1不买单
+     */
+    @ExcelProperty(value = "是否买单",index = 9,converter = IsPayConverter.class)
+    private String isPay;
+
+    /**
+     * 有无实物 0有 1没有
+     */
+    @ExcelProperty(value = "有无实物",index = 10,converter = IsEntityConverter.class)
+    private String isEntity;
+
+    /**
      * 报废数量
      */
-    @ExcelProperty(value = "报废数量",index = 9)
+    @ExcelProperty(value = "报废数量",index = 11)
     private Integer scrapAmount;
 
     /**
      * 报废单价
      */
-    @ExcelProperty(value = "报废数量",index = 10)
+    @ExcelProperty(value = "报废单价",index = 12)
     private BigDecimal materialPrice;
 
     /**
      * 报废金额
      */
-    @ExcelProperty(value = "报废金额",index = 11)
+    @ExcelProperty(value = "报废金额",index = 13)
     private BigDecimal scrapPrice;
 
     /**
-     * 兑现加工费
+     * 结算费用
      */
-    @ExcelProperty(value = "兑现加工费",index = 12)
-    private BigDecimal machiningPrice;
-
-    /**
-     * 结算单号
-     */
-    @ExcelProperty(value = "结算单号",index = 13)
-    private String settleNo;
-
-    /**
-     * 索赔金额
-     */
-    @ExcelProperty(value = "索赔金额",index = 14)
+    @ExcelProperty(value = "结算费用",index = 14)
     private BigDecimal settleFee;
 
     /**
@@ -130,33 +130,9 @@ public class SmsScrapOrderZB extends BaseEntity {
     private BigDecimal cashAmount;
 
     /**
-     * 未兑现金额
-     */
-    @ExcelProperty(value = "未兑现金额",index = 16)
-    private BigDecimal uncashAmount;
-
-    /**
-     * 是否买单 0买单  1不买单
-     */
-    @ExcelProperty(value = "是否买单",index = 17,converter = IsPayConverter.class)
-    private String isPay;
-
-    /**
-     * 有无实物 0有 1没有
-     */
-    @ExcelProperty(value = "有无实物",index = 18,converter = IsEntityConverter.class)
-    private String isEntity;
-
-    /**
-     * 报废状态 0待提交、1业务科待审核、2业务科驳回、3 SAP过账成功、4 SAP过账失败、11待结算、12结算完成、13已兑现、14部分兑现、15未兑现
-     */
-    @ExcelProperty(value = "报废状态",index = 19,converter = ScrapOrderStatusConverter.class)
-    private String scrapStatus;
-
-    /**
      * SAP过账单号
      */
-    @ExcelProperty(value = "SAP过账单号",index = 20)
+    @ExcelProperty(value = "SAP过账单号",index = 16)
     private String postingNo;
 
     /**
@@ -164,20 +140,19 @@ public class SmsScrapOrderZB extends BaseEntity {
      */
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @ExcelProperty(value = "SAP过账时间",index = 21)
+    @ExcelProperty(value = "SAP过账时间",index = 17)
     private Date sapTransDate;
 
     /**
-     * SAP创单备注
+     * 报废状态 0待提交、1业务科待审核、2业务科驳回、3 SAP过账成功、4 SAP过账失败、11待结算、12结算完成、13已兑现、14部分兑现、15未兑现
      */
-    @ExcelProperty(value = "报废金额",index = 22)
-    private String sapRemark;
-
+    @ExcelProperty(value = "报废状态",index = 18,converter = ScrapOrderStatusConverter.class)
+    private String scrapStatus;
 
     /**
      * 提交时间
      */
-    @ExcelProperty(value = "提交时间",index = 23)
+    @ExcelProperty(value = "提交时间",index = 19)
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date submitDate;
