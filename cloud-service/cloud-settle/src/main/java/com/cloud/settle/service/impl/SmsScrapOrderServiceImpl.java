@@ -602,9 +602,6 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog().builder()
                 .appId("SAP").interfaceName(SapConstants.ZESP_IM_001).build();
         String productMaterialCode = smsScrapOrder.getProductMaterialCode();//传SAP专用号
-        if (OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode().equals(smsScrapOrder.getScrapType())) {
-            productMaterialCode = smsScrapOrder.getSemiFinishedCode();
-        }
         //成品报废库位默认0088，如果0088没有库存就选择0188
         String lgort = "0088";
         CdProductWarehouse cdProductWarehouse = new CdProductWarehouse().builder()

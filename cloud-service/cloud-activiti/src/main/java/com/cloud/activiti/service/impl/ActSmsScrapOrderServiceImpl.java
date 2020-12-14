@@ -327,10 +327,10 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         }
         if (ScrapOrderStatusEnum.BF_ORDER_STATUS_DJS.getCode().equals(smsScrapOrder.getScrapStatus())) {
             //业务科审核通过传SAP
-//            R r = remoteSmsScrapOrderService.autidSuccessToSAP261(smsScrapOrder);
-//            if (!r.isSuccess()) {
-//                throw new BusinessException(r.getStr("msg"));
-//            }
+            R r = remoteSmsScrapOrderService.autidSuccessToSAP261(smsScrapOrder);
+            if (!r.isSuccess()) {
+                throw new BusinessException(r.getStr("msg"));
+            }
             Console.log("===========执行传SAP===========================");
         }
         R r = remoteSmsScrapOrderService.update(smsScrapOrder);
@@ -450,10 +450,10 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
         }
         if (ScrapOrderStatusEnum.BF_ORDER_STATUS_WXJS.getCode().equals(smsScrapOrder.getScrapStatus())) {
             //业务科审核通过传SAP
-//            R r = remoteSmsScrapOrderService.autidSuccessToSAP261(smsScrapOrder);
-//            if (!r.isSuccess()) {
-//                throw new BusinessException(r.getStr("msg"));
-//            }
+            R r = remoteSmsScrapOrderService.autidSuccessToSAP261(smsScrapOrder);
+            if (!r.isSuccess()) {
+                throw new BusinessException(r.getStr("msg"));
+            }
             Console.log("===========执行传SAP===========================");
         }
         R r = remoteSmsScrapOrderService.update(smsScrapOrder);
