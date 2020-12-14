@@ -121,7 +121,7 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         if (OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode().equals(smsScrapOrder.getScrapType())) {
             //半成品，按照成品加工费计算
             machiningPrice = getMachiningPrice(smsScrapOrder.getProductMaterialCode(),
-                    smsScrapOrder.getScrapType(),cdFactoryInfo.getPurchaseOrg(),smsScrapOrder.getSupplierCode(),smsScrapOrder.getScrapAmount());
+                    smsScrapOrder.getScrapType(),cdFactoryInfo.getPurchaseOrg(),smsScrapOrderCheck.getSupplierCode(),smsScrapOrder.getScrapAmount());
         }else{
             Preconditions.checkArgument(omsProductionOrder.getProcessCost() != null,StrUtil.format("生产订单：{}无加工费单价！",omsProductionOrder.getProductOrderCode()));
             machiningPrice = omsProductionOrder.getProcessCost().multiply(BigDecimal.valueOf(smsScrapOrder.getScrapAmount()));

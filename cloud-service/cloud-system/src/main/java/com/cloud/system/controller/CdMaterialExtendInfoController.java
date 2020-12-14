@@ -281,7 +281,7 @@ public class CdMaterialExtendInfoController extends BaseController {
     public R objectSelectByLikeCode(@RequestParam(value = "materialCode") String materialCode){
         Example example = new Example(CdMaterialExtendInfo.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andLike("materialCode",materialCode + "%");
+        criteria.andLike("materialCode", "%" + materialCode + "%");
         startPage();
         List<CdMaterialExtendInfo> cdMaterialExtendInfoList = cdMaterialExtendInfoService.selectByExample(example);
         return R.data(cdMaterialExtendInfoList);
