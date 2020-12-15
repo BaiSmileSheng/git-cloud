@@ -711,7 +711,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             weekNum += 1;
         }
         //从T+3周开始
-        int gatherWeek = weekNum + 3;
+        int gatherWeek = DateUtil.weekOfYear(DateUtil.offsetWeek(new Date(), 3));
         int[] weekRange= NumberUtil.range(gatherWeek, gatherWeek+10);
         mapGroup.forEach((keyCode,list)->{
             List<WeekAndNumGatherDTO> weekNumList = new ArrayList<>();
@@ -815,7 +815,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             weekNum += 1;
         }
         //从T+3周开始
-        int gatherWeek = weekNum + 3;
+        int gatherWeek = DateUtil.weekOfYear(DateUtil.offsetWeek(new Date(), 3));
         //所有周数 11周
         int[] weekRange= NumberUtil.range(gatherWeek, gatherWeek+10);
         //查出全部数据了

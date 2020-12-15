@@ -141,6 +141,9 @@ public class OmsDemandOrderGatherEditController extends BaseController {
         if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getCreateBy())) {
             criteria.andEqualTo("createBy", omsDemandOrderGatherEdit.getCreateBy() );
         }
+        if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getReceiveBy())) {
+            criteria.andEqualTo("receiveBy", omsDemandOrderGatherEdit.getReceiveBy() );
+        }
         return example;
     }
 
