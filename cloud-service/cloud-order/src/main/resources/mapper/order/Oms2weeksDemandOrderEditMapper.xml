@@ -31,6 +31,7 @@
         <result property="sapMessages" column="sap_messages"/>
         <result property="status" column="status"/>
         <result property="auditStatus" column="audit_status"/>
+        <result property="receiveBy" column="receive_by"/>
         <result property="delFlag" column="del_flag"/>
         <result property="remark" column="remark"/>
         <result property="createTime" column="create_time"/>
@@ -66,6 +67,7 @@
                sap_messages,
                status,
                audit_status,
+               receive_by,
                del_flag,
                remark,
                create_time,

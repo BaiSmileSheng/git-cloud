@@ -14,12 +14,20 @@ public enum ScrapOrderStatusEnum {
     BF_ORDER_STATUS_YWKBH("2", "业务科驳回"),
     BF_ORDER_STATUS_PCYSH("3", "排产员待审核"),
     BF_ORDER_STATUS_PCYBH("4", "排产员驳回"),
+    BF_ORDER_STATUS_ZLJLSH("5", "质量经理待审核-不买单"),
+    BF_ORDER_STATUS_ZLJLBH("6", "质量经理驳回-不买单"),
+    BF_ORDER_STATUS_PCYSHBMD("7", "排产员待审核-不买单"),
+    BF_ORDER_STATUS_PCYBHBMD("8", "排产员驳回-不买单"),
+    BF_ORDER_STATUS_YWKSHBMD("9", "业务科待审核-不买单"),
+    BF_ORDER_STATUS_YWKBHBMD("10", "业务科驳回-不买单"),
     BF_ORDER_STATUS_DJS("11", "待结算"),
     BF_ORDER_STATUS_JSWC("12", "结算完成"),
     BF_ORDER_STATUS_YDX("13", "已兑现"),
     BF_ORDER_STATUS_BFDX("14", "部分兑现"),
-    BF_ORDER_STATUS_WDX("15", "未兑现");
-
+    BF_ORDER_STATUS_WDX("15", "未兑现"),
+    BF_ORDER_STATUS_WXJS("16", "无需结算");
+    //质量经理审核-订单经理审核-业务科审核   不买单审批
+    //业务科审核-排产员审核   买单审批
     private String code;
     private String msg;
 

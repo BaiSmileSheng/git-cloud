@@ -233,4 +233,10 @@ public interface ISysUserService {
      * @return
      */
     List<SysUserRights> selectUserByRoleKey(String roleKey);
+
+    /**
+     * 查询所有有效的登录名
+     * @return
+     */
+    List<String> selectDistinctLoginName();
 }

@@ -4,6 +4,7 @@ import com.cloud.common.core.dao.BaseMapper;
 import com.cloud.system.domain.entity.CdMaterialPriceInfo;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 import java.util.Map;
@@ -39,4 +40,6 @@ public interface CdMaterialPriceInfoMapper extends BaseMapper<CdMaterialPriceInf
      * @return
      */
     int batchInsertOrUpdate(List<CdMaterialPriceInfo> list);
+    
+    List<CdMaterialPriceInfo> selectByMaterialSupplierList(@Param(value = "list") List<CdMaterialPriceInfo> list);
 }

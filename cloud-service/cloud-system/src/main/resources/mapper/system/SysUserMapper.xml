@@ -445,4 +445,10 @@
           AND sr.role_key
             = #{roleKey}
     </select>
+
+    <select id="selectDistinctLoginName" resultType="String">
+        select distinct u.login_name
+        from sys_user u
+        where del_flag = '0' and status = '0'
+    </select>
 </mapper>

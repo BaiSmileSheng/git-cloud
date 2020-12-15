@@ -233,4 +233,11 @@ public class CdMaterialPriceInfoController extends BaseController {
     public R selectMaterialPrice(@RequestBody Map<String,List<CdSettleProductMaterial>> map){
         return cdMaterialPriceInfoService.selectMaterialPrice(map);
     }
+    /**
+     * 根据原材料物料和供应商编码查询价格
+     */
+    @PostMapping("selectBymaterialSupplierList")
+    public R selectBymaterialSupplierList(@RequestBody List<CdMaterialPriceInfo> list){
+        return cdMaterialPriceInfoService.selectBymaterialSupplierList(list);
+    }
 }

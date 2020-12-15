@@ -84,6 +84,9 @@ public class OmsDemandOrderGatherEditController extends BaseController {
         Example example = listCondition(omsDemandOrderGatherEdit);
         SysUser sysUser = getUserInfo(SysUser.class);
         if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
+            example.and().andEqualTo("receiveBy", sysUser.getLoginName());
+        }
+        if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_ORDER)){
             example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
         }
         if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
@@ -137,6 +140,9 @@ public class OmsDemandOrderGatherEditController extends BaseController {
         }
         if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getCreateBy())) {
             criteria.andEqualTo("createBy", omsDemandOrderGatherEdit.getCreateBy() );
+        }
+        if (StrUtil.isNotEmpty(omsDemandOrderGatherEdit.getReceiveBy())) {
+            criteria.andEqualTo("receiveBy", omsDemandOrderGatherEdit.getReceiveBy() );
         }
         return example;
     }
@@ -247,6 +253,9 @@ public class OmsDemandOrderGatherEditController extends BaseController {
         Example example = listCondition(omsDemandOrderGatherEdit);
         SysUser sysUser = getUserInfo(SysUser.class);
         if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
+            example.and().andEqualTo("receiveBy", sysUser.getLoginName());
+        }
+        if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_ORDER)){
             example.and().andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
         }
         if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){

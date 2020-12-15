@@ -89,6 +89,12 @@ public class OmsDemandOrderGatherEditImportTemplete {
     private String place;
 
     /**
+     * 接收人
+     */
+    @ExcelProperty(value = "接收人")
+    private String receiveBy;
+
+    /**
      * 备注
      */
     @ExcelProperty(value = "备注")

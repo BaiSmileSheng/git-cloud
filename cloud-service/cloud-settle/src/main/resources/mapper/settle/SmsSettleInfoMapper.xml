@@ -92,7 +92,7 @@
     </sql>
     <select id="selectForMonthSettle" resultMap="SmsSettleInfoResult">
         <include refid="selectSmsSettleInfoVo"/>
-        WHERE DATE_FORMAT(product_start_date, '%Y%m') = #{month}
+        WHERE DATE_FORMAT(actual_end_date, '%Y%m') = #{month}
           AND order_status = #{orderStatus}
         and del_flag='0'
     </select>

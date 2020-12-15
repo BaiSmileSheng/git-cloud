@@ -22,6 +22,8 @@ public class EmailConstants {
 
     public static final String TITLE_RAW_MATERIAL = "原材料反馈信息处理-驳回通知";
 
+    public static final String TITLE_RAW_SCRAP = "原材料报废审批通知";
+
 
 
     /**
@@ -59,6 +61,6 @@ public class EmailConstants {
     public static final String RAW_MATERIAL_CONTEXT_AFTER = "</table>" +
             "</body>" +
             "</html>";
-
+    public static final String RAW_SCRAP_CONTEXT = "，您好！\n 订单评审系统有新的原材料报废订单待审批，请及时审批！";
 
 }
