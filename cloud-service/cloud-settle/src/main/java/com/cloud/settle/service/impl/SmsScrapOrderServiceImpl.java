@@ -328,8 +328,8 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
                 ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYBH.getCode(),
                 ScrapOrderStatusEnum.BF_ORDER_STATUS_ZLJLSH.getCode(),
                 ScrapOrderStatusEnum.BF_ORDER_STATUS_ZLJLBH.getCode(),
-                ScrapOrderStatusEnum.BF_ORDER_STATUS_DDJLSH.getCode(),
-                ScrapOrderStatusEnum.BF_ORDER_STATUS_DDJLBH.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYSHBMD.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYBHBMD.getCode(),
                 ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSHBMD.getCode(),
                 ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKBHBMD.getCode()
         );
@@ -393,8 +393,8 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
                 ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYBH.getCode(),
                 ScrapOrderStatusEnum.BF_ORDER_STATUS_ZLJLSH.getCode(),
                 ScrapOrderStatusEnum.BF_ORDER_STATUS_ZLJLBH.getCode(),
-                ScrapOrderStatusEnum.BF_ORDER_STATUS_DDJLSH.getCode(),
-                ScrapOrderStatusEnum.BF_ORDER_STATUS_DDJLBH.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYSHBMD.getCode(),
+                ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYBHBMD.getCode(),
                 ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSHBMD.getCode(),
                 ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKBHBMD.getCode()
         );

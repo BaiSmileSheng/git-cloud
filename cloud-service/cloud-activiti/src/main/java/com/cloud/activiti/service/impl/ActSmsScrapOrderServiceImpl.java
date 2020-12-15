@@ -402,11 +402,11 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
                 smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_WXJS.getCode());
                 smsScrapOrder.setSettleFee(BigDecimal.ZERO);
             }else if(ScrapOrderStatusEnum.BF_ORDER_STATUS_ZLJLSH.getCode().equals(smsScrapOrder.getScrapStatus())){
-                //质量工程师审批至订单经理
-                smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_DDJLSH.getCode());
-                roleKey = RoleConstants.ROLE_KEY_ORDER;
-            }else if(ScrapOrderStatusEnum.BF_ORDER_STATUS_DDJLSH.getCode().equals(smsScrapOrder.getScrapStatus())){
-                //订单经理审核通过至业务科审核
+                //质量工程师审批至排产员
+                smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYSHBMD.getCode());
+                roleKey = RoleConstants.ROLE_KEY_PCY;
+            }else if(ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYSHBMD.getCode().equals(smsScrapOrder.getScrapStatus())){
+                //排产员审核通过至业务科审核
                 smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSHBMD.getCode());
                 roleKey = RoleConstants.ROLE_KEY_YWK;
             }else {
@@ -439,8 +439,8 @@ public class ActSmsScrapOrderServiceImpl implements IActSmsScrapOrderService {
             //审批驳回
             if (ScrapOrderStatusEnum.BF_ORDER_STATUS_ZLJLSH.getCode().equals(smsScrapOrder.getScrapStatus())) {
                 smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_ZLJLBH.getCode());
-            }else if(ScrapOrderStatusEnum.BF_ORDER_STATUS_DDJLSH.getCode().equals(smsScrapOrder.getScrapStatus())) {
-                smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_DDJLBH.getCode());
+            }else if(ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYSHBMD.getCode().equals(smsScrapOrder.getScrapStatus())) {
+                smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_PCYBHBMD.getCode());
             } else if(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKSHBMD.getCode().equals(smsScrapOrder.getScrapStatus())) {
                 smsScrapOrder.setScrapStatus(ScrapOrderStatusEnum.BF_ORDER_STATUS_YWKBHBMD.getCode());
             }else {

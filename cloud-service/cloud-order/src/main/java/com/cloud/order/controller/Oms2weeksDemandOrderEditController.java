@@ -134,6 +134,9 @@ public class Oms2weeksDemandOrderEditController extends BaseController {
         if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getCreateBy())) {
             criteria.andEqualTo("createBy", oms2weeksDemandOrderEdit.getCreateBy() );
         }
+        if (StrUtil.isNotEmpty(oms2weeksDemandOrderEdit.getReceiveBy())) {
+            criteria.andEqualTo("receiveBy", oms2weeksDemandOrderEdit.getReceiveBy() );
+        }
         return example;
     }
 
