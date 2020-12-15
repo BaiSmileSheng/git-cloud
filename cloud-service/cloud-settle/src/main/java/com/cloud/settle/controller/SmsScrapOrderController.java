@@ -1,5 +1,6 @@
 package com.cloud.settle.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
@@ -13,11 +14,13 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.common.utils.bean.BeanUtils;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
+import com.cloud.settle.domain.entity.SmsScrapOrderZB;
 import com.cloud.settle.enums.ScrapOrderStatusEnum;
 import com.cloud.settle.service.ISmsScrapOrderService;
 import com.cloud.settle.util.DataScopeUtil;
 import com.cloud.settle.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.SysUser;
+import com.google.common.collect.Lists;
 import com.sap.conn.jco.JCoException;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -228,6 +231,43 @@ public class SmsScrapOrderController extends BaseController {
         }
         List<SmsScrapOrder> smsScrapOrderList = smsScrapOrderService.selectByExample(example);
         return EasyExcelUtilOSS.writeExcel(smsScrapOrderList,"报废申请.xlsx","sheet",new SmsScrapOrder());
+    }
+
+
+    /**
+     * 报废管理总部 导出
+     */
+    @GetMapping("exportZB")
+    @ApiOperation(value = "报废管理总部 导出", response = SmsScrapOrder.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "scrapNo", value = "报废单号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productOrderCode", value = "生产订单号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "supplierCode", value = "供应商编码", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "supplierName", value = "供应商名称", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "scrapStatus", value = "报废状态", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "productMaterialCode", value = "专用号", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "beginTime", value = "创建日期", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "endTime", value = "到", required = false, paramType = "query", dataType = "String")
+    })
+    @HasPermissions("settle:scrapOrder:exportZB")
+    public R exportZB(@ApiIgnore() SmsScrapOrder smsScrapOrder) {
+        Example example = new Example(SmsScrapOrder.class);
+        Example.Criteria criteria = example.createCriteria();
+        BeanUtils.nullifyStrings(smsScrapOrder);
+        criteria.andEqualTo(smsScrapOrder);
+        if(StrUtil.isNotEmpty(smsScrapOrder.getEndTime())){
+            criteria.andLessThanOrEqualTo("createTime", DateUtil.parse(smsScrapOrder.getEndTime()).offset(DateField.DAY_OF_MONTH,1));
+        }
+        if(StrUtil.isNotEmpty(smsScrapOrder.getBeginTime())){
+            criteria.andGreaterThanOrEqualTo("createTime", smsScrapOrder.getBeginTime());
+        }
+        List<SmsScrapOrder> smsScrapOrderList = smsScrapOrderService.selectByExample(example);
+        List<SmsScrapOrderZB> smsScrapOrderZBList = Lists.transform(smsScrapOrderList, (entity) -> {
+            SmsScrapOrderZB vo = new SmsScrapOrderZB();
+            BeanUtil.copyProperties(entity,vo);
+            return vo;
+        });
+        return EasyExcelUtilOSS.writeExcel(smsScrapOrderZBList,"报废申请（总部）.xlsx","sheet",new SmsScrapOrderZB());
     }
 
     /**

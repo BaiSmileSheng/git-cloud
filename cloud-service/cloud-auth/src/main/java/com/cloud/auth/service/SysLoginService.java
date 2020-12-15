@@ -159,6 +159,7 @@ public class SysLoginService {
             CdSupplierInfo cdSupplierInfo = supplierInfoService.getByNick(user.getLoginName());
             if (cdSupplierInfo != null) {
                 user.setSupplierCode(cdSupplierInfo.getSupplierCode());
+                user.setSupplierName(cdSupplierInfo.getCorporation());
             }
         }else{
             throw new UserException("user.type.null",null);

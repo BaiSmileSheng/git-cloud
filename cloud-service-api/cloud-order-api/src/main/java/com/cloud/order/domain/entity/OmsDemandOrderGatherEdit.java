@@ -207,6 +207,11 @@ public class OmsDemandOrderGatherEdit extends BaseEntity {
     private String auditStatus;
 
     /**
+     * 接收人
+     */
+    private String receiveBy;
+
+    /**
      * 是否删除 0：有效，1：删除
      */
     private String delFlag;

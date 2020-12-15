@@ -113,6 +113,13 @@ public class OmsDemandOrderGatherEditImport{
     private Long orderNum;
 
     /**
+     * 接收人
+     */
+    @ExcelProperty(value = "接收人")
+    @NotNull
+    private String receiveBy;
+
+    /**
      * 备注
      */
     @ExcelProperty(value = "备注")

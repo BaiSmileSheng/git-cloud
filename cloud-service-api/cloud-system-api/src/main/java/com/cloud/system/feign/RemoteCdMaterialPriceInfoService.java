@@ -86,4 +86,12 @@ public interface RemoteCdMaterialPriceInfoService {
      */
     @PostMapping("materialPrice/selectMaterialPrice")
     R selectMaterialPrice(@RequestBody Map<String,List<CdSettleProductMaterial>> map);
+
+    /**
+     * 根据原材料物料和供应商编码查询价格
+     * @param list
+     * @return R
+     */
+    @PostMapping("materialPrice/selectBymaterialSupplierList")
+    public R selectBymaterialSupplierList(@RequestBody List<CdMaterialPriceInfo> list);
 }

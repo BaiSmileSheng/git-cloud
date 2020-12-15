@@ -17,7 +17,6 @@ import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.mapper.*;
 import com.cloud.system.service.ISysConfigService;
 import com.cloud.system.service.ISysUserService;
-import io.seata.spring.annotation.GlobalTransactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +58,8 @@ public class SysUserServiceImpl implements ISysUserService {
 
     @Autowired
     private CdSupplierInfoMapper cdSupplierInfoMapper;
+    @Autowired
+    private SysUserMapper sysUserMapper;
 
     /**
      * 根据条件分页查询用户列表
@@ -526,5 +527,14 @@ public class SysUserServiceImpl implements ISysUserService {
         //查询指定角色用户
         List<SysUserRights> userRights = userMapper.selectListByRoleKey(roleKey);
         return userRights;
+    }
+
+    /**
+     * 查询所有有效的登录名
+     * @return
+     */
+    @Override
+    public List<String> selectDistinctLoginName() {
+        return sysUserMapper.selectDistinctLoginName();
     }
 }

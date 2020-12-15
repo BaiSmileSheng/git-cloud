@@ -1,6 +1,4 @@
 package com.cloud.order.service.impl;
-import java.util.List;
-
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
@@ -2321,7 +2319,7 @@ public class OmsProductionOrderServiceImpl extends BaseServiceImpl<OmsProduction
                 omsProductionOrder.setSettleMessages(settleMassagesBuffer.toString());
                 continue;
             }
-            smsSettleInfo.setMachiningPrice(cdMaterialPriceInfo.getProcessPrice());
+            smsSettleInfo.setMachiningPrice(cdMaterialPriceInfo.getNetWorth());
             smsSettleInfo.setDelFlag(DeleteFlagConstants.NO_DELETED);
             smsSettleInfo.setProductStartDate(DateUtils.dateTime(YYYY_MM_DD, omsProductionOrder.getProductStartDate()));
             smsSettleInfo.setProductEndDate(DateUtils.dateTime(YYYY_MM_DD, omsProductionOrder.getProductEndDate()));
