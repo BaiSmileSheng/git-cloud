@@ -1,6 +1,7 @@
 package com.cloud.settle.feign.factory;
 
 import com.cloud.common.core.domain.R;
+import com.cloud.settle.domain.entity.SmsRawMaterialScrapOrder;
 import com.cloud.settle.feign.RemoteSmsRawScrapOrderService;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,34 @@ public class RemoteSmsRawScrapOrderFallbackFactory implements FallbackFactory<Re
             @Override
             public R updateRawScrapJob() {
                 log.error("RemoteSmsRawScrapOrderService.updateRawScrapJob错误：{}",throwable.getMessage());
+                return R.error("服务器拥挤：请稍后再试！");
+            }
+            /**
+             * 查询原材料报废申请
+             */
+            @Override
+            public R get(Long id) {
+                log.error("RemoteSmsRawScrapOrderService.get错误：{}",throwable.getMessage());
+                return R.error("服务器拥挤：请稍后再试！");
+            }
+            /**
+             * 审核通过传SAP系统261进行报废
+             * @param
+             * @return
+             */
+            @Override
+            public R autidSuccessToSAP261(SmsRawMaterialScrapOrder smsRawMaterialScrapOrder) {
+                log.error("RemoteSmsRawScrapOrderService.autidSuccessToSAP261错误：{}",throwable.getMessage());
+                return R.error("服务器拥挤：请稍后再试！");
+            }
+            /**
+             * 更新原材料报废
+             * @param
+             * @return
+             */
+            @Override
+            public R updateAct(SmsRawMaterialScrapOrder smsRawMaterialScrapOrder) {
+                log.error("RemoteSmsRawScrapOrderService.updateAct错误：{}",throwable.getMessage());
                 return R.error("服务器拥挤：请稍后再试！");
             }
         };

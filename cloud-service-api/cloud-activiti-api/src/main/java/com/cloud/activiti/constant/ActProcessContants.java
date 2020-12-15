@@ -24,6 +24,14 @@ public class ActProcessContants {
      * 超期库存订单审批流程
      */
     public static final String ACTIVITI_PRO_TITLE_OVERDUE_STOCK = "超期库存订单审批流程";
+    /**
+     * 原材料报废-有实物审批流程
+     */
+    public static final String ACTIVITI_BF_TITLE_RAW_SCRAP_OBJECT = "原材料报废-有实物审批流程";
+    /**
+     * 原材料报废-无实物审批流程
+     */
+    public static final String ACTIVITI_BF_TITLE_RAW_SCRAP_NO_OBJECT = "原材料报废-无实物审批流程";
 
 
     /**
@@ -43,5 +51,10 @@ public class ActProcessContants {
 
     //超期库存订单审批Key
     public static final String ACTIVITI_OVERDUE_STOCK_ORDER_REVIEW = "productOrderOverStock";
+
+    //原材料报废有实物审批Key
+    public static final String ACTIVITI_RAW_SCRAP_REVIEW = "rawScrap";
+    //原材料报废无实物审批Key
+    public static final String ACTIVITI_RAW_SCRAP_REVIEW_NO_OBJECT = "rawScrapNoObject";
 
 }

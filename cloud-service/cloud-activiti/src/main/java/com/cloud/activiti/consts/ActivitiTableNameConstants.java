@@ -39,5 +39,7 @@ public class ActivitiTableNameConstants {
      * T+1-T+2周需求导入表
      */
     public static final String ACTIVITI_TABLE_NAME_DEMAND_ORDER_EDIT = "oms2weeks_demand_order_edit";
+
+    public static final String ACTIVITI_TABLE_NAME_RAW_SCRAP = "sms_raw_material_scrap_order";
 }
 
