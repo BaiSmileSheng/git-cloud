@@ -225,4 +225,22 @@ public class SmsRawMaterialScrapOrderController extends BaseController {
     public R updateRawScrapJob(){
         return smsRawMaterialScrapOrderService.updateRawScrapJob();
     }
+    /**
+     * 审核通过传SAP系统261进行报废
+     * @param
+     * @return
+     */
+    @PostMapping("autidSuccessToSAP261")
+    public R autidSuccessToSAP261(@RequestBody SmsRawMaterialScrapOrder smsRawMaterialScrapOrder){
+        return smsRawMaterialScrapOrderService.autidSuccessToSAP261(smsRawMaterialScrapOrder);
+    }
+    /**
+     * 更新原材料报废
+     * @param
+     * @return
+     */
+    @PostMapping("updateAct")
+    public R updateAct(@RequestBody SmsRawMaterialScrapOrder smsRawMaterialScrapOrder){
+        return toAjax(smsRawMaterialScrapOrderService.updateByPrimaryKeySelective(smsRawMaterialScrapOrder));
+    }
 }

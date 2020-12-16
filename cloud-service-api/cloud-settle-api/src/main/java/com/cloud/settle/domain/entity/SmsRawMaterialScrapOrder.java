@@ -245,16 +245,11 @@ public class SmsRawMaterialScrapOrder extends BaseEntity {
      */
     private String delFlag;
 
-    @JsonIgnore
-    @Transient
-    private String beginTime;
-
-    @JsonIgnore
-    @Transient
-    private String endTime;
-
-    @JsonIgnore
     @Transient
     private String saveOrSubmit;
+
+    @JsonIgnore
+    @Transient
+    private String purchaseGroup;
 
 }

@@ -2,9 +2,11 @@ package com.cloud.settle.feign;
 
 import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.common.core.domain.R;
+import com.cloud.settle.domain.entity.SmsRawMaterialScrapOrder;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
 import com.cloud.settle.feign.factory.RemoteSmsRawScrapOrderFallbackFactory;
 import com.cloud.settle.feign.factory.RemoteSmsScrapOrderFallbackFactory;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,4 +37,27 @@ public interface RemoteSmsRawScrapOrderService {
      */
     @PostMapping("rawMaterialScrapOrder/updateRawScrapJob")
     public R updateRawScrapJob();
+
+    /**
+     * 查询原材料报废申请
+     */
+    @GetMapping("rawMaterialScrapOrder/get")
+    R get(Long id);
+
+    /**
+     * 审核通过传SAP系统261进行报废
+     * @param
+     * @return
+     */
+    @PostMapping("rawMaterialScrapOrder/autidSuccessToSAP261")
+    R autidSuccessToSAP261(@RequestBody SmsRawMaterialScrapOrder smsRawMaterialScrapOrder);
+
+    /**
+     * 更新原材料报废
+     * @param
+     * @return
+     */
+    @PostMapping("updateAct")
+    R updateAct(@RequestBody SmsRawMaterialScrapOrder smsRawMaterialScrapOrder);
+
 }
