@@ -117,15 +117,8 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         CdFactoryInfo cdFactoryInfo = rFactory.getData(CdFactoryInfo.class);
         smsScrapOrder.setCompanyCode(cdFactoryInfo.getCompanyCode());
         //加工费总额
-        BigDecimal machiningPrice = BigDecimal.ZERO;
-        if (OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode().equals(smsScrapOrder.getScrapType())) {
-            //半成品，按照成品加工费计算
-            machiningPrice = getMachiningPrice(smsScrapOrder.getProductMaterialCode(),
-                    smsScrapOrder.getScrapType(),cdFactoryInfo.getPurchaseOrg(),smsScrapOrderCheck.getSupplierCode(),smsScrapOrder.getScrapAmount());
-        }else{
-            Preconditions.checkArgument(omsProductionOrder.getProcessCost() != null,StrUtil.format("生产订单：{}无加工费单价！",omsProductionOrder.getProductOrderCode()));
-            machiningPrice = omsProductionOrder.getProcessCost().multiply(BigDecimal.valueOf(smsScrapOrder.getScrapAmount()));
-        }
+        Preconditions.checkArgument(omsProductionOrder.getProcessCost() != null,StrUtil.format("生产订单：{}无加工费单价！",omsProductionOrder.getProductOrderCode()));
+        BigDecimal machiningPrice = omsProductionOrder.getProcessCost().multiply(BigDecimal.valueOf(smsScrapOrder.getScrapAmount()));
         smsScrapOrder.setMachiningPrice(machiningPrice);
         int rows = updateByPrimaryKeySelective(smsScrapOrder);
         return rows > 0 ? R.ok() : R.error("更新错误！");
@@ -195,15 +188,8 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         CdFactoryInfo cdFactoryInfo = rFactory.getData(CdFactoryInfo.class);
         smsScrapOrder.setCompanyCode(cdFactoryInfo.getCompanyCode());
         //加工费总额
-        BigDecimal machiningPrice = BigDecimal.ZERO;
-        if (OutSourceTypeEnum.OUT_SOURCE_TYPE_BWW.getCode().equals(smsScrapOrder.getScrapType())) {
-            //半成品，按照成品加工费计算
-            machiningPrice = getMachiningPrice(smsScrapOrder.getProductMaterialCode(),
-                    smsScrapOrder.getScrapType(),cdFactoryInfo.getPurchaseOrg(),smsScrapOrder.getSupplierCode(),smsScrapOrder.getScrapAmount());
-        }else{
-            Preconditions.checkArgument(omsProductionOrder.getProcessCost() != null,StrUtil.format("生产订单：{}无加工费单价！",omsProductionOrder.getProductOrderCode()));
-            machiningPrice = omsProductionOrder.getProcessCost().multiply(BigDecimal.valueOf(smsScrapOrder.getScrapAmount()));
-        }
+        Preconditions.checkArgument(omsProductionOrder.getProcessCost() != null,StrUtil.format("生产订单：{}无加工费单价！",omsProductionOrder.getProductOrderCode()));
+        BigDecimal machiningPrice = omsProductionOrder.getProcessCost().multiply(BigDecimal.valueOf(smsScrapOrder.getScrapAmount()));
         smsScrapOrder.setMachiningPrice(machiningPrice);
         smsScrapOrder.setFactoryCode(omsProductionOrder.getProductFactoryCode());
         if (StrUtil.isBlank(smsScrapOrder.getScrapStatus())) {
@@ -217,32 +203,6 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
         }else{
             return R.error("报废申请插入失败！");
         }
-    }
-
-    /**
-     * 计算加工费
-     * @param productMaterialCode
-     * @param outSourceType
-     * @param purchaseOrg
-     * @param supplierCode
-     * @param amount
-     * @return
-     */
-    public BigDecimal getMachiningPrice(String productMaterialCode,String outSourceType,String purchaseOrg,String supplierCode,int amount){
-        BigDecimal machiningPrice = BigDecimal.ZERO;
-        R productMaterialMap =
-                remoteCdSettleProductMaterialService.selectOne(productMaterialCode, outSourceType);
-        Preconditions.checkArgument(productMaterialMap.isSuccess(),"加工费号查询失败！");
-        CdSettleProductMaterial cdSettleProductMaterial = productMaterialMap.getData(CdSettleProductMaterial.class);
-        String rawMaterialCode = cdSettleProductMaterial.getRawMaterialCode();
-        //根据加工费号,供应商,采购组织 查加工费
-        R maResult = remoteCdMaterialPriceInfoService.selectOneByCondition(rawMaterialCode, purchaseOrg,
-                supplierCode, PriceTypeEnum.PRICE_TYPE_1.getCode());
-        Preconditions.checkArgument(maResult.isSuccess(),"加工费查询失败！");
-        CdMaterialPriceInfo cdMaterialPriceInfo = maResult.getData(CdMaterialPriceInfo.class);
-        Preconditions.checkArgument(cdMaterialPriceInfo.getNetWorth() != null, "加工费查询失败！");
-        machiningPrice = cdMaterialPriceInfo.getNetWorth().multiply(BigDecimal.valueOf(amount));
-        return machiningPrice;
     }
 
     /**
