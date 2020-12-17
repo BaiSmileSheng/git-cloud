@@ -1,6 +1,7 @@
 package com.cloud.activiti.listener;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
@@ -51,6 +52,9 @@ public class SettleSupplementJitCompletedListener implements ExecutionListener {
             log.info("参数{}={}", key, value);
         }
         //处理业务逻辑
+        if (ObjectUtil.isEmpty(delegateExecution.getVariable("result"))) {
+            return;
+        }
         String resultVar = delegateExecution.getVariable("result").toString();
         String taskIdVar = delegateExecution.getVariable("taskIdVar").toString();
         String bizBusinessId = delegateExecution.getVariable("bizBusinessId").toString();
