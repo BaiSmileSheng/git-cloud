@@ -234,8 +234,8 @@ public class ActSmsRawScrapOrderServiceImpl implements IActSmsRawScrapOrderServi
                 userIds.add(sysUserVo.getUserId().toString());
                 rResult.put("userIds",userIds);
                 try {
-                    mailService.sendTextMail(sysUserVo.getEmail(), EmailConstants.TITLE_RAW_SCRAP
-                            , sysUserVo.getUserName() + EmailConstants.RAW_SCRAP_CONTEXT + EmailConstants.ORW_URL);
+//                    mailService.sendTextMail(sysUserVo.getEmail(), EmailConstants.TITLE_RAW_SCRAP
+//                            , sysUserVo.getUserName() + EmailConstants.RAW_SCRAP_CONTEXT + EmailConstants.ORW_URL);
                 } catch (Exception e) {
                     log.error("发送邮件失败！");
                     throw new BusinessException("发送邮件失败！");

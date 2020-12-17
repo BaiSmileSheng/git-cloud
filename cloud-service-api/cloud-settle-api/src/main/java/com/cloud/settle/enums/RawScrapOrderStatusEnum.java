@@ -8,7 +8,8 @@ package com.cloud.settle.enums;
  */
 public enum RawScrapOrderStatusEnum {
 
-    //报废申请单状态
+    //报废申请单状态 0:待提交、1：待JIT审核、2：JIT驳回、3：待订单经理审核、4：订单经理驳回、5：待投入产出审核、6：投入产出驳回、11：待结算、12：结算完成
+    //13:已兑现、14：部分兑现、15：未兑现
     YCLBF_ORDER_STATUS_DTJ("0", "待提交"),
     YCLBF_ORDER_STATUS_JITSH("1", "待JIT审核"),
     YCLBF_ORDER_STATUS_JITBH("2", "JIT驳回"),
