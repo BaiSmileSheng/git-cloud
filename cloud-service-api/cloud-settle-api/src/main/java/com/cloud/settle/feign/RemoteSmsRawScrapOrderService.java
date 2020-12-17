@@ -42,7 +42,7 @@ public interface RemoteSmsRawScrapOrderService {
      * 查询原材料报废申请
      */
     @GetMapping("rawMaterialScrapOrder/get")
-    R get(Long id);
+    R get(@RequestParam(value = "id") Long id);
 
     /**
      * 审核通过传SAP系统261进行报废
@@ -57,7 +57,7 @@ public interface RemoteSmsRawScrapOrderService {
      * @param
      * @return
      */
-    @PostMapping("updateAct")
+    @PostMapping("rawMaterialScrapOrder/updateAct")
     R updateAct(@RequestBody SmsRawMaterialScrapOrder smsRawMaterialScrapOrder);
 
 }
