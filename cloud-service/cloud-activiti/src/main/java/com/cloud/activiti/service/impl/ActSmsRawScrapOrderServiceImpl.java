@@ -1,6 +1,7 @@
 package com.cloud.activiti.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.constant.ActProcessContants;
 import com.cloud.activiti.consts.ActivitiConstant;
@@ -30,6 +31,7 @@ import com.cloud.settle.feign.RemoteSmsRawScrapOrderService;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteUserService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
@@ -160,7 +162,7 @@ public class ActSmsRawScrapOrderServiceImpl implements IActSmsRawScrapOrderServi
         }
         //判断下级审批  修改状态
         //1jit待审核、2jit驳回、3订单经理待审核、4订单经理驳回、5投入产出待审核、6投入产出驳回
-        SysUserVo sysUserVo = null;
+        List<SysUserVo> sysUserVos = new ArrayList<>();
         if (result) {
             //审批通过
             if (RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_JITSH.getCode().equals(smsRawMaterialScrapOrder.getScrapStatus())) {
@@ -172,7 +174,7 @@ public class ActSmsRawScrapOrderServiceImpl implements IActSmsRawScrapOrderServi
                     log.error("根据工厂和角色查询用户信息失败，原因："+userMap.get("msg"));
                     throw new BusinessException("根据工厂和角色查询用户信息失败!");
                 }
-                sysUserVo = userMap.getData(SysUserVo.class);
+                sysUserVos = userMap.getCollectData(new TypeReference<List<SysUserVo>>() {});
             } else {
                 //判断有无实物
                 if (RawScrapOrderIsMaterialObjectEnum.YCLBF_ORDER_IS_MATERIAL_OBJECT_TRUE.getCode()
@@ -187,7 +189,7 @@ public class ActSmsRawScrapOrderServiceImpl implements IActSmsRawScrapOrderServi
                             log.error("根据工厂和角色查询用户信息失败，原因："+userMap.get("msg"));
                             throw new BusinessException("根据工厂和角色查询用户信息失败!");
                         }
-                        sysUserVo = userMap.getData(SysUserVo.class);
+                        sysUserVos = userMap.getCollectData(new TypeReference<List<SysUserVo>>() {});
                     } else if (RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_TRCCSH.getCode().equals(smsRawMaterialScrapOrder.getScrapStatus())){
                         //投入产出审核通过，待结算
                         smsRawMaterialScrapOrder.setScrapStatus(RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_DJS.getCode());
@@ -210,9 +212,6 @@ public class ActSmsRawScrapOrderServiceImpl implements IActSmsRawScrapOrderServi
             } else if (RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_TRCCSH.getCode().equals(smsRawMaterialScrapOrder.getScrapStatus())) {
                 //投入产出驳回
                 smsRawMaterialScrapOrder.setScrapStatus(RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_TRCCBH.getCode());
-            } else {
-                log.error(StrUtil.format("(原材料报废)原材料报废审批驳回状态错误：{}", smsRawMaterialScrapOrder.getScrapStatus()));
-                throw new BusinessException("此状态数据不允许审核！");
             }
         }
         //JIT审核通过传SAP
@@ -229,12 +228,18 @@ public class ActSmsRawScrapOrderServiceImpl implements IActSmsRawScrapOrderServi
             R rResult = new R();
             rResult.put("bizAudit",bizAudit);
             rResult.put("userId",userId);
-            if (BeanUtil.isNotEmpty(sysUserVo)) {
+            if (CollectionUtil.isNotEmpty(sysUserVos)) {
+                SysUserVo sysUserVo = sysUserVos.get(0);
                 Set<String> userIds = new HashSet<>();
                 userIds.add(sysUserVo.getUserId().toString());
                 rResult.put("userIds",userIds);
-                mailService.sendTextMail(sysUserVo.getEmail(), EmailConstants.TITLE_RAW_SCRAP
-                        ,sysUserVo.getUserName() + EmailConstants.RAW_SCRAP_CONTEXT + EmailConstants.ORW_URL);
+                try {
+                    mailService.sendTextMail(sysUserVo.getEmail(), EmailConstants.TITLE_RAW_SCRAP
+                            , sysUserVo.getUserName() + EmailConstants.RAW_SCRAP_CONTEXT + EmailConstants.ORW_URL);
+                } catch (Exception e) {
+                    log.error("发送邮件失败！");
+                    throw new BusinessException("发送邮件失败！");
+                }
             }
             return rResult;
         }else{

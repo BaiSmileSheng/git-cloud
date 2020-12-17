@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("actRawScrapOrder")
-@Api(tags = "报废申请单审核流程 ")
+@Api(tags = "原材料报废申请单审核流程 ")
 public class ActSmsRawScrapOrderActController extends BaseController {
     @Autowired
     private IActSmsRawScrapOrderService actSmsRawScrapOrderService;
