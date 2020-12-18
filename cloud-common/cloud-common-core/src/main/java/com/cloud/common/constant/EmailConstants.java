@@ -24,6 +24,8 @@ public class EmailConstants {
 
     public static final String TITLE_RAW_SCRAP = "原材料报废审批通知";
 
+    public static final String TITLE_QUALITY_SCRAP = "质量部报废申诉审批通知";
+
 
 
     /**
@@ -62,5 +64,7 @@ public class EmailConstants {
             "</body>" +
             "</html>";
     public static final String RAW_SCRAP_CONTEXT = "，您好！\n 订单评审系统有新的原材料报废订单待审批，请及时审批！";
+
+    public static final String QUALITY_SCRAP_CONTEXT = "，您好！\n 订单评审系统有新的质量部报废申诉订单待审批，请及时审批！";
 
 }
