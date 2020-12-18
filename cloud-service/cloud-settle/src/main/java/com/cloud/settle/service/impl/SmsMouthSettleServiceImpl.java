@@ -74,6 +74,8 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
     private RemoteInterfaceLogService remoteInterfaceLogService;
     @Autowired
     private ISmsRawMaterialScrapOrderService smsRawMaterialScrapOrderService;
+    @Autowired
+    private ISmsQualityScrapOrderService smsQualityScrapOrderService;
 
 
 
@@ -125,6 +127,12 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         Map<String,List<SmsRawMaterialScrapOrder>> mapRawScrap = rawScrapGroup(lastMonth);
         Map<String,List<SmsRawMaterialScrapOrder>> mapRawScrapLS = rawScrapLSGroup();
         /**-------------------原材料报废分组结束----------------------------------**/
+
+        /**-------------------质量部报废分组开始----------------------------------**/
+        //质量部报废分组开始分组Map
+        Map<String,List<SmsQualityScrapOrder>> mapQualityScrap = qualityScrapGroup(lastMonth);
+        Map<String,List<SmsQualityScrapOrder>> mapQualityScrapLS = qualityScrapLSGroup();
+        /**-------------------质量部报废分组结束----------------------------------**/
 
         /**-------------------加工费分组开始----------------------------------**/
         //结算分组map
@@ -184,6 +192,10 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
             map = rawScrapCompute(mapRawScrap,keyCode,monthSettleNo.toString(),(BigDecimal) map.get("settlePrice"),
                     (BigDecimal) map.get("claimPrice"),lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
 
+            //质量部报废
+            map = qualityScrapCompute(mapQualityScrap,keyCode,monthSettleNo.toString(),(BigDecimal) map.get("settlePrice"),
+                    (BigDecimal) map.get("claimPrice"),lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
+
             claimPrice = (BigDecimal) map.get("claimPrice");
             /**-------------------------历史计算-------------------------**/
             //物耗索赔历史
@@ -208,6 +220,10 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
 
             //原材料报废历史
             map = rawScrapLSCompute(mapRawScrapLS,keyCode,monthSettleNo.toString(),(BigDecimal) map.get("settlePrice"),
+                    (BigDecimal) map.get("unCashPrice"), lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
+
+            //质量部报废历史
+            map = qualityScrapLSCompute(mapQualityScrapLS,keyCode,monthSettleNo.toString(),(BigDecimal) map.get("settlePrice"),
                     (BigDecimal) map.get("unCashPrice"), lastMonth, (List<SmsClaimCashDetail>) map.get("claimCashDetailList"));
 
             settlePrice = (BigDecimal) map.get("settlePrice");
@@ -1577,7 +1593,7 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
 
                 //索赔明细
                 if (cashAmount.compareTo(BigDecimal.ZERO)>0) {
-                    SmsClaimCashDetail smsClaimCashDetail = new SmsClaimCashDetail().builder()
+                    SmsClaimCashDetail smsClaimCashDetail = SmsClaimCashDetail.builder()
                             .claimNo(smsRawMaterialScrapOrder.getRawScrapNo()).claimType(SettleRatioEnum.SPLX_BF.getCode())
                             .cashAmount(cashAmount).settleNo(monthSettleNo).delFlag("0")
                             .shouldCashMounth(DateUtil.format(smsRawMaterialScrapOrder.getSapTransDate(), "yyyyMM")).actualCashMounth(lastMonth).build();
@@ -1594,4 +1610,161 @@ public class SmsMouthSettleServiceImpl extends BaseServiceImpl<SmsMouthSettle> i
         return map;
     }
 
+    /**
+     * 质量部报废待结算分组
+     * @param lastMonth
+     */
+    public Map<String,List<SmsQualityScrapOrder>> qualityScrapGroup(String lastMonth){
+        String key;
+        Map<String, List<SmsQualityScrapOrder>> mapQualityScrap = new ConcurrentHashMap<>();
+        //取得计算月份、待结算的质量部报废记录
+        List<SmsQualityScrapOrder> smsQualityScrapOrders =
+                smsQualityScrapOrderService.selectByMonthAndStatus(lastMonth,  CollUtil.newArrayList(QualityScrapOrderStatusEnum.ZLBBF_ORDER_STATUS_DJS.getCode()));
+        if (smsQualityScrapOrders != null) {
+            for (SmsQualityScrapOrder smsQualityScrapOrder : smsQualityScrapOrders) {
+                //下面开始分组：根据供应商和付款公司分组
+                key = smsQualityScrapOrder.getSupplierCode() + smsQualityScrapOrder.getCompanyCode();
+                List<SmsQualityScrapOrder> smsQualityScrapOrderList = mapQualityScrap.getOrDefault(key, new ArrayList<>());
+                smsQualityScrapOrderList.add(smsQualityScrapOrder);
+                mapQualityScrap.put(key, smsQualityScrapOrderList);
+            }
+        }
+        return mapQualityScrap;
+    }
+
+    /**
+     * 质量部报废历史待结算分组
+     * @param
+     */
+    public Map<String,List<SmsQualityScrapOrder>> qualityScrapLSGroup(){
+        String key;
+        Map<String, List<SmsQualityScrapOrder>> mapQualityScrap = new ConcurrentHashMap<>();
+        List<String> statusList = CollUtil.newArrayList(QualityScrapOrderStatusEnum.ZLBBF_ORDER_STATUS_BFDX.getCode(),QualityScrapOrderStatusEnum.ZLBBF_ORDER_STATUS_WDX.getCode());
+        //取得计算月份、待结算的原材料报废记录
+        List<SmsQualityScrapOrder> smsQualityScrapOrders =
+                smsQualityScrapOrderService.selectByMonthAndStatus(null, statusList);
+        if (smsQualityScrapOrders != null) {
+            for (SmsQualityScrapOrder smsQualityScrapOrder : smsQualityScrapOrders) {
+                //下面开始分组：根据供应商和付款公司分组
+                key = smsQualityScrapOrder.getSupplierCode() + smsQualityScrapOrder.getCompanyCode();
+                List<SmsQualityScrapOrder> smsQualityScrapOrderList = mapQualityScrap.getOrDefault(key, new ArrayList<>());
+                smsQualityScrapOrderList.add(smsQualityScrapOrder);
+                mapQualityScrap.put(key, smsQualityScrapOrderList);
+            }
+        }
+        return mapQualityScrap;
+    }
+
+    /**
+     * 质量部报废计算
+     *
+     * @param mapQualityScrap
+     * @param keyCode
+     * @param monthSettleNo
+     * @param settlePrice
+     * @param claimPrice
+     * @param lastMonth
+     * @param claimCashDetailList
+     * @return
+     */
+    Map<String, Object> qualityScrapCompute(Map<String, List<SmsQualityScrapOrder>> mapQualityScrap, String keyCode, String monthSettleNo,
+                                        BigDecimal settlePrice, BigDecimal claimPrice, String lastMonth,
+                                        List<SmsClaimCashDetail> claimCashDetailList) {
+        //报废索赔
+        if (MapUtil.isNotEmpty(mapQualityScrap) && CollUtil.isNotEmpty(mapQualityScrap.get(keyCode))) {
+            for (SmsQualityScrapOrder smsQualityScrapOrder : mapQualityScrap.get(keyCode)) {
+                smsQualityScrapOrder.setSettleNo(monthSettleNo);//结算单号
+                if (settlePrice.compareTo(smsQualityScrapOrder.getSettleFee()) >= 0) {
+                    smsQualityScrapOrder.setCashAmount(smsQualityScrapOrder.getSettleFee());
+                    smsQualityScrapOrder.setUncashAmount(BigDecimal.ZERO);
+                    smsQualityScrapOrder.setScrapStatus(QualityScrapOrderStatusEnum.ZLBBF_ORDER_STATUS_YJS.getCode());
+                    settlePrice = settlePrice.subtract(smsQualityScrapOrder.getSettleFee());
+                } else {
+                    if (settlePrice.compareTo(BigDecimal.ZERO) == 0) {
+                        smsQualityScrapOrder.setCashAmount(BigDecimal.ZERO);
+                        smsQualityScrapOrder.setUncashAmount(smsQualityScrapOrder.getSettleFee());
+                        smsQualityScrapOrder.setScrapStatus(QualityScrapOrderStatusEnum.ZLBBF_ORDER_STATUS_WDX.getCode());
+                    } else {
+                        smsQualityScrapOrder.setCashAmount(settlePrice);
+                        smsQualityScrapOrder.setUncashAmount(smsQualityScrapOrder.getSettleFee().subtract(settlePrice));
+                        smsQualityScrapOrder.setScrapStatus(QualityScrapOrderStatusEnum.ZLBBF_ORDER_STATUS_BFDX.getCode());
+                        settlePrice = BigDecimal.ZERO;
+                    }
+                }
+                claimPrice = claimPrice.add(smsQualityScrapOrder.getSettleFee());
+
+                //索赔明细
+                if (smsQualityScrapOrder.getCashAmount().compareTo(BigDecimal.ZERO)>0) {
+                    SmsClaimCashDetail smsClaimCashDetail = SmsClaimCashDetail.builder()
+                            .claimNo(smsQualityScrapOrder.getScrapNo()).claimType(SettleRatioEnum.SPLX_ZLBBF.getCode())
+                            .cashAmount(smsQualityScrapOrder.getCashAmount()).settleNo(monthSettleNo).delFlag("0")
+                            .shouldCashMounth(lastMonth).actualCashMounth(lastMonth).build();
+                    smsClaimCashDetail.setCreateTime(DateUtil.date());
+                    claimCashDetailList.add(smsClaimCashDetail);
+                }
+            }
+            smsQualityScrapOrderService.updateBatchByPrimaryKeySelective(mapQualityScrap.get(keyCode));
+        }
+        Map<String, Object> map = new ConcurrentHashMap<>();
+        map.put("settlePrice", settlePrice);
+        map.put("claimPrice", claimPrice);
+        map.put("claimCashDetailList", claimCashDetailList);
+        return map;
+    }
+
+    /**
+     * 质量部报废历史计算
+     *
+     * @param mapQualityScrapLS
+     * @param keyCode
+     * @param monthSettleNo
+     * @param settlePrice
+     * @param unCashPrice
+     * @param lastMonth
+     * @param claimCashDetailList
+     * @return
+     */
+    Map<String, Object> qualityScrapLSCompute(Map<String, List<SmsQualityScrapOrder>> mapQualityScrapLS, String keyCode, String monthSettleNo,
+                                          BigDecimal settlePrice, BigDecimal unCashPrice, String lastMonth,
+                                          List<SmsClaimCashDetail> claimCashDetailList) {
+        //报废索赔历史
+        if (MapUtil.isNotEmpty(mapQualityScrapLS) && CollUtil.isNotEmpty(mapQualityScrapLS.get(keyCode))) {
+            for (SmsQualityScrapOrder smsQualityScrapOrder : mapQualityScrapLS.get(keyCode)) {
+                if (settlePrice.compareTo(BigDecimal.ZERO) < 0) {
+                    break;
+                }
+                BigDecimal cashAmount;
+                if (settlePrice.compareTo(smsQualityScrapOrder.getUncashAmount()) >= 0) {
+                    cashAmount = smsQualityScrapOrder.getUncashAmount();
+                    smsQualityScrapOrder.setCashAmount(smsQualityScrapOrder.getCashAmount().add(smsQualityScrapOrder.getUncashAmount()));
+                    smsQualityScrapOrder.setUncashAmount(BigDecimal.ZERO);
+                    smsQualityScrapOrder.setScrapStatus(QualityScrapOrderStatusEnum.ZLBBF_ORDER_STATUS_YJS.getCode());
+                    settlePrice = settlePrice.subtract(smsQualityScrapOrder.getUncashAmount());
+                } else {
+                    cashAmount = settlePrice;
+                    smsQualityScrapOrder.setCashAmount(smsQualityScrapOrder.getCashAmount().add(settlePrice));
+                    smsQualityScrapOrder.setUncashAmount(smsQualityScrapOrder.getUncashAmount().subtract(settlePrice));
+                    smsQualityScrapOrder.setScrapStatus(QualityScrapOrderStatusEnum.ZLBBF_ORDER_STATUS_BFDX.getCode());
+                    settlePrice = BigDecimal.ZERO;
+                }
+                unCashPrice = unCashPrice.add(smsQualityScrapOrder.getUncashAmount());
+
+                //索赔明细
+                if (cashAmount.compareTo(BigDecimal.ZERO)>0) {
+                    SmsClaimCashDetail smsClaimCashDetail = SmsClaimCashDetail.builder()
+                            .claimNo(smsQualityScrapOrder.getScrapNo()).claimType(SettleRatioEnum.SPLX_ZLBBF.getCode())
+                            .cashAmount(cashAmount).settleNo(monthSettleNo).delFlag("0")
+                            .shouldCashMounth(DateUtil.format(smsQualityScrapOrder.getSapDate(), "yyyyMM")).actualCashMounth(lastMonth).build();
+                    smsClaimCashDetail.setCreateTime(DateUtil.date());
+                    claimCashDetailList.add(smsClaimCashDetail);
+                }
+            }
+            smsQualityScrapOrderService.updateBatchByPrimaryKeySelective(mapQualityScrapLS.get(keyCode));
+        }
+        Map<String, Object> map = new ConcurrentHashMap<>();
+        map.put("settlePrice", settlePrice);
+        map.put("unCashPrice", unCashPrice);
+        map.put("claimCashDetailList", claimCashDetailList);
+        return map;
+    }
 }

@@ -2,10 +2,9 @@ package com.cloud.activiti.feign;
 
 import com.cloud.activiti.domain.entity.vo.ActBusinessVo;
 import com.cloud.activiti.feign.factory.RemoteActOmsProductionOrderFallbackFactory;
-import com.cloud.activiti.feign.factory.RemoteActSmsRawScrapOrderFallbackFactory;
+import com.cloud.activiti.feign.factory.RemoteActSmsQualityScrapOrderFallbackFactory;
 import com.cloud.common.constant.ServiceNameConstants;
 import com.cloud.common.core.domain.R;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,15 +16,15 @@ import org.springframework.web.bind.annotation.RequestBody;
  * Author: ltq
  * Date: 2020/6/24
  */
-@FeignClient(name = ServiceNameConstants.ACTIVITI_SERVICE, fallbackFactory = RemoteActSmsRawScrapOrderFallbackFactory.class)
-public interface RemoteActSmsRawScrapOrderService {
+@FeignClient(name = ServiceNameConstants.ACTIVITI_SERVICE, fallbackFactory = RemoteActSmsQualityScrapOrderFallbackFactory.class)
+public interface RemoteActSmsQualityScrapOrderService {
 
     /**
-     * 原材料报废审核开启流程  提交(编辑、新增提交)
+     * 质量部报废审核开启流程  提交(编辑、新增提交)
      *
      * @param actBusinessVo
      * @return R 成功/失败
      */
-    @PostMapping("actRawScrapOrder/open")
+    @PostMapping("actQualityScrapOrder/open")
     R addSave(@RequestBody ActBusinessVo actBusinessVo);
 }
