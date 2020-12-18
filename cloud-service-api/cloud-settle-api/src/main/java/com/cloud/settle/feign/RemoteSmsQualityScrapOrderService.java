@@ -38,4 +38,10 @@ public interface RemoteSmsQualityScrapOrderService {
             ,@RequestParam(value = "comment") String comment
             ,@RequestParam(value = "auditor") String auditor);
 
+    /**
+     * 定时更新质量部报废订单价格
+     */
+    @PostMapping("qualityScrapOrder/updatePriceJob")
+    R updatePriceJob();
+
 }

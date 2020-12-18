@@ -37,6 +37,14 @@ public class RemoteSmsQualityScrapOrderFallbackFactory implements FallbackFactor
                 log.error("RemoteSmsRawScrapOrderService.updateAct错误：{}",throwable.getMessage());
                 return R.error("服务器拥挤：请稍后再试！");
             }
+            /**
+             * 定时更新质量部报废订单价格
+             */
+            @Override
+            public R updatePriceJob() {
+                log.error("RemoteSmsRawScrapOrderService.updatePriceJob错误：{}",throwable.getMessage());
+                return R.error("服务器拥挤：请稍后再试！");
+            }
 
         };
     }
