@@ -33,6 +33,10 @@ public class ActProcessContants {
      */
     public static final String ACTIVITI_BF_TITLE_RAW_SCRAP_NO_OBJECT = "原材料报废-无实物审批流程";
 
+    public static final String ACTIVITI_BF_TITLE_QUALITY_SCRAP_ZLGCS = "质量部报废申诉-质量经理审批流程";
+    public static final String ACTIVITI_BF_TITLE_QUALITY_SCRAP_ZLBBZ = "质量部报废申诉-质量部长审批流程";
+    public static final String ACTIVITI_BF_TITLE_QUALITY_SCRAP_ZLPTZ = "质量部报废申诉-质量平台长审批流程";
+
 
     /**
      * 审批流程Key
@@ -56,5 +60,12 @@ public class ActProcessContants {
     public static final String ACTIVITI_RAW_SCRAP_REVIEW = "rawScrap";
     //原材料报废无实物审批Key
     public static final String ACTIVITI_RAW_SCRAP_REVIEW_NO_OBJECT = "rawScrapNoObject";
+    //质量部报废申诉审批流
+    //质量经理审批流
+    public static final String ACTIVITI_QUALITY_SCRAP_REVIEW_ZLGCS = "qualityScrapZLGCS";
+    //质量部长审批流
+    public static final String ACTIVITI_QUALITY_SCRAP_REVIEW_ZLBBZ = "qualityScrapZLBBZ";
+    //质量平台长审批流
+    public static final String ACTIVITI_QUALITY_SCRAP_REVIEW_ZLPTZ = "qualityScrapZLPTZ";
 
 }

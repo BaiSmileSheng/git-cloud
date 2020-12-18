@@ -1,6 +1,7 @@
 package com.cloud.settle.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -15,11 +16,9 @@ import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.enums.ProductionOrderStatusEnum;
 import com.cloud.order.feign.RemoteProductionOrderService;
 import com.cloud.settle.domain.entity.SmsScrapOrder;
-import com.cloud.settle.enums.CurrencyEnum;
-import com.cloud.settle.enums.IsEntityEnum;
-import com.cloud.settle.enums.IsPayEnum;
-import com.cloud.settle.enums.ScrapOrderStatusEnum;
+import com.cloud.settle.enums.*;
 import com.cloud.settle.mapper.SmsScrapOrderMapper;
+import com.cloud.settle.service.ISmsQualityScrapOrderService;
 import com.cloud.settle.service.ISmsScrapOrderService;
 import com.cloud.settle.util.OrderNoGenerateUtil;
 import com.cloud.system.domain.entity.*;
@@ -81,6 +80,8 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
     private RemoteCdSettleProductMaterialService remoteCdSettleProductMaterialService;
     @Autowired
     private RemoteCdMaterialPriceInfoService remoteCdMaterialPriceInfoService;
+    @Autowired
+    private ISmsQualityScrapOrderService smsQualityScrapOrderService;
 
 
 
@@ -463,6 +464,11 @@ public class SmsScrapOrderServiceImpl extends BaseServiceImpl<SmsScrapOrder> imp
     public R updateSAPPriceEveryMonth(String month) {
         //查询上个月、待结算的物耗申请中的物料号，公司编号
         List<Map<String,String>> materialCodeComCodeList = smsScrapOrderMapper.selectMaterialAndCompanyCodeGroupBy(month, CollUtil.newArrayList(ScrapOrderStatusEnum.BF_ORDER_STATUS_DJS.getCode()));
+        //查询上个月、待结算的质量部报废中的物料号、公司编码
+        List<Map<String,String>> materialComCodeList = smsQualityScrapOrderService.selectMaterialAndCompanyCodeGroupBy(month,CollUtil.newArrayList(QualityScrapOrderStatusEnum.ZLBBF_ORDER_STATUS_DJS.getCode()));
+        if (CollectionUtil.isNotEmpty(materialComCodeList)) {
+            materialCodeComCodeList.addAll(materialComCodeList);
+        }
         JCoDestination destination;
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog().builder()
                 .appId("SAP").interfaceName(SapConstants.ZSD_INT_DDPS_01)
