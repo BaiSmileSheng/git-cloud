@@ -423,6 +423,7 @@ public class SmsQualityScrapOrderServiceImpl extends BaseServiceImpl<SmsQualityS
                 .complaintDate(new Date())
                 .complaintDescription(complaintDescription)
                 .procNo(orderLogStatus)
+                .result(0)
                 .build();
         smsQualityScrapOrderLog.setCreateBy(sysUser.getLoginName());
         smsQualityScrapOrderLog.setCreateTime(new Date());

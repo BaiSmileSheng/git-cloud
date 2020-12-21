@@ -24,7 +24,7 @@ public interface RemoteSmsQualityScrapOrderLogService {
     /**
      * 根据报废ID查询质量部报废申诉记录
      */
-    @GetMapping("getByQualityId")
+    @GetMapping("qualityScrapOrderLog/getByQualityId")
     public R getByQualityId(@RequestParam(value = "qualityId") Long qualityId);
 
 }

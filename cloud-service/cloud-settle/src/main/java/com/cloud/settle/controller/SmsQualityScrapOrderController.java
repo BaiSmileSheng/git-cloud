@@ -234,10 +234,10 @@ public class SmsQualityScrapOrderController extends BaseController {
     /**
      * 审批流更新报废数据
      */
-    @GetMapping("updateAct")
-    public R updateAct(@RequestBody SmsQualityScrapOrder smsQualityScrapOrder,@RequestParam(value = "result") Integer result
-            ,@RequestParam(value = "comment") String comment
-            ,@RequestParam(value = "auditor") String auditor){
+    @PostMapping("updateAct")
+    public R updateAct(@RequestBody SmsQualityScrapOrder smsQualityScrapOrder, Integer result
+            ,String comment
+            ,String auditor){
         return smsQualityScrapOrderService.updateAct(smsQualityScrapOrder,result,comment,auditor);
     }
 
