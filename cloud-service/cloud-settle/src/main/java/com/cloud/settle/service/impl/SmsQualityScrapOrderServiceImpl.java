@@ -269,10 +269,10 @@ public class SmsQualityScrapOrderServiceImpl extends BaseServiceImpl<SmsQualityS
         //取得计算月份、待结算的报废数据
         List<SmsQualityScrapOrder> smsQualityScrapOrderList = selectByMonthAndStatus(month, CollUtil.newArrayList(QualityScrapOrderStatusEnum.ZLBBF_ORDER_STATUS_DJS.getCode()));
         //循环报废，计算索赔金额
-        if (smsQualityScrapOrderList != null) {
+        if (CollectionUtil.isNotEmpty(smsQualityScrapOrderList)) {
             for (SmsQualityScrapOrder smsQualityScrapOrder : smsQualityScrapOrderList) {
                 CdSapSalePrice cdSapSalePrice = sapPrice.get(smsQualityScrapOrder.getProductMaterialCode()+smsQualityScrapOrder.getCompanyCode());
-                if (cdSapSalePrice == null) {
+                if (BeanUtil.isNotEmpty(cdSapSalePrice)) {
                     //如果没有找到SAP销售价格，则更新备注
                     log.info(StrUtil.format("(定时任务)SAP销售价格未同步的物料号:{}", smsQualityScrapOrder.getProductMaterialCode()));
                     smsQualityScrapOrder.setRemark("SAP销售价格未同步！");
@@ -423,6 +423,7 @@ public class SmsQualityScrapOrderServiceImpl extends BaseServiceImpl<SmsQualityS
                 .complaintDate(new Date())
                 .complaintDescription(complaintDescription)
                 .procNo(orderLogStatus)
+                .result(0)
                 .build();
         smsQualityScrapOrderLog.setCreateBy(sysUser.getLoginName());
         smsQualityScrapOrderLog.setCreateTime(new Date());
@@ -445,8 +446,8 @@ public class SmsQualityScrapOrderServiceImpl extends BaseServiceImpl<SmsQualityS
         }
         R uplodeFileResult = remoteOssService.batchEditSaveById(sysOssList);
         try{
-            mailService.sendTextMail(userVo.getEmail(),EmailConstants.TITLE_QUALITY_SCRAP
-                    ,userVo.getUserName() + EmailConstants.QUALITY_SCRAP_CONTEXT + EmailConstants.ORW_URL);
+//            mailService.sendTextMail(userVo.getEmail(),EmailConstants.TITLE_QUALITY_SCRAP
+//                    ,userVo.getUserName() + EmailConstants.QUALITY_SCRAP_CONTEXT + EmailConstants.ORW_URL);
         }catch (Exception e) {
             log.error("质量部报废申诉审批邮件通知发送失败！");
             throw new BusinessException("质量部报废申诉审批邮件通知发送失败！");

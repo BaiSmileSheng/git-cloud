@@ -10,6 +10,7 @@ import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import com.cloud.settle.domain.entity.SmsQualityScrapOrderLog;
 import com.cloud.settle.domain.entity.vo.SmsQualityScrapOrderSupplierExportVo;
+import com.cloud.settle.enums.QualityScrapOrderStatusEnum;
 import com.cloud.settle.enums.ScrapOrderStatusEnum;
 import com.cloud.settle.util.DataScopeUtil;
 import com.cloud.settle.util.EasyExcelUtilOSS;
@@ -107,6 +108,7 @@ public class SmsQualityScrapOrderController extends BaseController {
             if (UserConstants.USER_TYPE_WB.equals(sysUser.getUserType())) {
                 //供应商查询自己工厂下的申请单
                 criteria.andEqualTo("supplierCode", sysUser.getSupplierCode());
+                criteria.andNotEqualTo("scrapStatus", QualityScrapOrderStatusEnum.ZLBBF_ORDER_STATUS_DTJ);
             } else if (UserConstants.USER_TYPE_HR.equals(sysUser.getUserType())) {
                 //海尔工厂用户根据工厂查询
                 criteria.andIn("factoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
@@ -232,10 +234,10 @@ public class SmsQualityScrapOrderController extends BaseController {
     /**
      * 审批流更新报废数据
      */
-    @GetMapping("updateAct")
-    public R updateAct(@RequestBody SmsQualityScrapOrder smsQualityScrapOrder,@RequestParam(value = "result") Integer result
-            ,@RequestParam(value = "comment") String comment
-            ,@RequestParam(value = "auditor") String auditor){
+    @PostMapping("updateAct")
+    public R updateAct(@RequestBody SmsQualityScrapOrder smsQualityScrapOrder, Integer result
+            ,String comment
+            ,String auditor){
         return smsQualityScrapOrderService.updateAct(smsQualityScrapOrder,result,comment,auditor);
     }
 

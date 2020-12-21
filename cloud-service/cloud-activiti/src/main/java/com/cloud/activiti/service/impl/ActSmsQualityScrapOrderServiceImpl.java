@@ -25,8 +25,10 @@ import com.cloud.settle.domain.entity.SmsRawMaterialScrapOrder;
 import com.cloud.settle.enums.QualityScrapOrderStatusEnum;
 import com.cloud.settle.enums.RawScrapOrderIsMaterialObjectEnum;
 import com.cloud.settle.enums.RawScrapOrderStatusEnum;
+import com.cloud.settle.feign.RemoteSmsQualityScrapOrderLogService;
 import com.cloud.settle.feign.RemoteSmsQualityScrapOrderService;
 import com.cloud.settle.feign.RemoteSmsRawScrapOrderService;
+import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
 import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -56,6 +58,8 @@ public class ActSmsQualityScrapOrderServiceImpl implements IActSmsQualityScrapOr
     private RemoteUserService remoteUserService;
     @Autowired
     private MailService mailService;
+    @Autowired
+    private RemoteSmsQualityScrapOrderLogService remoteSmsQualityScrapOrderLogService;
 
     @Override
     @GlobalTransactional
@@ -104,10 +108,18 @@ public class ActSmsQualityScrapOrderServiceImpl implements IActSmsQualityScrapOr
                 log.error("查询业务数据记录失败,原因："+smsScrapOrderMap.get("msg"));
                 return R.error("查询业务数据记录失败!");
             }
-            SmsRawMaterialScrapOrder smsRawMaterialScrapOrder = smsScrapOrderMap.getData(SmsRawMaterialScrapOrder.class);
+            SmsQualityScrapOrder smsQualityScrapOrder = smsScrapOrderMap.getData(SmsQualityScrapOrder.class);
+            R orderLogMap = remoteSmsQualityScrapOrderLogService.getByQualityId(smsQualityScrapOrder.getId());
+            if (!orderLogMap.isSuccess()) {
+                log.error("查询业务数据-申诉记录失败,原因："+orderLogMap.get("msg"));
+                return R.error("查询业务数据-申诉记录失败!");
+            }
+            List<SmsQualityScrapOrderLog> smsQualityScrapOrderLog = orderLogMap.getCollectData(new TypeReference<List<SmsQualityScrapOrderLog>>() {
+            });
             R result = new R();
             result.put("procInstId",business.getProcInstId());
-            result.put("data", smsRawMaterialScrapOrder);
+            result.put("data", smsQualityScrapOrder);
+            result.put("dataLog",smsQualityScrapOrderLog);
             return result;
         }
         return R.error("no record");
@@ -140,6 +152,7 @@ public class ActSmsQualityScrapOrderServiceImpl implements IActSmsQualityScrapOr
     @Override
     public R auditLogic(BizAudit bizAudit, long userId){
         log.info(StrUtil.format("质量部报废申请审核：参数为{}", bizAudit.toString()));
+        SysUser sysUser = remoteUserService.selectSysUserByUserId(userId);
         //流程审核业务表
         BizBusiness bizBusiness = bizBusinessService.selectBizBusinessById(bizAudit.getBusinessKey().toString());
         if (bizBusiness == null) {
@@ -167,7 +180,7 @@ public class ActSmsQualityScrapOrderServiceImpl implements IActSmsQualityScrapOr
             smsQualityScrapOrder.setScrapStatus(QualityScrapOrderStatusEnum.ZLBBF_ORDER_STATUS_SHBH.getCode());
         }
         //更新质量部报废订单
-        R r = remoteSmsQualityScrapOrderService.updateAct(smsQualityScrapOrder,bizAudit.getResult(),bizAudit.getComment(),bizAudit.getAuditor());
+        R r = remoteSmsQualityScrapOrderService.updateAct(smsQualityScrapOrder,bizAudit.getResult(),bizAudit.getComment(),sysUser.getUserName());
         if (r.isSuccess()) {
             //审批 推进工作流
             R rResult = new R();
