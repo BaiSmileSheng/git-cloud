@@ -25,6 +25,7 @@ import com.cloud.settle.domain.entity.SmsRawMaterialScrapOrder;
 import com.cloud.settle.enums.QualityScrapOrderStatusEnum;
 import com.cloud.settle.enums.RawScrapOrderIsMaterialObjectEnum;
 import com.cloud.settle.enums.RawScrapOrderStatusEnum;
+import com.cloud.settle.feign.RemoteSmsQualityScrapOrderLogService;
 import com.cloud.settle.feign.RemoteSmsQualityScrapOrderService;
 import com.cloud.settle.feign.RemoteSmsRawScrapOrderService;
 import com.cloud.system.domain.vo.SysUserVo;
@@ -56,6 +57,8 @@ public class ActSmsQualityScrapOrderServiceImpl implements IActSmsQualityScrapOr
     private RemoteUserService remoteUserService;
     @Autowired
     private MailService mailService;
+    @Autowired
+    private RemoteSmsQualityScrapOrderLogService remoteSmsQualityScrapOrderLogService;
 
     @Override
     @GlobalTransactional
@@ -104,10 +107,17 @@ public class ActSmsQualityScrapOrderServiceImpl implements IActSmsQualityScrapOr
                 log.error("查询业务数据记录失败,原因："+smsScrapOrderMap.get("msg"));
                 return R.error("查询业务数据记录失败!");
             }
-            SmsRawMaterialScrapOrder smsRawMaterialScrapOrder = smsScrapOrderMap.getData(SmsRawMaterialScrapOrder.class);
+            SmsQualityScrapOrder smsQualityScrapOrder = smsScrapOrderMap.getData(SmsQualityScrapOrder.class);
+            R orderLogMap = remoteSmsQualityScrapOrderLogService.getByQualityId(smsQualityScrapOrder.getId());
+            if (!orderLogMap.isSuccess()) {
+                log.error("查询业务数据-申诉记录失败,原因："+orderLogMap.get("msg"));
+                return R.error("查询业务数据-申诉记录失败!");
+            }
+            SmsQualityScrapOrderLog smsQualityScrapOrderLog = orderLogMap.getData(SmsQualityScrapOrderLog.class);
             R result = new R();
             result.put("procInstId",business.getProcInstId());
-            result.put("data", smsRawMaterialScrapOrder);
+            result.put("data", smsQualityScrapOrder);
+            result.put("dataLog",smsQualityScrapOrderLog);
             return result;
         }
         return R.error("no record");

@@ -2,14 +2,9 @@ package com.cloud.settle.controller;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
 import io.swagger.annotations.*;
+import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.settle.domain.entity.SmsQualityScrapOrderLog;
@@ -96,10 +91,10 @@ public class SmsQualityScrapOrderLogController extends BaseController {
      */
     @GetMapping("getByQualityId")
     @ApiOperation(value = "根据报废ID查询质量部报废申诉", response = SmsQualityScrapOrderLog.class)
-    public R getByQualityId(Long id){
+    public R getByQualityId(@RequestParam(value = "qualityId") Long qualityId){
         Example example = new Example(SmsQualityScrapOrderLog.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("qualityId",id);
+        criteria.andEqualTo("qualityId",qualityId);
         example.orderBy("procNo").asc();
         return R.data(smsQualityScrapOrderLogService.selectByExample(example));
 
