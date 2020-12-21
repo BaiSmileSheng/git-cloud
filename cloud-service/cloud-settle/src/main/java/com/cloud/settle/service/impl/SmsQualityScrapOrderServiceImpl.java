@@ -95,6 +95,10 @@ public class SmsQualityScrapOrderServiceImpl extends BaseServiceImpl<SmsQualityS
     @Autowired
     private MailService mailService;
 
+    private static final String OSS_INDEX_ONE = "_01";
+    private static final String OSS_INDEX_TWO = "_02";
+    private static final String OSS_INDEX_THREE = "_03";
+
     private static final String SAVE = "0";
     private static final String SUBMIT = "1";
 
@@ -374,6 +378,7 @@ public class SmsQualityScrapOrderServiceImpl extends BaseServiceImpl<SmsQualityS
         String actKey = ActProcessContants.ACTIVITI_QUALITY_SCRAP_REVIEW_ZLGCS;
         String actTitle = ActProcessContants.ACTIVITI_BF_TITLE_QUALITY_SCRAP_ZLGCS;
         String roleKey = RoleConstants.ROLE_KEY_ZLGCS;
+        String indexs = OSS_INDEX_ONE;
         if (CollectionUtil.isNotEmpty(orderLogList)) {
             if (orderLogList.size() == 1) {
                 orderLogStatus = "2";
@@ -381,12 +386,14 @@ public class SmsQualityScrapOrderServiceImpl extends BaseServiceImpl<SmsQualityS
                 actKey = ActProcessContants.ACTIVITI_QUALITY_SCRAP_REVIEW_ZLBBZ;
                 actTitle = ActProcessContants.ACTIVITI_BF_TITLE_QUALITY_SCRAP_ZLBBZ;
                 roleKey = RoleConstants.ROLE_KEY_ZLBBZ;
+                indexs = OSS_INDEX_TWO;
             } else if (orderLogList.size() == 2) {
                 orderLogStatus = "3";
                 orderStatus = QualityScrapOrderStatusEnum.ZLBBF_ORDER_STATUS_ZLPTZSH.getCode();
                 actKey = ActProcessContants.ACTIVITI_QUALITY_SCRAP_REVIEW_ZLPTZ;
                 actTitle = ActProcessContants.ACTIVITI_BF_TITLE_QUALITY_SCRAP_ZLPTZ;
                 roleKey = RoleConstants.ROLE_KEY_ZLPTZ;
+                indexs = OSS_INDEX_THREE;
             }
         }
         R rUser = remoteUserService.selectUserByMaterialCodeAndRoleKey(
@@ -436,7 +443,7 @@ public class SmsQualityScrapOrderServiceImpl extends BaseServiceImpl<SmsQualityS
         smsQualityScrapOrder.setUpdateTime(new Date());
         smsQualityScrapOrderMapper.updateByPrimaryKeySelective(smsQualityScrapOrder);
         //3.根据订单号新增文件
-        String orderNo = smsQualityScrapOrder.getScrapNo();
+        String orderNo = smsQualityScrapOrder.getScrapNo() + indexs;
         List<SysOss> sysOssList = new ArrayList<>();
         for(String ossId : ossIdsString){
             SysOss sysOss = new SysOss();
@@ -479,6 +486,42 @@ public class SmsQualityScrapOrderServiceImpl extends BaseServiceImpl<SmsQualityS
         smsQualityScrapOrderMapper.updateByPrimaryKeySelective(smsQualityScrapOrder);
         smsQualityScrapOrderLogService.updateByPrimaryKeySelective(smsQualityScrapOrderLog);
         return R.ok();
+    }
+
+    @Override
+    public R selectDeatils(Long id) {
+        if (!StrUtil.isNotBlank(id.toString())) {
+            return R.error("传入参数为空！");
+        }
+        //查询质量部报废订单
+        SmsQualityScrapOrder smsQualityScrapOrder = smsQualityScrapOrderMapper.selectByPrimaryKey(id);
+        //查询质量部报废申诉
+        Example example = new Example(SmsQualityScrapOrderLog.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("qualityId",smsQualityScrapOrder.getId());
+        criteria.andEqualTo("qualityNo",smsQualityScrapOrder.getScrapNo());
+        List<SmsQualityScrapOrderLog> logList = smsQualityScrapOrderLogService.selectByExample(example);
+        String ossNo = smsQualityScrapOrder.getScrapNo();
+        if (CollectionUtil.isNotEmpty(logList)) {
+            if (logList.size() <= 1) {
+                ossNo = StrUtil.concat(true,ossNo,"_01");
+            } else if (logList.size() <= 2){
+                ossNo = StrUtil.concat(true,ossNo,"_02");
+            } else if (logList.size() <= 3) {
+                ossNo = StrUtil.concat(true,ossNo,"_03");
+            }
+        }
+        R ossMap = remoteOssService.listByOrderNo(ossNo);
+        if (!ossMap.isSuccess()) {
+            log.error("根据质量部报废单号查询申诉文件失败，原因："+ossMap.get("msg"));
+            throw new BusinessException("根据质量部报废单号查询申诉文件失败，原因："+ossMap.get("msg"));
+        }
+        List<SysOss> qualityScrapOssList = ossMap.getCollectData(new TypeReference<List<SysOss>>() {});
+        R r = R.ok();
+        r.put("qualityScrapOrder",smsQualityScrapOrder);
+        r.put("qualityScrapLogList",logList);
+        r.put("qualityScrapOssList",qualityScrapOssList);
+        return r;
     }
 
     /**

@@ -261,5 +261,14 @@ public class SmsQualityScrapOrderController extends BaseController {
         List<SmsQualityScrapOrder> smsQualityScrapOrderList = smsQualityScrapOrderService.selectByExample(example);
         return EasyExcelUtilOSS.writeExcel(smsQualityScrapOrderList,"质量部报废申请表.xlsx","sheet",new SmsQualityScrapOrderSupplierExportVo());
     }
+    /**
+     * 详情
+     */
+    @GetMapping("selectDetails")
+    @HasPermissions("settle:qualityScrapOrder:selectDetails")
+    @ApiOperation(value = "根据id查询质量报废明细-详情", response = R.class)
+    public R selectDetails(Long id){
+        return smsQualityScrapOrderService.selectDeatils(id);
+    }
 
 }

@@ -28,8 +28,10 @@ import com.cloud.settle.enums.RawScrapOrderStatusEnum;
 import com.cloud.settle.feign.RemoteSmsQualityScrapOrderLogService;
 import com.cloud.settle.feign.RemoteSmsQualityScrapOrderService;
 import com.cloud.settle.feign.RemoteSmsRawScrapOrderService;
+import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
+import com.cloud.system.feign.RemoteOssService;
 import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
@@ -60,6 +62,8 @@ public class ActSmsQualityScrapOrderServiceImpl implements IActSmsQualityScrapOr
     private MailService mailService;
     @Autowired
     private RemoteSmsQualityScrapOrderLogService remoteSmsQualityScrapOrderLogService;
+    @Autowired
+    private RemoteOssService remoteOssService;
 
     @Override
     @GlobalTransactional
@@ -116,10 +120,27 @@ public class ActSmsQualityScrapOrderServiceImpl implements IActSmsQualityScrapOr
             }
             List<SmsQualityScrapOrderLog> smsQualityScrapOrderLog = orderLogMap.getCollectData(new TypeReference<List<SmsQualityScrapOrderLog>>() {
             });
+            String ossNo = smsQualityScrapOrder.getScrapNo();
+            if (CollectionUtil.isNotEmpty(smsQualityScrapOrderLog)) {
+                if (smsQualityScrapOrderLog.size() <= 1) {
+                    ossNo = StrUtil.concat(true,ossNo,"_01");
+                } else if (smsQualityScrapOrderLog.size() <= 2){
+                    ossNo = StrUtil.concat(true,ossNo,"_02");
+                } else if (smsQualityScrapOrderLog.size() <= 3) {
+                    ossNo = StrUtil.concat(true,ossNo,"_03");
+                }
+            }
+            R ossMap = remoteOssService.listByOrderNo(ossNo);
+            if (!ossMap.isSuccess()) {
+                log.error("根据质量部报废单号查询申诉文件失败，原因："+ossMap.get("msg"));
+                throw new BusinessException("根据质量部报废单号查询申诉文件失败，原因："+ossMap.get("msg"));
+            }
+            List<SysOss> qualityScrapOssList = ossMap.getCollectData(new TypeReference<List<SysOss>>() {});
             R result = new R();
             result.put("procInstId",business.getProcInstId());
-            result.put("data", smsQualityScrapOrder);
-            result.put("dataLog",smsQualityScrapOrderLog);
+            result.put("qualityScrapOrder", smsQualityScrapOrder);
+            result.put("qualityScrapLog",smsQualityScrapOrderLog);
+            result.put("qualityScrapOssList",qualityScrapOssList);
             return result;
         }
         return R.error("no record");

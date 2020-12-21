@@ -67,4 +67,6 @@ public interface ISmsQualityScrapOrderService extends BaseService<SmsQualityScra
      * 审批流更新业务数据
      */
     R updateAct(SmsQualityScrapOrder smsQualityScrapOrder,Integer result,String comment,String auditor);
+
+    R selectDeatils(Long id);
 }
