@@ -212,6 +212,7 @@ public class SmsQualityScrapOrderController extends BaseController {
      * 供应商确认
      */
     @PostMapping("confirm")
+    @HasPermissions("settle:qualityScrapOrder:confirm")
     public R confirm(@RequestBody String ids){
         SysUser sysUser = getUserInfo(SysUser.class);
         return smsQualityScrapOrderService.confirm(ids,sysUser);
