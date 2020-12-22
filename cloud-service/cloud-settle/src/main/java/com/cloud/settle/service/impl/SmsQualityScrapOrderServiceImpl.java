@@ -459,6 +459,10 @@ public class SmsQualityScrapOrderServiceImpl extends BaseServiceImpl<SmsQualityS
             log.error("质量部报废申诉审批邮件通知发送失败！");
             throw new BusinessException("质量部报废申诉审批邮件通知发送失败！");
         }
+        if (!uplodeFileResult.isSuccess()) {
+            log.error("质量部报废申诉附件上传失败！");
+            throw new BusinessException("质量部报废申诉附件上传失败！");
+        }
         return uplodeFileResult;
     }
     /**
