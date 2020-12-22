@@ -10,6 +10,7 @@ import com.cloud.activiti.domain.entity.vo.ActBusinessVo;
 import com.cloud.activiti.domain.entity.vo.ActProcessEmailUserVo;
 import com.cloud.activiti.domain.entity.vo.ActStartProcessVo;
 import com.cloud.activiti.feign.RemoteActSmsQualityScrapOrderService;
+import com.cloud.activiti.feign.RemoteBizBusinessService;
 import com.cloud.common.constant.EmailConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.SapConstants;
@@ -33,6 +34,8 @@ import io.seata.spring.annotation.GlobalTransactional;
 import lombok.Generated;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Service;
@@ -58,6 +61,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 @Slf4j
 public class SmsQualityScrapOrderServiceImpl extends BaseServiceImpl<SmsQualityScrapOrder> implements ISmsQualityScrapOrderService {
+    private static Logger logger = LoggerFactory.getLogger(SmsQualityScrapOrderServiceImpl.class);
     @Autowired
     private SmsQualityScrapOrderMapper smsQualityScrapOrderMapper;
     @Autowired
@@ -94,6 +98,9 @@ public class SmsQualityScrapOrderServiceImpl extends BaseServiceImpl<SmsQualityS
     private RemoteActSmsQualityScrapOrderService remoteActSmsQualityScrapOrderService;
     @Autowired
     private MailService mailService;
+    @Autowired
+    private RemoteBizBusinessService remoteBizBusinessService;
+
 
     private static final String OSS_INDEX_ONE = "_01";
     private static final String OSS_INDEX_TWO = "_02";
@@ -497,8 +504,10 @@ public class SmsQualityScrapOrderServiceImpl extends BaseServiceImpl<SmsQualityS
         if (!StrUtil.isNotBlank(id.toString())) {
             return R.error("传入参数为空！");
         }
+        R r = R.ok();
         //查询质量部报废订单
         SmsQualityScrapOrder smsQualityScrapOrder = smsQualityScrapOrderMapper.selectByPrimaryKey(id);
+        r.put("qualityScrapOrder",smsQualityScrapOrder);
         //查询质量部报废申诉
         Example example = new Example(SmsQualityScrapOrderLog.class);
         Example.Criteria criteria = example.createCriteria();
@@ -514,9 +523,26 @@ public class SmsQualityScrapOrderServiceImpl extends BaseServiceImpl<SmsQualityS
             List<SysOss> qualityScrapOssList = ossMap.getCollectData(new TypeReference<List<SysOss>>() {});
             log.setOssList(qualityScrapOssList);
         });
-        R r = R.ok();
-        r.put("qualityScrapOrder",smsQualityScrapOrder);
         r.put("qualityScrapLogList",logList);
+        long tableId = smsQualityScrapOrder.getId();
+        String scrapStatus = smsQualityScrapOrder.getScrapStatus();
+        String key = "";
+        if (QualityScrapOrderStatusEnum.ZLBBF_ORDER_STATUS_ZLJLSH.getCode().equals(scrapStatus)) {
+            key = ActProcessContants.ACTIVITI_QUALITY_SCRAP_REVIEW_ZLGCS;
+        } else if (QualityScrapOrderStatusEnum.ZLBBF_ORDER_STATUS_ZLBZSH.getCode().equals(scrapStatus)){
+            key = ActProcessContants.ACTIVITI_QUALITY_SCRAP_REVIEW_ZLBBZ;
+        } else if (QualityScrapOrderStatusEnum.ZLBBF_ORDER_STATUS_ZLPTZSH.getCode().equals(scrapStatus)){
+            key = ActProcessContants.ACTIVITI_QUALITY_SCRAP_REVIEW_ZLPTZ;
+        } else {
+            return r;
+        }
+        R businessMap = remoteBizBusinessService.selectByKeyAndTable(key,StrUtil.toString(tableId));
+        if (!businessMap.isSuccess()) {
+            logger.error("获取流程图失败，原因："+businessMap.get("msg"));
+            throw new BusinessException("获取流程图失败，原因："+businessMap.get("msg"));
+        }
+        String procInstId = businessMap.getStr("data");
+        r.put("procInstId",procInstId);
         return r;
     }
 
