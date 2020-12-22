@@ -120,27 +120,19 @@ public class ActSmsQualityScrapOrderServiceImpl implements IActSmsQualityScrapOr
             }
             List<SmsQualityScrapOrderLog> smsQualityScrapOrderLog = orderLogMap.getCollectData(new TypeReference<List<SmsQualityScrapOrderLog>>() {
             });
-            String ossNo = smsQualityScrapOrder.getScrapNo();
-            if (CollectionUtil.isNotEmpty(smsQualityScrapOrderLog)) {
-                if (smsQualityScrapOrderLog.size() <= 1) {
-                    ossNo = StrUtil.concat(true,ossNo,"_01");
-                } else if (smsQualityScrapOrderLog.size() <= 2){
-                    ossNo = StrUtil.concat(true,ossNo,"_02");
-                } else if (smsQualityScrapOrderLog.size() <= 3) {
-                    ossNo = StrUtil.concat(true,ossNo,"_03");
+            smsQualityScrapOrderLog.forEach(log ->{
+                String ossNo = StrUtil.concat(true,smsQualityScrapOrder.getScrapNo(),"_0",log.getProcNo());
+                R ossMap = remoteOssService.listByOrderNo(ossNo);
+                if (!ossMap.isSuccess()) {
+                    throw new BusinessException("根据质量部报废单号查询申诉文件失败，原因："+ossMap.get("msg"));
                 }
-            }
-            R ossMap = remoteOssService.listByOrderNo(ossNo);
-            if (!ossMap.isSuccess()) {
-                log.error("根据质量部报废单号查询申诉文件失败，原因："+ossMap.get("msg"));
-                throw new BusinessException("根据质量部报废单号查询申诉文件失败，原因："+ossMap.get("msg"));
-            }
-            List<SysOss> qualityScrapOssList = ossMap.getCollectData(new TypeReference<List<SysOss>>() {});
+                List<SysOss> qualityScrapOssList = ossMap.getCollectData(new TypeReference<List<SysOss>>() {});
+                log.setOssList(qualityScrapOssList);
+            });
             R result = new R();
             result.put("procInstId",business.getProcInstId());
             result.put("qualityScrapOrder", smsQualityScrapOrder);
             result.put("qualityScrapLog",smsQualityScrapOrderLog);
-            result.put("qualityScrapOssList",qualityScrapOssList);
             return result;
         }
         return R.error("no record");

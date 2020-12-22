@@ -501,26 +501,18 @@ public class SmsQualityScrapOrderServiceImpl extends BaseServiceImpl<SmsQualityS
         criteria.andEqualTo("qualityId",smsQualityScrapOrder.getId());
         criteria.andEqualTo("qualityNo",smsQualityScrapOrder.getScrapNo());
         List<SmsQualityScrapOrderLog> logList = smsQualityScrapOrderLogService.selectByExample(example);
-        String ossNo = smsQualityScrapOrder.getScrapNo();
-        if (CollectionUtil.isNotEmpty(logList)) {
-            if (logList.size() <= 1) {
-                ossNo = StrUtil.concat(true,ossNo,"_01");
-            } else if (logList.size() <= 2){
-                ossNo = StrUtil.concat(true,ossNo,"_02");
-            } else if (logList.size() <= 3) {
-                ossNo = StrUtil.concat(true,ossNo,"_03");
+        logList.forEach(log ->{
+            String ossNo = StrUtil.concat(true,smsQualityScrapOrder.getScrapNo(),"_0",log.getProcNo());
+            R ossMap = remoteOssService.listByOrderNo(ossNo);
+            if (!ossMap.isSuccess()) {
+                throw new BusinessException("根据质量部报废单号查询申诉文件失败，原因："+ossMap.get("msg"));
             }
-        }
-        R ossMap = remoteOssService.listByOrderNo(ossNo);
-        if (!ossMap.isSuccess()) {
-            log.error("根据质量部报废单号查询申诉文件失败，原因："+ossMap.get("msg"));
-            throw new BusinessException("根据质量部报废单号查询申诉文件失败，原因："+ossMap.get("msg"));
-        }
-        List<SysOss> qualityScrapOssList = ossMap.getCollectData(new TypeReference<List<SysOss>>() {});
+            List<SysOss> qualityScrapOssList = ossMap.getCollectData(new TypeReference<List<SysOss>>() {});
+            log.setOssList(qualityScrapOssList);
+        });
         R r = R.ok();
         r.put("qualityScrapOrder",smsQualityScrapOrder);
         r.put("qualityScrapLogList",logList);
-        r.put("qualityScrapOssList",qualityScrapOssList);
         return r;
     }
 

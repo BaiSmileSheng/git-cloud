@@ -4,6 +4,7 @@ import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
+import com.cloud.system.domain.entity.SysOss;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,9 +15,11 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Id;
 
+import org.springframework.data.annotation.Transient;
 import tk.mybatis.mapper.annotation.KeySql;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 质量部报废申诉对象 sms_quality_scrap_order_log
@@ -111,5 +114,8 @@ public class SmsQualityScrapOrderLog extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "审批时间")
     private Date auditTime;
+
+    @Transient
+    private List<SysOss> ossList;
 
 }
