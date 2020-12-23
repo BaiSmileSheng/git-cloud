@@ -53,7 +53,6 @@ public class ActSmsRawScrapOrderActController extends BaseController {
     @PostMapping("open")
     @OperLog(title = "原材料报废审核开启流程(编辑、新增提交)", businessType = BusinessType.INSERT)
     @ApiOperation(value = "原材料报废审核开启流程(编辑、新增提交)", response = R.class)
-    @HasPermissions("settle:actRawScrapOrder:commit")
     public R addSave(@RequestBody ActBusinessVo actBusinessVo) {
         return actSmsRawScrapOrderService.startAct(actBusinessVo);
     }
@@ -67,7 +66,6 @@ public class ActSmsRawScrapOrderActController extends BaseController {
      */
     @PostMapping("audit")
     @ApiOperation(value = "推进流程 ", response = R.class)
-    @HasPermissions("settle:actRawScrapOrder:audit")
     public R audit(@RequestBody BizAudit bizAudit) {
         return actSmsRawScrapOrderService.audit(bizAudit, getCurrentUserId());
     }

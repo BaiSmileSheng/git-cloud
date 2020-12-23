@@ -50,7 +50,6 @@ public class ActSmsQualityScrapOrderActController extends BaseController {
     @PostMapping("open")
     @OperLog(title = "质量部报废审核开启流程", businessType = BusinessType.INSERT)
     @ApiOperation(value = "质量部报废审核开启流程", response = R.class)
-    @HasPermissions("settle:actQualityScrapOrder:commit")
     public R addSave(@RequestBody ActBusinessVo actBusinessVo) {
         return actSmsQualityScrapOrderService.startAct(actBusinessVo);
     }
@@ -64,7 +63,6 @@ public class ActSmsQualityScrapOrderActController extends BaseController {
      */
     @PostMapping("audit")
     @ApiOperation(value = "推进流程 ", response = R.class)
-    @HasPermissions("settle:actQualityScrapOrder:audit")
     public R audit(@RequestBody BizAudit bizAudit) {
         return actSmsQualityScrapOrderService.audit(bizAudit, getCurrentUserId());
     }
