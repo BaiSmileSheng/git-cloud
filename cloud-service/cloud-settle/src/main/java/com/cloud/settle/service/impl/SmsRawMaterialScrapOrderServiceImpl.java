@@ -75,6 +75,8 @@ public class SmsRawMaterialScrapOrderServiceImpl extends BaseServiceImpl<SmsRawM
     private RemoteUserService remoteUserService;
     @Autowired
     private RemoteActSmsRawScrapOrderService remoteActSmsRawScrapOrderService;
+    @Autowired
+    private RemoteSupplierInfoService remoteSupplierInfoService;
 
     private static final String SAVE = "0";
     private static final String SUBMIT = "1";
@@ -630,6 +632,13 @@ public class SmsRawMaterialScrapOrderServiceImpl extends BaseServiceImpl<SmsRawM
         }
         CdFactoryInfo factoryInfo = factoryMap.getData(CdFactoryInfo.class);
         smsRawMaterialScrapOrder.setComponyCode(factoryInfo.getCompanyCode());
+        R supplierMap = remoteSupplierInfoService.selectOneBySupplierCode(smsRawMaterialScrapOrder.getSupplierCode().trim().toUpperCase());
+        if (!supplierMap.isSuccess()) {
+            log.error("查询"+smsRawMaterialScrapOrder.getSupplierCode()+"供应商信息失败，原因："+supplierMap.get("msg"));
+            throw new BusinessException("查询"+smsRawMaterialScrapOrder.getSupplierCode()+"供应商信息失败，原因："+supplierMap.get("msg"));
+        }
+        CdSupplierInfo cdSupplierInfo = supplierMap.getData(CdSupplierInfo.class);
+        smsRawMaterialScrapOrder.setSupplierName(cdSupplierInfo.getCorporation());
         return smsRawMaterialScrapOrder;
     }
 }
