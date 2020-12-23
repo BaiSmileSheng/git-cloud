@@ -145,6 +145,7 @@ public class SmsQualityScrapOrderServiceImpl extends BaseServiceImpl<SmsQualityS
         if (SAVE.equals(smsQualityScrapOrder.getSaveOrSubmit())) {
             smsQualityScrapOrder.setScrapStatus(QualityScrapOrderStatusEnum.ZLBBF_ORDER_STATUS_DTJ.getCode());
         } else {
+            smsQualityScrapOrder.setSubmitDate(new Date());
             smsQualityScrapOrder.setScrapStatus(QualityScrapOrderStatusEnum.ZLBBF_ORDER_STATUS_GYSDQR.getCode());
         }
         int insertCount = insertSelective(smsQualityScrapOrder);
@@ -361,10 +362,6 @@ public class SmsQualityScrapOrderServiceImpl extends BaseServiceImpl<SmsQualityS
     @Override
     @GlobalTransactional
     public R appealSupplier(Long id, String complaintDescription, String ossIds,SysUser sysUser) {
-        String[] ossIdsString = ossIds.split(",");
-        if(ossIdsString.length == 0){
-            throw new BusinessException("上传附件id不能为空");
-        }
         //1.查询质量部报废数据,判断状态是否是待确认,待确认可修改
         SmsQualityScrapOrder smsQualityScrapOrder = smsQualityScrapOrderMapper.selectByPrimaryKey(id);
         if (!BeanUtil.isNotEmpty(smsQualityScrapOrder)) {
@@ -450,15 +447,23 @@ public class SmsQualityScrapOrderServiceImpl extends BaseServiceImpl<SmsQualityS
         smsQualityScrapOrder.setUpdateTime(new Date());
         smsQualityScrapOrderMapper.updateByPrimaryKeySelective(smsQualityScrapOrder);
         //3.根据订单号新增文件
-        String orderNo = smsQualityScrapOrder.getScrapNo() + indexs;
-        List<SysOss> sysOssList = new ArrayList<>();
-        for(String ossId : ossIdsString){
-            SysOss sysOss = new SysOss();
-            sysOss.setId(Long.valueOf(ossId));
-            sysOss.setOrderNo(orderNo);
-            sysOssList.add(sysOss);
+        if (StrUtil.isNotBlank(ossIds)) {
+            String[] ossIdsString = ossIds.split(",");
+            String orderNo = smsQualityScrapOrder.getScrapNo() + indexs;
+            List<SysOss> sysOssList = new ArrayList<>();
+            for(String ossId : ossIdsString){
+                SysOss sysOss = new SysOss();
+                sysOss.setId(Long.valueOf(ossId));
+                sysOss.setOrderNo(orderNo);
+                sysOssList.add(sysOss);
+            }
+            R uplodeFileResult = remoteOssService.batchEditSaveById(sysOssList);
+            if (!uplodeFileResult.isSuccess()) {
+                log.error("质量部报废申诉附件上传失败！");
+                throw new BusinessException("质量部报废申诉附件上传失败！");
+            }
         }
-        R uplodeFileResult = remoteOssService.batchEditSaveById(sysOssList);
+
         try{
 //            mailService.sendTextMail(userVo.getEmail(),EmailConstants.TITLE_QUALITY_SCRAP
 //                    ,userVo.getUserName() + EmailConstants.QUALITY_SCRAP_CONTEXT + EmailConstants.ORW_URL);
@@ -466,11 +471,7 @@ public class SmsQualityScrapOrderServiceImpl extends BaseServiceImpl<SmsQualityS
             log.error("质量部报废申诉审批邮件通知发送失败！");
             throw new BusinessException("质量部报废申诉审批邮件通知发送失败！");
         }
-        if (!uplodeFileResult.isSuccess()) {
-            log.error("质量部报废申诉附件上传失败！");
-            throw new BusinessException("质量部报废申诉附件上传失败！");
-        }
-        return uplodeFileResult;
+        return R.ok();
     }
     /**
      * 审批流更新业务数据
