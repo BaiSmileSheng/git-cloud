@@ -328,11 +328,13 @@ public class SmsRawMaterialScrapOrderServiceImpl extends BaseServiceImpl<SmsRawM
             inputTable.setValue("ERFME", smsRawMaterialScrapOrder.getMeasureUnit());//基本计量单位
             inputTable.setValue("ERFMG", smsRawMaterialScrapOrder.getScrapNum());//数量
             inputTable.setValue("AUFNR", smsRawMaterialScrapOrder.getRawScrapNo());//每月维护一次订单号
+            inputTable.setValue("CHARG", smsRawMaterialScrapOrder.getAssessmentType());//批号/评估类型
             String content = StrUtil.format("BWARTWA:{},BKTXT:{},WERKS:{},LGORT:{},MATNR:{}" +
-                            ",ERFME:{},ERFMG:{},AUFNR:{}","261",
+                            ",ERFME:{},ERFMG:{},AUFNR:{},CHARG:{}","261",
                     StrUtil.concat(true,smsRawMaterialScrapOrder.getSupplierCode(),smsRawMaterialScrapOrder.getRawScrapNo()),
                     smsRawMaterialScrapOrder.getFactoryCode(),smsRawMaterialScrapOrder.getStation(),smsRawMaterialScrapOrder.getRawMaterialCode(),
-                    smsRawMaterialScrapOrder.getMeasureUnit(),smsRawMaterialScrapOrder.getScrapNum(),smsRawMaterialScrapOrder.getScrapOrderCode());
+                    smsRawMaterialScrapOrder.getMeasureUnit(),smsRawMaterialScrapOrder.getScrapNum(),smsRawMaterialScrapOrder.getScrapOrderCode(),
+                    smsRawMaterialScrapOrder.getAssessmentType());
             sysInterfaceLog.setContent(content);
             //执行函数
             JCoContext.begin(destination);
