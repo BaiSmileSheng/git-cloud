@@ -216,6 +216,7 @@ public class ActSmsRawScrapOrderServiceImpl implements IActSmsRawScrapOrderServi
         }
         //JIT审核通过传SAP
         if (RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_DJS.getCode().equals(smsRawMaterialScrapOrder.getScrapStatus())) {
+            smsRawMaterialScrapOrder.setSapFlag(SapConstants.SAP_Y61_FLAG_GZ);
             R rSAP = remoteSmsRawScrapOrderService.autidSuccessToSAP261(smsRawMaterialScrapOrder);
             if (!rSAP.isSuccess()) {
                 throw new BusinessException(rSAP.getStr("msg"));

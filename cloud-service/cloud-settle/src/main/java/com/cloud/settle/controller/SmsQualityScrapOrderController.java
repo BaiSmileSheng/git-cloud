@@ -91,6 +91,9 @@ public class SmsQualityScrapOrderController extends BaseController {
         if (StrUtil.isNotBlank(smsQualityScrapOrder.getSupplierCode())) {
             criteria.andEqualTo("supplierCode", smsQualityScrapOrder.getSupplierCode());
         }
+        if (StrUtil.isNotBlank(smsQualityScrapOrder.getSupplierName())) {
+            criteria.andLike("supplierName", "%"+smsQualityScrapOrder.getSupplierName()+"%");
+        }
         if (StrUtil.isNotBlank(smsQualityScrapOrder.getFactoryCode())) {
             criteria.andEqualTo("factoryCode", smsQualityScrapOrder.getFactoryCode());
         }
