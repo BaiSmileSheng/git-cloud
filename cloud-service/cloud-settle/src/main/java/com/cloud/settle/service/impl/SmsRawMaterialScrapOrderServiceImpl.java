@@ -603,9 +603,6 @@ public class SmsRawMaterialScrapOrderServiceImpl extends BaseServiceImpl<SmsRawM
         if (!StrUtil.isNotBlank(smsRawMaterialScrapOrder.getScrapNum().toString())) {
             return R.error("新增原材料报废申请，传入参数[报废数量]为空！");
         }
-        if (!StrUtil.isNotBlank(smsRawMaterialScrapOrder.getAssessmentType())) {
-            return R.error("新增原材料报废申请，传入参数[评估类型]为空！");
-        }
         if (!StrUtil.isNotBlank(smsRawMaterialScrapOrder.getIsCheck())) {
             return R.error("新增原材料报废申请，传入参数[是否买单]为空！");
         }
