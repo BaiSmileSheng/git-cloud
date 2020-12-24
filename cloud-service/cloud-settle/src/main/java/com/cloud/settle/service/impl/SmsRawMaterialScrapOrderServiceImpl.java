@@ -98,6 +98,7 @@ public class SmsRawMaterialScrapOrderServiceImpl extends BaseServiceImpl<SmsRawM
         }
         //数据字段合规校验
         try {
+            smsRawMaterialScrapOrder.setSupplierCode(sysUser.getSupplierCode());
             smsRawMaterialScrapOrder = checkData(smsRawMaterialScrapOrder);
         } catch (Exception e) {
             log.error("执行数据字段正确性校验方法返回错误：" + e.getMessage());
@@ -129,8 +130,6 @@ public class SmsRawMaterialScrapOrderServiceImpl extends BaseServiceImpl<SmsRawM
         smsRawMaterialScrapOrder.setScrapOrderCode(cdScrapMonthNo.getOrderNo());
         smsRawMaterialScrapOrder.setCreateBy(sysUser.getLoginName());
         smsRawMaterialScrapOrder.setCreateTime(new Date());
-        smsRawMaterialScrapOrder.setSupplierCode(sysUser.getSupplierCode());
-        smsRawMaterialScrapOrder.setSupplierName(sysUser.getSupplierName());
         R insertCheckMap = insertRawScrapCheck(smsRawMaterialScrapOrder,sysUser);
         if (!insertCheckMap.isSuccess()) {
             log.error("新增原材料报废失败，原因："+insertCheckMap.get("msg"));
@@ -160,6 +159,11 @@ public class SmsRawMaterialScrapOrderServiceImpl extends BaseServiceImpl<SmsRawM
             smsRawMaterialScrapOrder.setScrapStatus(RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_DTJ.getCode());
             insertSelective(smsRawMaterialScrapOrder);
         } else { //提交
+            smsRawMaterialScrapOrder.setSapFlag(SapConstants.SAP_Y61_FLAG_JY);
+            R checkSapMap = autidSuccessToSAP261(smsRawMaterialScrapOrder);
+            if (!checkSapMap.isSuccess()) {
+                throw new BusinessException(checkSapMap.getStr("msg"));
+            }
             smsRawMaterialScrapOrder.setScrapStatus(RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_JITSH.getCode());
             insertSelective(smsRawMaterialScrapOrder);
             //判断有无实物
@@ -228,6 +232,11 @@ public class SmsRawMaterialScrapOrderServiceImpl extends BaseServiceImpl<SmsRawM
         if (SAVE.equals(smsRawMaterialScrapOrder.getSaveOrSubmit())) { //保存
             updateByPrimaryKeySelective(smsRawMaterialScrapOrder);
         } else { //提交
+            smsRawMaterialScrapOrder.setSapFlag(SapConstants.SAP_Y61_FLAG_JY);
+            R checkSapMap = autidSuccessToSAP261(smsRawMaterialScrapOrder);
+            if (!checkSapMap.isSuccess()) {
+                throw new BusinessException(checkSapMap.getStr("msg"));
+            }
             smsRawMaterialScrapOrder.setScrapStatus(RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_JITSH.getCode());
             updateByPrimaryKeySelective(smsRawMaterialScrapOrder);
             //判断有无实物
@@ -317,7 +326,7 @@ public class SmsRawMaterialScrapOrderServiceImpl extends BaseServiceImpl<SmsRawM
                 throw new RuntimeException("Function does not exists in SAP system.");
             }
             JCoParameterList input = fm.getImportParameterList();
-            input.setValue("FLAG_GZ","1");
+            input.setValue("FLAG_GZ",smsRawMaterialScrapOrder.getSapFlag());
             //获取输入参数
             JCoTable inputTable = fm.getTableParameterList().getTable("T_INPUT");
             //附加表的最后一个新行,行指针,它指向新添加的行。

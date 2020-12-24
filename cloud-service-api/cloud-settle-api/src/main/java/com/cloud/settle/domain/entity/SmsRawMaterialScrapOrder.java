@@ -252,4 +252,10 @@ public class SmsRawMaterialScrapOrder extends BaseEntity {
     @Transient
     private String purchaseGroup;
 
+    /**
+     * 传Y61 0、校验  1、过账
+     */
+    @Transient
+    private String sapFlag;
+
 }
