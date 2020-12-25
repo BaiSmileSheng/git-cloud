@@ -133,10 +133,10 @@ public class CdSupplierInfoController extends BaseController {
             @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "supplierName", value = "供应商名称", required = false, paramType = "query", dataType = "String")
     })
-    public R objectSelectSupplierByLikeCode(@RequestParam(value = "supplierName") String supplierName){
+    public R objectSelectSupplierByLikeCode(@RequestParam(value = "corporation") String corporation){
         Example example = new Example(CdSupplierInfo.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andLike("supplierName","%"+supplierName + "%");
+        criteria.andLike("corporation","%"+corporation + "%");
         startPage();
         List<CdSupplierInfo> cdSupplierInfoList = cdSupplierInfoService.selectByExample(example);
         return R.data(cdSupplierInfoList);
