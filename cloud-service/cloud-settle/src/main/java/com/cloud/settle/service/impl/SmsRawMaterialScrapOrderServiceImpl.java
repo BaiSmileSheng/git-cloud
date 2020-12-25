@@ -75,6 +75,8 @@ public class SmsRawMaterialScrapOrderServiceImpl extends BaseServiceImpl<SmsRawM
     private RemoteUserService remoteUserService;
     @Autowired
     private RemoteActSmsRawScrapOrderService remoteActSmsRawScrapOrderService;
+    @Autowired
+    private RemoteSupplierInfoService remoteSupplierInfoService;
 
     private static final String SAVE = "0";
     private static final String SUBMIT = "1";
@@ -96,6 +98,7 @@ public class SmsRawMaterialScrapOrderServiceImpl extends BaseServiceImpl<SmsRawM
         }
         //数据字段合规校验
         try {
+            smsRawMaterialScrapOrder.setSupplierCode(sysUser.getSupplierCode());
             smsRawMaterialScrapOrder = checkData(smsRawMaterialScrapOrder);
         } catch (Exception e) {
             log.error("执行数据字段正确性校验方法返回错误：" + e.getMessage());
@@ -127,8 +130,6 @@ public class SmsRawMaterialScrapOrderServiceImpl extends BaseServiceImpl<SmsRawM
         smsRawMaterialScrapOrder.setScrapOrderCode(cdScrapMonthNo.getOrderNo());
         smsRawMaterialScrapOrder.setCreateBy(sysUser.getLoginName());
         smsRawMaterialScrapOrder.setCreateTime(new Date());
-        smsRawMaterialScrapOrder.setSupplierCode(sysUser.getSupplierCode());
-        smsRawMaterialScrapOrder.setSupplierName(sysUser.getSupplierName());
         R insertCheckMap = insertRawScrapCheck(smsRawMaterialScrapOrder,sysUser);
         if (!insertCheckMap.isSuccess()) {
             log.error("新增原材料报废失败，原因："+insertCheckMap.get("msg"));
@@ -158,6 +159,11 @@ public class SmsRawMaterialScrapOrderServiceImpl extends BaseServiceImpl<SmsRawM
             smsRawMaterialScrapOrder.setScrapStatus(RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_DTJ.getCode());
             insertSelective(smsRawMaterialScrapOrder);
         } else { //提交
+            smsRawMaterialScrapOrder.setSapFlag(SapConstants.SAP_Y61_FLAG_JY);
+            R checkSapMap = autidSuccessToSAP261(smsRawMaterialScrapOrder);
+            if (!checkSapMap.isSuccess()) {
+                throw new BusinessException(checkSapMap.getStr("msg"));
+            }
             smsRawMaterialScrapOrder.setScrapStatus(RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_JITSH.getCode());
             insertSelective(smsRawMaterialScrapOrder);
             //判断有无实物
@@ -226,6 +232,11 @@ public class SmsRawMaterialScrapOrderServiceImpl extends BaseServiceImpl<SmsRawM
         if (SAVE.equals(smsRawMaterialScrapOrder.getSaveOrSubmit())) { //保存
             updateByPrimaryKeySelective(smsRawMaterialScrapOrder);
         } else { //提交
+            smsRawMaterialScrapOrder.setSapFlag(SapConstants.SAP_Y61_FLAG_JY);
+            R checkSapMap = autidSuccessToSAP261(smsRawMaterialScrapOrder);
+            if (!checkSapMap.isSuccess()) {
+                throw new BusinessException(checkSapMap.getStr("msg"));
+            }
             smsRawMaterialScrapOrder.setScrapStatus(RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_JITSH.getCode());
             updateByPrimaryKeySelective(smsRawMaterialScrapOrder);
             //判断有无实物
@@ -315,7 +326,7 @@ public class SmsRawMaterialScrapOrderServiceImpl extends BaseServiceImpl<SmsRawM
                 throw new RuntimeException("Function does not exists in SAP system.");
             }
             JCoParameterList input = fm.getImportParameterList();
-            input.setValue("FLAG_GZ","1");
+            input.setValue("FLAG_GZ",smsRawMaterialScrapOrder.getSapFlag());
             //获取输入参数
             JCoTable inputTable = fm.getTableParameterList().getTable("T_INPUT");
             //附加表的最后一个新行,行指针,它指向新添加的行。
@@ -327,12 +338,14 @@ public class SmsRawMaterialScrapOrderServiceImpl extends BaseServiceImpl<SmsRawM
             inputTable.setValue("MATNR", smsRawMaterialScrapOrder.getRawMaterialCode().toUpperCase());//物料号
             inputTable.setValue("ERFME", smsRawMaterialScrapOrder.getMeasureUnit());//基本计量单位
             inputTable.setValue("ERFMG", smsRawMaterialScrapOrder.getScrapNum());//数量
-            inputTable.setValue("AUFNR", smsRawMaterialScrapOrder.getRawScrapNo());//每月维护一次订单号
+            inputTable.setValue("AUFNR", smsRawMaterialScrapOrder.getScrapOrderCode());//每月维护一次订单号
+            inputTable.setValue("CHARG", smsRawMaterialScrapOrder.getAssessmentType());//批号/评估类型
             String content = StrUtil.format("BWARTWA:{},BKTXT:{},WERKS:{},LGORT:{},MATNR:{}" +
-                            ",ERFME:{},ERFMG:{},AUFNR:{}","261",
+                            ",ERFME:{},ERFMG:{},AUFNR:{},CHARG:{}","261",
                     StrUtil.concat(true,smsRawMaterialScrapOrder.getSupplierCode(),smsRawMaterialScrapOrder.getRawScrapNo()),
                     smsRawMaterialScrapOrder.getFactoryCode(),smsRawMaterialScrapOrder.getStation(),smsRawMaterialScrapOrder.getRawMaterialCode(),
-                    smsRawMaterialScrapOrder.getMeasureUnit(),smsRawMaterialScrapOrder.getScrapNum(),smsRawMaterialScrapOrder.getScrapOrderCode());
+                    smsRawMaterialScrapOrder.getMeasureUnit(),smsRawMaterialScrapOrder.getScrapNum(),smsRawMaterialScrapOrder.getScrapOrderCode(),
+                    smsRawMaterialScrapOrder.getAssessmentType());
             sysInterfaceLog.setContent(content);
             //执行函数
             JCoContext.begin(destination);
@@ -590,9 +603,6 @@ public class SmsRawMaterialScrapOrderServiceImpl extends BaseServiceImpl<SmsRawM
         if (!StrUtil.isNotBlank(smsRawMaterialScrapOrder.getScrapNum().toString())) {
             return R.error("新增原材料报废申请，传入参数[报废数量]为空！");
         }
-        if (!StrUtil.isNotBlank(smsRawMaterialScrapOrder.getAssessmentType())) {
-            return R.error("新增原材料报废申请，传入参数[评估类型]为空！");
-        }
         if (!StrUtil.isNotBlank(smsRawMaterialScrapOrder.getIsCheck())) {
             return R.error("新增原材料报废申请，传入参数[是否买单]为空！");
         }
@@ -628,6 +638,13 @@ public class SmsRawMaterialScrapOrderServiceImpl extends BaseServiceImpl<SmsRawM
         }
         CdFactoryInfo factoryInfo = factoryMap.getData(CdFactoryInfo.class);
         smsRawMaterialScrapOrder.setComponyCode(factoryInfo.getCompanyCode());
+        R supplierMap = remoteSupplierInfoService.selectOneBySupplierCode(smsRawMaterialScrapOrder.getSupplierCode().trim().toUpperCase());
+        if (!supplierMap.isSuccess()) {
+            log.error("查询"+smsRawMaterialScrapOrder.getSupplierCode()+"供应商信息失败，原因："+supplierMap.get("msg"));
+            throw new BusinessException("查询"+smsRawMaterialScrapOrder.getSupplierCode()+"供应商信息失败，原因："+supplierMap.get("msg"));
+        }
+        CdSupplierInfo cdSupplierInfo = supplierMap.getData(CdSupplierInfo.class);
+        smsRawMaterialScrapOrder.setSupplierName(cdSupplierInfo.getCorporation());
         return smsRawMaterialScrapOrder;
     }
 }

@@ -3,7 +3,6 @@ package com.cloud.activiti.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
-import com.cloud.activiti.constant.ActProcessContants;
 import com.cloud.activiti.consts.ActivitiConstant;
 import com.cloud.activiti.consts.ActivitiTableNameConstants;
 import com.cloud.activiti.domain.BizAudit;
@@ -12,24 +11,27 @@ import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
 import com.cloud.activiti.domain.entity.vo.ActBusinessVo;
 import com.cloud.activiti.domain.entity.vo.ActStartProcessVo;
 import com.cloud.activiti.mail.MailService;
+import com.cloud.activiti.service.IActSmsQualityScrapOrderService;
 import com.cloud.activiti.service.IActSmsRawScrapOrderService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
-import com.cloud.common.constant.EmailConstants;
 import com.cloud.common.constant.RoleConstants;
-import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.redis.util.RedisUtils;
+import com.cloud.settle.domain.entity.SmsQualityScrapOrder;
+import com.cloud.settle.domain.entity.SmsQualityScrapOrderLog;
 import com.cloud.settle.domain.entity.SmsRawMaterialScrapOrder;
-import com.cloud.settle.domain.entity.SmsScrapOrder;
-import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
+import com.cloud.settle.enums.QualityScrapOrderStatusEnum;
 import com.cloud.settle.enums.RawScrapOrderIsMaterialObjectEnum;
 import com.cloud.settle.enums.RawScrapOrderStatusEnum;
-import com.cloud.settle.enums.SupplementaryOrderStatusEnum;
+import com.cloud.settle.feign.RemoteSmsQualityScrapOrderLogService;
+import com.cloud.settle.feign.RemoteSmsQualityScrapOrderService;
 import com.cloud.settle.feign.RemoteSmsRawScrapOrderService;
+import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
+import com.cloud.system.feign.RemoteOssService;
 import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
@@ -43,13 +45,13 @@ import java.util.*;
 
 @Service
 @Slf4j
-public class ActSmsRawScrapOrderServiceImpl implements IActSmsRawScrapOrderService {
+public class ActSmsQualityScrapOrderServiceImpl implements IActSmsQualityScrapOrderService {
     @Autowired
     private IActTaskService actTaskService;
     @Autowired
     private IBizBusinessService bizBusinessService;
     @Autowired
-    private RemoteSmsRawScrapOrderService remoteSmsRawScrapOrderService;
+    private RemoteSmsQualityScrapOrderService remoteSmsQualityScrapOrderService;
     @Autowired
     private TaskService taskService;
     @Autowired
@@ -58,6 +60,10 @@ public class ActSmsRawScrapOrderServiceImpl implements IActSmsRawScrapOrderServi
     private RemoteUserService remoteUserService;
     @Autowired
     private MailService mailService;
+    @Autowired
+    private RemoteSmsQualityScrapOrderLogService remoteSmsQualityScrapOrderLogService;
+    @Autowired
+    private RemoteOssService remoteOssService;
 
     @Override
     @GlobalTransactional
@@ -101,15 +107,32 @@ public class ActSmsRawScrapOrderServiceImpl implements IActSmsRawScrapOrderServi
         BizBusiness business = bizBusinessService.selectBizBusinessById(businessKey);
         if (null != business) {
             //根据流程业务表 tableId 查询业务表信息
-            R smsScrapOrderMap = remoteSmsRawScrapOrderService.get(Long.valueOf(business.getTableId()));
+            R smsScrapOrderMap = remoteSmsQualityScrapOrderService.get(Long.valueOf(business.getTableId()));
             if (!smsScrapOrderMap.isSuccess()) {
                 log.error("查询业务数据记录失败,原因："+smsScrapOrderMap.get("msg"));
                 return R.error("查询业务数据记录失败!");
             }
-            SmsRawMaterialScrapOrder smsRawMaterialScrapOrder = smsScrapOrderMap.getData(SmsRawMaterialScrapOrder.class);
+            SmsQualityScrapOrder smsQualityScrapOrder = smsScrapOrderMap.getData(SmsQualityScrapOrder.class);
+            R orderLogMap = remoteSmsQualityScrapOrderLogService.getByQualityId(smsQualityScrapOrder.getId());
+            if (!orderLogMap.isSuccess()) {
+                log.error("查询业务数据-申诉记录失败,原因："+orderLogMap.get("msg"));
+                return R.error("查询业务数据-申诉记录失败!");
+            }
+            List<SmsQualityScrapOrderLog> smsQualityScrapOrderLog = orderLogMap.getCollectData(new TypeReference<List<SmsQualityScrapOrderLog>>() {
+            });
+            smsQualityScrapOrderLog.forEach(log ->{
+                String ossNo = StrUtil.concat(true,smsQualityScrapOrder.getScrapNo(),"_0",log.getProcNo());
+                R ossMap = remoteOssService.listByOrderNo(ossNo);
+                if (!ossMap.isSuccess()) {
+                    throw new BusinessException("根据质量部报废单号查询申诉文件失败，原因："+ossMap.get("msg"));
+                }
+                List<SysOss> qualityScrapOssList = ossMap.getCollectData(new TypeReference<List<SysOss>>() {});
+                log.setOssList(qualityScrapOssList);
+            });
             R result = new R();
             result.put("procInstId",business.getProcInstId());
-            result.put("data", smsRawMaterialScrapOrder);
+            result.put("qualityScrapOrder", smsQualityScrapOrder);
+            result.put("qualityScrapLog",smsQualityScrapOrderLog);
             return result;
         }
         return R.error("no record");
@@ -141,107 +164,41 @@ public class ActSmsRawScrapOrderServiceImpl implements IActSmsRawScrapOrderServi
 
     @Override
     public R auditLogic(BizAudit bizAudit, long userId){
-        log.info(StrUtil.format("原材料报废申请审核：参数为{}", bizAudit.toString()));
+        log.info(StrUtil.format("质量部报废申请审核：参数为{}", bizAudit.toString()));
+        SysUser sysUser = remoteUserService.selectSysUserByUserId(userId);
         //流程审核业务表
         BizBusiness bizBusiness = bizBusinessService.selectBizBusinessById(bizAudit.getBusinessKey().toString());
         if (bizBusiness == null) {
-            log.error(StrUtil.format("(原材料报废)流程业务表数据为空,id参数为{}", bizAudit.getBusinessKey()));
+            log.error(StrUtil.format("(质量部报废)流程业务表数据为空,id参数为{}", bizAudit.getBusinessKey()));
             return R.error("流程业务表数据为空！");
         }
         //查询原材料报废表信息
-        R rawScrapMap = remoteSmsRawScrapOrderService.get(Long.valueOf(bizBusiness.getTableId()));
+        R rawScrapMap = remoteSmsQualityScrapOrderService.get(Long.valueOf(bizBusiness.getTableId()));
         if (!rawScrapMap.isSuccess()) {
-            log.error(StrUtil.format("(原材料报废)原材料报废表数据查询失败,id(原材料报废)参数为{}", bizBusiness.getTableId()));
-            return R.error("未找到原材料报废业务数据！");
+            log.error(StrUtil.format("(质量部报废)质量部报废表数据查询失败,id(质量部报废)参数为{}", bizBusiness.getTableId()));
+            return R.error("未找到质量部报废业务数据！");
         }
-        SmsRawMaterialScrapOrder smsRawMaterialScrapOrder = rawScrapMap.getData(SmsRawMaterialScrapOrder.class);
+        SmsQualityScrapOrder smsQualityScrapOrder = rawScrapMap.getData(SmsQualityScrapOrder.class);
         //审批结果
         Boolean result = false;
         if (bizAudit.getResult().intValue() == 2) {
             result = true;
         }
         //判断下级审批  修改状态
-        //1jit待审核、2jit驳回、3订单经理待审核、4订单经理驳回、5投入产出待审核、6投入产出驳回
-        List<SysUserVo> sysUserVos = new ArrayList<>();
         if (result) {
             //审批通过
-            if (RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_JITSH.getCode().equals(smsRawMaterialScrapOrder.getScrapStatus())) {
-                //JIT审核通过，进入下级，订单经理审核
-                smsRawMaterialScrapOrder.setScrapStatus(RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_DDJLSH.getCode());
-                //查询订单经理用户信息
-                R userMap = remoteUserService.selectUserByMaterialCodeAndRoleKey(smsRawMaterialScrapOrder.getFactoryCode(), RoleConstants.ROLE_KEY_ORDER);
-                if (!userMap.isSuccess()) {
-                    log.error("根据工厂和角色查询用户信息失败，原因："+userMap.get("msg"));
-                    throw new BusinessException("根据工厂和角色查询用户信息失败!");
-                }
-                sysUserVos = userMap.getCollectData(new TypeReference<List<SysUserVo>>() {});
-            } else {
-                //判断有无实物
-                if (RawScrapOrderIsMaterialObjectEnum.YCLBF_ORDER_IS_MATERIAL_OBJECT_TRUE.getCode()
-                        .equals(smsRawMaterialScrapOrder.getIsMaterialObject())) {
-                    //有实物
-                    if (RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_DDJLSH.getCode().equals(smsRawMaterialScrapOrder.getScrapStatus())) {
-                        //订单经理审核通过，进入下级，投入产出审核
-                        smsRawMaterialScrapOrder.setScrapStatus(RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_TRCCSH.getCode());
-                        //查询订单经理用户信息
-                        R userMap = remoteUserService.selectUserByMaterialCodeAndRoleKey(smsRawMaterialScrapOrder.getFactoryCode(), RoleConstants.ROLE_KEY_TRCC);
-                        if (!userMap.isSuccess()) {
-                            log.error("根据工厂和角色查询用户信息失败，原因："+userMap.get("msg"));
-                            throw new BusinessException("根据工厂和角色查询用户信息失败!");
-                        }
-                        sysUserVos = userMap.getCollectData(new TypeReference<List<SysUserVo>>() {});
-                    } else if (RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_TRCCSH.getCode().equals(smsRawMaterialScrapOrder.getScrapStatus())){
-                        //投入产出审核通过，待结算
-                        smsRawMaterialScrapOrder.setScrapStatus(RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_DJS.getCode());
-                    }
-                } else {
-                    //无实物
-                    if (RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_DDJLSH.getCode().equals(smsRawMaterialScrapOrder.getScrapStatus())) {
-                        //订单经理审核通过，待结算
-                        smsRawMaterialScrapOrder.setScrapStatus(RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_DJS.getCode());
-                    }
-                }
-            }
+            smsQualityScrapOrder.setScrapStatus(QualityScrapOrderStatusEnum.ZLBBF_ORDER_STATUS_WXJS.getCode());
         } else {
             //审批驳回
-            if (RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_JITSH.getCode().equals(smsRawMaterialScrapOrder.getScrapStatus())) {
-                smsRawMaterialScrapOrder.setScrapStatus(RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_JITBH.getCode());
-            } else if (RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_DDJLSH.getCode().equals(smsRawMaterialScrapOrder.getScrapStatus())) {
-                //订单经理审核驳回
-                smsRawMaterialScrapOrder.setScrapStatus(RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_DDJLBH.getCode());
-            } else if (RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_TRCCSH.getCode().equals(smsRawMaterialScrapOrder.getScrapStatus())) {
-                //投入产出驳回
-                smsRawMaterialScrapOrder.setScrapStatus(RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_TRCCBH.getCode());
-            }
+            smsQualityScrapOrder.setScrapStatus(QualityScrapOrderStatusEnum.ZLBBF_ORDER_STATUS_SHBH.getCode());
         }
-        //JIT审核通过传SAP
-        if (RawScrapOrderStatusEnum.YCLBF_ORDER_STATUS_DJS.getCode().equals(smsRawMaterialScrapOrder.getScrapStatus())) {
-            smsRawMaterialScrapOrder.setSapFlag(SapConstants.SAP_Y61_FLAG_GZ);
-            R rSAP = remoteSmsRawScrapOrderService.autidSuccessToSAP261(smsRawMaterialScrapOrder);
-            if (!rSAP.isSuccess()) {
-                throw new BusinessException(rSAP.getStr("msg"));
-            }
-            smsRawMaterialScrapOrder = rSAP.getData(SmsRawMaterialScrapOrder.class);
-        }
-        R r = remoteSmsRawScrapOrderService.updateAct(smsRawMaterialScrapOrder);
+        //更新质量部报废订单
+        R r = remoteSmsQualityScrapOrderService.updateAct(smsQualityScrapOrder,bizAudit.getResult(),bizAudit.getComment(),sysUser.getUserName());
         if (r.isSuccess()) {
             //审批 推进工作流
             R rResult = new R();
             rResult.put("bizAudit",bizAudit);
             rResult.put("userId",userId);
-            if (CollectionUtil.isNotEmpty(sysUserVos)) {
-                SysUserVo sysUserVo = sysUserVos.get(0);
-                Set<String> userIds = new HashSet<>();
-                userIds.add(sysUserVo.getUserId().toString());
-                rResult.put("userIds",userIds);
-                try {
-//                    mailService.sendTextMail(sysUserVo.getEmail(), EmailConstants.TITLE_RAW_SCRAP
-//                            , sysUserVo.getUserName() + EmailConstants.RAW_SCRAP_CONTEXT + EmailConstants.ORW_URL);
-                } catch (Exception e) {
-                    log.error("发送邮件失败！");
-                    throw new BusinessException("发送邮件失败！");
-                }
-            }
             return rResult;
         }else{
             throw new BusinessException(r.getStr("msg"));

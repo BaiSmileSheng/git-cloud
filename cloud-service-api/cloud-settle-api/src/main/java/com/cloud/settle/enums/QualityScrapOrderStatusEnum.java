@@ -17,6 +17,7 @@ public enum QualityScrapOrderStatusEnum {
     ZLBBF_ORDER_STATUS_ZLBZSH("5", "质量部长审核"),
     ZLBBF_ORDER_STATUS_ZLPTZSH("6", "质量平台长审核"),
     ZLBBF_ORDER_STATUS_SHBH("7", "供应商待确认(申诉驳回)"),
+    ZLBBF_ORDER_STATUS_QBSHBH("8", "申诉驳回"),
     ZLBBF_ORDER_STATUS_DJS("11", "待结算"),
     ZLBBF_ORDER_STATUS_YJS("12", "已结算"),
     ZLBBF_ORDER_STATUS_WXJS("13", "无需结算"),

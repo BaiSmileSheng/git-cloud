@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.settle.mapper.SmsQualityScrapOrderMapper">
+
+    <resultMap type="SmsQualityScrapOrder" id="SmsQualityScrapOrderResult">
+                    <result property="id" column="id"/>
+                    <result property="scrapNo" column="scrap_no"/>
+                    <result property="supplierCode" column="supplier_code"/>
+                    <result property="supplierName" column="supplier_name"/>
+                    <result property="productMaterialCode" column="product_material_code"/>
+                    <result property="productMaterialName" column="product_material_name"/>
+                    <result property="factoryCode" column="factory_code"/>
+                    <result property="companyCode" column="company_code"/>
+                    <result property="station" column="station"/>
+                    <result property="scrapStatus" column="scrap_status"/>
+                    <result property="scrapAmount" column="scrap_amount"/>
+                    <result property="stuffUnit" column="stuff_unit"/>
+                    <result property="submitDate" column="submit_date"/>
+                    <result property="complaintDescription" column="complaint_description"/>
+                    <result property="complaintDate" column="complaint_date"/>
+                    <result property="supplierConfirmDate" column="supplier_confirm_date"/>
+                    <result property="settleNo" column="settle_no"/>
+                    <result property="materialPrice" column="material_price"/>
+                    <result property="settleFee" column="settle_fee"/>
+                    <result property="cashAmount" column="cash_amount"/>
+                    <result property="uncashAmount" column="uncash_amount"/>
+                    <result property="sapStoreage" column="sap_storeage"/>
+                    <result property="sapResult" column="sap_result"/>
+                    <result property="sapRemark" column="sap_remark"/>
+                    <result property="postingNo" column="posting_no"/>
+                    <result property="sapDate" column="sap_date"/>
+                    <result property="currency" column="currency"/>
+                    <result property="rate" column="rate"/>
+                    <result property="delFlag" column="del_flag"/>
+                    <result property="remark" column="remark"/>
+                    <result property="createBy" column="create_by"/>
+                    <result property="createTime" column="create_time"/>
+                    <result property="updateBy" column="update_by"/>
+                    <result property="updateTime" column="update_time"/>
+                    </resultMap>
+
+    <sql id="selectSmsQualityScrapOrderVo">
+        select id, scrap_no, supplier_code, supplier_name, product_material_code, product_material_name, factory_code, company_code, station, scrap_status, scrap_amount, stuff_unit, submit_date, complaint_description, complaint_date, supplier_confirm_date, settle_no,material_price, settle_fee, cash_amount, uncash_amount, sap_storeage, sap_result, sap_remark, posting_no, sap_date, currency, rate, del_flag, remark, create_by, create_time, update_by, update_time from sms_quality_scrap_order
+    </sql>
+    <select id="selectMaterialByMonthAndStatus" resultType="java.lang.String">
+        select
+        DISTINCT product_material_code
+        from sms_quality_scrap_order
+        <where>
+            <if test="month != null">
+                DATE_FORMAT(sap_date, '%Y%m') = #{month}
+            </if>
+            AND scrap_status in
+            <foreach collection="scrapStatus" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+            and del_flag='0'
+        </where>
+    </select>
+
+    <select id="selectByMonthAndStatus" resultMap="SmsQualityScrapOrderResult">
+        <include refid="selectSmsQualityScrapOrderVo"/>
+        <where>
+            <if test="month != null">
+                DATE_FORMAT(sap_date, '%Y%m') = #{month}
+            </if>
+            AND scrap_status in
+            <foreach collection="scrapStatus" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+            and del_flag='0'
+        </where>
+    </select>
+    <select id="selectMaterialAndCompanyCodeGroupBy" resultType="java.util.HashMap">
+        select product_material_code as materialCode,company_code as companyCode
+        from sms_quality_scrap_order
+        <where>
+            <if test="month != null">
+                DATE_FORMAT(sap_date, '%Y%m') = #{month}
+            </if>
+            AND scrap_status in
+            <foreach collection="scrapStatus" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+            and del_flag='0'
+        </where>
+        GROUP BY product_material_code,company_code
+    </select>
+</mapper>

@@ -52,7 +52,7 @@
             <if test="lastMonth != null">
                 AND DATE_FORMAT(sap_trans_date, '%Y%m') = #{lastMonth}
             </if>
-            AND scrap_status
+            AND scrap_status in
             <foreach collection="scrapStatus" item="status" open="(" separator="," close=")">
                 #{status}
             </foreach>

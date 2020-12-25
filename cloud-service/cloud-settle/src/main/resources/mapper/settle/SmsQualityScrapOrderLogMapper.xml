@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloud.settle.mapper.SmsQualityScrapOrderLogMapper">
+
+    <resultMap type="SmsQualityScrapOrderLog" id="SmsQualityScrapOrderLogResult">
+                    <result property="id" column="id"/>
+                    <result property="qualityNo" column="quality_no"/>
+                    <result property="procNo" column="proc_no"/>
+                    <result property="complaintDescription" column="complaint_description"/>
+                    <result property="complaintDate" column="complaint_date"/>
+                    <result property="delFlag" column="del_flag"/>
+                    <result property="remark" column="remark"/>
+                    <result property="createBy" column="create_by"/>
+                    <result property="createTime" column="create_time"/>
+                    <result property="updateBy" column="update_by"/>
+                    <result property="updateTime" column="update_time"/>
+                    <result property="qualityId" column="quality_id"/>
+                    <result property="result" column="result"/>
+                    <result property="comment" column="comment"/>
+                    <result property="auditor" column="auditor"/>
+                    <result property="auditTime" column="audit_time"/>
+                    </resultMap>
+
+    <sql id="selectSmsQualityScrapOrderLogVo">
+        select id, quality_no, proc_no, complaint_description, complaint_date, del_flag, remark, create_by, create_time, update_by, update_time, quality_id, result, comment, auditor, audit_time from sms_quality_scrap_order_log
+    </sql>
+
+
+</mapper>

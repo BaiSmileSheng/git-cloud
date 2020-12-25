@@ -5,6 +5,7 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.system.domain.entity.CdMaterialInfo;
 import com.cloud.system.domain.entity.CdSupplierInfo;
 import com.cloud.system.service.ICdSupplierInfoService;
 import io.swagger.annotations.ApiImplicitParam;
@@ -120,5 +121,24 @@ public class CdSupplierInfoController extends BaseController {
         criteria.andEqualTo("supplierCode",supplierCode);
         CdSupplierInfo cdSupplierInfo = cdSupplierInfoService.findByExampleOne(example);
         return R.data(cdSupplierInfo);
+    }
+
+    /**
+     * 按供应商名称模糊查询,返回对象集合
+     */
+    @GetMapping("objectSelectSupplierByLikeCode")
+    @ApiOperation(value = "按供应商名称模糊查询,返回对象集合", response = CdSupplierInfo.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageNum", value = "当前记录起始索引", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "pageSize", value = "每页显示记录数", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "supplierName", value = "供应商名称", required = false, paramType = "query", dataType = "String")
+    })
+    public R objectSelectSupplierByLikeCode(@RequestParam(value = "corporation") String corporation){
+        Example example = new Example(CdSupplierInfo.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andLike("corporation","%"+corporation + "%");
+        startPage();
+        List<CdSupplierInfo> cdSupplierInfoList = cdSupplierInfoService.selectByExample(example);
+        return R.data(cdSupplierInfoList);
     }
 }
