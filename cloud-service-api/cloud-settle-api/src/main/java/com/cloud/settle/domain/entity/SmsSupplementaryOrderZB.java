@@ -137,5 +137,9 @@ public class SmsSupplementaryOrderZB extends BaseEntity {
     @ApiModelProperty(value = "SAP创单凭证")
     private String postingNo;
 
+    @ExcelProperty(value = "结算金额",index = 14)
+    @ApiModelProperty(value = "结算金额")
+    private BigDecimal settleFee;
+
 
 }

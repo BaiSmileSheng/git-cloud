@@ -199,6 +199,7 @@ public class Oms2weeksDemandOrderEdit extends BaseEntity {
     /**
      * SAP返回信息 传SAP返回信息
      */
+    @ExcelProperty(value = "SAP返回信息",index = 18)
     @ApiModelProperty(value = "SAP返回信息 传SAP返回信息")
     private String sapMessages;
 
@@ -215,6 +216,11 @@ public class Oms2weeksDemandOrderEdit extends BaseEntity {
     @ExcelProperty(value = "审核状态",index = 17,converter = DemandOrderGatherEditAuditStatusConverter.class)
     @ApiModelProperty(value = "审核状态 0：无需审核，1：审核中，2：审核完成")
     private String auditStatus;
+
+    /**
+     * 接收人
+     */
+    private String receiveBy;
 
     /**
      * 是否删除 0：有效，1：删除

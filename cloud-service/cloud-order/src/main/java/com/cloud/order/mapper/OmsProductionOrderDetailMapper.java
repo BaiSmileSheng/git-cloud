@@ -56,6 +56,7 @@ public interface OmsProductionOrderDetailMapper extends BaseMapper<OmsProduction
     * Date: 2020/7/1
     */
     List<OmsProductionOrderDetail> selectCommitListPageInfo(OmsProductionOrderDetail omsProductionOrderDetail);
+
     /**
     * Description: 根据List查询
     * Param:

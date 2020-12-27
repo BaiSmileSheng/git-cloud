@@ -70,6 +70,13 @@ public class OmsProductOrderWriteHandler extends AbstractRowWriteHandler {
             // 输入批注信息
             comment4.setString(new XSSFRichTextString(orderType));
             sheet.getRow(0).getCell(18).setCellComment(comment4);
+
+            String isSmallBatch = "是否小批：内部小批、生产小批、否";
+            XSSFClientAnchor xssfClientAnchor5 = new XSSFClientAnchor(0, 0, 0, 0, (short)22, 0, (short)23, 2);
+            Comment comment5 = drawingPatriarch.createCellComment(xssfClientAnchor5);
+            // 输入批注信息
+            comment5.setString(new XSSFRichTextString(isSmallBatch));
+            sheet.getRow(0).getCell(19).setCellComment(comment5);
         }
     }
 }

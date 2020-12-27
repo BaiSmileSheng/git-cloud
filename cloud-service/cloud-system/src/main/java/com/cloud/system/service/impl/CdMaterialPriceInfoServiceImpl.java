@@ -1,6 +1,8 @@
 package com.cloud.system.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.constant.SapConstants;
@@ -8,8 +10,10 @@ import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
 import com.cloud.common.exception.BusinessException;
 import com.cloud.common.utils.DateUtils;
+import com.cloud.settle.domain.entity.SmsRawMaterialScrapOrder;
 import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
 import com.cloud.settle.enums.MaterialPriceInfoSAPEnum;
+import com.cloud.settle.feign.RemoteSmsRawScrapOrderService;
 import com.cloud.settle.feign.RemoteSmsSupplementaryOrderService;
 import com.cloud.system.domain.entity.CdMaterialPriceInfo;
 import com.cloud.system.domain.entity.CdSettleProductMaterial;
@@ -59,6 +63,8 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
     private RemoteSmsSupplementaryOrderService remoteSmsSupplementaryOrderService;
     @Autowired
     private ICdSettleProductMaterialService cdSettleProductMaterialService;
+    @Autowired
+    private RemoteSmsRawScrapOrderService remoteSmsRawScrapOrderService;
 
     /**
      * 根据物料号校验价格是否已同步SAP,如果是返回价格信息
@@ -123,19 +129,38 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
 
         //1.查询sms_supplementary_order 待结算状态的物料编号 调SAP接口查原材料价格
         String createTimeStart = DateUtils.getMonthFirstTime(-1);
-        String createTimeEnd = DateUtils.getDate();
+        String createTimeEnd = DateUtil.now();
         R rMaterialList= remoteSmsSupplementaryOrderService.listByTime(createTimeStart,createTimeEnd);
-        if (!rMaterialList.isSuccess()) {
+
+        //1.1查询原材料报废表sms_raw_material_scrap_order待结算状态的物料编号，掉SAP接口查原材料价格
+        R rawScrapMap = remoteSmsRawScrapOrderService.listByTime(createTimeStart,createTimeEnd);
+        if (!rMaterialList.isSuccess() && !rawScrapMap.isSuccess()) {
             return rMaterialList;
         }
         //2.调SAP接口查原材料价格
-        List<SmsSupplementaryOrder> materialList = rMaterialList.getCollectData(new TypeReference<List<SmsSupplementaryOrder>>() {});
+        //2.1 物耗申请表的数据
+        List<SmsSupplementaryOrder> materialList =
+                rMaterialList.getCollectData(new TypeReference<List<SmsSupplementaryOrder>>() {});
+        //2.2 原材料报废表的数据
+        List<SmsRawMaterialScrapOrder> rawMaterialScrapOrders =
+                rawScrapMap.getCollectData(new TypeReference<List<SmsRawMaterialScrapOrder>>() {});
         List<String> materialCodeList =  new ArrayList<>();
-        materialList.forEach(smsSupplementaryOrder ->{
-            if(!materialCodeList.contains(smsSupplementaryOrder.getRawMaterialCode())){
-                materialCodeList.add(smsSupplementaryOrder.getRawMaterialCode());
-            }
-        });
+        //2.3判断物料申请表的物料
+        if (CollectionUtil.isNotEmpty(materialList)) {
+            materialList.forEach(smsSupplementaryOrder ->{
+                if(!materialCodeList.contains(smsSupplementaryOrder.getRawMaterialCode())){
+                    materialCodeList.add(smsSupplementaryOrder.getRawMaterialCode());
+                }
+            });
+        }
+        //2.4 判断原材料报废表的物料
+        if (CollectionUtil.isNotEmpty(rawMaterialScrapOrders)) {
+            rawMaterialScrapOrders.forEach(smsRawMaterialScrapOrder ->{
+                if(!materialCodeList.contains(smsRawMaterialScrapOrder.getRawMaterialCode())){
+                    materialCodeList.add(smsRawMaterialScrapOrder.getRawMaterialCode());
+                }
+            });
+        }
         List<CdMaterialPriceInfo> cdMaterialPriceInfoListY = selectSapCharges("YCL",materialCodeList);
         cdMaterialPriceInfoListY.forEach(cdMaterialPriceInfo -> {
             cdMaterialPriceInfo.setPriceType(PriceTypeEnum.PRICE_TYPE_0.getCode());
@@ -184,6 +209,20 @@ public class CdMaterialPriceInfoServiceImpl extends BaseServiceImpl<CdMaterialPr
         List<CdMaterialPriceInfo> cdMaterialPriceInfos =
                 cdMaterialPriceInfoMapper.selectByExample(materialPriceExample);
         return R.data(cdMaterialPriceInfos);
+    }
+    /**
+     * Description:  根据原材料物料和供应商查询价格
+     * Param: [list]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/12/8
+     */
+    @Override
+    public R selectBymaterialSupplierList(List<CdMaterialPriceInfo> list) {
+        if (!CollectionUtil.isNotEmpty(list)) {
+            return R.error("传入参数为空！");
+        }
+        return R.data(cdMaterialPriceInfoMapper.selectByMaterialSupplierList(list));
     }
 
     /**

@@ -34,6 +34,13 @@ public interface RemoteProductionOrderService {
      */
     @GetMapping("productionOrder/listForDelays")
     R listForDelays();
+
+    /**
+     * 把delaysFlag=3、已关单、实际结束日期与基本开始日期小于等于7的数据更改把delaysFlag为0
+     */
+    @GetMapping("productionOrder/updateNoNeedDelays")
+    R updateNoNeedDelays();
+
     /**
      * 根据ID查询
      * @param id
@@ -74,4 +81,18 @@ public interface RemoteProductionOrderService {
      */
     @PostMapping("productionOrder/updateBatchByPrimary")
     R updateBatchByPrimary(@RequestBody List<OmsProductionOrder> omsProductionOrderList);
+    /**
+     * 获取初始化中状态的排产订单
+     * @param
+     * @return
+     */
+    @PostMapping("productionOrder/selectByStatusAct")
+    R selectByStatusAct();
+    /**
+     * 定时任务校验排产订单审批流
+     * @param
+     * @return
+     */
+    @PostMapping("productionOrder/checkProductOrderAct")
+    R checkProductOrderAct(@RequestBody List<OmsProductionOrder> list);
 }

@@ -206,12 +206,13 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
         }
         //可以导入的结果集 插入
         List<ExcelImportSucObjectDto> successList=easyExcelListener.getSuccessList();
+        R result = new R();
         if (!CollectionUtils.isEmpty(successList)){
             List<OmsRealOrder> successResult =successList.stream().map(excelImportSucObjectDto -> {
                 OmsRealOrder omsRealOrder = BeanUtil.copyProperties(excelImportSucObjectDto.getObject(), OmsRealOrder.class);
                 return omsRealOrder;
             }).collect(Collectors.toList());
-            R result = importOmsRealOrder(successResult,auditResult,sysUser,orderFrom);
+            result = importOmsRealOrder(successResult,auditResult,sysUser,orderFrom);
             if(!result.isSuccess()){
                 logger.error("导入时插入数据异常 res:{}", JSONObject.toJSONString(result));
                 return result;
@@ -229,7 +230,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             //导出excel
             return EasyExcelUtilOSS.writeExcel(errorResults, "真单导入错误信息.xlsx", "sheet", new OmsRealOrderExcelImportErrorVo());
         }
-        return R.ok();
+        return R.ok(result.get("msg").toString());
     }
 
     /**
@@ -254,7 +255,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             omsRealOrder.setCreateBy(sysUser.getLoginName());
         });
         logger.info("导入真单插入数据开始");
-        omsRealOrderMapper.batchInsetOrUpdate(successResult);
+        int insertCount = omsRealOrderMapper.batchInsetOrUpdate(successResult);
 
         //key 工厂编号 ,客户编号 物料号,交货日期,订单类型
         if(!CollectionUtils.isEmpty(auditResult)){
@@ -288,7 +289,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             }
 
         }
-        return R.ok();
+        return R.ok("成功导入"+insertCount+"条！");
     }
 
     /**
@@ -373,6 +374,10 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
                     logger.error("非人工导入数据不可删除 订单号:{}",omsRealOrder1.getOrderCode());
                     throw new BusinessException("非人工导入数据不可删除");
                 }
+                if (!omsRealOrder1.getCreateBy().equals(sysUser.getLoginName())) {
+                    logger.error("只能删除自己导入的订单！");
+                    throw new BusinessException("只能删除自己导入的订单！");
+                }
             });
             int count = omsRealOrderMapper.deleteByIds(ids);
             orderCodeList = omsRealOrderSelectList.stream()
@@ -391,6 +396,7 @@ public class OmsRealOrderServiceImpl extends BaseServiceImpl<OmsRealOrder> imple
             if (StringUtils.isBlank(omsRealOrder.getProductFactoryCode())) {
                 example.and().andIn("productFactoryCode", Arrays.asList(
                         DataScopeUtil.getUserFactoryScopes(currentUserId).split(",")));
+                example.and().andEqualTo("createBy", sysUser.getLoginName());
             }
         } else if(CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
             example.and().andEqualTo("createBy", sysUser.getLoginName());

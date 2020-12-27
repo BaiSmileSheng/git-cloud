@@ -66,6 +66,16 @@ public class RemoteSettleInfoFallbackFactory implements FallbackFactory<RemoteSe
                 log.error("RemoteSettleInfoService.batchUpdateByProductOrderCode：{}",throwable.getMessage());
                 return R.error("服务器拥挤：请稍后再试！");
             }
+            /**
+             * 根据生产订单号删除
+             * @param productOrderCode
+             * @return
+             */
+            @Override
+            public R deleteByProductOrderCode(String productOrderCode) {
+                log.error("RemoteSettleInfoService.deleteByProductOrderCode：{}",throwable.getMessage());
+                return R.error("服务器拥挤：请稍后再试！");
+            }
         };
     }
 }

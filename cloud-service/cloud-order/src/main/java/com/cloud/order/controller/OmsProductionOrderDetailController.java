@@ -1,17 +1,26 @@
 package com.cloud.order.controller;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
+import com.cloud.common.constant.ProductOrderConstants;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.page.TableDataInfo;
 import com.cloud.common.log.annotation.OperLog;
 import com.cloud.common.log.enums.BusinessType;
+import com.cloud.order.domain.entity.Oms2weeksDemandOrder;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.domain.entity.OmsProductionOrderDetail;
 import com.cloud.order.domain.entity.OmsRawMaterialFeedback;
+import com.cloud.order.domain.entity.vo.OmsProductionOrderDetailCommitExportVo;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderDetailExportVo;
 import com.cloud.order.domain.entity.vo.OmsProductionOrderDetailVo;
 import com.cloud.order.service.IOmsProductionOrderDetailService;
+import com.cloud.order.util.EasyExcelUtilOSS;
 import com.cloud.system.domain.entity.SysUser;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +28,11 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 排产订单明细  提供者
@@ -173,5 +186,51 @@ public class OmsProductionOrderDetailController extends BaseController {
     public R remove(@RequestBody String ids) {
         return toAjax(omsProductionOrderDetailService.deleteByIds(ids));
     }
-
+    /**
+     * Description:  排产订单审批流程校验查询明细
+     * Param: [orderCodes]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/10/19
+     */
+    @PostMapping("selectDetailByOrderAct")
+    public R selectDetailByOrderAct(@RequestBody List<String> orderCodes){
+        Example example = new Example(OmsProductionOrderDetail.class);
+        Example.Criteria criteria = example.createCriteria();
+        if (CollectionUtil.isNotEmpty(orderCodes)) {
+            criteria.andIn("productOrderCode", orderCodes);
+        }
+        criteria.andEqualTo("status", ProductOrderConstants.DETAIL_STATUS_ZERO);
+        List<OmsProductionOrderDetail> list = omsProductionOrderDetailService.selectByExample(example);
+        if (ObjectUtil.isEmpty(list) || list.size() <= 0) {
+            return R.ok();
+        }
+        return R.data(list);
+    }
+    /**
+     * 原材料确认-导出
+     */
+    @GetMapping("commitExport")
+    @ApiOperation(value = "原材料确认-导出", response = OmsProductionOrderDetail.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "productFactoryCode", value = "生产工厂", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "materialCode", value = "原材料物料", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "checkStartDate", value = "查询开始日期", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "checkEndDate", value = "查询结束日期", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "status", value = "状态，0：未确认，1：已确认，2：反馈中'", required = false, paramType = "query", dataType = "String")
+    })
+    @OperLog(title = "原材料确认-导出 ", businessType = BusinessType.EXPORT)
+    @HasPermissions("order:productOrderDetail:commitExport")
+    public R commitExport(@ApiIgnore OmsProductionOrderDetail omsProductionOrderDetail) {
+        SysUser sysUser = getUserInfo(SysUser.class);
+        List<OmsProductionOrderDetail> list  =
+                omsProductionOrderDetailService.commitListPageInfo(omsProductionOrderDetail,sysUser);
+        List<OmsProductionOrderDetailCommitExportVo> omsProductionOrderDetailCommitExportVos = list.stream().map(detail ->{
+            OmsProductionOrderDetailCommitExportVo commitExportVo =
+                    BeanUtil.copyProperties(detail,OmsProductionOrderDetailCommitExportVo.class);
+            return commitExportVo;
+        }).collect(Collectors.toList());
+        String fileName = "原材料确认报表"+DateUtil.formatDate(new Date())+".xlsx";
+        return EasyExcelUtilOSS.writeExcel(omsProductionOrderDetailCommitExportVos, fileName, "sheet", new OmsProductionOrderDetailCommitExportVo());
+    }
 }

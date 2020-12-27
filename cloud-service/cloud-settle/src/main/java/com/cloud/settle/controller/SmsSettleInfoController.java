@@ -1,7 +1,5 @@
 package com.cloud.settle.controller;
 
-import cn.hutool.core.date.DateField;
-import cn.hutool.core.date.DateUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.core.controller.BaseController;
 import com.cloud.common.core.domain.R;
@@ -169,7 +167,7 @@ public class SmsSettleInfoController extends BaseController {
                 criteria.andGreaterThanOrEqualTo("productStartDate",smsSettleInfo.getBeginTime());
             }
             if(StringUtils.isNotBlank(smsSettleInfo.getEndTime())){
-                criteria.andLessThanOrEqualTo("productStartDate", DateUtil.parse(smsSettleInfo.getEndTime()).offset(DateField.DAY_OF_MONTH,1));
+                criteria.andLessThanOrEqualTo("productStartDate", smsSettleInfo.getEndTime());
             }
         }
         if(TimeTypeEnum.BASIC_END_TIME_TYPE.getCode().equals(smsSettleInfo.getTimeType())){
@@ -177,7 +175,7 @@ public class SmsSettleInfoController extends BaseController {
                 criteria.andGreaterThanOrEqualTo("productEndDate",smsSettleInfo.getBeginTime());
             }
             if(StringUtils.isNotBlank(smsSettleInfo.getEndTime())){
-                criteria.andLessThanOrEqualTo("productEndDate",DateUtil.parse(smsSettleInfo.getEndTime()).offset(DateField.DAY_OF_MONTH,1));
+                criteria.andLessThanOrEqualTo("productEndDate",smsSettleInfo.getEndTime());
             }
         }
 
@@ -186,7 +184,7 @@ public class SmsSettleInfoController extends BaseController {
                 criteria.andGreaterThanOrEqualTo("actualEndDate",smsSettleInfo.getBeginTime());
             }
             if(StringUtils.isNotBlank(smsSettleInfo.getEndTime())){
-                criteria.andLessThanOrEqualTo("actualEndDate",DateUtil.parse(smsSettleInfo.getEndTime()).offset(DateField.DAY_OF_MONTH,1));
+                criteria.andLessThanOrEqualTo("actualEndDate",smsSettleInfo.getEndTime());
             }
         }
 
@@ -269,5 +267,16 @@ public class SmsSettleInfoController extends BaseController {
     @PostMapping("batchUpdateByProductOrderCode")
     public R batchUpdateByProductOrderCode(@RequestBody List<SmsSettleInfo> smsSettleInfoList){
         return smsSettleInfoService.batchUpdateByProductOrderCode(smsSettleInfoList);
+    }
+    /**
+     * Description: 根据生产订单号删除加工结算信息
+     * Param: [productOrderCode]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/10/15
+     */
+    @PostMapping("deleteByProductOrderCode")
+    public R deleteByProductOrderCode(String productOrderCode){
+        return toAjax(smsSettleInfoService.delectByProductOrderCode(productOrderCode));
     }
 }

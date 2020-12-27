@@ -178,7 +178,7 @@ public class ActSmsDelaysDeliveryServiceImpl implements IActSmsDelaysDeliverySer
         }
         //4.发送邮件
         String factoryCode = selectSmsDelaysDelivery.getFactoryCode();
-        String roleKey = RoleConstants.ROLE_KEY_ZLBBZ;
+        String roleKey = RoleConstants.ROLE_KEY_ORDER;
         String delaysNo = selectSmsDelaysDelivery.getDelaysNo();
         List<SysUserVo> sysUserVoList = sendEmail(delaysNo, factoryCode, roleKey);
         R resultRes = new R();

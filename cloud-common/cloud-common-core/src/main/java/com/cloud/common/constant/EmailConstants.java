@@ -18,6 +18,14 @@ public class EmailConstants {
 
     public static final String TITLE_OVER_STOCK = "超期库存审批通知";
 
+    public static final String TITLE_RAW_FEEDBACK = "原材料反馈信息通知";
+
+    public static final String TITLE_RAW_MATERIAL = "原材料反馈信息处理-驳回通知";
+
+    public static final String TITLE_RAW_SCRAP = "原材料报废审批通知";
+
+    public static final String TITLE_QUALITY_SCRAP = "质量部报废申诉审批通知";
+
 
 
     /**
@@ -39,5 +47,24 @@ public class EmailConstants {
     public static final String ORW_URL = "\n外网地址：http://orw-khaos.cosmoplat.com/\n" +
             "内网地址：http://orw.khaos.cosmoplat.com/";
 
+    public static final String RAW_FEEDBACK_CONTEXT = "，您好！\n 订单评审系统有新的原材料反馈信息待处理，请及时处理！";
+
+    public static final String RAW_MATERIAL_CONTEXT_FRONT = "，您好！订单评审系统，原材料反馈信息处理模块排产员驳回列表如下：<html> " +
+            "<body> " +
+            "<table border= \"1\" cellspacing=\"0\" style=\"border-color: grey\">" +
+            "<tr bgcolor=\"grey\">" +
+            "<th style=\"width: 100px\">生产工厂</th>" +
+            "<th style=\"width: 150px\">成品专用号</th>" +
+            "<th style=\"width: 150px\">原材料号</th>" +
+            "<th style=\"width: 150px\">排产员</th>" +
+            "<th style=\"width: 150px\">反馈JIT</th>" +
+            "<th style=\"width: 200px\">反馈原因</th>" +
+            "</tr>";
+    public static final String RAW_MATERIAL_CONTEXT_AFTER = "</table>" +
+            "</body>" +
+            "</html>";
+    public static final String RAW_SCRAP_CONTEXT = "，您好！\n 订单评审系统有新的原材料报废订单待审批，请及时审批！";
+
+    public static final String QUALITY_SCRAP_CONTEXT = "，您好！\n 订单评审系统有新的质量部报废申诉订单待审批，请及时审批！";
 
 }

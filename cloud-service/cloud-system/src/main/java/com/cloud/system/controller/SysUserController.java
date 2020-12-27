@@ -1,6 +1,8 @@
 package com.cloud.system.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.StrUtil;
 import com.cloud.common.annotation.LoginUser;
 import com.cloud.common.auth.annotation.HasPermissions;
 import com.cloud.common.constant.UserConstants;
@@ -18,7 +20,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Set;
+import java.util.*;
 
 /**
  * 用户 提供者
@@ -191,6 +193,7 @@ public class SysUserController extends BaseController {
 
     /**
      * 根据供应商V码查询供应商信息
+     *
      * @param supplierCode 供应商编号
      * @return 用户信息
      */
@@ -200,6 +203,7 @@ public class SysUserController extends BaseController {
         SysUserVo sysUservo = sysUserService.findUserBySupplierCode(supplierCode);
         return R.data(sysUservo);
     }
+
     /**
      * Description:  查询用户权限
      * Param: []
@@ -209,24 +213,26 @@ public class SysUserController extends BaseController {
      */
     @PostMapping("selectUserRights")
     @ApiOperation(value = "查询用户权限 ", response = R.class)
-    public R selectUserRights(@RequestBody String roleKey){
+    public R selectUserRights(@RequestBody String roleKey) {
         return sysUserService.selectUserRights(roleKey);
     }
 
     /**
      * 根据工厂或物料号 角色查 用户信息
+     *
      * @param materialCode
      * @param roleKey
      * @return
      */
     @GetMapping("selectUserByMaterialCodeAndRoleKey")
     @ApiOperation(value = "根据工厂或物料号 角色查 用户信息 ", response = R.class)
-    public R selectUserByMaterialCodeAndRoleKey(@RequestParam("materialCode") String materialCode, @RequestParam("roleKey")String roleKey){
-        return R.data(sysUserService.selectUserByMaterialCodeAndRoleKey(materialCode,roleKey));
+    public R selectUserByMaterialCodeAndRoleKey(@RequestParam("materialCode") String materialCode, @RequestParam("roleKey") String roleKey) {
+        return R.data(sysUserService.selectUserByMaterialCodeAndRoleKey(materialCode, roleKey));
     }
 
     /**
      * 根据角色、工厂、采购组查对应的用户信息
+     *
      * @param factoryCode
      * @param purchaseCode
      * @param roleKey
@@ -234,18 +240,53 @@ public class SysUserController extends BaseController {
      */
     @GetMapping("selectUserByFactoryCodeAndPurchaseCodeAndRoleKey")
     @ApiOperation(value = "根据角色、工厂、采购组查对应的用户信息 ", response = R.class)
-    public R selectUserByFactoryCodeAndPurchaseCodeAndRoleKey(@RequestParam("factoryCode") String factoryCode,@RequestParam("purchaseCode") String purchaseCode, @RequestParam("roleKey")String roleKey){
-        return R.data(sysUserService.selectUserByFactoryCodeAndPurchaseCodeAndRoleKey(factoryCode,purchaseCode,roleKey));
+    public R selectUserByFactoryCodeAndPurchaseCodeAndRoleKey(@RequestParam("factoryCode") String factoryCode, @RequestParam("purchaseCode") String purchaseCode, @RequestParam("roleKey") String roleKey) {
+        return R.data(sysUserService.selectUserByFactoryCodeAndPurchaseCodeAndRoleKey(factoryCode, purchaseCode, roleKey));
     }
 
     /**
      * 根据角色查对应的用户名,邮箱
+     *
      * @param roleKey
      * @return
      */
     @GetMapping("selectUserByRoleKey")
     @ApiOperation(value = "根据角色查对应的用户名,邮箱", response = R.class)
-    public R selectUserByRoleKey(@RequestParam("roleKey")String roleKey){
+    public R selectUserByRoleKey(@RequestParam("roleKey") String roleKey) {
         return R.data(sysUserService.selectUserByRoleKey(roleKey));
+    }
+
+    /**
+     * 根据登录名查询用户
+     *
+     * @param
+     * @return
+     */
+    @GetMapping("selectUserByLoginName")
+    public R selectUserByLoginName(@RequestParam("loginNames") String loginNames) {
+        Set<SysUserVo> sysUserSet = new HashSet<>();
+        if (StrUtil.isNotBlank(loginNames)) {
+            List<String> loginNameList = Arrays.asList(loginNames.split(","));
+            loginNameList.forEach(n -> {
+                        SysUser sysUser = sysUserService.selectUserByLoginName(n);
+                        SysUserVo sysUserVo = BeanUtil.copyProperties(sysUser,
+                                SysUserVo.class);
+
+                        sysUserSet.add(sysUserVo);
+                    }
+            );
+        }
+        List<SysUserVo> sysUserList = new ArrayList<>(sysUserSet);
+        return R.data(sysUserList);
+    }
+
+    /**
+     * 查询所有有效的登录名
+     * @return
+     */
+    @GetMapping("selectDistinctLoginName")
+    public R selectDistinctLoginName() {
+        List<String> list = sysUserService.selectDistinctLoginName();
+        return R.data(list);
     }
 }

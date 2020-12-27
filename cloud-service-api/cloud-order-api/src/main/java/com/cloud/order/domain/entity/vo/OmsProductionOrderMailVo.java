@@ -245,7 +245,7 @@ public class OmsProductionOrderMailVo {
     /**
      * 发往地
      */
-    @ExcelProperty(value = "顺序",index = 15)
+    @ExcelProperty(value = "发往地", index = 15)
     @ApiModelProperty(value = "发往地")
     private String destination;
 

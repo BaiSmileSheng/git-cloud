@@ -9,12 +9,17 @@ import com.cloud.activiti.consts.ActivitiTableNameConstants;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
+import com.cloud.activiti.mail.MailService;
 import com.cloud.activiti.service.IActSmsSupplementaryOrderService;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizBusinessService;
+import com.cloud.common.constant.EmailConstants;
 import com.cloud.common.constant.RoleConstants;
+import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.common.redis.util.RedisUtils;
+import com.cloud.common.utils.StringUtils;
 import com.cloud.settle.domain.entity.SmsSupplementaryOrder;
 import com.cloud.settle.enums.SupplementaryOrderStatusEnum;
 import com.cloud.settle.feign.RemoteSmsSupplementaryOrderService;
@@ -25,6 +30,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
+import org.activiti.engine.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +52,12 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
     private RemoteSmsSupplementaryOrderService remoteSmsSupplementaryOrderService;
     @Autowired
     private IActTaskService actTaskService;
+    @Autowired
+    private MailService mailService;
+    @Autowired
+    private TaskService taskService;
+    @Autowired
+    private RedisUtils redisUtils;
 
 
     /**
@@ -83,6 +95,12 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
         smsSupplementaryOrder.setProcDefId(procDefId);
         smsSupplementaryOrder.setProcName(procName);
         SmsSupplementaryOrder smsSupplementaryOrderCheck = remoteSmsSupplementaryOrderService.get(smsSupplementaryOrder.getId());
+        //Y61校验数据准确性
+        smsSupplementaryOrderCheck.setSapFlag(SapConstants.SAP_Y61_FLAG_JY);
+        R rCheck = remoteSmsSupplementaryOrderService.autidSuccessToSAPY61(smsSupplementaryOrderCheck);
+        if (!rCheck.isSuccess()) {
+            throw new BusinessException(rCheck.getStr("msg"));
+        }
         smsSupplementaryOrder.setStuffNo(smsSupplementaryOrderCheck.getStuffNo());
         BizBusiness business = initBusiness(smsSupplementaryOrder, sysUser.getUserId());
         bizBusinessService.insertBizBusiness(business);
@@ -95,9 +113,37 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
             throw new BusinessException("物耗审批开启失败，下一级审核人为空！");
         }
         List<SysUserVo> users=rUser.getCollectData(new TypeReference<List<SysUserVo>>() {});
+        //发送邮件通知
+        try {
+            sendEmail(smsSupplementaryOrder.getStuffNo(),users);
+        } catch (Exception e) {
+            log.error("物耗审批发送邮件失败!{}", e);
+        }
         Set<String> userIds = users.stream().map(user->user.getUserId().toString()).collect(Collectors.toSet());
         bizBusinessService.startProcess(business, variables,userIds);
         return R.ok("提交成功！");
+    }
+
+    /**
+     * 发送邮件
+     * @param stuffNo
+     * @param sysUserVoList
+     */
+    private void sendEmail(String stuffNo, List<SysUserVo> sysUserVoList) {
+        //校验邮件
+        for(SysUserVo sysUserVo : sysUserVoList){
+            String email = sysUserVo.getEmail();
+            if(StringUtils.isBlank(email)){
+                throw new  BusinessException("用户"+sysUserVo.getUserName()+"邮箱不存在");
+            }
+        }
+        //发送邮件
+        for(SysUserVo sysUserVo : sysUserVoList){
+            String email = sysUserVo.getEmail();
+            String subject = "物耗申请单审批";
+            String content = "您有一条待办消息要处理!" + "物耗申请单 单号:" + stuffNo +  EmailConstants.ORW_URL;
+            mailService.sendTextMail(email,subject,content);
+        }
     }
 
     @Override
@@ -143,6 +189,12 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
             log.error(StrUtil.format("(物耗)只有待提交状态数据可以提交!原状态参数为{}", smsSupplementaryOrderCheck.getStuffStatus()));
             return R.error("只有待提交状态数据可以提交！");
         }
+        //Y61校验数据准确性
+        smsSupplementaryOrderCheck.setSapFlag(SapConstants.SAP_Y61_FLAG_JY);
+        R rCheck = remoteSmsSupplementaryOrderService.autidSuccessToSAPY61(smsSupplementaryOrderCheck);
+        if (!rCheck.isSuccess()) {
+            return R.error(rCheck.getStr("msg"));
+        }
         //更新数据
         smsSupplementaryOrder.setSubmitDate(DateUtil.date());
         smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode());
@@ -171,6 +223,12 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
             throw new BusinessException("物耗审批开启失败，下一级审核人为空！");
         }
         List<SysUserVo> users=rUser.getCollectData(new TypeReference<List<SysUserVo>>() {});
+        try {
+            sendEmail(smsSupplementaryOrderCheck.getStuffNo(),users);
+        } catch (Exception e) {
+            log.error("物耗审批发送邮件失败!{}", e);
+        }
+
         Set<String> userIds = users.stream().map(user->user.getUserId().toString()).collect(Collectors.toSet());
         bizBusinessService.startProcess(business, variables,userIds);
         return R.ok("提交成功！");
@@ -187,6 +245,21 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
     @Override
     @GlobalTransactional
     public R audit(BizAudit bizAudit, long userId) {
+        String taskId = bizAudit.getTaskId();
+        Map<String, Object> variables = Maps.newHashMap();
+        variables.put("result", bizAudit.getResult());
+        variables.put("comment", bizAudit.getComment());
+        variables.put("taskIdVar", taskId);
+        variables.put("bizBusinessId", bizAudit.getBusinessKey().toString());
+
+        taskService.complete(taskId, variables);
+        bizAudit = redisUtils.get(StrUtil.format("bizAudit{}{}", bizAudit.getBusinessKey().toString(), taskId),BizAudit.class);
+        Set<String> userIds = redisUtils.get(StrUtil.format("userIds{}{}", bizAudit.getBusinessKey().toString(), taskId), Set.class);
+        return actTaskService.auditCandidateUserMul(bizAudit, userId,userIds);
+    }
+
+    @Override
+    public R auditLogic(BizAudit bizAudit, long userId){
         log.info(StrUtil.format("物耗申请审核：参数为{}", bizAudit.toString()));
         //流程审核业务表
         BizBusiness bizBusiness = bizBusinessService.selectBizBusinessById(bizAudit.getBusinessKey().toString());
@@ -210,14 +283,8 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
         if (result) {
             //审批通过
             if (SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode().equals(smsSupplementaryOrder.getStuffStatus())) {
-                smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode());
-            } else if (SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode().equals(smsSupplementaryOrder.getStuffStatus())) {
-                //小微主审核通过传SAP
-                R r = remoteSmsSupplementaryOrderService.autidSuccessToSAPY61(smsSupplementaryOrder);
-                if (!r.isSuccess()) {
-                    throw new BusinessException(r.getStr("msg"));
-                }
-                smsSupplementaryOrder = (SmsSupplementaryOrder) r.get("data");
+                //审批完成
+                smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode());
             } else {
                 log.error(StrUtil.format("(物耗)物耗审批通过状态错误：{}", smsSupplementaryOrder.getStuffStatus()));
                 throw new BusinessException("此状态数据不允许审核！");
@@ -226,27 +293,27 @@ public class ActSmsSupplementaryOrderServiceImpl implements IActSmsSupplementary
             //审批驳回
             if (SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode().equals(smsSupplementaryOrder.getStuffStatus())) {
                 smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITBH.getCode());
-            } else if (SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode().equals(smsSupplementaryOrder.getStuffStatus())) {
-                smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZBH.getCode());
             } else {
                 log.error(StrUtil.format("(物耗)物耗审批驳回状态错误：{}", smsSupplementaryOrder.getStuffStatus()));
                 throw new BusinessException("此状态数据不允许审核！");
             }
         }
+        //JIT审核通过传SAP
+        if (SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode().equals(smsSupplementaryOrder.getStuffStatus())) {
+            smsSupplementaryOrder.setSapFlag(SapConstants.SAP_Y61_FLAG_GZ);
+            R rSAP = remoteSmsSupplementaryOrderService.autidSuccessToSAPY61(smsSupplementaryOrder);
+            if (!rSAP.isSuccess()) {
+                throw new BusinessException(rSAP.getStr("msg"));
+            }
+            smsSupplementaryOrder = rSAP.getData(SmsSupplementaryOrder.class);
+        }
         R r = remoteSmsSupplementaryOrderService.update(smsSupplementaryOrder);
         if (r.isSuccess()) {
             //审批 推进工作流
-            //指定下一审批人
-            R rUser = remoteUserService.selectUserByMaterialCodeAndRoleKey(smsSupplementaryOrder.getFactoryCode()
-                    ,  RoleConstants.ROLE_KEY_XWZ);
-            if (!rUser.isSuccess()) {
-                log.error("物耗审批开启失败，下一级审核人为空！");
-                throw new BusinessException("物耗审批开启失败，下一级审核人为空！");
-            }
-            List<SysUserVo> users = rUser.getCollectData(new TypeReference<List<SysUserVo>>() {
-            });
-            Set<String> userIds = users.stream().map(user -> user.getUserId().toString()).collect(Collectors.toSet());
-            return actTaskService.auditCandidateUser(bizAudit, userId,userIds);
+            R rResult = new R();
+            rResult.put("bizAudit",bizAudit);
+            rResult.put("userId",userId);
+            return rResult;
         }else{
             throw new BusinessException(r.getStr("msg"));
         }

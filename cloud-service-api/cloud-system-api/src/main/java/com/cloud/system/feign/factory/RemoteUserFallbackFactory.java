@@ -7,6 +7,7 @@ import com.cloud.system.feign.RemoteUserService;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.Set;
 
@@ -72,6 +73,7 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
                 return R.error("查询用户权限失败，原因{}："+throwable.getMessage());
             }
 
+            @GetMapping("user/selectUserByMaterialCodeAndRoleKey")
             @Override
             public R selectUserByMaterialCodeAndRoleKey(String materialCode, String roleKey) {
                 log.error("根据工厂或物料号 角色查 用户信息失败,原因{}："+throwable.getMessage());
@@ -93,6 +95,18 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
             public R selectUserByRoleKey(String roleKey) {
                 log.error("根据角色查对应的用户名,邮箱失败,原因{}："+throwable.getMessage());
                 return R.error("根据角色查对应的用户名,邮箱失败,原因{}："+throwable.getMessage());
+            }
+
+            @Override
+            public R selectUserByLoginName(String loginNames) {
+                log.error("根据登录名查询用户失败,原因{}："+throwable.getMessage());
+                return R.error("根据登录名查询用户失败,原因{}："+throwable.getMessage());
+            }
+
+            @Override
+            public R selectDistinctLoginName() {
+                log.error("查询所有有效的登录名失败,原因{}："+throwable.getMessage());
+                return R.error("查询所有有效的登录名失败,原因{}："+throwable.getMessage());
             }
         };
     }

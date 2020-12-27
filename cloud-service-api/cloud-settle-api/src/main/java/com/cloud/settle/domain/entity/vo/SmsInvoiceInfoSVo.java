@@ -2,7 +2,6 @@ package com.cloud.settle.domain.entity.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
-import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.cloud.common.core.domain.BaseEntity;
 import com.cloud.settle.domain.entity.SmsInvoiceInfo;
 import io.swagger.annotations.ApiModel;
@@ -11,12 +10,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tk.mybatis.mapper.annotation.KeySql;
 
-import javax.persistence.Id;
 import javax.persistence.Transient;
-import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -47,5 +42,8 @@ public class SmsInvoiceInfoSVo extends BaseEntity {
     @Transient
     @ApiModelProperty(value = "发票信息集合")
     private List<SmsInvoiceInfo> smsInvoiceInfoList;
+
+    @ApiModelProperty(value = "1、保存  2、提交")
+    private String typeFlag;
 
 }

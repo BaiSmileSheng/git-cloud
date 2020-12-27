@@ -2,6 +2,7 @@ package com.cloud.settle.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.cloud.activiti.feign.RemoteBizBusinessService;
+import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.constant.EmailConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
@@ -14,16 +15,10 @@ import com.cloud.settle.mail.MailService;
 import com.cloud.settle.mapper.SmsQualityOrderMapper;
 import com.cloud.settle.service.ISmsQualityOrderService;
 import com.cloud.system.domain.entity.CdFactoryInfo;
-import com.cloud.system.domain.entity.CdSupplierInfo;
 import com.cloud.system.domain.entity.SysOss;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.domain.vo.SysUserVo;
-import com.cloud.system.feign.RemoteFactoryInfoService;
-import com.cloud.system.feign.RemoteMaterialService;
-import com.cloud.system.feign.RemoteOssService;
-import com.cloud.system.feign.RemoteSequeceService;
-import com.cloud.system.feign.RemoteSupplierInfoService;
-import com.cloud.system.feign.RemoteUserService;
+import com.cloud.system.feign.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.slf4j.Logger;
@@ -33,11 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 质量索赔 Service业务层处理
@@ -581,6 +572,7 @@ public class SmsQualityOrderServiceImpl extends BaseServiceImpl<SmsQualityOrder>
         criteria.andEqualTo("qualityStatus", QualityStatusEnum.QUALITY_STATUS_1);
         criteria.andGreaterThanOrEqualTo("submitDate", submitDateStart);
         criteria.andLessThan("submitDate", submitDateEnd);
+        criteria.andEqualTo("delFlag", DeleteFlagConstants.NO_DELETED);
         List<SmsQualityOrder> smsQualityOrderList = smsQualityOrderMapper.selectByExample(example);
         return smsQualityOrderList;
     }

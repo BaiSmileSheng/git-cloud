@@ -2,8 +2,9 @@ package com.cloud.order.enums;
 
 public enum SmallBatchEnum {
 
-    SMALL_BATCH_TRUE("0","是"),
-    SMALL_BATCH_FALSE("1","否");
+    SMALL_BATCH_ZERO("0","内部小批"),
+    SMALL_BATCH_ONE("1","生产小批"),
+    SMALL_BATCH_TRUE("2","否");
     private String code;
     private String msg;
     SmallBatchEnum(String code, String msg) {

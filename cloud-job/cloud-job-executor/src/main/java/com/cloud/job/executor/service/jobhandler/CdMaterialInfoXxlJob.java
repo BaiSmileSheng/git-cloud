@@ -30,6 +30,7 @@ public class CdMaterialInfoXxlJob {
                 XxlJobLogger.log("==============定时任务执行异常============:"+r.get("msg"));
                 return ReturnT.FAIL;
             }
+            XxlJobLogger.log("=============="+r.get("msg")+"================");
             XxlJobLogger.log("==============调用保存物料主数据服务结束============");
         } catch (Exception e) {
             XxlJobLogger.log("定时任务执行异常："+e);
@@ -51,7 +52,7 @@ public class CdMaterialInfoXxlJob {
         XxlJobLogger.log("=================获取UPH数据定时任务开始==================");
         R r = remoteMaterialService.updateUphBySap();
         if (!r.isSuccess()) {
-            XxlJobLogger.log("==============获取UPH数据失败=============");
+            XxlJobLogger.log("==============获取UPH数据失败============="+r.get("msg"));
             return ReturnT.FAIL;
         }
         XxlJobLogger.log("=================获取UPH数据定时任务结束==================");

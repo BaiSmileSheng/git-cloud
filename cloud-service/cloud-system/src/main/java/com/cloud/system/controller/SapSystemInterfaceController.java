@@ -1,7 +1,9 @@
 package com.cloud.system.controller;
 
+import cn.hutool.core.collection.CollUtil;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
+import com.cloud.system.mail.MailService;
 import com.cloud.system.service.SystemFromSap601InterfaceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -26,6 +28,8 @@ import java.util.List;
 public class SapSystemInterfaceController {
     @Autowired
     private SystemFromSap601InterfaceService systemFromSap601InterfaceService;
+    @Autowired
+    private MailService mailService;
     /**
      * @Description: 获取uph数据
      * @Param:  factorys,materials
@@ -66,7 +70,16 @@ public class SapSystemInterfaceController {
     @PostMapping("sycBomInfo")
     @ApiOperation(value = "定时获取BOM清单数据 ", response = R.class)
     public R sycBomInfo(){
-        return systemFromSap601InterfaceService.sycBomInfo();
+        R r = new R();
+        StringBuffer msg = new StringBuffer();
+        try {
+            r = systemFromSap601InterfaceService.sycBomInfo();
+            msg.append(r.getStr("msg"));
+        } catch (Exception e) {
+            msg.append("bom获取失败："+e.getMessage());
+            throw e;
+        }
+        return r;
     }
 
     /**

@@ -85,7 +85,7 @@
         <where>
             detail.product_order_code = o.order_code
             and (o.audit_status = '0' or o.audit_status = '2')
-            and detail.product_start_date <![CDATA[ >= ]]> DATE_FORMAT(now(),'%Y-%m-%d')
+            and detail.product_start_date <![CDATA[ > ]]> DATE_FORMAT(now(),'%Y-%m-%d')
             and detail.product_start_date <![CDATA[ < ]]> DATE_FORMAT(DATE_ADD(now(),INTERVAL 31 day),'%Y-%m-%d')
             <if test="productFactoryCode != null and productFactoryCode != ''">
                 and detail.product_factory_code = #{productFactoryCode,jdbcType=VARCHAR}
@@ -115,7 +115,7 @@
         <where>
             detail.product_order_code = o.order_code
             and (o.audit_status = '0' or o.audit_status = '2')
-            and detail.product_start_date <![CDATA[ >= ]]> DATE_FORMAT(now(),'%Y-%m-%d')
+            and detail.product_start_date <![CDATA[ > ]]> DATE_FORMAT(now(),'%Y-%m-%d')
             and detail.product_start_date <![CDATA[ < ]]> DATE_FORMAT(DATE_ADD(now(),INTERVAL 31 day),'%Y-%m-%d')
             and detail.product_factory_code = #{productFactoryCode,jdbcType=VARCHAR}
             and detail.material_code = #{materialCode,jdbcType=VARCHAR}
@@ -136,7 +136,7 @@
         <where>
             detail.product_order_code = o.order_code
             and (o.audit_status = '0' or o.audit_status = '2')
-            and detail.product_start_date <![CDATA[ >= ]]> DATE_FORMAT(now(),'%Y-%m-%d')
+            and detail.product_start_date <![CDATA[ > ]]> DATE_FORMAT(now(),'%Y-%m-%d')
             and detail.product_start_date <![CDATA[ < ]]> DATE_FORMAT(DATE_ADD(now(),INTERVAL 31 day),'%Y-%m-%d')
             <if test="productFactoryCode != null and productFactoryCode != ''">
                 and detail.product_factory_code = #{productFactoryCode,jdbcType=VARCHAR}
@@ -241,6 +241,12 @@
                 <if test="item.materialCode != null and item.materialCode != ''">
                     and detail.material_code = #{item.materialCode,jdbcType=VARCHAR}
                 </if>
+                <if test="item.purchaseGroup != null and item.purchaseGroup != ''">
+                    and detail.purchase_group = #{item.purchaseGroup,jdbcType=VARCHAR}
+                </if>
+                <if test="item.createBy != null and item.createBy != ''">
+                    and detail.create_by = #{item.createBy,jdbcType=VARCHAR}
+                </if>
                 <if test="item.productFactoryQuery != null and item.productFactoryQuery != ''">
                     and detail.product_factory_code in (${item.productFactoryQuery})
                 </if>
@@ -249,6 +255,15 @@
                 </if>
                 <if test="item.status != null and item.status != ''">
                     and detail.status = #{item.status,jdbcType=VARCHAR}
+                </if>
+                <if test="item.checkStartDate != null and item.checkStartDate != ''">
+                    and detail.product_start_date >= #{item.checkStartDate,jdbcType=VARCHAR}
+                </if>
+                <if test="item.checkEndDate != null and item.checkEndDate != ''">
+                    and detail.product_start_date <![CDATA[ <= ]]> #{item.checkEndDate,jdbcType=VARCHAR}
+                </if>
+                <if test="item.productOrderCode != null and item.productOrderCode != ''">
+                    and detail.product_order_code = #{item.productOrderCode,jdbcType=VARCHAR}
                 </if>
                 )
             </foreach>

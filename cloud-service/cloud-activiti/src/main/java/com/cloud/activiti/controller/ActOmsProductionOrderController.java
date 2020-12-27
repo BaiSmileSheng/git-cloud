@@ -78,5 +78,16 @@ public class ActOmsProductionOrderController extends BaseController {
         return actOmsProductionOrderService.audit(bizAudit, getCurrentUserId());
     }
 
-
+    /**
+     * Description:  定时任务开启排产订单审批流程
+     * Param: []
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/10/19
+     */
+    @PostMapping("timeCheckProductOrderAct")
+    @ApiOperation(value = "定时任务开启排产订单审批流程 ", response = R.class)
+    public R timeCheckProductOrderAct(){
+        return actOmsProductionOrderService.timeCheckProductOrderAct();
+    }
 }

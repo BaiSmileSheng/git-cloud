@@ -151,4 +151,23 @@ public interface IOmsProductionOrderService extends BaseService<OmsProductionOrd
      */
     R deleteSAP(String id,SysUser sysUser);
 
+    /**
+     * Description:  定时任务校验排产订单审批流
+     * Param: [list]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/10/19
+     */
+    R checkProductOrderAct(List<OmsProductionOrder> list);
+
+
+    /**
+     * 把delaysFlag=3、已关单、实际结束日期与基本开始日期小于等于7的数据更改把delaysFlag为0
+     * @return
+     */
+	int updateDelaysFlag();
+
+	List<OmsProductionOrder> selectByStatus(String status);
+
+
 }

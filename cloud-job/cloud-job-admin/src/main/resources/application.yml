@@ -11,7 +11,7 @@ management:
       context-path: /actuator
   health:
     mail:
-      enabled: false
+      enabled: true
   endpoints:
     web:
       exposure:
@@ -42,20 +42,16 @@ spring:
       number_format: 0.##########
   ### xxl-job, email
   mail:
-    host: smtp.qq.com
+    host: 10.135.1.238
     port: 25
-    username: xxx@qq.com
-    password: xxx
+    username: ORW-KHAOS@haier.net
+    password:
+    protocol: smtp
+    defaultEncoding: utf-8
     properties:
       mail:
         stmp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-        socketFactory:
-          class: javax.net.ssl.SSLSocketFactory
-
+          auth: false
 
 ### mybatis
 mybatis:

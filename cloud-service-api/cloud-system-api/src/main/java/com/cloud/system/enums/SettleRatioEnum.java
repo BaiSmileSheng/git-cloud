@@ -9,9 +9,13 @@ public enum SettleRatioEnum {
 
     SPLX_WH("WH","物耗"),
     SPLX_BF("BF","报废"),
+    SPLX_WSWBF("WSWBF","无实物报废"),
     SPLX_ZL("ZL","质量"),
     SPLX_YQ("YQ","延期"),
-    SPLX_QT("QT","其他");
+    SPLX_QT("QT","其他"),
+    SPLX_YCLBF("YCLBF","原材料报废"),
+    SPLX_YCLWSW("YCLWSW","原材料无实物"),
+    SPLX_ZLBBF("ZLBBF","质量部报废");
 
 
     private String code;

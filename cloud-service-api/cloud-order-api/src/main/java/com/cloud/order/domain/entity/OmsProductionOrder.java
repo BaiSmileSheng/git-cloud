@@ -132,7 +132,7 @@ public class OmsProductionOrder extends BaseEntity {
     /**
      * 单位
      */
-    @ExcelProperty(value = "单位",index = 9)
+    @ExcelProperty(value = "单位",index = 10)
     @ApiModelProperty(value = "单位")
     @NotBlank
     private String unit;
@@ -140,7 +140,7 @@ public class OmsProductionOrder extends BaseEntity {
     /**
      * 基本开始日期
      */
-    @ExcelProperty(value = "基本开始日期",index = 10)
+    @ExcelProperty(value = "基本开始日期",index = 11)
     @DateTimeFormat("yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "基本开始日期")
@@ -150,7 +150,7 @@ public class OmsProductionOrder extends BaseEntity {
     /**
      * 基本结束日期
      */
-    @ExcelProperty(value = "基本结束日期",index=11)
+    @ExcelProperty(value = "基本结束日期",index=12)
     @DateTimeFormat("yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "基本结束日期")
@@ -160,14 +160,14 @@ public class OmsProductionOrder extends BaseEntity {
     /**
      * 基本结束时间
      */
-    @ExcelProperty(value = "基本结束时间",index=12)
+    @ExcelProperty(value = "基本结束时间",index=13)
     @ApiModelProperty(value = "基本结束时间")
     @NotBlank
     private String productEndTime;
     /**
      * 交货日期
      */
-    @ExcelProperty(value = "T-1交货日期",index = 13)
+    @ExcelProperty(value = "T-1交货日期",index = 14)
     @DateTimeFormat("yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "交货日期")
@@ -177,7 +177,7 @@ public class OmsProductionOrder extends BaseEntity {
     /**
      * 下达SAP时间
      */
-    @ExcelProperty(value = "下达SAP时间",index = 14)
+    @ExcelProperty(value = "下达SAP时间",index = 15)
     @DateTimeFormat("yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "下达SAP时间")
@@ -186,7 +186,7 @@ public class OmsProductionOrder extends BaseEntity {
     /**
      * 已传SAP时间
      */
-    @ExcelProperty(value = "已传SAP时间",index = 15)
+    @ExcelProperty(value = "已传SAP时间",index = 16)
     @DateTimeFormat("yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "已传SAP时间")
@@ -195,7 +195,7 @@ public class OmsProductionOrder extends BaseEntity {
     /**
      * 实际结束日期
      */
-    @ExcelProperty(value = "实际结束日期",index=16)
+    @ExcelProperty(value = "实际结束日期",index=17)
     @DateTimeFormat("yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "实际结束日期")
@@ -204,7 +204,7 @@ public class OmsProductionOrder extends BaseEntity {
     /**
      * BOM版本
      */
-    @ExcelProperty(value = "BOM版本",index = 17)
+    @ExcelProperty(value = "BOM版本",index = 18)
     @ApiModelProperty(value = "BOM版本")
     @NotBlank
     private String bomVersion;
@@ -218,82 +218,85 @@ public class OmsProductionOrder extends BaseEntity {
     /**
      * 老品/新品
      */
-    @ExcelProperty(value = "老品/新品",index = 18)
+    @ExcelProperty(value = "老品/新品",index = 19)
     @ApiModelProperty(value = "老品/新品")
     private String oldNew;
 
     /**
-     * 用时
-     */
-    @ExcelProperty(value = "用时",index = 19)
-    @ApiModelProperty(value = "用时")
-    private BigDecimal useTime;
-
-    /**
-     * 节拍
-     */
-    @ExcelProperty(value = "节拍",index = 20)
-    @ApiModelProperty(value = "节拍")
-    private BigDecimal rhythm;
-
-    /**
-     * 产品定员
-     */
-    @ExcelProperty(value = "产品定员",index = 21)
-    @ApiModelProperty(value = "产品定员")
-    private Integer productQuota;
-
-    /**
-     * PCB专用号
-     */
-    @ExcelProperty(value = "PCB专用号",index = 22)
-    @ApiModelProperty(value = "PCB专用号")
-    private String pcbSpecialCode;
-    /**
-     * 委外方式 0：半委外，1：全委外，2：自制
-     */
-    @ExcelProperty(value = "加工承揽方式" ,index = 23,converter = OutSourceTypeConverter.class)
-    @ApiModelProperty(value = "委外方式 0：半委外，1：全委外，2：自制")
-    @NotBlank
-    private String outsourceType;
-    /**
-     * 状态 0：待评审，1：反馈中，2：待调整，3：已评审，4：待传SAP，5：传SAP中，6：已传SAP，7：传SAP异常，8：已关单
-     */
-    @ExcelProperty(value = "状态 ",index=24,converter = ProductionOrderStatusConverter.class)
-    @ApiModelProperty(value = "状态 0：待评审，1：反馈中，2：待调整，3：已评审，4：待传SAP，5：传SAP中，6：已传SAP，7：传SAP异常，8：已关单")
-    private String status;
-    /**
-     * sap返回信息
-     */
-    @ExcelProperty(value = "sap返回信息",index = 25)
-    @ApiModelProperty(value = "sap返回信息")
-    private String sapMessages;
-
-    /**
-     * 是否小批
-     */
-    @ExcelProperty(value = "是否内部小批",index = 26,converter= SmallBatchConverter.class)
-    @ApiModelProperty(value = "是否内部小批")
-    private String isSmallBatch;
-
-    /**
-     * 交货量
-     */
-    @ApiModelProperty(value = "交货量")
-    private BigDecimal deliveryNum;
-
-
-    /**
      * 顺序
      */
+    @ExcelProperty(value = "顺序",index = 20)
     @ApiModelProperty(value = "顺序")
     private String sequence;
 
     /**
      * 发往地
      */
+    @ExcelProperty(value = "发往地",index = 21)
     @ApiModelProperty(value = "发往地")
     private String destination;
+
+    /**
+     * 用时
+     */
+    @ExcelProperty(value = "用时",index = 22)
+    @ApiModelProperty(value = "用时")
+    private BigDecimal useTime;
+
+    /**
+     * 节拍
+     */
+    @ExcelProperty(value = "节拍",index = 23)
+    @ApiModelProperty(value = "节拍")
+    private BigDecimal rhythm;
+
+    /**
+     * 产品定员
+     */
+    @ExcelProperty(value = "产品定员",index = 24)
+    @ApiModelProperty(value = "产品定员")
+    private Integer productQuota;
+
+    /**
+     * PCB专用号
+     */
+    @ExcelProperty(value = "PCB专用号",index = 25)
+    @ApiModelProperty(value = "PCB专用号")
+    private String pcbSpecialCode;
+    /**
+     * 委外方式 0：半委外，1：全委外，2：自制
+     */
+    @ExcelProperty(value = "加工承揽方式" ,index = 26,converter = OutSourceTypeConverter.class)
+    @ApiModelProperty(value = "委外方式 0：半委外，1：全委外，2：自制")
+    @NotBlank
+    private String outsourceType;
+    /**
+     * 状态 0：待评审，1：反馈中，2：待调整，3：已评审，4：待传SAP，5：传SAP中，6：已传SAP，7：传SAP异常，8：已关单
+     */
+    @ExcelProperty(value = "状态 ",index=27,converter = ProductionOrderStatusConverter.class)
+    @ApiModelProperty(value = "状态 0：待评审，1：反馈中，2：待调整，3：已评审，4：待传SAP，5：传SAP中，6：已传SAP，7：传SAP异常，8：已关单")
+    private String status;
+    /**
+     * sap返回信息
+     */
+    @ExcelProperty(value = "sap返回信息",index = 28)
+    @ApiModelProperty(value = "sap返回信息")
+    private String sapMessages;
+
+    /**
+     * 是否小批
+     */
+    @ExcelProperty(value = "是否小批",index = 29,converter= SmallBatchConverter.class)
+    @ApiModelProperty(value = "是否小批")
+    private String isSmallBatch;
+
+    /**
+     * 交货量
+     */
+    @ExcelProperty(value = "交货数量",index = 9)
+    @ApiModelProperty(value = "交货量")
+    private BigDecimal deliveryNum;
+
 
     /**
      * 加工费

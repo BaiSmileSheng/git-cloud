@@ -2,19 +2,20 @@ package com.cloud.activiti.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.activiti.consts.ActivitiConstant;
 import com.cloud.activiti.domain.BizAudit;
 import com.cloud.activiti.domain.BizBusiness;
 import com.cloud.activiti.domain.entity.ProcessDefinitionAct;
+import com.cloud.activiti.mapper.ActRuTaskMapper;
 import com.cloud.activiti.service.IActTaskService;
 import com.cloud.activiti.service.IBizAuditService;
 import com.cloud.activiti.service.IBizBusinessService;
 import com.cloud.activiti.vo.HiTaskVo;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.common.redis.util.RedisUtils;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteUserService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
+import org.activiti.engine.HistoryService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -33,10 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -64,7 +63,16 @@ public class ActTaskServiceImpl implements IActTaskService {
     private IBizBusinessService businessService;
     @Autowired
     private RepositoryService repositoryService;
+    @Autowired
+    private RedisUtils redisUtils;
 
+    @Autowired
+    private HistoryService historyService;
+    @Autowired
+    private ActRuTaskMapper actRuTaskMapper;
+
+    @Autowired
+    private IActTaskService actTaskService;
     /**
      * 审批通用方法  推进流程  设置下一审批人
      *
@@ -122,11 +130,43 @@ public class ActTaskServiceImpl implements IActTaskService {
                 .setProcName(bizAudit.getProcName())
                 .setApplyer(bizAudit.getApplyer());
         //如果有下级，设置审批人并推进，没有则结束
-        if (CollectionUtil.isEmpty(userIds)) {
-            businessService.setAuditor(bizBusiness, ActivitiConstant.RESULT_SUSPEND, auditUserId);
-        }else{
-            businessService.setAuditorCandidateUser(bizBusiness, ActivitiConstant.RESULT_SUSPEND, userIds);
+        businessService.setAuditorCandidateUser(bizBusiness, ActivitiConstant.RESULT_SUSPEND, userIds);
+        return R.ok();
+    }
+
+    /**
+     *
+     * @param 批量审批用
+     * @param auditUserId
+     * @param userIds
+     * @return
+     */
+    @Override
+    public R auditCandidateUserMul(BizAudit bizAudit, long auditUserId,Set<String> userIds) {
+//        Map<String, Object> variables = Maps.newHashMap();
+//        variables.put("result", bizAudit.getResult());
+//        // 审批
+//        taskService.complete(bizAudit.getTaskId(), variables);
+        SysUser user = remoteUserService.selectSysUserByUserId(auditUserId);
+        BizAudit bizAuditUpdate = new BizAudit();
+        bizAuditUpdate.setTaskId(bizAudit.getTaskId());
+        List<BizAudit> bizAudits = bizAuditService.selectBizAuditList(bizAuditUpdate);
+        if (CollectionUtil.isNotEmpty(bizAudits)) {
+            bizAuditUpdate = bizAudits.get(0);
+            bizAuditUpdate.setAuditor(user.getUserName());
+            bizAuditUpdate.setAuditorId(user.getUserId());
+            bizAuditUpdate.setResult(bizAudit.getResult());
+            bizAuditUpdate.setComment(bizAudit.getComment());
+            //更新审批历史
+            bizAuditService.updateBizAudit(bizAuditUpdate);
         }
+        BizBusiness bizBusiness = new BizBusiness().setId(bizAudit.getBusinessKey())
+                .setProcInstId(bizAudit.getProcInstId())
+                .setProcDefKey(bizAudit.getProcDefKey())
+                .setProcName(bizAudit.getProcName())
+                .setApplyer(bizAudit.getApplyer());
+        //如果有下级，设置审批人并推进，没有则结束
+        businessService.setAuditorCandidateUser(bizBusiness, ActivitiConstant.RESULT_SUSPEND, userIds);
         return R.ok();
     }
 
@@ -215,7 +255,7 @@ public class ActTaskServiceImpl implements IActTaskService {
     @Override
     @GlobalTransactional
     public R auditBatch(BizAudit bizAudit, long auditUserId) {
-        SysUser user = remoteUserService.selectSysUserByUserId(auditUserId);
+//        SysUser user = remoteUserService.selectSysUserByUserId(auditUserId);
         for (String taskId : bizAudit.getTaskIds()) {
             Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
             ProcessInstance pi = runtimeService.createProcessInstanceQuery()
@@ -225,17 +265,13 @@ public class ActTaskServiceImpl implements IActTaskService {
                 Map<String, Object> variables = Maps.newHashMap();
                 variables.put("result", bizAudit.getResult());
                 variables.put("taskIdVar", taskId);
-//                variables.put("auditUserIdVal", auditUserId);
-                // 审批
+                variables.put("bizBusinessId", bizBusiness.getId());
+                // 审批  触发监听
                 taskService.complete(taskId, variables);
-                Console.log(taskService.getVariable(taskId,"test"));
-                // 构建插入审批记录
-//                BizAudit audit = new BizAudit().setTaskId(taskId).setResult(bizAudit.getResult())
-//                        .setProcName(bizBusiness.getProcName()).setProcDefKey(bizBusiness.getProcDefKey())
-//                        .setApplyer(bizBusiness.getApplyer()).setAuditor(user.getUserName() + "-" + user.getLoginName())
-//                        .setAuditorId(user.getUserId());
-//                bizAuditService.insertBizAudit(audit);
-//                businessService.setAuditor(bizBusiness, audit.getResult(), auditUserId);
+                bizAudit = redisUtils.get(StrUtil.format("bizAudit{}{}", bizBusiness.getId(), taskId),BizAudit.class);
+                Set<String> userIds = redisUtils.get(StrUtil.format("userIds{}{}", bizBusiness.getId(), taskId), Set.class);
+                Long userId = redisUtils.get(StrUtil.format("userId{}{}", bizBusiness.getId(), taskId),Long.class);
+                actTaskService.auditCandidateUserMul(bizAudit, userId,userIds);
             }
         }
         return R.ok();
@@ -274,7 +310,7 @@ public class ActTaskServiceImpl implements IActTaskService {
                 .createProcessDefinitionQuery().processDefinitionKey(key).latestVersion().singleResult();
         if (BeanUtil.isEmpty(processDefinition)) {
             log.error("根据Key值查询流程实例失败!");
-            return R.error("根据Key值查询流程实例失败！");
+            throw new BusinessException("根据Key值查询流程实例失败！");
         }
         ProcessDefinitionAct processDefinitionAct =
                 ProcessDefinitionAct.builder()
@@ -297,6 +333,7 @@ public class ActTaskServiceImpl implements IActTaskService {
      * Date: 2020/8/12
      */
     @Override
+    @GlobalTransactional
     public R deleteByOrderCode(Map<String,Object> map) {
         log.info("删除审批流程方法-开始执行！");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -305,7 +342,7 @@ public class ActTaskServiceImpl implements IActTaskService {
                 objectMapper.convertValue(map.get("orderCodeList"), new TypeReference<List<String>>() {});
         if (ObjectUtil.isEmpty(orderCodeList) || orderCodeList.size() <= 0) {
             log.info("执行删除审批流程方法，传入的业务订单号为空！");
-            return R.error("执行删除审批流程方法，传入的业务订单号为空！");
+            throw new BusinessException("执行删除审批流程方法，传入的业务订单号为空！");
         }
         Example example = new Example(BizBusiness.class);
         Example.Criteria criteria = example.createCriteria();
@@ -316,12 +353,29 @@ public class ActTaskServiceImpl implements IActTaskService {
             return R.ok();
         }
         String ids = businesses.stream().map(b -> b.getId().toString()).collect(Collectors.joining(","));
-        businesses = businesses.stream()
-                .filter(o -> StrUtil.isNotBlank(o.getProcInstId()) && StrUtil.equals("1",o.getStatus().toString())).collect(Collectors.toList());
-        businesses.forEach(b -> {
-            String id  = b.getProcInstId();
-            runtimeService.deleteProcessInstance(id, userId);
-        });
+        List<BizBusiness> businessesDealing = businesses.stream()
+                .filter(o -> StrUtil.isNotBlank(o.getProcInstId())
+                        && ActivitiConstant.RESULT_DEALING.equals(o.getResult())
+                        && CollectionUtil.isNotEmpty(actRuTaskMapper.selectByProcInstId(Arrays.asList(o.getProcInstId())))).collect(Collectors.toList());
+        List<BizBusiness> businessesPass = businesses.stream()
+                .filter(o -> StrUtil.isNotBlank(o.getProcInstId())
+                        && !ActivitiConstant.RESULT_DEALING.equals(o.getResult())
+                        && !CollectionUtil.isNotEmpty(actRuTaskMapper.selectByProcInstId(Arrays.asList(o.getProcInstId())))).collect(Collectors.toList());
+        try {
+            //删除运行中的流程
+            businessesDealing.forEach(b -> {
+                String id = b.getProcInstId();
+                runtimeService.deleteProcessInstance(id, userId);
+            });
+            //删除结束的流程
+            businessesPass.forEach(b -> {
+                String id = b.getProcInstId();
+                historyService.deleteHistoricProcessInstance(id);
+            });
+        }catch (Exception e) {
+            log.error("删除审批流程失败："+e);
+            throw new BusinessException("删除审批流程失败，原因："+e.getMessage());
+        }
         businessService.deleteBizBusinessByIds(ids);
         log.info("删除审批流程方法-执行结束！");
         return R.ok();

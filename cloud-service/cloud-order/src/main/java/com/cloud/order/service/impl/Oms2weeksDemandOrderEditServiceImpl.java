@@ -13,6 +13,7 @@ import com.alibaba.excel.EasyExcel;
 import com.cloud.activiti.domain.entity.vo.OmsOrderMaterialOutVo;
 import com.cloud.activiti.feign.RemoteActOmsOrderMaterialOutService;
 import com.cloud.activiti.feign.RemoteActTaskService;
+import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
@@ -88,21 +89,19 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
     @Autowired
     private RemoteMaterialExtendInfoService remoteMaterialExtendInfoService;
     @Autowired
-    private RemoteSequeceService remoteSequeceService;
-    @Autowired
     private IOms2weeksDemandOrderEditHisService oms2weeksDemandOrderEditHisService;
     @Autowired
     private IOms2weeksDemandOrderService oms2weeksDemandOrderService;
-
     @Autowired
     private RemoteInterfaceLogService remoteInterfaceLogService;
-
     @Autowired
     private RemoteActOmsOrderMaterialOutService remoteActOmsOrderMaterialOutService;
     @Autowired
     private RemoteFactoryStorehouseInfoService remoteFactoryStorehouseInfoService;
     @Autowired
     private RemoteActTaskService remoteActTaskService;
+    @Autowired
+    private RemoteUserService remoteUserService;
 
     private static final String TABLE_NAME = "oms2weeks_demand_order_edit";//对应的表名
 
@@ -146,7 +145,7 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             //导出excel
             return EasyExcelUtilOSS.writeExcel(errorResults, "T+1、T+2草稿计划导入错误信息.xlsx", "sheet", new Oms2weeksDemandOrderEditImport());
         }
-        return R.ok();
+        return R.ok(StrUtil.format("成功导入{}条数据！",successList==null?0:successList.size()));
     }
 
     /**
@@ -325,6 +324,13 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
             throw new BusinessException("获取接收库位失败！");
         }
 
+        //查询所有有效的登录名 校验接收人
+        R rLoginName = remoteUserService.selectDistinctLoginName();
+        if(!rLoginName.isSuccess()){
+            throw new BusinessException("查询所有有效的登录名失败！");
+        }
+        List<String> loginNames=rLoginName.getCollectData(new TypeReference<List<String>>() {});
+
         //数据版本
         int nowYear = DateUtil.year(date);
         int nowWeek = DateUtil.weekOfYear(date);
@@ -335,13 +341,27 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
         //查询已导入数据
         Example example = new Example(Oms2weeksDemandOrderEdit.class);
         example.and().andNotEqualTo("status",Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
+        example.and().andEqualTo("delFlag", DeleteFlagConstants.NO_DELETED);
         List<Oms2weeksDemandOrderEdit> hisList = oms2weeksDemandOrderEditMapper.selectByExample(example);
         List<String> randomList = OrderNoGenerateUtil.getOrderNos(list.size() * 2, "DM");
+        Map<String, String> mapCheckRepeat = new HashMap<>();
         for(Oms2weeksDemandOrderEdit weeksDemandOrderEdit:list){
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
             ExcelImportOtherObjectDto othObjectDto = new ExcelImportOtherObjectDto();
             StringBuffer errMsg = new StringBuffer();
+
+            String unionKey = StrUtil.concat(true,weeksDemandOrderEdit.getProductMaterialCode(),
+                    weeksDemandOrderEdit.getCustomerCode(),weeksDemandOrderEdit.getDeliveryDate().toString(),
+                    weeksDemandOrderEdit.getProductFactoryCode(),weeksDemandOrderEdit.getBomVersion());
+            String v = mapCheckRepeat.putIfAbsent(unionKey, "1");
+            if (v != null) {
+                errObjectDto.setObject(weeksDemandOrderEdit);
+                errObjectDto.setErrMsg("excel中存在重复数据！");
+                errDtos.add(errObjectDto);
+                continue;
+            }
+
 
             boolean flag = hisList.stream().anyMatch(s -> StrUtil.equals(s.getProductMaterialCode(), weeksDemandOrderEdit.getProductMaterialCode())
                     && StrUtil.equals(s.getCustomerCode(), weeksDemandOrderEdit.getCustomerCode())
@@ -391,6 +411,12 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 errObjectDto.setErrMsg("交付日期不能是当前或历史周");
                 errDtos.add(errObjectDto);
                 continue;
+            }
+
+            //校验接收人
+            String loginName = weeksDemandOrderEdit.getReceiveBy();
+            if (!CollUtil.contains(loginNames, loginName)) {
+                errMsg.append(StrUtil.format("不存在此接收人：{};", loginName));
             }
 
             String factoryCode = weeksDemandOrderEdit.getProductFactoryCode();
@@ -530,6 +556,9 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 Weeks2DemandOrderEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());
         if (StrUtil.isEmpty(ids)) {
             if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
+                criteria.andEqualTo("receiveBy", sysUser.getLoginName());
+            }
+            if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_ORDER)){
                 criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(",")));
             }
             if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
@@ -637,6 +666,9 @@ public class Oms2weeksDemandOrderEditServiceImpl extends BaseServiceImpl<Oms2wee
                 ,Weeks2DemandOrderEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHWC.getCode());
         if (StrUtil.isEmpty(ids)) {
             if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
+                criteria.andEqualTo("receiveBy", sysUser.getLoginName());
+            }
+            if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_ORDER)){
                 criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(",")));
             }
             if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){

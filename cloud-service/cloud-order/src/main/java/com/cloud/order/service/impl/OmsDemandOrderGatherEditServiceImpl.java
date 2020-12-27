@@ -14,6 +14,7 @@ import com.alibaba.excel.EasyExcel;
 import com.cloud.activiti.domain.entity.vo.OmsOrderMaterialOutVo;
 import com.cloud.activiti.feign.RemoteActOmsOrderMaterialOutService;
 import com.cloud.activiti.feign.RemoteActTaskService;
+import com.cloud.common.constant.DeleteFlagConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
@@ -79,8 +80,6 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
     @Autowired
     private RemoteMaterialService remoteMaterialService;
     @Autowired
-    private RemoteSequeceService remoteSequeceService;
-    @Autowired
     private IOmsDemandOrderGatherEditHisService omsDemandOrderGatherEditHisService;
     @Autowired
     private IOmsDemandOrderGatherEditImportService omsDemandOrderGatherEditImportService;
@@ -94,6 +93,8 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
     private RemoteFactoryStorehouseInfoService remoteFactoryStorehouseInfoService;
     @Autowired
     private RemoteActTaskService remoteActTaskService;
+    @Autowired
+    private RemoteUserService remoteUserService;
 
     private static final String TABLE_NAME = "oms_demand_order_gather_edit";
 
@@ -136,6 +137,9 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CSAPYC.getCode());
         if (StrUtil.isEmpty(ids)) {
             if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
+                criteria.andEqualTo("receiveBy", sysUser.getLoginName());
+            }
+            if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_ORDER)){
                 criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(",")));
             }
             if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
@@ -193,6 +197,9 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 ,DemandOrderGatherEditAuditStatusEnum.DEMAND_ORDER_GATHER_EDIT_AUDIT_STATUS_SHWC.getCode());
         if (StrUtil.isEmpty(ids)) {
             if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_PCY)){
+                criteria.andEqualTo("receiveBy", sysUser.getLoginName());
+            }
+            if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_ORDER)){
                 criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(sysUser.getUserId()).split(",")));
             }
             if(!sysUser.isAdmin()&&CollectionUtil.contains(sysUser.getRoleKeys(), RoleConstants.ROLE_KEY_SCBJL)){
@@ -335,6 +342,13 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             throw new BusinessException("获取接收库位失败！");
         }
 
+        //查询所有有效的登录名 校验接收人
+        R rLoginName = remoteUserService.selectDistinctLoginName();
+        if(!rLoginName.isSuccess()){
+            throw new BusinessException("查询所有有效的登录名失败！");
+        }
+        List<String> loginNames=rLoginName.getCollectData(new TypeReference<List<String>>() {});
+
         //数据版本
         int nowYear = DateUtil.year(date);
         int nowWeek = DateUtil.weekOfYear(date);
@@ -345,13 +359,26 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
         //查询已导入数据
         Example example = new Example(OmsDemandOrderGatherEdit.class);
         example.and().andNotEqualTo("status",DemandOrderGatherEditStatusEnum.DEMAND_ORDER_GATHER_EDIT_STATUS_CS.getCode());
+        example.and().andEqualTo("delFlag", DeleteFlagConstants.NO_DELETED);
         List<OmsDemandOrderGatherEdit> hisList = omsDemandOrderGatherEditMapper.selectByExample(example);
         List<String> randomList = OrderNoGenerateUtil.getOrderNos(list.size() * 2, "DM");
+        Map<String, String> mapCheckRepeat = new HashMap<>();
         for(OmsDemandOrderGatherEdit demandOrderGatherEdit:list){
             ExcelImportErrObjectDto errObjectDto = new ExcelImportErrObjectDto();
             ExcelImportSucObjectDto sucObjectDto = new ExcelImportSucObjectDto();
             ExcelImportOtherObjectDto othObjectDto = new ExcelImportOtherObjectDto();
             StringBuffer errMsg = new StringBuffer();
+
+            String unionKey = StrUtil.concat(true,demandOrderGatherEdit.getProductMaterialCode(),
+                    demandOrderGatherEdit.getCustomerCode(),demandOrderGatherEdit.getDeliveryDate().toString(),
+                    demandOrderGatherEdit.getProductFactoryCode(),demandOrderGatherEdit.getBomVersion());
+            String v = mapCheckRepeat.putIfAbsent(unionKey, "1");
+            if (v != null) {
+                errObjectDto.setObject(demandOrderGatherEdit);
+                errObjectDto.setErrMsg("excel中存在重复数据！");
+                errDtos.add(errObjectDto);
+                continue;
+            }
 
             boolean flag = hisList.stream().anyMatch(s -> StrUtil.equals(s.getProductMaterialCode(), demandOrderGatherEdit.getProductMaterialCode())
                     && StrUtil.equals(s.getCustomerCode(), demandOrderGatherEdit.getCustomerCode())
@@ -400,6 +427,12 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
                 errObjectDto.setErrMsg("交付日期不能是当前或历史周");
                 errDtos.add(errObjectDto);
                 continue;
+            }
+
+            //校验接收人
+            String loginName = demandOrderGatherEdit.getReceiveBy();
+            if (!CollUtil.contains(loginNames, loginName)) {
+                errMsg.append(StrUtil.format("不存在此接收人：{};", loginName));
             }
 
             String factoryCode = demandOrderGatherEdit.getProductFactoryCode();
@@ -654,7 +687,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             //导出excel
             return EasyExcelUtilOSS.writeExcel(errorResults, "需求导入错误信息.xlsx", "sheet", new OmsDemandOrderGatherEditImport());
         }
-        return R.ok();
+        return R.ok(StrUtil.format("成功导入{}条数据！",successList==null?0:successList.size()));
     }
 
     /**
@@ -678,7 +711,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             weekNum += 1;
         }
         //从T+3周开始
-        int gatherWeek = weekNum + 3;
+        int gatherWeek = DateUtil.weekOfYear(DateUtil.offsetWeek(new Date(), 3));
         int[] weekRange= NumberUtil.range(gatherWeek, gatherWeek+10);
         mapGroup.forEach((keyCode,list)->{
             List<WeekAndNumGatherDTO> weekNumList = new ArrayList<>();
@@ -782,7 +815,7 @@ public class OmsDemandOrderGatherEditServiceImpl extends BaseServiceImpl<OmsDema
             weekNum += 1;
         }
         //从T+3周开始
-        int gatherWeek = weekNum + 3;
+        int gatherWeek = DateUtil.weekOfYear(DateUtil.offsetWeek(new Date(), 3));
         //所有周数 11周
         int[] weekRange= NumberUtil.range(gatherWeek, gatherWeek+10);
         //查出全部数据了

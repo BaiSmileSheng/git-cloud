@@ -72,14 +72,17 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
      */
     @Override
     public R saveMaterialInfo() {
+        log.info("保存MDM接口获取的物料信息数据方法开始======"+DateUtil.now());
         List<RowRisk> list = new ArrayList<>();
         //接口获取物料数据
         R r = materialInfoInterface(list, 0, null);
+        log.info("保存MDM接口获取的物料信息数据方法-调用外部接口结束======"+DateUtil.now());
         if (r.isSuccess()) {
             ObjectMapper objectMapper = new ObjectMapper();
             list = objectMapper.convertValue(r.get("list"), new TypeReference<List<RowRisk>>() {
             });
             if (ObjectUtil.isNotEmpty(list) && list.size() > 0) {
+                log.info("调用MDM接口获取物料主数据条数："+list.size());
                 //新增
                 List<CdMaterialInfo> cdMaterialInfosInsertOrUpdate = new ArrayList<>();
                 //成品物料扩展信息
@@ -111,7 +114,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
                         cdMaterialExtendInfo.setEstablishDate(StrUtil.isNotBlank(rowRisk.getCREATED()) ? DateUtil.parse(rowRisk.getCREATED(),"yyyy-MM-dd HH:mm:ss") : null);
                         cdMaterialExtendInfo.setDelFlag("0");
                         cdMaterialExtendInfo.setIsPuttingOut(PuttingOutEnum.IS_PUTTING_OUT_1.getCode());
-                        cdMaterialExtendInfo.setIsGetStock(GetStockEnum.IS_GET_STOCK_0.getCode());
+                        cdMaterialExtendInfo.setIsGetStock(GetStockEnum.IS_GET_STOCK_1.getCode());
                         cdMaterialExtendInfo.setCreateBy("systemJob");
                         cdMaterialExtendInfo.setUpdateBy("systemJob");
                         cdMaterialExtendInfosInsertOrUpdate.add(cdMaterialExtendInfo);
@@ -122,13 +125,14 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
                     cdMaterialExtendInfoService.batchMaterialInsertOrUpdate(cdMaterialExtendInfosInsertOrUpdate);
                 }
             } else {
-                log.error("接口获取物料主数据为空！");
-                return R.error("接口获取物料主数据为空！");
+                log.info("接口获取物料主数据为空！");
+                return R.ok("接口获取物料主数据为空！");
             }
         } else {
             log.error(r.get("msg").toString());
             return R.error(r.get("msg").toString());
         }
+        log.info("保存MDM接口获取的物料信息数据方法结束======"+DateUtil.now());
         return R.ok();
     }
 
@@ -142,6 +146,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
     @Override
     public R materialInfoInterface(List<RowRisk> list, int page, String batchId) {
         page += 1;
+        log.info("第"+page+"次调用获取MDM物料信息接口方法开始时间："+DateUtil.now());
         //定义返回对象
         R r = new R();
         StringHolder outPage = new StringHolder();
@@ -161,7 +166,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
             cl.add(Calendar.DATE, -1);//减一天
             String startDateString = sft.format(cl.getTime());
             String endDateString = sft.format(endDateTime);
-
+            log.info("第"+page+"次调用外部接口开始时间："+DateUtil.now());
             //获取链接
             GeneralMDMDataReleaseBindingStub generalMdmDataReleaseBindingStub =
                     (GeneralMDMDataReleaseBindingStub) new Generalmdmdatarelease_client_epLocator(mdmConnConfig).getGeneralMDMDataRelease_pt();
@@ -169,11 +174,18 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
             generalMdmDataReleaseBindingStub.process(mdmConnConfig.getSysName(), mdmConnConfig.getMasterType(),
                     mdmConnConfig.getTableName(), startDateString, endDateString, String.valueOf(page), batchId,
                     outPage, outResult, outRetcode, outAllNum, outPageCon, pageAll, outRetmsg, onBatchId);
+            log.info("第"+page+"次调用外部接口结束时间："+DateUtil.now());
             //判断返回的状态
             if (!"S".equals(outRetcode.value)) {
-                log.error("获取物料主数据接口调用失败:" + outRetmsg.value);
-                return R.error("获取物料主数据接口调用失败:" + outRetmsg.value);
+                if (!outRetmsg.value.contains("无数据")) {
+                    log.error("获取物料主数据接口调用失败:" + outRetmsg.value);
+                    return R.error("获取物料主数据接口调用失败:" + outRetmsg.value);
+                } else {
+                    log.info("获取物料主数据接口执行结束:" + outRetmsg.value);
+                    return R.ok("获取物料主数据接口执行结束:" + outRetmsg.value);
+                }
             }
+            log.info("第"+page+"次解析返回的XML开始时间："+DateUtil.now());
             //处理返回的xml字符串
             String xml1 = outResult.value.substring(0, outResult.value.indexOf("<NAME>"))
                     + outResult.value.substring(outResult.value.indexOf("<ROW>"));
@@ -188,6 +200,8 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
                 List<RowRisk> rowRisks = processResponse.getROWSET();
                 list.addAll(rowRisks);
             }
+            log.info("第"+page+"次解析返回的XML结束时间："+DateUtil.now());
+            log.info("第"+page+"次获取MDM物料信息条数："+list.size());
             r.put("list", list);
             r.put("batchId", onBatchId.value);
         } catch (Exception e) {
@@ -199,6 +213,7 @@ public class CdMaterialInfoServiceImpl extends BaseServiceImpl<CdMaterialInfo> i
             return r;
         }
         //递归调用
+        log.info("第"+page+"次调用获取MDM物料信息接口方法结束时间："+DateUtil.now());
         materialInfoInterface(list, page, onBatchId.value);
         return r;
     }

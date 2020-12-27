@@ -39,6 +39,16 @@ public class RemoteProductionOrderFallbackFactory implements FallbackFactory<Rem
                 log.error("RemoteProductionOrderService.listForDelays(生产订单)错误信息：{}",throwable.getMessage());
                 return R.error("服务拥挤请稍后再试");
             }
+
+            /**
+             * 把delaysFlag=3、已关单、实际结束日期与基本开始日期小于等于7的数据更改把delaysFlag为0
+             */
+            @Override
+            public R updateNoNeedDelays() {
+                log.error("RemoteProductionOrderService.updateNoNeedDelays错误信息：{}",throwable.getMessage());
+                return R.error("服务拥挤请稍后再试");
+            }
+
             /**
              * Description:  根据id查询排产订单
              * Param: [id]
@@ -81,6 +91,26 @@ public class RemoteProductionOrderFallbackFactory implements FallbackFactory<Rem
             @Override
             public R updateBatchByPrimary(List<OmsProductionOrder> omsProductionOrderList) {
                 log.error("RemoteProductionOrderService.updateBatchByPrimary：{}",throwable.getMessage());
+                return R.error("服务拥挤请稍后再试");
+            }
+            /**
+             * 获取初始化中状态的排产订单
+             * @param
+             * @return
+             */
+            @Override
+            public R selectByStatusAct() {
+                log.error("RemoteProductionOrderService.selectByStatusAct：{}",throwable.getMessage());
+                return R.error("服务拥挤请稍后再试");
+            }
+            /**
+             * 定时任务校验排产订单审批流
+             * @param
+             * @return
+             */
+            @Override
+            public R checkProductOrderAct(List<OmsProductionOrder> list) {
+                log.error("RemoteProductionOrderService.checkProductOrderAct：{}",throwable.getMessage());
                 return R.error("服务拥挤请稍后再试");
             }
 

@@ -248,7 +248,7 @@ public class SmsQualityOrderController extends BaseController {
     @PostMapping("remove")
     @HasPermissions("settle:qualityOrder:remove")
     @ApiOperation(value = "删除质量索赔 ", response = R.class)
-    @OperLog(title = "提交索赔单 ", businessType = BusinessType.DELETE)
+    @OperLog(title = "删除质量索赔 ", businessType = BusinessType.DELETE)
     public R remove(String ids) {
         return smsQualityOrderService.deleteSmsQualityOrderAndSysOss(ids);
     }

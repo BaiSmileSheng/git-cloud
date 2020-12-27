@@ -201,8 +201,8 @@ public class OmsProductionOrderExportVo {
     /**
      * 是否小批
      */
-    @ExcelProperty(value = "是否内部小批",index = 22,converter= SmallBatchConverter.class)
-    @ApiModelProperty(value = "是否内部小批")
+    @ExcelProperty(value = "是否小批",index = 22,converter= SmallBatchConverter.class)
+    @ApiModelProperty(value = "是否小批")
     private String isSmallBatch;
 
     /**
@@ -266,6 +266,18 @@ public class OmsProductionOrderExportVo {
 
     @ExcelProperty(value = "导入失败原因", index = 24)
     private String exportRemark;
+
+    /**
+     * 加工费
+     */
+    @ApiModelProperty(value = "加工费")
+    private BigDecimal processCost;
+
+    /**
+     * 生成延期索赔标记
+     */
+    @ApiModelProperty(value = "生成延期索赔标记",notes = "0:无需生成,1:待生成,2.已生成")
+    private String delaysFlag;
 
 
 }

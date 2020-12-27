@@ -92,7 +92,7 @@
     </sql>
     <select id="selectForMonthSettle" resultMap="SmsSettleInfoResult">
         <include refid="selectSmsSettleInfoVo"/>
-        WHERE DATE_FORMAT(product_start_date, '%Y%m') = #{month}
+        WHERE DATE_FORMAT(actual_end_date, '%Y%m') = #{month}
           AND order_status = #{orderStatus}
         and del_flag='0'
     </select>
@@ -211,6 +211,21 @@
                 </if>
                 <if test="item.updateBy != null and item.updateBy != ''">
                     update_by = #{item.updateBy},
+                </if>
+                <if test="item.remark != null and item.remark != ''">
+                    remark = #{item.remark,jdbcType=VARCHAR},
+                </if>
+                <if test="item.productStartDate != null">
+                    product_start_date = #{item.productStartDate},
+                </if>
+                <if test="item.productEndDate != null">
+                    product_end_date = #{item.productEndDate},
+                </if>
+                <if test="item.bomVersion != null and item.bomVersion != ''">
+                    bom_version = #{item.bomVersion},
+                </if>
+                <if test="item.orderAmount != null">
+                    order_amount = #{item.orderAmount},
                 </if>
             </trim>
             where product_order_code=#{item.productOrderCode}

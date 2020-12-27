@@ -69,6 +69,20 @@ public class SmsSupplementaryOrder extends BaseEntity {
     private String factoryCode;
 
     /**
+     * 工位
+     */
+    @ExcelProperty(value = "工位",index = 8)
+    @ApiModelProperty(value = "工位")
+    private String station;
+
+    /**
+     * 评估类型
+     */
+    @ExcelProperty(value = "评估类型",index = 9)
+    @ApiModelProperty(value = "评估类型")
+    private String assessType;
+
+    /**
      * 付款公司
      */
     @ApiModelProperty(value = "付款公司")
@@ -84,7 +98,7 @@ public class SmsSupplementaryOrder extends BaseEntity {
     /**
      * 订单状态 0 待提交、1jit待审核、2jit驳回、3小微主待审核、4小微主审核通过、5小微主驳回、 6 SAP成功、7 SAP创单失败、 11待结算、 12结算完成
      */
-    @ExcelProperty(value = "物耗单状态",index = 12,converter = SupplementaryOrderStatusConverter.class)
+    @ExcelProperty(value = "物耗单状态",index = 13,converter = SupplementaryOrderStatusConverter.class)
     @ApiModelProperty(value = "订单状态 0 待提交、1jit待审核、2jit驳回、3小微主待审核、4小微主审核通过、5小微主驳回、 6 SAP成功、7 SAP创单失败、 11待结算、 12结算完成")
     private String stuffStatus;
 
@@ -156,21 +170,21 @@ public class SmsSupplementaryOrder extends BaseEntity {
     /**
      * SAP创单备注
      */
-    @ExcelProperty(value = "SAP创单备注",index = 9)
+    @ExcelProperty(value = "SAP创单备注",index = 11)
     @ApiModelProperty(value = "SAP创单备注")
     private String sapRemark;
 
     /**
      * SAP创单凭证
      */
-    @ExcelProperty(value = "SAP创单凭证",index = 8)
+    @ExcelProperty(value = "SAP创单凭证",index = 10)
     @ApiModelProperty(value = "SAP创单凭证")
     private String postingNo;
 
     /**
      * SAP创单时间
      */
-    @ExcelProperty(value = "SAP创单时间",index = 10)
+    @ExcelProperty(value = "SAP创单时间",index = 12)
     @DateTimeFormat("yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date sapDate;
@@ -188,7 +202,6 @@ public class SmsSupplementaryOrder extends BaseEntity {
     private BigDecimal settleFee;
 
     /** 兑现金额 */
-    @ExcelProperty(value = "兑现金额",index = 11)
     @ApiModelProperty(value = "兑现金额")
     private BigDecimal cashAmount;
 
@@ -216,5 +229,11 @@ public class SmsSupplementaryOrder extends BaseEntity {
      */
     @Transient
     private String procName;
+
+    /**
+     * 传Y61 0、校验  1、过账
+     */
+    @Transient
+    private String sapFlag;
 
 }

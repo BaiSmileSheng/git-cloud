@@ -10,6 +10,7 @@ import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.exception.BusinessException;
+import com.cloud.common.utils.ListCommonUtil;
 import com.cloud.common.utils.bean.BeanUtils;
 import com.cloud.order.domain.entity.OmsProductionOrder;
 import com.cloud.order.domain.entity.OmsRawMaterialFeedback;
@@ -22,6 +23,7 @@ import com.cloud.system.domain.entity.CdRawMaterialStock;
 import com.cloud.system.domain.entity.SysUser;
 import com.cloud.system.feign.RemoteCdRawMaterialStockService;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.core.context.RootContext;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
@@ -564,11 +566,17 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
             detail.setConfirmBy(sysUser.getLoginName());
             detail.setConfirmTime(new Date());
         });
-        int updatDetailCount = omsProductionOrderDetailMapper.updateBatchByPrimaryKeySelective(omsProductionOrderDetails);
-        if (updatDetailCount <= 0) {
-            log.error("更新排产订单明细状态失败！");
-            return R.error("更新排产订单明细状态失败！");
-        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        //一次更新2000条
+        List<List<OmsProductionOrderDetail>> detailList =
+                objectMapper.convertValue(ListCommonUtil.subCollection(omsProductionOrderDetails, 2000), new TypeReference<List<List<OmsProductionOrderDetail>>>() {});
+        detailList.forEach(s -> {
+            int updatDetailCount = omsProductionOrderDetailMapper.updateBatchByPrimaryKeySelective(s);
+            if (updatDetailCount <= 0) {
+                log.error("更新排产订单明细状态失败！");
+                throw new BusinessException("更新排产订单明细状态失败！");
+            }
+        });
         //组织排产订单号
         List<String> orderCodes = omsProductionOrderDetails.stream()
                 .map(OmsProductionOrderDetail::getProductOrderCode).distinct().collect(Collectors.toList());
@@ -584,15 +592,28 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
             long count = value.stream()
                     .filter(detail -> ProductOrderConstants.DETAIL_STATUS_ONE.equals(detail.getStatus())).count();
             long countAll = value.size();
+            OmsProductionOrder omsProductionOrder = OmsProductionOrder.builder()
+                    .orderCode(key)
+                    .build();
             //已确认条数和总条数如果一致，则排产订单已评审
             if (count == countAll) {
-                OmsProductionOrder omsProductionOrder = OmsProductionOrder.builder()
-                        .orderCode(key)
-                        .status(ProductOrderConstants.STATUS_THREE)
-                        .build();
+                omsProductionOrder.setStatus(ProductOrderConstants.STATUS_THREE);
                 omsProductionOrder.setUpdateBy(sysUser.getLoginName());
-                orderList.add(omsProductionOrder);
+            } else {
+                //统计排产订单明细数据反馈的条数
+                long countTwo = value.stream()
+                        .filter(detail -> ProductOrderConstants.DETAIL_STATUS_TWO.equals(detail.getStatus())).count();
+                if (countTwo > 0L) {
+                    //反馈的条数大于0，则更新排产订单的状态为反馈中
+                    omsProductionOrder.setStatus(ProductOrderConstants.STATUS_ONE);
+                    omsProductionOrder.setUpdateBy(sysUser.getLoginName());
+                } else {
+                    //反馈的条数小于等于0，则更新排产订单的状态为待评审
+                    omsProductionOrder.setStatus(ProductOrderConstants.STATUS_ZERO);
+                    omsProductionOrder.setUpdateBy(sysUser.getLoginName());
+                }
             }
+            orderList.add(omsProductionOrder);
         });
         if (orderList.size() > 0) {
             omsProductionOrderService.updateByOrderCode(orderList);
@@ -630,11 +651,11 @@ public class OmsProductionOrderDetailServiceImpl extends BaseServiceImpl<OmsProd
      * Date: 2020/6/29
      */
     private String[] getDays() {
-        int[] days = NumberUtil.range(0, 30);
+        int[] days = NumberUtil.range(0, 29);
         String[] dates = new String[days.length];
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         for (int i : days) {
-            String day = dateTimeFormatter.format(LocalDate.now().plusDays(i));
+            String day = dateTimeFormatter.format(LocalDate.now().plusDays(i+1));
             dates[i] = day;
         }
         return dates;

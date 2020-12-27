@@ -89,6 +89,16 @@ public class RemoteCdMaterialPriceInfoFallbackFactory implements FallbackFactory
                 log.error("RemoteCdMaterialPriceInfoService.selectMaterialPrice ：{}",throwable.getMessage());
                 return R.error("服务器拥挤，请稍后再试！");
             }
+            /**
+             * 根据原材料物料和供应商编码查询价格
+             * @param list
+             * @return R
+             */
+            @Override
+            public R selectBymaterialSupplierList(List<CdMaterialPriceInfo> list) {
+                log.error("RemoteCdMaterialPriceInfoService.selectBymaterialSupplierList ：{}",throwable.getMessage());
+                return R.error("服务器拥挤，请稍后再试！");
+            }
 
         };
     }

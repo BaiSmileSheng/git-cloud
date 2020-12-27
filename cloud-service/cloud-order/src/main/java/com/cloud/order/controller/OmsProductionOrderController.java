@@ -1,9 +1,13 @@
 package com.cloud.order.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cloud.common.auth.annotation.HasPermissions;
+import com.cloud.common.constant.ProductOrderConstants;
 import com.cloud.common.constant.RoleConstants;
 import com.cloud.common.constant.UserConstants;
 import com.cloud.common.core.controller.BaseController;
@@ -34,6 +38,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 排产订单  提供者
@@ -113,9 +118,26 @@ public class OmsProductionOrderController extends BaseController {
 //            criteria.andIn("productFactoryCode", Arrays.asList(DataScopeUtil.getUserFactoryScopes(getCurrentUserId()).split(",")));
 //
             //查询订单状态已下达和已关单的两个状态的订单
-            List<String> statusList = CollectionUtil.toList(ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode(),
+            //如果加工承揽方式是半成品，供应商也可以看到订单传SAP之前的状态
+            List<String> statusList = CollectionUtil.toList(
+                    ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode(),
                     ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
-            criteria.andIn("status", statusList);
+            Example.Criteria outSourceCriteria = example.createCriteria();
+            outSourceCriteria.orNotEqualTo("outsourceType",ProductOrderConstants.OUTSOURCE_TYPE_HALF_PRODUCT);
+            outSourceCriteria.andIn("status", statusList);
+
+            List<String> outSourceStatusList = CollectionUtil.toList(
+                    ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_DPS.getCode(),
+                    ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_FKZ.getCode(),
+                    ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_DTZ.getCode(),
+                    ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YTZ.getCode(),
+                    ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_DCSAP.getCode(),
+                    ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_CSAPZ.getCode(),
+                    ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YCSAP.getCode(),
+                    ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode());
+            outSourceCriteria.orEqualTo("outsourceType",ProductOrderConstants.OUTSOURCE_TYPE_HALF_PRODUCT);
+            outSourceCriteria.andIn("status", outSourceStatusList);
+            example.and(outSourceCriteria);
 
             CdFactoryLineInfo cdFactoryLineInfo = new CdFactoryLineInfo().builder()
                     .supplierCode(sysUser.getSupplierCode()).build();
@@ -156,12 +178,35 @@ public class OmsProductionOrderController extends BaseController {
     public R listForDelays(){
         Example example = new Example(OmsProductionOrder.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("delaysFlag", ProductionOrderDelaysFlagEnum.PRODUCTION_ORDER_DELAYS_FLAG_1.getCode());
+        //查询delaysFlag为3的数据
+        //关单：判断实际结束日期与开始日期是否同月或是否大于8天
+        //未关单：判断当前日期与开始日期是否同月或是否大于8天
+        criteria.andEqualTo("delaysFlag", ProductionOrderDelaysFlagEnum.PRODUCTION_ORDER_DELAYS_FLAG_3.getCode());
         List<OmsProductionOrder> omsProductionOrderList = omsProductionOrderService.selectByExample(example);
-        //避免没有数据报错
-        R result = new R();
-        result.put("data",omsProductionOrderList);
-        return result;
+        List<OmsProductionOrder> listGD = omsProductionOrderList.stream().filter(o ->
+                ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode().equals(o.getStatus()))
+                .collect(Collectors.toList());
+        List<OmsProductionOrder> listGDDelays=listGD.stream().filter(o ->
+                        DateUtil.between(o.getActualEndDate(), DateUtil.parseDate(o.getProductStartDate()), DateUnit.DAY) > 7
+                                || DateUtil.month(o.getActualEndDate()) > DateUtil.month(DateUtil.parseDate(o.getProductStartDate())))
+                .collect(Collectors.toList());
+        List<OmsProductionOrder> listWGD = omsProductionOrderList.stream().filter(o ->
+                !ProductionOrderStatusEnum.PRODUCTION_ORDER_STATUS_YGD.getCode().equals(o.getStatus()) &&
+                        (DateUtil.between(DateUtil.date(), DateUtil.parseDate(o.getProductStartDate()), DateUnit.DAY) > 7
+                                || DateUtil.thisMonth() > DateUtil.month(DateUtil.parseDate(o.getProductStartDate()))))
+                .collect(Collectors.toList());
+        listGDDelays.addAll(listWGD);
+        return R.data(listGDDelays);
+    }
+
+    /**
+     * 把delaysFlag=3、已关单、实际结束日期与基本开始日期小于等于7的数据更改把delaysFlag为0
+     * @return
+     */
+    @GetMapping("updateNoNeedDelays")
+    @ApiOperation(value = "更新不需要延期索赔的生产订单flag", response = OmsProductionOrder.class)
+    public R updateNoNeedDelays(){
+        return toAjax(omsProductionOrderService.updateDelaysFlag());
     }
 
     /**
@@ -591,5 +636,31 @@ public class OmsProductionOrderController extends BaseController {
     @ApiOperation(value = "根据主键批量修改保存排产订单", response = R.class)
     public R updateBatchByPrimary(@RequestBody List<OmsProductionOrder> omsProductionOrderList) {
         return toAjax(omsProductionOrderService.updateBatchByPrimaryKeySelective(omsProductionOrderList));
+    }
+    /**
+     * Description: 查询初始化中状态的排产订单
+     * Param: []
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/10/16
+     */
+    @PostMapping("selectByStatusAct")
+    public R selectByStatusAct(){
+        List<OmsProductionOrder> omsProductionOrders = omsProductionOrderService.selectByStatus(ProductOrderConstants.STATUS_INIT);
+        if (ObjectUtil.isEmpty(omsProductionOrders) || omsProductionOrders.size() <= 0) {
+            return R.ok();
+        }
+        return R.data(omsProductionOrders);
+    }
+    /**
+     * Description:  定时任务校验排产订单审批流
+     * Param: [list]
+     * return: com.cloud.common.core.domain.R
+     * Author: ltq
+     * Date: 2020/10/19
+     */
+    @PostMapping("checkProductOrderAct")
+    public R checkProductOrderAct(@RequestBody List<OmsProductionOrder> list){
+        return omsProductionOrderService.checkProductOrderAct(list);
     }
 }

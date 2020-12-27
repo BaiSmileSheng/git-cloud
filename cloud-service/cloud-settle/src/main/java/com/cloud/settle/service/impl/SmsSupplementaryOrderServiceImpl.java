@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.cloud.activiti.feign.RemoteActTaskService;
 import com.cloud.common.constant.SapConstants;
 import com.cloud.common.core.domain.R;
 import com.cloud.common.core.service.impl.BaseServiceImpl;
@@ -23,6 +24,7 @@ import com.cloud.system.enums.PriceTypeEnum;
 import com.cloud.system.enums.SettleRatioEnum;
 import com.cloud.system.feign.*;
 import com.sap.conn.jco.*;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -67,7 +70,11 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
     @Autowired
     private RemoteInterfaceLogService remoteInterfaceLogService;
     @Autowired
-    private RemoteDictDataService remoteDictDataService;
+    private RemoteActTaskService remoteActTaskService;
+
+
+
+
     /**
      * 编辑保存物耗申请单功能  --有逻辑校验
      * @param smsSupplementaryOrder
@@ -79,7 +86,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         Long id = smsSupplementaryOrder.getId();
         log.info(StrUtil.format("物耗申请修改保存开始：参数为{}", smsSupplementaryOrder.toString()));
         //校验状态是否是未提交
-        R rCheckStatus = checkCondition(id);
+        R rCheckStatus = checkConditionCommit(id);
         SmsSupplementaryOrder smsSupplementaryOrderCheck = (SmsSupplementaryOrder) rCheckStatus.get("data");
         //校验
         R rCheck = checkSmsSupplementaryOrderCondition(smsSupplementaryOrder, smsSupplementaryOrderCheck.getProductOrderCode(),smsSupplementaryOrderCheck.getFactoryCode());
@@ -112,14 +119,33 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
      * @return
      */
     @Override
+    @GlobalTransactional
     public R remove(String ids) {
         log.info(StrUtil.format("物耗申请删除开始：id为{}", ids));
         if (StringUtils.isBlank(ids)) {
             throw new BusinessException("传入参数不能为空！");
         }
+        //如果已生成审批流信息需删除
+        List<String> shStatus = CollUtil.newArrayList(
+                SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode(),
+                SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITBH.getCode(),
+                SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZBH.getCode(),
+                SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode());
         for (String id : ids.split(",")) {
-            //校验状态是否是未提交
-            checkCondition(Long.valueOf(id));
+            //校验状态是否已传SAP
+            R rCheck = checkConditionRemove(Long.valueOf(id));
+            SmsSupplementaryOrder supplementaryOrder = rCheck.getData(SmsSupplementaryOrder.class);
+            if (CollUtil.contains(shStatus, supplementaryOrder.getStuffStatus())) {
+                //删除审批信息
+                Map<String,Object> map = new HashMap<>();
+                List<String> orderCodeList = CollUtil.newArrayList(supplementaryOrder.getStuffNo());
+//                map.put("userName","物耗删除同时删除审批流");
+                map.put("orderCodeList",orderCodeList);
+                R deleteActMap = remoteActTaskService.deleteByOrderCode(map);
+                if (!deleteActMap.isSuccess()){
+                    throw new BusinessException("删除审批流程失败，原因："+deleteActMap.get("msg"));
+                }
+            }
         }
         int rows = deleteByIds(ids);
         return rows > 0 ? R.ok() : R.error("删除错误！");
@@ -222,7 +248,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         }else{
             CdBomInfo cdBom = rBom.getData(CdBomInfo.class);
             smsSupplementaryOrder.setSapStoreage(cdBom.getStoragePoint());
-            smsSupplementaryOrder.setPurchaseGroupCode(cdBom.getProductFactoryCode());
+            smsSupplementaryOrder.setPurchaseGroupCode(cdBom.getPurchaseGroup());
         }
         smsSupplementaryOrder.setDelFlag("0");
         smsSupplementaryOrder.setCreateTime(DateUtils.getNowDate());
@@ -271,7 +297,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
     @Transactional(rollbackFor=Exception.class)
     public R updatePriceEveryMonth(String month) {
         //查询指定月、待结算的物耗申请中的物料号  用途是查询SAP成本价 更新到物耗表
-        List<String> materialCodeList = smsSupplementaryOrderMapper.selectMaterialByMonthAndStatus(month, CollUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode()));
+        List<String> materialCodeList = smsSupplementaryOrderMapper.selectMaterialByMonthAndStatus(null, CollUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode()));
         Map<String, CdMaterialPriceInfo> mapMaterialPrice = new ConcurrentHashMap<>();
         if (materialCodeList != null) {
             log.info(StrUtil.format("(定时任务)物耗申请需要更新成本价格的物料号:{}", materialCodeList.toString()));
@@ -288,19 +314,19 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             throw new BusinessException("物耗索赔系数未维护！");
         }
         //取得计算月份、待结算的物耗申请数据
-        List<SmsSupplementaryOrder> smsSupplementaryOrderList = selectByMonthAndStatus(month, CollUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode()));
+        List<SmsSupplementaryOrder> smsSupplementaryOrderList = selectByMonthAndStatus(null, CollUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode()));
         //循环物耗，更新成本价格，计算索赔金额
         if (smsSupplementaryOrderList != null) {
             for (SmsSupplementaryOrder smsSupplementaryOrder : smsSupplementaryOrderList) {
                 //根据工厂查询采购组织
-                String factCode = smsSupplementaryOrder.getFactoryCode();
-                R rFactoryInfo= remoteFactoryInfoService.selectOneByFactory(factCode);
-                if(!rFactoryInfo.isSuccess()){
-                    log.error(StrUtil.format("(物耗)物耗更新价格定时任务：公司信息为空参数为{}", factCode));
-                    return R.error(StringUtils.format("{}公司信息为空！",factCode));
-                }
-                CdFactoryInfo cdFactoryInfo = rFactoryInfo.getData(CdFactoryInfo.class);
-                CdMaterialPriceInfo cdMaterialPriceInfo = mapMaterialPrice.get(smsSupplementaryOrder.getRawMaterialCode()+cdFactoryInfo.getPurchaseOrg()+smsSupplementaryOrder.getSupplierCode()+PriceTypeEnum.PRICE_TYPE_0.getCode());
+//                String factCode = smsSupplementaryOrder.getFactoryCode();
+//                R rFactoryInfo= remoteFactoryInfoService.selectOneByFactory(factCode);
+//                if(!rFactoryInfo.isSuccess()){
+//                    log.error(StrUtil.format("(物耗)物耗更新价格定时任务：公司信息为空参数为{}", factCode));
+//                    throw new BusinessException(StringUtils.format("{}公司信息为空！",factCode));
+//                }
+//                CdFactoryInfo cdFactoryInfo = rFactoryInfo.getData(CdFactoryInfo.class);
+                CdMaterialPriceInfo cdMaterialPriceInfo = mapMaterialPrice.get(smsSupplementaryOrder.getRawMaterialCode()+PriceTypeEnum.PRICE_TYPE_0.getCode());
                 if (cdMaterialPriceInfo == null) {
                     //如果没有找到SAP价格，则更新备注
                     log.info(StrUtil.format("(月度结算定时任务)SAP价格未同步的物料号:{}", smsSupplementaryOrder.getRawMaterialCode()));
@@ -308,7 +334,13 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
                     updateByPrimaryKeySelective(smsSupplementaryOrder);
                     continue;
                 }
-                smsSupplementaryOrder.setStuffPrice(cdMaterialPriceInfo.getNetWorth().divide(new BigDecimal(cdMaterialPriceInfo.getPriceUnit()),2));//单价  取得materialPrice表的净价值
+                if(!StrUtil.equals(cdMaterialPriceInfo.getUnit(),smsSupplementaryOrder.getStuffUnit())){
+                    log.info(StrUtil.format("(月度结算定时任务)申请时单位与价格表单位不一致:{}", smsSupplementaryOrder.getStuffNo()));
+                    smsSupplementaryOrder.setRemark("单位不一致！");
+                    updateByPrimaryKeySelective(smsSupplementaryOrder);
+                    continue;
+                }
+                smsSupplementaryOrder.setStuffPrice(cdMaterialPriceInfo.getNetWorth().divide(new BigDecimal(cdMaterialPriceInfo.getPriceUnit()),6,BigDecimal.ROUND_HALF_UP));//单价  取得materialPrice表的净价值
                 smsSupplementaryOrder.setStuffUnit(cdMaterialPriceInfo.getUnit());
                 smsSupplementaryOrder.setCurrency(cdMaterialPriceInfo.getCurrency());//币种
                 //索赔金额=物耗数量* 原材料单价*物耗申请系数
@@ -331,8 +363,8 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
                     BigDecimal rate = cdMouthRate.getRate();//汇率
                     BigDecimal rateAmount = cdMouthRate.getAmount();//数额
                     //如果是外币，还要 除以数额*汇率
-                    spPrice = spPrice.divide(rateAmount,2).multiply(rate);
-                    smsSupplementaryOrder.setRate(rate.divide(rateAmount,2));
+                    spPrice = spPrice.divide(rateAmount,6, BigDecimal.ROUND_HALF_UP).multiply(rate);
+                    smsSupplementaryOrder.setRate(rate.divide(rateAmount,2, BigDecimal.ROUND_HALF_UP));
                 }
                 smsSupplementaryOrder.setSettleFee(spPrice);
             }
@@ -341,6 +373,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         }
         return R.ok();
     }
+
 
     /**
      * 小微主审批通过传SAPY61
@@ -352,11 +385,11 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         Date date = DateUtil.date();
         SysInterfaceLog sysInterfaceLog = new SysInterfaceLog().builder()
                 .appId("SAP").interfaceName(SapConstants.ZESP_IM_001).build();
-        //根据公司取库位
-        String lgort = remoteDictDataService.getLabel("company_storage_relation", smsSupplementaryOrder.getCompanyCode());
-        if (StrUtil.isEmpty(lgort)) {
-            return R.error(StrUtil.format("请维护公司：{}对应库位",smsSupplementaryOrder.getCompanyCode()));
-        }
+//        //根据公司取库位
+//        String lgort = remoteDictDataService.getLabel("company_storage_relation", smsSupplementaryOrder.getCompanyCode());
+//        if (StrUtil.isEmpty(lgort)) {
+//            return R.error(StrUtil.format("请维护公司：{}对应库位",smsSupplementaryOrder.getCompanyCode()));
+//        }
         //发送SAP
         JCoDestination destination =null;
         try {
@@ -370,7 +403,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
                 throw new RuntimeException("Function does not exists in SAP system.");
             }
             JCoParameterList input = fm.getImportParameterList();
-            input.setValue("FLAG_GZ","1");
+            input.setValue("FLAG_GZ",smsSupplementaryOrder.getSapFlag());//0 校验  1过账
             //获取输入参数
             JCoTable inputTable = fm.getTableParameterList().getTable("T_INPUT");
             //附加表的最后一个新行,行指针,它指向新添加的行。
@@ -378,15 +411,18 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
             inputTable.setValue("BWARTWA","Y61");//移动类型（库存管理）  261/Y61
             inputTable.setValue("BKTXT", StrUtil.concat(true,smsSupplementaryOrder.getSupplierCode(),smsSupplementaryOrder.getStuffNo()));//凭证抬头文本  V码+物耗单号
             inputTable.setValue("WERKS", smsSupplementaryOrder.getFactoryCode());//工厂
-            inputTable.setValue("LGORT", lgort);//库存地点
+            inputTable.setValue("LGORT", smsSupplementaryOrder.getStation());//库存地点/工位
+            if (StrUtil.isNotEmpty(smsSupplementaryOrder.getAssessType())) {
+                inputTable.setValue("CHARG", smsSupplementaryOrder.getAssessType());//批号/评估类型
+            }
             inputTable.setValue("MATNR", smsSupplementaryOrder.getRawMaterialCode().toUpperCase());//物料号
             inputTable.setValue("ERFME", smsSupplementaryOrder.getStuffUnit());//基本计量单位
             inputTable.setValue("ERFMG", smsSupplementaryOrder.getStuffAmount());//数量
             inputTable.setValue("AUFNR", smsSupplementaryOrder.getProductOrderCode());//生产订单号
-            String content = StrUtil.format("BWARTWA:{},BKTXT:{},WERKS:{},LGORT:{},MATNR:{}" +
-                            ",ERFME:{},ERFMG:{},AUFNR:{}","261",
+            String content = StrUtil.format("BWARTWA:{},BKTXT:{},WERKS:{},LGORT:{},CHARG:{},MATNR:{}" +
+                            ",ERFME:{},ERFMG:{},AUFNR:{}","Y61",
                     StrUtil.concat(true,smsSupplementaryOrder.getSupplierCode(),smsSupplementaryOrder.getStuffNo()),
-                    smsSupplementaryOrder.getFactoryCode(),lgort,smsSupplementaryOrder.getRawMaterialCode(),
+                    smsSupplementaryOrder.getFactoryCode(),smsSupplementaryOrder.getStation(),smsSupplementaryOrder.getAssessType(),smsSupplementaryOrder.getRawMaterialCode(),
                     smsSupplementaryOrder.getStuffUnit(),smsSupplementaryOrder.getStuffAmount(),smsSupplementaryOrder.getProductOrderCode());
             sysInterfaceLog.setContent(content);
             //执行函数
@@ -408,18 +444,17 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
                         smsSupplementaryOrder.setSapResult(outTableOutput.getString("FLAG"));
                         smsSupplementaryOrder.setSapDate(date);
                         smsSupplementaryOrder.setSapRemark(outTableOutput.getString("MESSAGE"));
-                        smsSupplementaryOrder.setStuffStatus(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DJS.getCode());
                         return R.data(smsSupplementaryOrder);
                     }else {
                         //获取失败
                         sysInterfaceLog.setResults(StrUtil.format("SAP返回错误信息：{}",outTableOutput.getString("MESSAGE")));
-                        throw new BusinessException(StrUtil.format("发送SAP失败！原因：{}",outTableOutput.getString("MESSAGE")));
+                        return R.error(StrUtil.format("发送SAP失败！原因：{}",outTableOutput.getString("MESSAGE")));
                     }
                 }
             }
         } catch (JCoException e) {
             log.error("Connect SAP fault, error msg: " + e.toString());
-            throw new BusinessException(e.getMessage());
+            return R.error(e.getMessage());
         }finally {
             sysInterfaceLog.setDelFlag("0");
             sysInterfaceLog.setCreateBy("定时任务");
@@ -526,7 +561,7 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
      * @param id
      * @return 返回SmsSupplementaryOrder信息
      */
-    public R checkCondition(Long id) {
+    public R checkConditionCommit(Long id) {
         if (id == null) {
             throw new BusinessException("ID不能为空！");
         }
@@ -536,6 +571,31 @@ public class SmsSupplementaryOrderServiceImpl extends BaseServiceImpl<SmsSupplem
         }
         if (!SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DTJ.getCode().equals(smsSupplementaryOrderCheck.getStuffStatus())) {
             throw new BusinessException("已提交的数据不能操作！");
+        }
+        return R.data(smsSupplementaryOrderCheck);
+    }
+
+    /**
+     * 校验状态是否已传SAP，如果是则抛出错误
+     *
+     * @param id
+     * @return 返回SmsSupplementaryOrder信息
+     */
+    public R checkConditionRemove(Long id) {
+        if (id == null) {
+            throw new BusinessException("ID不能为空！");
+        }
+        SmsSupplementaryOrder smsSupplementaryOrderCheck = selectByPrimaryKey(id);
+        if (smsSupplementaryOrderCheck == null) {
+            throw new BusinessException("未查询到此数据！");
+        }
+        List<String> canStatus = CollUtil.newArrayList(SupplementaryOrderStatusEnum.WH_ORDER_STATUS_DTJ.getCode(),
+                SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITSH.getCode(),
+                SupplementaryOrderStatusEnum.WH_ORDER_STATUS_JITBH.getCode(),
+                SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZDSH.getCode(),
+                SupplementaryOrderStatusEnum.WH_ORDER_STATUS_XWZBH.getCode());
+        if (!CollUtil.contains(canStatus,smsSupplementaryOrderCheck.getStuffStatus())) {
+            throw new BusinessException("已传SAP的数据不能操作！");
         }
         return R.data(smsSupplementaryOrderCheck);
     }
